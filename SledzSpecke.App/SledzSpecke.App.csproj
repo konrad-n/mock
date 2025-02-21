@@ -78,7 +78,6 @@
 	  <Folder Include="Converters\" />
 	  <Folder Include="Services\Navigation\" />
 	  <Folder Include="Services\Dialog\" />
-	  <Folder Include="Services\Platform\" />
     <Folder Include="ViewModels" />
 	  <Folder Include="ViewModels\Base\" />
 	  <Folder Include="ViewModels\Dashboard\" />
