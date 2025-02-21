@@ -1,11 +1,94 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             Title="DutiesPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             xmlns:viewmodels="clr-namespace:SledzSpecke.App.ViewModels.Duties"
+             x:Class="SledzSpecke.App.Views.Duties.DutiesPage"
+             x:DataType="viewmodels:DutiesViewModel"
+             Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto,Auto,*" 
+          Padding="20"
+          RowSpacing="20">
+
+        <!-- Statystyki -->
+        <Border Grid.Row="0"
+                BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource Gray300}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 10,10,10,10"
+                Padding="15">
+            <HorizontalStackLayout Spacing="20"
+                                 HorizontalOptions="Center">
+                <VerticalStackLayout>
+                    <Label Text="Godziny w tym miesiącu"
+                           Style="{StaticResource BodyLabel}"/>
+                    <Label Text="24/50"
+                           Style="{StaticResource ValueLabel}"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout>
+                    <Label Text="Godziny łącznie"
+                           Style="{StaticResource BodyLabel}"/>
+                    <Label Text="168/400"
+                           Style="{StaticResource ValueLabel}"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Border>
+
+        <!-- Przycisk dodawania -->
+        <Button Grid.Row="1"
+                Text="+ Dodaj dyżur"
+                Command="{Binding AddDutyCommand}"
+                Style="{StaticResource PrimaryButton}"/>
+
+        <!-- Lista dyżurów -->
+        <RefreshView Grid.Row="2"
+                    Command="{Binding RefreshCommand}"
+                    IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding Duties}"
+                          SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout HorizontalOptions="Center"
+                                       VerticalOptions="Center">
+                        <Label Text="Brak dyżurów"
+                               Style="{StaticResource SubHeaderLabel}"/>
+                        <Label Text="Dodaj swój pierwszy dyżur"
+                               Style="{StaticResource BodyLabel}"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Gray300}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 10,10,10,10"
+                                Margin="0,0,0,10"
+                                Padding="15">
+                            <Grid RowDefinitions="Auto,Auto"
+                                  ColumnDefinitions="*,Auto">
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding Location}"
+                                       Style="{StaticResource SubHeaderLabel}"/>
+
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding Hours, StringFormat='{0}h'}"
+                                       Style="{StaticResource ValueLabel}"/>
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Date, StringFormat='{0:d}'}"
+                                       Style="{StaticResource BodyLabel}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
 </ContentPage>
