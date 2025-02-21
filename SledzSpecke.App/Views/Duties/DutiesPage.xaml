@@ -12,29 +12,29 @@
 
         <!-- Statystyki -->
         <Border Grid.Row="0"
-                BackgroundColor="{StaticResource Surface}"
-                Stroke="{StaticResource Gray300}"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 10,10,10,10"
-                Padding="15">
-            <HorizontalStackLayout Spacing="20"
-                                 HorizontalOptions="Center">
-                <VerticalStackLayout>
-                    <Label Text="Godziny w tym miesiącu"
-                           Style="{StaticResource BodyLabel}"/>
-                    <Label Text="24/50"
-                           Style="{StaticResource ValueLabel}"
-                           HorizontalOptions="Center"/>
+                Style="{StaticResource CardBorder}">
+            <Grid ColumnDefinitions="*,*"
+                  ColumnSpacing="20">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Ten miesiąc"
+                           Style="{StaticResource SubHeaderLabel}"/>
+                    <Label Text="24/50h"
+                           Style="{StaticResource ValueLabel}"/>
+                    <ProgressBar Progress="0.48"
+                                Style="{StaticResource ProgressBar}"
+                                Margin="0,5,0,0"/>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout>
-                    <Label Text="Godziny łącznie"
-                           Style="{StaticResource BodyLabel}"/>
-                    <Label Text="168/400"
-                           Style="{StaticResource ValueLabel}"
-                           HorizontalOptions="Center"/>
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Łącznie"
+                           Style="{StaticResource SubHeaderLabel}"/>
+                    <Label Text="168/400h"
+                           Style="{StaticResource ValueLabel}"/>
+                    <ProgressBar Progress="0.42"
+                                Style="{StaticResource ProgressBar}"
+                                Margin="0,5,0,0"/>
                 </VerticalStackLayout>
-            </HorizontalStackLayout>
+            </Grid>
         </Border>
 
         <!-- Przycisk dodawania -->
@@ -47,28 +47,28 @@
         <RefreshView Grid.Row="2"
                     Command="{Binding RefreshCommand}"
                     IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView ItemsSource="{Binding Duties}"
-                          SelectionMode="None">
+            <CollectionView Style="{StaticResource ListCollectionView}"
+                          ItemsSource="{Binding Duties}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout HorizontalOptions="Center"
-                                       VerticalOptions="Center">
+                                       VerticalOptions="Center"
+                                       Spacing="10">
                         <Label Text="Brak dyżurów"
-                               Style="{StaticResource SubHeaderLabel}"/>
+                               Style="{StaticResource SubHeaderLabel}"
+                               HorizontalOptions="Center"/>
                         <Label Text="Dodaj swój pierwszy dyżur"
-                               Style="{StaticResource BodyLabel}"/>
+                               Style="{StaticResource BodyLabel}"
+                               HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Border BackgroundColor="{StaticResource Surface}"
-                                Stroke="{StaticResource Gray300}"
-                                StrokeThickness="1"
-                                StrokeShape="RoundRectangle 10,10,10,10"
-                                Margin="0,0,0,10"
-                                Padding="15">
-                            <Grid RowDefinitions="Auto,Auto"
-                                  ColumnDefinitions="*,Auto">
+                        <Border Style="{StaticResource CardBorder}"
+                                Margin="0,0,0,10">
+                            <Grid RowDefinitions="Auto,Auto,Auto"
+                                  ColumnDefinitions="*,Auto"
+                                  RowSpacing="5">
                                 <Label Grid.Row="0"
                                        Grid.Column="0"
                                        Text="{Binding Location}"
@@ -81,8 +81,13 @@
 
                                 <Label Grid.Row="1"
                                        Grid.Column="0"
-                                       Grid.ColumnSpan="2"
                                        Text="{Binding Date, StringFormat='{0:d}'}"
+                                       Style="{StaticResource BodyLabel}"/>
+
+                                <Label Grid.Row="2"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Type}"
                                        Style="{StaticResource BodyLabel}"/>
                             </Grid>
                         </Border>

@@ -6,52 +6,78 @@
              x:DataType="viewmodels:ProceduresViewModel"
              Title="{Binding Title}">
 
-    <Grid RowDefinitions="Auto,*" 
+    <Grid RowDefinitions="Auto,Auto,*" 
           Padding="20"
           RowSpacing="20">
 
-        <!-- Przycisk szybkiego dodawania -->
-        <Button Grid.Row="0"
+        <!-- Podsumowanie -->
+        <Border Grid.Row="0"
+                Style="{StaticResource CardBorder}">
+            <Grid ColumnDefinitions="*,*"
+                  ColumnSpacing="20">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Wykonane"
+                           Style="{StaticResource SubHeaderLabel}"/>
+                    <Label Text="15/30"
+                           Style="{StaticResource ValueLabel}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Pozostało"
+                           Style="{StaticResource SubHeaderLabel}"/>
+                    <Label Text="15"
+                           Style="{StaticResource ValueLabel}"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Przycisk dodawania -->
+        <Button Grid.Row="1"
                 Text="+ Dodaj procedurę"
                 Command="{Binding AddProcedureCommand}"
                 Style="{StaticResource PrimaryButton}"/>
 
         <!-- Lista procedur -->
-        <RefreshView Grid.Row="1"
+        <RefreshView Grid.Row="2"
                     Command="{Binding RefreshCommand}"
                     IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView ItemsSource="{Binding Procedures}"
-                          SelectionMode="None">
+            <CollectionView Style="{StaticResource ListCollectionView}"
+                          ItemsSource="{Binding Procedures}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout HorizontalOptions="Center"
-                                       VerticalOptions="Center">
+                                       VerticalOptions="Center"
+                                       Spacing="10">
                         <Label Text="Brak procedur"
-                               Style="{StaticResource SubHeaderLabel}"/>
+                               Style="{StaticResource SubHeaderLabel}"
+                               HorizontalOptions="Center"/>
                         <Label Text="Dodaj swoją pierwszą procedurę"
-                               Style="{StaticResource BodyLabel}"/>
+                               Style="{StaticResource BodyLabel}"
+                               HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Border BackgroundColor="{StaticResource Surface}"
-                                Stroke="{StaticResource Gray300}"
-                                StrokeThickness="1"
-                                StrokeShape="RoundRectangle 10,10,10,10"
-                                Margin="0,0,0,10"
-                                Padding="15">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0"
-                                                   Spacing="5">
-                                    <Label Text="{Binding Name}"
-                                           Style="{StaticResource SubHeaderLabel}"/>
-                                    <Label Text="{Binding Date, StringFormat='{0:d}'}"
-                                           Style="{StaticResource BodyLabel}"/>
-                                </VerticalStackLayout>
+                        <Border Style="{StaticResource CardBorder}"
+                                Margin="0,0,0,10">
+                            <Grid RowDefinitions="Auto,Auto"
+                                  ColumnDefinitions="*,Auto"
+                                  RowSpacing="5">
+                                <Label Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       Style="{StaticResource SubHeaderLabel}"/>
 
-                                <Label Grid.Column="1"
-                                       Text="{Binding Status}"
-                                       VerticalOptions="Center"/>
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       Text="{Binding Type}"
+                                       Style="{StaticResource BodyLabel}"/>
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Date, StringFormat='{0:d}'}"
+                                       Style="{StaticResource BodyLabel}"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
