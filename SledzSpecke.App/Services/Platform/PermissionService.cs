@@ -1,105 +1,141 @@
-﻿using Microsoft.Maui.ApplicationModel;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
-namespace SledzSpecke.App.Services.Platform
+public class PermissionService : IPermissionService
 {
-    public class PermissionService
+    // Sprawdzanie statusu uprawnień
+    public async Task<PermissionStatus> CheckPermissionAsync<TPermission>()
+        where TPermission : Permissions.BasePermission, new()
     {
-        // Sprawdzanie statusu uprawnień
-        public async Task<PermissionStatus> CheckPermissionStatus<TPermission>() where TPermission : Permissions.BasePermission, new()
+        try
         {
-            return await Permissions.CheckStatusAsync<TPermission>();
+            var status = await Permissions.CheckStatusAsync<TPermission>();
+            return status;
         }
-
-        // Żądanie pojedynczego uprawnienia
-        public async Task<PermissionStatus> RequestPermission<TPermission>() where TPermission : Permissions.BasePermission, new()
+        catch (Exception)
         {
-            try
+            return PermissionStatus.Unknown;
+        }
+    }
+
+    // Żądanie pojedynczego uprawnienia
+    public async Task<PermissionStatus> RequestPermissionAsync<TPermission>()
+        where TPermission : Permissions.BasePermission, new()
+    {
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<TPermission>();
+
+            if (status == PermissionStatus.Unknown)
             {
-                var status = await CheckPermissionStatus<TPermission>();
-
-                if (status == PermissionStatus.Granted)
-                    return status;
-
-                if (status == PermissionStatus.Denied && DeviceInfo.Platform == DevicePlatform.iOS)
-                {
-                    // Na iOS, jeśli użytkownik wcześniej odmówił, kierujemy do ustawień
-                    await OpenSettings();
-                    return status;
-                }
-
+                // If initial check returns Unknown, try requesting anyway
+                // This might help in some cases where the initial check fails
                 status = await Permissions.RequestAsync<TPermission>();
                 return status;
             }
-            catch (Exception ex)
-            {
-                // Logowanie błędu
-                Console.WriteLine($"Error requesting permission: {ex.Message}");
-                return PermissionStatus.Unknown;
-            }
-        }
 
-        // Żądanie grupy uprawnień
-        public async Task<Dictionary<Type, PermissionStatus>> RequestPermissions(params Type[] permissionTypes)
-        {
-            var results = new Dictionary<Type, PermissionStatus>();
+            if (status == PermissionStatus.Granted)
+                return status;
 
-            foreach (var permissionType in permissionTypes)
+            if (status == PermissionStatus.Denied && DeviceInfo.Platform == DevicePlatform.iOS)
             {
-                if (typeof(Permissions.BasePermission).IsAssignableFrom(permissionType))
-                {
-                    var permission = (Permissions.BasePermission)Activator.CreateInstance(permissionType);
-                    var status = await Permissions.RequestAsync(permission);
-                    results.Add(permissionType, status);
-                }
+                // iOS nie pozwala na ponowne pytanie - przekieruj do ustawień
+                return status;
             }
 
-            return results;
+            status = await Permissions.RequestAsync<TPermission>();
+            return status;
+        }
+        catch (Exception)
+        {
+            return PermissionStatus.Unknown;
+        }
+    }
+
+    // Żądanie grupy uprawnień
+    public async Task<IDictionary<Type, PermissionStatus>> RequestPermissionsAsync(
+        params Type[] permissionTypes)
+    {
+        var results = new Dictionary<Type, PermissionStatus>();
+
+        foreach (var permissionType in permissionTypes)
+        {
+            var status = await RequestPermissionByTypeAsync(permissionType);
+            results.Add(permissionType, status);
         }
 
-        // Obsługa odmowy uprawnień
-        public async Task HandlePermissionDenial<TPermission>(string permissionName) where TPermission : Permissions.BasePermission, new()
-        {
-            var shouldShowRationale = await Permissions.ShouldShowRationale<TPermission>();
+        return results;
+    }
 
-            if (shouldShowRationale)
+    // Obsługa odmowy uprawnień
+    public async Task<bool> HandleDeniedPermissionAsync<TPermission>(
+        string rationaleMessage)
+        where TPermission : Permissions.BasePermission, new()
+    {
+        var status = await CheckPermissionAsync<TPermission>();
+
+        if (status != PermissionStatus.Denied)
+            return true;
+
+        // Pokaż wyjaśnienie dlaczego potrzebujemy uprawnienia
+        var shouldShowRationale = Permissions.ShouldShowRationale<TPermission>();
+
+        if (shouldShowRationale)
+        {
+            var window = Application.Current?.Windows.FirstOrDefault();
+            if (window?.Page is not null)
             {
-                // Pokazujemy wyjaśnienie, dlaczego potrzebujemy uprawnienia
-                var result = await Application.Current.MainPage.DisplayAlert(
+                var answer = await window.Page.DisplayAlert(
                     "Uprawnienie wymagane",
-                    $"Aplikacja potrzebuje uprawnienia {permissionName} do prawidłowego działania.",
+                    rationaleMessage,
                     "Otwórz ustawienia",
                     "Anuluj");
 
-                if (result)
+                if (answer)
                 {
-                    await OpenSettings();
+                    AppInfo.ShowSettingsUI();
                 }
-            }
-            else
-            {
-                // Użytkownik zaznaczył "Nie pytaj ponownie"
-                await Application.Current.MainPage.DisplayAlert(
-                    "Uprawnienie niedostępne",
-                    $"Uprawnienie {permissionName} jest wymagane. Proszę włącz je w ustawieniach aplikacji.",
-                    "OK");
             }
         }
 
-        // Pomocnicza metoda do otwierania ustawień
-        private async Task OpenSettings()
+        return false;
+    }
+
+    private async Task<PermissionStatus> RequestPermissionByTypeAsync(Type permissionType)
+    {
+        var method = typeof(Permissions).GetMethod(
+            nameof(Permissions.RequestAsync),
+            BindingFlags.Public | BindingFlags.Static);
+
+        if (method == null)
         {
-            try
+            // Log or handle the error that the method was not found
+            return PermissionStatus.Unknown;
+        }
+
+        var genericMethod = method.MakeGenericMethod(permissionType);
+
+        if (genericMethod == null)
+        {
+            // Log or handle the error that the generic method could not be created
+            return PermissionStatus.Unknown;
+        }
+
+        try
+        {
+            var result = genericMethod.Invoke(null, null);
+            if (result is Task<PermissionStatus> task)
             {
-                await AppInfo.ShowSettingsUI();
+                return await task;
             }
-            catch (Exception ex)
+            else
             {
-                // Logowanie błędu
-                Console.WriteLine($"Error opening settings: {ex.Message}");
+                // Log or handle the error that the result is not of expected type
+                return PermissionStatus.Unknown;
             }
+        }
+        catch
+        {
+            return PermissionStatus.Unknown;
         }
     }
 }
