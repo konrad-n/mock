@@ -1,6 +1,9 @@
 using SledzSpecke.Core.Interfaces.Services;
 
-public class SQLiteDataService : IDataService
+namespace SledzSpecke.Infrastructure.Services
 {
-    // ... implementacja metod
+    public class SQLiteDataService : IDataService
+    {
+        // ... implementacja metod
+    }
 }

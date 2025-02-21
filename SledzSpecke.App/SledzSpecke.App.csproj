@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net9.0-android35.0</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
@@ -79,6 +79,7 @@
 	  <Folder Include="Services\Navigation\" />
 	  <Folder Include="Services\Dialog\" />
 	  <Folder Include="Services\Platform\" />
+    <Folder Include="ViewModels" />
 	  <Folder Include="ViewModels\Base\" />
 	  <Folder Include="ViewModels\Dashboard\" />
 	  <Folder Include="ViewModels\Duties\" />
@@ -86,6 +87,7 @@
 	  <Folder Include="ViewModels\Courses\" />
 	  <Folder Include="ViewModels\Profile\" />
 	  <Folder Include="ViewModels\Procedures\" />
+    <Folder Include="Views" />
 	  <Folder Include="Views\Dashboard\" />
 	  <Folder Include="Views\Duties\" />
 	  <Folder Include="Views\Internships\" />
