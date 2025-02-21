@@ -13,6 +13,7 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+				fonts.AddFont("FluentUI.ttf", "FluentUI");
 			});
 
 		// Rejestracja serwisów
@@ -23,9 +24,10 @@ public static class MauiProgram
 
 		// Rejestracja stron
 		builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<SplashPage>();
 
 #if DEBUG
-		builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
 		return builder.Build();

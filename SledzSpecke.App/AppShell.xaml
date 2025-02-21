@@ -8,6 +8,11 @@
     Title="SledzSpecke.App">
 
     <ShellContent
+        Title="Splash"
+        ContentTemplate="{DataTemplate local:SplashPage}"
+        Route="SplashPage" />
+
+    <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />

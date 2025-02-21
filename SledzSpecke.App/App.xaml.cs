@@ -8,8 +8,18 @@ namespace SledzSpecke.App
 
         public App(IPermissionService permissionService)
         {
-            InitializeComponent();
-            _permissionService = permissionService;
+            try
+            {
+                InitializeComponent();
+                _permissionService = permissionService;
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                // Log or inspect the inner exception for more details
+                var innerException = ex.InnerException;
+                Console.WriteLine(innerException?.Message);
+                throw;
+            }
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
