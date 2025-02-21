@@ -10,7 +10,7 @@
     Shell.FlyoutBehavior="Disabled">
 
     <TabBar>
-        <Tab Title="Dashboard" Icon="dashboard.png">
+        <Tab Title="Panel główny" Icon="dashboard.png">
             <ShellContent 
                 ContentTemplate="{DataTemplate dashboard:DashboardPage}"
                 Route="Dashboard" />
