@@ -78,22 +78,25 @@
 	  <Folder Include="Converters\" />
 	  <Folder Include="Services\Navigation\" />
 	  <Folder Include="Services\Dialog\" />
-    <Folder Include="ViewModels" />
-	  <Folder Include="ViewModels\Base\" />
-	  <Folder Include="ViewModels\Dashboard\" />
-	  <Folder Include="ViewModels\Duties\" />
 	  <Folder Include="ViewModels\Internships\" />
 	  <Folder Include="ViewModels\Courses\" />
 	  <Folder Include="ViewModels\Profile\" />
-	  <Folder Include="ViewModels\Procedures\" />
-    <Folder Include="Views" />
-	  <Folder Include="Views\Dashboard\" />
-	  <Folder Include="Views\Duties\" />
 	  <Folder Include="Views\Internships\" />
 	  <Folder Include="Views\Courses\" />
 	  <Folder Include="Views\Profile\" />
-	  <Folder Include="Views\Procedures\" />
     <Folder Include="Resources\Icons\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\Dashboard\DashboardPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Duties\DutiesPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Procedures\ProceduresPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 </Project>

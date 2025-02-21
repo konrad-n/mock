@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:SledzSpecke.App.ViewModels.Dashboard"
+             x:Class="SledzSpecke.App.Views.Dashboard.DashboardPage"
+             x:DataType="viewmodels:DashboardViewModel"
+             Title="{Binding Title}">
+
+    <RefreshView Command="{Binding RefreshCommand}"
+                 IsRefreshing="{Binding IsRefreshing}">
+        <ScrollView>
+            <Grid RowDefinitions="Auto,*"
+                  RowSpacing="10"
+                  Padding="20">
+                
+                <!-- Sekcja podsumowania -->
+                <VerticalStackLayout Grid.Row="0"
+                                   Spacing="10">
+                    <Label Text="Postęp specjalizacji"
+                           Style="{StaticResource HeaderLabel}"/>
+                    <ProgressBar Progress="0.6"
+                                HeightRequest="20"/>
+                    <Label Text="60% ukończone"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+
+                <!-- Sekcja kafelków -->
+                <Grid Grid.Row="1"
+                      RowDefinitions="Auto,Auto"
+                      ColumnDefinitions="*,*"
+                      RowSpacing="20"
+                      ColumnSpacing="20">
+
+                    <!-- Kafelek Procedury -->
+                    <Frame Grid.Row="0" 
+                           Grid.Column="0"
+                           Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout>
+                            <Label Text="Procedury"
+                                   Style="{StaticResource SubHeaderLabel}"/>
+                            <Label Text="15/30"
+                                   Style="{StaticResource ValueLabel}"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Kafelek Dyżury -->
+                    <Frame Grid.Row="0" 
+                           Grid.Column="1"
+                           Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout>
+                            <Label Text="Dyżury"
+                                   Style="{StaticResource SubHeaderLabel}"/>
+                            <Label Text="24/50"
+                                   Style="{StaticResource ValueLabel}"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Kafelek Staże -->
+                    <Frame Grid.Row="1" 
+                           Grid.Column="0"
+                           Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout>
+                            <Label Text="Staże"
+                                   Style="{StaticResource SubHeaderLabel}"/>
+                            <Label Text="2/5"
+                                   Style="{StaticResource ValueLabel}"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Kafelek Kursy -->
+                    <Frame Grid.Row="1" 
+                           Grid.Column="1"
+                           Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout>
+                            <Label Text="Kursy"
+                                   Style="{StaticResource SubHeaderLabel}"/>
+                            <Label Text="3/8"
+                                   Style="{StaticResource ValueLabel}"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </Grid>
+            </Grid>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>
