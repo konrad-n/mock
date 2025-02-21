@@ -12,7 +12,10 @@
     <Folder Include="Database\Repositories\" />
     <Folder Include="Migrations\" />
     <Folder Include="Helpers\" />
-    <Folder Include="Services\" />
+    <Folder Include="Factories\" />
+    <Folder Include="Services\Data\" />
+    <Folder Include="Services\Auth\" />
+    <Folder Include="Services\Sync\" />
   </ItemGroup>
 
   <ItemGroup>
