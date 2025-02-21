@@ -10,74 +10,83 @@
                  IsRefreshing="{Binding IsRefreshing}">
         <ScrollView>
             <Grid RowDefinitions="Auto,*"
-                  RowSpacing="10"
+                  RowSpacing="20"
                   Padding="20">
-                
+
                 <!-- Sekcja podsumowania -->
                 <VerticalStackLayout Grid.Row="0"
                                    Spacing="10">
                     <Label Text="Postęp specjalizacji"
                            Style="{StaticResource HeaderLabel}"/>
                     <ProgressBar Progress="0.6"
-                                HeightRequest="20"/>
+                                Style="{StaticResource ProgressBar}"/>
                     <Label Text="60% ukończone"
+                           Style="{StaticResource BodyLabel}"
                            HorizontalOptions="Center"/>
                 </VerticalStackLayout>
 
                 <!-- Sekcja kafelków -->
                 <Grid Grid.Row="1"
-                      RowDefinitions="Auto,Auto"
+                      RowDefinitions="*,*"
                       ColumnDefinitions="*,*"
                       RowSpacing="20"
                       ColumnSpacing="20">
 
                     <!-- Kafelek Procedury -->
-                    <Frame Grid.Row="0" 
+                    <Border Grid.Row="0" 
                            Grid.Column="0"
-                           Style="{StaticResource CardFrame}">
-                        <VerticalStackLayout>
+                           Style="{StaticResource CardBorder}">
+                        <Grid RowDefinitions="Auto,Auto" 
+                              RowSpacing="5">
                             <Label Text="Procedury"
                                    Style="{StaticResource SubHeaderLabel}"/>
                             <Label Text="15/30"
+                                   Grid.Row="1"
                                    Style="{StaticResource ValueLabel}"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                        </Grid>
+                    </Border>
 
                     <!-- Kafelek Dyżury -->
-                    <Frame Grid.Row="0" 
+                    <Border Grid.Row="0" 
                            Grid.Column="1"
-                           Style="{StaticResource CardFrame}">
-                        <VerticalStackLayout>
+                           Style="{StaticResource CardBorder}">
+                        <Grid RowDefinitions="Auto,Auto" 
+                              RowSpacing="5">
                             <Label Text="Dyżury"
                                    Style="{StaticResource SubHeaderLabel}"/>
                             <Label Text="24/50"
+                                   Grid.Row="1"
                                    Style="{StaticResource ValueLabel}"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                        </Grid>
+                    </Border>
 
                     <!-- Kafelek Staże -->
-                    <Frame Grid.Row="1" 
+                    <Border Grid.Row="1" 
                            Grid.Column="0"
-                           Style="{StaticResource CardFrame}">
-                        <VerticalStackLayout>
+                           Style="{StaticResource CardBorder}">
+                        <Grid RowDefinitions="Auto,Auto" 
+                              RowSpacing="5">
                             <Label Text="Staże"
                                    Style="{StaticResource SubHeaderLabel}"/>
                             <Label Text="2/5"
+                                   Grid.Row="1"
                                    Style="{StaticResource ValueLabel}"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                        </Grid>
+                    </Border>
 
                     <!-- Kafelek Kursy -->
-                    <Frame Grid.Row="1" 
+                    <Border Grid.Row="1" 
                            Grid.Column="1"
-                           Style="{StaticResource CardFrame}">
-                        <VerticalStackLayout>
+                           Style="{StaticResource CardBorder}">
+                        <Grid RowDefinitions="Auto,Auto" 
+                              RowSpacing="5">
                             <Label Text="Kursy"
                                    Style="{StaticResource SubHeaderLabel}"/>
                             <Label Text="3/8"
+                                   Grid.Row="1"
                                    Style="{StaticResource ValueLabel}"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Grid>
         </ScrollView>
