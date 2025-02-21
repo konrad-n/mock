@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35806.99 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.App", "SledzSpecke.App\SledzSpecke.App.csproj", "{78E33459-55B8-40B9-B2FA-D2A026A21CE1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Core", "SledzSpecke.Core\SledzSpecke.Core.csproj", "{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{78E33459-55B8-40B9-B2FA-D2A026A21CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78E33459-55B8-40B9-B2FA-D2A026A21CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78E33459-55B8-40B9-B2FA-D2A026A21CE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

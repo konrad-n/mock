@@ -65,4 +65,8 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.2" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\SledzSpecke.Core\SledzSpecke.Core.csproj" />
+	</ItemGroup>
+
 </Project>
