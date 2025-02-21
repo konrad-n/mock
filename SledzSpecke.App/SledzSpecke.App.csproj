@@ -67,6 +67,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\SledzSpecke.Core\SledzSpecke.Core.csproj" />
+	  <ProjectReference Include="..\SledzSpecke.Infrastructure\SledzSpecke.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>
