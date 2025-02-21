@@ -1,6 +1,7 @@
 ﻿namespace SledzSpecke.Core.Interfaces.Services
 {
-    interface IDataService
+    public interface IDataService
     {
+        // ... twoje metody interfejsu
     }
 }
