@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:SledzSpecke.App.ViewModels.Duties"
+             x:Class="SledzSpecke.App.Views.Duties.DutyAddPage"
+             x:DataType="viewmodels:DutyAddViewModel"
+             Title="Dodaj dyżur">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Miejsce dyżuru -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Miejsce dyżuru *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding Location}"
+                       Placeholder="Np. Oddział Psychiatryczny"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Data rozpoczęcia -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Data rozpoczęcia *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <HorizontalStackLayout Spacing="10">
+                    <DatePicker Date="{Binding StartDate}"
+                               Format="d"/>
+                    <TimePicker Time="{Binding StartTime}"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Data zakończenia -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Data zakończenia *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <HorizontalStackLayout Spacing="10">
+                    <DatePicker Date="{Binding EndDate}"
+                               Format="d"/>
+                    <TimePicker Time="{Binding EndTime}"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Typ dyżuru -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Typ dyżuru *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Picker ItemsSource="{Binding DutyTypes}"
+                        SelectedItem="{Binding SelectedDutyType}"/>
+            </VerticalStackLayout>
+
+            <!-- Notatki -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Notatki"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Editor Text="{Binding Notes}"
+                        Placeholder="Dodatkowe informacje..."
+                        HeightRequest="100"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Przyciski -->
+            <VerticalStackLayout Spacing="10" 
+                               Margin="0,20,0,0">
+                <Button Text="Zapisz"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding CanSave}"
+                        Style="{StaticResource PrimaryButton}"/>
+
+                <Button Text="Anuluj"
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

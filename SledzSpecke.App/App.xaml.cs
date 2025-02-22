@@ -1,17 +1,20 @@
 ﻿using Microsoft.Maui.ApplicationModel;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App
 {
     public partial class App : Application
     {
         private readonly IPermissionService _permissionService;
+        private readonly DatabaseInitializer _initializer;
 
-        public App(IPermissionService permissionService)
+        public App(IPermissionService permissionService, DatabaseInitializer initializer)
         {
             try
             {
                 InitializeComponent();
                 _permissionService = permissionService;
+                _initializer = initializer;
             }
             catch (System.Reflection.TargetInvocationException ex)
             {
@@ -31,6 +34,7 @@ namespace SledzSpecke.App
         {
             base.OnStart();
             await CheckCriticalPermissions();
+            await _initializer.InitializeAsync();
         }
 
         private async Task CheckCriticalPermissions()

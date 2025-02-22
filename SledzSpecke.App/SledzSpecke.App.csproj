@@ -80,11 +80,10 @@
 	  <Folder Include="Services\Dialog\" />
 	  <Folder Include="ViewModels\Internships\" />
 	  <Folder Include="ViewModels\Courses\" />
-	  <Folder Include="ViewModels\Profile\" />
 	  <Folder Include="Views\Internships\" />
 	  <Folder Include="Views\Courses\" />
-	  <Folder Include="Views\Profile\" />
     <Folder Include="Resources\Icons\" />
+    <Folder Include="Views\Settings\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -94,7 +93,25 @@
 	  <MauiXaml Update="Views\Duties\DutiesPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Duties\DutyAddPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Duties\DutyEditPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Procedures\ProcedureAddPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Procedures\ProcedureEditPage.xaml.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Procedures\ProceduresPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Profile\ProfilePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Profile\Settings.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

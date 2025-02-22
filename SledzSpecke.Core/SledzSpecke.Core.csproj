@@ -6,13 +6,10 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Folder Include="Enums\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Helpers\" />
     <Folder Include="Interfaces\Factories\" />
     <Folder Include="Interfaces\Repositories\" />
-    <Folder Include="Models\Domain\" />
-    <Folder Include="Models\Dto\" />
     <Folder Include="Models\Requests\" />
     <Folder Include="Constants\" />
     <Folder Include="Services\Base\" />

@@ -6,11 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Database\Context\" />
-    <Folder Include="Database\Configuration\" />
-    <Folder Include="Database\Extensions\" />
-    <Folder Include="Database\Repositories\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Helpers\" />
     <Folder Include="Factories\" />
     <Folder Include="Services\Data\" />
@@ -22,6 +17,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
+    <PackageReference Include="SQLiteNetExtensions.Async" Version="2.1.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
   </ItemGroup>
 

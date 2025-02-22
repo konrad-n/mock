@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:SledzSpecke.App.ViewModels.Procedures"
+             x:Class="SledzSpecke.App.Views.Procedures.ProcedureAddPage"
+             x:DataType="viewmodels:ProcedureAddViewModel"
+             Title="Dodaj procedurę">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Nazwa procedury -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Nazwa procedury *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding Name}"
+                       Placeholder="Np. Badanie psychiatryczne"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Data wykonania -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Data wykonania *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <DatePicker Date="{Binding ExecutionDate}"
+                           Format="d"/>
+            </VerticalStackLayout>
+
+            <!-- Typ wykonania -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Typ wykonania *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox IsChecked="{Binding IsSelfPerformed}"/>
+                    <Label Text="Wykonanie samodzielne"
+                           Style="{StaticResource BodyLabel}"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Lokalizacja -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Miejsce wykonania *"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding Location}"
+                       Placeholder="Np. Oddział Psychiatryczny"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Notatki -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Notatki"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Editor Text="{Binding Notes}"
+                        Placeholder="Dodatkowe informacje..."
+                        HeightRequest="100"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Przyciski -->
+            <VerticalStackLayout Spacing="10" 
+                               Margin="0,20,0,0">
+                <Button Text="Zapisz"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding CanSave}"
+                        Style="{StaticResource PrimaryButton}"/>
+
+                <Button Text="Anuluj"
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
