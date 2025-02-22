@@ -1,15 +1,16 @@
-﻿using SledzSpecke.Core.Models.Domain;
-using SQLite;
+﻿using SQLite;
+using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Configuration
 {
     public static class EntityConfiguration
     {
-        public static void ConfigureIndexes(SQLiteAsyncConnection connection)
+        public static async Task ConfigureIndexesAsync(SQLiteAsyncConnection connection)
         {
-            connection.CreateIndexAsync<User>("IX_User_Email", u => u.Email, true);
-            connection.CreateIndexAsync<User>("IX_User_PWZ", u => u.PWZ, true);
-            // Dodaj inne indeksy
+            await connection.ExecuteAsync(
+                "CREATE INDEX IF NOT EXISTS IX_User_Email ON User(Email)");
+            await connection.ExecuteAsync(
+                "CREATE INDEX IF NOT EXISTS IX_User_PWZ ON User(PWZ)");
         }
     }
 }

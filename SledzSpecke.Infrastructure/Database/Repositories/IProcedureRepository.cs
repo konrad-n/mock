@@ -8,6 +8,8 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
     {
         Task<List<ProcedureExecution>> GetUserProceduresAsync(int userId);
         Task<Dictionary<string, int>> GetProcedureStatsAsync(int userId);
+        Task<ProcedureExecution> GetProcedureWithDetailsAsync(int id);
+        Task<List<ProcedureDefinition>> SearchAsync(string query);
     }
 
 }

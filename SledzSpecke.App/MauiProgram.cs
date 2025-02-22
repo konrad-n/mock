@@ -11,6 +11,8 @@ using SledzSpecke.Infrastructure.Database.Configuration;
 using SledzSpecke.Infrastructure.Database.Context;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using SledzSpecke.Infrastructure.Database.Migrations;
+using SledzSpecke.Infrastructure.Services;
+using SledzSpecke.App.Services.Platform;
 
 namespace SledzSpecke.App;
 
@@ -64,11 +66,20 @@ public static class MauiProgram
         builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
         builder.Services.AddScoped<IProcedureRepository, ProcedureRepository>();
         builder.Services.AddScoped<IDutyRepository, DutyRepository>();
-        builder.Services.AddSingleton<IMigrationRunner, MigrationRunner>();
 
-        builder.Services.AddSingleton<IApplicationDbContext>(
-            provider => new ApplicationDbContext(DatabaseConfig.GetDatabasePath())
-        );
+        // Dodaj rejestrację serwisu
+        builder.Services.AddSingleton<IFileSystemService, FileSystemService>();
+
+        // I użyj go przy tworzeniu kontekstu
+        builder.Services.AddSingleton<IMigrationRunner, MigrationRunner>();
+        builder.Services.AddSingleton<IApplicationDbContext>(provider =>
+        {
+            var migrationRunner = provider.GetRequiredService<IMigrationRunner>();
+            var fileSystemService = provider.GetRequiredService<IFileSystemService>();
+            return new ApplicationDbContext(
+                DatabaseConfig.GetDatabasePath(fileSystemService.GetAppDataDirectory()),
+                migrationRunner);
+        });
 
 
 #if DEBUG

@@ -1,21 +1,21 @@
 ﻿using SQLite;
 using System.IO;
-
 namespace SledzSpecke.Infrastructure.Database.Configuration
 {
     public static class DatabaseConfig
     {
-        public static string GetDatabasePath()
+        public static string GetDatabasePath(string appDataPath)
         {
-            return Path.Combine(FileSystem.AppDataDirectory, "sledzspecke.db3");
+            return Path.Combine(appDataPath, "sledzspecke.db3");
         }
 
-        public static SQLiteConnectionString GetConnectionString()
+        public static SQLiteConnectionString GetConnectionString(string appDataPath)
         {
-            return new SQLiteConnectionString(GetDatabasePath(),
-                SQLiteOpenFlags.ReadWrite |
-                SQLiteOpenFlags.Create |
-                SQLiteOpenFlags.SharedCache);
+            return new SQLiteConnectionString(
+                GetDatabasePath(appDataPath),
+                true,
+                key: null
+            );
         }
     }
 }

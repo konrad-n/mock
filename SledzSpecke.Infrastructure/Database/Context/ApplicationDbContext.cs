@@ -5,14 +5,16 @@ using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Context
 {
-    public class ApplicationDbContext
+    public class ApplicationDbContext : IApplicationDbContext
     {
         private readonly SQLiteAsyncConnection _database;
+        private readonly IMigrationRunner _migrationRunner;
         private bool _isInitialized;
 
-        public ApplicationDbContext(string databasePath)
+        public ApplicationDbContext(string databasePath, IMigrationRunner migrationRunner)
         {
             _database = new SQLiteAsyncConnection(databasePath);
+            _migrationRunner = migrationRunner;
         }
 
         public async Task InitializeAsync()
@@ -62,6 +64,12 @@ namespace SledzSpecke.Infrastructure.Database.Context
             {
                 await _database.CreateTableAsync(type);
             }
+        }
+
+        private async Task UpdateDatabaseSchemaAsync()
+        {
+            // Implementacja aktualizacji schematu bazy danych
+            await _migrationRunner.RunMigrationsAsync();
         }
     }
 }

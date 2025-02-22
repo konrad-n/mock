@@ -21,7 +21,10 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
 
         public static List<ProcedureDefinition> GetBasicProcedures()
         {
-            // wczytaj dane z pliku dbconcept3
+            return new List<ProcedureDefinition>
+            {
+                // Dodaj przykładowe procedury
+            };
         }
     }
 }

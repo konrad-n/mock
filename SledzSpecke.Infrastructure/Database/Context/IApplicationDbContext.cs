@@ -7,5 +7,6 @@ namespace SledzSpecke.Infrastructure.Database.Context
     {
         Task InitializeAsync();
         SQLiteAsyncConnection GetConnection();
+        Task EnsureDatabaseCreatedAsync();
     }
 }

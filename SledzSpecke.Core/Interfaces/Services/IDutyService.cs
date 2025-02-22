@@ -7,10 +7,12 @@ namespace SledzSpecke.Core.Interfaces.Services
 {
     public interface IDutyService
     {
-        Task<List<Duty>> GetUserDutiesAsync(int userId, DateTime? fromDate = null);
+        Task<List<Duty>> GetUserDutiesAsync(DateTime? fromDate = null);
+        Task<Duty> GetDutyAsync(int id);
         Task<Duty> AddDutyAsync(Duty duty);
-        Task<DutyStatistics> GetDutyStatisticsAsync(int userId);
-        Task<bool> IsDutyOverlappingAsync(int userId, DateTime start, DateTime end);
-        Task<decimal> GetRemainingRequiredHoursAsync(int userId);
+        Task<bool> UpdateDutyAsync(Duty duty);
+        Task<bool> DeleteDutyAsync(int id);
+        Task<DutyStatistics> GetDutyStatisticsAsync();
+        Task<List<Duty>> GetUpcomingDutiesAsync(int daysAhead = 7);
     }
 }

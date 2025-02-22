@@ -17,6 +17,8 @@ namespace SledzSpecke.Core.Models.Domain
         public bool IsCompleted { get; set; }
         public DateTime? CompletionDate { get; set; }
 
+        public int SpecializationId { get; set; }
+
         // Właściwości nawigacyjne
         public User User { get; set; }
         public User Supervisor { get; set; }

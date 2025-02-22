@@ -7,6 +7,9 @@ namespace SledzSpecke.Core.Models.Domain
     {
         public int ProcedureDefinitionId { get; set; }
         public int UserId { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public ProcedureDefinition Definition { get; set; }
         public DateTime ExecutionDate { get; set; }
         public ProcedureType Type { get; set; } // Wykonanie/Asysta
         public int? SupervisorId { get; set; }
