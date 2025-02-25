@@ -25,6 +25,13 @@ namespace SledzSpecke.Core.Models.Domain
             set => _requiredProceduresJson = value;
         }
         
+        private string _assistantProceduresJson;
+        public string AssistantProceduresJson
+        {
+            get => _assistantProceduresJson;
+            set => _assistantProceduresJson = value;
+        }
+        
         // Właściwości nawigacyjne (nieserializowane)
         [SQLite.Ignore]
         public List<string> RequiredSkills
@@ -42,6 +49,15 @@ namespace SledzSpecke.Core.Models.Domain
                 ? new Dictionary<string, int>()
                 : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(_requiredProceduresJson);
             set => _requiredProceduresJson = System.Text.Json.JsonSerializer.Serialize(value);
+        }
+        
+        [SQLite.Ignore]
+        public Dictionary<string, int> AssistantProcedures
+        {
+            get => string.IsNullOrEmpty(_assistantProceduresJson)
+                ? new Dictionary<string, int>()
+                : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(_assistantProceduresJson);
+            set => _assistantProceduresJson = System.Text.Json.JsonSerializer.Serialize(value);
         }
         
         // Nawigacja

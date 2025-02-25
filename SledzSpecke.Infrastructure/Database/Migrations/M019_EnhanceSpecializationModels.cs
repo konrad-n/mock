@@ -67,6 +67,11 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
             ALTER TABLE DutyRequirement ADD COLUMN MinimumDutiesPerMonth INTEGER DEFAULT 0;
             ALTER TABLE DutyRequirement ADD COLUMN RequiredCompetenciesJson TEXT;
             ");
+
+            // 8. Aktualizacja tabeli InternshipModule
+            await _connection.ExecuteAsync(@"
+            ALTER TABLE InternshipModule ADD COLUMN AssistantProceduresJson TEXT;
+            ");
         }
 
         public override async Task DownAsync()
