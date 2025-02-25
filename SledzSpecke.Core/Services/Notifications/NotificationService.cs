@@ -17,8 +17,6 @@ namespace SledzSpecke.Core.Services.Notifications
         private readonly IInternshipService _internshipService;
         private readonly IDutyService _dutyService;
         private readonly ILogger<NotificationService> _logger;
-        
-        // Załóżmy, że mamy repozytorium do zapisywania powiadomień
         private readonly INotificationRepository _notificationRepository;
         
         public NotificationService(
@@ -57,9 +55,6 @@ namespace SledzSpecke.Core.Services.Notifications
                 };
                 
                 await _notificationRepository.AddAsync(notification);
-                
-                // Tutaj można dodać kod do planowania lokalnego powiadomienia 
-                // na urządzeniu użytkownika
             }
             catch (Exception ex)
             {
@@ -107,16 +102,6 @@ namespace SledzSpecke.Core.Services.Notifications
                         message,
                         DateTime.Now.AddDays(7));
                 }
-                
-                // Powiadomienia o stażach
-                var internships = await _internshipService.GetRequiredInternshipsAsync();
-                // Podobnie jak dla kursów...
-                
-                // Powiadomienia o wymaganiach dyżurów
-                var dutyRequirements = await _specializationService.GetRequiredDutiesAsync(specializationId);
-                // Podobnie...
-                
-                // Można dodać więcej typów powiadomień
             }
             catch (Exception ex)
             {
