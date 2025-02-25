@@ -6,11 +6,22 @@ namespace SledzSpecke.Core.Interfaces.Services
 {
     public interface IProcedureService
     {
+        // Istniejące metody
         Task<List<ProcedureExecution>> GetUserProceduresAsync();
         Task<ProcedureExecution> GetProcedureAsync(int id);
         Task<ProcedureExecution> AddProcedureAsync(ProcedureExecution procedure);
         Task<bool> UpdateProcedureAsync(ProcedureExecution procedure);
         Task<bool> DeleteProcedureAsync(int id);
-        Task<Dictionary<string, int>> GetProcedureStatisticsAsync();
+        
+        // Nowe metody
+        Task<List<ProcedureRequirement>> GetRequirementsForSpecializationAsync();
+        Task<List<ProcedureRequirement>> GetRequirementsByStageAsync(string stage);
+        Task<List<ProcedureRequirement>> GetRequirementsByCategoryAsync(string category);
+        Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync();
+        Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByStageAsync();
+        Task<double> GetProcedureCompletionPercentageAsync();
+        Task<List<string>> GetAvailableCategoriesAsync();
+        Task<List<string>> GetAvailableStagesAsync();
+        Task<bool> ValidateProcedureRequirementsAsync(ProcedureExecution procedure);
     }
 }
