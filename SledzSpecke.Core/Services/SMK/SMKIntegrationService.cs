@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Core.Models.Enums;
-using SledzSpecke.Infrastructure.Database.Repositories;
 
 namespace SledzSpecke.Core.Services.SMK
 {
@@ -17,7 +16,6 @@ namespace SledzSpecke.Core.Services.SMK
         private readonly HttpClient _httpClient;
         private readonly ILogger<SMKIntegrationService> _logger;
         private readonly IUserService _userService;
-        private readonly ISpecializationRepository _specializationRepository;
         
         // Konfiguracja
         private readonly string _baseUrl = string.Empty; // URL do API SMK
@@ -27,13 +25,11 @@ namespace SledzSpecke.Core.Services.SMK
             HttpClient httpClient,
             ILogger<SMKIntegrationService> logger,
             IUserService userService,
-            ISpecializationRepository specializationRepository,
             SMKConfiguration configuration)
         {
             _httpClient = httpClient;
             _logger = logger;
             _userService = userService;
-            _specializationRepository = specializationRepository;
             
             _baseUrl = configuration.BaseUrl;
             _httpClient.BaseAddress = new Uri(_baseUrl);

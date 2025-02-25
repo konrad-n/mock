@@ -13,17 +13,13 @@ using SledzSpecke.Infrastructure.Database.Repositories;
 using SledzSpecke.Infrastructure.Database.Migrations;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.App.Services.Platform;
-using SledzSpecke.Core.Services.SpecializationSync;
-using SledzSpecke.Core.Services.Notifications;
 using SledzSpecke.App.Services.Export;
 using SledzSpecke.Core.Services.SMK;
-using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.App.Views.MultipleSpecialization;
-using SledzSpecke.App.ViewModels.MultipleSpecialization;
 using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.App.ViewModels.Statistics;
-using SledzSpecke.App.Services.Accessibility;
 using SledzSpecke.App.Controls;
+using SledzSpecke.App.ViewModels.Profile;
 
 namespace SledzSpecke.App;
 
@@ -132,6 +128,9 @@ public static class MauiProgram
                 DatabaseConfig.GetDatabasePath(fileSystemService.GetAppDataDirectory()),
                 migrationRunner);
         });
+
+        builder.Services.AddSingleton<SledzSpecke.Core.Interfaces.Services.IBiometricAuthService, SledzSpecke.App.Services.Platform.BiometricAuthService>();
+        builder.Services.AddSingleton<SledzSpecke.Core.Interfaces.Services.IDocumentScanService, SledzSpecke.App.Services.Platform.DocumentScanService>();
 
 #if DEBUG
         builder.Logging.AddDebug();

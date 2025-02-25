@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,12 +7,12 @@ namespace SledzSpecke.Core.Data.MedicalTerminology
     public class SpecializationTerminology
     {
         private static Dictionary<string, Dictionary<string, string>> _terminologyBySpecialty;
-        
+
         static SpecializationTerminology()
         {
             InitializeTerminology();
         }
-        
+
         private static void InitializeTerminology()
         {
             _terminologyBySpecialty = new Dictionary<string, Dictionary<string, string>>
@@ -71,22 +72,22 @@ namespace SledzSpecke.Core.Data.MedicalTerminology
                 // Można dodać więcej specjalizacji
             };
         }
-        
+
         public static Dictionary<string, string> GetTerminologyForSpecialty(string specialtyName)
         {
             if (_terminologyBySpecialty.TryGetValue(specialtyName, out var terminology))
             {
                 return terminology;
             }
-            
+
             return new Dictionary<string, string>();
         }
-        
+
         public static List<string> GetAllSpecialties()
         {
             return _terminologyBySpecialty.Keys.ToList();
         }
-        
+
         public static string GetTermDefinition(string specialtyName, string term)
         {
             if (_terminologyBySpecialty.TryGetValue(specialtyName, out var terminology))
@@ -96,10 +97,10 @@ namespace SledzSpecke.Core.Data.MedicalTerminology
                     return definition;
                 }
             }
-            
+
             return null;
         }
-        
+
         public static List<string> SearchTerms(string specialtyName, string query)
         {
             if (_terminologyBySpecialty.TryGetValue(specialtyName, out var terminology))
@@ -108,7 +109,7 @@ namespace SledzSpecke.Core.Data.MedicalTerminology
                     .Where(term => term.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
-            
+
             return new List<string>();
         }
     }
