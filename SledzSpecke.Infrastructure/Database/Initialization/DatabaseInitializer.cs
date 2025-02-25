@@ -11,18 +11,22 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
         private readonly ISpecializationRepository _specializationRepo;
         private readonly IProcedureRepository _procedureRepo;
         private readonly ICourseRepository _courseRepo;
-
+        private readonly IInternshipRepository _internshipRepo;
+        private readonly IDutyRepository _dutyRepo;
 
         public DatabaseInitializer(IApplicationDbContext context,
                                  ISpecializationRepository specializationRepo,
                                  IProcedureRepository procedureRepo,
-                                 ICourseRepository courseRepo)
+                                 ICourseRepository courseRepo,
+                                 IInternshipRepository internshipRepo,
+                                 IDutyRepository dutyRepo)
         {
             _context = context;
             _specializationRepo = specializationRepo;
             _procedureRepo = procedureRepo;
             _courseRepo = courseRepo;
-
+            _internshipRepo = internshipRepo;
+            _dutyRepo = dutyRepo;
         }
 
         public async Task InitializeAsync()
@@ -39,8 +43,11 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
 
             // Zainicjuj podstawowe dane
             await SeedSpecializationsAsync();
-            await SeedProcedureDefinitionsAsync();
+            await SeedProcedureRequirementsAsync();
             await SeedCourseDefinitionsAsync();
+            await SeedInternshipDefinitionsAsync();
+            await SeedInternshipModulesAsync();
+            await SeedDutyRequirementsAsync();
         }
 
         private async Task SeedSpecializationsAsync()
@@ -52,12 +59,12 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             }
         }
 
-        private async Task SeedProcedureDefinitionsAsync()
+        private async Task SeedProcedureRequirementsAsync()
         {
-            var procedures = DataSeeder.GetBasicProcedures();
-            foreach (var proc in procedures)
+            var procedureRequirements = DataSeeder.GetBasicProcedureRequirements();
+            foreach (var procReq in procedureRequirements)
             {
-                await _procedureRepo.AddAsync(proc);
+                await _procedureRepo.AddAsync(procReq);
             }
         }
 
@@ -67,6 +74,33 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             foreach (var course in courses)
             {
                 await _courseRepo.AddAsync(course);
+            }
+        }
+
+        private async Task SeedInternshipDefinitionsAsync()
+        {
+            var internships = DataSeeder.GetBasicInternships();
+            foreach (var internship in internships)
+            {
+                await _internshipRepo.AddAsync(internship);
+            }
+        }
+
+        private async Task SeedInternshipModulesAsync()
+        {
+            var modules = DataSeeder.GetInternshipModules();
+            foreach (var module in modules)
+            {
+                await _context.GetConnection().InsertAsync(module);
+            }
+        }
+
+        private async Task SeedDutyRequirementsAsync()
+        {
+            var dutyRequirements = DataSeeder.GetDutyRequirements();
+            foreach (var dutyReq in dutyRequirements)
+            {
+                await _dutyRepo.AddAsync(dutyReq);
             }
         }
     }
