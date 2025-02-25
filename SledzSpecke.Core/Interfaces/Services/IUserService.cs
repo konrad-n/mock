@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using SledzSpecke.Core.Models.Domain;
+using System.Threading.Tasks;
 
 namespace SledzSpecke.Core.Interfaces.Services
 {
     public interface IUserService
     {
         Task<int> GetCurrentUserIdAsync();
-        // Inne metody...
+        Task<User> GetCurrentUserAsync();
+        Task<bool> ExportUserDataAsync();
+        Task<bool> LogoutAsync();
     }
 }

@@ -13,6 +13,6 @@ namespace SledzSpecke.Core.Models.Domain
         public decimal WeekendHours { get; set; }
         public decimal RemainingHours { get; set; }
         public Dictionary<DutyType, int> DutiesByType { get; set; }
-        public Dictionary<string, decimal> HoursByMonth { get; set; } // duplicate? which to use of MonthlyHours and HoursByMonth?
+        public Dictionary<string, decimal> HoursByMonth { get; set; } // Słownik godzin per miesiąc, klucz to string reprezentujący datę w formacie YYYY-MM
     }
 }
