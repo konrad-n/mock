@@ -1,4 +1,5 @@
 ﻿using SledzSpecke.Infrastructure.Database.Context;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,14 +11,25 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
         private readonly IApplicationDbContext _context;
         private readonly Dictionary<int, BaseMigration> _migrations;
 
-        public Task<int> GetCurrentVersionAsync()
+        public MigrationRunner(IApplicationDbContext context)
         {
-            throw new System.NotImplementedException();
+            _context = context;
+            _migrations = new Dictionary<int, BaseMigration>
+            {
+                { 1, new M001_InitialSchema(context.GetConnection()) },
+                // Add new migration
+                { 19, new M019_EnhanceSpecializationModels(context.GetConnection()) }
+            };
         }
 
-        public Task RollbackAsync(int version)
+        public async Task<int> GetCurrentVersionAsync()
         {
-            throw new System.NotImplementedException();
+            var conn = _context.GetConnection();
+            await conn.CreateTableAsync<VersionInfo>();
+            var lastVersion = await conn.Table<VersionInfo>()
+                .OrderByDescending(v => v.Version)
+                .FirstOrDefaultAsync();
+            return lastVersion?.Version ?? 0;
         }
 
         public async Task RunMigrationsAsync()
@@ -30,8 +42,40 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
             foreach (var migration in pendingMigrations)
             {
                 await migration.Value.UpAsync();
-                await UpdateVersionAsync(migration.Key);
+                await UpdateVersionAsync(migration.Key, migration.Value.Description);
             }
+        }
+
+        public async Task RollbackAsync(int version)
+        {
+            var currentVersion = await GetCurrentVersionAsync();
+            var migrationsToRollback = _migrations
+                .Where(m => m.Key > version && m.Key <= currentVersion)
+                .OrderByDescending(m => m.Key);
+
+            foreach (var migration in migrationsToRollback)
+            {
+                await migration.Value.DownAsync();
+                await DeleteVersionAsync(migration.Key);
+            }
+        }
+
+        private async Task UpdateVersionAsync(int version, string description)
+        {
+            var conn = _context.GetConnection();
+            var versionInfo = new VersionInfo
+            {
+                Version = version,
+                AppliedOn = DateTime.UtcNow,
+                Description = description
+            };
+            await conn.InsertAsync(versionInfo);
+        }
+
+        private async Task DeleteVersionAsync(int version)
+        {
+            var conn = _context.GetConnection();
+            await conn.DeleteAsync<VersionInfo>(version);
         }
     }
 }
