@@ -53,8 +53,8 @@ public static class MauiProgram
         
         // Nowe serwisy specjalizacji
         builder.Services.AddSingleton<ISpecializationService, SpecializationService>();
-        builder.Services.AddSingleton<ISpecializationSyncService, SpecializationSyncService>();
-        builder.Services.AddSingleton<INotificationService, NotificationService>();
+        builder.Services.AddSingleton<ISpecializationSyncService, SledzSpecke.Infrastructure.Services.SpecializationSyncService>();
+        builder.Services.AddSingleton<INotificationService, SledzSpecke.Infrastructure.Services.NotificationService>();
         builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
         
         // Serwis SMK

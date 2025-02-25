@@ -24,11 +24,10 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
             return await WhereAsync(u => u.SupervisorId == supervisorId);
         }
 
-        Task<List<User>> IBaseRepository<User>.GetAllAsync()
+        public override async Task<List<User>> GetAllAsync()
         {
-            throw new System.NotImplementedException();
+            await _context.InitializeAsync();
+            return await _connection.Table<User>().ToListAsync();
         }
     }
-
-    // Podobnie zaimplementuj pozostałe repozytoria
 }

@@ -7,7 +7,7 @@ using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Repositories;
 
-namespace SledzSpecke.Core.Services.Notifications
+namespace SledzSpecke.Infrastructure.Services
 {
     public class NotificationService : INotificationService
     {

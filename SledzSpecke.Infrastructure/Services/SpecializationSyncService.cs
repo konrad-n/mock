@@ -5,7 +5,7 @@ using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Repositories;
 
-namespace SledzSpecke.Core.Services.SpecializationSync
+namespace SledzSpecke.Infrastructure.Services
 {
     public class SpecializationSyncService : ISpecializationSyncService
     {
