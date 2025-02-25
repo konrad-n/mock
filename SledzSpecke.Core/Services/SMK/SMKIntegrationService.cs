@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database.Repositories;
 
 namespace SledzSpecke.Core.Services.SMK
@@ -19,8 +20,8 @@ namespace SledzSpecke.Core.Services.SMK
         private readonly ISpecializationRepository _specializationRepository;
         
         // Konfiguracja
-        private readonly string _baseUrl; // URL do API SMK
-        private string _authToken; // Token uwierzytelniający
+        private readonly string _baseUrl = string.Empty; // URL do API SMK
+        private string _authToken = string.Empty; // Token uwierzytelniający
         
         public SMKIntegrationService(
             HttpClient httpClient,
@@ -166,29 +167,29 @@ namespace SledzSpecke.Core.Services.SMK
         // Klasa pomocnicza do deserializacji odpowiedzi uwierzytelniania
         private class SMKAuthResult
         {
-            public string Token { get; set; }
+            public string Token { get; set; } = string.Empty;
             public DateTime Expiration { get; set; }
         }
         
         // Klasa pomocnicza do deserializacji procedur SMK
         private class SMKProcedure
         {
-            public string Name { get; set; }
+            public string Name { get; set; } = string.Empty;
             public DateTime ExecutionDate { get; set; }
-            public string Type { get; set; } // "Execution" lub "Assistance"
-            public string Location { get; set; }
+            public string Type { get; set; } = string.Empty; // "Execution" lub "Assistance"
+            public string Location { get; set; } = string.Empty;
             public int? SupervisorId { get; set; }
-            public string Notes { get; set; }
+            public string Notes { get; set; } = string.Empty;
             public bool IsSimulation { get; set; }
-            public string Category { get; set; }
-            public string Stage { get; set; }
+            public string Category { get; set; } = string.Empty;
+            public string Stage { get; set; } = string.Empty;
         }
     }
     
     // Klasa konfiguracyjna
     public class SMKConfiguration
     {
-        public string BaseUrl { get; set; }
-        public string ApiKey { get; set; }
+        public string BaseUrl { get; set; } = string.Empty;
+        public string ApiKey { get; set; } = string.Empty;
     }
 }

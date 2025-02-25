@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using SledzSpecke.Core.Models.Domain;
-using System.Collections.Generic;
-using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Core.Interfaces.Services;
+using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.Core.Services.DocumentManagement
 {
@@ -141,9 +141,9 @@ namespace SledzSpecke.Core.Services.DocumentManagement
     
     public class DocumentInfo
     {
-        public string RecognizedText { get; set; }
+        public string RecognizedText { get; set; } = string.Empty;
         public DocumentType DocumentType { get; set; }
-        public Dictionary<string, string> ExtractedFields { get; set; }
+        public Dictionary<string, string> ExtractedFields { get; set; } = new Dictionary<string, string>();
     }
     
     public interface IDocumentScanService
