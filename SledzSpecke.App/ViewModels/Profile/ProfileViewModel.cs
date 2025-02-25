@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
+using SledzSpecke.Core.Interfaces.Services;
 
 namespace SledzSpecke.App.ViewModels.Profile;
 
@@ -50,13 +51,13 @@ public partial class ProfileViewModel : BaseViewModel
                 UserName = user.Name;
                 PWZ = $"PWZ: {user.PWZ}";
 
-                var spec = await _specializationService.GetSpecializationAsync(user.CurrentSpecializationId);
+                var spec = await _specializationService.GetSpecializationAsync((int)user.CurrentSpecializationId);
                 if (spec != null)
                 {
                     Specialization = spec.Name;
 
                     // Oblicz postęp
-                    var stats = await _specializationService.GetProgressStatisticsAsync(user.CurrentSpecializationId);
+                    var stats = await _specializationService.GetProgressStatisticsAsync((int)user.CurrentSpecializationId);
                     Progress = stats.TotalProgress;
                     ProgressText = $"{stats.TotalProgress:P0} ukończone";
 

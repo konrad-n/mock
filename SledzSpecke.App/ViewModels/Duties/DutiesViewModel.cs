@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Enums;
 using System.Collections.ObjectModel;
 
 namespace SledzSpecke.App.ViewModels.Duties

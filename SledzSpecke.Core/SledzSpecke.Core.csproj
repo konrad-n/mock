@@ -11,6 +11,7 @@
     <Folder Include="Interfaces\Repositories\" />
     <Folder Include="Models\Requests\" />
     <Folder Include="Constants\" />
+    <Folder Include="Services\Authentication\" />
     <Folder Include="Services\Base\" />
   </ItemGroup>
 

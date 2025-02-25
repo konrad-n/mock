@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Repositories;
+using System;
+using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Services
 {

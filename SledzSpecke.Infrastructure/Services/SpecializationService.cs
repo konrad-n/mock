@@ -4,7 +4,6 @@ using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Services
@@ -118,7 +117,7 @@ namespace SledzSpecke.Infrastructure.Services
                 
                 // Pobierz odpowiednie dane
                 var procedureStats = await _procedureRepository.GetProcedureStatsAsync(userId);
-                var dutyStats = await _dutyRepository.GetDutyStatisticsAsync();
+                var dutyStats = await _dutyRepository.GetDutyStatisticsAsync(userId);
                 
                 // Oblicz postęp
                 double proceduresProgress = CalculateProceduresProgress(procedureStats);
@@ -277,8 +276,8 @@ namespace SledzSpecke.Infrastructure.Services
             {
                 return 0;
             }
-            
-            return Math.Min(1.0, (double)dutyStats.TotalHours / (dutyStats.TotalHours + dutyStats.RemainingHours));
+
+            return Math.Min(1.0, (double)dutyStats.TotalHours / (double)(dutyStats.TotalHours + dutyStats.RemainingHours));
         }
 
         private async Task<double> CalculateCoursesProgressAsync(int userId, int specializationId)

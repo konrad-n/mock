@@ -50,8 +50,8 @@ public static class MauiProgram
         
         // Nowe serwisy specjalizacji
         builder.Services.AddSingleton<ISpecializationService, SpecializationService>();
-        builder.Services.AddSingleton<ISpecializationSyncService, SledzSpecke.Infrastructure.Services.SpecializationSyncService>();
-        builder.Services.AddSingleton<INotificationService, SledzSpecke.Infrastructure.Services.NotificationService>();
+        builder.Services.AddSingleton<ISpecializationSyncService, SpecializationSyncService>();
+        builder.Services.AddSingleton<INotificationService, NotificationService>();
         builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
         
         // Serwis SMK
@@ -63,8 +63,8 @@ public static class MauiProgram
         });
         
         // Serwisy dostępności i integracji z kalendarzem
-        builder.Services.AddSingleton<IAccessibilityService, AccessibilityService>();
-        builder.Services.AddSingleton<ICalendarService, DeviceCalendarService>();
+        // builder.Services.AddSingleton<IAccessibilityService, AccessibilityService>();
+        // builder.Services.AddSingleton<ICalendarService, DeviceCalendarService>();
         builder.Services.AddSingleton<CalendarIntegration>();
 
         // Rejestracja ViewModels
@@ -85,7 +85,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsViewModel>();
         
         // Specjalizacje
-        builder.Services.AddTransient<SpecializationSwitcherViewModel>();
+        // builder.Services.AddTransient<SpecializationSwitcherViewModel>();
         builder.Services.AddTransient<SpecializationStatsViewModel>();
 
         // Rejestracja stron

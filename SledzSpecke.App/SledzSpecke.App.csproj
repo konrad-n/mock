@@ -60,6 +60,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Remove="Controls\SpecialtyProgressChart.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Include="Controls\SpecialtyProgressChart.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.40" />
@@ -75,8 +85,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Controls\" />
 	  <Folder Include="Converters\" />
+	  <Folder Include="Platforms\iOS\" />
 	  <Folder Include="Services\Navigation\" />
 	  <Folder Include="Services\Dialog\" />
 	  <Folder Include="ViewModels\Internships\" />
