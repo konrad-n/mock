@@ -13,14 +13,23 @@ namespace SledzSpecke.App.ViewModels.Procedures
     public partial class ProceduresViewModel : BaseViewModel
     {
         private readonly IProcedureService _procedureService;
+        private readonly ISpecializationService _specializationService;
         
-        public ProceduresViewModel(IProcedureService procedureService)
+        public ProceduresViewModel(
+            IProcedureService procedureService,
+            ISpecializationService specializationService)
         {
             _procedureService = procedureService;
+            _specializationService = specializationService;
+            
             Title = "Procedury";
             Procedures = new ObservableCollection<ProcedureExecution>();
             Categories = new ObservableCollection<string>();
             Stages = new ObservableCollection<string>();
+            
+            // Nowe kolekcje dla kategorii i etapów specyficznych dla specjalizacji
+            CategoriesBySpecialization = new ObservableCollection<string>();
+            StagesBySpecialization = new ObservableCollection<string>();
         }
 
         [ObservableProperty]
@@ -31,6 +40,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
         
         [ObservableProperty]
         private ObservableCollection<string> stages;
+        
+        [ObservableProperty]
+        private ObservableCollection<string> categoriesBySpecialization;
+        
+        [ObservableProperty]
+        private ObservableCollection<string> stagesBySpecialization;
         
         [ObservableProperty]
         private string selectedCategory;
@@ -85,6 +100,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 CategoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
                 StageProgress = await _procedureService.GetProcedureProgressByStageAsync();
                 
+                // Załaduj kategorie i etapy specyficzne dla specjalizacji
+                await LoadSpecializationFiltersAsync();
+                
                 // Ustaw domyślne filtrowanie
                 SelectedCategory = "Wszystkie";
                 SelectedStage = "Wszystkie";
@@ -92,6 +110,57 @@ namespace SledzSpecke.App.ViewModels.Procedures
             catch (System.Exception ex)
             {
                 await Shell.Current.DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task LoadSpecializationFiltersAsync()
+        {
+            if (IsBusy) return;
+            
+            try
+            {
+                IsBusy = true;
+                var specialization = await _specializationService.GetCurrentSpecializationAsync();
+                
+                if (specialization != null)
+                {
+                    CategoriesBySpecialization.Clear();
+                    StagesBySpecialization.Clear();
+                    
+                    // Załaduj kategorie specyficzne dla specjalizacji
+                    var requirements = await _specializationService.GetRequiredProceduresAsync(specialization.Id);
+                    
+                    var specialtyCategories = requirements
+                        .Select(r => r.Category)
+                        .Where(c => !string.IsNullOrEmpty(c))
+                        .Distinct()
+                        .OrderBy(c => c)
+                        .ToList();
+                        
+                    var specialtyStages = requirements
+                        .Select(r => r.Stage)
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .Distinct()
+                        .OrderBy(s => s)
+                        .ToList();
+                    
+                    // Dodaj opcję "Wszystkie" na początku
+                    CategoriesBySpecialization.Add("Wszystkie");
+                    foreach (var category in specialtyCategories)
+                    {
+                        CategoriesBySpecialization.Add(category);
+                    }
+                    
+                    StagesBySpecialization.Add("Wszystkie");
+                    foreach (var stage in specialtyStages)
+                    {
+                        StagesBySpecialization.Add(stage);
+                    }
+                }
             }
             finally
             {
@@ -160,6 +229,19 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private async Task ViewProcedureAsync(int id)
         {
             await Shell.Current.GoToAsync($"procedure/edit?id={id}");
+        }
+        
+        [RelayCommand]
+        private async Task RefreshDataAsync()
+        {
+            await LoadDataAsync();
+        }
+        
+        [RelayCommand]
+        private async Task ExportProceduresAsync()
+        {
+            // Implementacja eksportu procedur
+            await Shell.Current.DisplayAlert("Eksport", "Funkcja eksportu zostanie zaimplementowana wkrótce.", "OK");
         }
     }
 }
