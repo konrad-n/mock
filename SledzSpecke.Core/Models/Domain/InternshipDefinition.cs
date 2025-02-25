@@ -11,10 +11,28 @@ namespace SledzSpecke.Core.Models.Domain
         public bool IsRequired { get; set; }
         public int RecommendedYear { get; set; }
         public string Requirements { get; set; }
-        public string LearningObjectives { get; set; }
-
-        // Właściwości nawigacyjne
+        
+        // Serializowana lista wymagań do zaliczenia
+        private string _completionRequirementsJson;
+        public string CompletionRequirementsJson
+        {
+            get => _completionRequirementsJson;
+            set => _completionRequirementsJson = value;
+        }
+        
+        // Właściwość nawigacyjna (nieserializowana)
+        [SQLite.Ignore]
+        public List<string> CompletionRequirements
+        {
+            get => string.IsNullOrEmpty(_completionRequirementsJson)
+                ? new List<string>()
+                : System.Text.Json.JsonSerializer.Deserialize<List<string>>(_completionRequirementsJson);
+            set => _completionRequirementsJson = System.Text.Json.JsonSerializer.Serialize(value);
+        }
+        
+        // Nawigacja
         public Specialization Specialization { get; set; }
+        public ICollection<InternshipModule> DetailedStructure { get; set; }
         public ICollection<Internship> Internships { get; set; }
     }
 }

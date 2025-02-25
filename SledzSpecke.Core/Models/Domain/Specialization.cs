@@ -9,13 +9,15 @@ namespace SledzSpecke.Core.Models.Domain
         public int DurationInWeeks { get; set; }
         public string ProgramVersion { get; set; }
         public DateTime? ApprovalDate { get; set; }
+        public decimal MinimumDutyHours { get; set; }
         public string Requirements { get; set; }
-        public double MinimumDutyHours { get; set; }
         public string Description { get; set; }
-
-        // Właściwości nawigacyjne
+        
+        // Nawigacja
+        public ICollection<CourseDefinition> CourseDefinitions { get; set; }
+        public ICollection<InternshipDefinition> InternshipDefinitions { get; set; }
+        public ICollection<ProcedureRequirement> ProcedureRequirements { get; set; }
+        public ICollection<DutyRequirement> DutyRequirements { get; set; }
         public ICollection<User> Users { get; set; }
-        public ICollection<Course> RequiredCourses { get; set; }
-        public ICollection<Internship> RequiredInternships { get; set; }
     }
 }
