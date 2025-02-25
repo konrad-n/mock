@@ -3,6 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Models.Domain;
+using System.Collections.Generic;
+using SledzSpecke.Core.Models.Enums;
+using SledzSpecke.Core.Interfaces.Services;
 
 namespace SledzSpecke.Core.Services.DocumentManagement
 {

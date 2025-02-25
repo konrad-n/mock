@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using SledzSpecke.Core.Models.Domain;
 using Microsoft.Extensions.Logging;
+using SledzSpecke.Core.Interfaces.Services;
 
 namespace SledzSpecke.App.Services.Export
 {

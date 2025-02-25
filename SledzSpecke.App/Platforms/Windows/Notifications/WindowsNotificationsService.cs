@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.UI.Notifications;
 using Windows.Data.Xml.Dom;
+using System.Collections.Generic;
 
 namespace SledzSpecke.App.Platforms.Windows.Notifications
 {

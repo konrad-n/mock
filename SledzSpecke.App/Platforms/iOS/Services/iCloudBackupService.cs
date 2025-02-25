@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Services.Backup;
 using UIKit;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Platforms.iOS.Services
 {

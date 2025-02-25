@@ -17,6 +17,7 @@ using SledzSpecke.Core.Services.SpecializationSync;
 using SledzSpecke.Core.Services.Notifications;
 using SledzSpecke.App.Services.Export;
 using SledzSpecke.Core.Services.SMK;
+using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.App.Views.MultipleSpecialization;
 using SledzSpecke.App.ViewModels.MultipleSpecialization;
 using SledzSpecke.App.Views.Statistics;
