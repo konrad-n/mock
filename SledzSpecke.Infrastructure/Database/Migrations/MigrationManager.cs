@@ -3,6 +3,7 @@ using SQLite;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SledzSpecke.Infrastructure.Database.Migrations
 {

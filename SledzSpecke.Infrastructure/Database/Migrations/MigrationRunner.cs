@@ -9,12 +9,12 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
     public class MigrationRunner : IMigrationRunner
     {
         private readonly IApplicationDbContext _context;
-        private readonly Dictionary<int, BaseMigration> _migrations;
+        private readonly Dictionary<int, IMigration> _migrations;
 
         public MigrationRunner(IApplicationDbContext context)
         {
             _context = context;
-            _migrations = new Dictionary<int, BaseMigration>
+            _migrations = new Dictionary<int, IMigration>
             {
                 { 1, new M001_InitialSchema(context.GetConnection()) },
                 // Add new migration
@@ -41,7 +41,7 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
             foreach (var migration in pendingMigrations)
             {
-                await migration.Value.UpAsync();
+                await migration.Value.UpAsync(_context.GetConnection());
                 await UpdateVersionAsync(migration.Key, migration.Value.Description);
             }
         }
@@ -55,7 +55,7 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
             foreach (var migration in migrationsToRollback)
             {
-                await migration.Value.DownAsync();
+                await migration.Value.DownAsync(_context.GetConnection());
                 await DeleteVersionAsync(migration.Key);
             }
         }

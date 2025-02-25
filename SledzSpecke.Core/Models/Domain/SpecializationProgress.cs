@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace SledzSpecke.Core.Models.Domain
 {
@@ -12,10 +11,11 @@ namespace SledzSpecke.Core.Models.Domain
         public double InternshipsProgress { get; set; }
         public double DutiesProgress { get; set; }
         public double OverallProgress { get; set; }
+        public double TotalProgress { get; set; } // Added missing property
         public string RemainingRequirements { get; set; }
         public DateTime LastCalculated { get; set; }
-        
-        // Właściwości nawigacyjne
+
+        // Navigation properties
         public User User { get; set; }
         public Specialization Specialization { get; set; }
     }

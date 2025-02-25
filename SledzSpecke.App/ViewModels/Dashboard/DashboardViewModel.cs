@@ -4,7 +4,6 @@ using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace SledzSpecke.App.ViewModels.Dashboard
 {
@@ -28,7 +27,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             _internshipService = internshipService;
             _dutyService = dutyService;
             _userService = userService;
-            
+
             Title = "Dashboard";
             RecommendedCourses = new ObservableCollection<CourseDefinition>();
             RecommendedInternships = new ObservableCollection<InternshipDefinition>();
@@ -36,72 +35,75 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         [ObservableProperty]
         private double proceduresProgress;
-        
+
         [ObservableProperty]
         private string proceduresProgressText;
-        
+
         [ObservableProperty]
         private double coursesProgress;
-        
+
         [ObservableProperty]
         private string coursesProgressText;
-        
+
         [ObservableProperty]
         private double internshipsProgress;
-        
+
         [ObservableProperty]
         private string internshipsProgressText;
-        
+
         [ObservableProperty]
         private double dutiesProgress;
-        
+
         [ObservableProperty]
         private string dutiesProgressText;
-        
+
         [ObservableProperty]
         private double overallProgress;
-        
+
         [ObservableProperty]
         private string overallProgressText;
-        
+
         [ObservableProperty]
         private string timeLeftText;
-        
+
         [ObservableProperty]
         private ObservableCollection<CourseDefinition> recommendedCourses;
-        
+
         [ObservableProperty]
         private ObservableCollection<InternshipDefinition> recommendedInternships;
 
         public override async Task LoadDataAsync()
         {
             if (IsBusy) return;
-            
+
             try
             {
                 IsBusy = true;
-                
-                // Obliczanie postępów
+
+                // Calculate progress
                 ProceduresProgress = await _procedureService.GetProcedureCompletionPercentageAsync();
                 ProceduresProgressText = $"{ProceduresProgress:P0}";
-                
+
                 CoursesProgress = await _courseService.GetCourseProgressAsync();
                 CoursesProgressText = $"{CoursesProgress:P0}";
-                
+
                 InternshipsProgress = await _internshipService.GetInternshipProgressAsync();
                 InternshipsProgressText = $"{InternshipsProgress:P0}";
-                
+
                 var dutyStats = await _dutyService.GetDutyStatisticsAsync();
-                DutiesProgress = dutyStats.TotalHours > 0 
-                    ? (double)dutyStats.TotalHours / dutyStats.RemainingHours 
-                    : 0;
-                DutiesProgressText = $"{dutyStats.TotalHours}/{dutyStats.RemainingHours}h";
-                
-                // Obliczanie ogólnego postępu
+
+                // Fix: Convert decimal to double for division
+                double totalHours = (double)dutyStats.TotalHours;
+                double remainingHours = (double)(dutyStats.RemainingHours > 0 ? dutyStats.RemainingHours : 1);
+
+                DutiesProgress = totalHours / (totalHours + remainingHours);
+                DutiesProgressText = $"{dutyStats.TotalHours}/{dutyStats.TotalHours + dutyStats.RemainingHours}h";
+
+                // Calculate overall progress
                 OverallProgress = (ProceduresProgress + CoursesProgress + InternshipsProgress + DutiesProgress) / 4;
                 OverallProgressText = $"{OverallProgress:P0} ukończone";
-                
-                // Obliczanie pozostałego czasu
+
+                // Calculate remaining time
                 var user = await _userService.GetCurrentUserAsync();
                 if (user != null)
                 {
@@ -114,22 +116,22 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                         _ => $"Pozostało {daysLeft} dni"
                     };
                 }
-                
-                // Ładowanie rekomendacji
+
+                // Load recommendations
                 var recCourses = await _courseService.GetRecommendedCoursesForCurrentYearAsync();
                 RecommendedCourses.Clear();
                 foreach (var course in recCourses)
                 {
                     RecommendedCourses.Add(course);
                 }
-                
+
                 var recInternships = await _internshipService.GetRecommendedInternshipsForCurrentYearAsync();
                 RecommendedInternships.Clear();
                 foreach (var internship in recInternships)
                 {
                     RecommendedInternships.Add(internship);
                 }
-                
+
             }
             catch (System.Exception ex)
             {

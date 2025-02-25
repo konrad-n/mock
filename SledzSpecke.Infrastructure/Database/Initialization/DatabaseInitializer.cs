@@ -37,11 +37,11 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
 
         private async Task SeedBasicDataAsync()
         {
-            // Sprawdź czy dane już istnieją
+            // Check if data already exists
             var hasData = await _specializationRepo.GetAllAsync();
             if (hasData.Any()) return;
 
-            // Zainicjuj podstawowe dane
+            // Initialize basic data
             await SeedSpecializationsAsync();
             await SeedProcedureRequirementsAsync();
             await SeedCourseDefinitionsAsync();
@@ -64,7 +64,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             var procedureRequirements = DataSeeder.GetBasicProcedureRequirements();
             foreach (var procReq in procedureRequirements)
             {
-                await _procedureRepo.AddAsync(procReq);
+                // Use appropriate repository method for ProcedureRequirement
+                await _context.GetConnection().InsertAsync(procReq);
             }
         }
 
@@ -73,7 +74,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             var courses = DataSeeder.GetBasicCourses();
             foreach (var course in courses)
             {
-                await _courseRepo.AddAsync(course);
+                // Use appropriate repository method for CourseDefinition
+                await _context.GetConnection().InsertAsync(course);
             }
         }
 
@@ -82,7 +84,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             var internships = DataSeeder.GetBasicInternships();
             foreach (var internship in internships)
             {
-                await _internshipRepo.AddAsync(internship);
+                // Use appropriate repository method for InternshipDefinition
+                await _context.GetConnection().InsertAsync(internship);
             }
         }
 
@@ -100,7 +103,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             var dutyRequirements = DataSeeder.GetDutyRequirements();
             foreach (var dutyReq in dutyRequirements)
             {
-                await _dutyRepo.AddAsync(dutyReq);
+                // Use appropriate repository method for DutyRequirement
+                await _context.GetConnection().InsertAsync(dutyReq);
             }
         }
     }

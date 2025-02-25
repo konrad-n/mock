@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
+using SledzSpecke.Core.Interfaces.Services;
 
 namespace SledzSpecke.App.ViewModels.Profile;
 

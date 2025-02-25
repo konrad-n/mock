@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using SledzSpecke.Core.Models.Domain;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Interfaces.Services;

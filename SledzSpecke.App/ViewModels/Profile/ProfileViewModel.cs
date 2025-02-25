@@ -37,7 +37,7 @@ public partial class ProfileViewModel : BaseViewModel
     [ObservableProperty]
     private string timeLeft;
 
-    public async Task LoadDataAsync()
+    public override async Task LoadDataAsync()
     {
         if (IsBusy) return;
 
@@ -49,21 +49,21 @@ public partial class ProfileViewModel : BaseViewModel
             if (user != null)
             {
                 UserName = user.Name;
-                PWZ = $"PWZ: {user.PWZ}";
+                pwz = $"PWZ: {user.PWZ}";
 
                 var spec = await _specializationService.GetSpecializationAsync((int)user.CurrentSpecializationId);
                 if (spec != null)
                 {
                     Specialization = spec.Name;
 
-                    // Oblicz postęp
+                    // Calculate progress
                     var stats = await _specializationService.GetProgressStatisticsAsync((int)user.CurrentSpecializationId);
-                    Progress = stats.TotalProgress;
-                    ProgressText = $"{stats.TotalProgress:P0} ukończone";
+                    Progress = stats.OverallProgress;
+                    ProgressText = $"{stats.OverallProgress:P0} ukończone";
 
-                    // Oblicz pozostały czas
+                    // Calculate remaining time
                     var daysLeft = (user.ExpectedEndDate - DateTime.Today).Days;
-                    timeLeft = daysLeft switch
+                    TimeLeft = daysLeft switch
                     {
                         < 0 => "Specjalizacja zakończona",
                         0 => "Ostatni dzień specjalizacji",

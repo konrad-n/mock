@@ -2,7 +2,6 @@
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
-using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -36,7 +35,7 @@ namespace SledzSpecke.Infrastructure.Services
                 procedure.UserId = await _userService.GetCurrentUserIdAsync();
                 procedure.CreatedAt = DateTime.UtcNow;
                 await ValidateProcedureAsync(procedure);
-                
+
                 // Sprawdź, czy procedura pasuje do wymagań programu
                 await ValidateProcedureRequirementsAsync(procedure);
                 await _repository.AddAsync(procedure);
@@ -58,7 +57,7 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     throw new NotFoundException("Current specialization not found");
                 }
-                
+
                 return await _repository.GetRequirementsForSpecializationAsync(user.CurrentSpecializationId.Value);
             }
             catch (Exception ex)
@@ -77,7 +76,7 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     throw new NotFoundException("Current specialization not found");
                 }
-                
+
                 return await _repository.GetRequirementsByStageAsync(user.CurrentSpecializationId.Value, stage);
             }
             catch (Exception ex)
@@ -96,7 +95,7 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     throw new NotFoundException("Current specialization not found");
                 }
-                
+
                 return await _repository.GetRequirementsByCategoryAsync(user.CurrentSpecializationId.Value, category);
             }
             catch (Exception ex)
@@ -116,7 +115,7 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     throw new NotFoundException("Current specialization not found");
                 }
-                
+
                 return await _repository.GetProcedureProgressByCategoryAsync(userId, user.CurrentSpecializationId.Value);
             }
             catch (Exception ex)
@@ -136,7 +135,7 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     throw new NotFoundException("Current specialization not found");
                 }
-                
+
                 return await _repository.GetProcedureProgressByStageAsync(userId, user.CurrentSpecializationId.Value);
             }
             catch (Exception ex)
@@ -153,13 +152,13 @@ namespace SledzSpecke.Infrastructure.Services
                 var progress = await GetProcedureProgressByCategoryAsync();
                 int totalRequired = 0;
                 int totalCompleted = 0;
-                
+
                 foreach (var (_, stats) in progress)
                 {
                     totalRequired += stats.Required;
                     totalCompleted += stats.Completed;
                 }
-                
+
                 return totalRequired > 0 ? (double)totalCompleted / totalRequired : 1.0;
             }
             catch (Exception ex)
@@ -216,26 +215,26 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     return true;
                 }
-                
+
                 var user = await _userService.GetCurrentUserAsync();
                 if (user?.CurrentSpecializationId == null)
                 {
                     return true; // Nie można zwalidować, ale nie ma potrzeby rzucać wyjątkiem
                 }
-                
+
                 var requirements = await GetRequirementsForSpecializationAsync();
-                
+
                 // Znajdź pasujące wymaganie
                 var matchingRequirements = requirements
                     .Where(r => (string.IsNullOrEmpty(procedure.Category) || r.Category == procedure.Category) &&
                               (string.IsNullOrEmpty(procedure.Stage) || r.Stage == procedure.Stage))
                     .ToList();
-                
+
                 if (!matchingRequirements.Any())
                 {
                     return true; // Nie znaleziono pasujących wymagań, ale to nie błąd
                 }
-                
+
                 // Sprawdź czy procedura typu symulacja jest dozwolona
                 if (procedure.IsSimulation)
                 {
@@ -246,19 +245,19 @@ namespace SledzSpecke.Infrastructure.Services
                     }
                     // Sprawdź limity symulacji (to wymagałoby dodatkowej logiki do określenia ilu procedur użytkownik używa jako symulacje)
                 }
-                
+
                 // Sprawdź czy potrzebny nadzór
                 if (matchingRequirements.Any(r => r.SupervisionRequired) && procedure.SupervisorId == null)
                 {
                     throw new ValidationException("This procedure requires supervision");
                 }
-                
+
                 // Jeśli wszystko przeszło, oznacz procedurę jako pasującą do odpowiedniego wymagania programu
                 if (matchingRequirements.Count == 1)
                 {
                     procedure.ProcedureRequirementId = matchingRequirements[0].Id;
                 }
-                
+
                 return true;
             }
             catch (ValidationException)
@@ -283,23 +282,27 @@ namespace SledzSpecke.Infrastructure.Services
             {
                 throw new ValidationException("Procedure location is required");
             }
-            
+
             if (procedure.ExecutionDate > DateTime.Today)
             {
                 throw new ValidationException("Cannot add future procedures");
             }
-            
+
             // Sprawdź czy procedura wymaga nadzoru
             if (procedure.ProcedureRequirementId.HasValue)
             {
-                var requirement = await _repository.GetByIdAsync(procedure.ProcedureRequirementId.Value);
-                if (requirement != null && ((ProcedureRequirement)requirement).SupervisionRequired && procedure.SupervisorId == null)
+                // FIX: Use proper repository method to get ProcedureRequirement
+                var requirementId = procedure.ProcedureRequirementId.Value;
+                var requirements = await GetRequirementsForSpecializationAsync();
+                var requirement = requirements.FirstOrDefault(r => r.Id == requirementId);
+
+                if (requirement != null && requirement.SupervisionRequired && procedure.SupervisorId == null)
                 {
                     throw new ValidationException("This procedure requires supervision");
                 }
             }
         }
-        
+
         // Implementacje pozostałych istniejących metod pozostają bez zmian
         public async Task<List<ProcedureExecution>> GetUserProceduresAsync()
         {

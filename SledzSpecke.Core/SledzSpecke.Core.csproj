@@ -13,6 +13,7 @@
     <Folder Include="Constants\" />
     <Folder Include="Services\Authentication\" />
     <Folder Include="Services\Base\" />
+    <Folder Include="Services\DocumentManagement\" />
   </ItemGroup>
 
   <ItemGroup>

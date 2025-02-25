@@ -20,6 +20,7 @@ using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.App.ViewModels.Statistics;
 using SledzSpecke.App.Controls;
 using SledzSpecke.App.ViewModels.Profile;
+using SledzSpecke.App.Services;
 
 namespace SledzSpecke.App;
 
@@ -37,79 +38,78 @@ public static class MauiProgram
                 fonts.AddFont("FluentUI.ttf", "FluentUI");
             });
 
-        // Rejestracja serwisów platformy
+        // Register platform services
         builder.Services.AddSingleton<IPermissionService, PermissionService>();
         builder.Services.AddSingleton<IFileSystemService, FileSystemService>();
+        builder.Services.AddSingleton<ISettingsService, SettingsService>();
+        builder.Services.AddSingleton<IDataSyncService, DataSyncService>();
 
-        // Rejestracja serwisów biznesowych
+        // Register business services
         builder.Services.AddSingleton<IProcedureService, ProcedureService>();
         builder.Services.AddSingleton<IDutyService, DutyService>();
         builder.Services.AddSingleton<ICourseService, CourseService>();
         builder.Services.AddSingleton<IInternshipService, InternshipService>();
         builder.Services.AddSingleton<IUserService, UserService>();
-        
-        // Nowe serwisy specjalizacji
+
+        // New specialization services
         builder.Services.AddSingleton<ISpecializationService, SpecializationService>();
         builder.Services.AddSingleton<ISpecializationSyncService, SpecializationSyncService>();
         builder.Services.AddSingleton<INotificationService, NotificationService>();
         builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
-        
-        // Serwis SMK
+
+        // SMK Service
         builder.Services.AddSingleton<ISMKIntegrationService, SMKIntegrationService>();
-        builder.Services.AddSingleton<SMKConfiguration>(provider => new SMKConfiguration 
-        { 
-            BaseUrl = "https://api.smk.gov.pl", 
-            ApiKey = "demo_key" 
+        builder.Services.AddSingleton<SMKConfiguration>(provider => new SMKConfiguration
+        {
+            BaseUrl = "https://api.smk.gov.pl",
+            ApiKey = "demo_key"
         });
-        
-        // Serwisy dostępności i integracji z kalendarzem
-        // builder.Services.AddSingleton<IAccessibilityService, AccessibilityService>();
-        // builder.Services.AddSingleton<ICalendarService, DeviceCalendarService>();
+
+        // Calendar integration
         builder.Services.AddSingleton<CalendarIntegration>();
 
-        // Rejestracja ViewModels
+        // Register ViewModels
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<ProceduresViewModel>();
         builder.Services.AddTransient<DutiesViewModel>();
-        
-        // Procedury
+
+        // Procedures
         builder.Services.AddTransient<ProcedureAddViewModel>();
         builder.Services.AddTransient<ProcedureEditViewModel>();
-        
-        // Dyżury
+
+        // Duties
         builder.Services.AddTransient<DutyAddViewModel>();
         builder.Services.AddTransient<DutyEditViewModel>();
-        
-        // Profil i Ustawienia
+
+        // Profile and Settings
         builder.Services.AddTransient<ProfileViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
-        
-        // Specjalizacje
-        // builder.Services.AddTransient<SpecializationSwitcherViewModel>();
+
+        // Specializations
         builder.Services.AddTransient<SpecializationStatsViewModel>();
 
-        // Rejestracja stron
+        // Register pages
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<ProceduresPage>();
         builder.Services.AddTransient<DutiesPage>();
-        
-        // Procedury
+
+        // Procedures
         builder.Services.AddTransient<ProcedureAddPage>();
         builder.Services.AddTransient<ProcedureEditPage>();
-        
-        // Dyżury
+
+        // Duties
         builder.Services.AddTransient<DutyAddPage>();
         builder.Services.AddTransient<DutyEditPage>();
-        
-        // Ustawienia i Profil
+
+        // Settings and Profile
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<ProfilePage>();
-        
-        // Specjalizacje
+
+        // Specializations
         builder.Services.AddTransient<SpecializationSwitcherPage>();
         builder.Services.AddTransient<SpecializationStatsPage>();
 
-        // Repositoria
+        // Repositories
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<ISpecializationRepository, SpecializationRepository>();
         builder.Services.AddScoped<IProcedureRepository, ProcedureRepository>();
@@ -118,7 +118,7 @@ public static class MauiProgram
         builder.Services.AddScoped<IInternshipRepository, InternshipRepository>();
         builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
-        // Inicjalizacja bazy danych
+        // Database initialization
         builder.Services.AddSingleton<IMigrationRunner, MigrationRunner>();
         builder.Services.AddSingleton<IApplicationDbContext>(provider =>
         {
@@ -129,8 +129,8 @@ public static class MauiProgram
                 migrationRunner);
         });
 
-        builder.Services.AddSingleton<SledzSpecke.Core.Interfaces.Services.IBiometricAuthService, SledzSpecke.App.Services.Platform.BiometricAuthService>();
-        builder.Services.AddSingleton<SledzSpecke.Core.Interfaces.Services.IDocumentScanService, SledzSpecke.App.Services.Platform.DocumentScanService>();
+        // builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
+        // builder.Services.AddSingleton<IDocumentScanService, DocumentScanService>();
 
 #if DEBUG
         builder.Logging.AddDebug();

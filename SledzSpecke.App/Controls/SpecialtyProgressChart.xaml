@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:charts="clr-namespace:SledzSpecke.App.Controls.Charts"
+             xmlns:local="clr-namespace:SledzSpecke.App.Controls"
              x:Class="SledzSpecke.App.Controls.SpecialtyProgressChart">
 
     <ContentView.Resources>
         <ResourceDictionary>
-            <!-- Style dla obszarów wykresów -->
+            <!-- Style for chart areas -->
             <Style x:Key="ChartAreaStyle" TargetType="Border">
                 <Setter Property="Padding" Value="10" />
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
@@ -15,16 +15,16 @@
                 <Setter Property="StrokeShape" Value="RoundRectangle 10" />
                 <Setter Property="Margin" Value="0,0,0,15" />
             </Style>
-            
-            <!-- Style dla tytułów wykresów -->
+
+            <!-- Style for chart titles -->
             <Style x:Key="ChartTitleStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="16" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="HorizontalOptions" Value="Center" />
                 <Setter Property="Margin" Value="0,0,0,10" />
             </Style>
-            
-            <!-- Style dla etykiet osi -->
+
+            <!-- Style for axis labels -->
             <Style x:Key="AxisLabelStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="12" />
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}" />
@@ -33,34 +33,31 @@
     </ContentView.Resources>
 
     <Grid RowDefinitions="Auto,Auto,Auto,Auto" Padding="10">
-        <!-- Nagłówek -->
+        <!-- Header -->
         <Label Text="Postęp specjalizacji" Style="{StaticResource HeaderLabel}" Grid.Row="0" />
-        
-        <!-- Wykres kołowy postępu ogólnego -->
+
+        <!-- Overall progress circle chart -->
         <Border Grid.Row="1" Style="{StaticResource ChartAreaStyle}">
             <Grid RowDefinitions="Auto,*" RowSpacing="10">
                 <Label Text="Ogólny postęp" Style="{StaticResource ChartTitleStyle}" />
-                
+
                 <Grid Grid.Row="1" ColumnDefinitions="*,*">
-                    <!-- Wykres kołowy -->
-                    <charts:CircularProgressChart 
-                        Progress="{Binding OverallProgress}" 
-                        ProgressColor="{StaticResource Primary}"
-                        TrackColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray800}}"
-                        StrokeWidth="15"
-                        HeightRequest="150"
-                        WidthRequest="150" />
-                    
-                    <!-- Legenda -->
+                    <!-- Circle chart placeholder -->
+                    <BoxView Color="{StaticResource Primary}"
+                             CornerRadius="75"
+                             HeightRequest="150"
+                             WidthRequest="150" />
+
+                    <!-- Legend -->
                     <VerticalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
                         <Label Text="{Binding OverallProgressText, StringFormat='Postęp: {0}'}" 
                                FontSize="20" 
                                FontAttributes="Bold" 
                                TextColor="{StaticResource Primary}" />
-                        
+
                         <Label Text="{Binding TimeLeftText}" 
                                FontSize="14" />
-                               
+
                         <Button Text="Szczegóły" 
                                 Command="{Binding ViewDetailsCommand}"
                                 Style="{StaticResource PrimaryButton}"
@@ -69,35 +66,30 @@
                 </Grid>
             </Grid>
         </Border>
-        
-        <!-- Wykres słupkowy dla kategorii -->
+
+        <!-- Category progress bars -->
         <Border Grid.Row="2" Style="{StaticResource ChartAreaStyle}">
             <Grid RowDefinitions="Auto,*" RowSpacing="10">
                 <Label Text="Postęp według kategorii" Style="{StaticResource ChartTitleStyle}" />
-                
-                <charts:BarChart 
-                    Grid.Row="1"
-                    ItemsSource="{Binding CategoryProgress}"
-                    ValuePath="Value"
-                    CategoryPath="Key"
-                    BarColor="{StaticResource Primary}"
-                    HeightRequest="200" />
+
+                <!-- Bar chart placeholder -->
+                <VerticalStackLayout Grid.Row="1" Spacing="10">
+                    <Label Text="Bar Chart Placeholder" HorizontalOptions="Center" />
+                    <BoxView Color="{StaticResource Primary}" HeightRequest="150" />
+                </VerticalStackLayout>
             </Grid>
         </Border>
-        
-        <!-- Wykres liniowy postępu w czasie -->
+
+        <!-- Progress over time line chart -->
         <Border Grid.Row="3" Style="{StaticResource ChartAreaStyle}">
             <Grid RowDefinitions="Auto,*" RowSpacing="10">
                 <Label Text="Postęp w czasie" Style="{StaticResource ChartTitleStyle}" />
-                
-                <charts:LineChart 
-                    Grid.Row="1"
-                    ItemsSource="{Binding ProgressOverTime}"
-                    XValuePath="Key"
-                    YValuePath="Value"
-                    LineColor="{StaticResource Accent}"
-                    PointColor="{StaticResource Primary}"
-                    HeightRequest="200" />
+
+                <!-- Line chart placeholder -->
+                <VerticalStackLayout Grid.Row="1" Spacing="10">
+                    <Label Text="Line Chart Placeholder" HorizontalOptions="Center" />
+                    <BoxView Color="{StaticResource Primary}" HeightRequest="150" />
+                </VerticalStackLayout>
             </Grid>
         </Border>
     </Grid>

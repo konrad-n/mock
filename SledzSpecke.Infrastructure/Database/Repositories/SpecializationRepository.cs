@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Repositories
 {
-    // Infrastructure/Database/Repositories/SpecializationRepository.cs
     public class SpecializationRepository : BaseRepository<Specialization>, ISpecializationRepository
     {
         public SpecializationRepository(IApplicationDbContext context) : base(context)
@@ -26,14 +25,32 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
 
             if (specialization != null)
             {
-                // Załaduj powiązane wymagania
-                specialization.RequiredCourses = await _connection.Table<Course>()
+                // Load related requirements - Changed to use CourseDefinition instead
+                var courses = await _connection.Table<CourseDefinition>()
                     .Where(c => c.SpecializationId == id)
                     .ToListAsync();
 
-                specialization.RequiredInternships = await _connection.Table<Internship>()
+                specialization.RequiredCourses = courses;
+
+                var internships = await _connection.Table<InternshipDefinition>()
                     .Where(i => i.SpecializationId == id)
                     .ToListAsync();
+
+                specialization.RequiredInternships = internships;
+
+                // Load procedure requirements
+                var procedureRequirements = await _connection.Table<ProcedureRequirement>()
+                    .Where(p => p.SpecializationId == id)
+                    .ToListAsync();
+
+                specialization.ProcedureRequirements = procedureRequirements;
+
+                // Load duty requirements
+                var dutyRequirements = await _connection.Table<DutyRequirement>()
+                    .Where(d => d.SpecializationId == id)
+                    .ToListAsync();
+
+                specialization.DutyRequirements = dutyRequirements;
             }
 
             return specialization;

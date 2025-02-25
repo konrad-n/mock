@@ -12,12 +12,21 @@ namespace SledzSpecke.Core.Models.Domain
         public decimal MinimumDutyHours { get; set; }
         public string Requirements { get; set; }
         public string Description { get; set; }
-        
-        // Nawigacja
-        public ICollection<CourseDefinition> CourseDefinitions { get; set; }
-        public ICollection<InternshipDefinition> InternshipDefinitions { get; set; }
-        public ICollection<ProcedureRequirement> ProcedureRequirements { get; set; }
-        public ICollection<DutyRequirement> DutyRequirements { get; set; }
-        public ICollection<User> Users { get; set; }
+
+        // Navigation properties
+        [SQLite.Ignore]
+        public ICollection<CourseDefinition> RequiredCourses { get; set; } = new List<CourseDefinition>();
+
+        [SQLite.Ignore]
+        public ICollection<InternshipDefinition> RequiredInternships { get; set; } = new List<InternshipDefinition>();
+
+        [SQLite.Ignore]
+        public ICollection<ProcedureRequirement> ProcedureRequirements { get; set; } = new List<ProcedureRequirement>();
+
+        [SQLite.Ignore]
+        public ICollection<DutyRequirement> DutyRequirements { get; set; } = new List<DutyRequirement>();
+
+        [SQLite.Ignore]
+        public ICollection<User> Users { get; set; } = new List<User>();
     }
 }
