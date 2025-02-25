@@ -21,7 +21,7 @@ namespace SledzSpecke.Core.Services.SMK
         
         // Konfiguracja
         private readonly string _baseUrl = string.Empty; // URL do API SMK
-        private string _authToken = string.Empty; // Token uwierzytelniający
+        private string _authToken = string.Empty; // Token uwierzytelniający - initialize with empty string
         
         public SMKIntegrationService(
             HttpClient httpClient,
@@ -61,11 +61,14 @@ namespace SledzSpecke.Core.Services.SMK
                     var authResult = await JsonSerializer.DeserializeAsync<SMKAuthResult>(
                         await response.Content.ReadAsStreamAsync());
                     
-                    _authToken = authResult.Token;
-                    _httpClient.DefaultRequestHeaders.Authorization = 
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _authToken);
-                    
-                    return true;
+                    if (authResult != null) // Add null check to avoid dereference of possibly null reference
+                    {
+                        _authToken = authResult.Token;
+                        _httpClient.DefaultRequestHeaders.Authorization = 
+                            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _authToken);
+                        
+                        return true;
+                    }
                 }
                 
                 return false;
@@ -95,27 +98,30 @@ namespace SledzSpecke.Core.Services.SMK
                     var smkProcedures = await JsonSerializer.DeserializeAsync<List<SMKProcedure>>(
                         await response.Content.ReadAsStreamAsync());
                     
-                    // Konwertuj procedury SMK na procedury aplikacji
-                    var procedures = new List<ProcedureExecution>();
-                    foreach (var smkProcedure in smkProcedures)
+                    if (smkProcedures != null) // Add null check
                     {
-                        procedures.Add(new ProcedureExecution
+                        // Konwertuj procedury SMK na procedury aplikacji
+                        var procedures = new List<ProcedureExecution>();
+                        foreach (var smkProcedure in smkProcedures)
                         {
-                            UserId = userId,
-                            Name = smkProcedure.Name,
-                            ExecutionDate = smkProcedure.ExecutionDate,
-                            Type = smkProcedure.Type == "Execution" ? 
-                                ProcedureType.Execution : ProcedureType.Assistance,
-                            Location = smkProcedure.Location,
-                            SupervisorId = smkProcedure.SupervisorId,
-                            Notes = smkProcedure.Notes,
-                            IsSimulation = smkProcedure.IsSimulation,
-                            Category = smkProcedure.Category,
-                            Stage = smkProcedure.Stage
-                        });
+                            procedures.Add(new ProcedureExecution
+                            {
+                                UserId = userId,
+                                Name = smkProcedure.Name,
+                                ExecutionDate = smkProcedure.ExecutionDate,
+                                Type = smkProcedure.Type == "Execution" ? 
+                                    ProcedureType.Execution : ProcedureType.Assistance,
+                                Location = smkProcedure.Location,
+                                SupervisorId = smkProcedure.SupervisorId,
+                                Notes = smkProcedure.Notes,
+                                IsSimulation = smkProcedure.IsSimulation,
+                                Category = smkProcedure.Category,
+                                Stage = smkProcedure.Stage
+                            });
+                        }
+                        
+                        return procedures;
                     }
-                    
-                    return procedures;
                 }
                 
                 return new List<ProcedureExecution>();
@@ -151,8 +157,10 @@ namespace SledzSpecke.Core.Services.SMK
                 
                 if (response.IsSuccessStatusCode)
                 {
-                    return await JsonSerializer.DeserializeAsync<List<SMKSpecialization>>(
+                    var specializations = await JsonSerializer.DeserializeAsync<List<SMKSpecialization>>(
                         await response.Content.ReadAsStreamAsync());
+                    
+                    return specializations ?? new List<SMKSpecialization>();
                 }
                 
                 return new List<SMKSpecialization>();
