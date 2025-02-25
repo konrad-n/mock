@@ -1,4 +1,4 @@
-﻿using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
