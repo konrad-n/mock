@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SledzSpecke.App.Views.Shared.AdaptiveContentView">
+
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <!-- Stałe dla różnych wielkości ekranów -->
+            <x:Double x:Key="CompactWidth">600</x:Double>
+            <x:Double x:Key="MediumWidth">900</x:Double>
+        </ResourceDictionary>
+    </ContentView.Resources>
+    
+    <Grid x:Name="RootGrid">
+        <Grid.Triggers>
+            <!-- Zmiana układu dla wąskich ekranów (telefony) -->
+            <DataTrigger TargetType="Grid"
+                         Binding="{Binding Source={x:Static Width}, 
+                                  Converter={StaticResource CompareLessThanConverter}, 
+                                  ConverterParameter={StaticResource CompactWidth}}"
+                         Value="True">
+                <Setter Property="ColumnDefinitions" Value="*" />
+                <Setter Property="RowDefinitions" Value="Auto,*" />
+            </DataTrigger>
+            
+            <!-- Zmiana układu dla średnich ekranów (małe tablety) -->
+            <DataTrigger TargetType="Grid"
+                         Binding="{Binding Source={x:Static Width}, 
+                                  Converter={StaticResource IsBetweenConverter}, 
+                                  ConverterParameter={StaticResource CompactWidth,StaticResource MediumWidth}}"
+                         Value="True">
+                <Setter Property="ColumnDefinitions" Value="300,*" />
+                <Setter Property="RowDefinitions" Value="*" />
+            </DataTrigger>
+            
+            <!-- Zmiana układu dla dużych ekranów (duże tablety, desktopy) -->
+            <DataTrigger TargetType="Grid"
+                         Binding="{Binding Source={x:Static Width}, 
+                                  Converter={StaticResource CompareGreaterThanConverter}, 
+                                  ConverterParameter={StaticResource MediumWidth}}"
+                         Value="True">
+                <Setter Property="ColumnDefinitions" Value="300,*,300" />
+                <Setter Property="RowDefinitions" Value="*" />
+            </DataTrigger>
+        </Grid.Triggers>
+        
+        <!-- Tutaj będzie zawartość wstawiana dynamicznie -->
+    </Grid>
+</ContentView>
