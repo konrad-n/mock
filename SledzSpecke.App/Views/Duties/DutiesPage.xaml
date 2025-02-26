@@ -6,7 +6,7 @@
              x:DataType="viewmodels:DutiesViewModel"
              Title="{Binding Title}">
 
-    <Grid RowDefinitions="Auto,Auto,*" 
+    <Grid RowDefinitions="Auto,Auto,Auto,*" 
           Padding="20"
           RowSpacing="20">
 
@@ -18,7 +18,7 @@
                 <VerticalStackLayout Grid.Column="0">
                     <Label Text="Ten miesiąc"
                            Style="{StaticResource SubHeaderLabel}"/>
-                    <Label Text="24/50h"
+                    <Label Text="{Binding MonthlyHours, StringFormat='{0}/50h'}"
                            Style="{StaticResource ValueLabel}"/>
                     <ProgressBar Progress="0.48"
                                 Style="{StaticResource ProgressBar}"
@@ -28,23 +28,42 @@
                 <VerticalStackLayout Grid.Column="1">
                     <Label Text="Łącznie"
                            Style="{StaticResource SubHeaderLabel}"/>
-                    <Label Text="168/400h"
+                    <Label Text="{Binding TotalHours, StringFormat='{0}/{1}h', StringFormatArgs={Binding RemainingHours}}"
                            Style="{StaticResource ValueLabel}"/>
-                    <ProgressBar Progress="0.42"
+                    <ProgressBar Progress="{Binding Progress}"
                                 Style="{StaticResource ProgressBar}"
                                 Margin="0,5,0,0"/>
                 </VerticalStackLayout>
             </Grid>
         </Border>
 
-        <!-- Przycisk dodawania -->
-        <Button Grid.Row="1"
-                Text="+ Dodaj dyżur"
-                Command="{Binding AddDutyCommand}"
-                Style="{StaticResource PrimaryButton}"/>
+        <!-- Wymagania dyżurowe -->
+        <Border Grid.Row="1"
+                Style="{StaticResource CardBorder}"
+                IsVisible="{Binding DutyRequirementsText, Converter={StaticResource StringNotEmptyConverter}}">
+            <Label Text="{Binding DutyRequirementsText}"
+                   Style="{StaticResource BodyLabel}"/>
+        </Border>
+
+        <!-- Przycisk dodawania i filtry -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
+            <Picker Grid.Column="0"
+                    Title="Filtruj typ"
+                    ItemsSource="{Binding DutyTypes}"
+                    SelectedItem="{Binding SelectedDutyType}" />
+
+            <DatePicker Grid.Column="1"
+                       Date="{Binding FromDate}"
+                       Format="d" />
+
+            <Button Grid.Column="2"
+                    Text="+ Dodaj"
+                    Command="{Binding AddDutyCommand}"
+                    Style="{StaticResource PrimaryButton}"/>
+        </Grid>
 
         <!-- Lista dyżurów -->
-        <RefreshView Grid.Row="2"
+        <RefreshView Grid.Row="3"
                     Command="{Binding RefreshCommand}"
                     IsRefreshing="{Binding IsRefreshing}">
             <CollectionView Style="{StaticResource ListCollectionView}"
@@ -90,6 +109,12 @@
                                        Text="{Binding Type}"
                                        Style="{StaticResource BodyLabel}"/>
                             </Grid>
+
+                            <!-- Dodaj efekt tapnięcia -->
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:DutiesViewModel}}, Path=ViewDutyCommand}" 
+                                                      CommandParameter="{Binding Id}" />
+                            </Border.GestureRecognizers>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

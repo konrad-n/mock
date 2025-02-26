@@ -2,8 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
-using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Monitoring;
 using System.Collections.ObjectModel;
+using static SledzSpecke.Core.Models.Monitoring.ProcedureMonitoring;
 
 namespace SledzSpecke.App.ViewModels.Procedures
 {
@@ -11,26 +12,27 @@ namespace SledzSpecke.App.ViewModels.Procedures
     {
         private readonly IProcedureService _procedureService;
         private readonly ISpecializationService _specializationService;
+        private readonly ISpecializationRequirementsProvider _requirementsProvider;
 
         public ProceduresViewModel(
             IProcedureService procedureService,
-            ISpecializationService specializationService)
+            ISpecializationService specializationService,
+            ISpecializationRequirementsProvider requirementsProvider)
         {
             _procedureService = procedureService;
             _specializationService = specializationService;
+            _requirementsProvider = requirementsProvider;
 
             Title = "Procedury";
-            Procedures = new ObservableCollection<ProcedureExecution>();
+            Procedures = new ObservableCollection<Core.Models.Domain.ProcedureExecution>();
             Categories = new ObservableCollection<string>();
             Stages = new ObservableCollection<string>();
-
-            // Nowe kolekcje dla kategorii i etapów specyficznych dla specjalizacji
             CategoriesBySpecialization = new ObservableCollection<string>();
             StagesBySpecialization = new ObservableCollection<string>();
         }
 
         [ObservableProperty]
-        private ObservableCollection<ProcedureExecution> procedures;
+        private ObservableCollection<Core.Models.Domain.ProcedureExecution> procedures;
 
         [ObservableProperty]
         private ObservableCollection<string> categories;
@@ -59,6 +61,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
         [ObservableProperty]
         private Dictionary<string, (int Required, int Completed, int Assisted)> stageProgress;
 
+        [ObservableProperty]
+        private ProcedureMonitoring.ProgressSummary progressSummary;
+
+        private int _currentSpecializationId;
+
         public override async Task LoadDataAsync()
         {
             if (IsBusy) return;
@@ -66,6 +73,18 @@ namespace SledzSpecke.App.ViewModels.Procedures
             try
             {
                 IsBusy = true;
+
+                // Pobierz bieżącą specjalizację
+                var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
+                if (currentSpecialization != null)
+                {
+                    _currentSpecializationId = currentSpecialization.Id;
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Brak specjalizacji", "Nie wybrano żadnej specjalizacji.", "OK");
+                    return;
+                }
 
                 // Załaduj procedury
                 var userProcedures = await _procedureService.GetUserProceduresAsync();
@@ -75,30 +94,16 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     Procedures.Add(procedure);
                 }
 
-                // Załaduj dostępne kategorie i etapy
-                var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
-                Categories.Clear();
-                Categories.Add("Wszystkie");
-                foreach (var category in availableCategories)
-                {
-                    Categories.Add(category);
-                }
-
-                var availableStages = await _procedureService.GetAvailableStagesAsync();
-                Stages.Clear();
-                Stages.Add("Wszystkie");
-                foreach (var stage in availableStages)
-                {
-                    Stages.Add(stage);
-                }
+                // Załaduj kategorie i etapy specyficzne dla specjalizacji
+                await LoadSpecializationFiltersAsync();
 
                 // Załaduj postępy
                 CompletionPercentage = await _procedureService.GetProcedureCompletionPercentageAsync();
                 CategoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
                 StageProgress = await _procedureService.GetProcedureProgressByStageAsync();
 
-                // Załaduj kategorie i etapy specyficzne dla specjalizacji
-                await LoadSpecializationFiltersAsync();
+                // Oblicz postęp procedur z wymaganiami specjalizacji
+                await CalculateProgressSummaryAsync();
 
                 // Ustaw domyślne filtrowanie
                 SelectedCategory = "Wszystkie";
@@ -114,51 +119,157 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        public async Task LoadSpecializationFiltersAsync()
+        private async Task LoadSpecializationFiltersAsync()
         {
             try
             {
-                var specialization = await _specializationService.GetCurrentSpecializationAsync();
+                // Pobierz wymagania procedur dla tej specjalizacji
+                var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
 
-                if (specialization != null)
+                // Dodaj dostępne kategorie i etapy
+                CategoriesBySpecialization.Clear();
+                StagesBySpecialization.Clear();
+
+                // Dodaj opcję "Wszystkie" na początku
+                CategoriesBySpecialization.Add("Wszystkie");
+                StagesBySpecialization.Add("Wszystkie");
+
+                // Zbierz unikalne kategorie
+                var uniqueCategories = new HashSet<string>();
+                var uniqueStages = new HashSet<string>();
+
+                foreach (var category in procedureRequirements.Keys)
                 {
-                    CategoriesBySpecialization.Clear();
-                    StagesBySpecialization.Clear();
-
-                    // Załaduj kategorie specyficzne dla specjalizacji
-                    var requirements = await _specializationService.GetRequiredProceduresAsync(specialization.Id);
-
-                    var specialtyCategories = requirements
-                        .Select(r => r.Category)
-                        .Where(c => !string.IsNullOrEmpty(c))
-                        .Distinct()
-                        .OrderBy(c => c)
-                        .ToList();
-
-                    var specialtyStages = requirements
-                        .Select(r => r.Stage)
-                        .Where(s => !string.IsNullOrEmpty(s))
-                        .Distinct()
-                        .OrderBy(s => s)
-                        .ToList();
-
-                    // Dodaj opcję "Wszystkie" na początku
-                    CategoriesBySpecialization.Add("Wszystkie");
-                    foreach (var category in specialtyCategories)
+                    // Kategoria jako nazwa klucza
+                    if (!string.IsNullOrEmpty(category))
                     {
-                        CategoriesBySpecialization.Add(category);
+                        uniqueCategories.Add(category);
                     }
 
-                    StagesBySpecialization.Add("Wszystkie");
-                    foreach (var stage in specialtyStages)
+                    // Zbierz unikalne etapy z procedur
+                    foreach (var procedure in procedureRequirements[category])
                     {
-                        StagesBySpecialization.Add(stage);
+                        if (procedure.Description != null && procedure.Description.Contains("Etap:"))
+                        {
+                            var stageParts = procedure.Description.Split("Etap:");
+                            if (stageParts.Length > 1)
+                            {
+                                var stage = stageParts[1].Trim();
+                                if (!string.IsNullOrEmpty(stage))
+                                {
+                                    uniqueStages.Add(stage);
+                                }
+                            }
+                        }
                     }
                 }
+
+                // Dodaj unikalne kategorie i etapy do kolekcji
+                foreach (var category in uniqueCategories.OrderBy(c => c))
+                {
+                    CategoriesBySpecialization.Add(category);
+                }
+
+                foreach (var stage in uniqueStages.OrderBy(s => s))
+                {
+                    StagesBySpecialization.Add(stage);
+                }
+
+                // Załaduj także ogólne kategorie i etapy (z serwisu procedur)
+                var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
+                Categories.Clear();
+                Categories.Add("Wszystkie");
+                foreach (var category in availableCategories.Where(c => !string.IsNullOrEmpty(c)))
+                {
+                    Categories.Add(category);
+                }
+
+                var availableStages = await _procedureService.GetAvailableStagesAsync();
+                Stages.Clear();
+                Stages.Add("Wszystkie");
+                foreach (var stage in availableStages.Where(s => !string.IsNullOrEmpty(s)))
+                {
+                    Stages.Add(stage);
+                }
             }
-            catch (System.Exception)
+            catch (Exception)
             {
-                // Obsługa błędów - ukryj ten błąd, ponieważ jest to tylko dodatkowa funkcjonalność
+                // Ukryj błędy związane z filtrowaniem - to tylko dodatkowa funkcjonalność
+            }
+        }
+
+        private async Task CalculateProgressSummaryAsync()
+        {
+            try
+            {
+                // Pobierz wymagania procedur dla bieżącej specjalizacji
+                var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
+
+                // Przekształć dane o wykonanych procedurach
+                var completedProcedures = new Dictionary<string, ProcedureMonitoring.ProcedureProgress>();
+
+                foreach (var procedure in Procedures)
+                {
+                    if (!completedProcedures.ContainsKey(procedure.Name))
+                    {
+                        completedProcedures[procedure.Name] = new ProcedureMonitoring.ProcedureProgress
+                        {
+                            ProcedureName = procedure.Name,
+                            CompletedCount = 0,
+                            AssistanceCount = 0,
+                            SimulationCount = 0,
+                            Executions = new List<ProcedureMonitoring.ProcedureExecution>()
+                        };
+                    }
+
+                    var progress = completedProcedures[procedure.Name];
+                    var execution = new ProcedureMonitoring.ProcedureExecution
+                    {
+                        ExecutionDate = procedure.ExecutionDate,
+                        Type = procedure.Type.ToString(),
+                        Location = procedure.Location,
+                        Notes = procedure.Notes
+                    };
+
+                    // Ekstrakcja informacji o opiekunie z notatek (jeśli jest)
+                    if (!string.IsNullOrEmpty(procedure.Notes) && procedure.Notes.Contains("Opiekun:"))
+                    {
+                        var supervisorLine = procedure.Notes.Split('\n')
+                            .FirstOrDefault(l => l.StartsWith("Opiekun:"));
+
+                        if (supervisorLine != null)
+                        {
+                            execution.SupervisorName = supervisorLine.Substring("Opiekun:".Length).Trim();
+                        }
+                    }
+
+                    progress.Executions.Add(execution);
+
+                    // Aktualizuj liczniki
+                    switch (procedure.Type)
+                    {
+                        case Core.Models.Enums.ProcedureType.Execution:
+                            if (procedure.IsSimulation)
+                                progress.SimulationCount++;
+                            else
+                                progress.CompletedCount++;
+                            break;
+                        case Core.Models.Enums.ProcedureType.Assistance:
+                            progress.AssistanceCount++;
+                            break;
+                    }
+                }
+
+                // Utwórz instancję weryfikatora
+                var verifier = new ProcedureMonitoring.ProgressVerification(procedureRequirements);
+
+                // Generuj podsumowanie
+                ProgressSummary = verifier.GenerateProgressSummary(completedProcedures);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas obliczania podsumowania postępu: {ex.Message}");
+                // Nie pokazuj błędu użytkownikowi - to tylko statystyki
             }
         }
 
@@ -228,8 +339,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
         [RelayCommand]
         private async Task ExportProceduresAsync()
         {
-            // Implementacja eksportu procedur
-            await Shell.Current.DisplayAlert("Eksport", "Funkcja eksportu zostanie zaimplementowana wkrótce.", "OK");
+            if (ProgressSummary != null)
+            {
+                var report = ProgressSummary.GenerateReport();
+                await Shell.Current.DisplayAlert("Raport postępu procedur", report, "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Eksport", "Funkcja eksportu zostanie zaimplementowana wkrótce.", "OK");
+            }
         }
     }
 }

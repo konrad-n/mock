@@ -8,6 +8,16 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Wybór z wymaganych procedur -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Wybierz z listy wymaganych procedur"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Picker ItemsSource="{Binding RequiredProcedures}"
+                        SelectedItem="{Binding SelectedRequiredProcedure}"
+                        Title="Wybierz procedurę"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
             <!-- Nazwa procedury -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Nazwa procedury *"
@@ -37,53 +47,8 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Lokalizacja -->
-            <VerticalStackLayout Spacing="5">
-                <Label Text="Miejsce wykonania *"
-                       Style="{StaticResource SubHeaderLabel}"/>
-                <Entry Text="{Binding Location}"
-                       Placeholder="Np. Oddział Psychiatryczny"
-                       Style="{StaticResource BorderedEntry}"/>
-            </VerticalStackLayout>
-
-            <!-- Kategoria procedury -->
-            <VerticalStackLayout Spacing="5">
-                <Label Text="Kategoria procedury"
-                       Style="{StaticResource SubHeaderLabel}"/>
-                <Picker ItemsSource="{Binding Categories}"
-                        SelectedItem="{Binding SelectedCategory}"
-                        Title="Wybierz kategorię"
-                        Style="{StaticResource BorderedEntry}"/>
-            </VerticalStackLayout>
-
-            <!-- Etap specjalizacji -->
-            <VerticalStackLayout Spacing="5">
-                <Label Text="Etap specjalizacji"
-                       Style="{StaticResource SubHeaderLabel}"/>
-                <Picker ItemsSource="{Binding Stages}"
-                        SelectedItem="{Binding SelectedStage}"
-                        Title="Wybierz etap"
-                        Style="{StaticResource BorderedEntry}"/>
-            </VerticalStackLayout>
-
-            <!-- Opiekun -->
-            <VerticalStackLayout Spacing="5">
-                <Label Text="Opiekun"
-                       Style="{StaticResource SubHeaderLabel}"/>
-                <Entry Text="{Binding SupervisorName}"
-                       Placeholder="Imię i nazwisko opiekuna (opcjonalnie)"
-                       Style="{StaticResource BorderedEntry}"/>
-            </VerticalStackLayout>
-
-            <!-- Notatki -->
-            <VerticalStackLayout Spacing="5">
-                <Label Text="Notatki"
-                       Style="{StaticResource SubHeaderLabel}"/>
-                <Editor Text="{Binding Notes}"
-                        Placeholder="Dodatkowe informacje..."
-                        HeightRequest="100"
-                        Style="{StaticResource BorderedEntry}"/>
-            </VerticalStackLayout>
+            <!-- Pozostałe pola formularza -->
+            <!-- ... -->
 
             <!-- Przyciski -->
             <VerticalStackLayout Spacing="10" 

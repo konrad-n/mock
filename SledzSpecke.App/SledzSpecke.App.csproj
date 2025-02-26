@@ -62,10 +62,25 @@
 
   <ItemGroup>
     <Compile Remove="Converters\**" />
+    <Compile Remove="Views\Courses\**" />
+    <Compile Remove="Views\Internships\**" />
+    <Compile Remove="Views\Settings\**" />
     <EmbeddedResource Remove="Converters\**" />
+    <EmbeddedResource Remove="Views\Courses\**" />
+    <EmbeddedResource Remove="Views\Internships\**" />
+    <EmbeddedResource Remove="Views\Settings\**" />
     <MauiCss Remove="Converters\**" />
+    <MauiCss Remove="Views\Courses\**" />
+    <MauiCss Remove="Views\Internships\**" />
+    <MauiCss Remove="Views\Settings\**" />
     <MauiXaml Remove="Converters\**" />
+    <MauiXaml Remove="Views\Courses\**" />
+    <MauiXaml Remove="Views\Internships\**" />
+    <MauiXaml Remove="Views\Settings\**" />
     <None Remove="Converters\**" />
+    <None Remove="Views\Courses\**" />
+    <None Remove="Views\Internships\**" />
+    <None Remove="Views\Settings\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -88,10 +103,7 @@
     <Folder Include="Services\Dialog\" />
     <Folder Include="ViewModels\Internships\" />
     <Folder Include="ViewModels\Courses\" />
-    <Folder Include="Views\Internships\" />
-    <Folder Include="Views\Courses\" />
     <Folder Include="Resources\Icons\" />
-    <Folder Include="Views\Settings\" />
   </ItemGroup>
 
   <ItemGroup>

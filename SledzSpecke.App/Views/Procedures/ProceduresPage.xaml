@@ -13,29 +13,40 @@
         <!-- Podsumowanie -->
         <Border Grid.Row="0"
                 Style="{StaticResource CardBorder}">
-            <Grid ColumnDefinitions="*,*"
-                  ColumnSpacing="20">
-                <VerticalStackLayout Grid.Column="0">
-                    <Label Text="Wykonane"
-                           Style="{StaticResource SubHeaderLabel}"/>
-                    <Label Text="15/30"
-                           Style="{StaticResource ValueLabel}"/>
-                </VerticalStackLayout>
+            <VerticalStackLayout Spacing="15">
+                <Label Text="Ogólny postęp procedur" 
+                       Style="{StaticResource SubHeaderLabel}"/>
 
-                <VerticalStackLayout Grid.Column="1">
-                    <Label Text="Pozostało"
-                           Style="{StaticResource SubHeaderLabel}"/>
-                    <Label Text="15"
-                           Style="{StaticResource ValueLabel}"/>
-                </VerticalStackLayout>
-            </Grid>
+                <ProgressBar Progress="{Binding CompletionPercentage}" 
+                             Style="{StaticResource ProgressBar}"/>
+
+                <Label Text="{Binding ProgressSummary.OverallCompletionPercentage, StringFormat='{0:P0} ukończone'}"
+                       Style="{StaticResource BodyLabel}"
+                       HorizontalOptions="Center"/>
+
+                <Label Text="{Binding ProgressSummary.TotalProceduresCompleted, StringFormat='Wykonane procedury: {0}/{1}', StringFormatArgs={Binding ProgressSummary.TotalProceduresRequired}}"
+                       Style="{StaticResource BodyLabel}"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
         </Border>
 
-        <!-- Przycisk dodawania -->
-        <Button Grid.Row="1"
-                Text="+ Dodaj procedurę"
-                Command="{Binding AddProcedureCommand}"
-                Style="{StaticResource PrimaryButton}"/>
+        <!-- Filtry i przycisk dodawania -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
+            <Picker Grid.Column="0"
+                    Title="Filtruj kategorię"
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding SelectedCategory}" />
+
+            <Picker Grid.Column="1"
+                    Title="Filtruj etap"
+                    ItemsSource="{Binding Stages}"
+                    SelectedItem="{Binding SelectedStage}" />
+
+            <Button Grid.Column="2"
+                    Text="+ Dodaj"
+                    Command="{Binding AddProcedureCommand}"
+                    Style="{StaticResource PrimaryButton}"/>
+        </Grid>
 
         <!-- Lista procedur -->
         <RefreshView Grid.Row="2"
@@ -76,9 +87,28 @@
                                 <Label Grid.Row="1"
                                        Grid.Column="0"
                                        Grid.ColumnSpan="2"
-                                       Text="{Binding Date, StringFormat='{0:d}'}"
+                                       Text="{Binding ExecutionDate, StringFormat='{0:d}'}"
                                        Style="{StaticResource BodyLabel}"/>
+
+                                <Label Grid.Row="2" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Location}"
+                                       Style="{StaticResource BodyLabel}" />
+
+                                <Label Grid.Row="3" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding Category}"
+                                       Style="{StaticResource BodyLabel}"
+                                       IsVisible="{Binding Category, Converter={StaticResource StringNotEmptyConverter}}"/>
                             </Grid>
+
+                            <!-- Dodaj efekt tapnięcia -->
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProceduresViewModel}}, Path=ViewProcedureCommand}" 
+                                                      CommandParameter="{Binding Id}" />
+                            </Border.GestureRecognizers>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
