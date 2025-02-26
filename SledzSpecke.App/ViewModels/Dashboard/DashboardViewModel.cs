@@ -107,7 +107,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 var user = await _userService.GetCurrentUserAsync();
                 if (user != null)
                 {
-                    var daysLeft = (user.ExpectedEndDate - System.DateTime.Today).Days;
+                    var daysLeft = (user.ExpectedEndDate - DateTime.Today).Days;
                     TimeLeftText = daysLeft switch
                     {
                         < 0 => "Specjalizacja zakończona",
@@ -116,26 +116,19 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                         _ => $"Pozostało {daysLeft} dni"
                     };
                 }
+                else
+                {
+                    TimeLeftText = "Brak danych";
+                }
 
-                // Load recommendations
-                var recCourses = await _courseService.GetRecommendedCoursesForCurrentYearAsync();
+                // For testing purposes, we can leave these empty for now
                 RecommendedCourses.Clear();
-                foreach (var course in recCourses)
-                {
-                    RecommendedCourses.Add(course);
-                }
-
-                var recInternships = await _internshipService.GetRecommendedInternshipsForCurrentYearAsync();
                 RecommendedInternships.Clear();
-                foreach (var internship in recInternships)
-                {
-                    RecommendedInternships.Add(internship);
-                }
-
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+                // Don't show alert to user in this stage
             }
             finally
             {
