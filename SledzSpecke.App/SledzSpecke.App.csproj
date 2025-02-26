@@ -76,7 +76,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Converters\" />
-	  <Folder Include="Platforms\iOS\" />
 	  <Folder Include="Services\Navigation\" />
 	  <Folder Include="Services\Dialog\" />
 	  <Folder Include="ViewModels\Internships\" />
