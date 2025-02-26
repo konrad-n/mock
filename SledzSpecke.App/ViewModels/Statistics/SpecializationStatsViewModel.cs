@@ -75,9 +75,8 @@ namespace SledzSpecke.App.ViewModels.Statistics
             try
             {
                 IsBusy = true;
-
-                // Pobierz bieżącą specjalizację
                 CurrentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
+
                 if (CurrentSpecialization == null)
                 {
                     await Shell.Current.DisplayAlert(
@@ -87,10 +86,7 @@ namespace SledzSpecke.App.ViewModels.Statistics
                     return;
                 }
 
-                // Pobierz postępy
-                SpecializationProgress = await _specializationService.GetProgressStatisticsAsync(CurrentSpecialization.Id);
-                
-                // Ustawienie wartości progresów
+                SpecializationProgress = await _specializationService.GetProgressStatisticsAsync(CurrentSpecialization.Id);                
                 ProceduresProgress = await _procedureService.GetProcedureCompletionPercentageAsync();
                 
                 var dutyStats = await _dutyService.GetDutyStatisticsAsync();
@@ -101,17 +97,14 @@ namespace SledzSpecke.App.ViewModels.Statistics
                 CoursesProgress = await _courseService.GetCourseProgressAsync();
                 InternshipsProgress = await _internshipService.GetInternshipProgressAsync();
                 
-                // Obliczenie ogólnego postępu
                 OverallProgress = (ProceduresProgress + DutiesProgress + CoursesProgress + InternshipsProgress) / 4.0;
                 
-                // Ustawienie tekstów
                 ProgressText = $"{OverallProgress:P0} ukończone";
                 ProceduresProgressText = $"{ProceduresProgress:P0} ukończone";
                 DutiesProgressText = $"{DutiesProgress:P0} ukończone ({totalDutyHours:F1}h z {totalDutyHours + remainingHours:F1}h)";
                 CoursesProgressText = $"{CoursesProgress:P0} ukończone";
                 InternshipsProgressText = $"{InternshipsProgress:P0} ukończone";
                 
-                // Obliczenie pozostałego czasu
                 var daysLeft = CalculateRemainingDays();
                 TimeLeftText = FormatTimeLeft(daysLeft);
             }
@@ -130,7 +123,6 @@ namespace SledzSpecke.App.ViewModels.Statistics
 
         private int CalculateRemainingDays()
         {
-            // Obliczenie dni pozostałych do końca specjalizacji
             var expectedEndDate = DateTime.Today.AddDays(CurrentSpecialization.DurationInWeeks * 7);
             return (expectedEndDate - DateTime.Today).Days;
         }

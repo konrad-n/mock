@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Core.Models.Monitoring;
 using SledzSpecke.Core.Models.Requirements;
 using System.Collections.ObjectModel;
@@ -81,13 +82,10 @@ namespace SledzSpecke.App.ViewModels.Duties
             {
                 IsBusy = true;
 
-                // Pobierz bieżącą specjalizację
                 var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
                 if (currentSpecialization != null)
                 {
                     _currentSpecializationId = currentSpecialization.Id;
-
-                    // Oblicz obecny rok specjalizacji
                     var user = await _userService.GetCurrentUserAsync();
                     if (user?.SpecializationStartDate != null)
                     {
@@ -96,10 +94,9 @@ namespace SledzSpecke.App.ViewModels.Duties
                     }
                     else
                     {
-                        _currentSpecializationYear = 1; // domyślnie pierwszy rok
+                        _currentSpecializationYear = 1;
                     }
 
-                    // Pobierz wymagania dla bieżącego roku
                     CurrentYearRequirements = _requirementsProvider.GetDutyRequirementsBySpecialization(_currentSpecializationId)
                         .Where(r => r.Year == _currentSpecializationYear)
                         .ToList();
@@ -122,17 +119,12 @@ namespace SledzSpecke.App.ViewModels.Duties
                     DutyRequirementsText = "Brak danych o specjalizacji";
                 }
 
-                // Pobierz dyżury
                 var userDuties = await _dutyService.GetUserDutiesAsync(FromDate);
-
-                // Pobierz statystyki
                 Statistics = await _dutyService.GetDutyStatisticsAsync();
 
                 TotalHours = Statistics.TotalHours;
                 MonthlyHours = Statistics.MonthlyHours;
                 RemainingHours = Statistics.RemainingHours > 0 ? Statistics.RemainingHours : 1;
-
-                // Oblicz postęp
                 Progress = (double)(TotalHours / (TotalHours + RemainingHours));
 
                 UpdateDutiesList(userDuties);
@@ -178,7 +170,39 @@ namespace SledzSpecke.App.ViewModels.Duties
 
         private async Task ApplyFiltersAsync()
         {
-            // Istniejąca implementacja...
+            if (IsBusy) return;
+
+            try
+            {
+                IsBusy = true;
+
+                var userDuties = await _dutyService.GetUserDutiesAsync(FromDate);
+
+                if (SelectedDutyType != "Wszystkie")
+                {
+                    if (Enum.TryParse<DutyType>(SelectedDutyType, out var dutyType))
+                    {
+                        userDuties = userDuties.Where(d => d.Type == dutyType).ToList();
+                    }
+                }
+
+                userDuties = userDuties.Where(d =>
+                    d.StartTime.Date >= FromDate.Date &&
+                    d.StartTime.Date <= ToDate.Date).ToList();
+
+                UpdateDutiesList(userDuties);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert(
+                    "Błąd",
+                    $"Nie udało się zafiltrować dyżurów: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         [RelayCommand]
@@ -196,7 +220,6 @@ namespace SledzSpecke.App.ViewModels.Duties
         [RelayCommand]
         private async Task ExportDutiesAsync()
         {
-            // Konwersja dyżurów do modelu monitorowania
             var monthlyDuties = new List<DutyMonitoring.Duty>();
 
             foreach (var dutyVm in Duties)
@@ -211,7 +234,6 @@ namespace SledzSpecke.App.ViewModels.Duties
                 });
             }
 
-            // Weryfikacja zgodności z wymaganiami
             if (CurrentYearRequirements.Any())
             {
                 var validator = new DutyMonitoring.DutyValidator();

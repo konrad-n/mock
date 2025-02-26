@@ -2,7 +2,6 @@
 using SledzSpecke.App.Views.Procedures;
 using SledzSpecke.App.Views.Duties;
 using SledzSpecke.App.Views.Profile;
-using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.App.Views.Specialization;
 
 namespace SledzSpecke.App
@@ -30,9 +29,6 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("profile", typeof(ProfilePage));
             Routing.RegisterRoute("settings", typeof(SettingsPage));
             Routing.RegisterRoute("profile/edit", typeof(ProfileEditPage));
-
-            // Statistics routes
-            Routing.RegisterRoute("statistics", typeof(SpecializationStatsPage));
 
             // Specialization progress
             Routing.RegisterRoute("progress", typeof(SpecializationProgressPage));

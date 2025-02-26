@@ -80,7 +80,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             {
                 IsBusy = true;
 
-                // Calculate progress
                 ProceduresProgress = await _procedureService.GetProcedureCompletionPercentageAsync();
                 ProceduresProgressText = $"{ProceduresProgress:P0}";
 
@@ -92,18 +91,15 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
                 var dutyStats = await _dutyService.GetDutyStatisticsAsync();
 
-                // Fix: Convert decimal to double for division
                 double totalHours = (double)dutyStats.TotalHours;
                 double remainingHours = (double)(dutyStats.RemainingHours > 0 ? dutyStats.RemainingHours : 1);
 
                 DutiesProgress = totalHours / (totalHours + remainingHours);
                 DutiesProgressText = $"{dutyStats.TotalHours}/{dutyStats.TotalHours + dutyStats.RemainingHours}h";
 
-                // Calculate overall progress
                 OverallProgress = (ProceduresProgress + CoursesProgress + InternshipsProgress + DutiesProgress) / 4;
                 OverallProgressText = $"{OverallProgress:P0} ukończone";
 
-                // Calculate remaining time
                 var user = await _userService.GetCurrentUserAsync();
                 if (user != null)
                 {
@@ -121,14 +117,12 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     TimeLeftText = "Brak danych";
                 }
 
-                // For testing purposes, we can leave these empty for now
                 RecommendedCourses.Clear();
                 RecommendedInternships.Clear();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
-                // Don't show alert to user in this stage
             }
             finally
             {

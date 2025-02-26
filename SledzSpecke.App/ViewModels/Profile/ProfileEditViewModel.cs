@@ -13,7 +13,6 @@ public partial class ProfileEditViewModel : BaseViewModel
     {
         _userService = userService;
         Title = "Edytuj profil";
-        // Set default dates
         StartDate = DateTime.Now.AddYears(-1);
         EndDate = DateTime.Now.AddYears(4);
     }
@@ -42,8 +41,7 @@ public partial class ProfileEditViewModel : BaseViewModel
             if (user != null)
             {
                 UserName = user.Name;
-                Pwz = user.PWZ; // Note the capital P - ObservableProperty generates capitalized properties
-                // Set dates if user has them
+                Pwz = user.PWZ;
                 if (user.SpecializationStartDate != default)
                     StartDate = user.SpecializationStartDate;
                 if (user.ExpectedEndDate != default)
@@ -52,7 +50,6 @@ public partial class ProfileEditViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            // Log the error but don't show to user during development
             System.Diagnostics.Debug.WriteLine($"Error loading profile data: {ex}");
         }
         finally
@@ -64,7 +61,6 @@ public partial class ProfileEditViewModel : BaseViewModel
     [RelayCommand]
     private async Task SaveAsync()
     {
-        // For now, just return to previous page
         await Shell.Current.GoToAsync("..");
     }
 

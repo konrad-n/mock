@@ -9,8 +9,6 @@
     <Grid RowDefinitions="Auto,Auto,Auto,*"
           Padding="20"
           RowSpacing="20">
-
-        <!-- Statystyki -->
         <Border Grid.Row="0"
                 Style="{StaticResource CardBorder}">
             <Grid ColumnDefinitions="*,*"
@@ -26,8 +24,6 @@
                                  Style="{StaticResource ProgressBar}"
                                  Margin="0,5,0,0"/>
                 </VerticalStackLayout>
-
-                <!-- PRAWA kolumna: Łącznie -->
                 <VerticalStackLayout Grid.Column="1">
                     <Label Text="Łącznie"
                            Style="{StaticResource SubHeaderLabel}"/>
@@ -41,16 +37,12 @@
                 </VerticalStackLayout>
             </Grid>
         </Border>
-
-        <!-- Wymagania dyżurowe -->
         <Border Grid.Row="1"
                 Style="{StaticResource CardBorder}"
                 IsVisible="{Binding DutyRequirementsText, Converter={StaticResource StringNotEmptyConverter}}">
             <Label Text="{Binding DutyRequirementsText}"
                    Style="{StaticResource BodyLabel}"/>
         </Border>
-
-        <!-- Przycisk dodawania i filtry -->
         <Grid Grid.Row="2" ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
             <Picker Grid.Column="0"
                     Title="Filtruj typ"
@@ -66,8 +58,6 @@
                     Command="{Binding AddDutyCommand}"
                     Style="{StaticResource PrimaryButton}"/>
         </Grid>
-
-        <!-- Lista dyżurów -->
         <RefreshView Grid.Row="3"
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
@@ -114,8 +104,6 @@
                                        Text="{Binding Type}"
                                        Style="{StaticResource BodyLabel}"/>
                             </Grid>
-
-                            <!-- Dodaj efekt tapnięcia -->
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer 
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:DutiesViewModel}}, Path=ViewDutyCommand}"

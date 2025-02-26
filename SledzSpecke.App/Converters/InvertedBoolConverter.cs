@@ -11,7 +11,7 @@ namespace SledzSpecke.App.Converters
                 return !boolValue;
             }
 
-            return true; // Fallback value
+            return true;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -21,7 +21,7 @@ namespace SledzSpecke.App.Converters
                 return !boolValue;
             }
 
-            return false; // Fallback value
+            return false;
         }
     }
 }

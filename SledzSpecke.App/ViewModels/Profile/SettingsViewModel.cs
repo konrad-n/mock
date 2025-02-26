@@ -66,21 +66,17 @@ public partial class SettingsViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            // Załaduj ustawienia powiadomień
             NotifyCourses = _settingsService.GetSetting("NotifyCourses", true);
             NotifyDuties = _settingsService.GetSetting("NotifyDuties", true);
             NotifyProcedures = _settingsService.GetSetting("NotifyProcedures", true);
 
-            // Załaduj ustawienia synchronizacji
             BackgroundSync = _settingsService.GetSetting("BackgroundSync", true);
             WifiOnlySync = _settingsService.GetSetting("WifiOnlySync", true);
 
-            // Załaduj informacje o wersji
             var version = AppInfo.VersionString;
             var build = AppInfo.BuildString;
             VersionInfo = $"Wersja {version} (Build {build})";
 
-            // Making this method properly async with a placeholder
             await Task.CompletedTask;
         }
         finally

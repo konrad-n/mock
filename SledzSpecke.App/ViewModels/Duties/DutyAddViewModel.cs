@@ -65,16 +65,10 @@ public partial class DutyAddViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-
-            // Load available locations or other initialization data
-            // For example: var locations = await _dutyService.GetLocationsAsync();
-
-            // Comment: This placeholder makes the method properly async by using an await
             await Task.CompletedTask;
         }
         catch (Exception ex)
         {
-            // Handle potential errors
             await Shell.Current.DisplayAlert(
                 "Błąd",
                 "Nie udało się załadować danych",

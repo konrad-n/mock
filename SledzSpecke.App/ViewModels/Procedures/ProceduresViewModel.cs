@@ -62,7 +62,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private Dictionary<string, (int Required, int Completed, int Assisted)> stageProgress;
 
         [ObservableProperty]
-        private ProcedureMonitoring.ProgressSummary progressSummary;
+        private ProgressSummary progressSummary;
 
         public string OverallCompletionDisplay
         {
@@ -96,7 +96,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 IsBusy = true;
 
-                // Pobierz bieżącą specjalizację
                 var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
                 if (currentSpecialization != null)
                 {
@@ -108,7 +107,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     return;
                 }
 
-                // Załaduj procedury
                 var userProcedures = await _procedureService.GetUserProceduresAsync();
                 Procedures.Clear();
                 foreach (var procedure in userProcedures)
@@ -116,22 +114,17 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     Procedures.Add(procedure);
                 }
 
-                // Załaduj kategorie i etapy specyficzne dla specjalizacji
                 await LoadSpecializationFiltersAsync();
 
-                // Załaduj postępy
                 CompletionPercentage = await _procedureService.GetProcedureCompletionPercentageAsync();
                 CategoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
                 StageProgress = await _procedureService.GetProcedureProgressByStageAsync();
 
-                // Oblicz postęp procedur z wymaganiami specjalizacji
                 await CalculateProgressSummaryAsync();
 
-                // Ustaw domyślne filtrowanie
                 SelectedCategory = "Wszystkie";
                 SelectedStage = "Wszystkie";
 
-                // Powiadomienie, że właściwości do wyświetlania (OverallCompletionDisplay itp.) mogą się zmienić
                 OnPropertyChanged(nameof(OverallCompletionDisplay));
                 OnPropertyChanged(nameof(ProceduresCompletedDisplay));
             }
@@ -149,18 +142,14 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             try
             {
-                // Pobierz wymagania procedur dla tej specjalizacji
                 var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
 
-                // Dodaj dostępne kategorie i etapy
                 CategoriesBySpecialization.Clear();
                 StagesBySpecialization.Clear();
 
-                // Dodaj opcję "Wszystkie" na początku
                 CategoriesBySpecialization.Add("Wszystkie");
                 StagesBySpecialization.Add("Wszystkie");
 
-                // Zbierz unikalne kategorie i etapy
                 var uniqueCategories = new HashSet<string>();
                 var uniqueStages = new HashSet<string>();
 
@@ -184,7 +173,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
 
-                // Dodaj do kolekcji
                 foreach (var category in uniqueCategories.OrderBy(c => c))
                 {
                     CategoriesBySpecialization.Add(category);
@@ -195,7 +183,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     StagesBySpecialization.Add(stage);
                 }
 
-                // Załaduj także ogólne kategorie i etapy (z serwisu procedur)
                 var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
                 Categories.Clear();
                 Categories.Add("Wszystkie");
@@ -214,7 +201,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
             catch (Exception)
             {
-                // Ukryj błędy związane z filtrowaniem - to tylko dodatkowa funkcjonalność
             }
         }
 
@@ -222,10 +208,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             try
             {
-                // Pobierz wymagania procedur dla bieżącej specjalizacji
                 var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
-
-                // Przekształć dane o wykonanych procedurach
                 var completedProcedures = new Dictionary<string, ProcedureProgress>();
 
                 foreach (var procedure in Procedures)
@@ -251,7 +234,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         Notes = procedure.Notes
                     };
 
-                    // Ekstrakcja informacji o opiekunie z notatek (jeśli jest)
                     if (!string.IsNullOrEmpty(procedure.Notes) && procedure.Notes.Contains("Opiekun:"))
                     {
                         var supervisorLine = procedure.Notes.Split('\n')
@@ -265,7 +247,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                     progress.Executions.Add(execution);
 
-                    // Aktualizuj liczniki
                     switch (procedure.Type)
                     {
                         case Core.Models.Enums.ProcedureType.Execution:
@@ -280,20 +261,16 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
 
-                // Utwórz instancję weryfikatora
                 var verifier = new ProgressVerification(procedureRequirements);
 
-                // Generuj podsumowanie
                 ProgressSummary = verifier.GenerateProgressSummary(completedProcedures);
 
-                // Po aktualizacji ProgressSummary również zasygnalizuj zmianę
                 OnPropertyChanged(nameof(OverallCompletionDisplay));
                 OnPropertyChanged(nameof(ProceduresCompletedDisplay));
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas obliczania podsumowania postępu: {ex.Message}");
-                // Nie pokazuj błędu użytkownikowi - to tylko statystyki
             }
         }
 
@@ -316,7 +293,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 IsBusy = true;
                 var allProcedures = await _procedureService.GetUserProceduresAsync();
 
-                // Filtruj według kategorii i etapu
                 var filteredProcedures = allProcedures;
                 if (SelectedCategory != "Wszystkie" && SelectedCategory != null)
                 {
@@ -338,7 +314,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     Procedures.Add(procedure);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 await Shell.Current.DisplayAlert("Błąd", $"Nie udało się zafiltrować danych: {ex.Message}", "OK");
             }

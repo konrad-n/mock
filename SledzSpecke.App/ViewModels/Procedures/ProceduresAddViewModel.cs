@@ -1,11 +1,9 @@
-﻿// SledzSpecke.App/ViewModels/Procedures/ProcedureAddViewModel.cs
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Core.Models.Enums;
-using SledzSpecke.Core.Models.Requirements;
 using System.Collections.ObjectModel;
 
 namespace SledzSpecke.App.ViewModels.Procedures
@@ -85,19 +83,16 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 IsBusy = true;
 
-                // Pobierz bieżącą specjalizację
                 var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
                 if (currentSpecialization != null)
                 {
                     _currentSpecializationId = currentSpecialization.Id;
                 }
 
-                // Pobierz wymagane procedury dla tej specjalizacji
                 var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
 
-                // Dodaj procedury jako sugestie
                 RequiredProcedures.Clear();
-                RequiredProcedures.Add(""); // pusta opcja
+                RequiredProcedures.Add("");
 
                 foreach (var category in procedureRequirements.Keys)
                 {
@@ -107,11 +102,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
 
-                // Pobierz dostępne kategorie
                 var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
                 Categories.Clear();
 
-                // Dodaj pustą opcję na początku
                 Categories.Add("");
 
                 foreach (var category in availableCategories)
@@ -122,11 +115,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
 
-                // Pobierz dostępne etapy
                 var availableStages = await _procedureService.GetAvailableStagesAsync();
                 Stages.Clear();
-
-                // Dodaj pustą opcję na początku
                 Stages.Add("");
 
                 foreach (var stage in availableStages)
@@ -178,8 +168,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     Stage = SelectedStage
                 };
 
-                // Jeśli podano nazwę opiekuna, możemy zaimplementować logikę do powiązania jej z istniejącym 
-                // użytkownikiem w systemie lub po prostu zachować ją jako notatkę
                 if (!string.IsNullOrWhiteSpace(SupervisorName))
                 {
                     procedure.Notes = string.IsNullOrEmpty(procedure.Notes)

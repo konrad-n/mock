@@ -18,7 +18,6 @@ public partial class ProcedureEditViewModel : BaseViewModel
         _procedureService = procedureService;
         Title = "Edytuj procedurę";
 
-        // Inicjalizacja kolekcji
         Categories = new ObservableCollection<string>();
         Stages = new ObservableCollection<string>();
     }
@@ -66,7 +65,6 @@ public partial class ProcedureEditViewModel : BaseViewModel
             IsBusy = true;
             _procedureId = id;
 
-            // Najpierw załaduj kategorie i etapy
             await LoadCategoriesAndStagesAsync();
 
             var procedure = await _procedureService.GetProcedureAsync(id);
@@ -80,7 +78,6 @@ public partial class ProcedureEditViewModel : BaseViewModel
                 SelectedCategory = procedure.Category ?? "";
                 SelectedStage = procedure.Stage ?? "";
 
-                // Jeśli jest opiekun w notatkach, wyekstrahuj
                 ExtractSupervisorFromNotes();
             }
         }
@@ -103,16 +100,13 @@ public partial class ProcedureEditViewModel : BaseViewModel
         if (string.IsNullOrEmpty(Notes)) return;
 
         const string supervisorPrefix = "Opiekun: ";
-
-        // Sprawdź, czy notatki zawierają informację o opiekunie
         var lines = Notes.Split('\n');
+
         foreach (var line in lines)
         {
             if (line.StartsWith(supervisorPrefix))
             {
                 SupervisorName = line.Substring(supervisorPrefix.Length).Trim();
-
-                // Usuń informację o opiekunie z notatek
                 Notes = string.Join('\n', lines.Where(l => !l.StartsWith(supervisorPrefix)));
                 break;
             }
@@ -123,11 +117,9 @@ public partial class ProcedureEditViewModel : BaseViewModel
     {
         try
         {
-            // Pobierz dostępne kategorie
             var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
             Categories.Clear();
 
-            // Dodaj pustą opcję na początku
             Categories.Add("");
 
             foreach (var category in availableCategories)
@@ -138,11 +130,9 @@ public partial class ProcedureEditViewModel : BaseViewModel
                 }
             }
 
-            // Pobierz dostępne etapy
             var availableStages = await _procedureService.GetAvailableStagesAsync();
             Stages.Clear();
 
-            // Dodaj pustą opcję na początku
             Stages.Add("");
 
             foreach (var stage in availableStages)
@@ -155,7 +145,6 @@ public partial class ProcedureEditViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            // Logowanie błędu
             System.Diagnostics.Debug.WriteLine($"Błąd ładowania kategorii i etapów: {ex.Message}");
         }
     }
@@ -181,7 +170,6 @@ public partial class ProcedureEditViewModel : BaseViewModel
                 Stage = SelectedStage
             };
 
-            // Dodaj informację o opiekunie do notatek, jeśli jest podany
             if (!string.IsNullOrWhiteSpace(SupervisorName))
             {
                 procedure.Notes = string.IsNullOrEmpty(procedure.Notes)

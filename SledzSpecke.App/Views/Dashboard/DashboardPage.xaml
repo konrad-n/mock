@@ -5,15 +5,12 @@
              x:Class="SledzSpecke.App.Views.Dashboard.DashboardPage"
              x:DataType="viewmodels:DashboardViewModel"
              Title="{Binding Title}">
-
     <RefreshView Command="{Binding RefreshCommand}"
                  IsRefreshing="{Binding IsRefreshing}">
         <ScrollView>
             <Grid RowDefinitions="Auto,*"
                   RowSpacing="20"
                   Padding="20">
-
-                <!-- Sekcja podsumowania -->
                 <VerticalStackLayout Grid.Row="0"
                     Spacing="10">
                     <Label Text="Postęp specjalizacji"
@@ -28,15 +25,11 @@
                         Style="{StaticResource PrimaryButton}"
                         Margin="0,10,0,0"/>
                 </VerticalStackLayout>
-
-                <!-- Sekcja kafelków -->
                 <Grid Grid.Row="1"
                       RowDefinitions="*,*"
                       ColumnDefinitions="*,*"
                       RowSpacing="20"
                       ColumnSpacing="20">
-
-                    <!-- Kafelek Procedury -->
                     <Border Grid.Row="0" 
                            Grid.Column="0"
                            Style="{StaticResource CardBorder}">
@@ -49,8 +42,6 @@
                                    Style="{StaticResource ValueLabel}"/>
                         </Grid>
                     </Border>
-
-                    <!-- Kafelek Dyżury -->
                     <Border Grid.Row="0" 
                            Grid.Column="1"
                            Style="{StaticResource CardBorder}">
@@ -63,8 +54,6 @@
                                    Style="{StaticResource ValueLabel}"/>
                         </Grid>
                     </Border>
-
-                    <!-- Kafelek Staże -->
                     <Border Grid.Row="1" 
                            Grid.Column="0"
                            Style="{StaticResource CardBorder}">
@@ -77,8 +66,6 @@
                                    Style="{StaticResource ValueLabel}"/>
                         </Grid>
                     </Border>
-
-                    <!-- Kafelek Kursy -->
                     <Border Grid.Row="1" 
                            Grid.Column="1"
                            Style="{StaticResource CardBorder}">

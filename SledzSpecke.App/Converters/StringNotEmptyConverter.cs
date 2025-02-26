@@ -11,7 +11,7 @@ namespace SledzSpecke.App.Converters
                 return !string.IsNullOrWhiteSpace(stringValue);
             }
 
-            return false; // Fallback value
+            return false;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

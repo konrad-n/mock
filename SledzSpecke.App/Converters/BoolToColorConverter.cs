@@ -8,12 +8,10 @@ namespace SledzSpecke.App.Converters
         {
             if (value is bool isActive && isActive)
             {
-                // Zwróć kolor podświetlenia dla aktywnego przycisku
-                return Color.FromArgb("#1E88E5"); // Primary color
+                return Color.FromArgb("#1E88E5");
             }
 
-            // Domyślny kolor dla nieaktywnego przycisku
-            return Color.FromArgb("#808080"); // Gray color
+            return Color.FromArgb("#808080");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

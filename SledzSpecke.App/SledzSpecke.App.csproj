@@ -109,8 +109,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\Internships\" />
-    <Folder Include="ViewModels\Courses\" />
+    <Folder Include="Resources\Raw\" />
+    <Folder Include="Resources\Splash\" />
   </ItemGroup>
 
   <ItemGroup>

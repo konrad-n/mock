@@ -35,10 +35,8 @@ namespace SledzSpecke.App.ViewModels.Specializations
             Title = "Postęp specjalizacji";
             DetailedRequirements = new ObservableCollection<RequirementViewModel>();
             FilterOptions = new ObservableCollection<string>();
-            SelectedTab = "Procedures"; // Domyślna zakładka
+            SelectedTab = "Procedures";
         }
-
-        #region Properties
 
         [ObservableProperty]
         private string specializationName;
@@ -95,10 +93,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
         public bool IsCoursesTabActive => SelectedTab == "Courses";
         public bool IsInternshipsTabActive => SelectedTab == "Internships";
 
-        #endregion
-
-        #region Commands
-
         [RelayCommand]
         private void ShowDetailedView()
         {
@@ -143,10 +137,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
             }
         }
 
-        #endregion
-
-        #region Methods
-
         public override async Task LoadDataAsync()
         {
             if (IsBusy) return;
@@ -155,7 +145,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
             {
                 IsBusy = true;
 
-                // Pobierz bieżącą specjalizację
                 var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
                 if (currentSpecialization == null)
                 {
@@ -165,28 +154,22 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
                 SpecializationName = currentSpecialization.Name;
 
-                // Pobierz postęp procedur
                 ProceduresProgress = await _procedureService.GetProcedureCompletionPercentageAsync();
                 ProceduresProgressText = $"{ProceduresProgress:P0}";
 
-                // Pobierz postęp dyżurów
                 var dutyStats = await _dutyService.GetDutyStatisticsAsync();
                 DutiesProgress = Math.Min(1.0, (double)(dutyStats.TotalHours / (dutyStats.TotalHours + dutyStats.RemainingHours)));
                 DutiesProgressText = $"{DutiesProgress:P0}";
 
-                // Pobierz postęp kursów
                 CoursesProgress = await _courseService.GetCourseProgressAsync();
                 CoursesProgressText = $"{CoursesProgress:P0}";
 
-                // Pobierz postęp staży
                 InternshipsProgress = await _internshipService.GetInternshipProgressAsync();
                 InternshipsProgressText = $"{InternshipsProgress:P0}";
 
-                // Oblicz łączny postęp
                 TotalProgress = (ProceduresProgress + DutiesProgress + CoursesProgress + InternshipsProgress) / 4.0;
                 TotalProgressText = $"{TotalProgress:P0}";
 
-                // Załaduj szczegółowe wymagania jeśli widok szczegółowy jest aktywny
                 if (IsDetailedViewVisible)
                 {
                     LoadDetailedRequirements();
@@ -206,15 +189,12 @@ namespace SledzSpecke.App.ViewModels.Specializations
         {
             try
             {
-                // Wyczyść istniejące dane
                 DetailedRequirements.Clear();
                 FilterOptions.Clear();
 
-                // Pobierz bieżącą specjalizację
                 var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
                 if (currentSpecialization == null) return;
 
-                // Różne dane zależnie od wybranej zakładki
                 switch (SelectedTab)
                 {
                     case "Procedures":
@@ -241,26 +221,20 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
         private async Task LoadProceduresRequirements(int specializationId)
         {
-            // Pobierz wymogi procedur dla tej specjalizacji
             var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(specializationId);
-
-            // Pobierz faktycznie wykonane procedury i ich postęp
             var categoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
 
-            // Filtry - dostępne kategorie
             foreach (var category in procedureRequirements.Keys)
             {
                 FilterOptions.Add(category);
             }
 
-            // Zastosuj filtr jeśli wybrany
             var filteredCategories = procedureRequirements.Keys.ToList();
             if (!string.IsNullOrEmpty(SelectedFilter) && procedureRequirements.ContainsKey(SelectedFilter))
             {
                 filteredCategories = new List<string> { SelectedFilter };
             }
 
-            // Dodaj wymagania do listy
             foreach (var category in filteredCategories)
             {
                 foreach (var procedure in procedureRequirements[category])
@@ -268,7 +242,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
                     double progress = 0;
                     string progressText = "0%";
 
-                    // Znajdź postęp dla tej kategorii
                     if (categoryProgress.TryGetValue(category, out var progressData))
                     {
                         double requiredTotal = procedure.RequiredCount + procedure.AssistanceCount;
@@ -276,7 +249,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
                         if (requiredTotal > 0)
                         {
-                            // Uwzględnij tylko wymagane procedury (self i asysty)
                             if (procedure.RequiredCount > 0)
                             {
                                 completedTotal += Math.Min(progressData.Completed, procedure.RequiredCount);
@@ -292,7 +264,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
                         }
                     }
 
-                    // Przygotuj szczegóły do wyświetlenia
                     var details = new StringBuilder();
                     if (procedure.RequiredCount > 0)
                     {
@@ -322,27 +293,22 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
         private async Task LoadDutiesRequirements(int specializationId)
         {
-            // Pobierz wymogi dyżurów
             var dutyRequirements = _requirementsProvider.GetDutyRequirementsBySpecialization(specializationId);
-
-            // Pobierz statystyki dyżurów
             var dutyStats = await _dutyService.GetDutyStatisticsAsync();
-
-            // Filtry - dostępne typy dyżurów
             var dutyTypes = dutyRequirements.Select(d => d.Type).Distinct().ToList();
+
             foreach (var type in dutyTypes)
             {
                 FilterOptions.Add(type);
             }
 
-            // Zastosuj filtr jeśli wybrany
             var filteredDutyTypes = dutyTypes;
+
             if (!string.IsNullOrEmpty(SelectedFilter))
             {
                 filteredDutyTypes = dutyTypes.Where(t => t == SelectedFilter).ToList();
             }
 
-            // Dodaj wymagania do listy
             foreach (var dutyType in filteredDutyTypes)
             {
                 var requirements = dutyRequirements.Where(d => d.Type == dutyType).ToList();
@@ -352,15 +318,13 @@ namespace SledzSpecke.App.ViewModels.Specializations
                     double progress = 0;
                     string progressText = "0%";
 
-                    // Ustal postęp na podstawie faktycznych danych
                     if (dutyStats.DutiesByType.TryGetValue((DutyType)Enum.Parse(typeof(DutyType), dutyType), out int count))
                     {
-                        var monthlyRequired = requirement.MinimumDutiesPerMonth * 12 * requirement.Year; // Zakładane minimum na cały okres
+                        var monthlyRequired = requirement.MinimumDutiesPerMonth * 12 * requirement.Year;
                         progress = Math.Min(1.0, (double)count / monthlyRequired);
                         progressText = $"{progress:P0}";
                     }
 
-                    // Przygotuj szczegóły do wyświetlenia
                     var details = new StringBuilder();
                     details.AppendLine($"Rok: {requirement.Year}");
                     details.AppendLine($"Minimum miesięcznie: {requirement.MinimumDutiesPerMonth} dyżurów");
@@ -399,23 +363,16 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
         private async Task LoadCoursesRequirements(int specializationId)
         {
-            // Pobierz wymagane kursy
             var requiredCourses = await _courseService.GetRequiredCoursesAsync();
-
-            // Pobierz ukończone kursy
             var userCourses = await _courseService.GetUserCoursesAsync();
-
-            // Pobierz postęp wg roku
             var yearProgress = await _courseService.GetCourseProgressByYearAsync();
-
-            // Filtry - dostępne lata
             var years = requiredCourses.Select(c => c.RecommendedYear).Distinct().OrderBy(y => y).ToList();
+
             foreach (var year in years)
             {
                 FilterOptions.Add($"Rok {year}");
             }
 
-            // Zastosuj filtr jeśli wybrany
             var filteredYears = years;
             if (!string.IsNullOrEmpty(SelectedFilter) && SelectedFilter.StartsWith("Rok "))
             {
@@ -423,19 +380,16 @@ namespace SledzSpecke.App.ViewModels.Specializations
                 filteredYears = years.Where(y => y == selectedYear).ToList();
             }
 
-            // Dodaj wymagania do listy
             foreach (var year in filteredYears)
             {
                 var coursesForYear = requiredCourses.Where(c => c.RecommendedYear == year).ToList();
 
                 foreach (var course in coursesForYear)
                 {
-                    // Sprawdź czy kurs został ukończony
                     bool isCompleted = userCourses.Any(c => c.CourseDefinitionId == course.Id && c.IsCompleted);
                     double progress = isCompleted ? 1.0 : 0.0;
                     string progressText = isCompleted ? "100%" : "0%";
 
-                    // Przygotuj szczegóły kursu
                     var details = new StringBuilder();
                     details.AppendLine($"Rok: {course.RecommendedYear}");
                     details.AppendLine($"Czas trwania: {course.DurationInHours} godz. ({course.DurationInDays} dni)");
@@ -480,23 +434,16 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
         private async Task LoadInternshipsRequirements(int specializationId)
         {
-            // Pobierz wymagane staże
             var requiredInternships = await _internshipService.GetRequiredInternshipsAsync();
-
-            // Pobierz ukończone staże
             var userInternships = await _internshipService.GetUserInternshipsAsync();
-
-            // Pobierz postęp wg roku
             var yearProgress = await _internshipService.GetInternshipProgressByYearAsync();
-
-            // Filtry - dostępne lata
             var years = requiredInternships.Select(i => i.RecommendedYear).Distinct().OrderBy(y => y).ToList();
+
             foreach (var year in years)
             {
                 FilterOptions.Add($"Rok {year}");
             }
 
-            // Zastosuj filtr jeśli wybrany
             var filteredYears = years;
             if (!string.IsNullOrEmpty(SelectedFilter) && SelectedFilter.StartsWith("Rok "))
             {
@@ -504,20 +451,17 @@ namespace SledzSpecke.App.ViewModels.Specializations
                 filteredYears = years.Where(y => y == selectedYear).ToList();
             }
 
-            // Dodaj wymagania do listy
             foreach (var year in filteredYears)
             {
                 var internshipsForYear = requiredInternships.Where(i => i.RecommendedYear == year).ToList();
 
                 foreach (var internship in internshipsForYear)
                 {
-                    // Sprawdź czy staż został ukończony
                     bool isCompleted = userInternships.Any(i => i.InternshipDefinitionId == internship.Id && i.IsCompleted);
                     double progress = isCompleted ? 1.0 : 0.0;
                     string progressText = isCompleted ? "100%" : "0%";
-
-                    // Przygotuj szczegóły stażu
                     var details = new StringBuilder();
+
                     details.AppendLine($"Rok: {internship.RecommendedYear}");
                     details.AppendLine($"Czas trwania: {internship.DurationInWeeks} tygodni");
 
@@ -530,7 +474,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
                         details.AppendLine("Obowiązkowy: Nie");
                     }
 
-                    // Moduły stażu
                     try
                     {
                         var modules = await _internshipService.GetModulesForInternshipAsync(internship.Id);
@@ -545,7 +488,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
                     }
                     catch
                     {
-                        // Ignoruj błędy przy pobieraniu modułów
                     }
 
                     var completionRequirements = string.Empty;
@@ -571,9 +513,7 @@ namespace SledzSpecke.App.ViewModels.Specializations
                 }
             }
         }
-        #endregion
 
-        // Model do pokazywania szczegółowych wymagań
         public partial class RequirementViewModel : ObservableObject
         {
             public string Id { get; set; }

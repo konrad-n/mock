@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Platform;
-using SledzSpecke.App.ViewModels.Courses;
 using SledzSpecke.App.ViewModels.Dashboard;
 using SledzSpecke.App.ViewModels.Duties;
-using SledzSpecke.App.ViewModels.Internships;
 using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.ViewModels.Profile;
 using SledzSpecke.App.ViewModels.Statistics;
@@ -11,7 +9,6 @@ using SledzSpecke.App.Views.Dashboard;
 using SledzSpecke.App.Views.Duties;
 using SledzSpecke.App.Views.Procedures;
 using SledzSpecke.App.Views.Profile;
-using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Infrastructure.Database.Configuration;
 using SledzSpecke.Infrastructure.Database.Context;
@@ -151,12 +148,6 @@ public static class MauiProgram
         services.AddTransient<DutyAddViewModel>();
         services.AddTransient<DutyEditViewModel>();
 
-        // Courses
-        services.AddTransient<CoursesViewModel>();
-
-        // Internships
-        services.AddTransient<InternshipsViewModel>();
-
         // Profile
         services.AddTransient<ProfileViewModel>();
         services.AddTransient<ProfileEditViewModel>();
@@ -188,9 +179,6 @@ public static class MauiProgram
         services.AddTransient<ProfilePage>();
         services.AddTransient<ProfileEditPage>();
         services.AddTransient<SettingsPage>();
-
-        // Statistics
-        services.AddTransient<SpecializationStatsPage>();
 
         // Specialization
         services.AddTransient<SpecializationProgressPage>();
