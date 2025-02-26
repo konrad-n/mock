@@ -125,7 +125,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 Email = "test@example.com",
                 Name = "Test User",
                 PWZ = "123456",
-                CurrentSpecializationId = 5, // Hematology ID from the new data
+                CurrentSpecializationId = 1,
                 SpecializationStartDate = DateTime.Now.AddYears(-1),
                 ExpectedEndDate = DateTime.Now.AddYears(3) // Hematology is 3 years
             };

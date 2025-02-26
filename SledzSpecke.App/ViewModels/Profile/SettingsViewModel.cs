@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 
@@ -8,14 +7,11 @@ namespace SledzSpecke.App.ViewModels.Profile;
 public partial class SettingsViewModel : BaseViewModel
 {
     private readonly ISettingsService _settingsService;
-    private readonly IDataSyncService _syncService;
 
     public SettingsViewModel(
-        ISettingsService settingsService,
-        IDataSyncService syncService)
+        ISettingsService settingsService)
     {
         _settingsService = settingsService;
-        _syncService = syncService;
         Title = "Ustawienia";
     }
 
@@ -86,123 +82,6 @@ public partial class SettingsViewModel : BaseViewModel
 
             // Making this method properly async with a placeholder
             await Task.CompletedTask;
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task SyncNowAsync()
-    {
-        if (IsBusy) return;
-
-        try
-        {
-            IsBusy = true;
-            await _syncService.SyncAllDataAsync();
-            await Shell.Current.DisplayAlert(
-                "Sukces",
-                "Synchronizacja zakończona pomyślnie",
-                "OK");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlert(
-                "Błąd",
-                "Nie udało się zsynchronizować danych",
-                "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task BackupAsync()
-    {
-        if (IsBusy) return;
-
-        try
-        {
-            IsBusy = true;
-            await _syncService.CreateBackupAsync();
-            await Shell.Current.DisplayAlert(
-                "Sukces",
-                "Kopia zapasowa została utworzona",
-                "OK");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlert(
-                "Błąd",
-                "Nie udało się utworzyć kopii zapasowej",
-                "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task RestoreAsync()
-    {
-        var shouldRestore = await Shell.Current.DisplayAlert(
-            "Potwierdzenie",
-            "Przywrócenie kopii zapasowej nadpisze obecne dane. Czy chcesz kontynuować?",
-            "Przywróć",
-            "Anuluj");
-
-        if (!shouldRestore) return;
-
-        try
-        {
-            IsBusy = true;
-            await _syncService.RestoreFromBackupAsync();
-            await Shell.Current.DisplayAlert(
-                "Sukces",
-                "Dane zostały przywrócone z kopii zapasowej",
-                "OK");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlert(
-                "Błąd",
-                "Nie udało się przywrócić danych",
-                "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task ClearDataAsync()
-    {
-        var shouldClear = await Shell.Current.DisplayAlert(
-            "Potwierdzenie",
-            "Czy na pewno chcesz wyczyścić wszystkie dane? Tej operacji nie można cofnąć.",
-            "Wyczyść",
-            "Anuluj");
-
-        if (!shouldClear) return;
-
-        try
-        {
-            IsBusy = true;
-            await _syncService.ClearAllDataAsync();
-            await Shell.Current.GoToAsync("//login");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlert(
-                "Błąd",
-                "Nie udało się wyczyścić danych",
-                "OK");
         }
         finally
         {

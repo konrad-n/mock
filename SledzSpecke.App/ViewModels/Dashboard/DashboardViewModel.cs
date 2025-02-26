@@ -163,7 +163,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         [RelayCommand]
         private async Task NavigateToSpecializationProgressAsync()
         {
-            await Shell.Current.GoToAsync("specialization/progress");
+            await Shell.Current.GoToAsync("progress");
         }
     }
 }

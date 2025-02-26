@@ -34,30 +34,6 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Synchronizacja -->
-            <Border Style="{StaticResource CardBorder}">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Synchronizacja"
-                           Style="{StaticResource SubHeaderLabel}"/>
-
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="Synchronizuj w tle"
-                               Style="{StaticResource BodyLabel}"/>
-                        <Switch IsToggled="{Binding BackgroundSync}"/>
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="Tylko przez WiFi"
-                               Style="{StaticResource BodyLabel}"/>
-                        <Switch IsToggled="{Binding WifiOnlySync}"/>
-                    </VerticalStackLayout>
-
-                    <Button Text="Synchronizuj teraz"
-                            Command="{Binding SyncNowCommand}"
-                            Style="{StaticResource PrimaryButton}"/>
-                </VerticalStackLayout>
-            </Border>
-
             <!-- Dane aplikacji -->
             <Border Style="{StaticResource CardBorder}">
                 <VerticalStackLayout Spacing="15">
