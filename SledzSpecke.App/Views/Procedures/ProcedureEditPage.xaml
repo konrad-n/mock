@@ -5,26 +5,20 @@
              x:Class="SledzSpecke.App.Views.Procedures.ProcedureEditPage"
              x:DataType="viewmodels:ProcedureEditViewModel"
              Title="Edytuj procedurę">
-
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Nazwa procedury -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Nazwa procedury *"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <Entry Text="{Binding Name}"
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Data wykonania -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Data wykonania *"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <DatePicker Date="{Binding ExecutionDate}"
                            Format="d"/>
             </VerticalStackLayout>
-
-            <!-- Typ wykonania -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Typ wykonania *"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -35,16 +29,12 @@
                            VerticalOptions="Center"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
-
-            <!-- Lokalizacja -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Miejsce wykonania *"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <Entry Text="{Binding Location}"
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Kategoria procedury -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Kategoria procedury"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -53,8 +43,6 @@
                         Title="Wybierz kategorię"
                         Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Etap specjalizacji -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Etap specjalizacji"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -63,8 +51,6 @@
                         Title="Wybierz etap"
                         Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Opiekun -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Opiekun"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -72,8 +58,6 @@
                        Placeholder="Imię i nazwisko opiekuna (opcjonalnie)"
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Notatki -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Notatki"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -81,20 +65,16 @@
                         HeightRequest="100"
                         Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Przyciski -->
             <VerticalStackLayout Spacing="10" 
                                Margin="0,20,0,0">
                 <Button Text="Zapisz zmiany"
                         Command="{Binding SaveCommand}"
                         IsEnabled="{Binding CanSave}"
                         Style="{StaticResource PrimaryButton}"/>
-
                 <Button Text="Usuń procedurę"
                         Command="{Binding DeleteCommand}"
                         Style="{StaticResource SecondaryButton}"
                         BackgroundColor="{StaticResource Danger}"/>
-
                 <Button Text="Anuluj"
                         Command="{Binding CancelCommand}"
                         Style="{StaticResource SecondaryButton}"/>

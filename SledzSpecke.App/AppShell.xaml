@@ -9,26 +9,22 @@
     xmlns:duties="clr-namespace:SledzSpecke.App.Views.Duties"
     xmlns:profile="clr-namespace:SledzSpecke.App.Views.Profile"
     Shell.FlyoutBehavior="Disabled">
-
     <TabBar>
         <Tab Title="Panel główny" Icon="dashboard.png">
             <ShellContent 
                 ContentTemplate="{DataTemplate dashboard:DashboardPage}"
                 Route="Dashboard" />
         </Tab>
-
         <Tab Title="Procedury" Icon="procedure.png">
             <ShellContent 
                 ContentTemplate="{DataTemplate procedures:ProceduresPage}"
                 Route="Procedures" />
         </Tab>
-
         <Tab Title="Dyżury" Icon="duty.png">
             <ShellContent 
                 ContentTemplate="{DataTemplate duties:DutiesPage}"
                 Route="Duties" />
         </Tab>
-
         <Tab Title="Profil" Icon="profile.png">
             <ShellContent 
                 ContentTemplate="{DataTemplate profile:ProfilePage}"

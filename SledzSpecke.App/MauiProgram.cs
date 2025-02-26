@@ -39,19 +39,11 @@ public static class MauiProgram
                     fonts.AddFont("FluentUI.ttf", "FluentUI");
                 });
 
-            // Register platform services
             builder.Services.AddSingleton<IFileSystemService, FileSystemService>();
 
-            // Register databases services
             RegisterDatabaseServices(builder.Services);
-
-            // Register services
             RegisterServices(builder.Services);
-
-            // Register ViewModels
             RegisterViewModels(builder.Services);
-
-            // Register Pages
             RegisterPages(builder.Services);
 
 #if DEBUG
@@ -63,11 +55,9 @@ public static class MauiProgram
         }
         catch (Exception ex)
         {
-            // Log the exception
             Console.WriteLine($"ERROR IN STARTUP: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
 
-            // Return a minimal app that can display an error
             var builder = MauiApp.CreateBuilder();
             builder.UseMauiApp<ErrorApp>();
             return builder.Build();
@@ -76,12 +66,8 @@ public static class MauiProgram
 
     private static void RegisterDatabaseServices(IServiceCollection services)
     {
-        System.Diagnostics.Debug.WriteLine("Starting RegisterDatabaseServices");
-
-        // First register IFileSystemService before anything else
         services.AddSingleton<IFileSystemService, FileSystemService>();
 
-        // Store the database path in a variable for reuse
         var dbPath = string.Empty;
         services.AddSingleton(provider => {
             if (string.IsNullOrEmpty(dbPath))
@@ -91,27 +77,17 @@ public static class MauiProgram
             }
             return dbPath;
         });
-
-        // Create a factory function for getting the connection
         services.AddSingleton<Func<SQLiteAsyncConnection>>(provider => {
             var path = provider.GetRequiredService<string>();
             return () => new SQLiteAsyncConnection(path);
         });
-
-        // Register MigrationRunner with the connection factory
         services.AddSingleton<IMigrationRunner, MigrationRunner>();
-
-        // Now register the ApplicationDbContext
         services.AddSingleton<IApplicationDbContext>(provider => {
             var dbPath = provider.GetRequiredService<string>();
             var migrationRunner = provider.GetRequiredService<IMigrationRunner>();
             return new ApplicationDbContext(dbPath, migrationRunner);
         });
-
-        // Add DatabaseInitializer
         services.AddSingleton<DatabaseInitializer>();
-
-        // Repositories
         services.AddSingleton<IUserRepository, UserRepository>();
         services.AddSingleton<ISpecializationRepository, SpecializationRepository>();
         services.AddSingleton<IProcedureRepository, ProcedureRepository>();
@@ -135,52 +111,32 @@ public static class MauiProgram
 
     private static void RegisterViewModels(IServiceCollection services)
     {
-        // Dashboard
         services.AddTransient<DashboardViewModel>();
-
-        // Procedures
         services.AddTransient<ProceduresViewModel>();
         services.AddTransient<ProcedureAddViewModel>();
         services.AddTransient<ProcedureEditViewModel>();
-
-        // Duties
         services.AddTransient<DutiesViewModel>();
         services.AddTransient<DutyAddViewModel>();
         services.AddTransient<DutyEditViewModel>();
-
-        // Profile
         services.AddTransient<ProfileViewModel>();
         services.AddTransient<ProfileEditViewModel>();
         services.AddTransient<SettingsViewModel>();
-
-        // Statistics
         services.AddTransient<SpecializationStatsViewModel>();
-
-        // Specialization
         services.AddTransient<SpecializationProgressViewModel>();
     }
 
     private static void RegisterPages(IServiceCollection services)
     {
-        // Dashboard
         services.AddTransient<DashboardPage>();
-
-        // Procedures
         services.AddTransient<ProceduresPage>();
         services.AddTransient<ProcedureAddPage>();
         services.AddTransient<ProcedureEditPage>();
-
-        // Duties
         services.AddTransient<DutiesPage>();
         services.AddTransient<DutyAddPage>();
         services.AddTransient<DutyEditPage>();
-
-        // Profile
         services.AddTransient<ProfilePage>();
         services.AddTransient<ProfileEditPage>();
         services.AddTransient<SettingsPage>();
-
-        // Specialization
         services.AddTransient<SpecializationProgressPage>();
     }
 }

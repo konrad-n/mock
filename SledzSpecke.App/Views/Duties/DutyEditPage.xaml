@@ -5,18 +5,14 @@
              x:Class="SledzSpecke.App.Views.Duties.DutyEditPage"
              x:DataType="viewmodels:DutyEditViewModel"
              Title="Edytuj dyżur">
-
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Miejsce dyżuru -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Miejsce dyżuru *"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <Entry Text="{Binding Location}"
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Data rozpoczęcia -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Data rozpoczęcia *"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -26,8 +22,6 @@
                     <TimePicker Time="{Binding StartTime}"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
-
-            <!-- Data zakończenia -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Data zakończenia *"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -37,16 +31,12 @@
                     <TimePicker Time="{Binding EndTime}"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
-
-            <!-- Typ dyżuru -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Typ dyżuru *"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <Picker ItemsSource="{Binding DutyTypes}"
                         SelectedItem="{Binding SelectedDutyType}"/>
             </VerticalStackLayout>
-
-            <!-- Notatki -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Notatki"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -54,20 +44,16 @@
                         HeightRequest="100"
                         Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Przyciski -->
             <VerticalStackLayout Spacing="10" 
                                Margin="0,20,0,0">
                 <Button Text="Zapisz zmiany"
                         Command="{Binding SaveCommand}"
                         IsEnabled="{Binding CanSave}"
                         Style="{StaticResource PrimaryButton}"/>
-
                 <Button Text="Usuń dyżur"
                         Command="{Binding DeleteCommand}"
                         Style="{StaticResource SecondaryButton}"
                         BackgroundColor="{StaticResource Danger}"/>
-
                 <Button Text="Anuluj"
                         Command="{Binding CancelCommand}"
                         Style="{StaticResource SecondaryButton}"/>

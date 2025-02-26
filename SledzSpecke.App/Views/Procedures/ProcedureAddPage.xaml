@@ -5,10 +5,8 @@
              x:Class="SledzSpecke.App.Views.Procedures.ProcedureAddPage"
              x:DataType="viewmodels:ProcedureAddViewModel"
              Title="Dodaj procedurę">
-
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Wybór z wymaganych procedur -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Wybierz z listy wymaganych procedur"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -17,8 +15,6 @@
                         Title="Wybierz procedurę"
                         Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Nazwa procedury -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Nazwa procedury *"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -26,16 +22,12 @@
                        Placeholder="Np. Badanie psychiatryczne"
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
-
-            <!-- Data wykonania -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Data wykonania *"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <DatePicker Date="{Binding ExecutionDate}"
                            Format="d"/>
             </VerticalStackLayout>
-
-            <!-- Typ wykonania -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Typ wykonania *"
                        Style="{StaticResource SubHeaderLabel}"/>
@@ -46,11 +38,8 @@
                            VerticalOptions="Center"/>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
-
             <!-- Pozostałe pola formularza -->
             <!-- ... -->
-
-            <!-- Przyciski -->
             <VerticalStackLayout Spacing="10" 
                                Margin="0,20,0,0">
                 <Button Text="Zapisz"

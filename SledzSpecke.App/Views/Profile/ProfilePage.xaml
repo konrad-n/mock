@@ -5,10 +5,8 @@
              x:Class="SledzSpecke.App.Views.Profile.ProfilePage"
              x:DataType="viewmodels:ProfileViewModel"
              Title="Profil">
-
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Dane użytkownika -->
             <Border Style="{StaticResource CardBorder}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="{Binding UserName}"
@@ -19,8 +17,6 @@
                            Style="{StaticResource SubHeaderLabel}"/>
                 </VerticalStackLayout>
             </Border>
-
-            <!-- Postęp specjalizacji -->
             <Border Style="{StaticResource CardBorder}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Postęp specjalizacji"
@@ -35,21 +31,16 @@
                            HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Border>
-
-            <!-- Przyciski akcji -->
             <VerticalStackLayout Spacing="10">
                 <Button Text="Edytuj profil"
                         Command="{Binding EditProfileCommand}"
                         Style="{StaticResource PrimaryButton}"/>
-
                 <Button Text="Ustawienia"
                         Command="{Binding OpenSettingsCommand}"
                         Style="{StaticResource SecondaryButton}"/>
-
                 <Button Text="Eksportuj dane"
                         Command="{Binding ExportDataCommand}"
                         Style="{StaticResource SecondaryButton}"/>
-
                 <Button Text="Wyloguj"
                         Command="{Binding LogoutCommand}"
                         Style="{StaticResource SecondaryButton}"

@@ -5,17 +5,14 @@
              x:Class="SledzSpecke.App.Views.Specialization.SpecializationProgressPage"
              x:DataType="viewmodels:SpecializationProgressViewModel"
              Title="{Binding Title}">
-
     <RefreshView Command="{Binding RefreshCommand}"
                  IsRefreshing="{Binding IsRefreshing}">
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="20">
-                <!-- Nagłówek specjalizacji -->
                 <Border Style="{StaticResource CardBorder}">
                     <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
                         <Label Text="{Binding SpecializationName}" 
-                               Style="{StaticResource HeaderLabel}"/>
-                        
+                               Style="{StaticResource HeaderLabel}"/>                        
                         <StackLayout Grid.Row="1" Orientation="Horizontal">
                             <Label Text="Całkowity postęp: " 
                                    Style="{StaticResource BodyLabel}"/>
@@ -23,21 +20,16 @@
                                    Style="{StaticResource BodyLabel}"
                                    FontAttributes="Bold"
                                    TextColor="{StaticResource Primary}"/>
-                        </StackLayout>
-                        
+                        </StackLayout>                        
                         <ProgressBar Grid.Row="2"
                                      Progress="{Binding TotalProgress}"
                                      Style="{StaticResource ProgressBar}"/>
                     </Grid>
                 </Border>
-                
-                <!-- Skrócony widok sekcji -->
                 <Border Style="{StaticResource CardBorder}" IsVisible="{Binding IsDetailedViewVisible, Converter={StaticResource InvertedBoolConverter}}">
                     <VerticalStackLayout Spacing="20">
                         <Label Text="Podsumowanie wymagań" 
                                Style="{StaticResource SubHeaderLabel}"/>
-                        
-                        <!-- Procedury -->
                         <Border Style="{StaticResource CardBorder}">
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="10">
                                 <Label Grid.Row="0" Grid.Column="0" 
@@ -51,8 +43,6 @@
                                              Style="{StaticResource ProgressBar}"/>
                             </Grid>
                         </Border>
-                        
-                        <!-- Dyżury -->
                         <Border Style="{StaticResource CardBorder}">
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="10">
                                 <Label Grid.Row="0" Grid.Column="0" 
@@ -66,8 +56,6 @@
                                              Style="{StaticResource ProgressBar}"/>
                             </Grid>
                         </Border>
-                        
-                        <!-- Kursy -->
                         <Border Style="{StaticResource CardBorder}">
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="10">
                                 <Label Grid.Row="0" Grid.Column="0" 
@@ -81,8 +69,6 @@
                                              Style="{StaticResource ProgressBar}"/>
                             </Grid>
                         </Border>
-                        
-                        <!-- Staże -->
                         <Border Style="{StaticResource CardBorder}">
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="10">
                                 <Label Grid.Row="0" Grid.Column="0" 
@@ -98,26 +84,20 @@
                         </Border>
                     </VerticalStackLayout>
                 </Border>
-
-                <!-- Przyciski przełączania widoku -->
 				<Grid ColumnDefinitions="*" ColumnSpacing="10">
 					<Button Grid.Column="0" 
 							Text="Widok szczegółowy" 
 							Command="{Binding ShowDetailedViewCommand}"
 							Style="{StaticResource PrimaryButton}"
-							IsVisible="{Binding IsDetailedViewVisible, Converter={StaticResource InvertedBoolConverter}}"/>
-					
+							IsVisible="{Binding IsDetailedViewVisible, Converter={StaticResource InvertedBoolConverter}}"/>					
 					<Button Grid.Column="0" 
 							Text="Widok ogólny" 
 							Command="{Binding ShowSummaryViewCommand}"
 							Style="{StaticResource PrimaryButton}"
 							IsVisible="{Binding IsDetailedViewVisible}"/>
 				</Grid>
-                
-                <!-- Szczegółowy widok sekcji -->
                 <Border Style="{StaticResource CardBorder}" IsVisible="{Binding IsDetailedViewVisible}">
                     <VerticalStackLayout Spacing="20">
-                        <!-- Zakładki do przełączania kategorii -->
                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
                             <Button Text="Procedury" 
                                     Command="{Binding SwitchTabCommand}" 
@@ -143,8 +123,6 @@
                                     Style="{StaticResource SecondaryButton}"
                                     BackgroundColor="{Binding IsInternshipsTabActive, Converter={StaticResource BoolToColorConverter}}"/>
                         </HorizontalStackLayout>
-                        
-                        <!-- Filtrowanie -->
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding HasFilters}">
                             <Picker Grid.Column="0" 
                                     ItemsSource="{Binding FilterOptions}" 
@@ -156,8 +134,6 @@
                                     Command="{Binding ClearFilterCommand}"
                                     Style="{StaticResource SecondaryButton}"/>
                         </Grid>
-                        
-                        <!-- Lista szczegółowych wymagań -->
                         <CollectionView ItemsSource="{Binding DetailedRequirements}"
                                        SelectionMode="None">
                             <CollectionView.EmptyView>
@@ -165,13 +141,11 @@
                                     <Label Text="Brak danych dla wybranej kategorii"
                                            Style="{StaticResource SubHeaderLabel}"/>
                                 </VerticalStackLayout>
-                            </CollectionView.EmptyView>
-                            
+                            </CollectionView.EmptyView>                            
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
                                     <Border Style="{StaticResource CardBorder}" Margin="0,0,0,10">
                                         <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="5">
-                                            <!-- Nagłówek z nazwą i postępem -->
                                             <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                                                 <Label Grid.Column="0" 
                                                       Text="{Binding Name}" 
@@ -180,13 +154,9 @@
                                                       Text="{Binding ProgressText}" 
                                                       Style="{StaticResource ValueLabel}"/>
                                             </Grid>
-                                            
-                                            <!-- Pasek postępu -->
                                             <ProgressBar Grid.Row="1" 
                                                         Progress="{Binding Progress}"
                                                         Style="{StaticResource ProgressBar}"/>
-                                            
-                                            <!-- Szczegóły wymagań -->
                                             <VerticalStackLayout Grid.Row="2" Spacing="5" IsVisible="{Binding HasDetails}">
                                                 <Label Text="{Binding Description}" 
                                                       Style="{StaticResource BodyLabel}"
@@ -200,8 +170,6 @@
                                                       Style="{StaticResource BodyLabel}"
                                                       IsVisible="{Binding CompletionRequirements, Converter={StaticResource StringNotEmptyConverter}}"/>
                                             </VerticalStackLayout>
-                                            
-                                            <!-- Przycisk rozwijania szczegółów -->
                                             <Button Grid.Row="3" 
                                                    Text="{Binding ToggleDetailsText}" 
                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:SpecializationProgressViewModel}}, Path=ToggleDetailsCommand}"

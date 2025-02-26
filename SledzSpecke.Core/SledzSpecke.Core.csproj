@@ -10,21 +10,26 @@
     <Compile Remove="Helpers\**" />
     <Compile Remove="Interfaces\Factories\**" />
     <Compile Remove="Interfaces\Repositories\**" />
+    <Compile Remove="Models\Requests\**" />
+    <Compile Remove="Services\Authentication\**" />
+    <Compile Remove="Services\Base\**" />
+    <Compile Remove="Services\DocumentManagement\**" />
     <EmbeddedResource Remove="Constants\**" />
     <EmbeddedResource Remove="Helpers\**" />
     <EmbeddedResource Remove="Interfaces\Factories\**" />
     <EmbeddedResource Remove="Interfaces\Repositories\**" />
+    <EmbeddedResource Remove="Models\Requests\**" />
+    <EmbeddedResource Remove="Services\Authentication\**" />
+    <EmbeddedResource Remove="Services\Base\**" />
+    <EmbeddedResource Remove="Services\DocumentManagement\**" />
     <None Remove="Constants\**" />
     <None Remove="Helpers\**" />
     <None Remove="Interfaces\Factories\**" />
     <None Remove="Interfaces\Repositories\**" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Models\Requests\" />
-    <Folder Include="Services\Authentication\" />
-    <Folder Include="Services\Base\" />
-    <Folder Include="Services\DocumentManagement\" />
+    <None Remove="Models\Requests\**" />
+    <None Remove="Services\Authentication\**" />
+    <None Remove="Services\Base\**" />
+    <None Remove="Services\DocumentManagement\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +38,10 @@
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

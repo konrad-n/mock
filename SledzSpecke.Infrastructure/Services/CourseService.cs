@@ -5,7 +5,6 @@ using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Services
@@ -26,7 +25,6 @@ namespace SledzSpecke.Infrastructure.Services
             _logger = logger;
         }
 
-        // Implementacja istniejących metod
         public async Task<List<Course>> GetUserCoursesAsync()
         {
             try
@@ -93,14 +91,10 @@ namespace SledzSpecke.Infrastructure.Services
                 course.CompletionDate = DateTime.Now;
                 course.ModifiedAt = DateTime.UtcNow;
                 
-                // Dodanie certyfikatu
                 if (certificate != null)
                 {
                     certificate.CourseId = courseId;
                     certificate.CreatedAt = DateTime.UtcNow;
-                    
-                    // Tutaj można dodać kod do zapisu pliku certyfikatu
-                    // i aktualizacji w bazie danych
                 }
 
                 await _repository.UpdateAsync(course);
@@ -113,7 +107,6 @@ namespace SledzSpecke.Infrastructure.Services
             }
         }
 
-        // Nowe metody
         public async Task<List<CourseDefinition>> GetRequiredCoursesAsync()
         {
             try
