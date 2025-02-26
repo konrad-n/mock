@@ -1,4 +1,5 @@
-﻿using SledzSpecke.Infrastructure.Database.Context;
+﻿using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Infrastructure.Database.Context;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Linq;
@@ -11,23 +12,15 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
         private readonly IApplicationDbContext _context;
         private readonly ISpecializationRepository _specializationRepo;
         private readonly IProcedureRepository _procedureRepo;
-        private readonly ICourseRepository _courseRepo;
-        private readonly IInternshipRepository _internshipRepo;
-        private readonly IDutyRepository _dutyRepo;
 
-        public DatabaseInitializer(IApplicationDbContext context,
-                                 ISpecializationRepository specializationRepo,
-                                 IProcedureRepository procedureRepo,
-                                 ICourseRepository courseRepo,
-                                 IInternshipRepository internshipRepo,
-                                 IDutyRepository dutyRepo)
+        public DatabaseInitializer(
+            IApplicationDbContext context,
+            ISpecializationRepository specializationRepo,
+            IProcedureRepository procedureRepo)
         {
             _context = context;
             _specializationRepo = specializationRepo;
             _procedureRepo = procedureRepo;
-            _courseRepo = courseRepo;
-            _internshipRepo = internshipRepo;
-            _dutyRepo = dutyRepo;
         }
 
         public async Task InitializeAsync()
@@ -42,7 +35,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             catch (Exception ex)
             {
                 Console.WriteLine($"Database initialization failed: {ex.Message}");
-                // Log but don't throw to allow app to continue
                 System.Diagnostics.Debug.WriteLine($"Warning: Database initialization failed: {ex.Message}. App will continue with limited functionality.");
             }
         }
@@ -53,71 +45,72 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             var hasData = await _specializationRepo.GetAllAsync();
             if (hasData.Any()) return;
 
-            // Initialize basic data
-            await SeedSpecializationsAsync();
-            await SeedProcedureRequirementsAsync();
-            await SeedCourseDefinitionsAsync();
-            await SeedInternshipDefinitionsAsync();
-            await SeedInternshipModulesAsync();
-            await SeedDutyRequirementsAsync();
-        }
-
-        private async Task SeedSpecializationsAsync()
-        {
-            var specializations = DataSeeder.GetBasicSpecializations();
-            foreach (var spec in specializations)
+            // Seed specializations
+            var psychiatry = new Specialization
             {
-                await _specializationRepo.AddAsync(spec);
-            }
-        }
+                Name = "Psychiatria",
+                DurationInWeeks = 312,
+                ProgramVersion = "2023",
+                ApprovalDate = new DateTime(2023, 1, 1),
+                MinimumDutyHours = 1200,
+                Requirements = "Program specjalizacji w dziedzinie psychiatrii",
+                Description = "Celem szkolenia specjalizacyjnego jest uzyskanie szczególnych kwalifikacji w dziedzinie psychiatrii"
+            };
 
-        private async Task SeedProcedureRequirementsAsync()
-        {
-            var procedureRequirements = DataSeeder.GetBasicProcedureRequirements();
-            foreach (var procReq in procedureRequirements)
-            {
-                // Use appropriate repository method for ProcedureRequirement
-                await _context.GetConnection().InsertAsync(procReq);
-            }
-        }
+            await _specializationRepo.AddAsync(psychiatry);
 
-        private async Task SeedCourseDefinitionsAsync()
-        {
-            var courses = DataSeeder.GetBasicCourses();
-            foreach (var course in courses)
+            // Seed procedure requirements
+            var procedures = new[]
             {
-                // Use appropriate repository method for CourseDefinition
-                await _context.GetConnection().InsertAsync(course);
-            }
-        }
+                new ProcedureRequirement
+                {
+                    SpecializationId = 1, // Psychiatry ID
+                    Name = "Badanie psychiatryczne",
+                    Description = "Przeprowadzenie badania psychiatrycznego",
+                    RequiredCount = 20,
+                    AssistanceCount = 0,
+                    Category = "Podstawowe procedury",
+                    SupervisionRequired = true
+                },
+                new ProcedureRequirement
+                {
+                    SpecializationId = 1,
+                    Name = "Ocena stanu psychicznego",
+                    Description = "Ocena stanu psychicznego za pomocą skal klinicznych",
+                    RequiredCount = 20,
+                    AssistanceCount = 0,
+                    Category = "Diagnostyka",
+                    SupervisionRequired = true
+                },
+                new ProcedureRequirement
+                {
+                    SpecializationId = 1,
+                    Name = "Zabiegi elektrowstrząsowe",
+                    Description = "Kwalifikacja i przygotowanie pacjentów oraz przeprowadzenie zabiegów",
+                    RequiredCount = 5,
+                    AssistanceCount = 0,
+                    Category = "Zabiegi",
+                    SupervisionRequired = true
+                }
+            };
 
-        private async Task SeedInternshipDefinitionsAsync()
-        {
-            var internships = DataSeeder.GetBasicInternships();
-            foreach (var internship in internships)
+            foreach (var proc in procedures)
             {
-                // Use appropriate repository method for InternshipDefinition
-                await _context.GetConnection().InsertAsync(internship);
+                await _context.GetConnection().InsertAsync(proc);
             }
-        }
 
-        private async Task SeedInternshipModulesAsync()
-        {
-            var modules = DataSeeder.GetInternshipModules();
-            foreach (var module in modules)
+            // Create a test user
+            var user = new User
             {
-                await _context.GetConnection().InsertAsync(module);
-            }
-        }
+                Email = "test@example.com",
+                Name = "Test User",
+                PWZ = "123456",
+                CurrentSpecializationId = 1,
+                SpecializationStartDate = DateTime.Now.AddYears(-1),
+                ExpectedEndDate = DateTime.Now.AddYears(5)
+            };
 
-        private async Task SeedDutyRequirementsAsync()
-        {
-            var dutyRequirements = DataSeeder.GetDutyRequirements();
-            foreach (var dutyReq in dutyRequirements)
-            {
-                // Use appropriate repository method for DutyRequirement
-                await _context.GetConnection().InsertAsync(dutyReq);
-            }
+            await _context.GetConnection().InsertAsync(user);
         }
     }
 }

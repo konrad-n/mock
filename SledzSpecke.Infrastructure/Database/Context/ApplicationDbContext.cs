@@ -21,7 +21,7 @@ namespace SledzSpecke.Infrastructure.Database.Context
         {
             if (!_isInitialized)
             {
-                // Tworzenie tabel
+                // Create tables
                 await _database.CreateTableAsync<User>();
                 await _database.CreateTableAsync<Specialization>();
                 await _database.CreateTableAsync<ProcedureDefinition>();
@@ -51,13 +51,13 @@ namespace SledzSpecke.Infrastructure.Database.Context
 
         private async Task InitializeTablesAsync()
         {
-            // Tworzenie tabel w odpowiedniej kolejności
+            // Create tables in the correct order
             var tableTypes = new[]
             {
                 typeof(User),
                 typeof(Specialization),
                 typeof(ProcedureDefinition),
-                // pozostałe typy
+                // other types
             };
 
             foreach (var type in tableTypes)
@@ -68,7 +68,7 @@ namespace SledzSpecke.Infrastructure.Database.Context
 
         private async Task UpdateDatabaseSchemaAsync()
         {
-            // Implementacja aktualizacji schematu bazy danych
+            // Run database schema migrations
             await _migrationRunner.RunMigrationsAsync();
         }
     }

@@ -14,6 +14,12 @@ using SledzSpecke.App.Views.Procedures;
 using SledzSpecke.App.Views.Profile;
 using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.Core.Interfaces.Services;
+using SledzSpecke.Infrastructure.Database.Configuration;
+using SledzSpecke.Infrastructure.Database.Context;
+using SledzSpecke.Infrastructure.Database.Migrations;
+using SledzSpecke.Infrastructure.Database.Repositories;
+using SledzSpecke.Infrastructure.Database.Initialization;
+using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.App;
 
@@ -37,15 +43,11 @@ public static class MauiProgram
             builder.Services.AddSingleton<IPermissionService, PermissionService>();
             builder.Services.AddSingleton<IFileSystemService, FileSystemService>();
 
-            // Register stub services
-            builder.Services.AddSingleton<IProcedureService, StubProcedureService>();
-            builder.Services.AddSingleton<ICourseService, StubCourseService>();
-            builder.Services.AddSingleton<IInternshipService, StubInternshipService>();
-            builder.Services.AddSingleton<IDutyService, StubDutyService>();
-            builder.Services.AddSingleton<IUserService, StubUserService>();
-            builder.Services.AddSingleton<ISpecializationService, StubSpecializationService>();
-            builder.Services.AddSingleton<ISettingsService, StubSettingsService>();
-            builder.Services.AddSingleton<IDataSyncService, StubDataSyncService>();
+            // Register databases services
+            RegisterDatabaseServices(builder.Services);
+
+            // Use stub services for now until database is fully set up
+            RegisterStubServices(builder.Services);
 
             // Register ViewModels
             RegisterViewModels(builder.Services);
@@ -70,6 +72,47 @@ public static class MauiProgram
             builder.UseMauiApp<ErrorApp>();
             return builder.Build();
         }
+    }
+
+    private static void RegisterDatabaseServices(IServiceCollection services)
+    {
+        // Migrations and database context
+        services.AddSingleton<IMigrationRunner, MigrationRunner>();
+        services.AddSingleton<IApplicationDbContext>(provider =>
+        {
+            var fileSystemService = provider.GetRequiredService<IFileSystemService>();
+            var migrationRunner = provider.GetRequiredService<IMigrationRunner>();
+
+            var dbPath = DatabaseConfig.GetDatabasePath(fileSystemService.GetAppDataDirectory());
+            return new ApplicationDbContext(dbPath, migrationRunner);
+        });
+
+        // Add DatabaseInitializer
+        services.AddSingleton<DatabaseInitializer>();
+
+        // Repositories
+        services.AddSingleton<IUserRepository, UserRepository>();
+        services.AddSingleton<ISpecializationRepository, SpecializationRepository>();
+        services.AddSingleton<IProcedureRepository, ProcedureRepository>();
+        services.AddSingleton<IDutyRepository, DutyRepository>();
+        services.AddSingleton<ICourseRepository, CourseRepository>();
+        services.AddSingleton<IInternshipRepository, InternshipRepository>();
+        services.AddSingleton<INotificationRepository, NotificationRepository>();
+    }
+
+    private static void RegisterStubServices(IServiceCollection services)
+    {
+        // Replace the ProcedureService stub with real implementation
+        services.AddSingleton<IProcedureService, ProcedureService>();
+
+        // Keep using stub services for the rest until we're ready to implement them
+        services.AddSingleton<ICourseService, StubCourseService>();
+        services.AddSingleton<IInternshipService, StubInternshipService>();
+        services.AddSingleton<IDutyService, StubDutyService>();
+        services.AddSingleton<IUserService, StubUserService>();
+        services.AddSingleton<ISpecializationService, StubSpecializationService>();
+        services.AddSingleton<ISettingsService, StubSettingsService>();
+        services.AddSingleton<IDataSyncService, StubDataSyncService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
