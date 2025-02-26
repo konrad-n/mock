@@ -14,18 +14,33 @@ public partial class SplashPage : ContentPage
         try
         {
             await InitializeAppAsync();
-            await Shell.Current.GoToAsync("//MainPage");
+
+            // Change this to navigate to a route that exists in your AppShell
+            await Shell.Current.GoToAsync("//dashboard");
+            // If that doesn't work, try:
+            // await Shell.Current.GoToAsync("//Dashboard");
+            // Or check AppShell.xaml.cs for exact route names
         }
         catch (Exception ex)
         {
-            // Log the exception or handle it appropriately
-            System.Diagnostics.Debug.WriteLine($"Initialization error: {ex.Message}");
-            await DisplayAlert("Błąd", "Nie udało się zainicjalizować aplikacji", "OK");
+            Console.WriteLine($"Navigation error: {ex.Message}");
+            await DisplayAlert("Error", "Failed to initialize the app", "OK");
         }
     }
 
     private async Task InitializeAppAsync()
     {
-        await Task.Delay(2000); // Symulacja ładowania
+        try
+        {
+            // Your initialization code here
+            await Task.Delay(2000);
+
+            // Try navigating to the dashboard instead of MainPage
+            await Shell.Current.GoToAsync("//dashboard");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Initialization failed: {ex.Message}", "OK");
+        }
     }
 }

@@ -14,7 +14,6 @@ using SledzSpecke.Infrastructure.Database.Migrations;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.App.Services.Platform;
 using SledzSpecke.App.Services.Export;
-using SledzSpecke.Core.Services.SMK;
 using SledzSpecke.App.Views.MultipleSpecialization;
 using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.App.ViewModels.Statistics;
@@ -59,12 +58,12 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
 
         // SMK Service
-        builder.Services.AddSingleton<ISMKIntegrationService, SMKIntegrationService>();
+        /* builder.Services.AddSingleton<ISMKIntegrationService, SMKIntegrationService>();
         builder.Services.AddSingleton<SMKConfiguration>(provider => new SMKConfiguration
         {
             BaseUrl = "https://api.smk.gov.pl",
             ApiKey = "demo_key"
-        });
+        }); */
 
         // Calendar integration
         builder.Services.AddSingleton<CalendarIntegration>();
@@ -140,6 +139,25 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        try
+        {
+            return builder.Build();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            System.Diagnostics.Debug.WriteLine($"Exception during builder.Build(): {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+
+            // If there's an inner exception, log that too
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                System.Diagnostics.Debug.WriteLine($"Inner stack trace: {ex.InnerException.StackTrace}");
+            }
+
+            // Rethrow the exception or handle it as needed
+            throw;
+        }
     }
 }

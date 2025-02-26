@@ -11,6 +11,8 @@ namespace SledzSpecke.App
         {
             InitializeComponent();
 
+            Routing.RegisterRoute("MainPage", typeof(MainPage));
+
             // Rejestracja tras dla procedur
             Routing.RegisterRoute("procedure/add", typeof(ProcedureAddPage));
             Routing.RegisterRoute("procedure/edit", typeof(ProcedureEditPage));
