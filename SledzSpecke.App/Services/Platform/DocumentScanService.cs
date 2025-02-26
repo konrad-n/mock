@@ -58,6 +58,9 @@ namespace SledzSpecke.App.Services.Platform
                 // In a real implementation, you would use Microsoft.Azure.CognitiveServices.Vision.ComputerVision
                 // or another OCR library
 
+                // Making this properly async with a placeholder
+                await Task.CompletedTask;
+
                 // Sample implementation
                 return "Recognized text from document";
             }

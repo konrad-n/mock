@@ -83,6 +83,9 @@ public partial class SettingsViewModel : BaseViewModel
             var version = AppInfo.VersionString;
             var build = AppInfo.BuildString;
             VersionInfo = $"Wersja {version} (Build {build})";
+
+            // Making this method properly async with a placeholder
+            await Task.CompletedTask;
         }
         finally
         {

@@ -40,8 +40,29 @@ public partial class ProcedureAddViewModel : BaseViewModel
 
     public async Task InitializeAsync()
     {
-        // Można tu dodać ładowanie dodatkowych danych
-        // np. lista dostępnych lokalizacji
+        if (IsBusy) return;
+
+        try
+        {
+            IsBusy = true;
+
+            // Można tu dodać ładowanie dodatkowych danych
+            // np. lista dostępnych lokalizacji
+
+            // Placeholder to make method properly async
+            await Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert(
+                "Błąd",
+                "Nie udało się załadować danych",
+                "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
