@@ -4,13 +4,24 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Constants\**" />
+    <Compile Remove="Helpers\**" />
+    <Compile Remove="Interfaces\Factories\**" />
+    <Compile Remove="Interfaces\Repositories\**" />
+    <EmbeddedResource Remove="Constants\**" />
+    <EmbeddedResource Remove="Helpers\**" />
+    <EmbeddedResource Remove="Interfaces\Factories\**" />
+    <EmbeddedResource Remove="Interfaces\Repositories\**" />
+    <None Remove="Constants\**" />
+    <None Remove="Helpers\**" />
+    <None Remove="Interfaces\Factories\**" />
+    <None Remove="Interfaces\Repositories\**" />
+  </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Helpers\" />
-    <Folder Include="Interfaces\Factories\" />
-    <Folder Include="Interfaces\Repositories\" />
     <Folder Include="Models\Requests\" />
-    <Folder Include="Constants\" />
     <Folder Include="Services\Authentication\" />
     <Folder Include="Services\Base\" />
     <Folder Include="Services\DocumentManagement\" />

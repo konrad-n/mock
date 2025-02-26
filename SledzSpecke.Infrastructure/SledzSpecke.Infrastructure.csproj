@@ -6,8 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Helpers\" />
-    <Folder Include="Factories\" />
+    <Compile Remove="Factories\**" />
+    <Compile Remove="Helpers\**" />
+    <EmbeddedResource Remove="Factories\**" />
+    <EmbeddedResource Remove="Helpers\**" />
+    <None Remove="Factories\**" />
+    <None Remove="Helpers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Services\Data\" />
     <Folder Include="Services\Auth\" />
     <Folder Include="Services\Sync\" />

@@ -127,6 +127,7 @@ public static class MauiProgram
     {
         // Register real services
         services.AddSingleton<IProcedureService, ProcedureService>();
+        services.AddSingleton<ISpecializationRequirementsProvider, SpecializationRequirementsProvider>();
 
         // Keep using stub services for the rest until we're ready to implement them
         services.AddSingleton<ICourseService, StubCourseService>();

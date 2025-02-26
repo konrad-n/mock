@@ -1,24 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using SledzSpecke.Core.Models.Domain;
-using static SledzSpecke.Infrastructure.Database.Initialization.DataSeeder;
+using SledzSpecke.Core.Models.Requirements;
 
 namespace SledzSpecke.Infrastructure.Database.Initialization
 {
     public static class DataSeeder
     {
-        public class RequiredProcedure
-        {
-            public string Name { get; set; }
-            public int RequiredCount { get; set; }
-            public int AssistanceCount { get; set; }
-            public string? Description { get; set; }
-            public bool AllowSimulation { get; set; } = false;
-            public int? SimulationLimit { get; set; } // procent procedur możliwych do wykonania na symulatorach
-        }
-
         public static List<Specialization> GetBasicSpecializations()
         {
             return new List<Specialization>
@@ -1288,107 +1276,121 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
         {
             return new Dictionary<string, List<RequiredProcedure>>
             {
-                { // SpecializationId = 1
+                {
                     "Diagnostyka hematologiczna", new List<RequiredProcedure>
                     {
                         new RequiredProcedure
                         {
                             Name = "Biopsja szpiku z mostka",
                             RequiredCount = 3,
-                            AssistanceCount = 3
+                            AssistanceCount = 3,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Biopsja szpiku z kolca tylnego talerza biodrowego",
                             RequiredCount = 20,
-                            AssistanceCount = 5
+                            AssistanceCount = 5,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Biopsja szpiku z kolca przedniego talerza biodrowego",
                             RequiredCount = 3,
-                            AssistanceCount = 3
+                            AssistanceCount = 3,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Trepanobiopsja szpiku",
                             RequiredCount = 10,
-                            AssistanceCount = 5
+                            AssistanceCount = 5,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Biopsja cienkoigłowa węzła lub biopsja węzła pod kontrolą USG/TK",
                             RequiredCount = 0,
-                            AssistanceCount = 3
+                            AssistanceCount = 3,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Ocena rozmazu krwi obwodowej",
                             RequiredCount = 30,
-                            AssistanceCount = 30
+                            AssistanceCount = 30,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Ocena mielogramu",
                             RequiredCount = 30,
-                            AssistanceCount = 30
+                            AssistanceCount = 30,
+                            SpecializationId = 1
                         }
                     }
                 },
-                { // SpecializationId = 1
+                {
                     "Leczenie nowotworów krwi", new List<RequiredProcedure>
                     {
                         new RequiredProcedure
                         {
                             Name = "Prowadzenie intensywnego leczenia chorych na ostre białaczki szpikowe lub ostre białaczki limfoblastyczne",
                             RequiredCount = 7,
-                            AssistanceCount = 0
+                            AssistanceCount = 0,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Prowadzenie leczenia indukującego chorych na chłoniaki agresywne",
                             RequiredCount = 4,
-                            AssistanceCount = 0
+                            AssistanceCount = 0,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Punkcja lędźwiowa i dokanałowe podanie cytostatyków",
                             RequiredCount = 0,
-                            AssistanceCount = 10
+                            AssistanceCount = 10,
+                            SpecializationId = 1
                         }
                     }
                 },
-                { // SpecializationId = 1
+                {
                     "Zabiegi specjalistyczne", new List<RequiredProcedure>
                     {
                         new RequiredProcedure
                         {
                             Name = "Zakładanie centralnego cewnika żylnego",
                             RequiredCount = 0,
-                            AssistanceCount = 3
+                            AssistanceCount = 3,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Afereza lecznicza",
                             RequiredCount = 0,
-                            AssistanceCount = 1
+                            AssistanceCount = 1,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Przeszczepienie autologicznych komórek krwiotwórczych",
                             RequiredCount = 0,
-                            AssistanceCount = 2
+                            AssistanceCount = 2,
+                            SpecializationId = 1
                         },
                         new RequiredProcedure
                         {
                             Name = "Przeszczepienie allogenicznych komórek krwiotwórczych",
                             RequiredCount = 0,
-                            AssistanceCount = 1
+                            AssistanceCount = 1,
+                            SpecializationId = 1
                         }
                     }
                 },
                 // Podczas stażu podstawowego w zakresie medycyny morskiej i tropikalnej
-                { // SpecializationId = 2
+                {
                     "Staż podstawowy",
                     new List<RequiredProcedure>
                     {
@@ -1397,40 +1399,45 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Uczestniczenie w ocenie stanu zdrowia kandydatów i pracowników, wydawanie orzeczenia lekarskiego o zdolności do pracy na statkach morskich",
                             RequiredCount = 0,
                             AssistanceCount = 20,
-                            Description = "Uczestniczenie w badaniach, ocenach oraz wydawaniu orzeczeń"
+                            Description = "Uczestniczenie w badaniach, ocenach oraz wydawaniu orzeczeń",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Prowadzenie dokumentacji medycznej",
                             RequiredCount = 0,
                             AssistanceCount = 10,
-                            Description = "Uczestniczenie w prowadzeniu dokumentacji medycznej"
+                            Description = "Uczestniczenie w prowadzeniu dokumentacji medycznej",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Znajomość zasad współpracy z morską służbą ratownictwa i poszukiwań SAR",
                             RequiredCount = 0,
                             AssistanceCount = 3,
-                            Description = "Zapoznanie się z zasadami współpracy z morską służbą ratownictwa i poszukiwań SAR"
+                            Description = "Zapoznanie się z zasadami współpracy z morską służbą ratownictwa i poszukiwań SAR",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Uczestniczenie w ocenie stanu zdrowia osób udających się do krajów klimatu gorącego oraz powracających, wydawanie orzeczeń lekarskich",
                             RequiredCount = 0,
                             AssistanceCount = 20,
-                            Description = "Uczestniczenie w badaniach, ocenach oraz wydawaniu orzeczeń"
+                            Description = "Uczestniczenie w badaniach, ocenach oraz wydawaniu orzeczeń",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Uczestniczenie w procedurach orzekania o przydatności do pracy w charakterze nurka lub innych osób pracujących w podwyższonym ciśnieniu otoczenia",
                             RequiredCount = 0,
                             AssistanceCount = 5,
-                            Description = "Uczestniczenie w badaniach, ocenach oraz wydawaniu orzeczeń"
+                            Description = "Uczestniczenie w badaniach, ocenach oraz wydawaniu orzeczeń",
+                            SpecializationId = 2
                         }
                     }
                 },
                 // Podczas staży kierunkowych
-                { // SpecializationId = 2
+                {
                     "Staże kierunkowe",
                     new List<RequiredProcedure>
                     {
@@ -1440,21 +1447,24 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Ocena stanu zdrowia kandydatów i pracowników, wydawanie orzeczenia lekarskiego o zdolności do pracy na statkach morskich",
                             RequiredCount = 30,
                             AssistanceCount = 0,
-                            Description = "Samodzielne badanie, ocena oraz wydawanie orzeczeń"
+                            Description = "Samodzielne badanie, ocena oraz wydawanie orzeczeń",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Ocena następstw chorób i wypadków na zachowanie zdolności do pracy na morzu",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielna ocena następstw chorób i wypadków"
+                            Description = "Samodzielna ocena następstw chorób i wypadków",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Prowadzenie dokumentacji medycznej z udzielaniem pomocy drogą radiową",
                             RequiredCount = 20,
                             AssistanceCount = 0,
-                            Description = "Samodzielne prowadzenie dokumentacji medycznej"
+                            Description = "Samodzielne prowadzenie dokumentacji medycznej",
+                            SpecializationId = 2
                         },
                         // Medycyna morska w GSSE
                         new RequiredProcedure
@@ -1462,21 +1472,24 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Prowadzenie sanitarnej kontroli statku pod nadzorem Inspektora GSSE",
                             RequiredCount = 3,
                             AssistanceCount = 0,
-                            Description = "Samodzielne prowadzenie kontroli sanitarnej statku"
+                            Description = "Samodzielne prowadzenie kontroli sanitarnej statku",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Znajomość zasad pracy portu i służb portowych",
                             RequiredCount = 3,
                             AssistanceCount = 0,
-                            Description = "Zapoznanie się z zasadami pracy portu i służb portowych"
+                            Description = "Zapoznanie się z zasadami pracy portu i służb portowych",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Znajomość zasad współpracy z morską służbą ratownictwa i poszukiwań SAR",
                             RequiredCount = 3,
                             AssistanceCount = 0,
-                            Description = "Zapoznanie się z zasadami współpracy z morską służbą ratownictwa i poszukiwań SAR"
+                            Description = "Zapoznanie się z zasadami współpracy z morską służbą ratownictwa i poszukiwań SAR",
+                            SpecializationId = 2
                         },
                         // Medycyna tropikalna
                         new RequiredProcedure
@@ -1484,21 +1497,24 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Umiejętność pobierania krwi oraz wykonywania wymazów i rozmazów do badań mikrobiologicznych, parazytologicznych oraz serologicznych",
                             RequiredCount = 20,
                             AssistanceCount = 0,
-                            Description = "Samodzielne pobieranie materiału biologicznego"
+                            Description = "Samodzielne pobieranie materiału biologicznego",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Umiejętność interpretacji wyników tych badań",
                             RequiredCount = 20,
                             AssistanceCount = 0,
-                            Description = "Samodzielna interpretacja wyników badań"
+                            Description = "Samodzielna interpretacja wyników badań",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Umiejętność oceny stanu zdrowia osób udających się do krajów klimatu gorącego oraz powracających, wydawanie orzeczeń lekarskich",
                             RequiredCount = 40,
                             AssistanceCount = 0,
-                            Description = "Samodzielna ocena stanu zdrowia i wydawanie orzeczeń"
+                            Description = "Samodzielna ocena stanu zdrowia i wydawanie orzeczeń",
+                            SpecializationId = 2
                         },
                         // Choroby zakaźne
                         new RequiredProcedure
@@ -1506,14 +1522,16 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Pobieranie krwi oraz innych płynów ustrojowych oraz wymazów do badań mikrobiologicznych",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielne pobieranie materiału biologicznego"
+                            Description = "Samodzielne pobieranie materiału biologicznego",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Kwalifikacja do profilaktyki poekspozycyjnej (tężec, wścieklizna, HBV, HCV, HIV)",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielna kwalifikacja do profilaktyki poekspozycyjnej"
+                            Description = "Samodzielna kwalifikacja do profilaktyki poekspozycyjnej",
+                            SpecializationId = 2
                         },
                         // Medycyna nurkowa z elementami medycyny hiperbarycznej
                         new RequiredProcedure
@@ -1521,14 +1539,16 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Udział w przeprowadzaniu sesji hiperbarycznych (bez konieczności pobytu pod ciśnieniem)",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielny udział w przeprowadzaniu sesji hiperbarycznych"
+                            Description = "Samodzielny udział w przeprowadzaniu sesji hiperbarycznych",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Udział w procedurach orzekania o przydatności do pracy w charakterze nurka lub innych osób pracujących w podwyższonym ciśnieniu otoczenia",
                             RequiredCount = 0,
                             AssistanceCount = 15,
-                            Description = "Uczestniczenie w procedurach orzekania"
+                            Description = "Uczestniczenie w procedurach orzekania",
+                            SpecializationId = 2
                         },
                         // Neurologia
                         new RequiredProcedure
@@ -1536,14 +1556,16 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Wykonanie badania neurologicznego",
                             RequiredCount = 20,
                             AssistanceCount = 0,
-                            Description = "Samodzielne wykonanie badania neurologicznego"
+                            Description = "Samodzielne wykonanie badania neurologicznego",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Wykonanie nakłucia lędźwiowego",
                             RequiredCount = 0,
                             AssistanceCount = 3,
-                            Description = "Uczestniczenie w wykonaniu nakłucia lędźwiowego"
+                            Description = "Uczestniczenie w wykonaniu nakłucia lędźwiowego",
+                            SpecializationId = 2
                         },
                         // Psychologia pracy
                         new RequiredProcedure
@@ -1551,7 +1573,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Udział w procedurach badań psychologicznych i psychotechnicznych",
                             RequiredCount = 0,
                             AssistanceCount = 10,
-                            Description = "Uczestniczenie w procedurach badań psychologicznych i psychotechnicznych"
+                            Description = "Uczestniczenie w procedurach badań psychologicznych i psychotechnicznych",
+                            SpecializationId = 2
                         },
                         // Dermatologia i wenerologia
                         new RequiredProcedure
@@ -1559,14 +1582,16 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Pobieranie wycinków/skrawków skóry do badań mikroskopowych oraz PCR",
                             RequiredCount = 5,
                             AssistanceCount = 0,
-                            Description = "Samodzielne pobieranie wycinków/skrawków skóry"
+                            Description = "Samodzielne pobieranie wycinków/skrawków skóry",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Wykonywanie testów naskórkowych",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielne wykonywanie testów naskórkowych"
+                            Description = "Samodzielne wykonywanie testów naskórkowych",
+                            SpecializationId = 2
                         },
                         // Okulistyka
                         new RequiredProcedure
@@ -1574,28 +1599,32 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Określanie ostrości wzroku do dali i bliży bez korekcji i z korekcją",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielne określanie ostrości wzroku"
+                            Description = "Samodzielne określanie ostrości wzroku",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Ocenianie zdolności rozpoznawania barw",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielne ocenianie zdolności rozpoznawania barw"
+                            Description = "Samodzielne ocenianie zdolności rozpoznawania barw",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Ocenianie pola widzenia metodą orientacyjną i za pomocą perymetru",
                             RequiredCount = 5,
                             AssistanceCount = 0,
-                            Description = "Samodzielne ocenianie pola widzenia"
+                            Description = "Samodzielne ocenianie pola widzenia",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Usuwanie ciała obcego z oka",
                             RequiredCount = 5,
                             AssistanceCount = 0,
-                            Description = "Samodzielne usuwanie ciała obcego z oka"
+                            Description = "Samodzielne usuwanie ciała obcego z oka",
+                            SpecializationId = 2
                         },
                         // Otolaryngologia
                         new RequiredProcedure
@@ -1603,376 +1632,36 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Name = "Badanie ostrości słuchu szeptem i mową",
                             RequiredCount = 10,
                             AssistanceCount = 0,
-                            Description = "Samodzielne badanie ostrości słuchu"
+                            Description = "Samodzielne badanie ostrości słuchu",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Ocenianie badania audiometrycznego słuchu",
                             RequiredCount = 5,
                             AssistanceCount = 0,
-                            Description = "Samodzielne ocenianie badania audiometrycznego słuchu"
+                            Description = "Samodzielne ocenianie badania audiometrycznego słuchu",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Usuwanie ciała obcego/woskowiny z ucha",
                             RequiredCount = 3,
                             AssistanceCount = 0,
-                            Description = "Samodzielne usuwanie ciała obcego/woskowiny z ucha"
+                            Description = "Samodzielne usuwanie ciała obcego/woskowiny z ucha",
+                            SpecializationId = 2
                         },
                         new RequiredProcedure
                         {
                             Name = "Badanie czynności narządu równowagi przy pomocy obserwacji oczopląsu samoistnego i w okularach Frenzla",
                             RequiredCount = 5,
                             AssistanceCount = 0,
-                            Description = "Samodzielne badanie czynności narządu równowagi"
-                        }
+                            Description = "Samodzielne badanie czynności narządu równowagi",
+                            SpecializationId = 2
+                        },
                     }
                 },
             };
-        }
-    }
-
-    public static class ProcedureMonitoring
-    {
-        public class ProcedureProgress
-        {
-            public string ProcedureName { get; set; }
-            public int CompletedCount { get; set; }
-            public int AssistanceCount { get; set; }
-            public int SimulationCount { get; set; }
-            public List<ProcedureExecution> Executions { get; set; } = new List<ProcedureExecution>();
-        }
-
-        public class ProcedureExecution
-        {
-            public DateTime ExecutionDate { get; set; }
-            public string Type { get; set; } // "Wykonanie", "Asysta", "Symulacja"
-            public string SupervisorName { get; set; }
-            public string Location { get; set; }
-            public string PatientId { get; set; } // Zanonimizowany identyfikator
-            public string Notes { get; set; }
-        }
-
-        public class ProgressVerification
-        {
-            public (bool IsComplete, List<string> Deficiencies) VerifyProgress(
-                Dictionary<string, ProcedureProgress> completedProcedures)
-            {
-                var requirements = GetRequiredProcedures();
-                var deficiencies = new List<string>();
-
-                foreach (var category in requirements)
-                {
-                    foreach (var requiredProcedure in category.Value)
-                    {
-                        if (!completedProcedures.TryGetValue(requiredProcedure.Name, out var progress))
-                        {
-                            deficiencies.Add($"Brak wykonanych procedur: {requiredProcedure.Name}");
-                            continue;
-                        }
-
-                        // Sprawdzenie liczby wykonań
-                        if (progress.CompletedCount < requiredProcedure.RequiredCount)
-                        {
-                            deficiencies.Add($"Niewystarczająca liczba wykonań {requiredProcedure.Name}: " +
-                                             $"wykonano {progress.CompletedCount}/{requiredProcedure.RequiredCount}");
-                        }
-
-                        // Sprawdzenie liczby asyst
-                        if (progress.AssistanceCount < requiredProcedure.AssistanceCount)
-                        {
-                            deficiencies.Add($"Niewystarczająca liczba asyst {requiredProcedure.Name}: " +
-                                             $"wykonano {progress.AssistanceCount}/{requiredProcedure.AssistanceCount}");
-                        }
-
-                        // Weryfikacja limitu symulacji
-                        if (requiredProcedure.AllowSimulation)
-                        {
-                            var maxSimulations = (requiredProcedure.RequiredCount * requiredProcedure.SimulationLimit.Value) / 100;
-                            if (progress.SimulationCount > maxSimulations)
-                            {
-                                deficiencies.Add($"Przekroczony limit symulacji dla {requiredProcedure.Name}: " +
-                                                 $"wykonano {progress.SimulationCount}, " +
-                                                 $"maksymalnie dozwolone {maxSimulations}");
-                            }
-                        }
-                    }
-                }
-
-                return (deficiencies.Count == 0, deficiencies);
-            }
-
-            public ProgressSummary GenerateProgressSummary(Dictionary<string, ProcedureProgress> completedProcedures)
-            {
-                var requirements = GetRequiredProcedures();
-                var summary = new ProgressSummary();
-
-                foreach (var category in requirements)
-                {
-                    var categorySummary = new CategorySummary
-                    {
-                        CategoryName = category.Key,
-                        TotalRequired = category.Value.Sum(p => p.RequiredCount),
-                        TotalAssistanceRequired = category.Value.Sum(p => p.AssistanceCount),
-                        CompletedCount = 0,
-                        AssistanceCount = 0,
-                        SimulationCount = 0,
-                        CompletionPercentage = 0
-                    };
-
-                    foreach (var procedure in category.Value)
-                    {
-                        if (completedProcedures.TryGetValue(procedure.Name, out var progress))
-                        {
-                            categorySummary.CompletedCount += progress.CompletedCount;
-                            categorySummary.AssistanceCount += progress.AssistanceCount;
-                            categorySummary.SimulationCount += progress.SimulationCount;
-                        }
-                    }
-
-                    var totalRequired = categorySummary.TotalRequired + categorySummary.TotalAssistanceRequired;
-                    var totalCompleted = categorySummary.CompletedCount + categorySummary.AssistanceCount;
-
-                    categorySummary.CompletionPercentage = totalRequired > 0
-                        ? (totalCompleted * 100.0) / totalRequired
-                        : 0;
-
-                    summary.Categories.Add(categorySummary);
-                }
-
-                summary.CalculateOverallProgress();
-                return summary;
-            }
-        }
-
-        public class ProgressSummary
-        {
-            public List<CategorySummary> Categories { get; set; } = new List<CategorySummary>();
-            public double OverallCompletionPercentage { get; set; }
-            public int TotalProceduresRequired { get; set; }
-            public int TotalProceduresCompleted { get; set; }
-            public int TotalSimulationsUsed { get; set; }
-
-            public void CalculateOverallProgress()
-            {
-                TotalProceduresRequired = Categories.Sum(c => c.TotalRequired + c.TotalAssistanceRequired);
-                TotalProceduresCompleted = Categories.Sum(c => c.CompletedCount + c.AssistanceCount);
-                TotalSimulationsUsed = Categories.Sum(c => c.SimulationCount);
-
-                OverallCompletionPercentage = TotalProceduresRequired > 0
-                    ? (TotalProceduresCompleted * 100.0) / TotalProceduresRequired
-                    : 0;
-            }
-
-            public string GenerateReport()
-            {
-                var report = new StringBuilder();
-                report.AppendLine("Raport postępu wykonania procedur medycznych:");
-                report.AppendLine($"Całkowity postęp: {OverallCompletionPercentage:F1}%");
-                report.AppendLine($"Wykonane procedury: {TotalProceduresCompleted}/{TotalProceduresRequired}");
-                report.AppendLine($"Wykorzystane symulacje: {TotalSimulationsUsed}");
-                report.AppendLine();
-
-                foreach (var category in Categories)
-                {
-                    report.AppendLine($"Kategoria: {category.CategoryName}");
-                    report.AppendLine($"- Postęp: {category.CompletionPercentage:F1}%");
-                    report.AppendLine($"- Wykonane: {category.CompletedCount}/{category.TotalRequired}");
-                    report.AppendLine($"- Asysty: {category.AssistanceCount}/{category.TotalAssistanceRequired}");
-                    report.AppendLine($"- Symulacje: {category.SimulationCount}");
-                    report.AppendLine();
-                }
-
-                return report.ToString();
-            }
-        }
-
-        public class CategorySummary
-        {
-            public string CategoryName { get; set; }
-            public int TotalRequired { get; set; }
-            public int TotalAssistanceRequired { get; set; }
-            public int CompletedCount { get; set; }
-            public int AssistanceCount { get; set; }
-            public int SimulationCount { get; set; }
-            public double CompletionPercentage { get; set; }
-        }
-    }
-
-    public static class DutyRequirements
-    {
-        public class DutySpecification
-        {
-            public string Type { get; set; } // Regular, Emergency, Supervised, Independent
-            public int MinimumHoursPerMonth { get; set; }
-            public int MinimumDutiesPerMonth { get; set; }
-            public bool RequiresSupervision { get; set; }
-            public List<string> RequiredCompetencies { get; set; }
-            public int Year { get; set; }
-        }
-
-        public static List<DutySpecification> GetDutyRequirements()
-        {
-            return new List<DutySpecification>
-                {
-                    new DutySpecification  // SpecializationId = 1
-                    {
-                        Year = 1,
-                        MinimumHoursPerMonth = 40,
-                        MinimumDutiesPerMonth = 4,
-                        RequiresSupervision = true,
-                        Type = "Supervised",
-                        RequiredCompetencies = new List<string>
-                        {
-                            "Ocena stanu pacjenta",
-                            "Postępowanie w gorączce neutropenicznej",
-                            "Postępowanie w zespole lizy guza",
-                            "Kwalifikacja do przetoczenia składników krwi"
-                        }
-                    },
-                    new DutySpecification // SpecializationId = 2
-                    {
-                        Year = 1,
-                        MinimumHoursPerMonth = 40,
-                        MinimumDutiesPerMonth = 4,
-                        RequiresSupervision = true,
-                        Type = "Supervised",
-                        RequiredCompetencies = new List<string>
-                        {
-                            "Ocena stanu pacjenta",
-                            "Podstawowe procedury diagnostyczne w medycynie morskiej i tropikalnej",
-                            "Postępowanie w stanach nagłych związanych z podróżami i pracą w tropiku",
-                            "Kwalifikacja do leczenia w trybie pilnym"
-                        }
-                    },
-                    new DutySpecification // SpecializationId = 1
-                    {
-                        Year = 3,
-                        MinimumHoursPerMonth = 40,
-                        MinimumDutiesPerMonth = 4,
-                        RequiresSupervision = false,
-                        Type = "Independent",
-                        RequiredCompetencies = new List<string>
-                        {
-                            "Samodzielne prowadzenie dyżuru",
-                            "Koordynacja pracy zespołu",
-                            "Podejmowanie decyzji w stanach zagrożenia życia",
-                            "Nadzór nad młodszymi kolegami"
-                        }
-                    },
-                    new DutySpecification // SpecializationId = 2
-                    {
-                        Year = 2,
-                        MinimumHoursPerMonth = 40,
-                        MinimumDutiesPerMonth = 4,
-                        RequiresSupervision = false,
-                        Type = "Independent",
-                        RequiredCompetencies = new List<string>
-                        {
-                            "Samodzielne prowadzenie dyżuru",
-                            "Zaawansowane procedury w medycynie morskiej i tropikalnej",
-                            "Udzielanie porad medycznych drogą radiową",
-                            "Koordynacja pracy zespołu dyżurowego"
-                        }
-                    }
-                };
-        }
-    }
-
-    public static class DutyMonitoring
-    {
-        public class Duty
-        {
-            public DateTime StartTime { get; set; }
-            public DateTime EndTime { get; set; }
-            public string Type { get; set; }
-            public string Location { get; set; }
-            public string Supervisor { get; set; }
-            public int EmergencyCases { get; set; }
-            public List<string> PerformedProcedures { get; set; } = new List<string>();
-            public bool WasSupervised { get; set; }
-            public List<string> KeyCompetencies { get; set; } = new List<string>();
-            public double DurationInHours => (EndTime - StartTime).TotalHours;
-        }
-
-        public class DutyStats
-        {
-            public int TotalDuties { get; set; }
-            public double TotalHours { get; set; }
-            public int RegularDuties { get; set; }
-            public int EmergencyDuties { get; set; }
-            public int SupervisedDuties { get; set; }
-            public int IndependentDuties { get; set; }
-            public int TotalEmergencyCases { get; set; }
-            public List<string> ProceduresPerformed { get; set; } = new List<string>();
-        }
-
-        public class DutyValidator
-        {
-            public (bool IsCompliant, List<string> Deficiencies) CheckMonthlyCompliance(
-                int specializationYear,
-                List<Duty> monthlyDuties)
-            {
-                var requirements = DutyRequirements.GetDutyRequirements()
-                    .FirstOrDefault(r => r.Year == specializationYear);
-
-                var deficiencies = new List<string>();
-
-                if (requirements == null)
-                {
-                    deficiencies.Add($"Brak zdefiniowanych wymagań dla roku {specializationYear}");
-                    return (false, deficiencies);
-                }
-
-                // Sprawdzanie liczby godzin
-                var totalHours = monthlyDuties.Sum(d => d.DurationInHours);
-                if (totalHours < requirements.MinimumHoursPerMonth)
-                {
-                    deficiencies.Add($"Brakuje {requirements.MinimumHoursPerMonth - totalHours:F1} godzin dyżurowych");
-                }
-
-                // Sprawdzanie liczby dyżurów
-                if (monthlyDuties.Count < requirements.MinimumDutiesPerMonth)
-                {
-                    deficiencies.Add($"Brakuje {requirements.MinimumDutiesPerMonth - monthlyDuties.Count} dyżurów");
-                }
-
-                // Sprawdzanie nadzoru
-                if (requirements.RequiresSupervision && monthlyDuties.Any(d => !d.WasSupervised))
-                {
-                    deficiencies.Add("Niektóre dyżury odbyły się bez wymaganego nadzoru");
-                }
-
-                return (deficiencies.Count == 0, deficiencies);
-            }
-
-            public DutyStats GenerateStatistics(List<Duty> duties)
-            {
-                return new DutyStats
-                {
-                    TotalDuties = duties.Count,
-                    TotalHours = duties.Sum(d => d.DurationInHours),
-                    RegularDuties = duties.Count(d => d.Type == "Regular"),
-                    EmergencyDuties = duties.Count(d => d.Type == "Emergency"),
-                    SupervisedDuties = duties.Count(d => d.WasSupervised),
-                    IndependentDuties = duties.Count(d => !d.WasSupervised),
-                    TotalEmergencyCases = duties.Sum(d => d.EmergencyCases),
-                    ProceduresPerformed = duties.SelectMany(d => d.PerformedProcedures).ToList()
-                };
-            }
-
-            public string GenerateReport(DutyStats stats)
-            {
-                return $@"Raport dyżurowy:
-    - Całkowita liczba dyżurów: {stats.TotalDuties}
-    - Całkowita liczba godzin: {stats.TotalHours:F1}
-    - Dyżury zwykłe: {stats.RegularDuties}
-    - Dyżury ostre: {stats.EmergencyDuties}
-    - Dyżury pod nadzorem: {stats.SupervisedDuties}
-    - Dyżury samodzielne: {stats.IndependentDuties}
-    - Przypadki nagłe: {stats.TotalEmergencyCases}
-    - Liczba wykonanych procedur: {stats.ProceduresPerformed.Count}";
-            }
         }
     }
 }
