@@ -47,8 +47,8 @@ public static class MauiProgram
             // Register databases services
             RegisterDatabaseServices(builder.Services);
 
-            // Use stub services for now until database is fully set up
-            RegisterStubServices(builder.Services);
+            // Register services
+            RegisterServices(builder.Services);
 
             // Register ViewModels
             RegisterViewModels(builder.Services);
@@ -123,9 +123,9 @@ public static class MauiProgram
         services.AddSingleton<INotificationRepository, NotificationRepository>();
     }
 
-    private static void RegisterStubServices(IServiceCollection services)
+    private static void RegisterServices(IServiceCollection services)
     {
-        // Replace the ProcedureService stub with real implementation
+        // Register real services
         services.AddSingleton<IProcedureService, ProcedureService>();
 
         // Keep using stub services for the rest until we're ready to implement them

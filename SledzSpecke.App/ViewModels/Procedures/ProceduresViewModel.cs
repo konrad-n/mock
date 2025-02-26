@@ -3,10 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SledzSpecke.App.ViewModels.Procedures
 {
@@ -14,19 +11,19 @@ namespace SledzSpecke.App.ViewModels.Procedures
     {
         private readonly IProcedureService _procedureService;
         private readonly ISpecializationService _specializationService;
-        
+
         public ProceduresViewModel(
             IProcedureService procedureService,
             ISpecializationService specializationService)
         {
             _procedureService = procedureService;
             _specializationService = specializationService;
-            
+
             Title = "Procedury";
             Procedures = new ObservableCollection<ProcedureExecution>();
             Categories = new ObservableCollection<string>();
             Stages = new ObservableCollection<string>();
-            
+
             // Nowe kolekcje dla kategorii i etapów specyficznych dla specjalizacji
             CategoriesBySpecialization = new ObservableCollection<string>();
             StagesBySpecialization = new ObservableCollection<string>();
@@ -34,42 +31,42 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         [ObservableProperty]
         private ObservableCollection<ProcedureExecution> procedures;
-        
+
         [ObservableProperty]
         private ObservableCollection<string> categories;
-        
+
         [ObservableProperty]
         private ObservableCollection<string> stages;
-        
+
         [ObservableProperty]
         private ObservableCollection<string> categoriesBySpecialization;
-        
+
         [ObservableProperty]
         private ObservableCollection<string> stagesBySpecialization;
-        
+
         [ObservableProperty]
         private string selectedCategory;
-        
+
         [ObservableProperty]
         private string selectedStage;
-        
+
         [ObservableProperty]
         private double completionPercentage;
-        
+
         [ObservableProperty]
         private Dictionary<string, (int Required, int Completed, int Assisted)> categoryProgress;
-        
+
         [ObservableProperty]
         private Dictionary<string, (int Required, int Completed, int Assisted)> stageProgress;
 
         public override async Task LoadDataAsync()
         {
             if (IsBusy) return;
-            
+
             try
             {
                 IsBusy = true;
-                
+
                 // Załaduj procedury
                 var userProcedures = await _procedureService.GetUserProceduresAsync();
                 Procedures.Clear();
@@ -77,7 +74,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     Procedures.Add(procedure);
                 }
-                
+
                 // Załaduj dostępne kategorie i etapy
                 var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
                 Categories.Clear();
@@ -86,7 +83,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     Categories.Add(category);
                 }
-                
+
                 var availableStages = await _procedureService.GetAvailableStagesAsync();
                 Stages.Clear();
                 Stages.Add("Wszystkie");
@@ -94,15 +91,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     Stages.Add(stage);
                 }
-                
+
                 // Załaduj postępy
                 CompletionPercentage = await _procedureService.GetProcedureCompletionPercentageAsync();
                 CategoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
                 StageProgress = await _procedureService.GetProcedureProgressByStageAsync();
-                
+
                 // Załaduj kategorie i etapy specyficzne dla specjalizacji
                 await LoadSpecializationFiltersAsync();
-                
+
                 // Ustaw domyślne filtrowanie
                 SelectedCategory = "Wszystkie";
                 SelectedStage = "Wszystkie";
@@ -119,42 +116,39 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public async Task LoadSpecializationFiltersAsync()
         {
-            if (IsBusy) return;
-            
             try
             {
-                IsBusy = true;
                 var specialization = await _specializationService.GetCurrentSpecializationAsync();
-                
+
                 if (specialization != null)
                 {
                     CategoriesBySpecialization.Clear();
                     StagesBySpecialization.Clear();
-                    
+
                     // Załaduj kategorie specyficzne dla specjalizacji
                     var requirements = await _specializationService.GetRequiredProceduresAsync(specialization.Id);
-                    
+
                     var specialtyCategories = requirements
                         .Select(r => r.Category)
                         .Where(c => !string.IsNullOrEmpty(c))
                         .Distinct()
                         .OrderBy(c => c)
                         .ToList();
-                        
+
                     var specialtyStages = requirements
                         .Select(r => r.Stage)
                         .Where(s => !string.IsNullOrEmpty(s))
                         .Distinct()
                         .OrderBy(s => s)
                         .ToList();
-                    
+
                     // Dodaj opcję "Wszystkie" na początku
                     CategoriesBySpecialization.Add("Wszystkie");
                     foreach (var category in specialtyCategories)
                     {
                         CategoriesBySpecialization.Add(category);
                     }
-                    
+
                     StagesBySpecialization.Add("Wszystkie");
                     foreach (var stage in specialtyStages)
                     {
@@ -162,9 +156,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
             }
-            finally
+            catch (System.Exception)
             {
-                IsBusy = false;
+                // Obsługa błędów - ukryj ten błąd, ponieważ jest to tylko dodatkowa funkcjonalność
             }
         }
 
@@ -181,28 +175,28 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private async Task FilterProceduresAsync()
         {
             if (IsBusy) return;
-            
+
             try
             {
                 IsBusy = true;
                 var allProcedures = await _procedureService.GetUserProceduresAsync();
-                
+
                 // Filtruj według kategorii i etapu
                 var filteredProcedures = allProcedures;
-                if (SelectedCategory != "Wszystkie")
+                if (SelectedCategory != "Wszystkie" && SelectedCategory != null)
                 {
                     filteredProcedures = filteredProcedures
                         .Where(p => p.Category == SelectedCategory)
                         .ToList();
                 }
-                
-                if (SelectedStage != "Wszystkie")
+
+                if (SelectedStage != "Wszystkie" && SelectedStage != null)
                 {
                     filteredProcedures = filteredProcedures
                         .Where(p => p.Stage == SelectedStage)
                         .ToList();
                 }
-                
+
                 Procedures.Clear();
                 foreach (var procedure in filteredProcedures)
                 {
@@ -230,13 +224,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             await Shell.Current.GoToAsync($"procedure/edit?id={id}");
         }
-        
-        [RelayCommand]
-        private async Task RefreshDataAsync()
-        {
-            await LoadDataAsync();
-        }
-        
+
         [RelayCommand]
         private async Task ExportProceduresAsync()
         {

@@ -136,7 +136,7 @@ namespace SledzSpecke.Infrastructure.Services
                 var user = await _userService.GetCurrentUserAsync();
                 if (user?.CurrentSpecializationId == null)
                 {
-                    throw new NotFoundException("Current specialization not found");
+                    return new List<ProcedureRequirement>();
                 }
 
                 return await _repository.GetRequirementsForSpecializationAsync(user.CurrentSpecializationId.Value);
@@ -144,7 +144,7 @@ namespace SledzSpecke.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting procedure requirements");
-                throw;
+                return new List<ProcedureRequirement>();
             }
         }
 
@@ -163,7 +163,7 @@ namespace SledzSpecke.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting available categories");
-                throw;
+                return new List<string>();
             }
         }
 
@@ -182,11 +182,9 @@ namespace SledzSpecke.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting available stages");
-                throw;
+                return new List<string>();
             }
         }
-
-        // Other methods implementation...
 
         private async Task ValidateProcedureAsync(ProcedureExecution procedure)
         {
@@ -270,20 +268,106 @@ namespace SledzSpecke.Infrastructure.Services
             }
         }
 
-        // Implementation for remaining methods
-        public Task<List<ProcedureRequirement>> GetRequirementsByCategoryAsync(string category)
-            => throw new NotImplementedException();
+        public async Task<List<ProcedureRequirement>> GetRequirementsByCategoryAsync(string category)
+        {
+            try
+            {
+                var user = await _userService.GetCurrentUserAsync();
+                if (user?.CurrentSpecializationId == null)
+                {
+                    return new List<ProcedureRequirement>();
+                }
 
-        public Task<List<ProcedureRequirement>> GetRequirementsByStageAsync(string stage)
-            => throw new NotImplementedException();
+                return await _repository.GetRequirementsByCategoryAsync(user.CurrentSpecializationId.Value, category);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting requirements by category");
+                return new List<ProcedureRequirement>();
+            }
+        }
 
-        public Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync()
-            => throw new NotImplementedException();
+        public async Task<List<ProcedureRequirement>> GetRequirementsByStageAsync(string stage)
+        {
+            try
+            {
+                var user = await _userService.GetCurrentUserAsync();
+                if (user?.CurrentSpecializationId == null)
+                {
+                    return new List<ProcedureRequirement>();
+                }
 
-        public Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByStageAsync()
-            => throw new NotImplementedException();
+                return await _repository.GetRequirementsByStageAsync(user.CurrentSpecializationId.Value, stage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting requirements by stage");
+                return new List<ProcedureRequirement>();
+            }
+        }
 
-        public Task<double> GetProcedureCompletionPercentageAsync()
-            => Task.FromResult(0.25); // Default value for now
+        public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync()
+        {
+            try
+            {
+                var user = await _userService.GetCurrentUserAsync();
+                if (user?.CurrentSpecializationId == null)
+                {
+                    return new Dictionary<string, (int Required, int Completed, int Assisted)>();
+                }
+
+                return await _repository.GetProcedureProgressByCategoryAsync(user.Id, user.CurrentSpecializationId.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting procedure progress by category");
+                return new Dictionary<string, (int Required, int Completed, int Assisted)>();
+            }
+        }
+
+        public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByStageAsync()
+        {
+            try
+            {
+                var user = await _userService.GetCurrentUserAsync();
+                if (user?.CurrentSpecializationId == null)
+                {
+                    return new Dictionary<string, (int Required, int Completed, int Assisted)>();
+                }
+
+                return await _repository.GetProcedureProgressByStageAsync(user.Id, user.CurrentSpecializationId.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting procedure progress by stage");
+                return new Dictionary<string, (int Required, int Completed, int Assisted)>();
+            }
+        }
+
+        public async Task<double> GetProcedureCompletionPercentageAsync()
+        {
+            try
+            {
+                var categoriesProgress = await GetProcedureProgressByCategoryAsync();
+                if (categoriesProgress.Count == 0)
+                    return 0;
+
+                int totalRequired = 0;
+                int totalCompleted = 0;
+
+                foreach (var category in categoriesProgress)
+                {
+                    totalRequired += category.Value.Required;
+                    totalCompleted += category.Value.Completed;
+                }
+
+                return totalRequired > 0 ? (double)totalCompleted / totalRequired : 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating procedure completion percentage");
+                return 0;
+            }
+        }
     }
 }
