@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Platform;
-using SledzSpecke.App.Services.Stubs;
 using SledzSpecke.App.ViewModels.Courses;
 using SledzSpecke.App.ViewModels.Dashboard;
 using SledzSpecke.App.ViewModels.Duties;
@@ -21,6 +20,7 @@ using SledzSpecke.Infrastructure.Database.Repositories;
 using SledzSpecke.Infrastructure.Database.Initialization;
 using SledzSpecke.Infrastructure.Services;
 using SQLite;
+using SledzSpecke.App.Services;
 
 namespace SledzSpecke.App;
 
@@ -125,18 +125,15 @@ public static class MauiProgram
 
     private static void RegisterServices(IServiceCollection services)
     {
-        // Register real services
         services.AddSingleton<IProcedureService, ProcedureService>();
         services.AddSingleton<ISpecializationRequirementsProvider, SpecializationRequirementsProvider>();
-
-        // Keep using stub services for the rest until we're ready to implement them
-        services.AddSingleton<ICourseService, StubCourseService>();
-        services.AddSingleton<IInternshipService, StubInternshipService>();
-        services.AddSingleton<IDutyService, StubDutyService>();
-        services.AddSingleton<IUserService, StubUserService>();
-        services.AddSingleton<ISpecializationService, StubSpecializationService>();
-        services.AddSingleton<ISettingsService, StubSettingsService>();
-        services.AddSingleton<IDataSyncService, StubDataSyncService>();
+        services.AddSingleton<ICourseService, CourseService>();
+        services.AddSingleton<IInternshipService, InternshipService>();
+        services.AddSingleton<IDutyService, DutyService>();
+        services.AddSingleton<IUserService, UserService>();
+        services.AddSingleton<ISpecializationService, SpecializationService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IDataSyncService, DataSyncService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
