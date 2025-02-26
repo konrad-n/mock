@@ -1,9 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Core.Models.Enums;
+using System.Collections.ObjectModel;
 
 namespace SledzSpecke.App.ViewModels.Procedures;
 
@@ -15,7 +16,11 @@ public partial class ProcedureEditViewModel : BaseViewModel
     public ProcedureEditViewModel(IProcedureService procedureService)
     {
         _procedureService = procedureService;
-        Title = "Edytuj procedur?";
+        Title = "Edytuj procedurę";
+
+        // Inicjalizacja kolekcji
+        Categories = new ObservableCollection<string>();
+        Stages = new ObservableCollection<string>();
     }
 
     [ObservableProperty]
@@ -33,6 +38,21 @@ public partial class ProcedureEditViewModel : BaseViewModel
     [ObservableProperty]
     private string notes;
 
+    [ObservableProperty]
+    private string supervisorName;
+
+    [ObservableProperty]
+    private ObservableCollection<string> categories;
+
+    [ObservableProperty]
+    private string selectedCategory;
+
+    [ObservableProperty]
+    private ObservableCollection<string> stages;
+
+    [ObservableProperty]
+    private string selectedStage;
+
     public bool CanSave =>
         !string.IsNullOrWhiteSpace(Name) &&
         !string.IsNullOrWhiteSpace(Location);
@@ -46,6 +66,9 @@ public partial class ProcedureEditViewModel : BaseViewModel
             IsBusy = true;
             _procedureId = id;
 
+            // Najpierw załaduj kategorie i etapy
+            await LoadCategoriesAndStagesAsync();
+
             var procedure = await _procedureService.GetProcedureAsync(id);
             if (procedure != null)
             {
@@ -54,19 +77,86 @@ public partial class ProcedureEditViewModel : BaseViewModel
                 IsSelfPerformed = procedure.Type == ProcedureType.Execution;
                 Location = procedure.Location;
                 Notes = procedure.Notes;
+                SelectedCategory = procedure.Category ?? "";
+                SelectedStage = procedure.Stage ?? "";
+
+                // Jeśli jest opiekun w notatkach, wyekstrahuj
+                ExtractSupervisorFromNotes();
             }
         }
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlert(
-            "B??d",
-                "Nie uda?o si? za?adowa? danych procedury",
+                "Błąd",
+                "Nie udało się załadować danych procedury",
                 "OK");
             await Shell.Current.GoToAsync("..");
         }
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private void ExtractSupervisorFromNotes()
+    {
+        if (string.IsNullOrEmpty(Notes)) return;
+
+        const string supervisorPrefix = "Opiekun: ";
+
+        // Sprawdź, czy notatki zawierają informację o opiekunie
+        var lines = Notes.Split('\n');
+        foreach (var line in lines)
+        {
+            if (line.StartsWith(supervisorPrefix))
+            {
+                SupervisorName = line.Substring(supervisorPrefix.Length).Trim();
+
+                // Usuń informację o opiekunie z notatek
+                Notes = string.Join('\n', lines.Where(l => !l.StartsWith(supervisorPrefix)));
+                break;
+            }
+        }
+    }
+
+    private async Task LoadCategoriesAndStagesAsync()
+    {
+        try
+        {
+            // Pobierz dostępne kategorie
+            var availableCategories = await _procedureService.GetAvailableCategoriesAsync();
+            Categories.Clear();
+
+            // Dodaj pustą opcję na początku
+            Categories.Add("");
+
+            foreach (var category in availableCategories)
+            {
+                if (!string.IsNullOrEmpty(category))
+                {
+                    Categories.Add(category);
+                }
+            }
+
+            // Pobierz dostępne etapy
+            var availableStages = await _procedureService.GetAvailableStagesAsync();
+            Stages.Clear();
+
+            // Dodaj pustą opcję na początku
+            Stages.Add("");
+
+            foreach (var stage in availableStages)
+            {
+                if (!string.IsNullOrEmpty(stage))
+                {
+                    Stages.Add(stage);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Logowanie błędu
+            System.Diagnostics.Debug.WriteLine($"Błąd ładowania kategorii i etapów: {ex.Message}");
         }
     }
 
@@ -86,8 +176,18 @@ public partial class ProcedureEditViewModel : BaseViewModel
                 ExecutionDate = ExecutionDate,
                 Type = IsSelfPerformed ? ProcedureType.Execution : ProcedureType.Assistance,
                 Location = Location,
-                Notes = Notes
+                Notes = Notes,
+                Category = SelectedCategory,
+                Stage = SelectedStage
             };
+
+            // Dodaj informację o opiekunie do notatek, jeśli jest podany
+            if (!string.IsNullOrWhiteSpace(SupervisorName))
+            {
+                procedure.Notes = string.IsNullOrEmpty(procedure.Notes)
+                    ? $"Opiekun: {SupervisorName}"
+                    : $"Opiekun: {SupervisorName}\n{procedure.Notes}";
+            }
 
             await _procedureService.UpdateProcedureAsync(procedure);
             await Shell.Current.GoToAsync("..");
@@ -95,8 +195,8 @@ public partial class ProcedureEditViewModel : BaseViewModel
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlert(
-                "B??d",
-                "Nie uda?o si? zapisa? zmian",
+                "Błąd",
+                "Nie udało się zapisać zmian",
                 "OK");
         }
         finally
@@ -111,9 +211,9 @@ public partial class ProcedureEditViewModel : BaseViewModel
         if (IsBusy) return;
 
         var shouldDelete = await Shell.Current.DisplayAlert(
-        "Potwierdzenie",
-            "Czy na pewno chcesz usun?? t? procedur??",
-            "Usu?",
+            "Potwierdzenie",
+            "Czy na pewno chcesz usunąć tę procedurę?",
+            "Usuń",
             "Anuluj");
 
         if (!shouldDelete) return;
@@ -127,8 +227,8 @@ public partial class ProcedureEditViewModel : BaseViewModel
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlert(
-                "B??d",
-                "Nie uda?o si? usun?? procedury",
+                "Błąd",
+                "Nie udało się usunąć procedury",
                 "OK");
         }
         finally

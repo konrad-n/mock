@@ -46,49 +46,34 @@
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
 
-            <!-- Specialty-specific fields -->
-            <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasSpecialtyFields}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Wymagania specjalizacji" Style="{StaticResource SubHeaderLabel}"/>
-                    
-                    <Picker ItemsSource="{Binding SpecialtyCategoryOptions}"
-                            SelectedItem="{Binding SelectedSpecialtyCategory}"
-                            Title="Kategoria procedury"
-                            IsVisible="{Binding HasCategories}"/>
-                            
-                    <Picker ItemsSource="{Binding SpecialtyStageOptions}"
-                            SelectedItem="{Binding SelectedSpecialtyStage}"
-                            Title="Etap specjalizacji"
-                            IsVisible="{Binding HasStages}"/>
-                            
-                    <HorizontalStackLayout IsVisible="{Binding AllowsSimulation}" Spacing="10">
-                        <CheckBox IsChecked="{Binding IsSimulation}"/>
-                        <Label Text="Procedura wykonana na symulatorze" 
-                               Style="{StaticResource BodyLabel}"
-                               VerticalOptions="Center"/>
-                    </HorizontalStackLayout>
-                    
-                    <Label Text="{Binding ValidationMessage}" 
-                           TextColor="Red"
-                           IsVisible="{Binding HasValidationErrors}"/>
-                </VerticalStackLayout>
-            </Border>
+            <!-- Kategoria procedury -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Kategoria procedury"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Picker ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        Title="Wybierz kategorię"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
 
-            <!-- Supervisor section -->
-            <Border Style="{StaticResource CardBorder}" IsVisible="{Binding RequiresSupervisor}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Nadzór *" Style="{StaticResource SubHeaderLabel}"/>
-                    
-                    <Picker ItemsSource="{Binding AvailableSupervisors}"
-                            SelectedItem="{Binding SelectedSupervisor}"
-                            ItemDisplayBinding="{Binding Name}"
-                            Title="Wybierz opiekuna"/>
-                            
-                    <Label Text="Ta procedura wymaga nadzoru opiekuna" 
-                           Style="{StaticResource BodyLabel}"
-                           TextColor="{StaticResource AccentOrange}"/>
-                </VerticalStackLayout>
-            </Border>
+            <!-- Etap specjalizacji -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Etap specjalizacji"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Picker ItemsSource="{Binding Stages}"
+                        SelectedItem="{Binding SelectedStage}"
+                        Title="Wybierz etap"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Opiekun -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Opiekun"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding SupervisorName}"
+                       Placeholder="Imię i nazwisko opiekuna (opcjonalnie)"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
 
             <!-- Notatki -->
             <VerticalStackLayout Spacing="5">

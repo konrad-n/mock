@@ -44,6 +44,35 @@
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
 
+            <!-- Kategoria procedury -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Kategoria procedury"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Picker ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        Title="Wybierz kategorię"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Etap specjalizacji -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Etap specjalizacji"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Picker ItemsSource="{Binding Stages}"
+                        SelectedItem="{Binding SelectedStage}"
+                        Title="Wybierz etap"
+                        Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <!-- Opiekun -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Opiekun"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding SupervisorName}"
+                       Placeholder="Imię i nazwisko opiekuna (opcjonalnie)"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
             <!-- Notatki -->
             <VerticalStackLayout Spacing="5">
                 <Label Text="Notatki"
@@ -73,3 +102,4 @@
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
+ 
