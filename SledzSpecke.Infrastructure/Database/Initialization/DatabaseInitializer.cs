@@ -2,7 +2,6 @@
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Initialization
@@ -43,7 +42,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             catch (Exception ex)
             {
                 Console.WriteLine($"Database initialization failed: {ex.Message}");
-                throw; // Rethrow to be caught by the calling method
+                // Log but don't throw to allow app to continue
+                System.Diagnostics.Debug.WriteLine($"Warning: Database initialization failed: {ex.Message}. App will continue with limited functionality.");
             }
         }
 

@@ -27,7 +27,7 @@ public partial class SplashPage : ContentPage
     {
         try
         {
-            // Simulate loading for now
+            // Simple delay for splash screen effect
             await Task.Delay(2000);
         }
         catch (Exception ex)

@@ -87,16 +87,16 @@ public static class MauiProgram
         services.AddTransient<DutyAddViewModel>();
         services.AddTransient<DutyEditViewModel>();
 
-        // Courses (Make sure these classes exist)
+        // Courses
         services.AddTransient<CoursesViewModel>();
 
-        // Internships (Make sure these classes exist)
+        // Internships
         services.AddTransient<InternshipsViewModel>();
 
         // Profile
         services.AddTransient<ProfileViewModel>();
-        services.AddTransient<SettingsViewModel>();
         services.AddTransient<ProfileEditViewModel>();
+        services.AddTransient<SettingsViewModel>();
 
         // Statistics
         services.AddTransient<SpecializationStatsViewModel>();
@@ -119,8 +119,8 @@ public static class MauiProgram
 
         // Profile
         services.AddTransient<ProfilePage>();
-        services.AddTransient<SettingsPage>();
         services.AddTransient<ProfileEditPage>();
+        services.AddTransient<SettingsPage>();
 
         // Statistics
         services.AddTransient<SpecializationStatsPage>();
