@@ -1,4 +1,4 @@
-namespace SledzSpecke.App;
+﻿namespace SledzSpecke.App;
 
 public partial class SplashPage : ContentPage
 {
@@ -14,17 +14,13 @@ public partial class SplashPage : ContentPage
         try
         {
             await InitializeAppAsync();
-
-            // Change this to navigate to a route that exists in your AppShell
-            await Shell.Current.GoToAsync("//dashboard");
-            // If that doesn't work, try:
-            // await Shell.Current.GoToAsync("//Dashboard");
-            // Or check AppShell.xaml.cs for exact route names
+            // Change this to an existing route like Dashboard
+            await Shell.Current.GoToAsync("//Dashboard");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Navigation error: {ex.Message}");
-            await DisplayAlert("Error", "Failed to initialize the app", "OK");
+            System.Diagnostics.Debug.WriteLine($"Initialization error: {ex.Message}");
+            await DisplayAlert("Błąd", "Nie udało się zainicjalizować aplikacji", "OK");
         }
     }
 

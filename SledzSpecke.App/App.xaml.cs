@@ -12,7 +12,15 @@ namespace SledzSpecke.App
             try
             {
                 InitializeComponent();
-                _permissionService = permissionService;
+                MainPage = new ContentPage
+                {
+                    Content = new Label
+                    {
+                        Text = "Test Page",
+                        HorizontalOptions = LayoutOptions.Center,
+                        VerticalOptions = LayoutOptions.Center
+                    }
+                };
                 // _initializer = initializer;
             }
             catch (System.Reflection.TargetInvocationException ex)
@@ -31,9 +39,23 @@ namespace SledzSpecke.App
 
         protected override async void OnStart()
         {
-            base.OnStart();
-            await CheckCriticalPermissions();
-            // await _initializer.InitializeAsync();
+            try
+            {
+                base.OnStart();
+                await CheckCriticalPermissions();
+                await _initializer.InitializeAsync();
+
+                // Log successful initialization
+                Console.WriteLine("App initialization completed successfully");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error during app initialization: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+
+                // You could also display an error dialog here
+            }
         }
 
         private async Task CheckCriticalPermissions()

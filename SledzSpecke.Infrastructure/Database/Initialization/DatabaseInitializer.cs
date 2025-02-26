@@ -35,34 +35,15 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
         {
             try
             {
-                // Set up a cancellation token source with timeout
-                using var cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromSeconds(30)); // 30 second timeout
-
-                // Create a task for initialization
-                var initTask = _context.InitializeAsync();
-
-                // Wait for completion or cancellation
-                try
-                {
-                    await initTask;
-                    Console.WriteLine("Database context initialized successfully");
-
-                    // Now try to seed data
-                    var seedTask = SeedBasicDataAsync();
-                    await seedTask;
-                    Console.WriteLine("Database seeded successfully");
-                }
-                catch (OperationCanceledException)
-                {
-                    Console.WriteLine("Database initialization timed out after 30 seconds");
-                    // Handle timeout - perhaps create a fresh database
-                }
+                Console.WriteLine("Starting database initialization");
+                await _context.InitializeAsync();
+                await SeedBasicDataAsync();
+                Console.WriteLine("Database initialization completed successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Database initialization error: {ex.GetType().Name}: {ex.Message}");
-                // Consider logging the full exception details including stack trace
+                Console.WriteLine($"Database initialization failed: {ex.Message}");
+                throw; // Rethrow to be caught by the calling method
             }
         }
 
