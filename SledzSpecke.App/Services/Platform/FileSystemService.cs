@@ -6,6 +6,8 @@ public class FileSystemService : IFileSystemService
 {
     public string GetAppDataDirectory()
     {
-        return FileSystem.AppDataDirectory;
+        var path = FileSystem.AppDataDirectory;
+        System.Diagnostics.Debug.WriteLine($"AppDataDirectory: {path}");
+        return path;
     }
 }

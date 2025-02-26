@@ -1,4 +1,5 @@
 ﻿using SledzSpecke.Infrastructure.Database.Context;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,23 +9,23 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 {
     public class MigrationRunner : IMigrationRunner
     {
-        private readonly IApplicationDbContext _context;
+        private readonly Func<SQLiteAsyncConnection> _connectionFactory;
         private readonly Dictionary<int, IMigration> _migrations;
 
-        public MigrationRunner(IApplicationDbContext context)
+        public MigrationRunner(Func<SQLiteAsyncConnection> connectionFactory)
         {
-            _context = context;
+            _connectionFactory = connectionFactory;
             _migrations = new Dictionary<int, IMigration>
-            {
-                { 1, new M001_InitialSchema(context.GetConnection()) },
-                // Add new migration
-                { 19, new M019_EnhanceSpecializationModels(context.GetConnection()) }
-            };
+        {
+            { 1, new M001_InitialSchema(_connectionFactory()) },
+            // Add new migration
+            { 19, new M019_EnhanceSpecializationModels(_connectionFactory()) }
+        };
         }
 
         public async Task<int> GetCurrentVersionAsync()
         {
-            var conn = _context.GetConnection();
+            var conn = _connectionFactory();
             await conn.CreateTableAsync<VersionInfo>();
             var lastVersion = await conn.Table<VersionInfo>()
                 .OrderByDescending(v => v.Version)
@@ -41,7 +42,7 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
             foreach (var migration in pendingMigrations)
             {
-                await migration.Value.UpAsync(_context.GetConnection());
+                await migration.Value.UpAsync(_connectionFactory());
                 await UpdateVersionAsync(migration.Key, migration.Value.Description);
             }
         }
@@ -55,14 +56,14 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
             foreach (var migration in migrationsToRollback)
             {
-                await migration.Value.DownAsync(_context.GetConnection());
+                await migration.Value.DownAsync(_connectionFactory());
                 await DeleteVersionAsync(migration.Key);
             }
         }
 
         private async Task UpdateVersionAsync(int version, string description)
         {
-            var conn = _context.GetConnection();
+            var conn = _connectionFactory();
             var versionInfo = new VersionInfo
             {
                 Version = version,
@@ -74,7 +75,7 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
         private async Task DeleteVersionAsync(int version)
         {
-            var conn = _context.GetConnection();
+            var conn = _connectionFactory();
             await conn.DeleteAsync<VersionInfo>(version);
         }
     }

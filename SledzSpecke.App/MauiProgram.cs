@@ -20,6 +20,7 @@ using SledzSpecke.Infrastructure.Database.Migrations;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using SledzSpecke.Infrastructure.Database.Initialization;
 using SledzSpecke.Infrastructure.Services;
+using SQLite;
 
 namespace SledzSpecke.App;
 
@@ -77,14 +78,35 @@ public static class MauiProgram
 
     private static void RegisterDatabaseServices(IServiceCollection services)
     {
-        // Migrations and database context
-        services.AddSingleton<IMigrationRunner, MigrationRunner>();
-        services.AddSingleton<IApplicationDbContext>(provider =>
-        {
-            var fileSystemService = provider.GetRequiredService<IFileSystemService>();
-            var migrationRunner = provider.GetRequiredService<IMigrationRunner>();
+        System.Diagnostics.Debug.WriteLine("Starting RegisterDatabaseServices");
 
-            var dbPath = DatabaseConfig.GetDatabasePath(fileSystemService.GetAppDataDirectory());
+        // First register IFileSystemService before anything else
+        services.AddSingleton<IFileSystemService, FileSystemService>();
+
+        // Store the database path in a variable for reuse
+        var dbPath = string.Empty;
+        services.AddSingleton(provider => {
+            if (string.IsNullOrEmpty(dbPath))
+            {
+                var fileSystemService = provider.GetRequiredService<IFileSystemService>();
+                dbPath = DatabaseConfig.GetDatabasePath(fileSystemService.GetAppDataDirectory());
+            }
+            return dbPath;
+        });
+
+        // Create a factory function for getting the connection
+        services.AddSingleton<Func<SQLiteAsyncConnection>>(provider => {
+            var path = provider.GetRequiredService<string>();
+            return () => new SQLiteAsyncConnection(path);
+        });
+
+        // Register MigrationRunner with the connection factory
+        services.AddSingleton<IMigrationRunner, MigrationRunner>();
+
+        // Now register the ApplicationDbContext
+        services.AddSingleton<IApplicationDbContext>(provider => {
+            var dbPath = provider.GetRequiredService<string>();
+            var migrationRunner = provider.GetRequiredService<IMigrationRunner>();
             return new ApplicationDbContext(dbPath, migrationRunner);
         });
 
