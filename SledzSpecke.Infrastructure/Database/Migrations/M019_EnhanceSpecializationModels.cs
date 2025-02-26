@@ -1,4 +1,4 @@
-using SledzSpecke.Core.Models.Domain;
+﻿using SledzSpecke.Core.Models.Domain;
 using SQLite;
 using System.Threading.Tasks;
 
@@ -14,69 +14,103 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
         public override async Task UpAsync()
         {
-            // 1. Aktualizacja tabeli Specialization
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE Specialization ADD COLUMN MinimumDutyHours REAL DEFAULT 0;
-            ");
+            // 1. Check if MinimumDutyHours column already exists in Specialization table
+            var hasMinimumDutyHours = await CheckColumnExistsAsync("Specialization", "MinimumDutyHours");
 
-            // 2. Aktualizacja tabeli CourseDefinition
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE CourseDefinition ADD COLUMN DurationInDays INTEGER DEFAULT 1;
-            ALTER TABLE CourseDefinition ADD COLUMN IsRequired INTEGER DEFAULT 1;
-            ALTER TABLE CourseDefinition ADD COLUMN CanBeRemote INTEGER DEFAULT 0;
-            ALTER TABLE CourseDefinition ADD COLUMN RecommendedYear INTEGER DEFAULT 1;
-            ALTER TABLE CourseDefinition ADD COLUMN Requirements TEXT;
-            ALTER TABLE CourseDefinition ADD COLUMN CompletionRequirements TEXT;
-            ALTER TABLE CourseDefinition ADD COLUMN CourseTopicsJson TEXT;
-            ");
+            // Only add the column if it doesn't exist
+            if (!hasMinimumDutyHours)
+            {
+                await _connection.ExecuteAsync(@"
+                ALTER TABLE Specialization ADD COLUMN MinimumDutyHours REAL DEFAULT 0;
+                ");
+            }
 
-            // 3. Utworzenie tabeli InternshipModule
+            // 2. Check CourseDefinition columns before adding
+            await SafeAddColumnAsync("CourseDefinition", "DurationInDays", "INTEGER", "1");
+            await SafeAddColumnAsync("CourseDefinition", "IsRequired", "INTEGER", "1");
+            await SafeAddColumnAsync("CourseDefinition", "CanBeRemote", "INTEGER", "0");
+            await SafeAddColumnAsync("CourseDefinition", "RecommendedYear", "INTEGER", "1");
+            await SafeAddColumnAsync("CourseDefinition", "Requirements", "TEXT");
+            await SafeAddColumnAsync("CourseDefinition", "CompletionRequirements", "TEXT");
+            await SafeAddColumnAsync("CourseDefinition", "CourseTopicsJson", "TEXT");
+
+            // 3. Utworzenie tabeli InternshipModule - CreateTable jest bezpieczne, jeśli już istnieje, to nie tworzy
             await _connection.CreateTableAsync<InternshipModule>();
 
-            // 4. Aktualizacja tabeli InternshipDefinition
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE InternshipDefinition ADD COLUMN IsRequired INTEGER DEFAULT 1;
-            ALTER TABLE InternshipDefinition ADD COLUMN RecommendedYear INTEGER DEFAULT 1;
-            ALTER TABLE InternshipDefinition ADD COLUMN Requirements TEXT;
-            ALTER TABLE InternshipDefinition ADD COLUMN CompletionRequirementsJson TEXT;
-            ");
+            // 4. Check InternshipDefinition columns before adding
+            await SafeAddColumnAsync("InternshipDefinition", "IsRequired", "INTEGER", "1");
+            await SafeAddColumnAsync("InternshipDefinition", "RecommendedYear", "INTEGER", "1");
+            await SafeAddColumnAsync("InternshipDefinition", "Requirements", "TEXT");
+            await SafeAddColumnAsync("InternshipDefinition", "CompletionRequirementsJson", "TEXT");
 
-            // 5. Aktualizacja tabeli ProcedureRequirement
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE ProcedureRequirement ADD COLUMN RequiredCount INTEGER DEFAULT 0;
-            ALTER TABLE ProcedureRequirement ADD COLUMN AssistanceCount INTEGER DEFAULT 0;
-            ALTER TABLE ProcedureRequirement ADD COLUMN SupervisionRequired INTEGER DEFAULT 0;
-            ALTER TABLE ProcedureRequirement ADD COLUMN Category TEXT;
-            ALTER TABLE ProcedureRequirement ADD COLUMN Stage TEXT;
-            ALTER TABLE ProcedureRequirement ADD COLUMN AllowSimulation INTEGER DEFAULT 0;
-            ALTER TABLE ProcedureRequirement ADD COLUMN SimulationLimit INTEGER DEFAULT 0;
-            ");
+            // 5. Check ProcedureRequirement columns before adding
+            await SafeAddColumnAsync("ProcedureRequirement", "RequiredCount", "INTEGER", "0");
+            await SafeAddColumnAsync("ProcedureRequirement", "AssistanceCount", "INTEGER", "0");
+            await SafeAddColumnAsync("ProcedureRequirement", "SupervisionRequired", "INTEGER", "0");
+            await SafeAddColumnAsync("ProcedureRequirement", "Category", "TEXT");
+            await SafeAddColumnAsync("ProcedureRequirement", "Stage", "TEXT");
+            await SafeAddColumnAsync("ProcedureRequirement", "AllowSimulation", "INTEGER", "0");
+            await SafeAddColumnAsync("ProcedureRequirement", "SimulationLimit", "INTEGER", "0");
 
-            // 6. Aktualizacja tabeli ProcedureExecution
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE ProcedureExecution ADD COLUMN IsSimulation INTEGER DEFAULT 0;
-            ALTER TABLE ProcedureExecution ADD COLUMN Category TEXT;
-            ALTER TABLE ProcedureExecution ADD COLUMN Stage TEXT;
-            ALTER TABLE ProcedureExecution ADD COLUMN ProcedureRequirementId INTEGER;
-            ");
+            // 6. Check ProcedureExecution columns before adding
+            await SafeAddColumnAsync("ProcedureExecution", "IsSimulation", "INTEGER", "0");
+            await SafeAddColumnAsync("ProcedureExecution", "Category", "TEXT");
+            await SafeAddColumnAsync("ProcedureExecution", "Stage", "TEXT");
+            await SafeAddColumnAsync("ProcedureExecution", "ProcedureRequirementId", "INTEGER");
 
-            // 7. Aktualizacja tabeli DutyRequirement
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE DutyRequirement ADD COLUMN RequiresSupervision INTEGER DEFAULT 0;
-            ALTER TABLE DutyRequirement ADD COLUMN MinimumHoursPerMonth INTEGER DEFAULT 0;
-            ALTER TABLE DutyRequirement ADD COLUMN MinimumDutiesPerMonth INTEGER DEFAULT 0;
-            ALTER TABLE DutyRequirement ADD COLUMN RequiredCompetenciesJson TEXT;
-            ");
+            // 7. Check DutyRequirement columns before adding
+            await SafeAddColumnAsync("DutyRequirement", "RequiresSupervision", "INTEGER", "0");
+            await SafeAddColumnAsync("DutyRequirement", "MinimumHoursPerMonth", "INTEGER", "0");
+            await SafeAddColumnAsync("DutyRequirement", "MinimumDutiesPerMonth", "INTEGER", "0");
+            await SafeAddColumnAsync("DutyRequirement", "RequiredCompetenciesJson", "TEXT");
 
-            // 8. Aktualizacja tabeli InternshipModule
-            await _connection.ExecuteAsync(@"
-            ALTER TABLE InternshipModule ADD COLUMN AssistantProceduresJson TEXT;
-            ");
+            // 8. Check InternshipModule columns before adding
+            await SafeAddColumnAsync("InternshipModule", "AssistantProceduresJson", "TEXT");
         }
 
         public override async Task DownAsync()
         {
             // Implementacja powrotu do poprzedniej wersji (opcjonalnie)
+        }
+
+        private async Task<bool> CheckColumnExistsAsync(string tableName, string columnName)
+        {
+            var tableInfo = await _connection.QueryAsync<TableInfoResult>($"PRAGMA table_info({tableName})");
+            foreach (var column in tableInfo)
+            {
+                if (column.Name.Equals(columnName, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private async Task<bool> SafeAddColumnAsync(string tableName, string columnName, string columnType, string defaultValue = null)
+        {
+            if (await CheckColumnExistsAsync(tableName, columnName))
+            {
+                return false; // Column already exists
+            }
+
+            string sql = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType}";
+            if (defaultValue != null)
+            {
+                sql += $" DEFAULT {defaultValue}";
+            }
+
+            await _connection.ExecuteAsync(sql);
+            return true;
+        }
+
+        private class TableInfoResult
+        {
+            public int Cid { get; set; }
+            public string Name { get; set; }
+            public string Type { get; set; }
+            public int NotNull { get; set; }
+            public string DefaultValue { get; set; }
+            public int Pk { get; set; }
         }
     }
 }
