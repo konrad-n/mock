@@ -1,5 +1,4 @@
 ﻿using SledzSpecke.Core.Models.Domain;
-using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database.Context;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Repositories
 {
-    // Infrastructure/Database/Repositories/DutyRepository.cs
     public class DutyRepository : BaseRepository<Duty>, IDutyRepository
     {
         public DutyRepository(IApplicationDbContext context) : base(context)
@@ -24,16 +22,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                         && d.EndTime <= end)
                 .OrderByDescending(d => d.StartTime)
                 .ToListAsync();
-        }
-
-        public async Task<decimal> GetTotalHoursAsync(int userId)
-        {
-            await _context.InitializeAsync();
-            var duties = await _connection.Table<Duty>()
-                .Where(d => d.UserId == userId)
-                .ToListAsync();
-
-            return duties.Sum(d => (decimal)(d.EndTime - d.StartTime).TotalHours);
         }
 
         public async Task<Dictionary<DateTime, decimal>> GetMonthlyHoursAsync(int userId, DateTime startDate, DateTime endDate)
@@ -65,20 +53,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 (d.StartTime < end && d.EndTime >= end) ||
                 (d.StartTime >= start && d.EndTime <= end)
             ).CountAsync() > 0;
-        }
-
-        public async Task<List<Duty>> GetUpcomingDutiesAsync(int userId, int daysAhead = 7)
-        {
-            await _context.InitializeAsync();
-            var startDate = DateTime.Today;
-            var endDate = startDate.AddDays(daysAhead);
-
-            return await _connection.Table<Duty>()
-                .Where(d => d.UserId == userId
-                        && d.StartTime >= startDate
-                        && d.StartTime <= endDate)
-                .OrderBy(d => d.StartTime)
-                .ToListAsync();
         }
 
         public async Task<DutyStatistics> GetDutyStatisticsAsync(int userId)

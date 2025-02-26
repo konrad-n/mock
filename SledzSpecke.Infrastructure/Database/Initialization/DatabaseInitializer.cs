@@ -3,7 +3,6 @@ using SledzSpecke.Infrastructure.Database.Context;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Initialization
@@ -12,16 +11,13 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
     {
         private readonly IApplicationDbContext _context;
         private readonly ISpecializationRepository _specializationRepo;
-        private readonly IProcedureRepository _procedureRepo;
 
         public DatabaseInitializer(
             IApplicationDbContext context,
-            ISpecializationRepository specializationRepo,
-            IProcedureRepository procedureRepo)
+            ISpecializationRepository specializationRepo)
         {
             _context = context;
             _specializationRepo = specializationRepo;
-            _procedureRepo = procedureRepo;
         }
 
         public async Task InitializeAsync()
@@ -38,46 +34,30 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             {
                 System.Diagnostics.Debug.WriteLine($"Database initialization failed: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-                throw; // Rethrow to be caught in App.xaml.cs
+                throw;
             }
         }
 
         private async Task SeedBasicDataAsync()
         {
-            System.Diagnostics.Debug.WriteLine("Checking if data already exists...");
-            // Check if data already exists
-            var hasData = await _specializationRepo.GetAllAsync();
-            if (hasData.Any())
-            {
-                System.Diagnostics.Debug.WriteLine("Data already exists, skipping seeding...");
-                return;
-            }
-
-            System.Diagnostics.Debug.WriteLine("Seeding specializations...");
-            // Seed specializations from the new data seeder
             var specializations = DataSeeder.GetBasicSpecializations();
             foreach (var spec in specializations)
             {
                 await _specializationRepo.AddAsync(spec);
             }
 
-            System.Diagnostics.Debug.WriteLine("Seeding courses...");
-            // Seed courses
             var courses = DataSeeder.GetBasicCourses();
             foreach (var course in courses)
             {
                 await _context.GetConnection().InsertAsync(course);
             }
 
-            System.Diagnostics.Debug.WriteLine("Seeding internships...");
-            // Seed internships
             var internships = DataSeeder.GetBasicInternships();
             foreach (var internship in internships)
             {
                 await _context.GetConnection().InsertAsync(internship);
             }
 
-            // Add this code after inserting internships
             foreach (var internship in internships)
             {
                 if (internship.DetailedStructure != null)
@@ -90,8 +70,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine("Seeding procedures requirements...");
-            // Extract procedure requirements from the required procedures dictionary
             var procedureRequirements = new List<ProcedureRequirement>();
             var requiredProcedures = DataSeeder.GetRequiredProcedures();
 
@@ -101,7 +79,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 {
                     procedureRequirements.Add(new ProcedureRequirement
                     {
-                        SpecializationId = 5, // Hematology ID from the new data
+                        SpecializationId = 5,
                         Name = procedure.Name,
                         Description = $"Procedura z kategorii: {category.Key}",
                         RequiredCount = procedure.RequiredCount,
@@ -117,9 +95,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 await _context.GetConnection().InsertAsync(proc);
             }
 
-            System.Diagnostics.Debug.WriteLine("Seeding test user...");
-
-            // Create a test user
             var user = new User
             {
                 Email = "test@example.com",
@@ -127,12 +102,10 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 PWZ = "123456",
                 CurrentSpecializationId = 1,
                 SpecializationStartDate = DateTime.Now.AddYears(-1),
-                ExpectedEndDate = DateTime.Now.AddYears(3) // Hematology is 3 years
+                ExpectedEndDate = DateTime.Now.AddYears(3)
             };
 
             await _context.GetConnection().InsertAsync(user);
-
-            System.Diagnostics.Debug.WriteLine("Basic data sync completed.");
         }
     }
 }

@@ -189,19 +189,5 @@ namespace SledzSpecke.Infrastructure.Services
                 throw new ValidationException("Monthly duty hours limit exceeded");
             }
         }
-
-        public async Task<List<Duty>> GetUpcomingDutiesAsync(int daysAhead = 7)
-        {
-            try
-            {
-                var userId = await _userService.GetCurrentUserIdAsync();
-                return await _repository.GetUpcomingDutiesAsync(userId, daysAhead);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting upcoming duties");
-                throw;
-            }
-        }
     }
 }

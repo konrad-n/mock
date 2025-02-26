@@ -55,47 +55,6 @@ namespace SledzSpecke.Infrastructure.Services
             }
         }
 
-        public async Task<List<Specialization>> GetAvailableSpecializationsAsync()
-        {
-            try
-            {
-                return await _specializationRepository.GetActiveSpecializationsAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting available specializations");
-                return new List<Specialization>();
-            }
-        }
-
-        public async Task<bool> ChangeSpecializationAsync(int specializationId)
-        {
-            try
-            {
-                var user = await _userService.GetCurrentUserAsync();
-                if (user == null)
-                {
-                    return false;
-                }
-
-                var specialization = await _specializationRepository.GetByIdAsync(specializationId);
-                if (specialization == null)
-                {
-                    return false;
-                }
-
-                user.CurrentSpecializationId = specializationId;
-                // Tutaj powinno być zaktualizowanie użytkownika w bazie danych
-                
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error changing specialization");
-                return false;
-            }
-        }
-
         public async Task<Specialization> GetSpecializationAsync(int id)
         {
             try

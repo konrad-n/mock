@@ -1,9 +1,7 @@
 using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Context;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Repositories
@@ -28,28 +26,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 .Where(c => c.SpecializationId == specializationId && c.IsRequired)
                 .OrderBy(c => c.RecommendedYear)
                 .ToListAsync();
-        }
-
-        public async Task<List<CourseDefinition>> GetCoursesByYearAsync(int specializationId, int year)
-        {
-            await _context.InitializeAsync();
-            return await _connection.Table<CourseDefinition>()
-                .Where(c => c.SpecializationId == specializationId && c.RecommendedYear == year)
-                .OrderBy(c => c.Name)
-                .ToListAsync();
-        }
-
-        public async Task<List<string>> GetCourseTopicsAsync(int courseDefinitionId)
-        {
-            await _context.InitializeAsync();
-            var courseDefinition = await _connection.GetAsync<CourseDefinition>(courseDefinitionId);
-            
-            if (courseDefinition == null || string.IsNullOrEmpty(courseDefinition.CourseTopicsJson))
-            {
-                return new List<string>();
-            }
-            
-            return courseDefinition.CourseTopics;
         }
 
         public async Task<double> GetCourseProgressAsync(int userId, int specializationId)

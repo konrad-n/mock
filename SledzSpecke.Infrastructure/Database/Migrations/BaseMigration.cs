@@ -17,7 +17,6 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
         public abstract Task UpAsync();
         public abstract Task DownAsync();
 
-        // Implement interface methods
         Task IMigration.UpAsync(SQLiteAsyncConnection connection) => UpAsync();
         Task IMigration.DownAsync(SQLiteAsyncConnection connection) => DownAsync();
     }

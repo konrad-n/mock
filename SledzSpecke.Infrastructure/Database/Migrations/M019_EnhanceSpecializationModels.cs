@@ -14,10 +14,8 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
         public override async Task UpAsync()
         {
-            // 1. Check if MinimumDutyHours column already exists in Specialization table
             var hasMinimumDutyHours = await CheckColumnExistsAsync("Specialization", "MinimumDutyHours");
 
-            // Only add the column if it doesn't exist
             if (!hasMinimumDutyHours)
             {
                 await _connection.ExecuteAsync(@"
@@ -25,7 +23,6 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
                 ");
             }
 
-            // 2. Check CourseDefinition columns before adding
             await SafeAddColumnAsync("CourseDefinition", "DurationInDays", "INTEGER", "1");
             await SafeAddColumnAsync("CourseDefinition", "IsRequired", "INTEGER", "1");
             await SafeAddColumnAsync("CourseDefinition", "CanBeRemote", "INTEGER", "0");
@@ -33,17 +30,11 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
             await SafeAddColumnAsync("CourseDefinition", "Requirements", "TEXT");
             await SafeAddColumnAsync("CourseDefinition", "CompletionRequirements", "TEXT");
             await SafeAddColumnAsync("CourseDefinition", "CourseTopicsJson", "TEXT");
-
-            // 3. Utworzenie tabeli InternshipModule - CreateTable jest bezpieczne, jeśli już istnieje, to nie tworzy
             await _connection.CreateTableAsync<InternshipModule>();
-
-            // 4. Check InternshipDefinition columns before adding
             await SafeAddColumnAsync("InternshipDefinition", "IsRequired", "INTEGER", "1");
             await SafeAddColumnAsync("InternshipDefinition", "RecommendedYear", "INTEGER", "1");
             await SafeAddColumnAsync("InternshipDefinition", "Requirements", "TEXT");
             await SafeAddColumnAsync("InternshipDefinition", "CompletionRequirementsJson", "TEXT");
-
-            // 5. Check ProcedureRequirement columns before adding
             await SafeAddColumnAsync("ProcedureRequirement", "RequiredCount", "INTEGER", "0");
             await SafeAddColumnAsync("ProcedureRequirement", "AssistanceCount", "INTEGER", "0");
             await SafeAddColumnAsync("ProcedureRequirement", "SupervisionRequired", "INTEGER", "0");
@@ -51,26 +42,19 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
             await SafeAddColumnAsync("ProcedureRequirement", "Stage", "TEXT");
             await SafeAddColumnAsync("ProcedureRequirement", "AllowSimulation", "INTEGER", "0");
             await SafeAddColumnAsync("ProcedureRequirement", "SimulationLimit", "INTEGER", "0");
-
-            // 6. Check ProcedureExecution columns before adding
             await SafeAddColumnAsync("ProcedureExecution", "IsSimulation", "INTEGER", "0");
             await SafeAddColumnAsync("ProcedureExecution", "Category", "TEXT");
             await SafeAddColumnAsync("ProcedureExecution", "Stage", "TEXT");
             await SafeAddColumnAsync("ProcedureExecution", "ProcedureRequirementId", "INTEGER");
-
-            // 7. Check DutyRequirement columns before adding
             await SafeAddColumnAsync("DutyRequirement", "RequiresSupervision", "INTEGER", "0");
             await SafeAddColumnAsync("DutyRequirement", "MinimumHoursPerMonth", "INTEGER", "0");
             await SafeAddColumnAsync("DutyRequirement", "MinimumDutiesPerMonth", "INTEGER", "0");
             await SafeAddColumnAsync("DutyRequirement", "RequiredCompetenciesJson", "TEXT");
-
-            // 8. Check InternshipModule columns before adding
             await SafeAddColumnAsync("InternshipModule", "AssistantProceduresJson", "TEXT");
         }
 
         public override async Task DownAsync()
         {
-            // Implementacja powrotu do poprzedniej wersji (opcjonalnie)
         }
 
         private async Task<bool> CheckColumnExistsAsync(string tableName, string columnName)
@@ -90,7 +74,7 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
         {
             if (await CheckColumnExistsAsync(tableName, columnName))
             {
-                return false; // Column already exists
+                return false;
             }
 
             string sql = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType}";

@@ -13,7 +13,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             {
                 new Specialization
                 {
-                    Id = 1, // Kolejny numer po wcześniejszych specjalizacjach
+                    Id = 1,
                     Name = "Hematologia",
                     DurationInWeeks = 156, // 3 lata (52 tygodnie × 3)
                     ProgramVersion = "2023",
@@ -24,7 +24,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
                 new Specialization
                 {
-                    Id = 2, // Kolejny ID po psychiatrii, chirurgii onkologicznej i intensywnej terapii
+                    Id = 2,
                     Name = "Medycyna morska i tropikalna",
                     DurationInWeeks = 104, // 2 lata modułu specjalistycznego
                     ProgramVersion = "2023",
@@ -358,7 +358,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     },
                     CompletionRequirements = "Zaliczenie sprawdzianu z zakresu wiedzy objętej programem kursu"
                 },
-                // Kurs: Medycyna morska
                 new CourseDefinition
                 {
                     Name = "Medycyna morska",
@@ -386,7 +385,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     },
                     CompletionRequirements = "Zaliczenie sprawdzianu z zakresu wiedzy objętej programem kursu"
                 },
-                // Kurs: Medycyna nurkowa z elementami medycyny hiperbarycznej
                 new CourseDefinition
                 {
                     Name = "Medycyna nurkowa z elementami medycyny hiperbarycznej",
@@ -421,7 +419,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     },
                     CompletionRequirements = "Zaliczenie sprawdzianu z zakresu wiedzy objętej programem kursu"
                 },
-                // Kurs: Medycyna tropikalna
                 new CourseDefinition
                 {
                     Name = "Medycyna tropikalna",
@@ -451,7 +448,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     },
                     CompletionRequirements = "Zaliczenie sprawdzianu z zakresu wiedzy objętej programem kursu"
                 },
-                // Kurs: Medycyna podróży
                 new CourseDefinition
                 {
                     Name = "Medycyna podróży",
@@ -480,7 +476,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     },
                     CompletionRequirements = "Zaliczenie sprawdzianu z zakresu wiedzy objętej programem kursu"
                 },
-                // Kurs atestacyjny
                 new CourseDefinition
                 {
                     Name = "Kurs atestacyjny (podsumowujący): Medycyna morska i tropikalna",
@@ -806,7 +801,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych - potwierdzenie wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż podstawowy
                 new InternshipDefinition
                 {
                     Name = "Staż podstawowy w zakresie medycyny morskiej i tropikalnej",
@@ -840,7 +834,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika specjalizacji wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie medycyny morskiej
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie medycyny morskiej",
@@ -880,7 +873,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie medycyny morskiej w Granicznej Stacji Sanitarno-Epidemiologicznej
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie medycyny morskiej w Granicznej Stacji Sanitarno-Epidemiologicznej",
@@ -918,7 +910,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie medycyny tropikalnej
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie medycyny tropikalnej",
@@ -963,7 +954,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie chorób zakaźnych
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie chorób zakaźnych",
@@ -1009,7 +999,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie medycyny nurkowej z elementami medycyny hiperbarycznej
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie medycyny nurkowej z elementami medycyny hiperbarycznej",
@@ -1058,7 +1047,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie ortopedii i traumatologii
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie ortopedii i traumatologii",
@@ -1088,7 +1076,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie neurologii
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie neurologii",
@@ -1132,7 +1119,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie psychologii pracy
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie psychologii pracy",
@@ -1168,7 +1154,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie dermatologii i wenerologii
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie dermatologii i wenerologii",
@@ -1209,7 +1194,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie okulistyki
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie okulistyki",
@@ -1239,7 +1223,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         "Zaliczenie sprawdzianu z umiejętności praktycznych – potwierdzenie przez kierownika stażu wykonanych przez lekarza zabiegów lub procedur medycznych objętych programem stażu"
                     }
                 },
-                // Staż kierunkowy w zakresie otolaryngologii
                 new InternshipDefinition
                 {
                     Name = "Staż kierunkowy w zakresie otolaryngologii",
@@ -1389,7 +1372,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         }
                     }
                 },
-                // Podczas stażu podstawowego w zakresie medycyny morskiej i tropikalnej
                 {
                     "Staż podstawowy",
                     new List<RequiredProcedure>
@@ -1436,12 +1418,10 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         }
                     }
                 },
-                // Podczas staży kierunkowych
                 {
                     "Staże kierunkowe",
                     new List<RequiredProcedure>
                     {
-                        // Medycyna morska
                         new RequiredProcedure
                         {
                             Name = "Ocena stanu zdrowia kandydatów i pracowników, wydawanie orzeczenia lekarskiego o zdolności do pracy na statkach morskich",
@@ -1466,7 +1446,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Samodzielne prowadzenie dokumentacji medycznej",
                             SpecializationId = 2
                         },
-                        // Medycyna morska w GSSE
                         new RequiredProcedure
                         {
                             Name = "Prowadzenie sanitarnej kontroli statku pod nadzorem Inspektora GSSE",
@@ -1491,7 +1470,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Zapoznanie się z zasadami współpracy z morską służbą ratownictwa i poszukiwań SAR",
                             SpecializationId = 2
                         },
-                        // Medycyna tropikalna
                         new RequiredProcedure
                         {
                             Name = "Umiejętność pobierania krwi oraz wykonywania wymazów i rozmazów do badań mikrobiologicznych, parazytologicznych oraz serologicznych",
@@ -1516,7 +1494,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Samodzielna ocena stanu zdrowia i wydawanie orzeczeń",
                             SpecializationId = 2
                         },
-                        // Choroby zakaźne
                         new RequiredProcedure
                         {
                             Name = "Pobieranie krwi oraz innych płynów ustrojowych oraz wymazów do badań mikrobiologicznych",
@@ -1533,7 +1510,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Samodzielna kwalifikacja do profilaktyki poekspozycyjnej",
                             SpecializationId = 2
                         },
-                        // Medycyna nurkowa z elementami medycyny hiperbarycznej
                         new RequiredProcedure
                         {
                             Name = "Udział w przeprowadzaniu sesji hiperbarycznych (bez konieczności pobytu pod ciśnieniem)",
@@ -1550,7 +1526,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Uczestniczenie w procedurach orzekania",
                             SpecializationId = 2
                         },
-                        // Neurologia
                         new RequiredProcedure
                         {
                             Name = "Wykonanie badania neurologicznego",
@@ -1567,7 +1542,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Uczestniczenie w wykonaniu nakłucia lędźwiowego",
                             SpecializationId = 2
                         },
-                        // Psychologia pracy
                         new RequiredProcedure
                         {
                             Name = "Udział w procedurach badań psychologicznych i psychotechnicznych",
@@ -1576,7 +1550,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Uczestniczenie w procedurach badań psychologicznych i psychotechnicznych",
                             SpecializationId = 2
                         },
-                        // Dermatologia i wenerologia
                         new RequiredProcedure
                         {
                             Name = "Pobieranie wycinków/skrawków skóry do badań mikroskopowych oraz PCR",
@@ -1593,7 +1566,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Samodzielne wykonywanie testów naskórkowych",
                             SpecializationId = 2
                         },
-                        // Okulistyka
                         new RequiredProcedure
                         {
                             Name = "Określanie ostrości wzroku do dali i bliży bez korekcji i z korekcją",
@@ -1626,7 +1598,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                             Description = "Samodzielne usuwanie ciała obcego z oka",
                             SpecializationId = 2
                         },
-                        // Otolaryngologia
                         new RequiredProcedure
                         {
                             Name = "Badanie ostrości słuchu szeptem i mową",

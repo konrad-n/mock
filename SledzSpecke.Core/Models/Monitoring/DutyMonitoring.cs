@@ -49,20 +49,17 @@ namespace SledzSpecke.Core.Models.Monitoring
                     return (false, deficiencies);
                 }
 
-                // Sprawdzanie liczby godzin
                 var totalHours = monthlyDuties.Sum(d => d.DurationInHours);
                 if (totalHours < requirements.MinimumHoursPerMonth)
                 {
                     deficiencies.Add($"Brakuje {requirements.MinimumHoursPerMonth - totalHours:F1} godzin dyżurowych");
                 }
 
-                // Sprawdzanie liczby dyżurów
                 if (monthlyDuties.Count < requirements.MinimumDutiesPerMonth)
                 {
                     deficiencies.Add($"Brakuje {requirements.MinimumDutiesPerMonth - monthlyDuties.Count} dyżurów");
                 }
 
-                // Sprawdzanie nadzoru
                 if (requirements.RequiresSupervision && monthlyDuties.Any(d => !d.WasSupervised))
                 {
                     deficiencies.Add("Niektóre dyżury odbyły się bez wymaganego nadzoru");

@@ -38,34 +38,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Dictionary<string, List<string>>> GetRequiredSkillsByInternshipAsync(int internshipDefinitionId)
-        {
-            await _context.InitializeAsync();
-            var modules = await GetModulesForInternshipAsync(internshipDefinitionId);
-            var skillsDictionary = new Dictionary<string, List<string>>();
-            
-            foreach (var module in modules)
-            {
-                skillsDictionary[module.Name] = module.RequiredSkills;
-            }
-            
-            return skillsDictionary;
-        }
-
-        public async Task<Dictionary<string, Dictionary<string, int>>> GetRequiredProceduresByInternshipAsync(int internshipDefinitionId)
-        {
-            await _context.InitializeAsync();
-            var modules = await GetModulesForInternshipAsync(internshipDefinitionId);
-            var proceduresDictionary = new Dictionary<string, Dictionary<string, int>>();
-            
-            foreach (var module in modules)
-            {
-                proceduresDictionary[module.Name] = module.RequiredProcedures;
-            }
-            
-            return proceduresDictionary;
-        }
-
         public async Task<double> GetInternshipProgressAsync(int userId, int specializationId)
         {
             await _context.InitializeAsync();
@@ -73,7 +45,7 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
             var userInternships = await GetUserInternshipsAsync(userId);
             
             if (requiredInternships.Count == 0)
-                return 1.0; // 100% jeśli nie ma wymaganych staży
+                return 1.0;
             
             var completedCount = userInternships.Count(i => i.IsCompleted);
             return (double)completedCount / requiredInternships.Count;
@@ -94,7 +66,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
             
             foreach (var internship in userInternships.Where(i => i.IsCompleted))
             {
-                // Znajdź odpowiadającą definicję stażu
                 var definition = requiredInternships.FirstOrDefault(d => d.Id == internship.InternshipDefinitionId);
                 if (definition != null)
                 {

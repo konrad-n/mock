@@ -7,8 +7,6 @@ namespace SledzSpecke.Core.Interfaces.Services
     public interface ISpecializationService
     {
         Task<Specialization> GetCurrentSpecializationAsync();
-        Task<List<Specialization>> GetAvailableSpecializationsAsync();
-        Task<bool> ChangeSpecializationAsync(int specializationId);
         Task<Specialization> GetSpecializationAsync(int id);
         Task<SpecializationProgress> GetProgressStatisticsAsync(int specializationId);
         Task<List<ProcedureRequirement>> GetRequiredProceduresAsync(int specializationId);

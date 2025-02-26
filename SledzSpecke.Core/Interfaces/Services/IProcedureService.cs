@@ -12,11 +12,7 @@ namespace SledzSpecke.Core.Interfaces.Services
         Task<ProcedureExecution> AddProcedureAsync(ProcedureExecution procedure);
         Task<bool> UpdateProcedureAsync(ProcedureExecution procedure);
         Task<bool> DeleteProcedureAsync(int id);
-        
-        // Nowe metody
         Task<List<ProcedureRequirement>> GetRequirementsForSpecializationAsync();
-        Task<List<ProcedureRequirement>> GetRequirementsByStageAsync(string stage);
-        Task<List<ProcedureRequirement>> GetRequirementsByCategoryAsync(string category);
         Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync();
         Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByStageAsync();
         Task<double> GetProcedureCompletionPercentageAsync();

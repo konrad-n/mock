@@ -268,44 +268,6 @@ namespace SledzSpecke.Infrastructure.Services
             }
         }
 
-        public async Task<List<ProcedureRequirement>> GetRequirementsByCategoryAsync(string category)
-        {
-            try
-            {
-                var user = await _userService.GetCurrentUserAsync();
-                if (user?.CurrentSpecializationId == null)
-                {
-                    return new List<ProcedureRequirement>();
-                }
-
-                return await _repository.GetRequirementsByCategoryAsync(user.CurrentSpecializationId.Value, category);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting requirements by category");
-                return new List<ProcedureRequirement>();
-            }
-        }
-
-        public async Task<List<ProcedureRequirement>> GetRequirementsByStageAsync(string stage)
-        {
-            try
-            {
-                var user = await _userService.GetCurrentUserAsync();
-                if (user?.CurrentSpecializationId == null)
-                {
-                    return new List<ProcedureRequirement>();
-                }
-
-                return await _repository.GetRequirementsByStageAsync(user.CurrentSpecializationId.Value, stage);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting requirements by stage");
-                return new List<ProcedureRequirement>();
-            }
-        }
-
         public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync()
         {
             try

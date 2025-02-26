@@ -9,8 +9,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
         Task<List<Internship>> GetUserInternshipsAsync(int userId);
         Task<List<InternshipDefinition>> GetRequiredInternshipsAsync(int specializationId);
         Task<List<InternshipModule>> GetModulesForInternshipAsync(int internshipDefinitionId);
-        Task<Dictionary<string, List<string>>> GetRequiredSkillsByInternshipAsync(int internshipDefinitionId);
-        Task<Dictionary<string, Dictionary<string, int>>> GetRequiredProceduresByInternshipAsync(int internshipDefinitionId);
         Task<double> GetInternshipProgressAsync(int userId, int specializationId);
         Task<Dictionary<string, (int Required, int Completed)>> GetInternshipProgressByYearAsync(int userId, int specializationId);
     }

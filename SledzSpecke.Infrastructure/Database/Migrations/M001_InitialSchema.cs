@@ -15,7 +15,6 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
         public override async Task UpAsync()
         {
-            // Create base tables only if they don't exist
             if (!await _connection.TableExistsAsync<User>())
                 await _connection.CreateTableAsync<User>();
 
@@ -67,7 +66,6 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
 
         public override async Task DownAsync()
         {
-            // Drop tables in reverse order to avoid foreign key constraints
             await _connection.DropTableAsync<SpecializationProgress>();
             await _connection.DropTableAsync<DutyStatistics>();
             await _connection.DropTableAsync<NotificationInfo>();

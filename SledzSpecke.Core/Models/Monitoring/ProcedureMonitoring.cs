@@ -20,18 +20,16 @@ namespace SledzSpecke.Core.Models.Monitoring
         public class ProcedureExecution
         {
             public DateTime ExecutionDate { get; set; }
-            public string Type { get; set; } // "Wykonanie", "Asysta", "Symulacja"
+            public string Type { get; set; }
             public string SupervisorName { get; set; }
             public string Location { get; set; }
-            public string PatientId { get; set; } // Zanonimizowany identyfikator
+            public string PatientId { get; set; }
             public string Notes { get; set; }
         }
 
         public class ProgressVerification
         {
             private readonly Dictionary<string, List<RequiredProcedure>> _procedureRequirements;
-
-            // Konstruktor przyjmujący wymagania dotyczące procedur
             public ProgressVerification(Dictionary<string, List<RequiredProcedure>> procedureRequirements)
             {
                 _procedureRequirements = procedureRequirements;
@@ -52,14 +50,28 @@ namespace SledzSpecke.Core.Models.Monitoring
                             continue;
                         }
 
-                        // Sprawdzenie liczby wykonań
                         if (progress.CompletedCount < requiredProcedure.RequiredCount)
                         {
                             deficiencies.Add($"Niewystarczająca liczba wykonań {requiredProcedure.Name}: " +
                                              $"wykonano {progress.CompletedCount}/{requiredProcedure.RequiredCount}");
                         }
 
-                        // Pozostałe sprawdzenia...
+                        if (progress.AssistanceCount < requiredProcedure.AssistanceCount)
+                        {
+                            deficiencies.Add($"Niewystarczająca liczba asyst {requiredProcedure.Name}: " +
+                                             $"wykonano {progress.AssistanceCount}/{requiredProcedure.AssistanceCount}");
+                        }
+
+                        if (requiredProcedure.AllowSimulation)
+                        {
+                            var maxSimulations = (requiredProcedure.RequiredCount * requiredProcedure.SimulationLimit.Value) / 100;
+                            if (progress.SimulationCount > maxSimulations)
+                            {
+                                deficiencies.Add($"Przekroczony limit symulacji dla {requiredProcedure.Name}: " +
+                                                 $"wykonano {progress.SimulationCount}, " +
+                                                 $"maksymalnie dozwolone {maxSimulations}");
+                            }
+                        }
                     }
                 }
 
@@ -83,7 +95,22 @@ namespace SledzSpecke.Core.Models.Monitoring
                         CompletionPercentage = 0
                     };
 
-                    // Pozostała logika...
+                    foreach (var procedure in _procedureRequirements[category])
+                    {
+                        if (completedProcedures.TryGetValue(procedure.Name, out var progress))
+                        {
+                            categorySummary.CompletedCount += progress.CompletedCount;
+                            categorySummary.AssistanceCount += progress.AssistanceCount;
+                            categorySummary.SimulationCount += progress.SimulationCount;
+                        }
+                    }
+
+                    var totalRequired = categorySummary.TotalRequired + categorySummary.TotalAssistanceRequired;
+                    var totalCompleted = categorySummary.CompletedCount + categorySummary.AssistanceCount;
+
+                    categorySummary.CompletionPercentage = totalRequired > 0
+                        ? (totalCompleted * 100.0) / totalRequired
+                        : 0;
 
                     summary.Categories.Add(categorySummary);
                 }

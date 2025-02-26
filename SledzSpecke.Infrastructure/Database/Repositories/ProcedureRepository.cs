@@ -1,6 +1,5 @@
 ﻿using SledzSpecke.Core.Models.Domain;
 using SledzSpecke.Infrastructure.Database.Context;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,8 +9,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
     public class ProcedureRepository : BaseRepository<ProcedureExecution>, IProcedureRepository
     {
         public ProcedureRepository(IApplicationDbContext context) : base(context) { }
-
-        // Implementacja istniejących metod
         public async Task<List<ProcedureExecution>> GetUserProceduresAsync(int userId)
         {
             await _context.InitializeAsync();
@@ -41,7 +38,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
             
             if (procedure != null)
             {
-                // Możesz tu dodać ładowanie dodatkowych danych jeśli są potrzebne
                 if (procedure.ProcedureRequirementId.HasValue)
                 {
                     procedure.ProcedureRequirement = await _connection.GetAsync<ProcedureRequirement>(procedure.ProcedureRequirementId.Value);
@@ -55,16 +51,7 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
 
             return procedure;
         }
-        
-        public async Task<List<ProcedureDefinition>> SearchAsync(string query)
-        {
-            await _context.InitializeAsync();
-            return await _connection.Table<ProcedureDefinition>()
-                .Where(p => p.Name.ToLower().Contains(query.ToLower()))
-                .ToListAsync();
-        }
 
-        // Nowe metody
         public async Task<List<ProcedureRequirement>> GetRequirementsForSpecializationAsync(int specializationId)
         {
             await _context.InitializeAsync();
@@ -73,34 +60,16 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<ProcedureRequirement>> GetRequirementsByStageAsync(int specializationId, string stage)
-        {
-            await _context.InitializeAsync();
-            return await _connection.Table<ProcedureRequirement>()
-                .Where(p => p.SpecializationId == specializationId && p.Stage == stage)
-                .ToListAsync();
-        }
-
-        public async Task<List<ProcedureRequirement>> GetRequirementsByCategoryAsync(int specializationId, string category)
-        {
-            await _context.InitializeAsync();
-            return await _connection.Table<ProcedureRequirement>()
-                .Where(p => p.SpecializationId == specializationId && p.Category == category)
-                .ToListAsync();
-        }
-
         public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync(int userId, int specializationId)
         {
             await _context.InitializeAsync();
-            // Pobierz wszystkie wymagania dla specjalizacji
+
             var requirements = await GetRequirementsForSpecializationAsync(specializationId);
             
-            // Pobierz wszystkie wykonane procedury użytkownika
             var userProcedures = await _connection.Table<ProcedureExecution>()
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
-            
-            // Pogrupuj wymagania według kategorii
+
             var categorizedRequirements = requirements
                 .GroupBy(r => r.Category ?? "Uncategorized")
                 .ToDictionary(
@@ -110,8 +79,7 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                         Assisted: g.Sum(r => r.AssistanceCount),
                         Completed: 0
                     ));
-            
-            // Oblicz postęp dla każdej kategorii
+
             foreach (var procedure in userProcedures)
             {
                 var category = procedure.Category ?? "Uncategorized";
@@ -125,7 +93,7 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 {
                     categorizedRequirements[category] = (current.Required, current.Assisted, current.Completed + 1);
                 }
-                else // Assistance
+                else
                 {
                     categorizedRequirements[category] = (current.Required, current.Assisted - 1, current.Completed);
                 }
@@ -137,15 +105,13 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
         public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByStageAsync(int userId, int specializationId)
         {
             await _context.InitializeAsync();
-            // Pobierz wszystkie wymagania dla specjalizacji
+
             var requirements = await GetRequirementsForSpecializationAsync(specializationId);
-            
-            // Pobierz wszystkie wykonane procedury użytkownika
+
             var userProcedures = await _connection.Table<ProcedureExecution>()
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
-            
-            // Pogrupuj wymagania według etapu
+
             var stagedRequirements = requirements
                 .GroupBy(r => r.Stage ?? "Uncategorized")
                 .ToDictionary(
@@ -156,7 +122,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                         Completed: 0
                     ));
             
-            // Oblicz postęp dla każdego etapu
             foreach (var procedure in userProcedures)
             {
                 var stage = procedure.Stage ?? "Uncategorized";
@@ -170,7 +135,7 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 {
                     stagedRequirements[stage] = (current.Required, current.Assisted, current.Completed + 1);
                 }
-                else // Assistance
+                else
                 {
                     stagedRequirements[stage] = (current.Required, current.Assisted - 1, current.Completed);
                 }

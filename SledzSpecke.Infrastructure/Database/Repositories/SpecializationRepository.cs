@@ -11,13 +11,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
         {
         }
 
-        public async Task<List<Specialization>> GetActiveSpecializationsAsync()
-        {
-            await _context.InitializeAsync();
-            return await _connection.Table<Specialization>()
-                .ToListAsync();
-        }
-
         public async Task<Specialization> GetWithRequirementsAsync(int id)
         {
             await _context.InitializeAsync();
@@ -25,7 +18,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
 
             if (specialization != null)
             {
-                // Load related requirements - Changed to use CourseDefinition instead
                 var courses = await _connection.Table<CourseDefinition>()
                     .Where(c => c.SpecializationId == id)
                     .ToListAsync();
@@ -38,14 +30,12 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
 
                 specialization.RequiredInternships = internships;
 
-                // Load procedure requirements
                 var procedureRequirements = await _connection.Table<ProcedureRequirement>()
                     .Where(p => p.SpecializationId == id)
                     .ToListAsync();
 
                 specialization.ProcedureRequirements = procedureRequirements;
 
-                // Load duty requirements
                 var dutyRequirements = await _connection.Table<DutyRequirement>()
                     .Where(d => d.SpecializationId == id)
                     .ToListAsync();

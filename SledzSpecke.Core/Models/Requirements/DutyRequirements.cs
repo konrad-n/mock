@@ -7,13 +7,13 @@ namespace SledzSpecke.Core.Models.Requirements
     {
         public class DutySpecification
         {
-            public string Type { get; set; } // Regular, Emergency, Supervised, Independent
+            public string Type { get; set; }
             public int MinimumHoursPerMonth { get; set; }
             public int MinimumDutiesPerMonth { get; set; }
             public bool RequiresSupervision { get; set; }
             public List<string> RequiredCompetencies { get; set; }
             public int Year { get; set; }
-            public int SpecializationId { get; set; } // ID specjalizacji, do której należy specyfikacja
+            public int SpecializationId { get; set; }
         }
 
         public static List<DutySpecification> GetDutyRequirements()
@@ -27,7 +27,7 @@ namespace SledzSpecke.Core.Models.Requirements
                     MinimumDutiesPerMonth = 4,
                     RequiresSupervision = true,
                     Type = "Supervised",
-                    SpecializationId = 1, // Hematologia
+                    SpecializationId = 1,
                     RequiredCompetencies = new List<string>
                     {
                         "Ocena stanu pacjenta",
@@ -43,7 +43,7 @@ namespace SledzSpecke.Core.Models.Requirements
                     MinimumDutiesPerMonth = 4,
                     RequiresSupervision = true,
                     Type = "Supervised",
-                    SpecializationId = 2, // Medycyna morska i tropikalna
+                    SpecializationId = 2,
                     RequiredCompetencies = new List<string>
                     {
                         "Ocena stanu pacjenta",
@@ -52,7 +52,38 @@ namespace SledzSpecke.Core.Models.Requirements
                         "Kwalifikacja do leczenia w trybie pilnym"
                     }
                 },
-                // Pozostałe specyfikacje...
+                new DutySpecification
+                    {
+                        Year = 3,
+                        MinimumHoursPerMonth = 40,
+                        MinimumDutiesPerMonth = 4,
+                        RequiresSupervision = false,
+                        Type = "Independent",
+                        SpecializationId = 1,
+                        RequiredCompetencies = new List<string>
+                        {
+                            "Samodzielne prowadzenie dyżuru",
+                            "Koordynacja pracy zespołu",
+                            "Podejmowanie decyzji w stanach zagrożenia życia",
+                            "Nadzór nad młodszymi kolegami"
+                        }
+                    },
+                    new DutySpecification
+                    {
+                        Year = 2,
+                        MinimumHoursPerMonth = 40,
+                        MinimumDutiesPerMonth = 4,
+                        RequiresSupervision = false,
+                        Type = "Independent",
+                        SpecializationId = 2,
+                        RequiredCompetencies = new List<string>
+                        {
+                            "Samodzielne prowadzenie dyżuru",
+                            "Zaawansowane procedury w medycynie morskiej i tropikalnej",
+                            "Udzielanie porad medycznych drogą radiową",
+                            "Koordynacja pracy zespołu dyżurowego"
+                        }
+                    },
             };
         }
 

@@ -13,6 +13,5 @@ namespace SledzSpecke.Core.Interfaces.Services
         Task<bool> UpdateDutyAsync(Duty duty);
         Task<bool> DeleteDutyAsync(int id);
         Task<DutyStatistics> GetDutyStatisticsAsync();
-        Task<List<Duty>> GetUpcomingDutiesAsync(int daysAhead = 7);
     }
 }

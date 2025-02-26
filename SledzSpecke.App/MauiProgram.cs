@@ -94,7 +94,6 @@ public static class MauiProgram
         services.AddSingleton<IDutyRepository, DutyRepository>();
         services.AddSingleton<ICourseRepository, CourseRepository>();
         services.AddSingleton<IInternshipRepository, InternshipRepository>();
-        services.AddSingleton<INotificationRepository, NotificationRepository>();
     }
 
     private static void RegisterServices(IServiceCollection services)
