@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:SledzSpecke.App.ViewModels.Profile"
+             x:Class="SledzSpecke.App.Views.Profile.ProfileEditPage"
+             x:DataType="viewmodels:ProfileEditViewModel"
+             Title="Edytuj profil">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Imię i nazwisko"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding UserName}"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Numer PWZ"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <Entry Text="{Binding PWZ}"
+                       Style="{StaticResource BorderedEntry}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Data rozpoczęcia"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <DatePicker Date="{Binding StartDate}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Przewidywana data zakończenia"
+                       Style="{StaticResource SubHeaderLabel}"/>
+                <DatePicker Date="{Binding EndDate}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="10" Margin="0,20,0,0">
+                <Button Text="Zapisz"
+                        Command="{Binding SaveCommand}"
+                        Style="{StaticResource PrimaryButton}"/>
+
+                <Button Text="Anuluj"
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

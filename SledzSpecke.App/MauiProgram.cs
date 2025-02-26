@@ -1,12 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Platform;
 using SledzSpecke.App.Services.Stubs;
-using SledzSpecke.App.Views.Dashboard;
+using SledzSpecke.App.ViewModels.Courses;
 using SledzSpecke.App.ViewModels.Dashboard;
-using SledzSpecke.App.Views.Procedures;
-using SledzSpecke.App.Views.Duties;
-using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.ViewModels.Duties;
+using SledzSpecke.App.ViewModels.Internships;
+using SledzSpecke.App.ViewModels.Procedures;
+using SledzSpecke.App.ViewModels.Profile;
+using SledzSpecke.App.ViewModels.Statistics;
+using SledzSpecke.App.Views.Dashboard;
+using SledzSpecke.App.Views.Duties;
+using SledzSpecke.App.Views.Procedures;
+using SledzSpecke.App.Views.Profile;
+using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.Core.Interfaces.Services;
 
 namespace SledzSpecke.App;
@@ -37,16 +43,15 @@ public static class MauiProgram
             builder.Services.AddSingleton<IInternshipService, StubInternshipService>();
             builder.Services.AddSingleton<IDutyService, StubDutyService>();
             builder.Services.AddSingleton<IUserService, StubUserService>();
+            builder.Services.AddSingleton<ISpecializationService, StubSpecializationService>();
+            builder.Services.AddSingleton<ISettingsService, StubSettingsService>();
+            builder.Services.AddSingleton<IDataSyncService, StubDataSyncService>();
 
             // Register ViewModels
-            builder.Services.AddTransient<DashboardViewModel>();
-            builder.Services.AddTransient<ProceduresViewModel>();
-            builder.Services.AddTransient<DutiesViewModel>();
+            RegisterViewModels(builder.Services);
 
             // Register Pages
-            builder.Services.AddTransient<DashboardPage>();
-            builder.Services.AddTransient<ProceduresPage>();
-            builder.Services.AddTransient<DutiesPage>();
+            RegisterPages(builder.Services);
 
 #if DEBUG
             builder.Logging.AddDebug();
@@ -65,6 +70,60 @@ public static class MauiProgram
             builder.UseMauiApp<ErrorApp>();
             return builder.Build();
         }
+    }
+
+    private static void RegisterViewModels(IServiceCollection services)
+    {
+        // Dashboard
+        services.AddTransient<DashboardViewModel>();
+
+        // Procedures
+        services.AddTransient<ProceduresViewModel>();
+        services.AddTransient<ProcedureAddViewModel>();
+        services.AddTransient<ProcedureEditViewModel>();
+
+        // Duties
+        services.AddTransient<DutiesViewModel>();
+        services.AddTransient<DutyAddViewModel>();
+        services.AddTransient<DutyEditViewModel>();
+
+        // Courses (Make sure these classes exist)
+        services.AddTransient<CoursesViewModel>();
+
+        // Internships (Make sure these classes exist)
+        services.AddTransient<InternshipsViewModel>();
+
+        // Profile
+        services.AddTransient<ProfileViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<ProfileEditViewModel>();
+
+        // Statistics
+        services.AddTransient<SpecializationStatsViewModel>();
+    }
+
+    private static void RegisterPages(IServiceCollection services)
+    {
+        // Dashboard
+        services.AddTransient<DashboardPage>();
+
+        // Procedures
+        services.AddTransient<ProceduresPage>();
+        services.AddTransient<ProcedureAddPage>();
+        services.AddTransient<ProcedureEditPage>();
+
+        // Duties
+        services.AddTransient<DutiesPage>();
+        services.AddTransient<DutyAddPage>();
+        services.AddTransient<DutyEditPage>();
+
+        // Profile
+        services.AddTransient<ProfilePage>();
+        services.AddTransient<SettingsPage>();
+        services.AddTransient<ProfileEditPage>();
+
+        // Statistics
+        services.AddTransient<SpecializationStatsPage>();
     }
 }
 

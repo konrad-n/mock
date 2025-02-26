@@ -169,4 +169,107 @@ namespace SledzSpecke.App.Services.Stubs
         public Task<bool> LogoutAsync()
             => Task.FromResult(true);
     }
+
+    public class StubSpecializationService : ISpecializationService
+    {
+        public Task<bool> ChangeSpecializationAsync(int specializationId)
+            => Task.FromResult(true);
+
+        public Task<List<Specialization>> GetAvailableSpecializationsAsync()
+            => Task.FromResult(new List<Specialization>
+            {
+            new Specialization { Id = 1, Name = "Psychiatria", DurationInWeeks = 260 }
+            });
+
+        public Task<Specialization> GetCurrentSpecializationAsync()
+            => Task.FromResult(new Specialization
+            {
+                Id = 1,
+                Name = "Psychiatria",
+                DurationInWeeks = 260,
+                Description = "Specjalizacja z psychiatrii"
+            });
+
+        public Task<SpecializationProgress> GetProgressStatisticsAsync(int specializationId)
+            => Task.FromResult(new SpecializationProgress
+            {
+                UserId = 1,
+                SpecializationId = specializationId,
+                ProceduresProgress = 0.25,
+                CoursesProgress = 0.4,
+                InternshipsProgress = 0.3,
+                DutiesProgress = 0.45,
+                OverallProgress = 0.35,
+                LastCalculated = DateTime.Now
+            });
+
+        public Task<Dictionary<string, double>> GetRequirementsProgressAsync(int specializationId)
+            => Task.FromResult(new Dictionary<string, double>
+            {
+            { "Procedury", 0.25 },
+            { "Kursy", 0.4 },
+            { "Staże", 0.3 },
+            { "Dyżury", 0.45 }
+            });
+
+        public Task<List<CourseDefinition>> GetRequiredCoursesAsync(int specializationId)
+            => Task.FromResult(new List<CourseDefinition>());
+
+        public Task<List<DutyRequirement>> GetRequiredDutiesAsync(int specializationId)
+            => Task.FromResult(new List<DutyRequirement>());
+
+        public Task<List<InternshipDefinition>> GetRequiredInternshipsAsync(int specializationId)
+            => Task.FromResult(new List<InternshipDefinition>());
+
+        public Task<List<ProcedureRequirement>> GetRequiredProceduresAsync(int specializationId)
+            => Task.FromResult(new List<ProcedureRequirement>());
+
+        public Task<Specialization> GetSpecializationAsync(int id)
+            => Task.FromResult(new Specialization
+            {
+                Id = id,
+                Name = "Psychiatria",
+                DurationInWeeks = 260
+            });
+    }
+
+    public class StubSettingsService : ISettingsService
+    {
+        private readonly Dictionary<string, object> _settings = new Dictionary<string, object>();
+
+        public Task<bool> ClearAllSettingsAsync()
+        {
+            _settings.Clear();
+            return Task.FromResult(true);
+        }
+
+        public T GetSetting<T>(string key, T defaultValue)
+        {
+            if (_settings.TryGetValue(key, out var value) && value is T typedValue)
+            {
+                return typedValue;
+            }
+            return defaultValue;
+        }
+
+        public void SetSetting<T>(string key, T value)
+        {
+            _settings[key] = value;
+        }
+    }
+
+    public class StubDataSyncService : IDataSyncService
+    {
+        public Task<bool> ClearAllDataAsync()
+            => Task.FromResult(true);
+
+        public Task<bool> CreateBackupAsync()
+            => Task.FromResult(true);
+
+        public Task<bool> RestoreFromBackupAsync()
+            => Task.FromResult(true);
+
+        public Task<bool> SyncAllDataAsync()
+            => Task.FromResult(true);
+    }
 }
