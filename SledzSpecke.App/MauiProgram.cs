@@ -21,6 +21,8 @@ using SledzSpecke.Infrastructure.Database.Initialization;
 using SledzSpecke.Infrastructure.Services;
 using SQLite;
 using SledzSpecke.App.Services;
+using SledzSpecke.App.Views.Specialization;
+using SledzSpecke.App.ViewModels.Specializations;
 
 namespace SledzSpecke.App;
 
@@ -41,7 +43,6 @@ public static class MauiProgram
                 });
 
             // Register platform services
-            builder.Services.AddSingleton<IPermissionService, PermissionService>();
             builder.Services.AddSingleton<IFileSystemService, FileSystemService>();
 
             // Register databases services
@@ -133,7 +134,6 @@ public static class MauiProgram
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ISpecializationService, SpecializationService>();
         services.AddSingleton<ISettingsService, SettingsService>();
-        services.AddSingleton<IDataSyncService, DataSyncService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
@@ -164,6 +164,9 @@ public static class MauiProgram
 
         // Statistics
         services.AddTransient<SpecializationStatsViewModel>();
+
+        // Specialization
+        services.AddTransient<SpecializationProgressViewModel>();
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -188,6 +191,9 @@ public static class MauiProgram
 
         // Statistics
         services.AddTransient<SpecializationStatsPage>();
+
+        // Specialization
+        services.AddTransient<SpecializationProgressPage>();
     }
 }
 

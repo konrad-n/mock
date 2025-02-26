@@ -61,28 +61,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Converters\**" />
     <Compile Remove="Resources\Icons\**" />
+    <Compile Remove="Services\Dialog\**" />
+    <Compile Remove="Services\Navigation\**" />
     <Compile Remove="Views\Courses\**" />
     <Compile Remove="Views\Internships\**" />
     <Compile Remove="Views\Settings\**" />
-    <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
+    <EmbeddedResource Remove="Services\Dialog\**" />
+    <EmbeddedResource Remove="Services\Navigation\**" />
     <EmbeddedResource Remove="Views\Courses\**" />
     <EmbeddedResource Remove="Views\Internships\**" />
     <EmbeddedResource Remove="Views\Settings\**" />
-    <MauiCss Remove="Converters\**" />
     <MauiCss Remove="Resources\Icons\**" />
+    <MauiCss Remove="Services\Dialog\**" />
+    <MauiCss Remove="Services\Navigation\**" />
     <MauiCss Remove="Views\Courses\**" />
     <MauiCss Remove="Views\Internships\**" />
     <MauiCss Remove="Views\Settings\**" />
-    <MauiXaml Remove="Converters\**" />
     <MauiXaml Remove="Resources\Icons\**" />
+    <MauiXaml Remove="Services\Dialog\**" />
+    <MauiXaml Remove="Services\Navigation\**" />
     <MauiXaml Remove="Views\Courses\**" />
     <MauiXaml Remove="Views\Internships\**" />
     <MauiXaml Remove="Views\Settings\**" />
-    <None Remove="Converters\**" />
     <None Remove="Resources\Icons\**" />
+    <None Remove="Services\Dialog\**" />
+    <None Remove="Services\Navigation\**" />
     <None Remove="Views\Courses\**" />
     <None Remove="Views\Internships\**" />
     <None Remove="Views\Settings\**" />
@@ -104,9 +109,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Navigation\" />
-    <Folder Include="Services\Dialog\" />
-    <Folder Include="Services\Stubs\" />
     <Folder Include="ViewModels\Internships\" />
     <Folder Include="ViewModels\Courses\" />
   </ItemGroup>
@@ -140,6 +142,9 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\Profile\Settings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Specialization\SpecializationProgressPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>

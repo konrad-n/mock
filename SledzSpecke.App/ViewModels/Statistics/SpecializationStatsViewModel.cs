@@ -1,12 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace SledzSpecke.App.ViewModels.Statistics
 {
@@ -17,22 +12,19 @@ namespace SledzSpecke.App.ViewModels.Statistics
         private readonly IDutyService _dutyService;
         private readonly ICourseService _courseService;
         private readonly IInternshipService _internshipService;
-        private readonly IPdfExportService _pdfExportService;
 
         public SpecializationStatsViewModel(
             ISpecializationService specializationService,
             IProcedureService procedureService,
             IDutyService dutyService,
             ICourseService courseService,
-            IInternshipService internshipService,
-            IPdfExportService pdfExportService)
+            IInternshipService internshipService)
         {
             _specializationService = specializationService;
             _procedureService = procedureService;
             _dutyService = dutyService;
             _courseService = courseService;
             _internshipService = internshipService;
-            _pdfExportService = pdfExportService;
             
             Title = "Statystyki specjalizacji";
         }
@@ -159,44 +151,6 @@ namespace SledzSpecke.App.ViewModels.Statistics
             
             double years = days / 365.0;
             return $"Pozostało około {years:F1} {(years < 2 ? "rok" : (years < 5 ? "lata" : "lat"))}";
-        }
-
-        [RelayCommand]
-        private async Task ExportReportAsync()
-        {
-            if (IsBusy) return;
-
-            try
-            {
-                IsBusy = true;
-                
-                // Generuj raport PDF
-                var reportPath = await _pdfExportService.GenerateSpecializationSummaryAsync(
-                    CurrentSpecialization.Id, 0); // Zakładamy że userId = 0 dla uproszczenia
-                
-                if (string.IsNullOrEmpty(reportPath))
-                {
-                    await Shell.Current.DisplayAlert(
-                        "Błąd",
-                        "Nie udało się wygenerować raportu.",
-                        "OK");
-                    return;
-                }
-
-                // Udostępnij raport
-                await _pdfExportService.ShareReportAsync(reportPath);
-            }
-            catch (Exception ex)
-            {
-                await Shell.Current.DisplayAlert(
-                    "Błąd",
-                    $"Nie udało się wyeksportować raportu: {ex.Message}",
-                    "OK");
-            }
-            finally
-            {
-                IsBusy = false;
-            }
         }
     }
 }

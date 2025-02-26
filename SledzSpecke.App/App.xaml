@@ -2,6 +2,7 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:SledzSpecke.App"
+             xmlns:converters="clr-namespace:SledzSpecke.App.Converters"
              x:Class="SledzSpecke.App.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -153,6 +154,10 @@
 
             <!-- Zmienne kolorów -->
             <Color x:Key="Danger">#E53935</Color>
+
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -159,5 +159,11 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         {
             await Shell.Current.GoToAsync("//duties");
         }
+
+        [RelayCommand]
+        private async Task NavigateToSpecializationProgressAsync()
+        {
+            await Shell.Current.GoToAsync("specialization/progress");
+        }
     }
 }
