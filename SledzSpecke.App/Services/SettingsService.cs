@@ -20,27 +20,33 @@ namespace SledzSpecke.App.Services
                 {
                     if (typeof(T) == typeof(bool))
                     {
-                        return (T)(object)Preferences.Get(key, (bool)(object)defaultValue);
+                        bool typedDefault = defaultValue != null ? (bool)(object)defaultValue : default;
+                        return (T)(object)Preferences.Get(key, typedDefault);
                     }
                     else if (typeof(T) == typeof(string))
                     {
-                        return (T)(object)Preferences.Get(key, (string)(object)defaultValue);
+                        string? typedDefault = defaultValue != null ? (string?)(object)defaultValue : default;
+                        return (T)(object)(Preferences.Get(key, typedDefault) ?? string.Empty);
                     }
                     else if (typeof(T) == typeof(int))
                     {
-                        return (T)(object)Preferences.Get(key, (int)(object)defaultValue);
+                        int typedDefault = defaultValue != null ? (int)(object)defaultValue : default;
+                        return (T)(object)Preferences.Get(key, typedDefault);
                     }
                     else if (typeof(T) == typeof(double))
                     {
-                        return (T)(object)Preferences.Get(key, (double)(object)defaultValue);
+                        double typedDefault = defaultValue != null ? (double)(object)defaultValue : default;
+                        return (T)(object)Preferences.Get(key, typedDefault);
                     }
                     else if (typeof(T) == typeof(float))
                     {
-                        return (T)(object)Preferences.Get(key, (float)(object)defaultValue);
+                        float typedDefault = defaultValue != null ? (float)(object)defaultValue : default;
+                        return (T)(object)Preferences.Get(key, typedDefault);
                     }
                     else if (typeof(T) == typeof(long))
                     {
-                        return (T)(object)Preferences.Get(key, (long)(object)defaultValue);
+                        long typedDefault = defaultValue != null ? (long)(object)defaultValue : default;
+                        return (T)(object)Preferences.Get(key, typedDefault);
                     }
                     else if (typeof(T) == typeof(DateTime))
                     {
@@ -62,6 +68,12 @@ namespace SledzSpecke.App.Services
         {
             try
             {
+                if (value == null)
+                {
+                    _logger.LogWarning("Attempted to set null value for key {Key}", key);
+                    return;
+                }
+
                 if (typeof(T) == typeof(bool))
                 {
                     Preferences.Set(key, (bool)(object)value);
@@ -97,17 +109,17 @@ namespace SledzSpecke.App.Services
             }
         }
 
-        public async Task<bool> ClearAllSettingsAsync()
+        public Task<bool> ClearAllSettingsAsync()
         {
             try
             {
                 Preferences.Clear();
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error clearing all settings");
-                return false;
+                return Task.FromResult(false);
             }
         }
     }
