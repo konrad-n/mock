@@ -1,4 +1,5 @@
 using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database.Context;
 using System;
 using System.Collections.Generic;
