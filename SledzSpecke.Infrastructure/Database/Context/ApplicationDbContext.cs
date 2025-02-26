@@ -2,7 +2,6 @@
 using SledzSpecke.Infrastructure.Database.Migrations;
 using SQLite;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace SledzSpecke.Infrastructure.Database.Context
@@ -23,23 +22,32 @@ namespace SledzSpecke.Infrastructure.Database.Context
         {
             if (!_isInitialized)
             {
-                // Create tables
-                await _database.CreateTableAsync<User>();
-                await _database.CreateTableAsync<Specialization>();
-                await _database.CreateTableAsync<ProcedureDefinition>();
-                await _database.CreateTableAsync<ProcedureExecution>();
-                await _database.CreateTableAsync<ProcedureRequirement>();
-                await _database.CreateTableAsync<Duty>();
-                await _database.CreateTableAsync<Internship>();
-                await _database.CreateTableAsync<InternshipDefinition>();
-                await _database.CreateTableAsync<InternshipModule>();
-                await _database.CreateTableAsync<Course>();
-                await _database.CreateTableAsync<CourseDefinition>();
-                await _database.CreateTableAsync<DutyRequirement>();
-                await _database.CreateTableAsync<NotificationInfo>();
+                try
+                {
+                    await _database.CreateTableAsync<User>();
+                    await _database.CreateTableAsync<Specialization>();
 
-                await _migrationRunner.RunMigrationsAsync();
-                _isInitialized = true;
+                    await _database.CreateTableAsync<ProcedureDefinition>();
+                    await _database.CreateTableAsync<ProcedureExecution>();
+                    await _database.CreateTableAsync<ProcedureRequirement>();
+                    await _database.CreateTableAsync<Duty>();
+                    await _database.CreateTableAsync<DutyRequirement>();
+                    await _database.CreateTableAsync<Course>();
+                    await _database.CreateTableAsync<CourseDefinition>();
+                    await _database.CreateTableAsync<Internship>();
+                    await _database.CreateTableAsync<InternshipDefinition>();
+                    await _database.CreateTableAsync<InternshipModule>();
+                    await _database.CreateTableAsync<NotificationInfo>();
+
+                    await _migrationRunner.RunMigrationsAsync();
+                    _isInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error initializing database: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+                    throw;
+                }
             }
         }
 
