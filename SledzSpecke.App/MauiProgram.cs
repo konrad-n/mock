@@ -21,6 +21,7 @@ using SledzSpecke.App.ViewModels.Statistics;
 using SledzSpecke.App.Controls;
 using SledzSpecke.App.ViewModels.Profile;
 using SledzSpecke.App.Services;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App;
 
@@ -108,6 +109,9 @@ public static class MauiProgram
         // Specializations
         builder.Services.AddTransient<SpecializationSwitcherPage>();
         builder.Services.AddTransient<SpecializationStatsPage>();
+
+        // DbInitializer
+        builder.Services.AddSingleton<DatabaseInitializer>();
 
         // Repositories
         builder.Services.AddScoped<IUserRepository, UserRepository>();
