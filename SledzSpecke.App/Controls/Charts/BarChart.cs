@@ -72,7 +72,7 @@ namespace SledzSpecke.App.Controls.Charts
             Invalidate();
         }
 
-        internal void Invalidate()
+        internal new void Invalidate()
         {
             Invalidate();
         }

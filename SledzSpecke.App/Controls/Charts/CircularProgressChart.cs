@@ -47,7 +47,7 @@
             Drawable = new CircularProgressDrawable(this);
         }
 
-        internal void Invalidate()
+        internal new void Invalidate()
         {
             Invalidate();
         }
