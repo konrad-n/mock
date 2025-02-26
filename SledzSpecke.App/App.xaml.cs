@@ -1,4 +1,17 @@
-﻿using SledzSpecke.Infrastructure.Database.Initialization;
+﻿namespace SledzSpecke.App;
+
+public partial class App : Application
+{
+    public App()
+    {
+        InitializeComponent();
+        MainPage = new AppShell();
+    }
+}
+
+/* Previous version:
+using Microsoft.Maui.ApplicationModel;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App
 {
@@ -12,16 +25,8 @@ namespace SledzSpecke.App
             try
             {
                 InitializeComponent();
-                MainPage = new ContentPage
-                {
-                    Content = new Label
-                    {
-                        Text = "Test Page",
-                        HorizontalOptions = LayoutOptions.Center,
-                        VerticalOptions = LayoutOptions.Center
-                    }
-                };
-                // _initializer = initializer;
+                _permissionService = permissionService;
+                _initializer = initializer;
             }
             catch (System.Reflection.TargetInvocationException ex)
             {
@@ -39,23 +44,9 @@ namespace SledzSpecke.App
 
         protected override async void OnStart()
         {
-            try
-            {
-                base.OnStart();
-                await CheckCriticalPermissions();
-                await _initializer.InitializeAsync();
-
-                // Log successful initialization
-                Console.WriteLine("App initialization completed successfully");
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine($"Error during app initialization: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
-
-                // You could also display an error dialog here
-            }
+            base.OnStart();
+            await CheckCriticalPermissions();
+            await _initializer.InitializeAsync();
         }
 
         private async Task CheckCriticalPermissions()
@@ -137,4 +128,4 @@ namespace SledzSpecke.App
             }
         }
     }
-}
+} */

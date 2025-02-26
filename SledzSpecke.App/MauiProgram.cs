@@ -1,4 +1,92 @@
 ﻿using Microsoft.Extensions.Logging;
+using SledzSpecke.App.ViewModels.Dashboard;
+using SledzSpecke.Core.Interfaces.Services;
+using SledzSpecke.App.Services.Platform;
+
+namespace SledzSpecke.App;
+
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        try
+        {
+            var builder = MauiApp.CreateBuilder();
+            builder
+                .UseMauiApp<App>()
+                .ConfigureFonts(fonts =>
+                {
+                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("FluentUI.ttf", "FluentUI");
+                });
+
+            // Register platform services
+            builder.Services.AddSingleton<IPermissionService, PermissionService>();
+            builder.Services.AddSingleton<IFileSystemService, FileSystemService>();
+            builder.Services.AddTransient<DashboardViewModel>(provider => new StubDashboardViewModel());
+#if DEBUG
+            builder.Logging.AddDebug();
+            #endif
+
+            return builder.Build();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            Console.WriteLine($"ERROR IN STARTUP: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+
+            // Return a minimal app that can display an error
+            var builder = MauiApp.CreateBuilder();
+            builder.UseMauiApp<ErrorApp>();
+            return builder.Build();
+        }
+    }
+}
+
+public class ErrorApp : Application
+{
+    public ErrorApp()
+    {
+        MainPage = new ContentPage
+        {
+            BackgroundColor = Colors.Red,
+            Content = new Label
+            {
+                Text = "App failed to start - check debug output",
+                TextColor = Colors.White,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            }
+        };
+    }
+}
+
+public class StubDashboardViewModel : DashboardViewModel
+{
+    public StubDashboardViewModel() : base(
+        // Pass null for all dependencies temporarily
+        null, null, null, null, null)
+    {
+        // Override properties with default values
+        Title = "Dashboard";
+        OverallProgress = 0.25;
+        OverallProgressText = "25% Complete";
+        TimeLeftText = "Placeholder";
+    }
+
+    // Override LoadDataAsync to do nothing
+    public override Task LoadDataAsync()
+    {
+        return Task.CompletedTask;
+    }
+}
+
+
+// Previous version:
+/*
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Views.Dashboard;
 using SledzSpecke.App.Views.Procedures;
 using SledzSpecke.App.Views.Duties;
@@ -14,6 +102,7 @@ using SledzSpecke.Infrastructure.Database.Migrations;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.App.Services.Platform;
 using SledzSpecke.App.Services.Export;
+using SledzSpecke.Core.Services.SMK;
 using SledzSpecke.App.Views.MultipleSpecialization;
 using SledzSpecke.App.Views.Statistics;
 using SledzSpecke.App.ViewModels.Statistics;
@@ -58,12 +147,12 @@ public static class MauiProgram
         builder.Services.AddSingleton<IPdfExportService, PdfExportService>();
 
         // SMK Service
-        /* builder.Services.AddSingleton<ISMKIntegrationService, SMKIntegrationService>();
+        builder.Services.AddSingleton<ISMKIntegrationService, SMKIntegrationService>();
         builder.Services.AddSingleton<SMKConfiguration>(provider => new SMKConfiguration
         {
             BaseUrl = "https://api.smk.gov.pl",
             ApiKey = "demo_key"
-        }); */
+        });
 
         // Calendar integration
         builder.Services.AddSingleton<CalendarIntegration>();
@@ -139,25 +228,7 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        try
-        {
-            return builder.Build();
-        }
-        catch (Exception ex)
-        {
-            // Log the exception
-            System.Diagnostics.Debug.WriteLine($"Exception during builder.Build(): {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-
-            // If there's an inner exception, log that too
-            if (ex.InnerException != null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
-                System.Diagnostics.Debug.WriteLine($"Inner stack trace: {ex.InnerException.StackTrace}");
-            }
-
-            // Rethrow the exception or handle it as needed
-            throw;
-        }
+        return builder.Build();
     }
 }
+*/
