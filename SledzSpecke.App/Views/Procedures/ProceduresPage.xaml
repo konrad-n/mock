@@ -20,11 +20,11 @@
                 <ProgressBar Progress="{Binding CompletionPercentage}" 
                              Style="{StaticResource ProgressBar}"/>
 
-                <Label Text="{Binding ProgressSummary.OverallCompletionPercentage, StringFormat='{0:P0} ukończone'}"
+                <Label Text="{Binding OverallCompletionDisplay}"
                        Style="{StaticResource BodyLabel}"
                        HorizontalOptions="Center"/>
 
-                <Label Text="{Binding ProgressSummary.TotalProceduresCompleted, StringFormat='Wykonane procedury: {0}/{1}', StringFormatArgs={Binding ProgressSummary.TotalProceduresRequired}}"
+                <Label Text="{Binding ProceduresCompletedDisplay}"
                        Style="{StaticResource BodyLabel}"
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
@@ -50,14 +50,14 @@
 
         <!-- Lista procedur -->
         <RefreshView Grid.Row="2"
-                    Command="{Binding RefreshCommand}"
-                    IsRefreshing="{Binding IsRefreshing}">
+                     Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsRefreshing}">
             <CollectionView Style="{StaticResource ListCollectionView}"
-                          ItemsSource="{Binding Procedures}">
+                            ItemsSource="{Binding Procedures}">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout HorizontalOptions="Center"
-                                       VerticalOptions="Center"
-                                       Spacing="10">
+                                         VerticalOptions="Center"
+                                         Spacing="10">
                         <Label Text="Brak procedur"
                                Style="{StaticResource SubHeaderLabel}"
                                HorizontalOptions="Center"/>
@@ -106,8 +106,9 @@
 
                             <!-- Dodaj efekt tapnięcia -->
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProceduresViewModel}}, Path=ViewProcedureCommand}" 
-                                                      CommandParameter="{Binding Id}" />
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProceduresViewModel}}, Path=ViewProcedureCommand}"
+                                    CommandParameter="{Binding Id}" />
                             </Border.GestureRecognizers>
                         </Border>
                     </DataTemplate>
