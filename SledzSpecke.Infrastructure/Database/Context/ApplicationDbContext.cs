@@ -26,9 +26,16 @@ namespace SledzSpecke.Infrastructure.Database.Context
                 await _database.CreateTableAsync<Specialization>();
                 await _database.CreateTableAsync<ProcedureDefinition>();
                 await _database.CreateTableAsync<ProcedureExecution>();
+                await _database.CreateTableAsync<ProcedureRequirement>();
                 await _database.CreateTableAsync<Duty>();
                 await _database.CreateTableAsync<Internship>();
+                await _database.CreateTableAsync<InternshipDefinition>();
+                await _database.CreateTableAsync<InternshipModule>();
                 await _database.CreateTableAsync<Course>();
+                await _database.CreateTableAsync<CourseDefinition>();
+                await _database.CreateTableAsync<DutyRequirement>();
+                await _database.CreateTableAsync<NotificationInfo>();
+
                 await _migrationRunner.RunMigrationsAsync();
                 _isInitialized = true;
             }

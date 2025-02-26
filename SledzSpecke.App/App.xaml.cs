@@ -24,10 +24,12 @@ public partial class App : Application
         try
         {
             await _initializer.InitializeAsync();
+            System.Diagnostics.Debug.WriteLine("Database initialization completed");
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Database initialization error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine(ex.StackTrace);
             // We'll continue even if database initialization fails
             // This ensures the app can still run with stub services
         }

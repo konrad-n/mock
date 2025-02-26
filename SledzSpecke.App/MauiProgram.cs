@@ -59,7 +59,8 @@ public static class MauiProgram
             builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+            return app;
         }
         catch (Exception ex)
         {

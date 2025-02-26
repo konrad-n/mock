@@ -7,7 +7,7 @@ namespace SledzSpecke.Infrastructure.Database.Configuration
     {
         public static string GetDatabasePath(string appDataPath)
         {
-            return Path.Combine(appDataPath, /* no database!!! */);
+            return Path.Combine(appDataPath, "sledzspecke.db3");
         }
 
         public static SQLiteConnectionString GetConnectionString(string appDataPath)
