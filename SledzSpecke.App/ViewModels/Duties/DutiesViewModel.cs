@@ -52,10 +52,16 @@ namespace SledzSpecke.App.ViewModels.Duties
         private decimal monthlyHours;
 
         [ObservableProperty]
-        private decimal remainingHours;
+        private decimal requiredTotalHours;
+
+        [ObservableProperty]
+        private decimal requiredMonthlyHours;
 
         [ObservableProperty]
         private double progress;
+
+        [ObservableProperty]
+        private double monthlyProgress;
 
         [ObservableProperty]
         private List<DutyRequirements.DutySpecification> currentYearRequirements;
@@ -65,6 +71,10 @@ namespace SledzSpecke.App.ViewModels.Duties
 
         private int _currentSpecializationId;
         private int _currentSpecializationYear;
+
+        // Display properties for binding
+        public string TotalHoursDisplay => $"{TotalHours:F1} / {RequiredTotalHours:F1}h";
+        public string MonthlyHoursDisplay => $"{MonthlyHours:F1} / {RequiredMonthlyHours:F1}h";
 
         public override async Task LoadDataAsync()
         {
@@ -96,6 +106,12 @@ namespace SledzSpecke.App.ViewModels.Duties
                     if (CurrentYearRequirements.Any())
                     {
                         var requirement = CurrentYearRequirements.First();
+
+                        // Update required hours based on requirements
+                        RequiredMonthlyHours = requirement.MinimumHoursPerMonth;
+                        // Calculate total required hours for the year (12 months)
+                        RequiredTotalHours = requirement.MinimumHoursPerMonth * 12;
+
                         DutyRequirementsText = $"Wymagania na rok {_currentSpecializationYear}:\n" +
                                                $"Min. {requirement.MinimumHoursPerMonth} godz./m-c\n" +
                                                $"Min. {requirement.MinimumDutiesPerMonth} dyżurów/m-c";
@@ -105,9 +121,18 @@ namespace SledzSpecke.App.ViewModels.Duties
                             DutyRequirementsText += "\nWymagany nadzór";
                         }
                     }
+                    else
+                    {
+                        // Default values if no requirements found
+                        RequiredMonthlyHours = 40; // Default value from DutyRequirements
+                        RequiredTotalHours = 480; // 40 * 12 months
+                        DutyRequirementsText = "Standardowe wymagania:\nMin. 40 godz./m-c";
+                    }
                 }
                 else
                 {
+                    RequiredMonthlyHours = 40;
+                    RequiredTotalHours = 480;
                     DutyRequirementsText = "Brak danych o specjalizacji";
                 }
 
@@ -115,13 +140,24 @@ namespace SledzSpecke.App.ViewModels.Duties
                 Statistics = await _dutyService.GetDutyStatisticsAsync();
 
                 TotalHours = Statistics.TotalHours;
-                MonthlyHours = Statistics.MonthlyHours;
-                RemainingHours = Statistics.RemainingHours > 0 ? Statistics.RemainingHours : 1;
-                Progress = (double)(TotalHours / (TotalHours + RemainingHours));
+
+                // Calculate current month hours
+                var currentMonthDuties = userDuties
+                    .Where(d => d.StartTime.Month == DateTime.Today.Month && d.StartTime.Year == DateTime.Today.Year)
+                    .ToList();
+                MonthlyHours = currentMonthDuties.Sum(d => (decimal)(d.EndTime - d.StartTime).TotalHours);
+
+                // Calculate progress relative to requirements
+                Progress = Math.Min(1.0, (double)(TotalHours / RequiredTotalHours));
+                MonthlyProgress = Math.Min(1.0, (double)(MonthlyHours / RequiredMonthlyHours));
 
                 UpdateDutiesList(userDuties);
 
                 await ApplyFiltersAsync();
+
+                // Force UI update for calculated properties
+                OnPropertyChanged(nameof(TotalHoursDisplay));
+                OnPropertyChanged(nameof(MonthlyHoursDisplay));
             }
             catch (Exception ex)
             {
