@@ -16,12 +16,13 @@ public partial class DutyAddViewModel : BaseViewModel
         _dutyService = dutyService;
         Title = "Dodaj dyżur";
         StartDate = DateTime.Today;
-        EndDate = DateTime.Today;
+        EndDate = DateTime.Today.AddDays(1);
         StartTime = TimeSpan.FromHours(8);
         EndTime = TimeSpan.FromHours(8);
         DutyTypes = Enum.GetValues(typeof(DutyType))
             .Cast<DutyType>()
             .ToList();
+        SelectedDutyType = DutyType.Regular;
     }
 
     [ObservableProperty]
@@ -65,13 +66,17 @@ public partial class DutyAddViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-            await Task.CompletedTask;
+            if (StartDate == EndDate)
+            {
+                StartTime = new TimeSpan(8, 0, 0);
+                EndTime = new TimeSpan(8, 0, 0);
+            }
         }
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlert(
                 "Błąd",
-                "Nie udało się załadować danych",
+                $"Nie udało się załadować danych: {ex.Message}",
                 "OK");
         }
         finally
@@ -85,6 +90,24 @@ public partial class DutyAddViewModel : BaseViewModel
     {
         if (IsBusy) return;
 
+        if (string.IsNullOrWhiteSpace(Location))
+        {
+            await Shell.Current.DisplayAlert(
+                "Błąd",
+                "Miejsce dyżuru jest wymagane.",
+                "OK");
+            return;
+        }
+
+        if (GetStartDateTime() >= GetEndDateTime())
+        {
+            await Shell.Current.DisplayAlert(
+                "Błąd",
+                "Data zakończenia musi być późniejsza niż data rozpoczęcia.",
+                "OK");
+            return;
+        }
+
         try
         {
             IsBusy = true;
@@ -95,17 +118,22 @@ public partial class DutyAddViewModel : BaseViewModel
                 StartTime = GetStartDateTime(),
                 EndTime = GetEndDateTime(),
                 Type = SelectedDutyType,
-                Notes = Notes
+                Notes = Notes,
+                DurationInHours = (decimal)(GetEndDateTime() - GetStartDateTime()).TotalHours
             };
 
             await _dutyService.AddDutyAsync(duty);
+            await Shell.Current.DisplayAlert(
+                "Sukces",
+                "Dyżur został dodany pomyślnie.",
+                "OK");
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlert(
                 "Błąd",
-                "Nie udało się zapisać dyżuru",
+                $"Nie udało się zapisać dyżuru: {ex.Message}",
                 "OK");
         }
         finally
