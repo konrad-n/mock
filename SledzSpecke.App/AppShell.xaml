@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
- x:Class="SledzSpecke.AppShell"
- xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
- xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
- xmlns:local="clr-namespace:SledzSpecke"
- xmlns:views="clr-namespace:SledzSpecke.App.Views"
- Shell.FlyoutBehavior="Flyout"
- FlyoutHeaderBehavior="Fixed"
- FlyoutWidth="280"
- Title="ŚledzSpecke">
+    x:Class="SledzSpecke.App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:SledzSpecke.App"
+    xmlns:views="clr-namespace:SledzSpecke.App.Views"
+    Shell.FlyoutBehavior="Flyout"
+    FlyoutHeaderBehavior="Fixed"
+    FlyoutWidth="280"
+    Title="ŚledzSpecke">
     <Shell.FlyoutHeader>
         <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">
             <VerticalStackLayout Padding="20" VerticalOptions="Center">
