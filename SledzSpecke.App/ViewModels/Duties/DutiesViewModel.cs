@@ -220,43 +220,12 @@ namespace SledzSpecke.App.ViewModels.Duties
         [RelayCommand]
         private async Task ExportDutiesAsync()
         {
-            var monthlyDuties = new List<DutyMonitoring.Duty>();
-
-            foreach (var dutyVm in Duties)
+            var navigationParameter = new Dictionary<string, object>
             {
-                monthlyDuties.Add(new DutyMonitoring.Duty
-                {
-                    StartTime = dutyVm.StartTime,
-                    EndTime = dutyVm.EndTime,
-                    Type = dutyVm.Type,
-                    Location = dutyVm.Location,
-                    WasSupervised = dutyVm.Type.Contains("Supervised")
-                });
-            }
+                { "ReportType", "Statystyki dyżurów" }
+            };
 
-            if (CurrentYearRequirements.Any())
-            {
-                var validator = new DutyMonitoring.DutyValidator();
-                var (isCompliant, deficiencies) = validator.CheckMonthlyCompliance(
-                    _currentSpecializationId, _currentSpecializationYear, monthlyDuties);
-
-                var stats = validator.GenerateStatistics(monthlyDuties);
-                var report = validator.GenerateReport(stats);
-
-                if (!isCompliant)
-                {
-                    report += "\n\nDeficyty:\n" + string.Join("\n", deficiencies);
-                }
-
-                await Shell.Current.DisplayAlert("Raport dyżurowy", report, "OK");
-            }
-            else
-            {
-                await Shell.Current.DisplayAlert(
-                    "Eksport dyżurów",
-                    "Funkcja eksportu dyżurów zostanie zaimplementowana wkrótce.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("reports", navigationParameter);
         }
     }
 
