@@ -73,7 +73,11 @@ namespace SledzSpecke.App.Services
         {
             try
             {
+                _logger.LogInformation("Attempting login for user: {Email}", email);
+
                 var users = await _databaseService.QueryAsync<User>("SELECT * FROM Users WHERE Email = ?", email);
+                _logger.LogDebug("Query returned {Count} users for email: {Email}", users.Count, email);
+
                 if (users.Count == 0)
                 {
                     _logger.LogWarning("Login failed: User with email {Email} not found", email);
@@ -81,9 +85,12 @@ namespace SledzSpecke.App.Services
                 }
 
                 var user = users[0];
+                _logger.LogDebug("Found user: {Username} with ID: {Id}", user.Username, user.Id);
 
                 // Verify password
                 bool isPasswordValid = VerifyPassword(password, user.PasswordHash);
+                _logger.LogDebug("Password verification result for user {Email}: {Result}", email, isPasswordValid ? "Valid" : "Invalid");
+
                 if (!isPasswordValid)
                 {
                     _logger.LogWarning("Login failed: Invalid password for user {Email}", email);
@@ -102,7 +109,7 @@ namespace SledzSpecke.App.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during user login");
+                _logger.LogError(ex, "Error during user login for {Email}", email);
                 return false;
             }
         }
@@ -167,6 +174,8 @@ namespace SledzSpecke.App.Services
         {
             try
             {
+                _logger.LogInformation("Seeding test user");
+
                 // Check if test user already exists
                 var existingUsers = await _databaseService.QueryAsync<User>("SELECT * FROM Users WHERE Email = ?", "olo@pozakontrololo.com");
                 if (existingUsers.Count > 0)
@@ -176,28 +185,36 @@ namespace SledzSpecke.App.Services
                     return true;
                 }
 
+                // Ensure specialization types are available
+                _logger.LogDebug("Getting specialization types");
+                var types = await _databaseService.GetAllAsync<SpecializationType>();
+                if (types.Count == 0)
+                {
+                    _logger.LogInformation("No specialization types found, adding them");
+                    var seedTypes = SledzSpecke.Infrastructure.Database.Initialization.SpecializationTypeSeeder.SeedSpecializationTypes();
+                    foreach (var type in seedTypes)
+                    {
+                        await _databaseService.SaveAsync(type);
+                    }
+                }
+
                 // Get hematology specialization type
+                _logger.LogDebug("Getting hematology specialization type");
                 var specializationTypes = await _databaseService.QueryAsync<SpecializationType>("SELECT * FROM SpecializationTypes WHERE Name = ?", "Hematologia");
                 int specializationTypeId = 28; // Default ID for hematology
 
                 if (specializationTypes.Count > 0)
                 {
                     specializationTypeId = specializationTypes[0].Id;
+                    _logger.LogDebug("Found hematology specialization type with ID: {Id}", specializationTypeId);
                 }
                 else
                 {
-                    // Use App.DataManager instead of creating a new instance
-                    await App.DataManager.GetAllSpecializationTypesAsync();
-
-                    // Try again
-                    specializationTypes = await _databaseService.QueryAsync<SpecializationType>("SELECT * FROM SpecializationTypes WHERE Name = ?", "Hematologia");
-                    if (specializationTypes.Count > 0)
-                    {
-                        specializationTypeId = specializationTypes[0].Id;
-                    }
+                    _logger.LogWarning("Hematology specialization type not found, using default ID: {Id}", specializationTypeId);
                 }
 
                 // Create the test user
+                _logger.LogInformation("Creating test user");
                 var testUser = new User
                 {
                     Username = "Olo Pozakontrolo",
@@ -209,19 +226,33 @@ namespace SledzSpecke.App.Services
 
                 // Save the user
                 await _databaseService.SaveAsync(testUser);
+                _logger.LogDebug("Test user saved with ID: {Id}", testUser.Id);
 
                 // Create user settings
+                _logger.LogInformation("Creating user settings for test user");
                 var settings = new UserSettings
                 {
                     Username = testUser.Username,
                     EnableNotifications = true,
                     EnableAutoSync = true,
-                    UseDarkTheme = false
+                    UseDarkTheme = false,
+                    CurrentSpecializationId = 0 // Will be updated when specialization is created
                 };
                 await _databaseService.SaveUserSettingsAsync(settings);
 
-                // Initialize specialization for the user - use App.DataManager instead
-                var specialization = await App.DataManager.InitializeSpecializationForUserAsync(specializationTypeId, testUser.Username);
+                // Create specialization
+                _logger.LogInformation("Creating specialization for test user");
+                var specialization = SledzSpecke.Infrastructure.Database.Initialization.DataSeeder.SeedHematologySpecialization();
+                await _databaseService.SaveAsync(specialization);
+                _logger.LogDebug("Specialization saved with ID: {Id}", specialization.Id);
+
+                // Update user settings with specialization ID
+                _logger.LogInformation("Updating user settings with specialization ID");
+                settings.CurrentSpecializationId = specialization.Id;
+                await _databaseService.SaveUserSettingsAsync(settings);
+
+                // Save related data
+                await SaveRelatedDataAsync(specialization);
 
                 _logger.LogInformation("Test user seeded successfully");
                 return true;
@@ -230,6 +261,43 @@ namespace SledzSpecke.App.Services
             {
                 _logger.LogError(ex, "Error seeding test user");
                 return false;
+            }
+        }
+
+        private async Task SaveRelatedDataAsync(Specialization specialization)
+        {
+            _logger.LogInformation("Saving related data for specialization");
+
+            try
+            {
+                // Save courses
+                foreach (var course in specialization.RequiredCourses)
+                {
+                    course.SpecializationId = specialization.Id;
+                    await _databaseService.SaveAsync(course);
+                }
+                _logger.LogDebug("Saved {Count} courses", specialization.RequiredCourses.Count);
+
+                // Save internships
+                foreach (var internship in specialization.RequiredInternships)
+                {
+                    internship.SpecializationId = specialization.Id;
+                    await _databaseService.SaveAsync(internship);
+                }
+                _logger.LogDebug("Saved {Count} internships", specialization.RequiredInternships.Count);
+
+                // Save procedures
+                foreach (var procedure in specialization.RequiredProcedures)
+                {
+                    procedure.SpecializationId = specialization.Id;
+                    await _databaseService.SaveAsync(procedure);
+                }
+                _logger.LogDebug("Saved {Count} procedures", specialization.RequiredProcedures.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving related data for specialization");
+                throw;
             }
         }
     }

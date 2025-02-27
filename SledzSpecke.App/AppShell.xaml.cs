@@ -21,7 +21,17 @@ namespace SledzSpecke.App
             Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
 
             // Set user information in flyout header
-            UpdateUserInfo();
+            try
+            {
+                UpdateUserInfo();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating user info: {ex.Message}");
+                // Ustawienie wartości domyślnych w przypadku błędu
+                UserNameLabel.Text = "Użytkownik";
+                SpecializationLabel.Text = "Specjalizacja";
+            }
         }
 
         private void UpdateUserInfo()
@@ -31,10 +41,37 @@ namespace SledzSpecke.App
             {
                 UserNameLabel.Text = App.AuthenticationService.CurrentUser.Username;
 
-                // Get specialization name
-                var specializationTask = App.SpecializationService.GetSpecializationAsync();
-                specializationTask.Wait(); // This is not ideal in production, but simple for now
-                SpecializationLabel.Text = specializationTask.Result?.Name ?? "Brak specjalizacji";
+                try
+                {
+                    // Pobierz nazwę specjalizacji asynchronicznie
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var specialization = await App.SpecializationService.GetSpecializationAsync();
+
+                            // Upewnij się, że aktualizacja UI odbywa się na głównym wątku
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                SpecializationLabel.Text = specialization?.Name ?? "Brak specjalizacji";
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error getting specialization: {ex.Message}");
+
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                SpecializationLabel.Text = "Brak specjalizacji";
+                            });
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in task: {ex.Message}");
+                    SpecializationLabel.Text = "Brak specjalizacji";
+                }
             }
         }
 
