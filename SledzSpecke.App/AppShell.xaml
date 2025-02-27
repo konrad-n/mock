@@ -8,6 +8,7 @@
     xmlns:procedures="clr-namespace:SledzSpecke.App.Views.Procedures"
     xmlns:duties="clr-namespace:SledzSpecke.App.Views.Duties"
     xmlns:profile="clr-namespace:SledzSpecke.App.Views.Profile"
+    xmlns:reports="clr-namespace:SledzSpecke.App.Views.Reports"
     Shell.FlyoutBehavior="Disabled">
     <TabBar>
         <Tab Title="Panel główny" Icon="dashboard.png">
