@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:SledzSpecke.App.ViewModels.Procedures"
-             xmlns:models="clr-namespace:SledzSpecke.Core.Models.Domain"
+             xmlns:domain="clr-namespace:SledzSpecke.Core.Models.Domain;assembly=SledzSpecke.Core"
              x:Class="SledzSpecke.App.Views.Procedures.ProceduresPage"
              x:DataType="viewmodels:ProceduresViewModel"
              Title="{Binding Title}">
@@ -61,7 +61,7 @@
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:ProcedureExecution">
+                    <DataTemplate x:DataType="domain:ProcedureExecution">
                         <Border Style="{StaticResource CardBorder}"
                                 Margin="0,0,0,10">
                             <Grid RowDefinitions="Auto,Auto"
