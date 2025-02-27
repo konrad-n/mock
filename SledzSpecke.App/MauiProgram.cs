@@ -108,6 +108,7 @@ public static class MauiProgram
         services.AddSingleton<IUserService, UserService>();
         services.AddSingleton<ISpecializationService, SpecializationService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IExcelExportService, ExcelExportService>();
     }
 
     private static void RegisterViewModels(IServiceCollection services)
