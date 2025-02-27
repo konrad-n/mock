@@ -17,9 +17,6 @@ public static class MauiProgram
                 fonts.AddFont("FluentUI.ttf", "FluentUI");
             });
 
-        RegisterDatabaseServices(builder.Services);
-        RegisterServices(builder.Services);
-        RegisterViewModels(builder.Services);
         RegisterPages(builder.Services);
 
 #if DEBUG
@@ -28,18 +25,6 @@ public static class MauiProgram
 
         var app = builder.Build();
         return app;
-    }
-
-    private static void RegisterDatabaseServices(IServiceCollection services)
-    {
-    }
-
-    private static void RegisterServices(IServiceCollection services)
-    {
-    }
-
-    private static void RegisterViewModels(IServiceCollection services)
-    {
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -56,23 +41,5 @@ public static class MauiProgram
         services.AddTransient<SelfEducationPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<SMKExportPage>();
-    }
-}
-
-public class ErrorApp : Application
-{
-    public ErrorApp()
-    {
-        MainPage = new ContentPage
-        {
-            BackgroundColor = Colors.Red,
-            Content = new Label
-            {
-                Text = "App failed to start - check debug output",
-                TextColor = Colors.White,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center
-            }
-        };
     }
 }

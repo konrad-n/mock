@@ -110,7 +110,6 @@
 
   <ItemGroup>
     <Folder Include="Converters\" />
-    <Folder Include="Resources\Raw\" />
     <Folder Include="Resources\Splash\" />
     <Folder Include="ViewModels\" />
   </ItemGroup>
@@ -119,6 +118,12 @@
     <Compile Update="Views\Reports\SMKExportPage.xaml.cs">
       <DependentUpon>SMKExportPage.xaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiAsset Update="Resources\Raw\specialization.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiAsset>
   </ItemGroup>
 
   <ItemGroup>

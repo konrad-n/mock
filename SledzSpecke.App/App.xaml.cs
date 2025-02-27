@@ -8,6 +8,7 @@ public partial class App : Application
     public static ExportService ExportService { get; private set; }
     public static NotificationService NotificationService { get; private set; }
     public static AppSettings AppSettings { get; private set; }
+    public static SpecializationService SpecializationService { get; private set; }
 
     public App()
     {
@@ -18,6 +19,9 @@ public partial class App : Application
         ExportService = new ExportService(DataManager);
         NotificationService = new NotificationService(DataManager);
         AppSettings = new AppSettings();
+
+        // Initialize the SpecializationService
+        SpecializationService = new SpecializationService();
 
         // Asynchroniczne ładowanie ustawień
         _ = InitializeSettingsAsync();
@@ -48,6 +52,9 @@ public partial class App : Application
 
     protected override void OnStart()
     {
+        // Initialize the specialization at app start
+        _ = SpecializationService.GetSpecializationAsync();
+
         // Sprawdzenie i planowanie powiadomień przy uruchomieniu aplikacji
         _ = NotificationService.CheckAndScheduleNotificationsAsync();
     }

@@ -9,25 +9,25 @@ namespace SledzSpecke.App.Views
         public DashboardPage()
         {
             InitializeComponent();
-            LoadDashboardData();
+            LoadSpecializationData();
         }
 
-        protected override async void OnAppearing()
+        protected override void OnAppearing()
         {
             base.OnAppearing();
-            await LoadSpecializationData();
+            LoadSpecializationData();
         }
 
-        private async Task LoadSpecializationData()
+        private async void LoadSpecializationData()
         {
             try
             {
-                _specialization = await App.DataManager.LoadSpecializationAsync();
+                _specialization = await App.SpecializationService.GetSpecializationAsync();
                 LoadDashboardData();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", $"Wystąpił problem podczas ładowania danych: {ex.Message}", "OK");
+                await DisplayAlert("Error", $"Failed to load specialization data: {ex.Message}", "OK");
             }
         }
 
@@ -86,8 +86,10 @@ namespace SledzSpecke.App.Views
             DutyShiftsLabel.Text = "125/520 godzin";
             SelfEducationLabel.Text = "5/18 dni";
 
-            // Przygotowanie najbliższych terminów
-            UpdateUpcomingEvents();
+            // Symulowane najbliższe terminy dla przykładu
+            UpcomingEvent1.Text = "15.03.2023 - Kurs: Zaburzenia hemostazy";
+            UpcomingEvent2.Text = "01.04.2023 - Staż kierunkowy w laboratorium hematologicznym";
+            UpcomingEvent3.Text = "30.05.2023 - Koniec modułu podstawowego";
         }
 
         private double GetBasicModuleProgress()
