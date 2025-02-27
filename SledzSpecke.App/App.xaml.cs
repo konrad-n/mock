@@ -69,6 +69,9 @@ namespace SledzSpecke.App
                 // Initialize database
                 await DatabaseService.InitAsync();
 
+                // Seed test user
+                await AuthenticationService.SeedTestUserAsync();
+
                 // Load settings
                 await AppSettings.LoadAsync();
 

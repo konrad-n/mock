@@ -162,5 +162,75 @@ namespace SledzSpecke.App.Services
             string hashedPassword = HashPassword(password);
             return hashedPassword == storedHash;
         }
+
+        public async Task<bool> SeedTestUserAsync()
+        {
+            try
+            {
+                // Check if test user already exists
+                var existingUsers = await _databaseService.QueryAsync<User>("SELECT * FROM Users WHERE Email = ?", "olo@pozakontrololo.com");
+                if (existingUsers.Count > 0)
+                {
+                    // User already exists, no need to create it again
+                    _logger.LogInformation("Test user already exists");
+                    return true;
+                }
+
+                // Get hematology specialization type
+                var specializationTypes = await _databaseService.QueryAsync<SpecializationType>("SELECT * FROM SpecializationTypes WHERE Name = ?", "Hematologia");
+                int specializationTypeId = 28; // Default ID for hematology
+
+                if (specializationTypes.Count > 0)
+                {
+                    specializationTypeId = specializationTypes[0].Id;
+                }
+                else
+                {
+                    // Use App.DataManager instead of creating a new instance
+                    await App.DataManager.GetAllSpecializationTypesAsync();
+
+                    // Try again
+                    specializationTypes = await _databaseService.QueryAsync<SpecializationType>("SELECT * FROM SpecializationTypes WHERE Name = ?", "Hematologia");
+                    if (specializationTypes.Count > 0)
+                    {
+                        specializationTypeId = specializationTypes[0].Id;
+                    }
+                }
+
+                // Create the test user
+                var testUser = new User
+                {
+                    Username = "Olo Pozakontrolo",
+                    Email = "olo@pozakontrololo.com",
+                    PasswordHash = HashPassword("gucio"),
+                    SpecializationTypeId = specializationTypeId,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // Save the user
+                await _databaseService.SaveAsync(testUser);
+
+                // Create user settings
+                var settings = new UserSettings
+                {
+                    Username = testUser.Username,
+                    EnableNotifications = true,
+                    EnableAutoSync = true,
+                    UseDarkTheme = false
+                };
+                await _databaseService.SaveUserSettingsAsync(settings);
+
+                // Initialize specialization for the user - use App.DataManager instead
+                var specialization = await App.DataManager.InitializeSpecializationForUserAsync(specializationTypeId, testUser.Username);
+
+                _logger.LogInformation("Test user seeded successfully");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error seeding test user");
+                return false;
+            }
+        }
     }
 }

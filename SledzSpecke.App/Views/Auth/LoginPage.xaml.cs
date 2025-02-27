@@ -5,6 +5,10 @@
         public LoginPage()
         {
             InitializeComponent();
+#if DEBUG
+            EmailEntry.Text = "olo@pozakontrololo.com";
+            PasswordEntry.Text = "gucio";
+#endif
         }
 
         private async void OnLoginClicked(object sender, EventArgs e)
