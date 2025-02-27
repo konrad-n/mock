@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database;
 using SledzSpecke.Infrastructure.Database.Initialization;
 

@@ -1,11 +1,12 @@
-﻿using SledzSpecke.Core.Models;
+﻿// SledzSpecke.App/Views/DutyShiftDetailsPage.xaml.cs
+using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Views
 {
     public partial class DutyShiftDetailsPage : ContentPage
     {
         private DutyShift _dutyShift;
-        private Action<DutyShift> _onSaveCallback;
+        private Func<DutyShift, Task> _onSaveCallback;
 
         public string PageTitle { get; set; }
         public DateTime StartDate { get; set; } = DateTime.Now;
@@ -18,7 +19,7 @@ namespace SledzSpecke.App.Views
         public string Notes { get; set; }
         public bool IsSupervisorVisible { get; set; }
 
-        public DutyShiftDetailsPage(DutyShift dutyShift, Action<DutyShift> onSaveCallback)
+        public DutyShiftDetailsPage(DutyShift dutyShift, Func<DutyShift, Task> onSaveCallback)
         {
             InitializeComponent();
             _onSaveCallback = onSaveCallback;
@@ -143,7 +144,10 @@ namespace SledzSpecke.App.Views
 
             try
             {
-                _onSaveCallback?.Invoke(_dutyShift);
+                if (_onSaveCallback != null)
+                {
+                    await _onSaveCallback(_dutyShift);
+                }
                 await Navigation.PopAsync();
             }
             catch (Exception ex)

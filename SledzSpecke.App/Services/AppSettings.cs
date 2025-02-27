@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// SledzSpecke.App/Services/AppSettings.cs
+using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
 
@@ -73,32 +74,35 @@ namespace SledzSpecke.App.Services
             switch (key)
             {
                 case "Username":
-                    _settings.Username = (string)(object)value;
+                    _settings.Username = value as string;
                     break;
                 case "MedicalLicenseNumber":
-                    _settings.MedicalLicenseNumber = (string)(object)value;
+                    _settings.MedicalLicenseNumber = value as string;
                     break;
                 case "TrainingUnit":
-                    _settings.TrainingUnit = (string)(object)value;
+                    _settings.TrainingUnit = value as string;
                     break;
                 case "Supervisor":
-                    _settings.Supervisor = (string)(object)value;
+                    _settings.Supervisor = value as string;
                     break;
                 case "EnableNotifications":
-                    _settings.EnableNotifications = (bool)(object)value;
+                    if (value is bool boolValue)
+                        _settings.EnableNotifications = boolValue;
                     break;
                 case "EnableAutoSync":
-                    _settings.EnableAutoSync = (bool)(object)value;
+                    if (value is bool autoSyncValue)
+                        _settings.EnableAutoSync = autoSyncValue;
                     break;
                 case "UseDarkTheme":
-                    _settings.UseDarkTheme = (bool)(object)value;
+                    if (value is bool darkThemeValue)
+                        _settings.UseDarkTheme = darkThemeValue;
                     break;
             }
         }
 
         public void RemoveSetting(string key)
         {
-            SetSetting(key, default);
+            SetSetting<object>(key, null);
         }
     }
 }

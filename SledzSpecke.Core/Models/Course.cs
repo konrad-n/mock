@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿// SledzSpecke.Core/Models/Course.cs
+using SQLite;
 using System;
 
 namespace SledzSpecke.Core.Models

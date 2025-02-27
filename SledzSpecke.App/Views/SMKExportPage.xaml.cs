@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Services;
+﻿using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Views
 {
@@ -42,14 +42,14 @@ namespace SledzSpecke.App.Views
             _exportOptions.IncludeCourses = CoursesCheckBox.IsChecked;
             _exportOptions.IncludeInternships = InternshipsCheckBox.IsChecked;
             _exportOptions.IncludeProcedures = ProceduresCheckBox.IsChecked;
-            _exportOptions.Format = FormatPicker.SelectedIndex == 0 ? ExportFormat.Excel : ExportFormat.Csv;
+            _exportOptions.Format = FormatPicker.SelectedIndex == 0 ? ExportFormat.Excel : ExportFormat.CSV;
 
             if (AllModulesRadioButton.IsChecked)
-                _exportOptions.SelectedModule = SMKExportModuleFilter.All;
+                _exportOptions.ModuleFilter = SMKExportModuleFilter.All;
             else if (BasicModuleRadioButton.IsChecked)
-                _exportOptions.SelectedModule = SMKExportModuleFilter.BasicOnly;
+                _exportOptions.ModuleFilter = SMKExportModuleFilter.BasicOnly;
             else if (SpecialisticModuleRadioButton.IsChecked)
-                _exportOptions.SelectedModule = SMKExportModuleFilter.SpecialisticOnly;
+                _exportOptions.ModuleFilter = SMKExportModuleFilter.SpecialisticOnly;
 
             // Pokazanie indykatora ładowania
             await ShowLoadingIndicator(true);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.Infrastructure.Database.Initialization
 {

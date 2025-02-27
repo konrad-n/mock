@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
+using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.Infrastructure.Database
 {
@@ -11,10 +12,12 @@ namespace SledzSpecke.Infrastructure.Database
     {
         private SQLiteAsyncConnection _database;
         private readonly ILogger<DatabaseService> _logger;
+        private readonly IFileSystemService _fileSystemService;
         private bool _isInitialized = false;
 
-        public DatabaseService(ILogger<DatabaseService> logger)
+        public DatabaseService(IFileSystemService fileSystemService, ILogger<DatabaseService> logger)
         {
+            _fileSystemService = fileSystemService;
             _logger = logger;
         }
 
@@ -23,7 +26,7 @@ namespace SledzSpecke.Infrastructure.Database
             if (_isInitialized)
                 return;
 
-            var databasePath = Path.Combine(FileSystem.AppDataDirectory, "SledzSpecke.db3");
+            var databasePath = Path.Combine(_fileSystemService.GetAppDataDirectory(), "SledzSpecke.db3");
             _database = new SQLiteAsyncConnection(databasePath);
 
             await _database.CreateTableAsync<SpecializationType>();

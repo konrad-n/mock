@@ -1,5 +1,8 @@
-﻿public enum ProcedureType
+﻿namespace SledzSpecke.Core.Models.Enums
 {
-    TypeA,  // wykonywanie samodzielne z asystą lub pod nadzorem
-    TypeB   // jako pierwsza asysta
+    public enum ProcedureType
+    {
+        TypeA,
+        TypeB
+    }
 }

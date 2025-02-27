@@ -1,4 +1,5 @@
 ﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Views
 {
@@ -23,7 +24,7 @@ namespace SledzSpecke.App.Views
             _onSaveCallback = onSaveCallback;
 
             ProcedureName = procedure.Name;
-            ProcedureType = procedure.ProcedureType == SledzSpecke.Core.Models.ProcedureType.TypeA
+            ProcedureType = procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeA
                 ? "Kod A - wykonywanie samodzielne"
                 : "Kod B - pierwsza asysta";
             CompletionStatus = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount}";
@@ -52,7 +53,7 @@ namespace SledzSpecke.App.Views
             }
 
             // Dla typu B (asysta) wymagany jest nadzorujący
-            if (_procedure.ProcedureType == SledzSpecke.Core.Models.ProcedureType.TypeB && string.IsNullOrWhiteSpace(SupervisorName))
+            if (_procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(SupervisorName))
             {
                 await DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla procedury typu B.", "OK");
                 return;

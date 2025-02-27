@@ -2,6 +2,7 @@
 using SledzSpecke.App.Services;
 using SledzSpecke.App.Views;
 using SledzSpecke.Infrastructure.Database;
+using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.App;
 
@@ -35,6 +36,9 @@ public static class MauiProgram
 
     private static void RegisterServices(IServiceCollection services)
     {
+        // Register file system service
+        services.AddSingleton<IFileSystemService, MauiFileSystemService>();
+
         // Register database service
         services.AddSingleton<DatabaseService>();
 

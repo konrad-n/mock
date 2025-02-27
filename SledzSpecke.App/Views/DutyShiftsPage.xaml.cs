@@ -1,4 +1,5 @@
-﻿using SledzSpecke.Core.Models;
+﻿// SledzSpecke.App/Views/DutyShiftsPage.xaml.cs
+using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Views
 {
@@ -201,7 +202,7 @@ namespace SledzSpecke.App.Views
 
         private async void OnAddDutyShiftClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new DutyShiftDetailsPage(null, OnDutyShiftAdded));
+            await Navigation.PushAsync(new DutyShiftDetailsPage(null, OnDutyShiftSaved));
         }
 
         private async void OnEditDutyShiftClicked(object sender, EventArgs e)
@@ -211,12 +212,12 @@ namespace SledzSpecke.App.Views
                 var dutyShift = await App.DutyShiftService.GetDutyShiftAsync(dutyShiftId);
                 if (dutyShift != null)
                 {
-                    await Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, OnDutyShiftUpdated));
+                    await Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, OnDutyShiftSaved));
                 }
             }
         }
 
-        private async void OnDutyShiftAdded(DutyShift dutyShift)
+        private async Task OnDutyShiftSaved(DutyShift dutyShift)
         {
             try
             {
@@ -224,27 +225,11 @@ namespace SledzSpecke.App.Views
                 await App.DutyShiftService.SaveDutyShiftAsync(dutyShift);
 
                 // Refresh data
-                await LoadDataAsync();
+                await Task.Run(() => LoadDataAsync());
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Error", $"Failed to save duty shift: {ex.Message}", "OK");
-            }
-        }
-
-        private async void OnDutyShiftUpdated(DutyShift dutyShift)
-        {
-            try
-            {
-                // Save to database
-                await App.DutyShiftService.SaveDutyShiftAsync(dutyShift);
-
-                // Refresh data
-                await LoadDataAsync();
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"Failed to update duty shift: {ex.Message}", "OK");
             }
         }
     }

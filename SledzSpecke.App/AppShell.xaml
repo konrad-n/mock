@@ -9,31 +9,31 @@
     <TabBar>
         <ShellContent
         Title="Dashboard"
-        Icon="dashboard_icon.png"
+        Icon="dashboard.png"
         ContentTemplate="{DataTemplate views:DashboardPage}"
         Route="DashboardPage" />
 
         <ShellContent
         Title="Kursy"
-        Icon="course_icon.png"
+        Icon="course.png"
         ContentTemplate="{DataTemplate views:CoursesPage}"
         Route="CoursesPage" />
 
         <ShellContent
         Title="Staże"
-        Icon="internship_icon.png"
+        Icon="internship.png"
         ContentTemplate="{DataTemplate views:InternshipsPage}"
         Route="InternshipsPage" />
 
         <ShellContent
         Title="Procedury"
-        Icon="procedure_icon.png"
+        Icon="procedure.png"
         ContentTemplate="{DataTemplate views:ProceduresPage}"
         Route="ProceduresPage" />
 
         <ShellContent
         Title="Dyżury"
-        Icon="duty_icon.png"
+        Icon="duty.png"
         ContentTemplate="{DataTemplate views:DutyShiftsPage}"
         Route="DutyShiftsPage" />
     </TabBar>

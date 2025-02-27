@@ -22,8 +22,11 @@ public partial class App : Application
     {
         InitializeComponent();
 
+        // Create file system service
+        var fileSystemService = new MauiFileSystemService();
+
         // Initialize services
-        DatabaseService = new DatabaseService(LoggerFactory.Create(builder =>
+        DatabaseService = new DatabaseService(fileSystemService, LoggerFactory.Create(builder =>
             builder.AddDebug()).CreateLogger<DatabaseService>());
 
         DataManager = new DataManager(DatabaseService, LoggerFactory.Create(builder =>
