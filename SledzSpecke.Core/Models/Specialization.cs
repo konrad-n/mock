@@ -1,5 +1,4 @@
-﻿using SledzSpecke.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,7 +22,6 @@ namespace SledzSpecke.Core.Models
         public int RequiredDutyHoursPerWeek { get; set; }
         public bool RequiresPublication { get; set; }
         public int RequiredConferences { get; set; }
-
 
         public double GetCompletionPercentage()
         {

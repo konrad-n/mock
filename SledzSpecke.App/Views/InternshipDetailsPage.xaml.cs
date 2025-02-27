@@ -7,9 +7,6 @@ namespace SledzSpecke.App.Views
         private Internship _internship;
         private ModuleType _currentModule;
         private Action<Internship> _onSaveCallback;
-
-
-
         public string PageTitle { get; set; }
         public string DurationWeeks { get; set; }
         public string WorkingDays { get; set; }

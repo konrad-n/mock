@@ -7,8 +7,6 @@
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Dane procedury" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
-
-
             <Label Text="Nazwa procedury" FontAttributes="Bold"/>
             <Entry x:Name="ProcedureNameEntry" Placeholder="Wprowadź nazwę procedury" Text="{Binding Procedure.Name}"/>
 

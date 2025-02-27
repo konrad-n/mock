@@ -15,8 +15,6 @@ namespace SledzSpecke.Core.Models
         public int? InternshipId { get; set; }
     }
 
-
-
     public enum DutyType
     {
         Accompanied,

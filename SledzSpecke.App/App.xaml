@@ -1,1 +1,80 @@
-﻿
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:SledzSpecke"
+             x:Class="SledzSpecke.App.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Custom Colors -->
+            <Color x:Key="PrimaryColor">#1E3A8A</Color>
+            <Color x:Key="SecondaryColor">#3B82F6</Color>
+            <Color x:Key="AccentColor">#38BDF8</Color>
+            <Color x:Key="SuccessColor">#10B981</Color>
+            <Color x:Key="WarningColor">#F59E0B</Color>
+            <Color x:Key="DangerColor">#EF4444</Color>
+            <Color x:Key="BackgroundColor">#F9FAFB</Color>
+            <Color x:Key="TextColor">#1F2937</Color>
+            <Color x:Key="TextMutedColor">#6B7280</Color>
+
+            <!-- Custom Styles -->
+            <Style TargetType="Button" x:Key="PrimaryButton">
+                <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16,10" />
+            </Style>
+
+            <Style TargetType="Button" x:Key="SecondaryButton">
+                <Setter Property="BackgroundColor" Value="{StaticResource SecondaryColor}" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16,10" />
+            </Style>
+
+            <Style TargetType="Button" x:Key="OutlineButton">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor" Value="{StaticResource PrimaryColor}" />
+                <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16,10" />
+            </Style>
+
+            <Style TargetType="Frame" x:Key="CardFrame">
+                <Setter Property="BackgroundColor" Value="White" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="BorderColor" Value="#E5E7EB" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="HasShadow" Value="True" />
+                <Setter Property="Margin" Value="0,8" />
+            </Style>
+
+            <Style TargetType="Label" x:Key="HeaderLabel">
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource TextColor}" />
+                <Setter Property="Margin" Value="0,16,0,8" />
+            </Style>
+
+            <Style TargetType="Label" x:Key="SubHeaderLabel">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource TextColor}" />
+                <Setter Property="Margin" Value="0,8,0,4" />
+            </Style>
+
+            <Style TargetType="ProgressBar" x:Key="CustomProgressBar">
+                <Setter Property="ProgressColor" Value="{StaticResource SuccessColor}" />
+                <Setter Property="HeightRequest" Value="10" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

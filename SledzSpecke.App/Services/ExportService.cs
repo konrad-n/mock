@@ -1,5 +1,4 @@
 ﻿using SledzSpecke.Core.Models;
-using SledzSpecke.Models;
 
 namespace SledzSpecke.App.Services
 {

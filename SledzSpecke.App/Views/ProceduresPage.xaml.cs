@@ -1,10 +1,5 @@
-﻿using System;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Models;
-using SledzSpecke.Services;
-using System.Collections.Generic;
-using System.Linq;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
@@ -13,8 +8,6 @@ namespace SledzSpecke.App.Views
         private Specialization _specialization;
         private ModuleType _currentModule = ModuleType.Basic;
         private ProcedureType _currentProcedureType = ProcedureType.TypeA;
-
-
 
         public ProceduresPage()
         {

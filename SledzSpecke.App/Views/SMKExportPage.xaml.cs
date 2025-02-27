@@ -1,4 +1,6 @@
-﻿namespace SledzSpecke.App.Views
+﻿using SledzSpecke.App.Services;
+
+namespace SledzSpecke.App.Views
 {
     public partial class SMKExportPage : ContentPage
     {

@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Views
 {
@@ -8,9 +6,6 @@ namespace SledzSpecke.App.Views
     {
         private SelfEducation _selfEducation;
         private Action<SelfEducation> _onSaveCallback;
-
-
-
         public string PageTitle { get; set; }
         public string Title { get; set; }
         public DateTime StartDate { get; set; } = DateTime.Now;

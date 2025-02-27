@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Views
 {
@@ -10,57 +6,55 @@ namespace SledzSpecke.App.Views
     {
         // Przykładowa lista dyżurów dla demonstracji
         private List<DutyShift> _dutyShifts = new List<DutyShift>
-{
-new DutyShift
-{
-Id = 1,
-StartDate = DateTime.Now.AddDays(-30),
-EndDate = DateTime.Now.AddDays(-29).AddHours(10).AddMinutes(5),
-DurationHours = 10 + (5/60.0),
-Type = DutyType.Accompanied,
-Location = "Oddział Hematologii",
-SupervisorName = "Dr Jan Kowalski"
-},
-new DutyShift
-{
-Id = 2,
-StartDate = DateTime.Now.AddDays(-25),
-EndDate = DateTime.Now.AddDays(-24).AddHours(10).AddMinutes(5),
-DurationHours = 10 + (5/60.0),
-Type = DutyType.Accompanied,
-Location = "Oddział Hematologii",
-SupervisorName = "Dr Jan Kowalski"
-},
-new DutyShift
-{
-Id = 3,
-StartDate = DateTime.Now.AddDays(-20),
-EndDate = DateTime.Now.AddDays(-19).AddHours(10).AddMinutes(5),
-DurationHours = 10 + (5/60.0),
-Type = DutyType.Independent,
-Location = "Oddział Hematologii"
-},
-new DutyShift
-{
-Id = 4,
-StartDate = DateTime.Now.AddDays(-15),
-EndDate = DateTime.Now.AddDays(-14).AddHours(10).AddMinutes(5),
-DurationHours = 10 + (5/60.0),
-Type = DutyType.Independent,
-Location = "Oddział Hematologii"
-},
-new DutyShift
-{
-Id = 5,
-StartDate = DateTime.Now.AddDays(-10),
-EndDate = DateTime.Now.AddDays(-9).AddHours(10).AddMinutes(5),
-DurationHours = 10 + (5/60.0),
-Type = DutyType.Independent,
-Location = "Oddział Hematologii"
-}
-};
-
-
+        {
+            new DutyShift
+            {
+                Id = 1,
+                StartDate = DateTime.Now.AddDays(-30),
+                EndDate = DateTime.Now.AddDays(-29).AddHours(10).AddMinutes(5),
+                DurationHours = 10 + (5/60.0),
+                Type = DutyType.Accompanied,
+                Location = "Oddział Hematologii",
+                SupervisorName = "Dr Jan Kowalski"
+            },
+            new DutyShift
+            {
+                Id = 2,
+                StartDate = DateTime.Now.AddDays(-25),
+                EndDate = DateTime.Now.AddDays(-24).AddHours(10).AddMinutes(5),
+                DurationHours = 10 + (5/60.0),
+                Type = DutyType.Accompanied,
+                Location = "Oddział Hematologii",
+                SupervisorName = "Dr Jan Kowalski"
+            },
+            new DutyShift
+            {
+                Id = 3,
+                StartDate = DateTime.Now.AddDays(-20),
+                EndDate = DateTime.Now.AddDays(-19).AddHours(10).AddMinutes(5),
+                DurationHours = 10 + (5/60.0),
+                Type = DutyType.Independent,
+                Location = "Oddział Hematologii"
+            },
+            new DutyShift
+            {
+                Id = 4,
+                StartDate = DateTime.Now.AddDays(-15),
+                EndDate = DateTime.Now.AddDays(-14).AddHours(10).AddMinutes(5),
+                DurationHours = 10 + (5/60.0),
+                Type = DutyType.Independent,
+                Location = "Oddział Hematologii"
+            },
+            new DutyShift
+            {
+                Id = 5,
+                StartDate = DateTime.Now.AddDays(-10),
+                EndDate = DateTime.Now.AddDays(-9).AddHours(10).AddMinutes(5),
+                DurationHours = 10 + (5/60.0),
+                Type = DutyType.Independent,
+                Location = "Oddział Hematologii"
+            }
+        };
 
         public DutyShiftsPage()
         {

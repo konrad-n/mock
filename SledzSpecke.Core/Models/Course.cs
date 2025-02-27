@@ -20,8 +20,6 @@ namespace SledzSpecke.Core.Models
         public string Notes { get; set; }
     }
 
-
-
     public enum ModuleType
     {
         Basic,

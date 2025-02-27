@@ -7,8 +7,6 @@
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Ustawienia aplikacji" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
-
-
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Dane specjalizacji" FontSize="16" FontAttributes="Bold"/>

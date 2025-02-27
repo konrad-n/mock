@@ -23,19 +23,13 @@
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
-
-
-
     <Grid RowDefinitions="Auto,*">
         <Grid ColumnDefinitions="*,*" Padding="10">
             <Button Text="Moduł podstawowy" 
                 Clicked="OnBasicModuleButtonClicked" 
                 Grid.Column="0" 
                 Margin="5"
-x:Name="BasicModuleButton"/>
-
-
-
+                x:Name="BasicModuleButton"/>
             <Button Text="Moduł specjalistyczny" 
                 Clicked="OnSpecialisticModuleButtonClicked" 
                 Grid.Column="1" 

@@ -1,5 +1,5 @@
-﻿using SledzSpecke.Services;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
@@ -7,8 +7,6 @@ namespace SledzSpecke.App.Views
     {
         private Specialization _specialization;
         private ModuleType _currentModule = ModuleType.Basic;
-
-
 
         public InternshipsPage()
         {

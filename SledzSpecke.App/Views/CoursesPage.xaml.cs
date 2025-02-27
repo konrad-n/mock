@@ -1,189 +1,179 @@
 ﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
-    public partial class CourseDetailsPage : ContentPage
+    public partial class CoursesPage : ContentPage
     {
-        private Course _course;
-        private ModuleType _currentModule;
-        private Action<Course> _onSaveCallback;
+        private Specialization _specialization;
+        private ModuleType _currentModule = ModuleType.Basic;
 
-
-
-        public string PageTitle { get; set; }
-        public string DurationDays { get; set; }
-        public DateTime CourseDate { get; set; } = DateTime.Now.AddDays(30);
-        public DateTime CompletionDate { get; set; } = DateTime.Now;
-        public bool IsDateVisible { get; set; }
-        public bool IsCompletionDateVisible { get; set; }
-        public bool IsCompletionVisible { get; set; }
-
-        public Course Course => _course;
-
-        public CourseDetailsPage(Course course, ModuleType currentModule, Action<Course> onSaveCallback)
+        public CoursesPage()
         {
             InitializeComponent();
-            _currentModule = currentModule;
-            _onSaveCallback = onSaveCallback;
+            _specialization = DataSeeder.SeedHematologySpecialization();
+            DisplayCourses(_currentModule);
+        }
 
-            if (course == null)
+        private void DisplayCourses(ModuleType moduleType)
+        {
+            _currentModule = moduleType;
+            CoursesLayout.Children.Clear();
+            NoModuleSelectedLabel.IsVisible = false;
+
+            // Ustawienie aktywnego przycisku
+            if (moduleType == ModuleType.Basic)
             {
-                // Nowy kurs
-                _course = new Course
-                {
-                    Id = new Random().Next(1000, 9999), // Tymczasowe ID
-                    Module = currentModule,
-                    IsRequired = true
-                };
-                PageTitle = "Dodaj kurs";
+                BasicModuleButton.BackgroundColor = Colors.DarkBlue;
+                BasicModuleButton.TextColor = Colors.White;
+                SpecialisticModuleButton.BackgroundColor = Colors.LightGray;
+                SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else
             {
-                // Edycja istniejącego kursu
-                _course = course;
-                PageTitle = "Szczegóły kursu";
-                DurationDays = course.DurationDays.ToString();
-
-                // Ustawienie pickerów
-                ModulePicker.SelectedIndex = course.Module == ModuleType.Basic ? 0 : 1;
-
-                // Ustawienie statusu
-                if (course.IsCompleted)
-                {
-                    StatusPicker.SelectedIndex = 3; // Ukończony
-                    IsCompletionDateVisible = true;
-                    IsCompletionVisible = true;
-                    if (course.CompletionDate.HasValue)
-                        CompletionDate = course.CompletionDate.Value;
-                }
-                else if (course.IsAttended)
-                {
-                    StatusPicker.SelectedIndex = 2; // Zarejestrowany
-                    IsDateVisible = true;
-                    if (course.ScheduledDate.HasValue)
-                        CourseDate = course.ScheduledDate.Value;
-                }
-                else if (course.ScheduledDate.HasValue)
-                {
-                    StatusPicker.SelectedIndex = 1; // Zaplanowany
-                    IsDateVisible = true;
-                    CourseDate = course.ScheduledDate.Value;
-                }
-                else
-                {
-                    StatusPicker.SelectedIndex = 0; // Oczekujący
-                }
+                BasicModuleButton.BackgroundColor = Colors.LightGray;
+                BasicModuleButton.TextColor = Colors.Black;
+                SpecialisticModuleButton.BackgroundColor = Colors.DarkBlue;
+                SpecialisticModuleButton.TextColor = Colors.White;
             }
 
-            BindingContext = this;
-        }
+            var courses = _specialization.RequiredCourses
+                .Where(c => c.Module == moduleType)
+                .OrderBy(c => c.IsCompleted)
+                .ToList();
 
-        private void OnModulePickerSelectedIndexChanged(object sender, EventArgs e)
-        {
-            _course.Module = ModulePicker.SelectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
-        }
-
-        private void OnStatusPickerSelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (StatusPicker.SelectedIndex)
+            if (courses.Count == 0)
             {
-                case 0: // Oczekujący
-                    IsDateVisible = false;
-                    IsCompletionDateVisible = false;
-                    IsCompletionVisible = false;
-                    _course.ScheduledDate = null;
-                    _course.IsRegistered = false;
-                    _course.IsAttended = false;
-                    _course.IsCompleted = false;
-                    _course.CompletionDate = null;
-                    break;
-                case 1: // Zaplanowany
-                    IsDateVisible = true;
-                    IsCompletionDateVisible = false;
-                    IsCompletionVisible = false;
-                    _course.ScheduledDate = CourseDate;
-                    _course.IsRegistered = false;
-                    _course.IsAttended = false;
-                    _course.IsCompleted = false;
-                    _course.CompletionDate = null;
-                    break;
-                case 2: // Zarejestrowany
-                    IsDateVisible = true;
-                    IsCompletionDateVisible = false;
-                    IsCompletionVisible = false;
-                    _course.ScheduledDate = CourseDate;
-                    _course.IsRegistered = true;
-                    _course.IsAttended = true;
-                    _course.IsCompleted = false;
-                    _course.CompletionDate = null;
-                    break;
-                case 3: // Ukończony
-                    IsDateVisible = false;
-                    IsCompletionDateVisible = true;
-                    IsCompletionVisible = true;
-                    _course.IsRegistered = true;
-                    _course.IsAttended = true;
-                    _course.IsCompleted = true;
-                    _course.CompletionDate = CompletionDate;
-                    break;
-            }
-            OnPropertyChanged(nameof(IsDateVisible));
-            OnPropertyChanged(nameof(IsCompletionDateVisible));
-            OnPropertyChanged(nameof(IsCompletionVisible));
-        }
-
-        private async void OnAddAttachmentClicked(object sender, EventArgs e)
-        {
-            try
-            {
-                var fileResult = await FilePicker.PickAsync();
-                if (fileResult != null)
+                CoursesLayout.Children.Add(new Label
                 {
-                    _course.CertificateFilePath = fileResult.FullPath;
-                    await DisplayAlert("Sukces", "Plik został dodany pomyślnie.", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Błąd", $"Wystąpił problem z wyborem pliku: {ex.Message}", "OK");
-            }
-        }
-
-        private async void OnCancelClicked(object sender, EventArgs e)
-        {
-            await Navigation.PopAsync();
-        }
-
-        private async void OnSaveClicked(object sender, EventArgs e)
-        {
-            // Walidacja
-            if (string.IsNullOrWhiteSpace(_course.Name))
-            {
-                await DisplayAlert("Błąd", "Nazwa kursu jest wymagana.", "OK");
+                    Text = "Brak kursów do wyświetlenia",
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center,
+                    Margin = new Thickness(0, 20, 0, 0)
+                });
                 return;
             }
 
-            if (!int.TryParse(DurationDays, out int duration) || duration <= 0)
+            foreach (var course in courses)
             {
-                await DisplayAlert("Błąd", "Wprowadź poprawny czas trwania kursu.", "OK");
-                return;
+                var frame = new Frame
+                {
+                    Padding = new Thickness(10),
+                    Margin = new Thickness(0, 0, 0, 10),
+                    CornerRadius = 5,
+                    Style = course.IsCompleted ? (Style)Resources["CompletedCourseStyle"] :
+                            course.ScheduledDate.HasValue ? (Style)Resources["PlannedCourseStyle"] :
+                            (Style)Resources["PendingCourseStyle"]
+                };
+
+                var statusIndicator = new BoxView
+                {
+                    Color = course.IsCompleted ? Colors.Green :
+                            course.ScheduledDate.HasValue ? Colors.Orange :
+                            Colors.Gray,
+                    WidthRequest = 16,
+                    HeightRequest = 16,
+                    CornerRadius = 8,
+                    VerticalOptions = LayoutOptions.Center
+                };
+
+                var titleLabel = new Label
+                {
+                    Text = course.Name,
+                    FontAttributes = FontAttributes.Bold,
+                    FontSize = 16
+                };
+
+                var descriptionLabel = new Label
+                {
+                    Text = $"Czas trwania: {course.DurationDays} dni",
+                    FontSize = 14
+                };
+
+                var statusLabel = new Label
+                {
+                    Text = course.IsCompleted ? "Ukończony" :
+                           course.ScheduledDate.HasValue ? $"Zaplanowany na: {course.ScheduledDate.Value.ToString("dd.MM.yyyy")}" :
+                           "Oczekujący",
+                    FontSize = 14,
+                    TextColor = course.IsCompleted ? Colors.Green :
+                                course.ScheduledDate.HasValue ? Colors.Orange :
+                                Colors.Gray
+                };
+
+                var detailsButton = new Button
+                {
+                    Text = "Szczegóły",
+                    HeightRequest = 35,
+                    FontSize = 14,
+                    Margin = new Thickness(0, 5, 0, 0),
+                    CommandParameter = course.Id
+                };
+                detailsButton.Clicked += OnCourseDetailsClicked;
+
+                var headerLayout = new Grid
+                {
+                    ColumnDefinitions = new ColumnDefinitionCollection
+                {
+                    new ColumnDefinition { Width = new GridLength(30) },
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+                }
+                };
+                headerLayout.Add(statusIndicator, 0, 0);
+                headerLayout.Add(titleLabel, 1, 0);
+
+                var contentLayout = new VerticalStackLayout
+                {
+                    Children = { headerLayout, descriptionLabel, statusLabel, detailsButton }
+                };
+
+                frame.Content = contentLayout;
+                CoursesLayout.Children.Add(frame);
             }
+        }
 
-            _course.DurationDays = duration;
+        private void OnBasicModuleButtonClicked(object sender, EventArgs e)
+        {
+            DisplayCourses(ModuleType.Basic);
+        }
 
-            // Dodatkowe ustawienia w zależności od statusu
-            if (IsDateVisible && _course.ScheduledDate == null)
+        private void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
+        {
+            DisplayCourses(ModuleType.Specialistic);
+        }
+
+        private async void OnAddCourseClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new CourseDetailsPage(null, _currentModule, OnCourseAdded));
+        }
+
+        private async void OnCourseDetailsClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is int courseId)
             {
-                _course.ScheduledDate = CourseDate;
+                var course = _specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
+                if (course != null)
+                {
+                    await Navigation.PushAsync(new CourseDetailsPage(course, _currentModule, OnCourseUpdated));
+                }
             }
+        }
 
-            if (IsCompletionDateVisible && _course.CompletionDate == null)
+        private void OnCourseAdded(Course course)
+        {
+            _specialization.RequiredCourses.Add(course);
+            DisplayCourses(_currentModule);
+        }
+
+        private void OnCourseUpdated(Course course)
+        {
+            var existingCourse = _specialization.RequiredCourses.FirstOrDefault(c => c.Id == course.Id);
+            if (existingCourse != null)
             {
-                _course.CompletionDate = CompletionDate;
+                var index = _specialization.RequiredCourses.IndexOf(existingCourse);
+                _specialization.RequiredCourses[index] = course;
             }
-
-            _onSaveCallback?.Invoke(_course);
-            await Navigation.PopAsync();
+            DisplayCourses(_currentModule);
         }
     }
 }

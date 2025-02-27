@@ -6,9 +6,6 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Dane stażu" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
-
-
-
             <Label Text="Nazwa stażu" FontAttributes="Bold"/>
             <Entry x:Name="InternshipNameEntry" Placeholder="Wprowadź nazwę stażu" Text="{Binding Internship.Name}"/>
 

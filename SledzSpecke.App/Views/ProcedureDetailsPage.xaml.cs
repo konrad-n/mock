@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Core.Models;
-using SledzSpecke.Models;
-using SledzSpecke.Services;
+﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
@@ -15,8 +10,6 @@ namespace SledzSpecke.App.Views
         private ProcedureType _currentProcedureType;
         private Action<MedicalProcedure> _onSaveCallback;
         private List<Internship> _internships;
-
-
 
         public string PageTitle { get; set; }
         public string RequiredCount { get; set; }

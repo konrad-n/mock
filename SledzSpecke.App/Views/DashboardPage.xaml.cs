@@ -1,13 +1,10 @@
 ﻿using SledzSpecke.Core.Models;
-using SledzSpecke.Models;
 
 namespace SledzSpecke.App.Views
 {
     public partial class DashboardPage : ContentPage
     {
         private Specialization _specialization;
-
-
 
         public DashboardPage()
         {

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using SledzSpecke.Core.Models;
-using SledzSpecke.Services;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Services
 {
@@ -8,8 +8,6 @@ namespace SledzSpecke.App.Services
     {
         private static readonly string _appDataFolder = FileSystem.AppDataDirectory;
         private static readonly string _specializationFile = Path.Combine(_appDataFolder, "specialization.json");
-
-
 
         private Specialization _specialization;
 

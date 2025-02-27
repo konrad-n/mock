@@ -12,8 +12,6 @@
                  Margin="5"
                  x:Name="BasicModuleButton"/>
 
-
-
             <Button Text="Moduł specjalistyczny" 
                 Clicked="OnSpecialisticModuleButtonClicked" 
                 Grid.Column="1" 

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SledzSpecke.Core.Models;
-using SledzSpecke.Models;
 
-namespace SledzSpecke.Services
+namespace SledzSpecke.Infrastructure.Database.Initialization
 {
     public class DataSeeder
     { // na pewno będzie trzeba zrobić Seed innych specjalizacji potem
@@ -21,7 +20,7 @@ namespace SledzSpecke.Services
                 VacationDaysPerYear = 26,
                 SelfEducationDaysPerYear = 6,
                 StatutoryHolidaysPerYear = 13,
-                RequiredDutyHoursPerWeek = (int)(10 + (5 / 60.0)),  // 10 godzin 5 minut
+                RequiredDutyHoursPerWeek = (int)(10 + 5 / 60.0),  // 10 godzin 5 minut
                 RequiresPublication = true,
                 RequiredConferences = 3
             };

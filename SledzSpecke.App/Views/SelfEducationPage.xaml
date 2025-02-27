@@ -7,9 +7,6 @@
         <HorizontalStackLayout Padding="15" Spacing="10" HorizontalOptions="Center">
             <Label Text="Wykorzystane dni:" VerticalOptions="Center" FontSize="16"/>
             <Label x:Name="UsedDaysLabel" Text="5/18" VerticalOptions="Center" FontSize="16" FontAttributes="Bold"/>
-
-
-
             <Frame BackgroundColor="#E3F2FD" Padding="5" CornerRadius="5" Margin="10,0,0,0">
                 <HorizontalStackLayout Spacing="5">
                     <Label Text="Rocznie:" VerticalOptions="Center" FontSize="14"/>

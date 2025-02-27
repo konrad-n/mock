@@ -1,8 +1,7 @@
-﻿using SledzSpecke.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace SledzSpecke.Models
+namespace SledzSpecke.Core.Models
 {
     public class MedicalProcedure
     {
