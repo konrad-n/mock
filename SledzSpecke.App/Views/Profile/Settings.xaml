@@ -30,18 +30,17 @@
             </Border>
             <Border Style="{StaticResource CardBorder}">
                 <VerticalStackLayout Spacing="15">
-                    <Label Text="Dane aplikacji"
-                           Style="{StaticResource SubHeaderLabel}"/>
-                    <Button Text="Wykonaj kopię zapasową"
-                            Command="{Binding BackupCommand}"
-                            Style="{StaticResource SecondaryButton}"/>
-                    <Button Text="Przywróć z kopii"
-                            Command="{Binding RestoreCommand}"
-                            Style="{StaticResource SecondaryButton}"/>
-                    <Button Text="Wyczyść dane"
-                            Command="{Binding ClearDataCommand}"
-                            Style="{StaticResource SecondaryButton}"
-                            BackgroundColor="{StaticResource Danger}"/>
+                    <Label Text="Synchronizacja specjalizacji"
+                        Style="{StaticResource SubHeaderLabel}"/>
+                    <Button Text="Zaktualizuj program specjalizacji"
+                        Command="{Binding UpdateSpecializationCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
+                    <Button Text="Eksportuj dane specjalizacji"
+                        Command="{Binding ExportSpecializationCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
+                    <Button Text="Importuj dane specjalizacji"
+                        Command="{Binding ImportSpecializationCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
                 </VerticalStackLayout>
             </Border>
             <Border Style="{StaticResource CardBorder}">
