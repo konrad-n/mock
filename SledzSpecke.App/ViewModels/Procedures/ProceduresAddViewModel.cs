@@ -157,6 +157,24 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 IsBusy = true;
 
+                if (string.IsNullOrWhiteSpace(Name))
+                {
+                    await Shell.Current.DisplayAlert(
+                        "Błąd",
+                        "Nazwa procedury jest wymagana.",
+                        "OK");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(Location))
+                {
+                    await Shell.Current.DisplayAlert(
+                        "Błąd",
+                        "Miejsce wykonania jest wymagane.",
+                        "OK");
+                    return;
+                }
+
                 var procedure = new ProcedureExecution
                 {
                     Name = Name,
@@ -176,6 +194,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 }
 
                 await _procedureService.AddProcedureAsync(procedure);
+                await Shell.Current.DisplayAlert(
+                    "Sukces",
+                    "Procedura została dodana pomyślnie.",
+                    "OK");
                 await Shell.Current.GoToAsync("..");
             }
             catch (Exception ex)
