@@ -15,15 +15,18 @@ namespace SledzSpecke.Infrastructure.Services
     {
         private readonly IProcedureRepository _repository;
         private readonly IUserService _userService;
+        private readonly ISpecializationRequirementsProvider _requirementsProvider;
         private readonly ILogger<ProcedureService> _logger;
 
         public ProcedureService(
             IProcedureRepository repository,
             IUserService userService,
+            ISpecializationRequirementsProvider requirementsProvider,
             ILogger<ProcedureService> logger)
         {
             _repository = repository;
             _userService = userService;
+            _requirementsProvider = requirementsProvider;
             _logger = logger;
         }
 
@@ -38,6 +41,7 @@ namespace SledzSpecke.Infrastructure.Services
                 // Check if procedure meets program requirements
                 await ValidateProcedureRequirementsAsync(procedure);
                 await _repository.AddAsync(procedure);
+
                 return procedure;
             }
             catch (Exception ex)
@@ -94,6 +98,7 @@ namespace SledzSpecke.Infrastructure.Services
                 await ValidateProcedureAsync(procedure);
                 await ValidateProcedureRequirementsAsync(procedure);
                 await _repository.UpdateAsync(procedure);
+
                 return true;
             }
             catch (Exception ex)
@@ -107,11 +112,8 @@ namespace SledzSpecke.Infrastructure.Services
         {
             try
             {
-                var procedure = await _repository.GetByIdAsync(id);
-                if (procedure == null)
-                {
-                    throw new NotFoundException("Procedure not found");
-                }
+                var procedure = await _repository.GetByIdAsync(id)
+                    ?? throw new NotFoundException("Procedure not found");
 
                 var currentUserId = await _userService.GetCurrentUserIdAsync();
                 if (procedure.UserId != currentUserId)
@@ -208,51 +210,89 @@ namespace SledzSpecke.Infrastructure.Services
         {
             try
             {
-                // If no category or stage is assigned, nothing to check
                 if (string.IsNullOrEmpty(procedure.Category) && string.IsNullOrEmpty(procedure.Stage))
                 {
                     return true;
                 }
 
                 var user = await _userService.GetCurrentUserAsync();
+
                 if (user?.CurrentSpecializationId == null)
                 {
                     return true;
                 }
 
-                var requirements = await GetRequirementsForSpecializationAsync();
+                var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(user.CurrentSpecializationId.Value);
+                var matchingRequirements = new List<Core.Models.Requirements.RequiredProcedure>();
 
-                // Find matching requirements
-                var matchingRequirements = requirements
-                    .Where(r => (string.IsNullOrEmpty(procedure.Category) || r.Category == procedure.Category) &&
-                              (string.IsNullOrEmpty(procedure.Stage) || r.Stage == procedure.Stage))
-                    .ToList();
+                foreach (var category in procedureRequirements.Keys)
+                {
+                    if (string.IsNullOrEmpty(procedure.Category) || category == procedure.Category)
+                    {
+                        var procedures = procedureRequirements[category]
+                            .Where(p => p.Name.Equals(procedure.Name, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
+                        if (procedures.Any())
+                        {
+                            matchingRequirements.AddRange(procedures);
+                        }
+                    }
+                }
 
                 if (!matchingRequirements.Any())
                 {
                     return true;
                 }
 
-                // Check if simulation procedures are allowed
                 if (procedure.IsSimulation)
                 {
                     var allowsSimulation = matchingRequirements.Any(r => r.AllowSimulation);
                     if (!allowsSimulation)
                     {
-                        throw new ValidationException("Simulation procedures are not allowed for this category/stage");
+                        throw new ValidationException("Simulation procedures are not allowed for this procedure type");
+                    }
+
+                    var simulationLimitedProcedure = matchingRequirements.FirstOrDefault(r => r.SimulationLimit.HasValue);
+                    if (simulationLimitedProcedure != null)
+                    {
+                        var userProcedures = await GetUserProceduresAsync();
+                        var sameProcedures = userProcedures
+                            .Where(p => p.Name.Equals(procedure.Name, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+                        var simulationCount = sameProcedures.Count(p => p.IsSimulation);
+                        var totalRequired = simulationLimitedProcedure.RequiredCount;
+
+                        if (totalRequired > 0)
+                        {
+                            var maxSimulations = (totalRequired * simulationLimitedProcedure.SimulationLimit.Value) / 100;
+                            if (simulationCount + 1 > maxSimulations)
+                            {
+                                throw new ValidationException($"Simulation limit exceeded. Maximum allowed: {maxSimulations}");
+                            }
+                        }
                     }
                 }
 
-                // Check if supervision is required
-                if (matchingRequirements.Any(r => r.SupervisionRequired) && procedure.SupervisorId == null)
+                var needsSupervision = matchingRequirements.Any(r => r.RequiredCount > 0) &&
+                                      procedure.Type == Core.Models.Enums.ProcedureType.Execution;
+
+                if (needsSupervision && procedure.SupervisorId == null)
                 {
                     throw new ValidationException("This procedure requires supervision");
                 }
 
-                // Mark procedure as meeting appropriate program requirement
                 if (matchingRequirements.Count == 1)
                 {
-                    procedure.ProcedureRequirementId = matchingRequirements[0].Id;
+                    var requirements = await GetRequirementsForSpecializationAsync();
+                    var matchingDbRequirement = requirements.FirstOrDefault(r =>
+                        r.Name.Equals(matchingRequirements[0].Name, StringComparison.OrdinalIgnoreCase) &&
+                        r.Category == procedure.Category);
+
+                    if (matchingDbRequirement != null)
+                    {
+                        procedure.ProcedureRequirementId = matchingDbRequirement.Id;
+                    }
                 }
 
                 return true;
@@ -273,6 +313,7 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var user = await _userService.GetCurrentUserAsync();
+
                 if (user?.CurrentSpecializationId == null)
                 {
                     return new Dictionary<string, (int Required, int Completed, int Assisted)>();
@@ -283,6 +324,7 @@ namespace SledzSpecke.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting procedure progress by category");
+
                 return new Dictionary<string, (int Required, int Completed, int Assisted)>();
             }
         }
@@ -292,6 +334,7 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var user = await _userService.GetCurrentUserAsync();
+
                 if (user?.CurrentSpecializationId == null)
                 {
                     return new Dictionary<string, (int Required, int Completed, int Assisted)>();
@@ -311,8 +354,11 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var categoriesProgress = await GetProcedureProgressByCategoryAsync();
+
                 if (categoriesProgress.Count == 0)
+                {
                     return 0;
+                }
 
                 int totalRequired = 0;
                 int totalCompleted = 0;
@@ -320,7 +366,7 @@ namespace SledzSpecke.Infrastructure.Services
                 foreach (var category in categoriesProgress)
                 {
                     totalRequired += category.Value.Required;
-                    totalCompleted += category.Value.Completed;
+                    totalCompleted += Math.Min(category.Value.Completed, category.Value.Required);
                 }
 
                 return totalRequired > 0 ? (double)totalCompleted / totalRequired : 0;
