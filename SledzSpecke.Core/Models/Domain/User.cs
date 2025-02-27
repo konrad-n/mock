@@ -16,9 +16,6 @@ namespace SledzSpecke.Core.Models.Domain
         [Column("Name")]
         public string Name { get; set; }
 
-        [Column("PWZ")]
-        public string PWZ { get; set; } // Numer prawa wykonywania zawodu
-
         [Column("CurrentSpecializationId")]
         public int? CurrentSpecializationId { get; set; }
 

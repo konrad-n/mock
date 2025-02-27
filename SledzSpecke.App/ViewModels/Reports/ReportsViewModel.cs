@@ -37,6 +37,7 @@ namespace SledzSpecke.App.ViewModels.Reports
 
             StartDate = DateTime.Today.AddMonths(-6);
             EndDate = DateTime.Today;
+            ExportRange = true; // Domyślnie wybieramy zakres dat
         }
 
         [ObservableProperty]
@@ -44,6 +45,12 @@ namespace SledzSpecke.App.ViewModels.Reports
 
         [ObservableProperty]
         private string selectedExportType;
+
+        [ObservableProperty]
+        private bool exportAll;
+
+        [ObservableProperty]
+        private bool exportRange;
 
         [ObservableProperty]
         private DateTime startDate;
@@ -60,6 +67,41 @@ namespace SledzSpecke.App.ViewModels.Reports
         partial void OnSelectedExportTypeChanged(string value)
         {
             LoadDataPreviewAsync();
+        }
+
+        partial void OnExportAllChanged(bool value)
+        {
+            if (value)
+            {
+                ExportRange = false;
+                LoadDataPreviewAsync();
+            }
+        }
+
+        partial void OnExportRangeChanged(bool value)
+        {
+            if (value)
+            {
+                ExportAll = false;
+                LoadDataPreviewAsync();
+            }
+        }
+
+        partial void OnStartDateChanged(DateTime value)
+        {
+            if (ExportRange)
+                LoadDataPreviewAsync();
+        }
+
+        partial void OnEndDateChanged(DateTime value)
+        {
+            if (ExportRange)
+                LoadDataPreviewAsync();
+        }
+
+        public override async Task LoadDataAsync()
+        {
+            await LoadDataPreviewAsync();
         }
 
         private async Task LoadDataPreviewAsync()
@@ -106,54 +148,69 @@ namespace SledzSpecke.App.ViewModels.Reports
         private async Task PreviewProceduresAsync()
         {
             var procedures = await _procedureService.GetUserProceduresAsync();
-            procedures = procedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+
+            if (!ExportAll)
+            {
+                procedures = procedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+            }
 
             var user = await _userService.GetCurrentUserAsync();
 
-            PreviewSummary = $"Znaleziono {procedures.Count} procedur w wybranym zakresie dat.\n" +
-                             $"Dane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
+            PreviewSummary = $"Znaleziono {procedures.Count} procedur " +
+                             (ExportAll ? "w całej aplikacji." : $"w wybranym zakresie dat ({StartDate:d} - {EndDate:d}).") +
+                             $"\nDane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
         }
 
         private async Task PreviewDutiesAsync()
         {
-            var duties = await _dutyService.GetUserDutiesAsync(StartDate);
-            duties = duties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+            var duties = await _dutyService.GetUserDutiesAsync();
 
-            PreviewSummary = $"Znaleziono {duties.Count} dyżurów w wybranym zakresie dat.\n" +
-                             $"Dane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
+            if (!ExportAll)
+            {
+                duties = duties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+            }
+
+            PreviewSummary = $"Znaleziono {duties.Count} dyżurów " +
+                             (ExportAll ? "w całej aplikacji." : $"w wybranym zakresie dat ({StartDate:d} - {EndDate:d}).") +
+                             $"\nDane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
         }
 
         private async Task PreviewCoursesAsync()
         {
             var courses = await Task.FromResult(new List<Course>()); // Zastąp faktycznym wywołaniem
 
-            PreviewSummary = $"Znaleziono {courses.Count} kursów w wybranym zakresie dat.\n" +
-                             $"Dane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
+            PreviewSummary = $"Znaleziono {courses.Count} kursów " +
+                             (ExportAll ? "w całej aplikacji." : $"w wybranym zakresie dat ({StartDate:d} - {EndDate:d}).") +
+                             $"\nDane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
         }
 
         private async Task PreviewInternshipsAsync()
         {
             var internships = await Task.FromResult(new List<Internship>()); // Zastąp faktycznym wywołaniem
 
-            PreviewSummary = $"Znaleziono {internships.Count} staży w wybranym zakresie dat.\n" +
-                             $"Dane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
+            PreviewSummary = $"Znaleziono {internships.Count} staży " +
+                             (ExportAll ? "w całej aplikacji." : $"w wybranym zakresie dat ({StartDate:d} - {EndDate:d}).") +
+                             $"\nDane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
         }
 
         private async Task PreviewAllDataAsync()
         {
             var procedures = await _procedureService.GetUserProceduresAsync();
-            procedures = procedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+            var duties = await _dutyService.GetUserDutiesAsync();
 
-            var duties = await _dutyService.GetUserDutiesAsync(StartDate);
-            duties = duties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+            if (!ExportAll)
+            {
+                procedures = procedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+                duties = duties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+            }
 
             PreviewSummary = $"Znaleziono:\n" +
                              $"- {procedures.Count} procedur\n" +
                              $"- {duties.Count} dyżurów\n" +
                              $"- 0 kursów\n" +
                              $"- 0 staży\n" +
-                             $"w wybranym zakresie dat.\n\n" +
-                             $"Dane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
+                             (ExportAll ? "w całej aplikacji." : $"w wybranym zakresie dat ({StartDate:d} - {EndDate:d}).") +
+                             $"\n\nDane zostaną wyeksportowane w formacie kompatybilnym z SMK.";
         }
 
         [RelayCommand]
@@ -173,12 +230,18 @@ namespace SledzSpecke.App.ViewModels.Reports
                 {
                     case "Wykonane procedury":
                         var procedures = await _procedureService.GetUserProceduresAsync();
-                        procedures = procedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+                        if (!ExportAll)
+                        {
+                            procedures = procedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+                        }
                         fileName = await _excelExportService.ExportProceduresToExcelAsync(procedures);
                         break;
                     case "Dyżury":
-                        var duties = await _dutyService.GetUserDutiesAsync(StartDate);
-                        duties = duties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+                        var duties = await _dutyService.GetUserDutiesAsync();
+                        if (!ExportAll)
+                        {
+                            duties = duties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+                        }
                         fileName = await _excelExportService.ExportDutiesToExcelAsync(duties);
                         break;
                     case "Kursy":
@@ -193,10 +256,13 @@ namespace SledzSpecke.App.ViewModels.Reports
                         break;
                     case "Wszystkie dane":
                         var allProcedures = await _procedureService.GetUserProceduresAsync();
-                        allProcedures = allProcedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+                        var allDuties = await _dutyService.GetUserDutiesAsync();
 
-                        var allDuties = await _dutyService.GetUserDutiesAsync(StartDate);
-                        allDuties = allDuties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+                        if (!ExportAll)
+                        {
+                            allProcedures = allProcedures.Where(p => p.ExecutionDate >= StartDate && p.ExecutionDate <= EndDate).ToList();
+                            allDuties = allDuties.Where(d => d.StartTime >= StartDate && d.StartTime <= EndDate).ToList();
+                        }
 
                         fileName = await _excelExportService.ExportAllDataToExcelAsync(allProcedures, allDuties);
                         break;

@@ -16,11 +16,21 @@
                             SelectedItem="{Binding SelectedExportType}"
                             Title="Wybierz typ danych"/>
 
+                    <!-- Opcja eksportu -->
+                    <RadioButton Content="Wszystkie dodane w aplikacji" 
+                                 IsChecked="{Binding ExportAll}" 
+                                 GroupName="ExportRange" />
+
+                    <RadioButton Content="Zakres dat" 
+                                 IsChecked="{Binding ExportRange}" 
+                                 GroupName="ExportRange" />
+
                     <!-- Filtry eksportu -->
                     <Grid RowDefinitions="Auto,Auto"
                           ColumnDefinitions="*,*"
                           RowSpacing="10"
-                          ColumnSpacing="10">
+                          ColumnSpacing="10"
+                          IsVisible="{Binding ExportRange}">
                         <Label Grid.Row="0" Grid.Column="0"
                                Text="Od:"
                                Style="{StaticResource BodyLabel}"/>
@@ -52,4 +62,3 @@
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
-    

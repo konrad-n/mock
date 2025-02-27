@@ -14,10 +14,12 @@
                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="5">
-                <Label Text="Numer PWZ"
+                <Label Text="Specjalizacja"
                        Style="{StaticResource SubHeaderLabel}"/>
-                <Entry Text="{Binding PWZ}"
-                       Style="{StaticResource BorderedEntry}"/>
+                <Picker ItemsSource="{Binding AvailableSpecializations}"
+                        SelectedItem="{Binding SelectedSpecialization}"
+                        Title="Wybierz specjalizację"
+                        Style="{StaticResource BorderedEntry}"/>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="5">
                 <Label Text="Data rozpoczęcia"
@@ -27,7 +29,13 @@
             <VerticalStackLayout Spacing="5">
                 <Label Text="Przewidywana data zakończenia"
                        Style="{StaticResource SubHeaderLabel}"/>
-                <DatePicker Date="{Binding EndDate}" />
+                <Label Text="{Binding EndDateText}"
+                       Style="{StaticResource BodyLabel}"
+                       Margin="0,10,0,0"/>
+                <Label Text="(Wyliczana automatycznie na podstawie programu specjalizacji i ewentualnych zwolnień)"
+                       Style="{StaticResource BodyLabel}"
+                       FontSize="12"
+                       TextColor="Gray"/>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="10" Margin="0,20,0,0">
                 <Button Text="Zapisz"

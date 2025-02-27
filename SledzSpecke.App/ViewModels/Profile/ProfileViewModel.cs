@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
+using System.Threading.Tasks;
 
 namespace SledzSpecke.App.ViewModels.Profile;
 
@@ -9,21 +10,21 @@ public partial class ProfileViewModel : BaseViewModel
 {
     private readonly IUserService _userService;
     private readonly ISpecializationService _specializationService;
+    private readonly IFileSystemService _fileSystemService;
 
     public ProfileViewModel(
         IUserService userService,
-        ISpecializationService specializationService)
+        ISpecializationService specializationService,
+        IFileSystemService fileSystemService)
     {
         _userService = userService;
         _specializationService = specializationService;
+        _fileSystemService = fileSystemService;
         Title = "Profil";
     }
 
     [ObservableProperty]
     private string userName;
-
-    [ObservableProperty]
-    private string pwz;
 
     [ObservableProperty]
     private string specialization;
@@ -49,9 +50,11 @@ public partial class ProfileViewModel : BaseViewModel
             if (user != null)
             {
                 UserName = user.Name;
-                pwz = $"PWZ: {user.PWZ}";
 
-                var spec = await _specializationService.GetSpecializationAsync((int)user.CurrentSpecializationId);
+                var spec = user.CurrentSpecializationId.HasValue
+                    ? await _specializationService.GetSpecializationAsync((int)user.CurrentSpecializationId)
+                    : null;
+
                 if (spec != null)
                 {
                     Specialization = spec.Name;
@@ -106,17 +109,91 @@ public partial class ProfileViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-            await _userService.ExportUserDataAsync();
-            await Shell.Current.DisplayAlert(
-                "Sukces",
-                "Dane zostały wyeksportowane",
-                "OK");
+
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string fileName = Path.Combine(documentsPath, $"SledzSpecke_Data_{DateTime.Now:yyyyMMdd}.json");
+
+            bool result = await _userService.ExportUserDataAsync(fileName);
+
+            if (result)
+            {
+                await Shell.Current.DisplayAlert(
+                    "Sukces",
+                    $"Dane zostały wyeksportowane do pliku:\n{fileName}",
+                    "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert(
+                    "Błąd",
+                    "Nie udało się wyeksportować danych",
+                    "OK");
+            }
         }
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlert(
                 "Błąd",
-                "Nie udało się wyeksportować danych",
+                $"Nie udało się wyeksportować danych: {ex.Message}",
+                "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ImportDataAsync()
+    {
+        if (IsBusy) return;
+
+        try
+        {
+            IsBusy = true;
+
+            // W prawdziwej aplikacji tutaj byłby picker plików lub inne rozwiązanie
+            // Dla uproszczenia użyjemy domyślnej lokalizacji
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string[] files = Directory.GetFiles(documentsPath, "SledzSpecke_Data_*.json");
+
+            if (files.Length == 0)
+            {
+                await Shell.Current.DisplayAlert(
+                    "Informacja",
+                    "Nie znaleziono plików z danymi do importu",
+                    "OK");
+                return;
+            }
+
+            // Użyj najnowszego pliku
+            string newestFile = files.OrderByDescending(f => new FileInfo(f).CreationTime).First();
+
+            bool result = await _userService.ImportUserDataAsync(newestFile);
+
+            if (result)
+            {
+                await Shell.Current.DisplayAlert(
+                    "Sukces",
+                    $"Dane zostały zaimportowane z pliku:\n{newestFile}",
+                    "OK");
+
+                // Odśwież dane
+                await LoadDataAsync();
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert(
+                    "Błąd",
+                    "Nie udało się zaimportować danych",
+                    "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert(
+                "Błąd",
+                $"Nie udało się zaimportować danych: {ex.Message}",
                 "OK");
         }
         finally
@@ -137,7 +214,7 @@ public partial class ProfileViewModel : BaseViewModel
         if (shouldLogout)
         {
             await _userService.LogoutAsync();
-            await Shell.Current.GoToAsync("//login");
+            await Shell.Current.GoToAsync("//dashboard");
         }
     }
 }

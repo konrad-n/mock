@@ -72,6 +72,20 @@ namespace SledzSpecke.Infrastructure.Services
             }
         }
 
+        public async Task<List<Specialization>> GetAllSpecializationsAsync()
+        {
+            try
+            {
+                return await _specializationRepository.GetAllAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all specializations");
+                return new List<Specialization>();
+            }
+        }
+
+
         public async Task<SpecializationProgress> GetProgressStatisticsAsync(int specializationId)
         {
             try

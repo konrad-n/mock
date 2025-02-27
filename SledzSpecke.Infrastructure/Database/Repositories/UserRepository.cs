@@ -14,11 +14,6 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
             return await FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User> GetByPWZAsync(string pwz)
-        {
-            return await FirstOrDefaultAsync(u => u.PWZ == pwz);
-        }
-
         public async Task<List<User>> GetSupervisedUsersAsync(int supervisorId)
         {
             return await WhereAsync(u => u.SupervisorId == supervisorId);

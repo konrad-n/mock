@@ -11,8 +11,6 @@
                 <VerticalStackLayout Spacing="10">
                     <Label Text="{Binding UserName}"
                            Style="{StaticResource HeaderLabel}"/>
-                    <Label Text="{Binding PWZ}"
-                           Style="{StaticResource BodyLabel}"/>
                     <Label Text="{Binding Specialization}"
                            Style="{StaticResource SubHeaderLabel}"/>
                 </VerticalStackLayout>
@@ -40,6 +38,9 @@
                         Style="{StaticResource SecondaryButton}"/>
                 <Button Text="Eksportuj dane"
                         Command="{Binding ExportDataCommand}"
+                        Style="{StaticResource SecondaryButton}"/>
+                <Button Text="Importuj dane"
+                        Command="{Binding ImportDataCommand}"
                         Style="{StaticResource SecondaryButton}"/>
                 <Button Text="Wyloguj"
                         Command="{Binding LogoutCommand}"

@@ -108,7 +108,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             {
                 Email = "test@example.com",
                 Name = "Jan Kowalski",
-                PWZ = "123456",
                 CurrentSpecializationId = targetSpecializationId,
                 SpecializationStartDate = DateTime.Now.AddYears(-1),
                 ExpectedEndDate = DateTime.Now.AddYears(3),
