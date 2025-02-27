@@ -222,7 +222,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
         private async Task LoadProceduresRequirements(int specializationId)
         {
             var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(specializationId);
-            var categoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
 
             foreach (var category in procedureRequirements.Keys)
             {
@@ -241,28 +240,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
                 {
                     double progress = 0;
                     string progressText = "0%";
-
-                    if (categoryProgress.TryGetValue(category, out var progressData))
-                    {
-                        double requiredTotal = procedure.RequiredCount + procedure.AssistanceCount;
-                        double completedTotal = 0;
-
-                        if (requiredTotal > 0)
-                        {
-                            if (procedure.RequiredCount > 0)
-                            {
-                                completedTotal += Math.Min(progressData.Completed, procedure.RequiredCount);
-                            }
-
-                            if (procedure.AssistanceCount > 0)
-                            {
-                                completedTotal += Math.Min(progressData.Assisted, procedure.AssistanceCount);
-                            }
-
-                            progress = completedTotal / requiredTotal;
-                            progressText = $"{progress:P0}";
-                        }
-                    }
 
                     var details = new StringBuilder();
                     if (procedure.RequiredCount > 0)
@@ -512,6 +489,28 @@ namespace SledzSpecke.App.ViewModels.Specializations
                     DetailedRequirements.Add(requirementViewModel);
                 }
             }
+        }
+
+        [RelayCommand]
+        private async Task GenerateReportAsync()
+        {
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "ReportType", "Pełny raport postępu specjalizacji" }
+            };
+
+            await Shell.Current.GoToAsync("reports", navigationParameter);
+        }
+
+        [RelayCommand]
+        private async Task ShowDeficienciesAsync()
+        {
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "ReportType", "Braki w wymaganiach specjalizacji" }
+            };
+
+            await Shell.Current.GoToAsync("reports", navigationParameter);
         }
 
         public partial class RequirementViewModel : ObservableObject

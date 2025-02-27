@@ -2,6 +2,7 @@
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Monitoring;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -37,8 +38,6 @@ namespace SledzSpecke.Infrastructure.Services
                 procedure.UserId = await _userService.GetCurrentUserIdAsync();
                 procedure.CreatedAt = DateTime.UtcNow;
                 await ValidateProcedureAsync(procedure);
-
-                // Check if procedure meets program requirements
                 await ValidateProcedureRequirementsAsync(procedure);
                 await _repository.AddAsync(procedure);
 
@@ -222,7 +221,8 @@ namespace SledzSpecke.Infrastructure.Services
                     return true;
                 }
 
-                var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(user.CurrentSpecializationId.Value);
+                var procedureRequirements =
+                    _requirementsProvider.GetRequiredProceduresBySpecialization(user.CurrentSpecializationId.Value);
                 var matchingRequirements = new List<Core.Models.Requirements.RequiredProcedure>();
 
                 foreach (var category in procedureRequirements.Keys)
@@ -274,8 +274,8 @@ namespace SledzSpecke.Infrastructure.Services
                     }
                 }
 
-                var needsSupervision = matchingRequirements.Any(r => r.RequiredCount > 0) &&
-                                      procedure.Type == Core.Models.Enums.ProcedureType.Execution;
+                var needsSupervision = matchingRequirements.Any(r => r.RequiredCount > 0)
+                                       && procedure.Type == Core.Models.Enums.ProcedureType.Execution;
 
                 if (needsSupervision && procedure.SupervisorId == null)
                 {
@@ -308,74 +308,73 @@ namespace SledzSpecke.Infrastructure.Services
             }
         }
 
-        public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByCategoryAsync()
-        {
-            try
-            {
-                var user = await _userService.GetCurrentUserAsync();
-
-                if (user?.CurrentSpecializationId == null)
-                {
-                    return new Dictionary<string, (int Required, int Completed, int Assisted)>();
-                }
-
-                return await _repository.GetProcedureProgressByCategoryAsync(user.Id, user.CurrentSpecializationId.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting procedure progress by category");
-
-                return new Dictionary<string, (int Required, int Completed, int Assisted)>();
-            }
-        }
-
-        public async Task<Dictionary<string, (int Required, int Completed, int Assisted)>> GetProcedureProgressByStageAsync()
-        {
-            try
-            {
-                var user = await _userService.GetCurrentUserAsync();
-
-                if (user?.CurrentSpecializationId == null)
-                {
-                    return new Dictionary<string, (int Required, int Completed, int Assisted)>();
-                }
-
-                return await _repository.GetProcedureProgressByStageAsync(user.Id, user.CurrentSpecializationId.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting procedure progress by stage");
-                return new Dictionary<string, (int Required, int Completed, int Assisted)>();
-            }
-        }
-
         public async Task<double> GetProcedureCompletionPercentageAsync()
         {
             try
             {
-                var categoriesProgress = await GetProcedureProgressByCategoryAsync();
-
-                if (categoriesProgress.Count == 0)
-                {
+                var user = await _userService.GetCurrentUserAsync();
+                if (user?.CurrentSpecializationId == null)
                     return 0;
-                }
 
-                int totalRequired = 0;
-                int totalCompleted = 0;
+                var requiredProcedures =
+                    _requirementsProvider.GetRequiredProceduresBySpecialization(user.CurrentSpecializationId.Value);
+                var userProcedures = await GetUserProceduresAsync();
+                var completedProcedures = MapToProcedureProgress(userProcedures);
+                var verifier = new ProcedureMonitoring.ProgressVerification(requiredProcedures);
+                var summary = verifier.GenerateProgressSummary(completedProcedures);
 
-                foreach (var category in categoriesProgress)
-                {
-                    totalRequired += category.Value.Required;
-                    totalCompleted += Math.Min(category.Value.Completed, category.Value.Required);
-                }
-
-                return totalRequired > 0 ? (double)totalCompleted / totalRequired : 0;
+                return summary.OverallCompletionPercentage / 100.0;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error calculating procedure completion percentage");
                 return 0;
             }
+        }
+
+        private Dictionary<string, ProcedureMonitoring.ProcedureProgress> MapToProcedureProgress(
+            List<ProcedureExecution> procedures)
+        {
+            var result = new Dictionary<string, ProcedureMonitoring.ProcedureProgress>();
+
+            foreach (var procedure in procedures)
+            {
+                if (!result.ContainsKey(procedure.Name))
+                {
+                    result[procedure.Name] = new ProcedureMonitoring.ProcedureProgress
+                    {
+                        ProcedureName = procedure.Name,
+                        CompletedCount = 0,
+                        AssistanceCount = 0,
+                        SimulationCount = 0,
+                        Executions = new List<ProcedureMonitoring.ProcedureExecution>()
+                    };
+                }
+
+                var progress = result[procedure.Name];
+
+                progress.Executions.Add(new ProcedureMonitoring.ProcedureExecution
+                {
+                    ExecutionDate = procedure.ExecutionDate,
+                    Type = procedure.Type.ToString(),
+                    Location = procedure.Location,
+                    Notes = procedure.Notes
+                });
+
+                if (procedure.Type == Core.Models.Enums.ProcedureType.Execution)
+                {
+                    if (procedure.IsSimulation)
+                        progress.SimulationCount++;
+                    else
+                        progress.CompletedCount++;
+                }
+                else
+                {
+                    progress.AssistanceCount++;
+                }
+            }
+
+            return result;
         }
     }
 }

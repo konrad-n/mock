@@ -285,19 +285,9 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var userId = await _userService.GetCurrentUserIdAsync();
-                var procedureProgress = await _procedureRepository.GetProcedureProgressByCategoryAsync(userId, specializationId);
                 var coursesProgress = await _courseRepository.GetCourseProgressByYearAsync(userId, specializationId);
                 var internshipsProgress = await _internshipRepository.GetInternshipProgressByYearAsync(userId, specializationId);
                 var requirementsProgress = new Dictionary<string, double>();
-
-                foreach (var category in procedureProgress)
-                {
-                    if (category.Value.Required > 0)
-                    {
-                        requirementsProgress[$"Procedury: {category.Key}"] =
-                            Math.Min(1.0, (double)category.Value.Completed / category.Value.Required);
-                    }
-                }
 
                 foreach (var year in coursesProgress)
                 {

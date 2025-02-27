@@ -122,6 +122,16 @@
                                     CommandParameter="Internships"
                                     Style="{StaticResource SecondaryButton}"
                                     BackgroundColor="{Binding IsInternshipsTabActive, Converter={StaticResource BoolToColorConverter}}"/>
+
+                            <Button Text="Wygeneruj pełny raport"
+                                    Command="{Binding GenerateReportCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    IsVisible="{Binding IsDetailedViewVisible}"/>
+
+                            <Button Text="Pokaż braki"
+                                    Command="{Binding ShowDeficienciesCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    IsVisible="{Binding IsDetailedViewVisible}"/>
                         </HorizontalStackLayout>
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding HasFilters}">
                             <Picker Grid.Column="0" 

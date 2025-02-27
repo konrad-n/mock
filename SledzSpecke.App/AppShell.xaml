@@ -25,6 +25,11 @@
                 ContentTemplate="{DataTemplate duties:DutiesPage}"
                 Route="Duties" />
         </Tab>
+        <Tab Title="Raporty" Icon="report.png">
+            <ShellContent 
+                ContentTemplate="{DataTemplate reports:ReportsPage}"
+                Route="Reports" />
+        </Tab>
         <Tab Title="Profil" Icon="profile.png">
             <ShellContent 
                 ContentTemplate="{DataTemplate profile:ProfilePage}"

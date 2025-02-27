@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
-using SledzSpecke.Core.Models.Monitoring;
 using System.Collections.ObjectModel;
 using static SledzSpecke.Core.Models.Monitoring.ProcedureMonitoring;
 
@@ -55,11 +54,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
         [ObservableProperty]
         private double completionPercentage;
 
-        [ObservableProperty]
-        private Dictionary<string, (int Required, int Completed, int Assisted)> categoryProgress;
-
-        [ObservableProperty]
-        private Dictionary<string, (int Required, int Completed, int Assisted)> stageProgress;
 
         [ObservableProperty]
         private ProgressSummary progressSummary;
@@ -117,8 +111,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 await LoadSpecializationFiltersAsync();
 
                 CompletionPercentage = await _procedureService.GetProcedureCompletionPercentageAsync();
-                CategoryProgress = await _procedureService.GetProcedureProgressByCategoryAsync();
-                StageProgress = await _procedureService.GetProcedureProgressByStageAsync();
 
                 await CalculateProgressSummaryAsync();
 
@@ -142,7 +134,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             try
             {
-                var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
+                var procedureRequirements =
+                    _requirementsProvider.GetRequiredProceduresBySpecialization(_currentSpecializationId);
 
                 CategoriesBySpecialization.Clear();
                 StagesBySpecialization.Clear();
@@ -238,10 +231,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     {
                         var supervisorLine = procedure.Notes.Split('\n')
                             .FirstOrDefault(l => l.StartsWith("Opiekun:"));
-
                         if (supervisorLine != null)
                         {
-                            execution.SupervisorName = supervisorLine.Substring("Opiekun:".Length).Trim();
+                            execution.SupervisorName =
+                                supervisorLine.Substring("Opiekun:".Length).Trim();
                         }
                     }
 
@@ -262,7 +255,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 }
 
                 var verifier = new ProgressVerification(procedureRequirements);
-
                 ProgressSummary = verifier.GenerateProgressSummary(completedProcedures);
 
                 OnPropertyChanged(nameof(OverallCompletionDisplay));
@@ -292,8 +284,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 IsBusy = true;
                 var allProcedures = await _procedureService.GetUserProceduresAsync();
-
                 var filteredProcedures = allProcedures;
+
                 if (SelectedCategory != "Wszystkie" && SelectedCategory != null)
                 {
                     filteredProcedures = filteredProcedures
