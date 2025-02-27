@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
+using SledzSpecke.Core.Models.Monitoring;
 using SledzSpecke.Infrastructure.Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace SledzSpecke.Infrastructure.Services
         private readonly ICourseRepository _courseRepository;
         private readonly IInternshipRepository _internshipRepository;
         private readonly IDutyRepository _dutyRepository;
+        private readonly ISpecializationRequirementsProvider _requirementsProvider;
         private readonly ILogger<SpecializationService> _logger;
 
         public SpecializationService(
@@ -25,6 +27,7 @@ namespace SledzSpecke.Infrastructure.Services
             ICourseRepository courseRepository,
             IInternshipRepository internshipRepository,
             IDutyRepository dutyRepository,
+            ISpecializationRequirementsProvider requirementsProvider,
             ILogger<SpecializationService> logger)
         {
             _specializationRepository = specializationRepository;
@@ -33,6 +36,7 @@ namespace SledzSpecke.Infrastructure.Services
             _courseRepository = courseRepository;
             _internshipRepository = internshipRepository;
             _dutyRepository = dutyRepository;
+            _requirementsProvider = requirementsProvider;
             _logger = logger;
         }
 
@@ -73,21 +77,13 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var userId = await _userService.GetCurrentUserIdAsync();
-                
-                // Pobierz odpowiednie dane
-                var procedureStats = await _procedureRepository.GetProcedureStatsAsync(userId);
+                double proceduresProgress = await CalculateProceduresProgressAsync(userId, specializationId);
                 var dutyStats = await _dutyRepository.GetDutyStatisticsAsync(userId);
-                
-                // Oblicz postęp
-                double proceduresProgress = CalculateProceduresProgress(procedureStats);
                 double dutiesProgress = CalculateDutiesProgress(dutyStats);
                 double coursesProgress = await CalculateCoursesProgressAsync(userId, specializationId);
                 double internshipsProgress = await CalculateInternshipsProgressAsync(userId, specializationId);
-                
-                // Oblicz ogólny postęp
                 double overallProgress = (proceduresProgress + dutiesProgress + coursesProgress + internshipsProgress) / 4.0;
-                
-                // Utwórz obiekt postępu specjalizacji
+
                 var progress = new SpecializationProgress
                 {
                     UserId = userId,
@@ -97,9 +93,11 @@ namespace SledzSpecke.Infrastructure.Services
                     InternshipsProgress = internshipsProgress,
                     DutiesProgress = dutiesProgress,
                     OverallProgress = overallProgress,
-                    LastCalculated = DateTime.Now
+                    TotalProgress = overallProgress,
+                    LastCalculated = DateTime.Now,
+                    RemainingRequirements = GenerateRemainingRequirementsText(proceduresProgress, dutiesProgress, coursesProgress, internshipsProgress)
                 };
-                
+
                 return progress;
             }
             catch (Exception ex)
@@ -109,8 +107,124 @@ namespace SledzSpecke.Infrastructure.Services
                 {
                     UserId = await _userService.GetCurrentUserIdAsync(),
                     SpecializationId = specializationId,
-                    OverallProgress = 0
+                    OverallProgress = 0,
+                    TotalProgress = 0
                 };
+            }
+        }
+
+        private string GenerateRemainingRequirementsText(double proceduresProgress, double dutiesProgress,
+                                                      double coursesProgress, double internshipsProgress)
+        {
+            var remainingItems = new List<string>();
+
+            if (proceduresProgress < 1.0)
+                remainingItems.Add($"Procedury: {proceduresProgress:P0} ukończone");
+
+            if (dutiesProgress < 1.0)
+                remainingItems.Add($"Dyżury: {dutiesProgress:P0} ukończone");
+
+            if (coursesProgress < 1.0)
+                remainingItems.Add($"Kursy: {coursesProgress:P0} ukończone");
+
+            if (internshipsProgress < 1.0)
+                remainingItems.Add($"Staże: {internshipsProgress:P0} ukończone");
+
+            return string.Join("\n", remainingItems);
+        }
+
+        private async Task<double> CalculateProceduresProgressAsync(int userId, int specializationId)
+        {
+            try
+            {
+                var requiredProcedures = _requirementsProvider.GetRequiredProceduresBySpecialization(specializationId);
+                var userProcedures = await _procedureRepository.GetUserProceduresAsync(userId);
+                var completedProcedures = new Dictionary<string, ProcedureMonitoring.ProcedureProgress>();
+
+                foreach (var procedure in userProcedures)
+                {
+                    if (!completedProcedures.ContainsKey(procedure.Name))
+                    {
+                        completedProcedures[procedure.Name] = new ProcedureMonitoring.ProcedureProgress
+                        {
+                            ProcedureName = procedure.Name,
+                            CompletedCount = 0,
+                            AssistanceCount = 0,
+                            SimulationCount = 0,
+                            Executions = new List<ProcedureMonitoring.ProcedureExecution>()
+                        };
+                    }
+
+                    var progress = completedProcedures[procedure.Name];
+
+                    var execution = new ProcedureMonitoring.ProcedureExecution
+                    {
+                        ExecutionDate = procedure.ExecutionDate,
+                        Type = procedure.Type.ToString(),
+                        Location = procedure.Location,
+                        Notes = procedure.Notes
+                    };
+
+                    progress.Executions.Add(execution);
+
+                    if (procedure.Type == Core.Models.Enums.ProcedureType.Execution)
+                    {
+                        if (procedure.IsSimulation)
+                            progress.SimulationCount++;
+                        else
+                            progress.CompletedCount++;
+                    }
+                    else
+                    {
+                        progress.AssistanceCount++;
+                    }
+                }
+
+                var verifier = new ProcedureMonitoring.ProgressVerification(requiredProcedures);
+                var summary = verifier.GenerateProgressSummary(completedProcedures);
+
+                return summary.OverallCompletionPercentage / 100.0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating procedures progress");
+                return 0;
+            }
+        }
+
+        private double CalculateDutiesProgress(DutyStatistics dutyStats)
+        {
+            if (dutyStats == null || dutyStats.TotalHours + dutyStats.RemainingHours <= 0)
+            {
+                return 0;
+            }
+
+            return Math.Min(1.0, (double)dutyStats.TotalHours / (double)(dutyStats.TotalHours + dutyStats.RemainingHours));
+        }
+
+        private async Task<double> CalculateCoursesProgressAsync(int userId, int specializationId)
+        {
+            try
+            {
+                return await _courseRepository.GetCourseProgressAsync(userId, specializationId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating courses progress");
+                return 0;
+            }
+        }
+
+        private async Task<double> CalculateInternshipsProgressAsync(int userId, int specializationId)
+        {
+            try
+            {
+                return await _internshipRepository.GetInternshipProgressAsync(userId, specializationId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating internships progress");
+                return 0;
             }
         }
 
@@ -157,8 +271,6 @@ namespace SledzSpecke.Infrastructure.Services
         {
             try
             {
-                // Tutaj należałoby zaimplementować pobranie wymagań dotyczących dyżurów
-                // z odpowiedniego repozytorium
                 return new List<DutyRequirement>();
             }
             catch (Exception ex)
@@ -173,94 +285,44 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var userId = await _userService.GetCurrentUserIdAsync();
-                
-                // Pobierz postęp dla różnych kategorii wymagań
                 var procedureProgress = await _procedureRepository.GetProcedureProgressByCategoryAsync(userId, specializationId);
                 var coursesProgress = await _courseRepository.GetCourseProgressByYearAsync(userId, specializationId);
                 var internshipsProgress = await _internshipRepository.GetInternshipProgressByYearAsync(userId, specializationId);
-                
-                // Oblicz postęp dla każdej kategorii
                 var requirementsProgress = new Dictionary<string, double>();
-                
-                // Dodaj postęp procedur
+
                 foreach (var category in procedureProgress)
                 {
                     if (category.Value.Required > 0)
                     {
-                        requirementsProgress[$"Procedury: {category.Key}"] = 
-                            (double)category.Value.Completed / category.Value.Required;
+                        requirementsProgress[$"Procedury: {category.Key}"] =
+                            Math.Min(1.0, (double)category.Value.Completed / category.Value.Required);
                     }
                 }
-                
-                // Dodaj postęp kursów
+
                 foreach (var year in coursesProgress)
                 {
                     if (year.Value.Required > 0)
                     {
-                        requirementsProgress[$"Kursy: {year.Key}"] = 
-                            (double)year.Value.Completed / year.Value.Required;
+                        requirementsProgress[$"Kursy: {year.Key}"] =
+                            Math.Min(1.0, (double)year.Value.Completed / year.Value.Required);
                     }
                 }
-                
-                // Dodaj postęp staży
+
                 foreach (var year in internshipsProgress)
                 {
                     if (year.Value.Required > 0)
                     {
-                        requirementsProgress[$"Staże: {year.Key}"] = 
-                            (double)year.Value.Completed / year.Value.Required;
+                        requirementsProgress[$"Staże: {year.Key}"] =
+                            Math.Min(1.0, (double)year.Value.Completed / year.Value.Required);
                     }
                 }
-                
+
                 return requirementsProgress;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting requirements progress");
                 return new Dictionary<string, double>();
-            }
-        }
-
-        // Metody pomocnicze do obliczania postępu
-        private double CalculateProceduresProgress(Dictionary<string, int> procedureStats)
-        {
-            // W rzeczywistej implementacji należałoby porównać liczbę wykonanych 
-            // procedur z wymaganiami specjalizacji
-            return 0.5; // Domyślna wartość dla uproszczenia
-        }
-
-        private double CalculateDutiesProgress(DutyStatistics dutyStats)
-        {
-            if (dutyStats.TotalHours + dutyStats.RemainingHours <= 0)
-            {
-                return 0;
-            }
-
-            return Math.Min(1.0, (double)dutyStats.TotalHours / (double)(dutyStats.TotalHours + dutyStats.RemainingHours));
-        }
-
-        private async Task<double> CalculateCoursesProgressAsync(int userId, int specializationId)
-        {
-            try
-            {
-                return await _courseRepository.GetCourseProgressAsync(userId, specializationId);
-            }
-            catch
-            {
-                return 0;
-            }
-        }
-
-        private async Task<double> CalculateInternshipsProgressAsync(int userId, int specializationId)
-        {
-            try
-            {
-                // W rzeczywistej implementacji należałoby pobierać tę wartość z repozytorium
-                return 0.3; // Domyślna wartość dla uproszczenia
-            }
-            catch
-            {
-                return 0;
             }
         }
     }
