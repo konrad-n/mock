@@ -78,5 +78,27 @@ namespace SledzSpecke.Infrastructure.Services
                 return false;
             }
         }
+
+        public async Task<bool> UpdateSpecializationAsync(Specialization specialization)
+        {
+            try
+            {
+                var user = await GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return false;
+                }
+
+                user.CurrentSpecialization = specialization;
+                user.CurrentSpecializationId = specialization.Id;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during logout");
+                return false;
+            }
+        }
     }
 }

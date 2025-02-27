@@ -9,5 +9,6 @@ namespace SledzSpecke.Core.Interfaces.Services
         Task<User> GetCurrentUserAsync();
         Task<bool> ExportUserDataAsync();
         Task<bool> LogoutAsync();
+        Task<bool> UpdateSpecializationAsync(Specialization specialization);
     }
 }

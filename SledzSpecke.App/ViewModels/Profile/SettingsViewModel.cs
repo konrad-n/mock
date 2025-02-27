@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 
@@ -7,11 +8,17 @@ namespace SledzSpecke.App.ViewModels.Profile;
 public partial class SettingsViewModel : BaseViewModel
 {
     private readonly ISettingsService _settingsService;
+    private readonly ISpecializationService _specializationService;
+    private readonly IUserService _userService;
 
     public SettingsViewModel(
-        ISettingsService settingsService)
+        ISettingsService settingsService,
+        ISpecializationService specializationService,
+        IUserService userService)
     {
         _settingsService = settingsService;
+        _specializationService = specializationService;
+        _userService = userService;
         Title = "Ustawienia";
     }
 
@@ -56,6 +63,52 @@ public partial class SettingsViewModel : BaseViewModel
     partial void OnWifiOnlySyncChanged(bool value)
     {
         _settingsService.SetSetting("WifiOnlySync", value);
+    }
+
+    [RelayCommand]
+    private async Task UpdateSpecializationAsync()
+    {
+        var specOptions = new List<string> { "Hematologia", "Medycyna morska i tropikalna" };
+        var selected = await Shell.Current.DisplayActionSheet(
+            "Wybierz program specjalizacji",
+            "Anuluj",
+            null,
+            specOptions.ToArray());
+
+        if (selected != null && selected != "Anuluj")
+        {
+            var user = await _userService.GetCurrentUserAsync();
+            if (user?.CurrentSpecializationId != null)
+            {
+                var specialization = await _specializationService.GetSpecializationAsync(user.CurrentSpecializationId.Value);
+                if (specialization != null)
+                {
+                    var result = await _userService.UpdateSpecializationAsync(specialization);
+                    if (result)
+                    {
+                        await Shell.Current.DisplayAlert("Sukces", "Specjalizacja przypisana do użytkownika", "OK");
+                    }
+                    else
+                    {
+                        await Shell.Current.DisplayAlert("Błąd", "Nie udało się zaktualizować programu specjalizacji", "OK");
+                    }
+                }
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportSpecializationAsync()
+    {
+        await Shell.Current.DisplayAlert("Eksport",
+            "Funkcja eksportu danych specjalizacji zostanie zaimplementowana wkrótce.", "OK");
+    }
+
+    [RelayCommand]
+    private async Task ImportSpecializationAsync()
+    {
+        await Shell.Current.DisplayAlert("Import",
+            "Funkcja importu danych specjalizacji zostanie zaimplementowana wkrótce.", "OK");
     }
 
     public async Task LoadSettingsAsync()
