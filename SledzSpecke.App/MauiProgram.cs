@@ -20,6 +20,8 @@ using SQLite;
 using SledzSpecke.App.Services;
 using SledzSpecke.App.Views.Specialization;
 using SledzSpecke.App.ViewModels.Specializations;
+using SledzSpecke.App.Views.Reports;
+using SledzSpecke.App.ViewModels.Reports;
 
 namespace SledzSpecke.App;
 
@@ -122,6 +124,7 @@ public static class MauiProgram
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<SpecializationStatsViewModel>();
         services.AddTransient<SpecializationProgressViewModel>();
+        services.AddTransient<ReportsViewModel>();
     }
 
     private static void RegisterPages(IServiceCollection services)
@@ -137,6 +140,7 @@ public static class MauiProgram
         services.AddTransient<ProfileEditPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<SpecializationProgressPage>();
+        services.AddTransient<ReportsPage>();
     }
 }
 

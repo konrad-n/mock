@@ -23,6 +23,7 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("settings", typeof(SettingsPage));
             Routing.RegisterRoute("profile/edit", typeof(ProfileEditPage));
             Routing.RegisterRoute("progress", typeof(SpecializationProgressPage));
+            Routing.RegisterRoute("report", typeof(SpecializationProgressPage)); // TO DO: implement somewhere report button
         }
     }
 }
