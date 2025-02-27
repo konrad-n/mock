@@ -79,8 +79,7 @@ namespace SledzSpecke.Infrastructure.Services
                 worksheet.Cell(1, 2).Value = "Imię i nazwisko";
                 worksheet.Cell(1, 3).Value = "Data";
                 worksheet.Cell(1, 4).Value = "Lokalizacja";
-                worksheet.Cell(1, 5).Value = "Rodzaj dyżuru";
-                worksheet.Cell(1, 6).Value = "Godziny";
+                worksheet.Cell(1, 5).Value = "Godziny";
 
                 // Dodaj dane
                 int row = 2;
@@ -90,8 +89,7 @@ namespace SledzSpecke.Infrastructure.Services
                     worksheet.Cell(row, 2).Value = user.Name;
                     worksheet.Cell(row, 3).Value = duty.StartTime.ToString("yyyy-MM-dd");
                     worksheet.Cell(row, 4).Value = duty.Location;
-                    worksheet.Cell(row, 5).Value = duty.Type.ToString();
-                    worksheet.Cell(row, 6).Value = duty.DurationInHours;
+                    worksheet.Cell(row, 5).Value = duty.DurationInHours;
                     row++;
                 }
 
@@ -163,8 +161,7 @@ namespace SledzSpecke.Infrastructure.Services
                 dutiesSheet.Cell(1, 2).Value = "Imię i nazwisko";
                 dutiesSheet.Cell(1, 3).Value = "Data";
                 dutiesSheet.Cell(1, 4).Value = "Lokalizacja";
-                dutiesSheet.Cell(1, 5).Value = "Rodzaj dyżuru";
-                dutiesSheet.Cell(1, 6).Value = "Godziny";
+                dutiesSheet.Cell(1, 5).Value = "Godziny";
 
                 // Dane dyżurów
                 row = 2;
@@ -174,8 +171,7 @@ namespace SledzSpecke.Infrastructure.Services
                     dutiesSheet.Cell(row, 2).Value = user.Name;
                     dutiesSheet.Cell(row, 3).Value = duty.StartTime.ToString("yyyy-MM-dd");
                     dutiesSheet.Cell(row, 4).Value = duty.Location;
-                    dutiesSheet.Cell(row, 5).Value = duty.Type.ToString();
-                    dutiesSheet.Cell(row, 6).Value = duty.DurationInHours;
+                    dutiesSheet.Cell(row, 5).Value = duty.DurationInHours;
                     row++;
                 }
 

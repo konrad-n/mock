@@ -31,8 +31,6 @@ namespace SledzSpecke.App.ViewModels.Duties
             Title = "Dyżury";
 
             Duties = new ObservableCollection<DutyViewModel>();
-            DutyTypes = new ObservableCollection<string> { "Wszystkie", "Regular", "Emergency", "Weekend", "Holiday", "Supervised" };
-            SelectedDutyType = "Wszystkie";
         }
 
         [ObservableProperty]
@@ -40,12 +38,6 @@ namespace SledzSpecke.App.ViewModels.Duties
 
         [ObservableProperty]
         private DutyStatistics statistics;
-
-        [ObservableProperty]
-        private ObservableCollection<string> dutyTypes;
-
-        [ObservableProperty]
-        private string selectedDutyType;
 
         [ObservableProperty]
         private DateTime fromDate = DateTime.Today.AddMonths(-1);
@@ -155,17 +147,11 @@ namespace SledzSpecke.App.ViewModels.Duties
                     Location = duty.Location,
                     Date = duty.StartTime.Date,
                     Hours = (decimal)(duty.EndTime - duty.StartTime).TotalHours,
-                    Type = duty.Type.ToString(),
                     StartTime = duty.StartTime,
                     EndTime = duty.EndTime,
                     Notes = duty.Notes
                 });
             }
-        }
-
-        partial void OnSelectedDutyTypeChanged(string value)
-        {
-            _ = ApplyFiltersAsync();
         }
 
         private async Task ApplyFiltersAsync()
@@ -177,14 +163,6 @@ namespace SledzSpecke.App.ViewModels.Duties
                 IsBusy = true;
 
                 var userDuties = await _dutyService.GetUserDutiesAsync(FromDate);
-
-                if (SelectedDutyType != "Wszystkie")
-                {
-                    if (Enum.TryParse<DutyType>(SelectedDutyType, out var dutyType))
-                    {
-                        userDuties = userDuties.Where(d => d.Type == dutyType).ToList();
-                    }
-                }
 
                 userDuties = userDuties.Where(d =>
                     d.StartTime.Date >= FromDate.Date &&

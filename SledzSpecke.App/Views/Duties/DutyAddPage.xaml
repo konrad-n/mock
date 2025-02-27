@@ -33,12 +33,6 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="5">
-                <Label Text="Typ dyżuru *"
-                       Style="{StaticResource SubHeaderLabel}"/>
-                <Picker ItemsSource="{Binding DutyTypes}"
-                        SelectedItem="{Binding SelectedDutyType}"/>
-            </VerticalStackLayout>
-            <VerticalStackLayout Spacing="5">
                 <Label Text="Notatki"
                        Style="{StaticResource SubHeaderLabel}"/>
                 <Editor Text="{Binding Notes}"

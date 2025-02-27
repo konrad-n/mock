@@ -44,11 +44,6 @@
                    Style="{StaticResource BodyLabel}"/>
         </Border>
         <Grid Grid.Row="2" ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
-            <Picker Grid.Column="0"
-                    Title="Filtruj typ"
-                    ItemsSource="{Binding DutyTypes}"
-                    SelectedItem="{Binding SelectedDutyType}" />
-
             <DatePicker Grid.Column="1"
                        Date="{Binding FromDate}"
                        Format="d" />

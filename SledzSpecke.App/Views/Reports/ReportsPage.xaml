@@ -26,22 +26,34 @@
                                  GroupName="ExportRange" />
 
                     <!-- Filtry eksportu -->
-                    <Grid RowDefinitions="Auto,Auto"
-                          ColumnDefinitions="*,*"
-                          RowSpacing="10"
-                          ColumnSpacing="10"
-                          IsVisible="{Binding ExportRange}">
-                        <Label Grid.Row="0" Grid.Column="0"
-                               Text="Od:"
-                               Style="{StaticResource BodyLabel}"/>
-                        <DatePicker Grid.Row="0" Grid.Column="1"
-                                   Date="{Binding StartDate}"/>
-                        <Label Grid.Row="1" Grid.Column="0"
-                               Text="Do:"
-                               Style="{StaticResource BodyLabel}"/>
-                        <DatePicker Grid.Row="1" Grid.Column="1"
-                                   Date="{Binding EndDate}"/>
-                    </Grid>
+                    <VerticalStackLayout Spacing="10">
+                        <!-- Opcja eksportu -->
+                        <RadioButton Content="Wszystkie dodane w aplikacji" 
+                             IsChecked="{Binding ExportAll}" 
+                             GroupName="ExportRange" />
+
+                        <RadioButton Content="Zakres dat" 
+                             IsChecked="{Binding ExportRange}" 
+                             GroupName="ExportRange" />
+
+                        <!-- Filtry eksportu -->
+                        <Grid RowDefinitions="Auto,Auto"
+                              ColumnDefinitions="*,*"
+                              RowSpacing="10"
+                              ColumnSpacing="10"
+                              IsVisible="{Binding ExportRange}">
+                            <Label Grid.Row="0" Grid.Column="0"
+                                   Text="Od:"
+                                   Style="{StaticResource BodyLabel}"/>
+                            <DatePicker Grid.Row="0" Grid.Column="1"
+                                  Date="{Binding StartDate}"/>
+                            <Label Grid.Row="1" Grid.Column="0"
+                                   Text="Do:"
+                                   Style="{StaticResource BodyLabel}"/>
+                            <DatePicker Grid.Row="1" Grid.Column="1"
+                                       Date="{Binding EndDate}"/>
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <Button Text="Eksportuj do Excel"
                             Command="{Binding ExportToExcelCommand}"

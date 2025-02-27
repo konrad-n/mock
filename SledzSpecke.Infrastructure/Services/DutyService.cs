@@ -177,7 +177,7 @@ namespace SledzSpecke.Infrastructure.Services
             }
 
             var dutyRequirements = _requirementsProvider.GetDutyRequirementsBySpecialization(user.CurrentSpecializationId.Value);
-            var typeRequirements = dutyRequirements.FirstOrDefault(dr => dr.Type == duty.Type.ToString());
+            var typeRequirements = dutyRequirements.FirstOrDefault();
             var monthStart = new DateTime(duty.StartTime.Year, duty.StartTime.Month, 1);
             var monthEnd = monthStart.AddMonths(1).AddDays(-1);
             var monthlyHours = await _repository.GetMonthlyHoursAsync(duty.UserId, monthStart, monthEnd);
@@ -186,7 +186,7 @@ namespace SledzSpecke.Infrastructure.Services
 
             if (typeRequirements != null && typeRequirements.RequiresSupervision && duty.SupervisorId == null)
             {
-                throw new ValidationException($"This type of duty ({duty.Type}) requires supervision");
+                throw new ValidationException($"This type of duty requires supervision");
             }
 
             decimal maxMonthlyHours = 240;

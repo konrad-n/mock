@@ -1,5 +1,4 @@
-﻿using SledzSpecke.Core.Models.Enums;
-using SQLite;
+﻿using SQLite;
 using System.Collections.Generic;
 
 namespace SledzSpecke.Core.Models.Domain
@@ -45,15 +44,6 @@ namespace SledzSpecke.Core.Models.Domain
         {
             get => _hoursByMonthJson;
             set => _hoursByMonthJson = value;
-        }
-
-        [Ignore]
-        public Dictionary<DutyType, int> DutiesByType
-        {
-            get => string.IsNullOrEmpty(_dutiesByTypeJson)
-                ? new Dictionary<DutyType, int>()
-                : System.Text.Json.JsonSerializer.Deserialize<Dictionary<DutyType, int>>(_dutiesByTypeJson);
-            set => _dutiesByTypeJson = System.Text.Json.JsonSerializer.Serialize(value);
         }
 
         [Ignore]

@@ -36,7 +36,6 @@ namespace SledzSpecke.Infrastructure.Database.Context
                     await _database.CreateTableAsync<Internship>();
                     await _database.CreateTableAsync<InternshipDefinition>();
                     await _database.CreateTableAsync<InternshipModule>();
-                    await _database.CreateTableAsync<NotificationInfo>();
                     await _migrationRunner.RunMigrationsAsync();
                     _isInitialized = true;
                 }

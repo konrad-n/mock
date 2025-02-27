@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
 using SledzSpecke.Core.Models.Domain;
-using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.ViewModels.Duties;
 
@@ -19,10 +18,6 @@ public partial class DutyAddViewModel : BaseViewModel
         EndDate = DateTime.Today.AddDays(1);
         StartTime = TimeSpan.FromHours(8);
         EndTime = TimeSpan.FromHours(8);
-        DutyTypes = Enum.GetValues(typeof(DutyType))
-            .Cast<DutyType>()
-            .ToList();
-        SelectedDutyType = DutyType.Regular;
     }
 
     [ObservableProperty]
@@ -39,12 +34,6 @@ public partial class DutyAddViewModel : BaseViewModel
 
     [ObservableProperty]
     private TimeSpan endTime;
-
-    [ObservableProperty]
-    private List<DutyType> dutyTypes;
-
-    [ObservableProperty]
-    private DutyType selectedDutyType;
 
     [ObservableProperty]
     private string notes;
@@ -117,7 +106,6 @@ public partial class DutyAddViewModel : BaseViewModel
                 Location = Location,
                 StartTime = GetStartDateTime(),
                 EndTime = GetEndDateTime(),
-                Type = SelectedDutyType,
                 Notes = Notes,
                 DurationInHours = (decimal)(GetEndDateTime() - GetStartDateTime()).TotalHours
             };

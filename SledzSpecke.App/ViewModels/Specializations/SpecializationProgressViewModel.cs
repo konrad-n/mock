@@ -295,13 +295,6 @@ namespace SledzSpecke.App.ViewModels.Specializations
                     double progress = 0;
                     string progressText = "0%";
 
-                    if (dutyStats.DutiesByType.TryGetValue((DutyType)Enum.Parse(typeof(DutyType), dutyType), out int count))
-                    {
-                        var monthlyRequired = requirement.MinimumDutiesPerMonth * 12 * requirement.Year;
-                        progress = Math.Min(1.0, (double)count / monthlyRequired);
-                        progressText = $"{progress:P0}";
-                    }
-
                     var details = new StringBuilder();
                     details.AppendLine($"Rok: {requirement.Year}");
                     details.AppendLine($"Minimum miesięcznie: {requirement.MinimumDutiesPerMonth} dyżurów");

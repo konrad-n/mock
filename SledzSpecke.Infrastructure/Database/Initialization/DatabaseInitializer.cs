@@ -183,7 +183,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
         {
             var duties = new List<Duty>();
             var random = new Random();
-            var dutyTypes = Enum.GetValues(typeof(DutyType));
 
             for (int month = 1; month <= 6; month++)
             {
@@ -192,7 +191,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 for (int i = 0; i < dutiesCount; i++)
                 {
                     var startDate = DateTime.Now.AddMonths(-month).AddDays(random.Next(1, 28));
-                    var dutyType = (DutyType)dutyTypes.GetValue(random.Next(dutyTypes.Length));
                     var durationHours = random.Next(8, 25);
 
                     var duty = new Duty
@@ -200,9 +198,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                         UserId = userId,
                         StartTime = startDate.Date.AddHours(8),
                         EndTime = startDate.Date.AddHours(8 + durationHours),
-                        Location = dutyType == DutyType.Emergency ? "SOR" : "Oddział Hematologii",
-                        Type = dutyType,
-                        Notes = $"Dyżur {dutyType} w dniu {startDate:d}",
+                        Location = "Oddział Hematologii",
+                        Notes = $"Dyżur w dniu {startDate:d}",
                         DurationInHours = durationHours,
                         IsConfirmed = true,
                         CreatedAt = DateTime.Now
@@ -215,7 +212,6 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             for (int i = 0; i < 3; i++)
             {
                 var startDate = DateTime.Now.AddDays(random.Next(1, 30));
-                var dutyType = (DutyType)dutyTypes.GetValue(random.Next(dutyTypes.Length));
                 var durationHours = random.Next(8, 25);
 
                 var duty = new Duty
@@ -223,9 +219,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     UserId = userId,
                     StartTime = startDate.Date.AddHours(8),
                     EndTime = startDate.Date.AddHours(8 + durationHours),
-                    Location = dutyType == DutyType.Emergency ? "SOR" : "Oddział Hematologii",
-                    Type = dutyType,
-                    Notes = $"Planowany dyżur {dutyType} w dniu {startDate:d}",
+                    Location = "Oddział Hematologii",
+                    Notes = $"Planowany dyżur w dniu {startDate:d}",
                     DurationInHours = durationHours,
                     IsConfirmed = false,
                     CreatedAt = DateTime.Now

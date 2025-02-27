@@ -68,10 +68,7 @@ namespace SledzSpecke.Infrastructure.Database.Repositories
                 MonthlyHours = duties
                     .Where(d => d.StartTime.Month == DateTime.Today.Month && d.StartTime.Year == DateTime.Today.Year)
                     .Sum(d => (decimal)(d.EndTime - d.StartTime).TotalHours),
-                TotalCount = duties.Count,
-                DutiesByType = duties
-                    .GroupBy(d => d.Type)
-                    .ToDictionary(g => g.Key, g => g.Count())
+                TotalCount = duties.Count
             };
 
             return statistics;

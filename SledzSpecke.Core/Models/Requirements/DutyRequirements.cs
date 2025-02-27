@@ -26,7 +26,6 @@ namespace SledzSpecke.Core.Models.Requirements
                     MinimumHoursPerMonth = 40,
                     MinimumDutiesPerMonth = 4,
                     RequiresSupervision = true,
-                    Type = "Supervised",
                     SpecializationId = 1,
                     RequiredCompetencies = new List<string>
                     {

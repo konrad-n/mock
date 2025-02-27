@@ -54,9 +54,6 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
             if (!await _connection.TableExistsAsync<InternshipDocument>())
                 await _connection.CreateTableAsync<InternshipDocument>();
 
-            if (!await _connection.TableExistsAsync<NotificationInfo>())
-                await _connection.CreateTableAsync<NotificationInfo>();
-
             if (!await _connection.TableExistsAsync<DutyStatistics>())
                 await _connection.CreateTableAsync<DutyStatistics>();
 
@@ -68,7 +65,6 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
         {
             await _connection.DropTableAsync<SpecializationProgress>();
             await _connection.DropTableAsync<DutyStatistics>();
-            await _connection.DropTableAsync<NotificationInfo>();
             await _connection.DropTableAsync<InternshipDocument>();
             await _connection.DropTableAsync<CourseDocument>();
             await _connection.DropTableAsync<InternshipDefinition>();

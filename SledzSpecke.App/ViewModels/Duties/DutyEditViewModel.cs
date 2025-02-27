@@ -2,8 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.ViewModels.Base;
 using SledzSpecke.Core.Interfaces.Services;
-using SledzSpecke.Core.Models.Domain;
-using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.ViewModels.Duties;
 
@@ -16,9 +14,6 @@ public partial class DutyEditViewModel : BaseViewModel
     {
         _dutyService = dutyService;
         Title = "Edytuj dyżur";
-        DutyTypes = Enum.GetValues(typeof(DutyType))
-            .Cast<DutyType>()
-            .ToList();
     }
 
     [ObservableProperty]
@@ -35,12 +30,6 @@ public partial class DutyEditViewModel : BaseViewModel
 
     [ObservableProperty]
     private TimeSpan endTime;
-
-    [ObservableProperty]
-    private List<DutyType> dutyTypes;
-
-    [ObservableProperty]
-    private DutyType selectedDutyType;
 
     [ObservableProperty]
     private string notes;
@@ -72,7 +61,6 @@ public partial class DutyEditViewModel : BaseViewModel
                 StartTime = duty.StartTime.TimeOfDay;
                 EndDate = duty.EndTime.Date;
                 EndTime = duty.EndTime.TimeOfDay;
-                SelectedDutyType = duty.Type;
                 Notes = duty.Notes;
             }
         }
@@ -105,7 +93,6 @@ public partial class DutyEditViewModel : BaseViewModel
                 Location = Location,
                 StartTime = GetStartDateTime(),
                 EndTime = GetEndDateTime(),
-                Type = SelectedDutyType,
                 Notes = Notes
             };
 
