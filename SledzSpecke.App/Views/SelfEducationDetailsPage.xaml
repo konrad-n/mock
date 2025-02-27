@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.SelfEducationDetailsPage"
+          Title="{Binding PageTitle}">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Dane wydarzenia" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+
+
+            <Label Text="Tytuł" FontAttributes="Bold"/>
+            <Entry x:Name="TitleEntry" Placeholder="Wprowadź tytuł wydarzenia" Text="{Binding Title}"/>
+
+            <Label Text="Typ wydarzenia" FontAttributes="Bold"/>
+            <Picker x:Name="TypePicker" Title="Wybierz typ wydarzenia" SelectedIndexChanged="OnTypePickerSelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>Konferencja</x:String>
+                    <x:String>Warsztaty</x:String>
+                    <x:String>Kurs</x:String>
+                    <x:String>Spotkanie naukowe</x:String>
+                    <x:String>Publikacja</x:String>
+                    <x:String>Inne</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Label Text="Data rozpoczęcia" FontAttributes="Bold"/>
+            <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" DateSelected="OnDateSelected"/>
+
+            <Label Text="Data zakończenia" FontAttributes="Bold"/>
+            <DatePicker x:Name="EndDatePicker" Date="{Binding EndDate}" DateSelected="OnDateSelected"/>
+
+            <Label Text="Liczba dni" FontAttributes="Bold"/>
+            <Entry x:Name="DurationDaysEntry" Placeholder="Liczba dni" Keyboard="Numeric" Text="{Binding DurationDays}"/>
+
+            <Label Text="Miejsce" FontAttributes="Bold"/>
+            <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce wydarzenia" Text="{Binding Location}"/>
+
+            <Label Text="Organizator" FontAttributes="Bold"/>
+            <Entry x:Name="OrganizerEntry" Placeholder="Wprowadź nazwę organizatora" Text="{Binding Organizer}"/>
+
+            <StackLayout Orientation="Horizontal">
+                <CheckBox x:Name="IsRequiredCheckBox" IsChecked="{Binding IsRequired}"/>
+                <Label Text="Wymagane w programie specjalizacji" VerticalOptions="Center"/>
+            </StackLayout>
+
+            <Label Text="Załączniki" FontAttributes="Bold" Margin="0,10,0,0"/>
+            <Button Text="Dodaj certyfikat/zaświadczenie" Clicked="OnAddAttachmentClicked"/>
+
+            <Label Text="Notatki" FontAttributes="Bold"/>
+            <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Notes}"/>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
+                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="Gray"/>
+                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="DarkBlue" TextColor="White"/>
+            </StackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

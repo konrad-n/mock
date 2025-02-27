@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.CourseDetailsPage"
+          Title="{Binding PageTitle}">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Dane kursu" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+
+
+            <Label Text="Nazwa kursu" FontAttributes="Bold"/>
+            <Entry x:Name="CourseNameEntry" Placeholder="Wprowadź nazwę kursu" Text="{Binding Course.Name}"/>
+
+            <Label Text="Opis" FontAttributes="Bold"/>
+            <Editor x:Name="CourseDescriptionEditor" Placeholder="Wprowadź opis kursu" HeightRequest="100" Text="{Binding Course.Description}"/>
+
+            <Label Text="Czas trwania (dni)" FontAttributes="Bold"/>
+            <Entry x:Name="CourseDurationEntry" Placeholder="Wprowadź czas trwania w dniach" Keyboard="Numeric" Text="{Binding DurationDays}"/>
+
+            <Label Text="Moduł" FontAttributes="Bold"/>
+            <Picker x:Name="ModulePicker" Title="Wybierz moduł" SelectedIndexChanged="OnModulePickerSelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>Moduł podstawowy</x:String>
+                    <x:String>Moduł specjalistyczny</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Label Text="Status" FontAttributes="Bold"/>
+            <Picker x:Name="StatusPicker" Title="Wybierz status" SelectedIndexChanged="OnStatusPickerSelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>Oczekujący</x:String>
+                    <x:String>Zaplanowany</x:String>
+                    <x:String>Zarejestrowany</x:String>
+                    <x:String>Ukończony</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Label Text="Data kursu" FontAttributes="Bold" IsVisible="{Binding IsDateVisible}"/>
+            <DatePicker x:Name="CourseDatePicker" IsVisible="{Binding IsDateVisible}" Date="{Binding CourseDate}"/>
+
+            <Label Text="Data ukończenia" FontAttributes="Bold" IsVisible="{Binding IsCompletionDateVisible}"/>
+            <DatePicker x:Name="CompletionDatePicker" IsVisible="{Binding IsCompletionDateVisible}" Date="{Binding CompletionDate}"/>
+
+            <StackLayout Orientation="Horizontal" IsVisible="{Binding IsCompletionVisible}">
+                <CheckBox x:Name="ExamPassedCheckBox" IsChecked="{Binding Course.HasPassedExam}"/>
+                <Label Text="Zaliczony egzamin/sprawdzian" VerticalOptions="Center"/>
+            </StackLayout>
+
+            <Label Text="Załączniki" FontAttributes="Bold" Margin="0,10,0,0"/>
+            <Button Text="Dodaj certyfikat/zaświadczenie" Clicked="OnAddAttachmentClicked"/>
+
+            <Label Text="Notatki" FontAttributes="Bold"/>
+            <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Course.Notes}"/>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
+                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="Gray"/>
+                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="DarkBlue" TextColor="White"/>
+            </StackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.InternshipDetailsPage"
+          Title="{Binding PageTitle}">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Dane stażu" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+
+
+            <Label Text="Nazwa stażu" FontAttributes="Bold"/>
+            <Entry x:Name="InternshipNameEntry" Placeholder="Wprowadź nazwę stażu" Text="{Binding Internship.Name}"/>
+
+            <Label Text="Opis" FontAttributes="Bold"/>
+            <Editor x:Name="InternshipDescriptionEditor" Placeholder="Wprowadź opis stażu" HeightRequest="100" Text="{Binding Internship.Description}"/>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Czas trwania (tygodnie)" FontAttributes="Bold"/>
+                    <Entry x:Name="DurationWeeksEntry" Placeholder="Tygodnie" Keyboard="Numeric" Text="{Binding DurationWeeks}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Dni robocze" FontAttributes="Bold"/>
+                    <Entry x:Name="WorkingDaysEntry" Placeholder="Dni" Keyboard="Numeric" Text="{Binding WorkingDays}"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="Moduł" FontAttributes="Bold"/>
+            <Picker x:Name="ModulePicker" Title="Wybierz moduł" SelectedIndexChanged="OnModulePickerSelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>Moduł podstawowy</x:String>
+                    <x:String>Moduł specjalistyczny</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Label Text="Status" FontAttributes="Bold"/>
+            <Picker x:Name="StatusPicker" Title="Wybierz status" SelectedIndexChanged="OnStatusPickerSelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>Oczekujący</x:String>
+                    <x:String>Zaplanowany</x:String>
+                    <x:String>W trakcie</x:String>
+                    <x:String>Ukończony</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Label Text="Data rozpoczęcia" FontAttributes="Bold" IsVisible="{Binding IsStartDateVisible}"/>
+            <DatePicker x:Name="StartDatePicker" IsVisible="{Binding IsStartDateVisible}" Date="{Binding StartDate}"/>
+
+            <Label Text="Data zakończenia" FontAttributes="Bold" IsVisible="{Binding IsEndDateVisible}"/>
+            <DatePicker x:Name="EndDatePicker" IsVisible="{Binding IsEndDateVisible}" Date="{Binding EndDate}"/>
+
+            <StackLayout Orientation="Horizontal" IsVisible="{Binding IsCompletionVisible}">
+                <CheckBox x:Name="ExamPassedCheckBox" IsChecked="{Binding Internship.HasPassedExam}"/>
+                <Label Text="Zaliczony egzamin/kolokwium" VerticalOptions="Center"/>
+            </StackLayout>
+
+            <Label Text="Miejsce stażu" FontAttributes="Bold"/>
+            <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce stażu" Text="{Binding Internship.Location}"/>
+
+            <Label Text="Kierownik stażu" FontAttributes="Bold"/>
+            <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko kierownika" Text="{Binding Internship.SupervisorName}"/>
+
+            <Label Text="Notatki" FontAttributes="Bold"/>
+            <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Internship.Notes}"/>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
+                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="Gray"/>
+                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="DarkBlue" TextColor="White"/>
+            </StackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

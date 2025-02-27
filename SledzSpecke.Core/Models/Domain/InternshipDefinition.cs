@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Zaktualizować SledzSpecke.Core/Models/Domain/InternshipDefinition.cs
+using SledzSpecke.Core.Models.Enums;
 using SQLite;
+using System.Collections.Generic;
 
 namespace SledzSpecke.Core.Models.Domain
 {
@@ -21,6 +23,9 @@ namespace SledzSpecke.Core.Models.Domain
         [Column("DurationInWeeks")]
         public int DurationInWeeks { get; set; }
 
+        [Column("WorkingDays")]
+        public int WorkingDays { get; set; }
+
         [Column("IsRequired")]
         public bool IsRequired { get; set; }
 
@@ -29,6 +34,9 @@ namespace SledzSpecke.Core.Models.Domain
 
         [Column("Requirements")]
         public string Requirements { get; set; }
+
+        [Column("Module")]
+        public ModuleType Module { get; set; }
 
         // Serializowana lista wymagań do zaliczenia
         private string _completionRequirementsJson;

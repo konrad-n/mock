@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.ProcedureEntryPage"
+          Title="Dodaj wykonanie procedury">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="{Binding ProcedureName}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="{Binding ProcedureType}" FontAttributes="Bold"/>
+                    <Label Text="{Binding CompletionStatus}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="Data wykonania" FontAttributes="Bold"/>
+            <DatePicker x:Name="DatePicker" Date="{Binding EntryDate}"/>
+
+            <Label Text="Identyfikator pacjenta" FontAttributes="Bold"/>
+            <Entry x:Name="PatientIdEntry" Placeholder="Wprowadź identyfikator pacjenta" Text="{Binding PatientId}"/>
+
+            <Label Text="Miejsce wykonania" FontAttributes="Bold"/>
+            <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce wykonania" Text="{Binding Location}"/>
+
+            <Label Text="Nadzorujący" FontAttributes="Bold"/>
+            <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko nadzorującego" Text="{Binding SupervisorName}"/>
+
+            <Label Text="Notatki" FontAttributes="Bold"/>
+            <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Notes}"/>
+
+            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
+                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="Gray"/>
+                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="DarkBlue" TextColor="White"/>
+            </StackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

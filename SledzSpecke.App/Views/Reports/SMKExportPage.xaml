@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SledzSpecke.App.Views.Reports.SMKExportPage"
+             Title="Eksport do SMK">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Eksport danych do SMK" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Wybierz zakres danych do eksportu" FontSize="16" FontAttributes="Bold"/>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <CheckBox x:Name="CoursesCheckBox" IsChecked="True" Grid.Column="0" Grid.Row="0"/>
+                        <Label Text="Kursy" VerticalOptions="Center" Grid.Column="1" Grid.Row="0"/>
+
+                        <CheckBox x:Name="InternshipsCheckBox" IsChecked="True" Grid.Column="0" Grid.Row="1"/>
+                        <Label Text="Staże" VerticalOptions="Center" Grid.Column="1" Grid.Row="1"/>
+
+                        <CheckBox x:Name="ProceduresCheckBox" IsChecked="True" Grid.Column="0" Grid.Row="2"/>
+                        <Label Text="Procedury" VerticalOptions="Center" Grid.Column="1" Grid.Row="2"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Wybierz format eksportu" FontSize="16" FontAttributes="Bold"/>
+
+                    <Picker x:Name="FormatPicker" Title="Wybierz format" SelectedIndex="0">
+                        <Picker.Items>
+                            <x:String>Excel (.xlsx)</x:String>
+                            <x:String>CSV (.csv)</x:String>
+                        </Picker.Items>
+                    </Picker>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Wybierz moduł" FontSize="16" FontAttributes="Bold"/>
+
+                    <RadioButton x:Name="AllModulesRadioButton" Content="Wszystkie moduły" IsChecked="True" GroupName="ModuleGroup"/>
+                    <RadioButton x:Name="BasicModuleRadioButton" Content="Tylko moduł podstawowy" GroupName="ModuleGroup"/>
+                    <RadioButton x:Name="SpecialisticModuleRadioButton" Content="Tylko moduł specjalistyczny" GroupName="ModuleGroup"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Zakres dat" FontSize="16" FontAttributes="Bold"/>
+
+                    <RadioButton x:Name="AllDatesRadioButton" Content="Wszystkie daty" IsChecked="True" GroupName="DateGroup"/>
+                    <RadioButton x:Name="CustomDatesRadioButton" Content="Niestandardowy zakres dat" GroupName="DateGroup" CheckedChanged="OnCustomDatesCheckedChanged"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10" IsVisible="False" x:Name="DateRangeGrid">
+                        <Label Text="Od:" VerticalOptions="Center" Grid.Column="0" Grid.Row="0"/>
+                        <DatePicker x:Name="StartDatePicker" Grid.Column="1" Grid.Row="0"/>
+
+                        <Label Text="Do:" VerticalOptions="Center" Grid.Column="0" Grid.Row="1"/>
+                        <DatePicker x:Name="EndDatePicker" Grid.Column="1" Grid.Row="1"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Button Text="Generuj raport" Clicked="OnGenerateReportClicked" BackgroundColor="DarkBlue" TextColor="White"/>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10" IsVisible="False" x:Name="ResultFrame">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Raport został wygenerowany" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label x:Name="FilePathLabel" Text="Ścieżka pliku: /Downloads/SMK_Export_20230301.xlsx" TextColor="Blue"/>
+
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Button Text="Otwórz plik" Clicked="OnOpenFileClicked" BackgroundColor="Green" TextColor="White"/>
+                        <Button Text="Otwórz folder" Clicked="OnOpenFolderClicked" BackgroundColor="Gray" TextColor="White"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

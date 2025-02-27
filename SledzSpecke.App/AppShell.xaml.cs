@@ -1,30 +1,71 @@
-﻿using SledzSpecke.App.Views.Dashboard;
-using SledzSpecke.App.Views.Procedures;
-using SledzSpecke.App.Views.Duties;
-using SledzSpecke.App.Views.Profile;
-using SledzSpecke.App.Views.Specialization;
-using SledzSpecke.App.Views.Reports;
+﻿using System;
+using Microsoft.Maui.Controls;
+using SledzSpecke.Services;
 
-namespace SledzSpecke.App
+namespace SledzSpecke
 {
-    public partial class AppShell : Shell
+    public partial class App : Application
     {
-        public AppShell()
+        public static DataManager DataManager { get; private set; }
+        public static ExportService ExportService { get; private set; }
+        public static NotificationService NotificationService { get; private set; }
+        public static AppSettings AppSettings { get; private set; }
+
+
+
+        public App()
         {
             InitializeComponent();
 
-            Routing.RegisterRoute("dashboard", typeof(DashboardPage));
-            Routing.RegisterRoute("procedures", typeof(ProceduresPage));
-            Routing.RegisterRoute("duties", typeof(DutiesPage));
-            Routing.RegisterRoute("procedure/add", typeof(ProcedureAddPage));
-            Routing.RegisterRoute("procedure/edit", typeof(ProcedureEditPage));
-            Routing.RegisterRoute("duty/add", typeof(DutyAddPage));
-            Routing.RegisterRoute("duty/edit", typeof(DutyEditPage));
-            Routing.RegisterRoute("profile", typeof(ProfilePage));
-            Routing.RegisterRoute("settings", typeof(SettingsPage));
-            Routing.RegisterRoute("profile/edit", typeof(ProfileEditPage));
-            Routing.RegisterRoute("progress", typeof(SpecializationProgressPage));
-            Routing.RegisterRoute("reports", typeof(ReportsPage));
+            // Inicjalizacja usług
+            DataManager = new DataManager();
+            ExportService = new ExportService(DataManager);
+            NotificationService = new NotificationService(DataManager);
+            AppSettings = new AppSettings();
+
+            // Asynchroniczne ładowanie ustawień
+            _ = InitializeSettingsAsync();
+
+            MainPage = new AppShell();
+        }
+
+        private async Task InitializeSettingsAsync()
+        {
+            try
+            {
+                await AppSettings.LoadAsync();
+                bool useDarkTheme = AppSettings.GetSetting<bool>("UseDarkTheme");
+                if (useDarkTheme)
+                {
+                    Application.Current.UserAppTheme = AppTheme.Dark;
+                }
+                else
+                {
+                    Application.Current.UserAppTheme = AppTheme.Light;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing settings: {ex.Message}");
+            }
+        }
+
+        protected override void OnStart()
+        {
+            // Sprawdzenie i planowanie powiadomień przy uruchomieniu aplikacji
+            _ = NotificationService.CheckAndScheduleNotificationsAsync();
+        }
+
+        protected override void OnSleep()
+        {
+            // Zapisanie ustawień i danych przy wstrzymaniu aplikacji
+            _ = AppSettings.SaveAsync();
+        }
+
+        protected override void OnResume()
+        {
+            // Sprawdzenie i planowanie powiadomień przy wznowieniu aplikacji
+            _ = NotificationService.CheckAndScheduleNotificationsAsync();
         }
     }
 }

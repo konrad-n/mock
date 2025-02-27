@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.SettingsPage"
+          Title="Ustawienia">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Ustawienia aplikacji" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Dane specjalizacji" FontSize="16" FontAttributes="Bold"/>
+
+                    <Label Text="Nazwa specjalizacji" FontAttributes="Bold"/>
+                    <Entry x:Name="SpecializationNameEntry" Text="Hematologia" IsEnabled="False"/>
+
+                    <Label Text="Data rozpoczęcia" FontAttributes="Bold"/>
+                    <DatePicker x:Name="StartDatePicker"/>
+
+                    <Label Text="Czas trwania (w latach)" FontAttributes="Bold"/>
+                    <Entry x:Name="DurationYearsEntry" Text="5" Keyboard="Numeric" IsEnabled="False"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Dane personalne" FontSize="16" FontAttributes="Bold"/>
+
+                    <Label Text="Imię i nazwisko" FontAttributes="Bold"/>
+                    <Entry x:Name="FullNameEntry" Placeholder="Wprowadź imię i nazwisko"/>
+
+                    <Label Text="Numer PWZ" FontAttributes="Bold"/>
+                    <Entry x:Name="MedicalLicenseNumberEntry" Placeholder="Wprowadź numer PWZ"/>
+
+                    <Label Text="Jednostka szkoląca" FontAttributes="Bold"/>
+                    <Entry x:Name="TrainingUnitEntry" Placeholder="Wprowadź nazwę jednostki szkolącej"/>
+
+                    <Label Text="Kierownik specjalizacji" FontAttributes="Bold"/>
+                    <Entry x:Name="SupervisorEntry" Placeholder="Wprowadź imię i nazwisko kierownika"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Ustawienia aplikacji" FontSize="16" FontAttributes="Bold"/>
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                        <Label Text="Powiadomienia" VerticalOptions="Center" Grid.Column="0"/>
+                        <Switch x:Name="NotificationsSwitch" IsToggled="True" Grid.Column="1"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                        <Label Text="Automatyczna synchronizacja" VerticalOptions="Center" Grid.Column="0"/>
+                        <Switch x:Name="AutoSyncSwitch" IsToggled="True" Grid.Column="1"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                        <Label Text="Motyw ciemny" VerticalOptions="Center" Grid.Column="0"/>
+                        <Switch x:Name="DarkThemeSwitch" IsToggled="False" Grid.Column="1"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="SMK" FontSize="16" FontAttributes="Bold"/>
+
+                    <Label Text="Ustawienia integracji z SMK" FontAttributes="Bold"/>
+                    <Label Text="Aplikacja wspiera eksport danych dla Systemu Monitorowania Kształcenia (SMK)" FontSize="14"/>
+
+                    <Button Text="Konfiguruj integrację z SMK" Clicked="OnConfigureSMKClicked" BackgroundColor="Gray" TextColor="White"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Button Text="Zapisz zmiany" Clicked="OnSaveChangesClicked" BackgroundColor="DarkBlue" TextColor="White"/>
+
+            <Button Text="Wyczyść wszystkie dane" Clicked="OnClearDataClicked" BackgroundColor="Red" TextColor="White" Margin="0,20,0,0"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

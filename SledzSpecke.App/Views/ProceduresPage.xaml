@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.ProceduresPage"
+          Title="Procedury">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Filtry modułów -->
+        <Grid ColumnDefinitions="*,*" Padding="10" Grid.Row="0">
+            <Button Text="Moduł podstawowy" 
+                 Clicked="OnBasicModuleButtonClicked" 
+                 Grid.Column="0" 
+                 Margin="5"
+                 x:Name="BasicModuleButton"/>
+
+
+
+            <Button Text="Moduł specjalistyczny" 
+                Clicked="OnSpecialisticModuleButtonClicked" 
+                Grid.Column="1" 
+                Margin="5"
+                x:Name="SpecialisticModuleButton"/>
+        </Grid>
+
+        <!-- Filtry typów procedur -->
+        <Grid ColumnDefinitions="*,*" Padding="10" Grid.Row="1">
+            <Button Text="Kod A" 
+                Clicked="OnTypeAButtonClicked" 
+                Grid.Column="0" 
+                Margin="5"
+                x:Name="TypeAButton"/>
+
+            <Button Text="Kod B" 
+                Clicked="OnTypeBButtonClicked" 
+                Grid.Column="1" 
+                Margin="5"
+                x:Name="TypeBButton"/>
+        </Grid>
+
+        <!-- Lista procedur -->
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="15" Spacing="10" x:Name="ProceduresLayout">
+                <Label Text="Wybierz moduł i typ procedury powyżej" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center"
+                   x:Name="NoSelectionLabel"/>
+
+                <!-- Tutaj będą dynamicznie dodawane elementy procedur -->
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Dodaj" Clicked="OnAddProcedureClicked" IconImageSource="add_icon.png" />
+    </ContentPage.ToolbarItems>
+</ContentPage>

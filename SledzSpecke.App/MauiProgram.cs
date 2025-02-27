@@ -126,6 +126,8 @@ public static class MauiProgram
         services.AddTransient<SpecializationStatsViewModel>();
         services.AddTransient<SpecializationProgressViewModel>();
         services.AddTransient<ReportsViewModel>();
+        services.AddTransient<SMKExportViewModel>();
+        services.AddTransient<SelfEducationViewModel>();
     }
 
     private static void RegisterPages(IServiceCollection services)

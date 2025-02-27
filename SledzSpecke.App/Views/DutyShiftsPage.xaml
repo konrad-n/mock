@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.DutyShiftsPage"
+          Title="Dyżury">
+    <Grid RowDefinitions="Auto,*">
+        <HorizontalStackLayout Padding="15" Spacing="10" HorizontalOptions="Center">
+            <Label Text="Suma godzin dyżurów:" VerticalOptions="Center" FontSize="16"/>
+            <Label x:Name="TotalHoursLabel" Text="125/520" VerticalOptions="Center" FontSize="16" FontAttributes="Bold"/>
+
+
+
+            <Frame BackgroundColor="#E3F2FD" Padding="5" CornerRadius="5" Margin="10,0,0,0">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Tygodniowo:" VerticalOptions="Center" FontSize="14"/>
+                    <Label x:Name="WeeklyHoursLabel" Text="10h 5min" VerticalOptions="Center" FontSize="14" FontAttributes="Bold"/>
+                </HorizontalStackLayout>
+            </Frame>
+        </HorizontalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="15" Spacing="10" x:Name="DutyShiftsLayout">
+                <!-- Tutaj będą dynamicznie dodawane elementy dyżurów -->
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Dodaj" Clicked="OnAddDutyShiftClicked" IconImageSource="add_icon.png" />
+    </ContentPage.ToolbarItems>
+</ContentPage>

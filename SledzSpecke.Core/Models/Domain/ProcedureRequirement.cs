@@ -1,4 +1,7 @@
+// Zaktualizować SledzSpecke.Core/Models/Domain/ProcedureRequirement.cs
+using SledzSpecke.Core.Models.Enums;
 using SQLite;
+using System;
 
 namespace SledzSpecke.Core.Models.Domain
 {
@@ -38,8 +41,24 @@ namespace SledzSpecke.Core.Models.Domain
         [Column("SimulationLimit")]
         public int SimulationLimit { get; set; } // Procent procedur możliwych do wykonania na symulatorach
 
+        [Column("Module")]
+        public ModuleType Module { get; set; }
+
+        [Column("InternshipId")]
+        public int? InternshipId { get; set; }
+
         // Nawigacja
         [Ignore]
         public Specialization Specialization { get; set; } = null!;
+
+        [Ignore]
+        public InternshipDefinition Internship { get; set; }
+
+        // Pomocnicza metoda do obliczania procentu ukończenia
+        public double GetCompletionPercentage(int completedCount)
+        {
+            if (RequiredCount <= 0) return 0;
+            return Math.Min((completedCount * 100.0) / RequiredCount, 100.0);
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using SQLite;
+﻿// Zaktualizować SledzSpecke.Core/Models/Domain/CourseDefinition.cs
+using SledzSpecke.Core.Models.Enums;
+using SQLite;
 using System.Collections.Generic;
 
 namespace SledzSpecke.Core.Models.Domain
@@ -38,6 +40,9 @@ namespace SledzSpecke.Core.Models.Domain
 
         [Column("CompletionRequirements")]
         public string CompletionRequirements { get; set; }
+
+        [Column("Module")]
+        public ModuleType Module { get; set; }
 
         // Serializowana lista tematów kursu
         private string _courseTopicsJson;

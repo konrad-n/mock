@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          x:Class="SledzSpecke.Views.InternshipsPage"
+          Title="Staże">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="CompletedInternshipStyle" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="#E6F7E6" />
+                <Setter Property="BorderColor" Value="#4CAF50" />
+            </Style>
+            <Style x:Key="CurrentInternshipStyle" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="#E3F2FD" />
+                <Setter Property="BorderColor" Value="#2196F3" />
+            </Style>
+            <Style x:Key="PlannedInternshipStyle" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="#FFF8E6" />
+                <Setter Property="BorderColor" Value="#FFB74D" />
+            </Style>
+            <Style x:Key="PendingInternshipStyle" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="#F5F5F5" />
+                <Setter Property="BorderColor" Value="#9E9E9E" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid ColumnDefinitions="*,*" Padding="10">
+            <Button Text="Moduł podstawowy" 
+                Clicked="OnBasicModuleButtonClicked" 
+                Grid.Column="0" 
+                Margin="5"
+x:Name="BasicModuleButton"/>
+
+
+
+            <Button Text="Moduł specjalistyczny" 
+                Clicked="OnSpecialisticModuleButtonClicked" 
+                Grid.Column="1" 
+                Margin="5"
+                x:Name="SpecialisticModuleButton"/>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="15" Spacing="10" x:Name="InternshipsLayout">
+                <Label Text="Wybierz moduł powyżej, aby zobaczyć staże" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center"
+                   x:Name="NoModuleSelectedLabel"/>
+
+                <!-- Tutaj będą dynamicznie dodawane elementy staży -->
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Dodaj" Clicked="OnAddInternshipClicked" IconImageSource="add_icon.png" />
+    </ContentPage.ToolbarItems>
+</ContentPage>
