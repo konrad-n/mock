@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services;
+using SledzSpecke.App.Views.Auth;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App;
@@ -14,6 +15,7 @@ public partial class App : Application
     public static SpecializationService SpecializationService { get; private set; }
     public static DutyShiftService DutyShiftService { get; private set; }
     public static SelfEducationService SelfEducationService { get; private set; }
+    public static AuthenticationService AuthenticationService { get; private set; }
 
     private static readonly ILogger<App> _logger = LoggerFactory.Create(builder =>
         builder.AddDebug()).CreateLogger<App>();
@@ -50,16 +52,20 @@ public partial class App : Application
         SelfEducationService = new SelfEducationService(DatabaseService, LoggerFactory.Create(builder =>
             builder.AddDebug()).CreateLogger<SelfEducationService>());
 
-        // Asynchronously load settings
-        _ = InitializeAsync();
+        AuthenticationService = new AuthenticationService(DatabaseService, LoggerFactory.Create(builder =>
+            builder.AddDebug()).CreateLogger<AuthenticationService>());
 
-        MainPage = new AppShell();
+        // Initialize app async
+        InitializeAsync();
     }
 
-    private async Task InitializeAsync()
+    private async void InitializeAsync()
     {
         try
         {
+            // Initialize database
+            await DatabaseService.InitAsync();
+
             // Load settings
             await AppSettings.LoadAsync();
 
@@ -67,14 +73,20 @@ public partial class App : Application
             bool useDarkTheme = AppSettings.GetSetting<bool>("UseDarkTheme");
             Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
 
-            // Ensure specialization is loaded
-            await SpecializationService.GetSpecializationAsync();
+            // Check if user is already logged in
+            // TODO: Implement auto-login with token system
+
+            // Set initial page
+            MainPage = new NavigationPage(new LoginPage());
 
             _logger.LogInformation("Application initialized successfully");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error initializing application");
+            // Show error page or dialog
+            // For now, still go to login page even if there's an error
+            MainPage = new NavigationPage(new LoginPage());
         }
     }
 

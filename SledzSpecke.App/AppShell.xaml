@@ -5,36 +5,67 @@
  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
  xmlns:local="clr-namespace:SledzSpecke"
  xmlns:views="clr-namespace:SledzSpecke.App.Views"
- Shell.FlyoutBehavior="Disabled">
-    <TabBar>
-        <ShellContent
+ Shell.FlyoutBehavior="Flyout"
+ FlyoutHeaderBehavior="Fixed"
+ FlyoutWidth="280"
+ Title="ŚledzSpecke">
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">
+            <VerticalStackLayout Padding="20" VerticalOptions="Center">
+                <Image Source="app_logo.png" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" />
+                <Label x:Name="UserNameLabel" Text="Imię i Nazwisko" FontSize="18" TextColor="White" HorizontalOptions="Center" Margin="0,10,0,0" />
+                <Label x:Name="SpecializationLabel" Text="Specjalizacja" FontSize="14" TextColor="White" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <ShellContent
         Title="Dashboard"
         Icon="dashboard.png"
         ContentTemplate="{DataTemplate views:DashboardPage}"
         Route="DashboardPage" />
 
-        <ShellContent
+    <ShellContent
         Title="Kursy"
         Icon="course.png"
         ContentTemplate="{DataTemplate views:CoursesPage}"
         Route="CoursesPage" />
 
-        <ShellContent
+    <ShellContent
         Title="Staże"
         Icon="internship.png"
         ContentTemplate="{DataTemplate views:InternshipsPage}"
         Route="InternshipsPage" />
 
-        <ShellContent
+    <ShellContent
         Title="Procedury"
         Icon="procedure.png"
         ContentTemplate="{DataTemplate views:ProceduresPage}"
         Route="ProceduresPage" />
 
-        <ShellContent
+    <ShellContent
         Title="Dyżury"
         Icon="duty.png"
         ContentTemplate="{DataTemplate views:DutyShiftsPage}"
         Route="DutyShiftsPage" />
-    </TabBar>
+
+    <ShellContent
+        Title="Samokształcenie"
+        Icon="education.png"
+        ContentTemplate="{DataTemplate views:SelfEducationPage}"
+        Route="SelfEducationPage" />
+
+    <ShellContent
+        Title="Eksport do SMK"
+        Icon="export.png"
+        ContentTemplate="{DataTemplate views:SMKExportPage}"
+        Route="SMKExportPage" />
+
+    <ShellContent
+        Title="Ustawienia"
+        Icon="settings.png"
+        ContentTemplate="{DataTemplate views:SettingsPage}"
+        Route="SettingsPage" />
+
+    <MenuItem Text="Wyloguj" IconImageSource="logout.png" Clicked="OnLogoutClicked" />
 </Shell>

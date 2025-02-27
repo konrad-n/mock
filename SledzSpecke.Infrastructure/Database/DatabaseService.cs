@@ -21,7 +21,7 @@ namespace SledzSpecke.Infrastructure.Database
             _logger = logger;
         }
 
-        async Task Init()
+        public async Task InitAsync()
         {
             if (_isInitialized)
                 return;
@@ -29,6 +29,8 @@ namespace SledzSpecke.Infrastructure.Database
             var databasePath = Path.Combine(_fileSystemService.GetAppDataDirectory(), "SledzSpecke.db3");
             _database = new SQLiteAsyncConnection(databasePath);
 
+            // Create tables for all models
+            await _database.CreateTableAsync<User>();
             await _database.CreateTableAsync<SpecializationType>();
             await _database.CreateTableAsync<Specialization>();
             await _database.CreateTableAsync<Course>();
@@ -45,43 +47,43 @@ namespace SledzSpecke.Infrastructure.Database
 
         public async Task<List<T>> GetAllAsync<T>() where T : new()
         {
-            await Init();
+            await InitAsync();
             return await _database.Table<T>().ToListAsync();
         }
 
         public async Task<T> GetByIdAsync<T>(int id) where T : class, new()
         {
-            await Init();
+            await InitAsync();
             return await _database.FindAsync<T>(id);
         }
 
         public async Task<int> SaveAsync<T>(T item) where T : new()
         {
-            await Init();
+            await InitAsync();
             return await _database.InsertOrReplaceAsync(item);
         }
 
         public async Task<int> DeleteAsync<T>(T item) where T : new()
         {
-            await Init();
+            await InitAsync();
             return await _database.DeleteAsync(item);
         }
 
         public async Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : new()
         {
-            await Init();
+            await InitAsync();
             return await _database.QueryAsync<T>(query, args);
         }
 
         public async Task<int> ExecuteAsync(string query, params object[] args)
         {
-            await Init();
+            await InitAsync();
             return await _database.ExecuteAsync(query, args);
         }
 
         public async Task<List<MedicalProcedure>> GetProceduresForInternshipAsync(int internshipId)
         {
-            await Init();
+            await InitAsync();
             return await _database.Table<MedicalProcedure>()
                 .Where(p => p.InternshipId == internshipId)
                 .ToListAsync();
@@ -89,7 +91,7 @@ namespace SledzSpecke.Infrastructure.Database
 
         public async Task<List<ProcedureEntry>> GetEntriesForProcedureAsync(int procedureId)
         {
-            await Init();
+            await InitAsync();
             return await _database.Table<ProcedureEntry>()
                 .Where(e => e.ProcedureId == procedureId)
                 .ToListAsync();
@@ -97,7 +99,7 @@ namespace SledzSpecke.Infrastructure.Database
 
         public async Task<List<Course>> GetCoursesForModuleAsync(ModuleType moduleType)
         {
-            await Init();
+            await InitAsync();
             return await _database.Table<Course>()
                 .Where(c => c.Module == moduleType)
                 .ToListAsync();
@@ -105,7 +107,7 @@ namespace SledzSpecke.Infrastructure.Database
 
         public async Task<List<Internship>> GetInternshipsForModuleAsync(ModuleType moduleType)
         {
-            await Init();
+            await InitAsync();
             return await _database.Table<Internship>()
                 .Where(i => i.Module == moduleType)
                 .ToListAsync();
@@ -113,20 +115,20 @@ namespace SledzSpecke.Infrastructure.Database
 
         public async Task<UserSettings> GetUserSettingsAsync()
         {
-            await Init();
+            await InitAsync();
             var settings = await _database.Table<UserSettings>().FirstOrDefaultAsync();
             return settings ?? new UserSettings();
         }
 
         public async Task SaveUserSettingsAsync(UserSettings settings)
         {
-            await Init();
+            await InitAsync();
             await _database.InsertOrReplaceAsync(settings);
         }
 
         public async Task<Specialization> GetCurrentSpecializationAsync()
         {
-            await Init();
+            await InitAsync();
             var userSettings = await GetUserSettingsAsync();
 
             if (userSettings.CurrentSpecializationId == 0)
@@ -137,7 +139,7 @@ namespace SledzSpecke.Infrastructure.Database
 
         public async Task DeleteAllDataAsync()
         {
-            await Init();
+            await InitAsync();
             await _database.DeleteAllAsync<Course>();
             await _database.DeleteAllAsync<Internship>();
             await _database.DeleteAllAsync<MedicalProcedure>();
@@ -145,6 +147,7 @@ namespace SledzSpecke.Infrastructure.Database
             await _database.DeleteAllAsync<DutyShift>();
             await _database.DeleteAllAsync<SelfEducation>();
             await _database.DeleteAllAsync<Specialization>();
+            await _database.DeleteAllAsync<User>();
             _logger.LogInformation("All data deleted from the database");
         }
     }

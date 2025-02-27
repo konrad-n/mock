@@ -191,7 +191,7 @@ namespace SledzSpecke.App.Services
                 if (types.Count == 0)
                 {
                     // Seed specialization types if none exist
-                    types = SeedSpecializationTypes();
+                    types = SpecializationTypeSeeder.SeedSpecializationTypes();
                     foreach (var type in types)
                     {
                         await _databaseService.SaveAsync(type);
@@ -203,22 +203,82 @@ namespace SledzSpecke.App.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting specialization types");
-                return SeedSpecializationTypes();
+                return SpecializationTypeSeeder.SeedSpecializationTypes();
             }
         }
 
-        private List<SpecializationType> SeedSpecializationTypes()
+        public async Task<Specialization> InitializeSpecializationForUserAsync(int specializationTypeId, string username)
         {
-            var specializationTypes = new List<SpecializationType>
+            try
             {
-                new SpecializationType { Name = "Hematologia", BaseDurationWeeks = 261, BasicModuleDurationWeeks = 104, SpecialisticModuleDurationWeeks = 157 },
-                // Add more specialization types
-                new SpecializationType { Name = "Alergologia", BaseDurationWeeks = 208, BasicModuleDurationWeeks = 104, SpecialisticModuleDurationWeeks = 104 },
-                new SpecializationType { Name = "Anestezjologia i intensywna terapia", BaseDurationWeeks = 312, BasicModuleDurationWeeks = 104, SpecialisticModuleDurationWeeks = 208 },
-                // Add more specialization types as needed
-            };
+                // Get specialization type
+                var specializationType = await _databaseService.GetByIdAsync<SpecializationType>(specializationTypeId);
+                if (specializationType == null)
+                {
+                    _logger.LogError("Specialization type with ID {Id} not found", specializationTypeId);
+                    return null;
+                }
 
-            return specializationTypes;
+                // Create new specialization based on type
+                var newSpecialization = new Specialization
+                {
+                    Name = specializationType.Name,
+                    StartDate = DateTime.Now,
+                    ExpectedEndDate = DateTime.Now.AddDays(specializationType.BaseDurationWeeks * 7),
+                    BaseDurationWeeks = specializationType.BaseDurationWeeks,
+                    BasicModuleDurationWeeks = specializationType.BasicModuleDurationWeeks,
+                    SpecialisticModuleDurationWeeks = specializationType.SpecialisticModuleDurationWeeks,
+                    VacationDaysPerYear = specializationType.VacationDaysPerYear,
+                    SelfEducationDaysPerYear = specializationType.SelfEducationDaysPerYear,
+                    StatutoryHolidaysPerYear = specializationType.StatutoryHolidaysPerYear,
+                    RequiredDutyHoursPerWeek = specializationType.RequiredDutyHoursPerWeek,
+                    RequiresPublication = specializationType.RequiresPublication,
+                    RequiredConferences = specializationType.RequiredConferences,
+                    SpecializationTypeId = specializationType.Id
+                };
+
+                // Save specialization to database
+                await _databaseService.SaveAsync(newSpecialization);
+
+                // Update user settings
+                var settings = await _databaseService.GetUserSettingsAsync();
+                settings.Username = username;
+                settings.CurrentSpecializationId = newSpecialization.Id;
+                await _databaseService.SaveUserSettingsAsync(settings);
+
+                // Load required courses, internships, and procedures for this specialization
+                await LoadRequiredItemsForSpecializationAsync(newSpecialization);
+
+                _logger.LogInformation("Specialization initialized successfully for user {Username}", username);
+                return newSpecialization;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing specialization for user");
+                return null;
+            }
+        }
+
+        private async Task LoadRequiredItemsForSpecializationAsync(Specialization specialization)
+        {
+            // This would need to be expanded to load data for each specialization type
+            // For now, we'll use the default hematology data for all specializations
+
+            // TODO: Load specialization-specific data when available
+            var seededSpecialization = DataSeeder.SeedHematologySpecialization();
+
+            // Copy data to the new specialization
+            specialization.RequiredCourses = seededSpecialization.RequiredCourses;
+            specialization.RequiredInternships = seededSpecialization.RequiredInternships;
+            specialization.RequiredProcedures = seededSpecialization.RequiredProcedures;
+
+            // Save the data to database
+            await SaveSpecializationAsync(specialization);
+        }
+
+        public string GetSpecializationName()
+        {
+            return _specialization?.Name ?? "Brak specjalizacji";
         }
     }
 }

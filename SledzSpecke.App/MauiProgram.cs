@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// SledzSpecke.App/MauiProgram.cs
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services;
 using SledzSpecke.App.Views;
+using SledzSpecke.App.Views.Auth;
 using SledzSpecke.Infrastructure.Database;
 using SledzSpecke.Infrastructure.Services;
 
@@ -50,10 +52,15 @@ public static class MauiProgram
         services.AddSingleton<ExportService>();
         services.AddSingleton<NotificationService>();
         services.AddSingleton<AppSettings>();
+        services.AddSingleton<AuthenticationService>();
     }
 
     private static void RegisterPages(IServiceCollection services)
     {
+        // Register auth pages
+        services.AddTransient<LoginPage>();
+        services.AddTransient<RegistrationPage>();
+
         // Register main pages
         services.AddTransient<DashboardPage>();
         services.AddTransient<SettingsPage>();

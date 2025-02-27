@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SledzSpecke.App.Views.Auth.RegistrationPage"
+             Title="Rejestracja">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Utwórz nowe konto" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,20" TextColor="{StaticResource Primary}" />
+
+            <Label Text="Imię i nazwisko" FontAttributes="Bold" />
+            <Entry x:Name="UsernameEntry" Placeholder="Wprowadź imię i nazwisko" />
+
+            <Label Text="Adres email" FontAttributes="Bold" />
+            <Entry x:Name="EmailEntry" Placeholder="Wprowadź adres email" Keyboard="Email" />
+
+            <Label Text="Hasło" FontAttributes="Bold" />
+            <Entry x:Name="PasswordEntry" Placeholder="Wprowadź hasło" IsPassword="True" />
+
+            <Label Text="Powtórz hasło" FontAttributes="Bold" />
+            <Entry x:Name="ConfirmPasswordEntry" Placeholder="Powtórz hasło" IsPassword="True" />
+
+            <Label Text="Specjalizacja" FontAttributes="Bold" />
+            <Picker x:Name="SpecializationPicker" Title="Wybierz specjalizację" />
+
+            <Button x:Name="RegisterButton" Text="Zarejestruj się" Clicked="OnRegisterClicked" BackgroundColor="{StaticResource Primary}" TextColor="White" Margin="0,20,0,0" />
+
+            <ActivityIndicator x:Name="ActivityIndicator" IsRunning="False" HorizontalOptions="Center" Margin="0,10,0,10" />
+
+            <Label Text="Rejestrując się, akceptujesz regulamin aplikacji." HorizontalOptions="Center" FontSize="12" TextColor="Gray" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
