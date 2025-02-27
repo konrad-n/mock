@@ -99,48 +99,48 @@
                 </Grid>
                 <Border Style="{StaticResource CardBorder}" IsVisible="{Binding IsDetailedViewVisible}">
                     <VerticalStackLayout Spacing="20">
-                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <FlexLayout JustifyContent="Center" 
+                                    Wrap="Wrap" 
+                                    AlignItems="Center" 
+                                    AlignContent="Center">
                             <Button Text="Procedury" 
                                     Command="{Binding SwitchTabCommand}" 
                                     CommandParameter="Procedures"
                                     Style="{StaticResource SecondaryButton}"
-                                    BackgroundColor="{Binding IsProceduresTabActive, Converter={StaticResource BoolToColorConverter}}"/>
-
+                                    BackgroundColor="{Binding IsProceduresTabActive, Converter={StaticResource BoolToColorConverter}}"
+                                    Margin="5"/>
                             <Button Text="Dyżury" 
                                     Command="{Binding SwitchTabCommand}" 
                                     CommandParameter="Duties"
                                     Style="{StaticResource SecondaryButton}"
-                                    BackgroundColor="{Binding IsDutiesTabActive, Converter={StaticResource BoolToColorConverter}}"/>
-
+                                    BackgroundColor="{Binding IsDutiesTabActive, Converter={StaticResource BoolToColorConverter}}"
+                                    Margin="5"/>
                             <Button Text="Kursy" 
                                     Command="{Binding SwitchTabCommand}" 
                                     CommandParameter="Courses"
                                     Style="{StaticResource SecondaryButton}"
-                                    BackgroundColor="{Binding IsCoursesTabActive, Converter={StaticResource BoolToColorConverter}}"/>
-
+                                    BackgroundColor="{Binding IsCoursesTabActive, Converter={StaticResource BoolToColorConverter}}"
+                                    Margin="5"/>
                             <Button Text="Staże" 
                                     Command="{Binding SwitchTabCommand}" 
                                     CommandParameter="Internships"
                                     Style="{StaticResource SecondaryButton}"
-                                    BackgroundColor="{Binding IsInternshipsTabActive, Converter={StaticResource BoolToColorConverter}}"/>
-                        </HorizontalStackLayout>
-
+                                    BackgroundColor="{Binding IsInternshipsTabActive, Converter={StaticResource BoolToColorConverter}}"
+                                    Margin="5"/>
+                        </FlexLayout>
                         <Button Text="Wygeneruj pełny raport"
                                 Command="{Binding GenerateReportCommand}"
                                 Style="{StaticResource PrimaryButton}"
                                 IsVisible="{Binding IsDetailedViewVisible}"/>
-
                         <Button Text="Pokaż braki"
                                 Command="{Binding ShowDeficienciesCommand}"
                                 Style="{StaticResource SecondaryButton}"
                                 IsVisible="{Binding IsDetailedViewVisible}"/>
-
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding HasFilters}">
                             <Picker Grid.Column="0" 
                                     ItemsSource="{Binding FilterOptions}" 
                                     SelectedItem="{Binding SelectedFilter}"
                                     Title="Filtruj"/>
-
                             <Button Grid.Column="1" 
                                     Text="Wyczyść" 
                                     Command="{Binding ClearFilterCommand}"
