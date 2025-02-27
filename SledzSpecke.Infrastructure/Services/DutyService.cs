@@ -16,14 +16,17 @@ namespace SledzSpecke.Infrastructure.Services
         private readonly IDutyRepository _repository;
         private readonly IUserService _userService;
         private readonly ILogger<DutyService> _logger;
+        private readonly ISpecializationRequirementsProvider _requirementsProvider;
 
         public DutyService(
             IDutyRepository repository,
             IUserService userService,
+            ISpecializationRequirementsProvider requirementsProvider,
             ILogger<DutyService> logger)
         {
             _repository = repository;
             _userService = userService;
+            _requirementsProvider = requirementsProvider;
             _logger = logger;
         }
 
@@ -32,7 +35,9 @@ namespace SledzSpecke.Infrastructure.Services
             try
             {
                 var userId = await _userService.GetCurrentUserIdAsync();
-                var startDate = fromDate ?? DateTime.Today.AddMonths(-1);
+                var startDate = fromDate
+                    ?? DateTime.Today.AddMonths(-1);
+
                 return await _repository.GetUserDutiesInRangeAsync(userId, startDate, DateTime.Today.AddYears(1));
             }
             catch (Exception ex)
@@ -46,13 +51,9 @@ namespace SledzSpecke.Infrastructure.Services
         {
             try
             {
-                var duty = await _repository.GetByIdAsync(id);
-                if (duty == null)
-                {
-                    throw new NotFoundException("Duty not found");
-                }
-
+                var duty = await _repository.GetByIdAsync(id) ?? throw new NotFoundException("Duty not found");
                 var currentUserId = await _userService.GetCurrentUserIdAsync();
+
                 if (duty.UserId != currentUserId)
                 {
                     throw new UnauthorizedAccessException("Cannot access other user's duty");
@@ -89,13 +90,10 @@ namespace SledzSpecke.Infrastructure.Services
         {
             try
             {
-                var existingDuty = await _repository.GetByIdAsync(duty.Id);
-                if (existingDuty == null)
-                {
-                    throw new NotFoundException("Duty not found");
-                }
-
+                var existingDuty = await _repository.GetByIdAsync(duty.Id)
+                    ?? throw new NotFoundException("Duty not found");
                 var currentUserId = await _userService.GetCurrentUserIdAsync();
+
                 if (existingDuty.UserId != currentUserId)
                 {
                     throw new UnauthorizedAccessException("Cannot update other user's duty");
@@ -117,12 +115,8 @@ namespace SledzSpecke.Infrastructure.Services
         {
             try
             {
-                var duty = await _repository.GetByIdAsync(id);
-                if (duty == null)
-                {
-                    throw new NotFoundException("Duty not found");
-                }
-
+                var duty = await _repository.GetByIdAsync(id)
+                    ?? throw new NotFoundException("Duty not found");
                 var currentUserId = await _userService.GetCurrentUserIdAsync();
                 if (duty.UserId != currentUserId)
                 {
@@ -176,17 +170,34 @@ namespace SledzSpecke.Infrastructure.Services
                 throw new ValidationException("This duty overlaps with another duty");
             }
 
-            // Sprawdź czy nie przekroczono limitu godzin w miesiącu
+            var user = await _userService.GetCurrentUserAsync();
+            if (user?.CurrentSpecializationId == null)
+            {
+                return;
+            }
+
+            var dutyRequirements = _requirementsProvider.GetDutyRequirementsBySpecialization(user.CurrentSpecializationId.Value);
+            var typeRequirements = dutyRequirements.FirstOrDefault(dr => dr.Type == duty.Type.ToString());
             var monthStart = new DateTime(duty.StartTime.Year, duty.StartTime.Month, 1);
             var monthEnd = monthStart.AddMonths(1).AddDays(-1);
             var monthlyHours = await _repository.GetMonthlyHoursAsync(duty.UserId, monthStart, monthEnd);
-
             var newDutyHours = (decimal)(duty.EndTime - duty.StartTime).TotalHours;
             var totalMonthlyHours = monthlyHours.Values.Sum() + newDutyHours;
 
-            if (totalMonthlyHours > 240) // Przykładowy limit miesięczny
+            if (typeRequirements != null && typeRequirements.RequiresSupervision && duty.SupervisorId == null)
             {
-                throw new ValidationException("Monthly duty hours limit exceeded");
+                throw new ValidationException($"This type of duty ({duty.Type}) requires supervision");
+            }
+
+            decimal maxMonthlyHours = 240;
+            if (typeRequirements != null && typeRequirements.MinimumHoursPerMonth > 0)
+            {
+                maxMonthlyHours = typeRequirements.MinimumHoursPerMonth * 2;
+            }
+
+            if (totalMonthlyHours > maxMonthlyHours)
+            {
+                throw new ValidationException($"Monthly duty hours limit exceeded (max: {maxMonthlyHours}h)");
             }
         }
     }
