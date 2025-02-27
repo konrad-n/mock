@@ -27,16 +27,6 @@
 
                     <!-- Filtry eksportu -->
                     <VerticalStackLayout Spacing="10">
-                        <!-- Opcja eksportu -->
-                        <RadioButton Content="Wszystkie dodane w aplikacji" 
-                             IsChecked="{Binding ExportAll}" 
-                             GroupName="ExportRange" />
-
-                        <RadioButton Content="Zakres dat" 
-                             IsChecked="{Binding ExportRange}" 
-                             GroupName="ExportRange" />
-
-                        <!-- Filtry eksportu -->
                         <Grid RowDefinitions="Auto,Auto"
                               ColumnDefinitions="*,*"
                               RowSpacing="10"

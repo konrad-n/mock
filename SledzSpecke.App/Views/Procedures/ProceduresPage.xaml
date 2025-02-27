@@ -63,40 +63,39 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="domain:ProcedureExecution">
                         <Border Style="{StaticResource CardBorder}"
-                                Margin="0,0,0,10">
-                            <Grid RowDefinitions="Auto,Auto"
+                            Margin="0,0,0,10">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                                   ColumnDefinitions="*,Auto"
                                   RowSpacing="5">
                                 <Label Grid.Row="0"
-                                       Grid.Column="0"
-                                       Text="{Binding Name}"
-                                       Style="{StaticResource SubHeaderLabel}"/>
+                                    Grid.Column="0"
+                                    Text="{Binding Name}"
+                                    Style="{StaticResource SubHeaderLabel}"
+                                    LineBreakMode="WordWrap" />
                                 <Label Grid.Row="0"
-                                       Grid.Column="1"
-                                       Text="{Binding Type}"
-                                       Style="{StaticResource BodyLabel}"/>
+                                   Grid.Column="1"
+                                   Text="{Binding Type}"
+                                   Style="{StaticResource BodyLabel}"
+                                   Margin="0,0,0,5" />
                                 <Label Grid.Row="1"
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding ExecutionDate, StringFormat='{0:d}'}"
-                                       Style="{StaticResource BodyLabel}"/>
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding ExecutionDate, StringFormat='{0:d}'}"
+                                   Style="{StaticResource BodyLabel}" />
                                 <Label Grid.Row="2" 
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding Location}"
-                                       Style="{StaticResource BodyLabel}" />
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding Location}"
+                                   Style="{StaticResource BodyLabel}"
+                                   LineBreakMode="WordWrap" />
                                 <Label Grid.Row="3" 
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding Category}"
-                                       Style="{StaticResource BodyLabel}"
-                                       IsVisible="{Binding Category, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding Category}"
+                                   Style="{StaticResource BodyLabel}"
+                                   IsVisible="{Binding Category, Converter={StaticResource StringNotEmptyConverter}}"
+                                   LineBreakMode="WordWrap" />
                             </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer 
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:ProceduresViewModel}}, Path=ViewProcedureCommand}"
-                                    CommandParameter="{Binding Id}" />
-                            </Border.GestureRecognizers>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

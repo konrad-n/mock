@@ -498,12 +498,50 @@ namespace SledzSpecke.App.ViewModels.Specializations
         [RelayCommand]
         private async Task ShowDeficienciesAsync()
         {
-            var navigationParameter = new Dictionary<string, object>
+            try
             {
-                { "ReportType", "Braki w wymaganiach specjalizacji" }
-            };
+                IsBusy = true;
+                var currentSpecialization = await _specializationService.GetCurrentSpecializationAsync();
+                if (currentSpecialization == null) return;
 
-            await Shell.Current.GoToAsync("reports", navigationParameter);
+                var deficienciesList = new List<string>();
+
+                if (ProceduresProgress < 1.0)
+                {
+                    var procedureRequirements = _requirementsProvider.GetRequiredProceduresBySpecialization(currentSpecialization.Id);
+                    var userProcedures = await _procedureService.GetUserProceduresAsync();
+
+                    deficienciesList.Add($"Procedury: {ProceduresProgressText} ukończone");
+                }
+
+                if (DutiesProgress < 1.0)
+                {
+                    deficienciesList.Add($"Dyżury: {DutiesProgressText} ukończone");
+                }
+
+                if (CoursesProgress < 1.0)
+                {
+                    deficienciesList.Add($"Kursy: {CoursesProgressText} ukończone");
+                }
+
+                if (InternshipsProgress < 1.0)
+                {
+                    deficienciesList.Add($"Staże: {InternshipsProgressText} ukończone");
+                }
+
+                await Shell.Current.DisplayAlert(
+                    "Braki w wymaganiach specjalizacji",
+                    string.Join("\n\n", deficienciesList),
+                    "OK");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Błąd", $"Wystąpił błąd podczas analizy braków: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         public partial class RequirementViewModel : ObservableObject
