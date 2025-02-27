@@ -1,15 +1,11 @@
-﻿using System;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class DutyShiftDetailsPage : ContentPage
     {
         private DutyShift _dutyShift;
         private Action<DutyShift> _onSaveCallback;
-
-
 
         public string PageTitle { get; set; }
         public DateTime StartDate { get; set; } = DateTime.Now;

@@ -1,11 +1,7 @@
-﻿using System;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Services;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SledzSpecke.Services;
 using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class InternshipsPage : ContentPage
     {

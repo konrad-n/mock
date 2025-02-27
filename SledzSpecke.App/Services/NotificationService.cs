@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.Services
+﻿namespace SledzSpecke.App.Services
 {
     public class NotificationService
     {

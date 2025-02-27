@@ -1,43 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class SelfEducationPage : ContentPage
     {
         // Przykładowa lista wydarzeń samokształcenia dla demonstracji
         private List<SelfEducation> _selfEducationList = new List<SelfEducation>
-{
-new SelfEducation
-{
-Id = 1,
-Title = "Konferencja Polskiego Towarzystwa Hematologów i Transfuzjologów",
-Type = SelfEducationType.Conference,
-StartDate = DateTime.Now.AddMonths(-5),
-EndDate = DateTime.Now.AddMonths(-5).AddDays(2),
-DurationDays = 3,
-Location = "Warszawa",
-Organizer = "PTHiT",
-IsRequired = true,
-Notes = "Udział w sesji dotyczącej nowotworów hematologicznych"
-},
-new SelfEducation
-{
-Id = 2,
-Title = "Warsztaty diagnostyki cytologicznej szpiku",
-Type = SelfEducationType.Workshop,
-StartDate = DateTime.Now.AddMonths(-3),
-EndDate = DateTime.Now.AddMonths(-3).AddDays(1),
-DurationDays = 2,
-Location = "Kraków",
-Organizer = "Instytut Hematologii",
-IsRequired = false,
-Notes = "Praktyczne warsztaty z oceny rozmazów szpiku"
-}
-};
+        {
+            new SelfEducation
+            {
+                Id = 1,
+                Title = "Konferencja Polskiego Towarzystwa Hematologów i Transfuzjologów",
+                Type = SelfEducationType.Conference,
+                StartDate = DateTime.Now.AddMonths(-5),
+                EndDate = DateTime.Now.AddMonths(-5).AddDays(2),
+                DurationDays = 3,
+                Location = "Warszawa",
+                Organizer = "PTHiT",
+                IsRequired = true,
+                Notes = "Udział w sesji dotyczącej nowotworów hematologicznych"
+                },
+            new SelfEducation
+            {
+                Id = 2,
+                Title = "Warsztaty diagnostyki cytologicznej szpiku",
+                Type = SelfEducationType.Workshop,
+                StartDate = DateTime.Now.AddMonths(-3),
+                EndDate = DateTime.Now.AddMonths(-3).AddDays(1),
+                DurationDays = 2,
+                Location = "Kraków",
+                Organizer = "Instytut Hematologii",
+                IsRequired = false,
+                Notes = "Praktyczne warsztaty z oceny rozmazów szpiku"
+            }
+        };
 
 
 

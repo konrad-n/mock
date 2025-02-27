@@ -6,7 +6,7 @@ using SledzSpecke.Models;
 namespace SledzSpecke.Services
 {
     public class DataSeeder
-    {
+    { // na pewno będzie trzeba zrobić Seed innych specjalizacji potem
         public static Specialization SeedHematologySpecialization()
         {
             var specialization = new Specialization

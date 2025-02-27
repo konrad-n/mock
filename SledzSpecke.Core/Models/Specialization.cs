@@ -1,5 +1,4 @@
-﻿using SledzSpecke.Core.Models.Domain;
-using SledzSpecke.Models;
+﻿using SledzSpecke.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

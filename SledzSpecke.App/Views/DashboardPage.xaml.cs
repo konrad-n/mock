@@ -1,10 +1,7 @@
-﻿using System;
-using Microsoft.Maui.Controls;
-using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Models;
-using SledzSpecke.Services;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class DashboardPage : ContentPage
     {

@@ -1,17 +1,8 @@
-﻿using System;
-using Microsoft.Maui.Controls;
-using System.IO;
-using System.Threading.Tasks;
-using SledzSpecke.Services;
-
-namespace SledzSpecke.Views
+﻿namespace SledzSpecke.App.Views
 {
     public partial class SMKExportPage : ContentPage
     {
         private SMKExportOptions _exportOptions;
-
-
-
         public SMKExportPage()
         {
             InitializeComponent();

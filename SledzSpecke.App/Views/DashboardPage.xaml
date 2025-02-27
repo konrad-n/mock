@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-          x:Class="SledzSpecke.Views.DashboardPage"
+          x:Class="SledzSpecke.App.Views.DashboardPage"
           Title="Dashboard">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
-
-
-
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
                 <VerticalStackLayout>
                     <Label Text="Specjalizacja: Hematologia" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>

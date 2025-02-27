@@ -109,9 +109,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Converters\" />
     <Folder Include="Resources\Raw\" />
     <Folder Include="Resources\Splash\" />
-    <Folder Include="Views\Dashboard\" />
+    <Folder Include="ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -128,15 +129,6 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\DashboardPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Duties\DutiesPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Duties\DutyAddPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Duties\DutyEditPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\DutyShiftDetailsPage.xaml">
@@ -160,28 +152,7 @@
     <MauiXaml Update="Views\ProceduresPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Procedures\ProcedureAddPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Procedures\ProcedureEditPage.xaml.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Procedures\ProceduresPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Profile\ProfileEditPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Profile\ProfilePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Profile\Settings.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Views\Reports\SMKExportPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Reports\ReportsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\SelfEducationDetailsPage.xaml">
@@ -194,9 +165,6 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\SMKExportPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Specialization\SpecializationProgressPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>

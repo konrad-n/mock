@@ -1,13 +1,11 @@
 ﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Models;
 
-namespace SledzSpecke.Services
+namespace SledzSpecke.App.Services
 {
     public class ExportService
     {
         private readonly DataManager _dataManager;
-
-
 
         public ExportService(DataManager dataManager)
         {

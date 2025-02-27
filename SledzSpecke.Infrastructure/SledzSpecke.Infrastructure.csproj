@@ -8,19 +8,10 @@
   <ItemGroup>
     <Compile Remove="Factories\**" />
     <Compile Remove="Helpers\**" />
-    <Compile Remove="Services\Auth\**" />
-    <Compile Remove="Services\Data\**" />
-    <Compile Remove="Services\Sync\**" />
     <EmbeddedResource Remove="Factories\**" />
     <EmbeddedResource Remove="Helpers\**" />
-    <EmbeddedResource Remove="Services\Auth\**" />
-    <EmbeddedResource Remove="Services\Data\**" />
-    <EmbeddedResource Remove="Services\Sync\**" />
     <None Remove="Factories\**" />
     <None Remove="Helpers\**" />
-    <None Remove="Services\Auth\**" />
-    <None Remove="Services\Data\**" />
-    <None Remove="Services\Sync\**" />
   </ItemGroup>
 
   <ItemGroup>

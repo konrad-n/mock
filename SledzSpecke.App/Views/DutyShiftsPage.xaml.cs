@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Maui.Controls;
 using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class DutyShiftsPage : ContentPage
     {

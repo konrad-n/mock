@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
 using SledzSpecke.Core.Models;
+using SledzSpecke.Services;
 
-namespace SledzSpecke.Services
+namespace SledzSpecke.App.Services
 {
     public class DataManager
     {

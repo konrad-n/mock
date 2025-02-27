@@ -1,27 +1,66 @@
-﻿using SledzSpecke.Infrastructure.Database.Initialization;
+﻿using SledzSpecke.App.Services;
 
 namespace SledzSpecke.App;
 
 public partial class App : Application
 {
-    private readonly DatabaseInitializer _initializer;
+    public static DataManager DataManager { get; private set; }
+    public static ExportService ExportService { get; private set; }
+    public static NotificationService NotificationService { get; private set; }
+    public static AppSettings AppSettings { get; private set; }
 
-    public App(DatabaseInitializer initializer)
+    public App()
     {
         InitializeComponent();
-        _initializer = initializer;
+
+        // Inicjalizacja usług
+        DataManager = new DataManager();
+        ExportService = new ExportService(DataManager);
+        NotificationService = new NotificationService(DataManager);
+        AppSettings = new AppSettings();
+
+        // Asynchroniczne ładowanie ustawień
+        _ = InitializeSettingsAsync();
+
         MainPage = new AppShell();
     }
 
-    protected override async void OnStart()
+    private async Task InitializeSettingsAsync()
     {
-        base.OnStart();
-        await InitializeDatabaseAsync();
+        try
+        {
+            await AppSettings.LoadAsync();
+            bool useDarkTheme = AppSettings.GetSetting<bool>("UseDarkTheme");
+            if (useDarkTheme)
+            {
+                Application.Current.UserAppTheme = AppTheme.Dark;
+            }
+            else
+            {
+                Application.Current.UserAppTheme = AppTheme.Light;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing settings: {ex.Message}");
+        }
     }
 
-    private async Task InitializeDatabaseAsync()
+    protected override void OnStart()
     {
-        await _initializer.InitializeAsync();
-        System.Diagnostics.Debug.WriteLine("Database initialization completed");
+        // Sprawdzenie i planowanie powiadomień przy uruchomieniu aplikacji
+        _ = NotificationService.CheckAndScheduleNotificationsAsync();
+    }
+
+    protected override void OnSleep()
+    {
+        // Zapisanie ustawień i danych przy wstrzymaniu aplikacji
+        _ = AppSettings.SaveAsync();
+    }
+
+    protected override void OnResume()
+    {
+        // Sprawdzenie i planowanie powiadomień przy wznowieniu aplikacji
+        _ = NotificationService.CheckAndScheduleNotificationsAsync();
     }
 }

@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-          x:Class="SledzSpecke.Views.CourseDetailsPage"
+          x:Class="SledzSpecke.App.Views.CourseDetailsPage"
           Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Dane kursu" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
-
-
-
             <Label Text="Nazwa kursu" FontAttributes="Bold"/>
             <Entry x:Name="CourseNameEntry" Placeholder="Wprowadź nazwę kursu" Text="{Binding Course.Name}"/>
-
             <Label Text="Opis" FontAttributes="Bold"/>
             <Editor x:Name="CourseDescriptionEditor" Placeholder="Wprowadź opis kursu" HeightRequest="100" Text="{Binding Course.Description}"/>
 

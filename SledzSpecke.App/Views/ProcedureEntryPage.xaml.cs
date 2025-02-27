@@ -2,7 +2,7 @@
 using Microsoft.Maui.Controls;
 using SledzSpecke.Models;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class ProcedureEntryPage : ContentPage
     {

@@ -6,7 +6,7 @@ using SledzSpecke.Core.Models;
 using SledzSpecke.Models;
 using SledzSpecke.Services;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class ProcedureDetailsPage : ContentPage
     {

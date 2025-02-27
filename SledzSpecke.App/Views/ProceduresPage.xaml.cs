@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.Views
+namespace SledzSpecke.App.Views
 {
     public partial class ProceduresPage : ContentPage
     {
