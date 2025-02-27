@@ -64,13 +64,27 @@ namespace SledzSpecke.Infrastructure.Database.Migrations
         private async Task UpdateVersionAsync(int version, string description)
         {
             var conn = _connectionFactory();
-            var versionInfo = new VersionInfo
+            try
             {
-                Version = version,
-                AppliedOn = DateTime.UtcNow,
-                Description = description
-            };
-            await conn.InsertAsync(versionInfo);
+                var versionInfo = new VersionInfo
+                {
+                    Version = version,
+                    AppliedOn = DateTime.UtcNow,
+                    Description = description
+                };
+                await conn.InsertAsync(versionInfo);
+            }
+            catch (SQLiteException ex) when (ex.Message.Contains("UNIQUE constraint failed"))
+            {
+                System.Diagnostics.Debug.WriteLine($"Version {version} already exists, updating information");
+                var existingVersion = await conn.Table<VersionInfo>().Where(v => v.Version == version).FirstOrDefaultAsync();
+                if (existingVersion != null)
+                {
+                    existingVersion.AppliedOn = DateTime.UtcNow;
+                    existingVersion.Description = description;
+                    await conn.UpdateAsync(existingVersion);
+                }
+            }
         }
 
         private async Task DeleteVersionAsync(int version)

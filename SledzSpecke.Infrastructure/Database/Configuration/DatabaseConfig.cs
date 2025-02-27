@@ -1,4 +1,5 @@
 ﻿using SQLite;
+using System;
 using System.IO;
 
 namespace SledzSpecke.Infrastructure.Database.Configuration
@@ -7,7 +8,8 @@ namespace SledzSpecke.Infrastructure.Database.Configuration
     {
         public static string GetDatabasePath(string appDataPath)
         {
-            return Path.Combine(appDataPath, "sledzspecke.db3");
+            var databaseName = $"sledzspecke_{DateTime.Now.Ticks}.db3";
+            return Path.Combine(appDataPath, databaseName);
         }
 
         public static SQLiteConnectionString GetConnectionString(string appDataPath)
