@@ -4,77 +4,73 @@ namespace SledzSpecke.App.Views
 {
     public partial class DutyShiftsPage : ContentPage
     {
-        // Przykładowa lista dyżurów dla demonstracji
-        private List<DutyShift> _dutyShifts = new List<DutyShift>
-        {
-            new DutyShift
-            {
-                Id = 1,
-                StartDate = DateTime.Now.AddDays(-30),
-                EndDate = DateTime.Now.AddDays(-29).AddHours(10).AddMinutes(5),
-                DurationHours = 10 + (5/60.0),
-                Type = DutyType.Accompanied,
-                Location = "Oddział Hematologii",
-                SupervisorName = "Dr Jan Kowalski"
-            },
-            new DutyShift
-            {
-                Id = 2,
-                StartDate = DateTime.Now.AddDays(-25),
-                EndDate = DateTime.Now.AddDays(-24).AddHours(10).AddMinutes(5),
-                DurationHours = 10 + (5/60.0),
-                Type = DutyType.Accompanied,
-                Location = "Oddział Hematologii",
-                SupervisorName = "Dr Jan Kowalski"
-            },
-            new DutyShift
-            {
-                Id = 3,
-                StartDate = DateTime.Now.AddDays(-20),
-                EndDate = DateTime.Now.AddDays(-19).AddHours(10).AddMinutes(5),
-                DurationHours = 10 + (5/60.0),
-                Type = DutyType.Independent,
-                Location = "Oddział Hematologii"
-            },
-            new DutyShift
-            {
-                Id = 4,
-                StartDate = DateTime.Now.AddDays(-15),
-                EndDate = DateTime.Now.AddDays(-14).AddHours(10).AddMinutes(5),
-                DurationHours = 10 + (5/60.0),
-                Type = DutyType.Independent,
-                Location = "Oddział Hematologii"
-            },
-            new DutyShift
-            {
-                Id = 5,
-                StartDate = DateTime.Now.AddDays(-10),
-                EndDate = DateTime.Now.AddDays(-9).AddHours(10).AddMinutes(5),
-                DurationHours = 10 + (5/60.0),
-                Type = DutyType.Independent,
-                Location = "Oddział Hematologii"
-            }
-        };
+        private List<DutyShift> _dutyShifts;
+        private double _totalRequiredHours;
 
         public DutyShiftsPage()
         {
             InitializeComponent();
-            UpdateTotalHours();
-            DisplayDutyShifts();
+            LoadDataAsync();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            LoadDataAsync();
+        }
+
+        private async void LoadDataAsync()
+        {
+            try
+            {
+                // Get all duty shifts from the database
+                _dutyShifts = await App.DutyShiftService.GetAllDutyShiftsAsync();
+
+                // Get specialization for required hours
+                var specialization = await App.SpecializationService.GetSpecializationAsync();
+                _totalRequiredHours = specialization.RequiredDutyHoursPerWeek * (specialization.BaseDurationWeeks / 52.0) * 52;
+
+                // Get weekly average
+                var weeklyAverage = await App.DutyShiftService.GetAverageWeeklyHoursAsync();
+
+                // Update UI
+                UpdateTotalHours();
+                DisplayDutyShifts();
+
+                // Update weekly hours label
+                WeeklyHoursLabel.Text = $"{weeklyAverage:F1}h";
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to load duty shifts: {ex.Message}", "OK");
+            }
         }
 
         private void UpdateTotalHours()
         {
             double totalHours = _dutyShifts.Sum(d => d.DurationHours);
-            // Załóżmy, że wymagane jest 520 godzin dyżurów w trakcie specjalizacji
-            TotalHoursLabel.Text = $"{totalHours:F1}/520 godzin";
+            TotalHoursLabel.Text = $"{totalHours:F1}/{_totalRequiredHours:F0} godzin";
+
+            // Update color based on progress
+            if (totalHours >= _totalRequiredHours)
+            {
+                TotalHoursLabel.TextColor = Colors.Green;
+            }
+            else if (totalHours >= _totalRequiredHours * 0.75)
+            {
+                TotalHoursLabel.TextColor = Colors.Orange;
+            }
+            else
+            {
+                TotalHoursLabel.TextColor = Colors.DarkBlue;
+            }
         }
 
         private void DisplayDutyShifts()
         {
             DutyShiftsLayout.Children.Clear();
 
-            // Grupowanie dyżurów po miesiącach
+            // Group duty shifts by month
             var dutyShiftsByMonth = _dutyShifts
                 .OrderByDescending(d => d.StartDate)
                 .GroupBy(d => new { d.StartDate.Year, d.StartDate.Month })
@@ -82,7 +78,7 @@ namespace SledzSpecke.App.Views
 
             foreach (var monthGroup in dutyShiftsByMonth)
             {
-                // Nagłówek miesiąca
+                // Month header
                 var monthHeader = new Label
                 {
                     Text = $"{GetMonthName(monthGroup.Key.Month)} {monthGroup.Key.Year}",
@@ -92,7 +88,7 @@ namespace SledzSpecke.App.Views
                 };
                 DutyShiftsLayout.Children.Add(monthHeader);
 
-                // Łączna liczba godzin w miesiącu
+                // Monthly total hours
                 var totalMonthHours = monthGroup.Sum(d => d.DurationHours);
                 var monthTotalLabel = new Label
                 {
@@ -169,6 +165,18 @@ namespace SledzSpecke.App.Views
                     DutyShiftsLayout.Children.Add(frame);
                 }
             }
+
+            if (_dutyShifts.Count == 0)
+            {
+                var emptyLabel = new Label
+                {
+                    Text = "Brak dyżurów. Kliknij '+' aby dodać nowy dyżur.",
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center,
+                    Margin = new Thickness(0, 20, 0, 0)
+                };
+                DutyShiftsLayout.Children.Add(emptyLabel);
+            }
         }
 
         private string GetMonthName(int month)
@@ -200,7 +208,7 @@ namespace SledzSpecke.App.Views
         {
             if (sender is Button button && button.CommandParameter is int dutyShiftId)
             {
-                var dutyShift = _dutyShifts.FirstOrDefault(d => d.Id == dutyShiftId);
+                var dutyShift = await App.DutyShiftService.GetDutyShiftAsync(dutyShiftId);
                 if (dutyShift != null)
                 {
                     await Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, OnDutyShiftUpdated));
@@ -208,25 +216,36 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private void OnDutyShiftAdded(DutyShift dutyShift)
+        private async void OnDutyShiftAdded(DutyShift dutyShift)
         {
-            // Generowanie nowego ID
-            dutyShift.Id = _dutyShifts.Count > 0 ? _dutyShifts.Max(d => d.Id) + 1 : 1;
-            _dutyShifts.Add(dutyShift);
-            UpdateTotalHours();
-            DisplayDutyShifts();
+            try
+            {
+                // Save to database
+                await App.DutyShiftService.SaveDutyShiftAsync(dutyShift);
+
+                // Refresh data
+                await LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to save duty shift: {ex.Message}", "OK");
+            }
         }
 
-        private void OnDutyShiftUpdated(DutyShift dutyShift)
+        private async void OnDutyShiftUpdated(DutyShift dutyShift)
         {
-            var existingDutyShift = _dutyShifts.FirstOrDefault(d => d.Id == dutyShift.Id);
-            if (existingDutyShift != null)
+            try
             {
-                var index = _dutyShifts.IndexOf(existingDutyShift);
-                _dutyShifts[index] = dutyShift;
+                // Save to database
+                await App.DutyShiftService.SaveDutyShiftAsync(dutyShift);
+
+                // Refresh data
+                await LoadDataAsync();
             }
-            UpdateTotalHours();
-            DisplayDutyShifts();
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to update duty shift: {ex.Message}", "OK");
+            }
         }
     }
 }

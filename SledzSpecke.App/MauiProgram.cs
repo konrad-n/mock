@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using SledzSpecke.App.Services;
 using SledzSpecke.App.Views;
+using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App;
 
@@ -17,6 +19,10 @@ public static class MauiProgram
                 fonts.AddFont("FluentUI.ttf", "FluentUI");
             });
 
+        // Register services
+        RegisterServices(builder.Services);
+
+        // Register pages
         RegisterPages(builder.Services);
 
 #if DEBUG
@@ -27,19 +33,39 @@ public static class MauiProgram
         return app;
     }
 
+    private static void RegisterServices(IServiceCollection services)
+    {
+        // Register database service
+        services.AddSingleton<DatabaseService>();
+
+        // Register application services
+        services.AddSingleton<DataManager>();
+        services.AddSingleton<SpecializationService>();
+        services.AddSingleton<DutyShiftService>();
+        services.AddSingleton<SelfEducationService>();
+        services.AddSingleton<ExportService>();
+        services.AddSingleton<NotificationService>();
+        services.AddSingleton<AppSettings>();
+    }
+
     private static void RegisterPages(IServiceCollection services)
     {
-        services.AddTransient<CourseDetailsPage>();
-        services.AddTransient<CoursesPage>();
+        // Register main pages
         services.AddTransient<DashboardPage>();
-        services.AddTransient<DutyShiftDetailsPage>();
-        services.AddTransient<DutyShiftsPage>();
+        services.AddTransient<SettingsPage>();
+
+        // Register feature pages
+        services.AddTransient<CoursesPage>();
+        services.AddTransient<CourseDetailsPage>();
         services.AddTransient<InternshipsPage>();
+        services.AddTransient<InternshipDetailsPage>();
+        services.AddTransient<ProceduresPage>();
         services.AddTransient<ProcedureDetailsPage>();
         services.AddTransient<ProcedureEntryPage>();
-        services.AddTransient<SelfEducationDetailsPage>();
+        services.AddTransient<DutyShiftsPage>();
+        services.AddTransient<DutyShiftDetailsPage>();
         services.AddTransient<SelfEducationPage>();
-        services.AddTransient<SettingsPage>();
+        services.AddTransient<SelfEducationDetailsPage>();
         services.AddTransient<SMKExportPage>();
     }
 }

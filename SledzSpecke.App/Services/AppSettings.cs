@@ -1,41 +1,33 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Logging;
+using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Services
 {
     public class AppSettings
     {
-        private static readonly string _appDataFolder = FileSystem.AppDataDirectory;
-        private static readonly string _settingsFile = Path.Combine(_appDataFolder, "settings.json");
-        private Dictionary<string, object> _settings;
+        private readonly DatabaseService _databaseService;
+        private readonly ILogger<AppSettings> _logger;
+        private UserSettings _settings;
 
-        public AppSettings()
+        public AppSettings(DatabaseService databaseService, ILogger<AppSettings> logger)
         {
-            if (!Directory.Exists(_appDataFolder))
-            {
-                Directory.CreateDirectory(_appDataFolder);
-            }
-
-            _settings = new Dictionary<string, object>();
+            _databaseService = databaseService;
+            _logger = logger;
+            _settings = new UserSettings();
         }
 
         public async Task LoadAsync()
         {
-            if (File.Exists(_settingsFile))
+            try
             {
-                try
-                {
-                    string json = await File.ReadAllTextAsync(_settingsFile);
-                    _settings = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error loading settings: {ex.Message}");
-                    _settings = GetDefaultSettings();
-                }
+                _settings = await _databaseService.GetUserSettingsAsync();
+                _logger.LogInformation("Settings loaded successfully");
             }
-            else
+            catch (Exception ex)
             {
-                _settings = GetDefaultSettings();
+                _logger.LogError(ex, "Error loading settings");
+                _settings = new UserSettings(); // Use default settings in case of error
             }
         }
 
@@ -43,86 +35,70 @@ namespace SledzSpecke.App.Services
         {
             try
             {
-                string json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
-                await File.WriteAllTextAsync(_settingsFile, json);
+                await _databaseService.SaveUserSettingsAsync(_settings);
+                _logger.LogInformation("Settings saved successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving settings: {ex.Message}");
+                _logger.LogError(ex, "Error saving settings");
                 throw;
             }
         }
 
         public T GetSetting<T>(string key, T defaultValue = default)
         {
-            if (_settings.TryGetValue(key, out object value))
+            switch (key)
             {
-                try
-                {
-                    if (value is JsonElement element)
-                    {
-                        switch (element.ValueKind)
-                        {
-                            case JsonValueKind.String:
-                                if (typeof(T) == typeof(string))
-                                    return (T)(object)element.GetString();
-                                else if (typeof(T) == typeof(DateTime))
-                                    return (T)(object)DateTime.Parse(element.GetString());
-                                break;
-                            case JsonValueKind.Number:
-                                if (typeof(T) == typeof(int))
-                                    return (T)(object)element.GetInt32();
-                                else if (typeof(T) == typeof(double))
-                                    return (T)(object)element.GetDouble();
-                                break;
-                            case JsonValueKind.True:
-                            case JsonValueKind.False:
-                                if (typeof(T) == typeof(bool))
-                                    return (T)(object)element.GetBoolean();
-                                break;
-                        }
-                    }
-                    else if (value is T typedValue)
-                    {
-                        return typedValue;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error getting setting for key {key}: {ex.Message}");
-                }
+                case "Username":
+                    return (T)(object)_settings.Username;
+                case "MedicalLicenseNumber":
+                    return (T)(object)_settings.MedicalLicenseNumber;
+                case "TrainingUnit":
+                    return (T)(object)_settings.TrainingUnit;
+                case "Supervisor":
+                    return (T)(object)_settings.Supervisor;
+                case "EnableNotifications":
+                    return (T)(object)_settings.EnableNotifications;
+                case "EnableAutoSync":
+                    return (T)(object)_settings.EnableAutoSync;
+                case "UseDarkTheme":
+                    return (T)(object)_settings.UseDarkTheme;
+                default:
+                    return defaultValue;
             }
-
-            return defaultValue;
         }
 
         public void SetSetting<T>(string key, T value)
         {
-            _settings[key] = value;
+            switch (key)
+            {
+                case "Username":
+                    _settings.Username = (string)(object)value;
+                    break;
+                case "MedicalLicenseNumber":
+                    _settings.MedicalLicenseNumber = (string)(object)value;
+                    break;
+                case "TrainingUnit":
+                    _settings.TrainingUnit = (string)(object)value;
+                    break;
+                case "Supervisor":
+                    _settings.Supervisor = (string)(object)value;
+                    break;
+                case "EnableNotifications":
+                    _settings.EnableNotifications = (bool)(object)value;
+                    break;
+                case "EnableAutoSync":
+                    _settings.EnableAutoSync = (bool)(object)value;
+                    break;
+                case "UseDarkTheme":
+                    _settings.UseDarkTheme = (bool)(object)value;
+                    break;
+            }
         }
 
         public void RemoveSetting(string key)
         {
-            if (_settings.ContainsKey(key))
-                _settings.Remove(key);
-        }
-
-        public Dictionary<string, object> GetDefaultSettings()
-        {
-            return new Dictionary<string, object>
-            {
-                ["Username"] = "",
-                ["MedicalLicenseNumber"] = "",
-                ["TrainingUnit"] = "",
-                ["Supervisor"] = "",
-                ["EnableNotifications"] = true,
-                ["EnableAutoSync"] = true,
-                ["UseDarkTheme"] = false,
-                ["LastAutoSync"] = DateTime.MinValue
-            };
+            SetSetting(key, default);
         }
     }
 }

@@ -25,22 +25,21 @@ namespace SledzSpecke.App.Views
 
             if (dutyShift == null)
             {
-                // Nowy dyżur
+                // New duty shift
                 _dutyShift = new DutyShift
                 {
-                    Id = new Random().Next(1000, 9999), // Tymczasowe ID
                     StartDate = DateTime.Now.Date.Add(StartTime),
                     EndDate = DateTime.Now.Date.AddDays(1).Add(EndTime),
                     DurationHours = 24,
                     Type = DutyType.Independent
                 };
                 PageTitle = "Dodaj dyżur";
-                DutyTypePicker.SelectedIndex = 0; // Samodzielny
+                DutyTypePicker.SelectedIndex = 0; // Independent
                 IsSupervisorVisible = false;
             }
             else
             {
-                // Edycja istniejącego dyżuru
+                // Edit existing duty shift
                 _dutyShift = dutyShift;
                 PageTitle = "Edytuj dyżur";
 
@@ -111,7 +110,7 @@ namespace SledzSpecke.App.Views
 
         private async void OnSaveClicked(object sender, EventArgs e)
         {
-            // Walidacja
+            // Validation
             if (string.IsNullOrWhiteSpace(Location))
             {
                 await DisplayAlert("Błąd", "Miejsce dyżuru jest wymagane.", "OK");
@@ -127,14 +126,14 @@ namespace SledzSpecke.App.Views
                 return;
             }
 
-            // Dla typu towarzyszącego wymagany jest nadzorujący
+            // For accompanied type, supervisor is required
             if (_dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(SupervisorName))
             {
                 await DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla dyżuru towarzyszącego.", "OK");
                 return;
             }
 
-            // Aktualizacja dyżuru
+            // Update duty shift
             _dutyShift.StartDate = startDateTime;
             _dutyShift.EndDate = endDateTime;
             _dutyShift.DurationHours = (endDateTime - startDateTime).TotalHours;
@@ -142,8 +141,15 @@ namespace SledzSpecke.App.Views
             _dutyShift.SupervisorName = SupervisorName;
             _dutyShift.Notes = Notes;
 
-            _onSaveCallback?.Invoke(_dutyShift);
-            await Navigation.PopAsync();
+            try
+            {
+                _onSaveCallback?.Invoke(_dutyShift);
+                await Navigation.PopAsync();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Failed to save duty shift: {ex.Message}", "OK");
+            }
         }
     }
 }

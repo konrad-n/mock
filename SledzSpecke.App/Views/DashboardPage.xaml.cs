@@ -31,7 +31,7 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private void LoadDashboardData()
+        private async void LoadDashboardData()
         {
             // Podstawowe informacje o specjalizacji
             StartDateLabel.Text = _specialization.StartDate.ToString("dd-MM-yyyy");
@@ -82,14 +82,17 @@ namespace SledzSpecke.App.Views
             var completedProceduresTypeB = proceduresTypeB.Sum(p => p.CompletedCount);
             ProceduresBLabel.Text = $"{completedProceduresTypeB}/{totalProceduresTypeB} wykonanych";
 
-            // Symulowane dane dla przykładu
-            DutyShiftsLabel.Text = "125/520 godzin";
-            SelfEducationLabel.Text = "5/18 dni";
+            // Get statistics from services
+            var totalDutyHours = await App.DutyShiftService.GetTotalDutyHoursAsync();
+            var requiredDutyHours = _specialization.RequiredDutyHoursPerWeek * (_specialization.BaseDurationWeeks / 52.0) * 52;
+            DutyShiftsLabel.Text = $"{totalDutyHours:F1}/{requiredDutyHours:F0} godzin";
 
-            // Symulowane najbliższe terminy dla przykładu
-            UpcomingEvent1.Text = "15.03.2023 - Kurs: Zaburzenia hemostazy";
-            UpcomingEvent2.Text = "01.04.2023 - Staż kierunkowy w laboratorium hematologicznym";
-            UpcomingEvent3.Text = "30.05.2023 - Koniec modułu podstawowego";
+            var totalSelfEducationDays = await App.SelfEducationService.GetTotalUsedDaysAsync();
+            var totalAllowedDays = _specialization.SelfEducationDaysPerYear * 3; // 3 years typical
+            SelfEducationLabel.Text = $"{totalSelfEducationDays}/{totalAllowedDays} dni";
+
+            // Show upcoming events
+            UpdateUpcomingEvents();
         }
 
         private double GetBasicModuleProgress()
@@ -122,7 +125,7 @@ namespace SledzSpecke.App.Views
                 .Sum(p => p.RequiredCount);
             var proceduresBProgress = totalProceduresB > 0 ? (double)completedProceduresB / totalProceduresB : 0;
 
-            // Średni postęp ze wszystkich kategorii
+            // Average progress across all categories
             return (coursesProgress + internshipsProgress + proceduresAProgress + proceduresBProgress) / 4;
         }
 
@@ -156,16 +159,16 @@ namespace SledzSpecke.App.Views
                 .Sum(p => p.RequiredCount);
             var proceduresBProgress = totalProceduresB > 0 ? (double)completedProceduresB / totalProceduresB : 0;
 
-            // Średni postęp ze wszystkich kategorii
+            // Average progress across all categories
             return (coursesProgress + internshipsProgress + proceduresAProgress + proceduresBProgress) / 4;
         }
 
         private void UpdateUpcomingEvents()
         {
             var today = DateTime.Now.Date;
-            var upcomingEvents = new List<Tuple<DateTime, string, bool>>(); // data, opis, czy ważne
+            var upcomingEvents = new List<Tuple<DateTime, string, bool>>(); // date, description, is important
 
-            // Dodaj kursy
+            // Add courses
             foreach (var course in _specialization.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
             {
                 if (course.ScheduledDate.Value >= today)
@@ -178,7 +181,7 @@ namespace SledzSpecke.App.Views
                 }
             }
 
-            // Dodaj staże
+            // Add internships
             foreach (var internship in _specialization.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
             {
                 if (internship.StartDate.Value >= today)
@@ -191,7 +194,7 @@ namespace SledzSpecke.App.Views
                 }
             }
 
-            // Dodaj koniec modułu (jeśli jest w przyszłości)
+            // Add end of basic module (if in future)
             var endOfBasicModule = _specialization.StartDate.AddDays(_specialization.BasicModuleDurationWeeks * 7);
             if (endOfBasicModule >= today)
             {
@@ -202,10 +205,10 @@ namespace SledzSpecke.App.Views
                 ));
             }
 
-            // Posortuj wydarzenia po dacie
+            // Sort events by date
             upcomingEvents = upcomingEvents.OrderBy(e => e.Item1).ToList();
 
-            // Wyświetl 3 najbliższe wydarzenia
+            // Display up to 3 upcoming events
             if (upcomingEvents.Count > 0 && upcomingEvents.Count >= 1)
             {
                 UpcomingEvent1.Text = $"{upcomingEvents[0].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[0].Item2}";
@@ -220,6 +223,7 @@ namespace SledzSpecke.App.Views
             {
                 UpcomingEvent2.Text = $"{upcomingEvents[1].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[1].Item2}";
                 UpcomingEvent2.TextColor = upcomingEvents[1].Item3 ? Colors.Red : Colors.DarkBlue;
+                UpcomingEvent2.IsVisible = true;
             }
             else
             {
@@ -230,6 +234,7 @@ namespace SledzSpecke.App.Views
             {
                 UpcomingEvent3.Text = $"{upcomingEvents[2].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[2].Item2}";
                 UpcomingEvent3.TextColor = upcomingEvents[2].Item3 ? Colors.Red : Colors.DarkBlue;
+                UpcomingEvent3.IsVisible = true;
             }
             else
             {
