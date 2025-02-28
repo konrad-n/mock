@@ -18,6 +18,11 @@ namespace SledzSpecke.Core.Models
         public DateTime? StartDate { get; set; } = DateTime.Now.AddMonths(-3);
         public DateTime? EndDate { get; set; } = DateTime.Now;
 
+        // New fields for SMK format according to manual
+        public bool UseSmkExactFormat { get; set; } = true;
+        public bool IncludePatientIds { get; set; } = true;
+        public bool SplitDutyHoursAndMinutes { get; set; } = true;
+
         public string ExportFileName => $"SMK_Export_{DateTime.Now:yyyyMMdd}";
         public string FullExportFileName => ExportFileName + (Format == ExportFormat.Excel ? ".xlsx" : ".csv");
     }

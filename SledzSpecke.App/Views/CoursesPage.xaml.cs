@@ -1,4 +1,5 @@
 ﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views

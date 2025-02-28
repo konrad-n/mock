@@ -13,11 +13,19 @@ namespace SledzSpecke.Core.Models
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
+
         public double DurationHours { get; set; }
+
+        // New fields for SMK export format requirements
+        [Ignore]
+        public int DurationHoursInt => (int)Math.Floor(DurationHours);
+
+        [Ignore]
+        public int DurationMinutes => (int)Math.Round((DurationHours - DurationHoursInt) * 60);
 
         public DutyType Type { get; set; }
 
-        public string Location { get; set; }
+        public string Location { get; set; } // In SMK "Nazwa komórki organizacyjnej"
 
         public string SupervisorName { get; set; }
 
@@ -27,5 +35,8 @@ namespace SledzSpecke.Core.Models
         public int? InternshipId { get; set; }
 
         public int SpecializationId { get; set; }
+
+        // Department name for SMK export
+        public string DepartmentName { get; set; }
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace SledzSpecke.Core.Models.Enums
 {
-    public enum DutyType
+    public enum ModuleType
     {
-        Accompanied,
-        Independent
+        Basic,
+        Specialistic
     }
 }

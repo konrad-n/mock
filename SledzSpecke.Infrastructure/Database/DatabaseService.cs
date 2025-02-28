@@ -7,6 +7,7 @@ using System.IO;
 using SledzSpecke.Infrastructure.Services;
 using System.Threading;
 using System;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.Infrastructure.Database
 {

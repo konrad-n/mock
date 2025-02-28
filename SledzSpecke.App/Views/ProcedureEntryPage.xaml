@@ -6,7 +6,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="{Binding ProcedureName}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
-            
+
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="5">
                     <Label Text="{Binding ProcedureType}" FontAttributes="Bold"/>
@@ -20,11 +20,28 @@
             <Label Text="Identyfikator pacjenta" FontAttributes="Bold"/>
             <Entry x:Name="PatientIdEntry" Placeholder="Wprowadź identyfikator pacjenta" Text="{Binding PatientId}"/>
 
+            <Label Text="Płeć pacjenta" FontAttributes="Bold"/>
+            <Picker x:Name="PatientGenderPicker" Title="Wybierz płeć pacjenta" SelectedItem="{Binding PatientGender}">
+                <Picker.Items>
+                    <x:String>Mężczyzna</x:String>
+                    <x:String>Kobieta</x:String>
+                </Picker.Items>
+            </Picker>
+
             <Label Text="Miejsce wykonania" FontAttributes="Bold"/>
             <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce wykonania" Text="{Binding Location}"/>
 
             <Label Text="Nadzorujący" FontAttributes="Bold"/>
             <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko nadzorującego" Text="{Binding SupervisorName}"/>
+
+            <Label Text="Dane osoby wykonującej I asystę" FontAttributes="Bold"/>
+            <Entry x:Name="FirstAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej I asystę" Text="{Binding FirstAssistantData}"/>
+
+            <Label Text="Dane osoby wykonującej II asystę" FontAttributes="Bold"/>
+            <Entry x:Name="SecondAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej II asystę" Text="{Binding SecondAssistantData}"/>
+
+            <Label Text="Procedura z grupy" FontAttributes="Bold"/>
+            <Entry x:Name="ProcedureGroupEntry" Placeholder="Wprowadź procedurę z grupy" Text="{Binding ProcedureGroup}"/>
 
             <Label Text="Notatki" FontAttributes="Bold"/>
             <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Notes}"/>

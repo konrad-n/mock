@@ -32,6 +32,9 @@
             <Label Text="Miejsce" FontAttributes="Bold"/>
             <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce dyżuru" Text="{Binding Location}"/>
 
+            <Label Text="Nazwa komórki organizacyjnej (SMK)" FontAttributes="Bold"/>
+            <Entry x:Name="DepartmentNameEntry" Placeholder="Wprowadź nazwę komórki organizacyjnej" Text="{Binding DepartmentName}"/>
+
             <Label Text="Nadzorujący" FontAttributes="Bold" IsVisible="{Binding IsSupervisorVisible}"/>
             <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko nadzorującego" Text="{Binding SupervisorName}" IsVisible="{Binding IsSupervisorVisible}"/>
 

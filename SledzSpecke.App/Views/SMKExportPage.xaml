@@ -75,6 +75,21 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- New section for SMK format options -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Opcje formatu SMK" FontSize="16" FontAttributes="Bold"/>
+
+                    <StackLayout Orientation="Horizontal">
+                        <CheckBox x:Name="UseSmkExactFormatCheckBox" IsChecked="True"/>
+                        <Label Text="Użyj dokładnego formatu SMK" VerticalOptions="Center"/>
+                    </StackLayout>
+
+                    <Label Text="Zgodnie z instrukcją SMK, eksport będzie zawierał wszystkie wymagane kolumny w odpowiednim formacie." 
+                           FontSize="12" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </Frame>
+
             <Button Text="Generuj raport" Clicked="OnGenerateReportClicked" BackgroundColor="DarkBlue" TextColor="White"/>
 
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="10" IsVisible="False" x:Name="ResultFrame">

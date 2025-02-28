@@ -196,7 +196,7 @@ namespace SledzSpecke.App.Services
                 "SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
 
             // Collect all procedure entries in the format required by SMK
-            var procedureEntries = new List<(string PatientName, DateTime Date, string PerformingDoctor, string AssistingDoctors, string ProcedureGroup)>();
+            var procedureEntries = new List<(string PatientName, string PatientGender, DateTime Date, string PerformingDoctor, string AssistingDoctors, string ProcedureGroup)>();
 
             foreach (var procedure in procedures.Where(p => FilterByModule(p.Module, options.ModuleFilter)))
             {
@@ -230,16 +230,32 @@ namespace SledzSpecke.App.Services
                 {
                     string procedureWithType = $"{procedure.Name} (Kod {(procedure.ProcedureType == ProcedureType.TypeA ? "A" : "B")})";
 
+                    // Determine the procedure group - use the specific one if available
+                    string procedureGroup = !string.IsNullOrEmpty(entry.ProcedureGroup) ?
+                        entry.ProcedureGroup :
+                        $"{procedureWithType} - {internshipName}";
+
                     // Get the user settings for doctor's name
                     var settings = await _databaseService.GetUserSettingsAsync();
                     string doctorName = settings.Username ?? "Lekarz";
 
+                    string assistingDoctors = procedure.ProcedureType == ProcedureType.TypeA ?
+                        (string.IsNullOrEmpty(entry.FirstAssistantData) ? entry.SupervisorName : entry.FirstAssistantData) :
+                        doctorName;
+
+                    // Add second assistant if available
+                    if (!string.IsNullOrEmpty(entry.SecondAssistantData))
+                    {
+                        assistingDoctors += $", {entry.SecondAssistantData}";
+                    }
+
                     procedureEntries.Add((
-                        PatientName: entry.PatientId, // Using PatientId as PatientName
+                        PatientName: entry.PatientId,
+                        PatientGender: entry.PatientGender ?? "",
                         Date: entry.Date,
                         PerformingDoctor: procedure.ProcedureType == ProcedureType.TypeA ? doctorName : entry.SupervisorName,
-                        AssistingDoctors: procedure.ProcedureType == ProcedureType.TypeA ? entry.SupervisorName : doctorName,
-                        ProcedureGroup: $"{procedureWithType} - {internshipName}"
+                        AssistingDoctors: assistingDoctors,
+                        ProcedureGroup: procedureGroup
                     ));
                 }
             }
@@ -333,14 +349,14 @@ namespace SledzSpecke.App.Services
                 int row = 2;
                 foreach (var duty in dutyShifts.OrderByDescending(d => d.StartDate))
                 {
-                    // Calculate hours and minutes
-                    int totalHours = (int)Math.Floor(duty.DurationHours);
-                    int totalMinutes = (int)Math.Round((duty.DurationHours - totalHours) * 60);
+                    // Calculate hours and minutes for SMK format
+                    int totalHours = duty.DurationHoursInt;
+                    int totalMinutes = duty.DurationMinutes;
 
                     worksheet.Cell(row, 1).Value = totalHours;
                     worksheet.Cell(row, 2).Value = totalMinutes;
                     worksheet.Cell(row, 3).Value = duty.StartDate.ToString("yyyy-MM-dd"); // SMK format
-                    worksheet.Cell(row, 4).Value = duty.Location;
+                    worksheet.Cell(row, 4).Value = !string.IsNullOrEmpty(duty.DepartmentName) ? duty.DepartmentName : duty.Location;
                     row++;
                 }
 

@@ -13,8 +13,13 @@ namespace SledzSpecke.App.Views
         public string CompletionStatus { get; set; }
         public DateTime EntryDate { get; set; } = DateTime.Now;
         public string PatientId { get; set; }
+        public string PatientGender { get; set; } // New field for SMK
         public string Location { get; set; }
         public string SupervisorName { get; set; }
+        public string FirstAssistantData { get; set; } // New field for SMK
+        public string SecondAssistantData { get; set; } // New field for SMK
+        public string ProcedureGroup { get; set; } // New field for SMK
+        public string InternshipName { get; set; } // New field for SMK
         public string Notes { get; set; }
 
         public ProcedureEntryPage(MedicalProcedure procedure, Action<MedicalProcedure, ProcedureEntry> onSaveCallback)
@@ -29,6 +34,31 @@ namespace SledzSpecke.App.Views
                 : "Kod B - pierwsza asysta";
             CompletionStatus = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount}";
 
+            // Get internship name if available
+            if (procedure.InternshipId.HasValue)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        var internship = await App.DatabaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                        if (internship != null)
+                        {
+                            InternshipName = internship.Name;
+                            // Update UI on main thread
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                OnPropertyChanged(nameof(InternshipName));
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error getting internship: {ex.Message}");
+                    }
+                });
+            }
+
             BindingContext = this;
         }
 
@@ -39,10 +69,16 @@ namespace SledzSpecke.App.Views
 
         private async void OnSaveClicked(object sender, EventArgs e)
         {
-            // Walidacja
+            // Validation
             if (string.IsNullOrWhiteSpace(PatientId))
             {
                 await DisplayAlert("Błąd", "Identyfikator pacjenta jest wymagany.", "OK");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(PatientGender))
+            {
+                await DisplayAlert("Błąd", "Płeć pacjenta jest wymagana.", "OK");
                 return;
             }
 
@@ -52,21 +88,26 @@ namespace SledzSpecke.App.Views
                 return;
             }
 
-            // Dla typu B (asysta) wymagany jest nadzorujący
+            // For type B (assistance) supervisor is required
             if (_procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(SupervisorName))
             {
                 await DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla procedury typu B.", "OK");
                 return;
             }
 
-            // Tworzenie nowego wpisu
+            // Create new entry
             var procedureEntry = new ProcedureEntry
             {
-                Id = new Random().Next(1000, 9999), // Tymczasowe ID
+                Id = new Random().Next(1000, 9999), // Temporary ID
                 Date = EntryDate,
                 PatientId = PatientId,
+                PatientGender = PatientGender,
                 Location = Location,
                 SupervisorName = SupervisorName,
+                FirstAssistantData = FirstAssistantData,
+                SecondAssistantData = SecondAssistantData,
+                ProcedureGroup = ProcedureGroup,
+                InternshipName = InternshipName,
                 Notes = Notes
             };
 

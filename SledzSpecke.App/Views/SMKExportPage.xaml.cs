@@ -36,6 +36,9 @@ namespace SledzSpecke.App.Views
             if (!e.Value) return; // Only handle when checked, not unchecked
 
             OnPropertyChanged(nameof(IsGeneralExportSelected));
+
+            // Update SMK format options based on export type
+            UseSmkExactFormatCheckBox.IsChecked = ProcedureExportRadioButton.IsChecked || DutyShiftExportRadioButton.IsChecked;
         }
 
         private void OnCustomDatesCheckedChanged(object sender, CheckedChangedEventArgs e)
@@ -82,19 +85,23 @@ namespace SledzSpecke.App.Views
             else if (SpecialisticModuleRadioButton.IsChecked)
                 _exportOptions.ModuleFilter = SMKExportModuleFilter.SpecialisticOnly;
 
-            // Pokazanie indykatora ładowania
+            // SMK format settings
+            _exportOptions.UseSmkExactFormat = UseSmkExactFormatCheckBox.IsChecked;
+            _exportOptions.SplitDutyHoursAndMinutes = true; // Always true for SMK format
+
+            // Show loading indicator
             await ShowLoadingIndicator(true);
 
             try
             {
-                // Generowanie raportu
+                // Generate report
                 string filePath = await App.ExportService.ExportToSMKAsync(_exportOptions);
 
-                // Wyświetlenie informacji o wygenerowanym pliku
+                // Display file information
                 FilePathLabel.Text = $"Ścieżka pliku: {filePath}";
                 ResultFrame.IsVisible = true;
 
-                await DisplayAlert("Sukces", "Raport został wygenerowany pomyślnie.", "OK");
+                await DisplayAlert("Sukces", "Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.", "OK");
             }
             catch (Exception ex)
             {
@@ -102,7 +109,7 @@ namespace SledzSpecke.App.Views
             }
             finally
             {
-                // Ukrycie indykatora ładowania
+                // Hide loading indicator
                 await ShowLoadingIndicator(false);
             }
         }
@@ -110,19 +117,38 @@ namespace SledzSpecke.App.Views
         private async Task ShowLoadingIndicator(bool isVisible)
         {
             await Task.CompletedTask;
-            // W rzeczywistej aplikacji tutaj byłaby implementacja pokazywania/ukrywania indykatora ładowania
+            // In a real application, this would implement showing/hiding a loading indicator
         }
 
         private async void OnOpenFileClicked(object sender, EventArgs e)
         {
-            await DisplayAlert("Informacja", "Funkcja otwierania pliku zostanie zaimplementowana.", "OK");
-            // W rzeczywistej aplikacji tutaj byłoby otwieranie pliku
+            try
+            {
+                // Try to open the file in the default application
+                await Launcher.OpenAsync(new OpenFileRequest
+                {
+                    File = new ReadOnlyFile(FilePathLabel.Text.Replace("Ścieżka pliku: ", ""))
+                });
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się otworzyć pliku: {ex.Message}", "OK");
+            }
         }
 
         private async void OnOpenFolderClicked(object sender, EventArgs e)
         {
-            await DisplayAlert("Informacja", "Funkcja otwierania folderu zostanie zaimplementowana.", "OK");
-            // W rzeczywistej aplikacji tutaj byłoby otwieranie folderu
+            try
+            {
+                // Try to open the folder containing the file
+                string filePath = FilePathLabel.Text.Replace("Ścieżka pliku: ", "");
+                string folderPath = Path.GetDirectoryName(filePath);
+                await Launcher.OpenAsync(folderPath);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się otworzyć folderu: {ex.Message}", "OK");
+            }
         }
     }
 }

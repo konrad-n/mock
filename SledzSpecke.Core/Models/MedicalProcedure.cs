@@ -1,6 +1,5 @@
 ﻿using SledzSpecke.Core.Models.Enums;
 using SQLite;
-using System;
 using System.Collections.Generic;
 
 namespace SledzSpecke.Core.Models
@@ -33,25 +32,5 @@ namespace SledzSpecke.Core.Models
         public List<ProcedureEntry> Entries { get; set; } = new List<ProcedureEntry>();
 
         public double CompletionPercentage => RequiredCount > 0 ? (CompletedCount * 100.0 / RequiredCount) : 0;
-    }
-
-    [Table("ProcedureEntries")]
-    public class ProcedureEntry
-    {
-        [PrimaryKey, AutoIncrement]
-        public int Id { get; set; }
-
-        public DateTime Date { get; set; }
-
-        public string PatientId { get; set; }
-
-        public string Location { get; set; }
-
-        public string SupervisorName { get; set; }
-
-        public string Notes { get; set; }
-
-        [Indexed]
-        public int ProcedureId { get; set; }
     }
 }

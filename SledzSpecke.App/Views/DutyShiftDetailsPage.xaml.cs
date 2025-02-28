@@ -15,6 +15,7 @@ namespace SledzSpecke.App.Views
         public TimeSpan EndTime { get; set; } = new TimeSpan(8, 0, 0); // 8:00 AM next day
         public string DurationText { get; set; } = "24 godziny";
         public string Location { get; set; }
+        public string DepartmentName { get; set; } // New field for SMK
         public string SupervisorName { get; set; }
         public string Notes { get; set; }
         public bool IsSupervisorVisible { get; set; }
@@ -50,6 +51,7 @@ namespace SledzSpecke.App.Views
                 EndTime = dutyShift.EndDate.TimeOfDay;
 
                 Location = dutyShift.Location;
+                DepartmentName = dutyShift.DepartmentName;
                 SupervisorName = dutyShift.SupervisorName;
                 Notes = dutyShift.Notes;
 
@@ -88,17 +90,21 @@ namespace SledzSpecke.App.Views
             var duration = endDateTime - startDateTime;
             _dutyShift.DurationHours = duration.TotalHours;
 
+            // Format according to SMK requirements - split into hours and minutes
+            int hours = _dutyShift.DurationHoursInt;
+            int minutes = _dutyShift.DurationMinutes;
+
             if (duration.TotalHours < 24)
             {
-                DurationText = $"{duration.Hours} godz. {duration.Minutes} min.";
+                DurationText = $"{hours} godz. {minutes} min.";
             }
             else
             {
                 var days = Math.Floor(duration.TotalDays);
-                var remainingHours = duration.Hours - (days * 24);
+                var remainingHours = hours - (days * 24);
                 DurationText = days > 0
-                    ? $"{days} dni {remainingHours} godz. {duration.Minutes} min."
-                    : $"{duration.Hours} godz. {duration.Minutes} min.";
+                    ? $"{days} dni {remainingHours} godz. {minutes} min."
+                    : $"{hours} godz. {minutes} min.";
             }
 
             OnPropertyChanged(nameof(DurationText));
@@ -139,6 +145,7 @@ namespace SledzSpecke.App.Views
             _dutyShift.EndDate = endDateTime;
             _dutyShift.DurationHours = (endDateTime - startDateTime).TotalHours;
             _dutyShift.Location = Location;
+            _dutyShift.DepartmentName = DepartmentName;
             _dutyShift.SupervisorName = SupervisorName;
             _dutyShift.Notes = Notes;
 

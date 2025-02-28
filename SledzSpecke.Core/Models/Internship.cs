@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using SledzSpecke.Core.Models.Enums;
+using SQLite;
 using System;
 using System.Collections.Generic;
 

@@ -1,4 +1,4 @@
-﻿// SledzSpecke.Core/Models/Course.cs
+﻿using SledzSpecke.Core.Models.Enums;
 using SQLite;
 using System;
 
@@ -38,11 +38,5 @@ namespace SledzSpecke.Core.Models
         public string Notes { get; set; }
 
         public int SpecializationId { get; set; }
-    }
-
-    public enum ModuleType
-    {
-        Basic,
-        Specialistic
     }
 }
