@@ -214,16 +214,17 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private async void OnInternshipAdded(Internship internship)
+        // Zmiana metod callback na async Task
+        private async Task OnInternshipAdded(Internship internship)
         {
             await App.SpecializationService.SaveInternshipAsync(internship);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
 
-        private async void OnInternshipUpdated(Internship internship)
+        private async Task OnInternshipUpdated(Internship internship)
         {
             await App.SpecializationService.SaveInternshipAsync(internship);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
     }
 }

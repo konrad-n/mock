@@ -230,22 +230,23 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private async void OnProcedureAdded(MedicalProcedure procedure)
+        // Zmiana metod callback na async Task
+        private async Task OnProcedureAdded(MedicalProcedure procedure)
         {
             await App.SpecializationService.SaveProcedureAsync(procedure);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
 
-        private async void OnProcedureUpdated(MedicalProcedure procedure)
+        private async Task OnProcedureUpdated(MedicalProcedure procedure)
         {
             await App.SpecializationService.SaveProcedureAsync(procedure);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
 
-        private async void OnProcedureEntryAdded(MedicalProcedure procedure, ProcedureEntry entry)
+        private async Task OnProcedureEntryAdded(MedicalProcedure procedure, ProcedureEntry entry)
         {
             await App.SpecializationService.AddProcedureEntryAsync(procedure, entry);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
     }
 }

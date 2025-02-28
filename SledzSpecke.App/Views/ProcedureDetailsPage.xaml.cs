@@ -9,7 +9,7 @@ namespace SledzSpecke.App.Views
         private MedicalProcedure _procedure;
         private ModuleType _currentModule;
         private ProcedureType _currentProcedureType;
-        private Action<MedicalProcedure> _onSaveCallback;
+        private Func<MedicalProcedure, Task> _onSaveCallback;
         private List<Internship> _internships;
 
         public string PageTitle { get; set; }
@@ -19,7 +19,7 @@ namespace SledzSpecke.App.Views
 
         public MedicalProcedure Procedure => _procedure;
 
-        public ProcedureDetailsPage(MedicalProcedure procedure, ModuleType currentModule, ProcedureType currentProcedureType, Action<MedicalProcedure> onSaveCallback)
+        public ProcedureDetailsPage(MedicalProcedure procedure, ModuleType currentModule, ProcedureType currentProcedureType, Func<MedicalProcedure, Task> onSaveCallback)
         {
             InitializeComponent();
             _currentModule = currentModule;
@@ -134,7 +134,11 @@ namespace SledzSpecke.App.Views
             _procedure.RequiredCount = requiredCount;
             _procedure.Description = Notes;
 
-            _onSaveCallback?.Invoke(_procedure);
+            if (_onSaveCallback != null)
+            {
+                await _onSaveCallback(_procedure);
+            }
+
             await Navigation.PopAsync();
         }
     }

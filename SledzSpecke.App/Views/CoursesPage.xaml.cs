@@ -178,16 +178,17 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private async void OnCourseAdded(Course course)
+        // Zmiana metod callback na async Task
+        private async Task OnCourseAdded(Course course)
         {
             await App.SpecializationService.SaveCourseAsync(course);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
 
-        private async void OnCourseUpdated(Course course)
+        private async Task OnCourseUpdated(Course course)
         {
             await App.SpecializationService.SaveCourseAsync(course);
-            await LoadDataAsync();
+            LoadDataAsync();
         }
     }
 }

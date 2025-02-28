@@ -7,7 +7,7 @@ namespace SledzSpecke.App.Views
     {
         private Course _course;
         private ModuleType _currentModule;
-        private Action<Course> _onSaveCallback;
+        private Func<Course, Task> _onSaveCallback;
 
         public string PageTitle { get; set; }
         public string DurationDays { get; set; }
@@ -19,7 +19,7 @@ namespace SledzSpecke.App.Views
 
         public Course Course => _course;
 
-        public CourseDetailsPage(Course course, ModuleType currentModule, Action<Course> onSaveCallback)
+        public CourseDetailsPage(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {
             InitializeComponent();
             _currentModule = currentModule;
@@ -181,7 +181,11 @@ namespace SledzSpecke.App.Views
                 _course.CompletionDate = CompletionDate;
             }
 
-            _onSaveCallback?.Invoke(_course);
+            if (_onSaveCallback != null)
+            {
+                await _onSaveCallback(_course);
+            }
+
             await Navigation.PopAsync();
         }
     }

@@ -6,7 +6,7 @@ namespace SledzSpecke.App.Views
     public partial class ProcedureEntryPage : ContentPage
     {
         private MedicalProcedure _procedure;
-        private Action<MedicalProcedure, ProcedureEntry> _onSaveCallback;
+        private Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
 
         public string ProcedureName { get; set; }
         public string ProcedureType { get; set; }
@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Views
         public string InternshipName { get; set; } // New field for SMK
         public string Notes { get; set; }
 
-        public ProcedureEntryPage(MedicalProcedure procedure, Action<MedicalProcedure, ProcedureEntry> onSaveCallback)
+        public ProcedureEntryPage(MedicalProcedure procedure, Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
             InitializeComponent();
             _procedure = procedure;
@@ -111,7 +111,11 @@ namespace SledzSpecke.App.Views
                 Notes = Notes
             };
 
-            _onSaveCallback?.Invoke(_procedure, procedureEntry);
+            if (_onSaveCallback != null)
+            {
+                await _onSaveCallback(_procedure, procedureEntry);
+            }
+
             await Navigation.PopAsync();
         }
     }

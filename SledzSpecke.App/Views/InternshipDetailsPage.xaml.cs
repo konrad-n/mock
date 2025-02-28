@@ -7,7 +7,7 @@ namespace SledzSpecke.App.Views
     {
         private Internship _internship;
         private ModuleType _currentModule;
-        private Action<Internship> _onSaveCallback;
+        private Func<Internship, Task> _onSaveCallback;
         public string PageTitle { get; set; }
         public string DurationWeeks { get; set; }
         public string WorkingDays { get; set; }
@@ -19,7 +19,7 @@ namespace SledzSpecke.App.Views
 
         public Internship Internship => _internship;
 
-        public InternshipDetailsPage(Internship internship, ModuleType currentModule, Action<Internship> onSaveCallback)
+        public InternshipDetailsPage(Internship internship, ModuleType currentModule, Func<Internship, Task> onSaveCallback)
         {
             InitializeComponent();
             _currentModule = currentModule;
@@ -174,7 +174,11 @@ namespace SledzSpecke.App.Views
                 _internship.EndDate = EndDate;
             }
 
-            _onSaveCallback?.Invoke(_internship);
+            if (_onSaveCallback != null)
+            {
+                await _onSaveCallback(_internship);
+            }
+
             await Navigation.PopAsync();
         }
     }
