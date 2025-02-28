@@ -36,10 +36,36 @@ namespace SledzSpecke.App.Views
         {
             // Podstawowe informacje o specjalizacji
             StartDateLabel.Text = _specialization.StartDate.ToString("dd-MM-yyyy");
-            EndDateLabel.Text = _specialization.ExpectedEndDate.ToString("dd-MM-yyyy");
 
-            var daysLeft = (_specialization.ExpectedEndDate - DateTime.Now).Days;
-            DaysLeftLabel.Text = daysLeft.ToString();
+            // Oblicz datę zakończenia bez nieobecności (zgodnie z programem)
+            DateTime plannedEndDate = _specialization.StartDate.AddDays(_specialization.BaseDurationWeeks * 7);
+            PlannedEndDateLabel.Text = plannedEndDate.ToString("dd-MM-yyyy");
+
+            // Inicjalizacja domyślną wartością
+            DateTime actualEndDate = plannedEndDate;
+            try
+            {
+                actualEndDate = await App.SpecializationDateCalculator.CalculateExpectedEndDateAsync(_specialization.Id);
+                ActualEndDateLabel.Text = actualEndDate.ToString("dd-MM-yyyy");
+
+                // Zmień kolor tekstu na czerwony, jeśli data z nieobecnościami jest późniejsza
+                if (actualEndDate > plannedEndDate)
+                {
+                    // Kolor jest już ustawiony w XAML na pomarańczowy
+                    // Można dodatkowo wyróżnić np. pogrubieniem
+                    ActualEndDateLabel.FontAttributes = FontAttributes.Bold;
+                }
+            }
+            catch (Exception ex)
+            {
+                // W przypadku błędu, pokazujemy planowaną datę
+                ActualEndDateLabel.Text = plannedEndDate.ToString("dd-MM-yyyy");
+                System.Diagnostics.Debug.WriteLine($"Error calculating actual end date: {ex.Message}");
+            }
+
+            // Oblicz pozostałe dni, używając daty z nieobecnościami
+            var daysLeft = (actualEndDate - DateTime.Now).Days;
+            DaysLeftLabel.Text = daysLeft > 0 ? daysLeft.ToString() : "0";
 
             // Określenie obecnego etapu
             var daysSinceStart = (DateTime.Now - _specialization.StartDate).Days;
@@ -213,7 +239,7 @@ namespace SledzSpecke.App.Views
             if (upcomingEvents.Count > 0 && upcomingEvents.Count >= 1)
             {
                 UpcomingEvent1.Text = $"{upcomingEvents[0].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[0].Item2}";
-                UpcomingEvent1.TextColor = upcomingEvents[0].Item3 ? Colors.Red : new Color(8,32,68);
+                UpcomingEvent1.TextColor = upcomingEvents[0].Item3 ? Colors.Red : new Color(8, 32, 68);
             }
             else
             {
@@ -223,7 +249,7 @@ namespace SledzSpecke.App.Views
             if (upcomingEvents.Count >= 2)
             {
                 UpcomingEvent2.Text = $"{upcomingEvents[1].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[1].Item2}";
-                UpcomingEvent2.TextColor = upcomingEvents[1].Item3 ? Colors.Red : new Color(8,32,68);
+                UpcomingEvent2.TextColor = upcomingEvents[1].Item3 ? Colors.Red : new Color(8, 32, 68);
                 UpcomingEvent2.IsVisible = true;
             }
             else
@@ -234,7 +260,7 @@ namespace SledzSpecke.App.Views
             if (upcomingEvents.Count >= 3)
             {
                 UpcomingEvent3.Text = $"{upcomingEvents[2].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[2].Item2}";
-                UpcomingEvent3.TextColor = upcomingEvents[2].Item3 ? Colors.Red : new Color(8,32,68);
+                UpcomingEvent3.TextColor = upcomingEvents[2].Item3 ? Colors.Red : new Color(8, 32, 68);
                 UpcomingEvent3.IsVisible = true;
             }
             else

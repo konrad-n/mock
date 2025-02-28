@@ -62,6 +62,7 @@ namespace SledzSpecke.Infrastructure.Database
                 await _database.CreateTableAsync<DutyShift>().ConfigureAwait(false);
                 await _database.CreateTableAsync<SelfEducation>().ConfigureAwait(false);
                 await _database.CreateTableAsync<UserSettings>().ConfigureAwait(false);
+                await _database.CreateTableAsync<Absence>().ConfigureAwait(false);  // Dodana linia tworząca tabelę Absences
 
                 _isInitialized = true;
                 _logger.LogInformation("Database initialized successfully at {Path}", databasePath);
@@ -303,6 +304,7 @@ namespace SledzSpecke.Infrastructure.Database
                 await _database.DeleteAllAsync<Specialization>().ConfigureAwait(false);
                 await _database.DeleteAllAsync<User>().ConfigureAwait(false);
                 await _database.DeleteAllAsync<UserSettings>().ConfigureAwait(false);
+                await _database.DeleteAllAsync<Absence>().ConfigureAwait(false);  // Dodana linia usuwająca dane z tabeli Absences
                 _logger.LogInformation("All data deleted from the database");
                 return true;
             }
