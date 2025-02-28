@@ -277,5 +277,10 @@ namespace SledzSpecke.App.Views
         {
             await Navigation.PushAsync(new SettingsPage());
         }
+
+        private async void OnManageAbsencesClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AbsenceManagementPage());
+        }
     }
 }

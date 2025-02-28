@@ -44,7 +44,7 @@
 
   <ItemGroup>
     <!-- App Icon -->
-    <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="559,559"/>
+    <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="559,559" />
 
     <!-- Splash Screen -->
     <MauiSplashScreen Include="Resources\AppIcon\appicon.png" Color="#0d759c" BaseSize="559,559" />
@@ -134,6 +134,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Views\AbsemceDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\AbsenceManagementPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\Auth\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="SledzSpecke.App.Views.AbsenceDetailsPage"
+            Title="{Binding PageTitle}">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <!-- Header -->
+            <Label Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" 
+                   HorizontalOptions="Center" Margin="0,0,0,10" 
+                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+
+            <!-- Main form -->
+            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                   Padding="20" CornerRadius="10">
+                <VerticalStackLayout Spacing="15">
+                    <!-- Absence type -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Typ nieobecności" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Picker x:Name="AbsenceTypePicker" Title="Wybierz typ nieobecności" 
+                                    SelectedIndexChanged="OnAbsenceTypeChanged"
+                                    Margin="10,0" BackgroundColor="Transparent">
+                                <Picker.Items>
+                                    <x:String>Zwolnienie lekarskie (L4)</x:String>
+                                    <x:String>Urlop wypoczynkowy</x:String>
+                                    <x:String>Urlop szkoleniowy (samokształcenie)</x:String>
+                                    <x:String>Urlop macierzyński</x:String>
+                                    <x:String>Urlop rodzicielski</x:String>
+                                    <x:String>Urlop okolicznościowy</x:String>
+                                    <x:String>Urlop bezpłatny</x:String>
+                                    <x:String>Inna nieobecność</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Date range -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                        <!-- Start date -->
+                        <VerticalStackLayout Grid.Column="0" Spacing="5">
+                            <Label Text="Data rozpoczęcia" FontAttributes="Bold" 
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                            <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                    StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                                <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" 
+                                            DateSelected="OnDateSelected"
+                                            Margin="10,0" BackgroundColor="Transparent"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- End date -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="5">
+                            <Label Text="Data zakończenia" FontAttributes="Bold" 
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                            <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                    StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                                <DatePicker x:Name="EndDatePicker" Date="{Binding EndDate}" 
+                                            DateSelected="OnDateSelected"
+                                            Margin="10,0" BackgroundColor="Transparent"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Duration -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Liczba dni" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="DurationEntry" Placeholder="Liczba dni" Keyboard="Numeric" 
+                                   Text="{Binding DurationDays}" IsEnabled="False"
+                                   Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Description -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Opis" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Editor x:Name="DescriptionEditor" Placeholder="Wprowadź opis nieobecności" 
+                                    HeightRequest="100" Text="{Binding Description}" 
+                                    Margin="10,5" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Affects specialization length -->
+                    <Grid ColumnDefinitions="Auto,*" Margin="0,5,0,5">
+                        <CheckBox x:Name="AffectsSpecializationCheckBox" 
+                                  IsChecked="{Binding AffectsSpecializationLength}" 
+                                  Color="#24C1DE" VerticalOptions="Center"/>
+                        <Label Text="Wydłuża czas trwania specjalizacji" 
+                               VerticalOptions="Center" Grid.Column="1"
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    </Grid>
+
+                    <!-- Document reference -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Sygnatura dokumentu" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="DocumentReferenceEntry" Placeholder="Wprowadź sygnaturę dokumentu" 
+                                   Text="{Binding DocumentReference}" 
+                                   Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Year -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Rok" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="YearEntry" Placeholder="Rok" Keyboard="Numeric" 
+                                   Text="{Binding Year}" 
+                                   Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Is approved -->
+                    <Grid ColumnDefinitions="Auto,*" Margin="0,5,0,5">
+                        <CheckBox x:Name="IsApprovedCheckBox" 
+                                  IsChecked="{Binding IsApproved}" 
+                                  Color="#24C1DE" VerticalOptions="Center"/>
+                        <Label Text="Zatwierdzone" 
+                               VerticalOptions="Center" Grid.Column="1"
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,10,0,20">
+                <Button Grid.Column="0" Text="Usuń" Clicked="OnDeleteClicked" 
+                        BackgroundColor="#F44336" TextColor="White"
+                        HeightRequest="50" CornerRadius="8" IsVisible="{Binding IsExistingAbsence}"/>
+
+                <Button Grid.Column="1" Text="Anuluj" Clicked="OnCancelClicked" 
+                        BackgroundColor="#547E9E" TextColor="White"
+                        HeightRequest="50" CornerRadius="8"/>
+
+                <Button Grid.Column="2" Text="Zapisz" Clicked="OnSaveClicked" 
+                        BackgroundColor="#082044" TextColor="White"
+                        HeightRequest="50" CornerRadius="8"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

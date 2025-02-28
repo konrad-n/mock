@@ -52,6 +52,7 @@ namespace SledzSpecke.App
             services.AddSingleton<NotificationService>();
             services.AddSingleton<AppSettings>();
             services.AddSingleton<AuthenticationService>();
+            services.AddSingleton<SpecializationDateCalculator>();
         }
 
         private static void RegisterPages(IServiceCollection services)
@@ -77,6 +78,8 @@ namespace SledzSpecke.App
             services.AddTransient<SelfEducationPage>();
             services.AddTransient<SelfEducationDetailsPage>();
             services.AddTransient<SMKExportPage>();
+            services.AddTransient<AbsenceManagementPage>();
+            services.AddTransient<AbsenceDetailsPage>();
         }
     }
 }

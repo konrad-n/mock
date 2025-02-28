@@ -251,6 +251,12 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <Button Text="Zarządzaj nieobecnościami" 
+                Clicked="OnManageAbsencesClicked" 
+                BackgroundColor="#0D759C" TextColor="White"
+                HeightRequest="45" CornerRadius="8" 
+                Margin="0,10,0,0"/>
+
             <!-- Action Buttons with Improved Layout -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,5,0,20">
                 <Button Grid.Column="0" Text="Raport do SMK" 

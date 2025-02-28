@@ -56,6 +56,12 @@
         Route="SelfEducationPage" />
 
     <ShellContent
+        Title="Zarządzanie nieobecnościami"
+        Icon="absence.png"
+        ContentTemplate="{DataTemplate views:AbsenceManagementPage}"
+        Route="SelfEducationPage" />
+
+    <ShellContent
         Title="Eksport do SMK"
         Icon="export.png"
         ContentTemplate="{DataTemplate views:SMKExportPage}"

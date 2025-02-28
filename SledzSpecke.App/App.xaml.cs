@@ -16,6 +16,7 @@ namespace SledzSpecke.App
         public static DutyShiftService DutyShiftService { get; private set; }
         public static SelfEducationService SelfEducationService { get; private set; }
         public static AuthenticationService AuthenticationService { get; private set; }
+        public static SpecializationDateCalculator SpecializationDateCalculator { get; private set; }
 
         private static readonly ILogger<App> _logger = LoggerFactory.Create(builder =>
             builder.AddDebug()).CreateLogger<App>();
@@ -56,6 +57,9 @@ namespace SledzSpecke.App
 
                 AuthenticationService = new AuthenticationService(DatabaseService, LoggerFactory.Create(builder =>
                     builder.AddDebug()).CreateLogger<AuthenticationService>());
+
+                SpecializationDateCalculator = new SpecializationDateCalculator(DatabaseService, LoggerFactory.Create(builder =>
+                    builder.AddDebug()).CreateLogger<SpecializationDateCalculator>());
 
                 // Set a default MainPage immediately to prevent exceptions
                 MainPage = new NavigationPage(new LoginPage());

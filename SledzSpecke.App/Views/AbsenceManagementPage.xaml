@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="SledzSpecke.App.Views.AbsenceManagementPage"
+            Title="Nieobecności i urlopy">
+    <Grid RowDefinitions="Auto,*">
+        <!-- Dashboard for absence information -->
+        <Frame Margin="15" Padding="15" CornerRadius="10" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+               BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}">
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <!-- End date info -->
+                <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                    <Label Text="Planowany koniec specjalizacji" FontSize="14" 
+                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                    <Label x:Name="PlannedEndDateLabel" Text="31.12.2027" FontSize="18" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                </VerticalStackLayout>
+
+                <!-- End date with absences -->
+                <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                    <Label Text="Koniec z nieobecnościami" FontSize="14" 
+                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                    <Label x:Name="ActualEndDateLabel" Text="15.03.2028" FontSize="18" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#FF9800, Dark=#FFAB40}"/>
+                </VerticalStackLayout>
+
+                <!-- Self-education days -->
+                <Frame Grid.Row="1" Grid.Column="0" Padding="10" CornerRadius="8" BorderColor="#e4f0f5"
+                       BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
+                    <VerticalStackLayout>
+                        <Label Text="Dni samokształcenia w roku" FontSize="14" 
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Label x:Name="SelfEducationDaysLabel" Text="4/6" FontSize="18" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                            <Label Text=" dni" FontSize="18" 
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </StackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Other leaves -->
+                <Frame Grid.Row="1" Grid.Column="1" Padding="10" CornerRadius="8" BorderColor="#e4f0f5"
+                       BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
+                    <VerticalStackLayout>
+                        <Label Text="Suma nieobecności" FontSize="14" 
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <StackLayout Orientation="Horizontal">
+                            <Label x:Name="TotalAbsenceDaysLabel" Text="45" FontSize="18" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                            <Label Text=" dni" FontSize="18" 
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </StackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Add absence button -->
+                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Dodaj nieobecność" 
+                        Clicked="OnAddAbsenceClicked" HeightRequest="45" 
+                        BackgroundColor="#0D759C" TextColor="White"/>
+            </Grid>
+        </Frame>
+
+        <!-- Absences list -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="15" Spacing="15" x:Name="AbsencesLayout">
+                <!-- Filter controls -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                       Padding="15" CornerRadius="10">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <Label Text="Pokaż:" Grid.Row="0" Grid.Column="0" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Picker x:Name="FilterTypePicker" Grid.Row="0" Grid.Column="1" Title="Wszystkie typy"
+                                SelectedIndexChanged="OnFilterTypeChanged">
+                            <Picker.Items>
+                                <x:String>Wszystkie typy</x:String>
+                                <x:String>L4</x:String>
+                                <x:String>Urlop wypoczynkowy</x:String>
+                                <x:String>Samokształcenie</x:String>
+                                <x:String>Urlop macierzyński/rodzicielski</x:String>
+                                <x:String>Pozostałe</x:String>
+                            </Picker.Items>
+                        </Picker>
+
+                        <Label Text="Rok:" Grid.Row="1" Grid.Column="0" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Picker x:Name="FilterYearPicker" Grid.Row="1" Grid.Column="1" Title="Wszystkie lata"
+                                SelectedIndexChanged="OnFilterYearChanged">
+                            <!-- Years will be added dynamically -->
+                        </Picker>
+                    </Grid>
+                </Frame>
+
+                <!-- Absences will be added here dynamically -->
+                <Label x:Name="NoAbsencesLabel" Text="Brak nieobecności do wyświetlenia"
+                       HorizontalOptions="Center" IsVisible="False" Margin="0,20,0,0"
+                       TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
