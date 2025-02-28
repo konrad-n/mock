@@ -1,14 +1,26 @@
 ﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Views
 {
     public partial class SMKExportPage : ContentPage
     {
         private SMKExportOptions _exportOptions;
+
+        public bool IsGeneralExportSelected => GeneralExportRadioButton.IsChecked;
+
         public SMKExportPage()
         {
             InitializeComponent();
             SetupInitialState();
+
+            // Bind properties for visibility
+            BindingContext = this;
+
+            // Set up radio button event handlers
+            GeneralExportRadioButton.CheckedChanged += OnExportTypeChanged;
+            ProcedureExportRadioButton.CheckedChanged += OnExportTypeChanged;
+            DutyShiftExportRadioButton.CheckedChanged += OnExportTypeChanged;
         }
 
         private void SetupInitialState()
@@ -17,6 +29,13 @@ namespace SledzSpecke.App.Views
 
             StartDatePicker.Date = DateTime.Now.AddMonths(-3);
             EndDatePicker.Date = DateTime.Now;
+        }
+
+        private void OnExportTypeChanged(object sender, CheckedChangedEventArgs e)
+        {
+            if (!e.Value) return; // Only handle when checked, not unchecked
+
+            OnPropertyChanged(nameof(IsGeneralExportSelected));
         }
 
         private void OnCustomDatesCheckedChanged(object sender, CheckedChangedEventArgs e)
@@ -38,10 +57,22 @@ namespace SledzSpecke.App.Views
 
         private async void OnGenerateReportClicked(object sender, EventArgs e)
         {
-            // Pobierz opcje eksportu z UI
-            _exportOptions.IncludeCourses = CoursesCheckBox.IsChecked;
-            _exportOptions.IncludeInternships = InternshipsCheckBox.IsChecked;
-            _exportOptions.IncludeProcedures = ProceduresCheckBox.IsChecked;
+            // Determine export type
+            if (GeneralExportRadioButton.IsChecked)
+                _exportOptions.ExportType = SMKExportType.General;
+            else if (ProcedureExportRadioButton.IsChecked)
+                _exportOptions.ExportType = SMKExportType.Procedures;
+            else if (DutyShiftExportRadioButton.IsChecked)
+                _exportOptions.ExportType = SMKExportType.DutyShifts;
+
+            // Only set these options if general export is selected
+            if (_exportOptions.ExportType == SMKExportType.General)
+            {
+                _exportOptions.IncludeCourses = CoursesCheckBox.IsChecked;
+                _exportOptions.IncludeInternships = InternshipsCheckBox.IsChecked;
+                _exportOptions.IncludeProcedures = ProceduresCheckBox.IsChecked;
+            }
+
             _exportOptions.Format = FormatPicker.SelectedIndex == 0 ? ExportFormat.Excel : ExportFormat.CSV;
 
             if (AllModulesRadioButton.IsChecked)

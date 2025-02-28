@@ -30,103 +30,20 @@ namespace SledzSpecke.App.Services
                     throw new Exception("No active specialization found.");
                 }
 
-                // Load related data
-                var courses = await _databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
-                var internships = await _databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
-                var procedures = await _databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+                string filePath = string.Empty;
 
-                // Load procedure entries
-                foreach (var procedure in procedures)
+                // Export based on selected type
+                if (options.ExportType == SMKExportType.General)
                 {
-                    procedure.Entries = await _databaseService.QueryAsync<ProcedureEntry>(
-                        "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
-                    procedure.CompletedCount = procedure.Entries.Count;
+                    filePath = await ExportGeneralToExcelAsync(specialization, options);
                 }
-
-                // Prepare data for export based on options
-                var data = new List<Dictionary<string, string>>();
-
-                // Filter data based on options
-                if (options.IncludeCourses)
+                else if (options.ExportType == SMKExportType.Procedures)
                 {
-                    foreach (var course in courses.Where(c => FilterByModule(c.Module, options.ModuleFilter)))
-                    {
-                        if (!FilterByDate(course.CompletionDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
-                            continue;
-
-                        var courseData = new Dictionary<string, string>
-                        {
-                            ["Typ"] = "Kurs",
-                            ["Nazwa"] = course.Name,
-                            ["Data rozpoczęcia"] = course.ScheduledDate?.ToString("dd.MM.yyyy") ?? "",
-                            ["Data zakończenia"] = course.CompletionDate?.ToString("dd.MM.yyyy") ?? "",
-                            ["Status"] = GetStatusText(course.IsCompleted),
-                            ["Moduł"] = GetModuleText(course.Module)
-                        };
-                        data.Add(courseData);
-                    }
+                    filePath = await ExportProceduresToExcelAsync(specialization, options);
                 }
-
-                if (options.IncludeInternships)
+                else if (options.ExportType == SMKExportType.DutyShifts)
                 {
-                    foreach (var internship in internships.Where(i => FilterByModule(i.Module, options.ModuleFilter)))
-                    {
-                        if (!FilterByDate(internship.EndDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
-                            continue;
-
-                        var internshipData = new Dictionary<string, string>
-                        {
-                            ["Typ"] = "Staż",
-                            ["Nazwa"] = internship.Name,
-                            ["Data rozpoczęcia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? "",
-                            ["Data zakończenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? "",
-                            ["Status"] = GetStatusText(internship.IsCompleted),
-                            ["Moduł"] = GetModuleText(internship.Module),
-                            ["Miejsce"] = internship.Location ?? "",
-                            ["Opiekun"] = internship.SupervisorName ?? ""
-                        };
-                        data.Add(internshipData);
-                    }
-                }
-
-                if (options.IncludeProcedures)
-                {
-                    var proceduresGrouped = procedures
-                        .Where(p => FilterByModule(p.Module, options.ModuleFilter))
-                        .GroupBy(p => new { p.Name, p.ProcedureType, p.Module })
-                        .ToList();
-
-                    foreach (var group in proceduresGrouped)
-                    {
-                        var entries = group.SelectMany(p => p.Entries).ToList();
-
-                        if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue &&
-                            !entries.Any(e => e.Date >= options.StartDate && e.Date <= options.EndDate))
-                            continue;
-
-                        var procedureData = new Dictionary<string, string>
-                        {
-                            ["Typ"] = "Procedura",
-                            ["Nazwa"] = group.Key.Name,
-                            ["Kod"] = group.Key.ProcedureType == ProcedureType.TypeA ? "A" : "B",
-                            ["Wymagane"] = group.Sum(p => p.RequiredCount).ToString(),
-                            ["Wykonane"] = group.Sum(p => p.CompletedCount).ToString(),
-                            ["Status"] = group.Sum(p => p.CompletedCount) >= group.Sum(p => p.RequiredCount) ? "Ukończono" : "W trakcie",
-                            ["Moduł"] = GetModuleText(group.Key.Module)
-                        };
-                        data.Add(procedureData);
-                    }
-                }
-
-                // Generate export file
-                string filePath;
-                if (options.Format == ExportFormat.Excel)
-                {
-                    filePath = await ExportToExcelAsync(data, options);
-                }
-                else
-                {
-                    filePath = await ExportToCsvAsync(data, options);
+                    filePath = await ExportDutyShiftsToExcelAsync(specialization, options);
                 }
 
                 _logger.LogInformation("Export completed successfully. File saved at: {FilePath}", filePath);
@@ -139,8 +56,96 @@ namespace SledzSpecke.App.Services
             }
         }
 
-        private async Task<string> ExportToExcelAsync(List<Dictionary<string, string>> data, SMKExportOptions options)
+        private async Task<string> ExportGeneralToExcelAsync(Specialization specialization, SMKExportOptions options)
         {
+            // Load related data
+            var courses = await _databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
+            var internships = await _databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
+            var procedures = await _databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+
+            // Load procedure entries
+            foreach (var procedure in procedures)
+            {
+                procedure.Entries = await _databaseService.QueryAsync<ProcedureEntry>(
+                    "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
+                procedure.CompletedCount = procedure.Entries.Count;
+            }
+
+            // Prepare data for export based on options
+            var data = new List<Dictionary<string, string>>();
+
+            // Filter data based on options
+            if (options.IncludeCourses)
+            {
+                foreach (var course in courses.Where(c => FilterByModule(c.Module, options.ModuleFilter)))
+                {
+                    if (!FilterByDate(course.CompletionDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
+                        continue;
+
+                    var courseData = new Dictionary<string, string>
+                    {
+                        ["Typ"] = "Kurs",
+                        ["Nazwa"] = course.Name,
+                        ["Data rozpoczęcia"] = course.ScheduledDate?.ToString("dd.MM.yyyy") ?? "",
+                        ["Data zakończenia"] = course.CompletionDate?.ToString("dd.MM.yyyy") ?? "",
+                        ["Status"] = GetStatusText(course.IsCompleted),
+                        ["Moduł"] = GetModuleText(course.Module)
+                    };
+                    data.Add(courseData);
+                }
+            }
+
+            if (options.IncludeInternships)
+            {
+                foreach (var internship in internships.Where(i => FilterByModule(i.Module, options.ModuleFilter)))
+                {
+                    if (!FilterByDate(internship.EndDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
+                        continue;
+
+                    var internshipData = new Dictionary<string, string>
+                    {
+                        ["Typ"] = "Staż",
+                        ["Nazwa"] = internship.Name,
+                        ["Data rozpoczęcia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? "",
+                        ["Data zakończenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? "",
+                        ["Status"] = GetStatusText(internship.IsCompleted),
+                        ["Moduł"] = GetModuleText(internship.Module),
+                        ["Miejsce"] = internship.Location ?? "",
+                        ["Opiekun"] = internship.SupervisorName ?? ""
+                    };
+                    data.Add(internshipData);
+                }
+            }
+
+            if (options.IncludeProcedures)
+            {
+                var proceduresGrouped = procedures
+                    .Where(p => FilterByModule(p.Module, options.ModuleFilter))
+                    .GroupBy(p => new { p.Name, p.ProcedureType, p.Module })
+                    .ToList();
+
+                foreach (var group in proceduresGrouped)
+                {
+                    var entries = group.SelectMany(p => p.Entries).ToList();
+
+                    if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue &&
+                        !entries.Any(e => e.Date >= options.StartDate && e.Date <= options.EndDate))
+                        continue;
+
+                    var procedureData = new Dictionary<string, string>
+                    {
+                        ["Typ"] = "Procedura",
+                        ["Nazwa"] = group.Key.Name,
+                        ["Kod"] = group.Key.ProcedureType == ProcedureType.TypeA ? "A" : "B",
+                        ["Wymagane"] = group.Sum(p => p.RequiredCount).ToString(),
+                        ["Wykonane"] = group.Sum(p => p.CompletedCount).ToString(),
+                        ["Status"] = group.Sum(p => p.CompletedCount) >= group.Sum(p => p.RequiredCount) ? "Ukończono" : "W trakcie",
+                        ["Moduł"] = GetModuleText(group.Key.Module)
+                    };
+                    data.Add(procedureData);
+                }
+            }
+
             // Create a unique filename
             string fileName = $"SMK_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
@@ -174,6 +179,202 @@ namespace SledzSpecke.App.Services
                 worksheet.Columns().AdjustToContents();
 
                 // Save the workbook
+                workbook.SaveAs(filePath);
+            }
+
+            return filePath;
+        }
+
+        private async Task<string> ExportProceduresToExcelAsync(Specialization specialization, SMKExportOptions options)
+        {
+            // Create a unique filename
+            string fileName = $"SMK_Procedury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
+
+            // Load procedures and entries
+            var procedures = await _databaseService.QueryAsync<MedicalProcedure>(
+                "SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+
+            // Collect all procedure entries in the format required by SMK
+            var procedureEntries = new List<(string PatientName, DateTime Date, string PerformingDoctor, string AssistingDoctors, string ProcedureGroup)>();
+
+            foreach (var procedure in procedures.Where(p => FilterByModule(p.Module, options.ModuleFilter)))
+            {
+                // Load entries for this procedure
+                var entries = await _databaseService.QueryAsync<ProcedureEntry>(
+                    "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
+
+                // Filter by date range if needed
+                if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue)
+                {
+                    entries = entries.Where(e => e.Date >= options.StartDate && e.Date <= options.EndDate).ToList();
+                }
+
+                // Skip if no entries
+                if (!entries.Any())
+                    continue;
+
+                // Get internship name for the procedure group
+                string internshipName = "Nieokreślony";
+                if (procedure.InternshipId.HasValue)
+                {
+                    var internship = await _databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                    if (internship != null)
+                    {
+                        internshipName = internship.Name;
+                    }
+                }
+
+                // Create entry for each procedure execution
+                foreach (var entry in entries)
+                {
+                    string procedureWithType = $"{procedure.Name} (Kod {(procedure.ProcedureType == ProcedureType.TypeA ? "A" : "B")})";
+
+                    // Get the user settings for doctor's name
+                    var settings = await _databaseService.GetUserSettingsAsync();
+                    string doctorName = settings.Username ?? "Lekarz";
+
+                    procedureEntries.Add((
+                        PatientName: entry.PatientId, // Using PatientId as PatientName
+                        Date: entry.Date,
+                        PerformingDoctor: procedure.ProcedureType == ProcedureType.TypeA ? doctorName : entry.SupervisorName,
+                        AssistingDoctors: procedure.ProcedureType == ProcedureType.TypeA ? entry.SupervisorName : doctorName,
+                        ProcedureGroup: $"{procedureWithType} - {internshipName}"
+                    ));
+                }
+            }
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Procedury");
+
+                // Add header row with SMK format
+                worksheet.Cell(1, 1).Value = "Imię i nazwisko";
+                worksheet.Cell(1, 2).Value = "Data";
+                worksheet.Cell(1, 3).Value = "Osoba Wykonująca";
+                worksheet.Cell(1, 4).Value = "Dane Asystentów";
+                worksheet.Cell(1, 5).Value = "Procedura z grupy";
+
+                // Format headers - highlight required fields
+                var headerRange = worksheet.Range("A1:E1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                // Add data rows
+                int row = 2;
+                foreach (var entry in procedureEntries.OrderBy(e => e.Date))
+                {
+                    worksheet.Cell(row, 1).Value = entry.PatientName;
+                    worksheet.Cell(row, 2).Value = entry.Date.ToString("yyyy-MM-dd"); // SMK format
+                    worksheet.Cell(row, 3).Value = entry.PerformingDoctor;
+                    worksheet.Cell(row, 4).Value = entry.AssistingDoctors;
+                    worksheet.Cell(row, 5).Value = entry.ProcedureGroup;
+                    row++;
+                }
+
+                // Add explanation sheet
+                var infoSheet = workbook.Worksheets.Add("Instrukcja");
+                infoSheet.Cell(1, 1).Value = "Instrukcja importu danych do SMK";
+                infoSheet.Cell(1, 1).Style.Font.Bold = true;
+                infoSheet.Cell(1, 1).Style.Font.FontSize = 14;
+
+                infoSheet.Cell(3, 1).Value = "Format danych:";
+                infoSheet.Cell(3, 1).Style.Font.Bold = true;
+
+                infoSheet.Cell(4, 1).Value = "1. Imię i nazwisko - identyfikator pacjenta";
+                infoSheet.Cell(5, 1).Value = "2. Data - data w formacie RRRR-MM-DD";
+                infoSheet.Cell(6, 1).Value = "3. Osoba Wykonująca - lekarz wykonujący procedurę";
+                infoSheet.Cell(7, 1).Value = "4. Dane Asystentów - osoby asystujące przy procedurze";
+                infoSheet.Cell(8, 1).Value = "5. Procedura z grupy - nazwa procedury i grupa";
+
+                // Auto-adjust columns width
+                worksheet.Columns().AdjustToContents();
+                infoSheet.Columns().AdjustToContents();
+
+                // Save workbook
+                workbook.SaveAs(filePath);
+            }
+
+            return filePath;
+        }
+
+        private async Task<string> ExportDutyShiftsToExcelAsync(Specialization specialization, SMKExportOptions options)
+        {
+            // Create a unique filename
+            string fileName = $"SMK_Dyzury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
+
+            // Load duty shifts
+            var dutyShifts = await _databaseService.QueryAsync<DutyShift>(
+                "SELECT * FROM DutyShifts WHERE SpecializationId = ?", specialization.Id);
+
+            // Filter by date range if needed
+            if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue)
+            {
+                dutyShifts = dutyShifts.Where(d => d.StartDate >= options.StartDate && d.StartDate <= options.EndDate).ToList();
+            }
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Dyżury");
+
+                // Add header row with SMK format
+                worksheet.Cell(1, 1).Value = "Liczba godzin";
+                worksheet.Cell(1, 2).Value = "Liczba minut";
+                worksheet.Cell(1, 3).Value = "Data rozpoczęcia";
+                worksheet.Cell(1, 4).Value = "Nazwa komórki organizacyjnej";
+
+                // Format headers
+                var headerRange = worksheet.Range("A1:D1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                // Add data rows
+                int row = 2;
+                foreach (var duty in dutyShifts.OrderByDescending(d => d.StartDate))
+                {
+                    // Calculate hours and minutes
+                    int totalHours = (int)Math.Floor(duty.DurationHours);
+                    int totalMinutes = (int)Math.Round((duty.DurationHours - totalHours) * 60);
+
+                    worksheet.Cell(row, 1).Value = totalHours;
+                    worksheet.Cell(row, 2).Value = totalMinutes;
+                    worksheet.Cell(row, 3).Value = duty.StartDate.ToString("yyyy-MM-dd"); // SMK format
+                    worksheet.Cell(row, 4).Value = duty.Location;
+                    row++;
+                }
+
+                // Add summary row
+                worksheet.Cell(row + 1, 1).Value = "Suma:";
+                worksheet.Cell(row + 1, 1).Style.Font.Bold = true;
+
+                // Calculate total duration
+                double totalDuration = dutyShifts.Sum(d => d.DurationHours);
+                int sumHours = (int)Math.Floor(totalDuration);
+                int sumMinutes = (int)Math.Round((totalDuration - sumHours) * 60);
+
+                worksheet.Cell(row + 1, 2).Value = $"{sumHours} godz. {sumMinutes} min.";
+                worksheet.Cell(row + 1, 2).Style.Font.Bold = true;
+
+                // Add explanation sheet
+                var infoSheet = workbook.Worksheets.Add("Instrukcja");
+                infoSheet.Cell(1, 1).Value = "Instrukcja importu danych do SMK";
+                infoSheet.Cell(1, 1).Style.Font.Bold = true;
+                infoSheet.Cell(1, 1).Style.Font.FontSize = 14;
+
+                infoSheet.Cell(3, 1).Value = "Format danych:";
+                infoSheet.Cell(3, 1).Style.Font.Bold = true;
+
+                infoSheet.Cell(4, 1).Value = "1. Liczba godzin - całkowita liczba godzin dyżuru";
+                infoSheet.Cell(5, 1).Value = "2. Liczba minut - dodatkowe minuty (ponad pełne godziny)";
+                infoSheet.Cell(6, 1).Value = "3. Data rozpoczęcia - data w formacie RRRR-MM-DD";
+                infoSheet.Cell(7, 1).Value = "4. Nazwa komórki organizacyjnej - miejsce dyżuru";
+
+                // Auto-adjust columns width
+                worksheet.Columns().AdjustToContents();
+                infoSheet.Columns().AdjustToContents();
+
+                // Save workbook
                 workbook.SaveAs(filePath);
             }
 

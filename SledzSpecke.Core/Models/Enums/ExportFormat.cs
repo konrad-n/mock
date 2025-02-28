@@ -1,5 +1,9 @@
-﻿public enum ExportFormat
+﻿namespace SledzSpecke.Core.Models.Enums
 {
-    Excel,
-    CSV
+    public enum ExportFormat
+    {
+        Excel,
+        CSV
+    }
 }
+

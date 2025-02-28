@@ -6,7 +6,19 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Eksport danych do SMK" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Wybierz typ eksportu" FontSize="16" FontAttributes="Bold"/>
+
+                    <RadioButton x:Name="GeneralExportRadioButton" Content="Eksport ogólny" IsChecked="True" GroupName="ExportTypeGroup"/>
+                    <RadioButton x:Name="ProcedureExportRadioButton" Content="Eksport procedur w formacie SMK" GroupName="ExportTypeGroup"/>
+                    <RadioButton x:Name="DutyShiftExportRadioButton" Content="Eksport dyżurów w formacie SMK" GroupName="ExportTypeGroup"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Options for general export -->
+            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10" IsVisible="{Binding IsGeneralExportSelected}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Wybierz zakres danych do eksportu" FontSize="16" FontAttributes="Bold"/>
 
@@ -22,6 +34,7 @@
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
+
             <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Wybierz format eksportu" FontSize="16" FontAttributes="Bold"/>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SledzSpecke.Core.Models.Enums;
+using System;
 
 namespace SledzSpecke.Core.Models
 {
@@ -11,6 +12,7 @@ namespace SledzSpecke.Core.Models
         public bool IncludeSelfEducation { get; set; } = false;
         public ExportFormat Format { get; set; } = ExportFormat.Excel;
         public SMKExportModuleFilter ModuleFilter { get; set; } = SMKExportModuleFilter.All;
+        public SMKExportType ExportType { get; set; } = SMKExportType.General;
 
         public bool UseCustomDateRange { get; set; } = false;
         public DateTime? StartDate { get; set; } = DateTime.Now.AddMonths(-3);

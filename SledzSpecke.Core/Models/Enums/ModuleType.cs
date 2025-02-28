@@ -1,5 +1,8 @@
-﻿public enum DutyType
+﻿namespace SledzSpecke.Core.Models.Enums
 {
-    Accompanied,
-    Independent
+    public enum DutyType
+    {
+        Accompanied,
+        Independent
+    }
 }

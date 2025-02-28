@@ -1,6 +1,6 @@
-﻿using SQLite;
+﻿using SledzSpecke.Core.Models.Enums;
+using SQLite;
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace SledzSpecke.Core.Models
 {

@@ -1,6 +1,9 @@
-﻿public enum SMKExportModuleFilter
+﻿namespace SledzSpecke.Core.Models.Enums
 {
-    All,
-    BasicOnly,
-    SpecialisticOnly
+    public enum SMKExportModuleFilter
+    {
+        All,
+        BasicOnly,
+        SpecialisticOnly
+    }
 }

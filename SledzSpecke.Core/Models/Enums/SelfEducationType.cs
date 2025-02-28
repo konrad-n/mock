@@ -1,9 +1,12 @@
-﻿public enum SelfEducationType
+﻿namespace SledzSpecke.Core.Models.Enums
 {
-    Conference,
-    Workshop,
-    Course,
-    ScientificMeeting,
-    Publication,
-    Other
+    public enum SelfEducationType
+    {
+        Conference,
+        Workshop,
+        Course,
+        ScientificMeeting,
+        Publication,
+        Other
+    }
 }
