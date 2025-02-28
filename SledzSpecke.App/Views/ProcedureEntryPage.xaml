@@ -5,7 +5,7 @@
           Title="Dodaj wykonanie procedury">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
-            <!-- Header with procedure name -->
+            <!-- Header with procedure name and progress information -->
             <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
                    Padding="15" CornerRadius="10" Margin="0,0,0,10">
@@ -14,12 +14,27 @@
                            HorizontalOptions="Center" TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                     <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                              Margin="0,5,0,5"/>
-                    <Grid ColumnDefinitions="Auto,*,Auto">
-                        <Label Text="{Binding ProcedureType}" FontAttributes="Bold" Grid.Column="0"
-                               TextColor="{AppThemeBinding Light=#0D759C, Dark=#24C1DE}"/>
-                        <Label Text="{Binding CompletionStatus}" Grid.Column="2" HorizontalOptions="End"
+
+                    <!-- New: Visual indication of procedure type with color coding -->
+                    <Frame Padding="10,5" CornerRadius="5" HorizontalOptions="Center"
+                           BackgroundColor="{Binding ProcedureTypeColor}" BorderColor="{Binding ProcedureTypeBorderColor}">
+                        <Label Text="{Binding ProcedureType}" FontAttributes="Bold" 
+                               TextColor="White" FontSize="14"/>
+                    </Frame>
+
+                    <!-- New: Progress information -->
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,8,0,0">
+                        <Label Text="{Binding CompletionStatus}" FontSize="14"
                                TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
-                    </Grid>
+                        <Label Text=" ― " FontSize="14"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Label x:Name="RemainingLabel" Text="{Binding RemainingText}" FontSize="14"
+                               TextColor="{AppThemeBinding Light=#FF9800, Dark=#FFAB40}"/>
+                    </StackLayout>
+
+                    <!-- New: Progress bar -->
+                    <ProgressBar Progress="{Binding CompletionProgress}" HeightRequest="8" 
+                                 Margin="0,5,0,0" ProgressColor="{Binding ProgressColor}"/>
                 </VerticalStackLayout>
             </Frame>
 
@@ -92,11 +107,11 @@
 
                     <!-- Supervisor -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Nadzorujący" FontAttributes="Bold" 
+                        <Label Text="{Binding SupervisorLabel}" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
-                            <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko nadzorującego" 
+                            <Entry x:Name="SupervisorNameEntry" Placeholder="{Binding SupervisorPlaceholder}" 
                                    Text="{Binding SupervisorName}" Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
@@ -113,11 +128,11 @@
 
                     <!-- First Assistant -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Dane osoby wykonującej I asystę" FontAttributes="Bold" 
+                        <Label Text="{Binding FirstAssistantLabel}" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
-                            <Entry x:Name="FirstAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej I asystę" 
+                            <Entry x:Name="FirstAssistantEntry" Placeholder="{Binding FirstAssistantPlaceholder}" 
                                    Text="{Binding FirstAssistantData}" Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
@@ -135,10 +150,15 @@
 
                     <!-- Procedure Group for SMK -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Procedura z grupy" FontAttributes="Bold" 
-                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                        <Label Text="Pole wymagane do eksportu SMK" FontSize="12" 
-                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Procedura z grupy" FontAttributes="Bold" 
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                            <Button Grid.Column="1" Text="?" FontSize="12" WidthRequest="25" HeightRequest="25"
+                                    CornerRadius="12" BackgroundColor="#0D759C" TextColor="White"
+                                    Clicked="OnProcedureGroupInfoClicked"/>
+                        </Grid>
+                        <Label Text="Pole wymagane do eksportu SMK. Uzupełnij jeśli procedura jest częścią szerszej kategorii." 
+                               FontSize="12" TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
                         <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
                             <Entry x:Name="ProcedureGroupEntry" Placeholder="Wprowadź procedurę z grupy" 
