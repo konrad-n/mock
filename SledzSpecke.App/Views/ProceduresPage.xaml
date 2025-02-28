@@ -4,45 +4,69 @@
           x:Class="SledzSpecke.App.Views.ProceduresPage"
           Title="Procedury">
     <Grid RowDefinitions="Auto,Auto,*">
-        <!-- Filtry modułów -->
-        <Grid ColumnDefinitions="*,*" Padding="10" Grid.Row="0">
-            <Button Text="Moduł podstawowy" 
-                 Clicked="OnBasicModuleButtonClicked" 
-                 Grid.Column="0" 
-                 Margin="5"
-                 x:Name="BasicModuleButton"/>
+        <!-- Filter section with visual improvements -->
+        <Frame Grid.Row="0" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+               BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
+               Margin="15,15,15,0" Padding="10" CornerRadius="10">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Wybierz moduł" FontSize="16" FontAttributes="Bold" 
+                       TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-            <Button Text="Moduł specjalistyczny" 
-                Clicked="OnSpecialisticModuleButtonClicked" 
-                Grid.Column="1" 
-                Margin="5"
-                x:Name="SpecialisticModuleButton"/>
-        </Grid>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="Moduł podstawowy" 
+                         Clicked="OnBasicModuleButtonClicked" 
+                         Grid.Column="0" 
+                         Margin="0" HeightRequest="45" CornerRadius="8"
+                         x:Name="BasicModuleButton"
+                         BackgroundColor="#082044" TextColor="White"/>
 
-        <!-- Filtry typów procedur -->
-        <Grid ColumnDefinitions="*,*" Padding="10" Grid.Row="1">
-            <Button Text="Kod A" 
-                Clicked="OnTypeAButtonClicked" 
-                Grid.Column="0" 
-                Margin="5"
-                x:Name="TypeAButton"/>
+                    <Button Text="Moduł specjalistyczny" 
+                        Clicked="OnSpecialisticModuleButtonClicked" 
+                        Grid.Column="1" 
+                        Margin="0" HeightRequest="45" CornerRadius="8"
+                        x:Name="SpecialisticModuleButton"
+                        BackgroundColor="#e4f0f5" TextColor="#082044"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
 
-            <Button Text="Kod B" 
-                Clicked="OnTypeBButtonClicked" 
-                Grid.Column="1" 
-                Margin="5"
-                x:Name="TypeBButton"/>
-        </Grid>
+        <!-- Type filters with visual improvements -->
+        <Frame Grid.Row="1" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+               BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
+               Margin="15,10,15,10" Padding="10" CornerRadius="10">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Wybierz typ procedury" FontSize="16" FontAttributes="Bold" 
+                       TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-        <!-- Lista procedur -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="Kod A" 
+                        Clicked="OnTypeAButtonClicked" 
+                        Grid.Column="0" 
+                        Margin="0" HeightRequest="45" CornerRadius="8"
+                        x:Name="TypeAButton"
+                        BackgroundColor="DarkGreen" TextColor="White"/>
+
+                    <Button Text="Kod B" 
+                        Clicked="OnTypeBButtonClicked" 
+                        Grid.Column="1" 
+                        Margin="0" HeightRequest="45" CornerRadius="8"
+                        x:Name="TypeBButton"
+                        BackgroundColor="#e4f0f5" TextColor="#082044"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Procedures list with enhanced visuals -->
         <ScrollView Grid.Row="2">
-            <VerticalStackLayout Padding="15" Spacing="10" x:Name="ProceduresLayout">
+            <VerticalStackLayout Padding="15" Spacing="15" x:Name="ProceduresLayout">
+                <!-- Placeholder message when no selection -->
                 <Label Text="Wybierz moduł i typ procedury powyżej" 
                    HorizontalOptions="Center" 
                    VerticalOptions="Center"
-                   x:Name="NoSelectionLabel"/>
+                   x:Name="NoSelectionLabel"
+                   FontSize="16" TextColor="{AppThemeBinding Light=#082044, Dark=#95B8CE}"/>
 
-                <!-- Tutaj będą dynamicznie dodawane elementy procedur -->
+                <!-- Dynamic procedure content will be added here -->
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
@@ -50,4 +74,22 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Dodaj" Clicked="OnAddProcedureClicked" IconImageSource="add_icon.png" />
     </ContentPage.ToolbarItems>
+
+    <!-- Add a custom visual for empty state -->
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ControlTemplate x:Key="EmptyStateTemplate">
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center"
+                                    Spacing="20" Padding="20">
+                    <Label Text="Brak procedur do wyświetlenia" 
+                           HorizontalTextAlignment="Center"
+                           FontSize="18" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                    <Label Text="Dodaj procedury za pomocą przycisku '+'."
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                </VerticalStackLayout>
+            </ControlTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 </ContentPage>

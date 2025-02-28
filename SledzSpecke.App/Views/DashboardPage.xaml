@@ -4,134 +4,265 @@
           x:Class="SledzSpecke.App.Views.DashboardPage"
           Title="Dashboard">
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
-            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
-                <VerticalStackLayout>
-                    <Label Text="Specjalizacja: Hematologia" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
-
-                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                        <Frame BorderColor="LightBlue" Padding="10" Grid.Column="0" Grid.Row="0">
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Header Section with Shadow -->
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
+                   Margin="0,0,0,10">
+                <Grid RowDefinitions="Auto,Auto">
+                    <VerticalStackLayout Grid.Row="0">
+                        <Label Text="Specjalizacja: Hematologia" FontSize="22" FontAttributes="Bold" 
+                               HorizontalOptions="Center" Margin="0,0,0,15"
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    </VerticalStackLayout>
+                    
+                    <Grid Grid.Row="1" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="15" RowSpacing="15">
+                        <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                               BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#0D365B}"
+                               Padding="15" Grid.Column="0" Grid.Row="0" CornerRadius="8">
                             <VerticalStackLayout>
                                 <Label Text="Data rozpoczęcia" FontSize="14" TextColor="#547E9E"/>
-                                <Label x:Name="StartDateLabel" Text="01-01-2023" FontSize="16" FontAttributes="Bold"/>
+                                <Label x:Name="StartDateLabel" Text="01-01-2023" FontSize="18" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                             </VerticalStackLayout>
                         </Frame>
 
-                        <Frame BorderColor="LightBlue" Padding="10" Grid.Column="1" Grid.Row="0">
+                        <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                               BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#0D365B}"
+                               Padding="15" Grid.Column="1" Grid.Row="0" CornerRadius="8">
                             <VerticalStackLayout>
-                                <Label Text="Przewidywana data zakończenia" FontSize="14" TextColor="#547E9E"/>
-                                <Label x:Name="EndDateLabel" Text="01-01-2028" FontSize="16" FontAttributes="Bold"/>
+                                <Label Text="Planowane zakończenie" FontSize="14" TextColor="#547E9E"/>
+                                <Label x:Name="EndDateLabel" Text="01-01-2028" FontSize="18" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                             </VerticalStackLayout>
                         </Frame>
 
-                        <Frame BorderColor="LightBlue" Padding="10" Grid.Column="0" Grid.Row="1">
+                        <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                               BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#0D365B}"
+                               Padding="15" Grid.Column="0" Grid.Row="1" CornerRadius="8">
                             <VerticalStackLayout>
                                 <Label Text="Pozostało dni" FontSize="14" TextColor="#547E9E"/>
-                                <Label x:Name="DaysLeftLabel" Text="1825" FontSize="16" FontAttributes="Bold"/>
+                                <Label x:Name="DaysLeftLabel" Text="1825" FontSize="18" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                             </VerticalStackLayout>
                         </Frame>
 
-                        <Frame BorderColor="LightBlue" Padding="10" Grid.Column="1" Grid.Row="1">
+                        <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                               BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#0D365B}"
+                               Padding="15" Grid.Column="1" Grid.Row="1" CornerRadius="8">
                             <VerticalStackLayout>
                                 <Label Text="Obecny etap" FontSize="14" TextColor="#547E9E"/>
-                                <Label x:Name="CurrentStageLabel" Text="Moduł podstawowy" FontSize="16" FontAttributes="Bold"/>
+                                <Label x:Name="CurrentStageLabel" Text="Moduł podstawowy" FontSize="18" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                             </VerticalStackLayout>
                         </Frame>
+                    </Grid>
+                </Grid>
+            </Frame>
+
+            <!-- Progress Section with Enhanced Visuals -->
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Postęp całościowy" FontSize="20" FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,5">
+                            <Label Text="Ogólny" Grid.Column="0" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                            <ProgressBar x:Name="TotalProgressBar" Progress="0.35" HeightRequest="16" 
+                                         Grid.Column="1" Margin="10,0"/>
+                            <Label x:Name="TotalProgressLabel" Text="35%" Grid.Column="2" 
+                                   FontAttributes="Bold" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,5">
+                            <Label Text="Moduł podstawowy" Grid.Column="0" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                            <ProgressBar x:Name="BasicModuleProgressBar" Progress="0.6" HeightRequest="12" 
+                                         Grid.Column="1" Margin="10,0"
+                                         ProgressColor="{AppThemeBinding Light=#149CD9, Dark=#24C1DE}"/>
+                            <Label x:Name="BasicModuleProgressLabel" Text="60%" Grid.Column="2" 
+                                   FontAttributes="Bold" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,5,0,5">
+                            <Label Text="Moduł specjalistyczny" Grid.Column="0" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                            <ProgressBar x:Name="SpecialisticModuleProgressBar" Progress="0.1" HeightRequest="12" 
+                                         Grid.Column="1" Margin="10,0" 
+                                         ProgressColor="{AppThemeBinding Light=#149CD9, Dark=#24C1DE}"/>
+                            <Label x:Name="SpecialisticModuleProgressLabel" Text="10%" Grid.Column="2" 
+                                   FontAttributes="Bold" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Categories Grid with Enhanced Visual Appeal -->
+            <Label Text="Kategorie" FontSize="20" FontAttributes="Bold" Margin="10,0,0,0"
+                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+            
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="15" RowSpacing="15">
+                <!-- Courses -->
+                <Frame Grid.Column="0" Grid.Row="0" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <BoxView Color="#24C1DE" WidthRequest="4" HeightRequest="16" 
+                                     CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Label Text="Kursy" FontSize="16" FontAttributes="Bold" Grid.Column="1" Margin="8,0,0,0"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        <Label x:Name="CoursesLabel" Text="5/21 ukończonych" FontSize="14" Margin="0,5,0,10"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Button Text="Przejdź" Clicked="OnCoursesButtonClicked" HeightRequest="40" 
+                                BackgroundColor="#0D759C" TextColor="White" CornerRadius="8" 
+                                Padding="0" FontSize="14"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Internships -->
+                <Frame Grid.Column="1" Grid.Row="0" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <BoxView Color="#0D759C" WidthRequest="4" HeightRequest="16" 
+                                     CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Label Text="Staże" FontSize="16" FontAttributes="Bold" Grid.Column="1" Margin="8,0,0,0"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        <Label x:Name="InternshipsLabel" Text="2/10 ukończonych" FontSize="14" Margin="0,5,0,10"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Button Text="Przejdź" Clicked="OnInternshipsButtonClicked" HeightRequest="40" 
+                                BackgroundColor="#0D759C" TextColor="White" CornerRadius="8" 
+                                Padding="0" FontSize="14"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Procedures A -->
+                <Frame Grid.Column="0" Grid.Row="1" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <BoxView Color="#149CD9" WidthRequest="4" HeightRequest="16" 
+                                     CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Label Text="Procedury A" FontSize="16" FontAttributes="Bold" Grid.Column="1" Margin="8,0,0,0"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        <Label x:Name="ProceduresALabel" Text="45/107 wykonanych" FontSize="14" Margin="0,5,0,10"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Button Text="Przejdź" Clicked="OnProceduresButtonClicked" HeightRequest="40" 
+                                BackgroundColor="#0D759C" TextColor="White" CornerRadius="8" 
+                                Padding="0" FontSize="14"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Procedures B -->
+                <Frame Grid.Column="1" Grid.Row="1" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <BoxView Color="#547E9E" WidthRequest="4" HeightRequest="16" 
+                                     CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Label Text="Procedury B" FontSize="16" FontAttributes="Bold" Grid.Column="1" Margin="8,0,0,0"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        <Label x:Name="ProceduresBLabel" Text="25/96 wykonanych" FontSize="14" Margin="0,5,0,10"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Button Text="Przejdź" Clicked="OnProceduresButtonClicked" HeightRequest="40" 
+                                BackgroundColor="#0D759C" TextColor="White" CornerRadius="8" 
+                                Padding="0" FontSize="14"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Duty Shifts -->
+                <Frame Grid.Column="0" Grid.Row="2" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <BoxView Color="#30DDE8" WidthRequest="4" HeightRequest="16" 
+                                     CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Label Text="Dyżury" FontSize="16" FontAttributes="Bold" Grid.Column="1" Margin="8,0,0,0"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        <Label x:Name="DutyShiftsLabel" Text="125/520 godzin" FontSize="14" Margin="0,5,0,10"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Button Text="Przejdź" Clicked="OnDutyShiftsButtonClicked" HeightRequest="40" 
+                                BackgroundColor="#0D759C" TextColor="White" CornerRadius="8" 
+                                Padding="0" FontSize="14"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Self Education -->
+                <Frame Grid.Column="1" Grid.Row="2" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
+                       BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <BoxView Color="#4AF5F7" WidthRequest="4" HeightRequest="16" 
+                                     CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start"/>
+                            <Label Text="Samokształcenie" FontSize="16" FontAttributes="Bold" Grid.Column="1" Margin="8,0,0,0"
+                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        </Grid>
+                        <Label x:Name="SelfEducationLabel" Text="5/18 dni" FontSize="14" Margin="0,5,0,10"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Button Text="Przejdź" Clicked="OnSelfEducationButtonClicked" HeightRequest="40" 
+                                BackgroundColor="#0D759C" TextColor="White" CornerRadius="8" 
+                                Padding="0" FontSize="14"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Upcoming Events with Visual Enhancement -->
+            <Frame BorderColor="#e4f0f5" Padding="20" CornerRadius="10" Margin="0,5,0,15"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Najbliższe terminy" FontSize="20" FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+                        <!-- Event 1 -->
+                        <BoxView Grid.Row="0" Grid.Column="0" Color="#24C1DE" WidthRequest="4" HeightRequest="20" 
+                                 CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,10,0"/>
+                        <Label x:Name="UpcomingEvent1" Grid.Row="0" Grid.Column="1"
+                               Text="15.03.2023 - Kurs: Zaburzenia hemostazy" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        
+                        <!-- Event 2 -->
+                        <BoxView Grid.Row="1" Grid.Column="0" IsVisible="{Binding Source={x:Reference UpcomingEvent2}, Path=IsVisible}"
+                                 Color="#0D759C" WidthRequest="4" HeightRequest="20" 
+                                 CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,10,0"/>
+                        <Label x:Name="UpcomingEvent2" Grid.Row="1" Grid.Column="1"
+                               Text="01.04.2023 - Staż kierunkowy w laboratorium hematologicznym" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        
+                        <!-- Event 3 -->
+                        <BoxView Grid.Row="2" Grid.Column="0" IsVisible="{Binding Source={x:Reference UpcomingEvent3}, Path=IsVisible}"
+                                 Color="#FF9800" WidthRequest="4" HeightRequest="20" 
+                                 CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,10,0"/>
+                        <Label x:Name="UpcomingEvent3" Grid.Row="2" Grid.Column="1"
+                               Text="30.05.2023 - Koniec modułu podstawowego" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#FF9800, Dark=#FFAB40}"/>
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
 
-            <Label Text="Postęp całościowy" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
-                <VerticalStackLayout>
-                    <ProgressBar x:Name="TotalProgressBar" Progress="0.35" HeightRequest="15" Margin="0,0,0,5"/>
-                    <Label x:Name="TotalProgressLabel" Text="35% ukończono" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
-            </Frame>
-
-            <Label Text="Postęp modułów" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="0">
-                    <VerticalStackLayout>
-                        <Label Text="Moduł podstawowy" FontSize="14" FontAttributes="Bold"/>
-                        <ProgressBar x:Name="BasicModuleProgressBar" Progress="0.6" HeightRequest="10" Margin="0,5,0,5"/>
-                        <Label x:Name="BasicModuleProgressLabel" Text="60%" HorizontalOptions="Center" FontSize="12"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="0">
-                    <VerticalStackLayout>
-                        <Label Text="Moduł specjalistyczny" FontSize="14" FontAttributes="Bold"/>
-                        <ProgressBar x:Name="SpecialisticModuleProgressBar" Progress="0.1" HeightRequest="10" Margin="0,5,0,5"/>
-                        <Label x:Name="SpecialisticModuleProgressLabel" Text="10%" HorizontalOptions="Center" FontSize="12"/>
-                    </VerticalStackLayout>
-                </Frame>
+            <!-- Action Buttons with Improved Layout -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,5,0,20">
+                <Button Grid.Column="0" Text="Raport do SMK" 
+                        Clicked="OnGenerateReportButtonClicked" 
+                        BackgroundColor="#082044" TextColor="White"
+                        HeightRequest="50" CornerRadius="10" FontSize="15"/>
+                        
+                <Button Grid.Column="1" Text="Ustawienia" 
+                        Clicked="OnSettingsButtonClicked" 
+                        BackgroundColor="#547E9E" TextColor="White"
+                        HeightRequest="50" CornerRadius="10" FontSize="15"/>
             </Grid>
-
-            <Label Text="Kategorie" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="0" BackgroundColor="AliceBlue">
-                    <VerticalStackLayout>
-                        <Label Text="Kursy" FontSize="16" FontAttributes="Bold"/>
-                        <Label x:Name="CoursesLabel" Text="5/21 ukończonych" FontSize="14"/>
-                        <Button Text="Przejdź" Clicked="OnCoursesButtonClicked" HeightRequest="30" FontSize="12" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="0" BackgroundColor="AliceBlue">
-                    <VerticalStackLayout>
-                        <Label Text="Staże" FontSize="16" FontAttributes="Bold"/>
-                        <Label x:Name="InternshipsLabel" Text="2/10 ukończonych" FontSize="14"/>
-                        <Button Text="Przejdź" Clicked="OnInternshipsButtonClicked" HeightRequest="30" FontSize="12" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="1" BackgroundColor="AliceBlue">
-                    <VerticalStackLayout>
-                        <Label Text="Procedury A" FontSize="16" FontAttributes="Bold"/>
-                        <Label x:Name="ProceduresALabel" Text="45/107 wykonanych" FontSize="14"/>
-                        <Button Text="Przejdź" Clicked="OnProceduresButtonClicked" HeightRequest="30" FontSize="12" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="1" BackgroundColor="AliceBlue">
-                    <VerticalStackLayout>
-                        <Label Text="Procedury B" FontSize="16" FontAttributes="Bold"/>
-                        <Label x:Name="ProceduresBLabel" Text="25/96 wykonanych" FontSize="14"/>
-                        <Button Text="Przejdź" Clicked="OnProceduresButtonClicked" HeightRequest="30" FontSize="12" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="2" BackgroundColor="AliceBlue">
-                    <VerticalStackLayout>
-                        <Label Text="Dyżury" FontSize="16" FontAttributes="Bold"/>
-                        <Label x:Name="DutyShiftsLabel" Text="125/520 godzin" FontSize="14"/>
-                        <Button Text="Przejdź" Clicked="OnDutyShiftsButtonClicked" HeightRequest="30" FontSize="12" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="2" BackgroundColor="AliceBlue">
-                    <VerticalStackLayout>
-                        <Label Text="Samokształcenie" FontSize="16" FontAttributes="Bold"/>
-                        <Label x:Name="SelfEducationLabel" Text="5/18 dni" FontSize="14"/>
-                        <Button Text="Przejdź" Clicked="OnSelfEducationButtonClicked" HeightRequest="30" FontSize="12" Margin="0,5,0,0"/>
-                    </VerticalStackLayout>
-                </Frame>
-            </Grid>
-
-            <Label Text="Najbliższe terminy" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
-                <VerticalStackLayout Spacing="10">
-                    <Label x:Name="UpcomingEvent1" Text="15.03.2023 - Kurs: Zaburzenia hemostazy" TextColor="#082044"/>
-                    <Label x:Name="UpcomingEvent2" Text="01.04.2023 - Staż kierunkowy w laboratorium hematologicznym" TextColor="#082044"/>
-                    <Label x:Name="UpcomingEvent3" Text="30.05.2023 - Koniec modułu podstawowego" TextColor="#547E9E" FontAttributes="Bold"/>
-                </VerticalStackLayout>
-            </Frame>
-
-            <VerticalStackLayout Spacing="10" Margin="0,10,0,0">
-                <Button Text="Generuj raport do SMK" Clicked="OnGenerateReportButtonClicked" BackgroundColor="#082044" TextColor="White"/>
-                <Button Text="Ustawienia" Clicked="OnSettingsButtonClicked" BackgroundColor="#547E9E" TextColor="White"/>
-            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

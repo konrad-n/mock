@@ -1,4 +1,5 @@
-﻿using SledzSpecke.Core.Models;
+﻿using DocumentFormat.OpenXml.Vml.Spreadsheet;
+using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Views
@@ -29,6 +30,10 @@ namespace SledzSpecke.App.Views
 
             StartDatePicker.Date = DateTime.Now.AddMonths(-3);
             EndDatePicker.Date = DateTime.Now;
+
+            // Ensure LoadingOverlay is behind everything but invisible
+            LoadingOverlay.IsVisible = false;
+            LoadingOverlay.ZIndex = 1000;
         }
 
         private void OnExportTypeChanged(object sender, CheckedChangedEventArgs e)
@@ -60,6 +65,21 @@ namespace SledzSpecke.App.Views
 
         private async void OnGenerateReportClicked(object sender, EventArgs e)
         {
+            // Validate selections
+            if (CustomDatesRadioButton.IsChecked && StartDatePicker.Date > EndDatePicker.Date)
+            {
+                await DisplayAlert("Błąd zakresu dat", "Data początkowa nie może być późniejsza niż data końcowa.", "OK");
+                return;
+            }
+
+            // If general export selected, ensure at least one category is selected
+            if (GeneralExportRadioButton.IsChecked &&
+                !CoursesCheckBox.IsChecked && !InternshipsCheckBox.IsChecked && !ProceduresCheckBox.IsChecked)
+            {
+                await DisplayAlert("Błąd wyboru zakresu", "Wybierz przynajmniej jedną kategorię danych do eksportu.", "OK");
+                return;
+            }
+
             // Determine export type
             if (GeneralExportRadioButton.IsChecked)
                 _exportOptions.ExportType = SMKExportType.General;
@@ -85,6 +105,20 @@ namespace SledzSpecke.App.Views
             else if (SpecialisticModuleRadioButton.IsChecked)
                 _exportOptions.ModuleFilter = SMKExportModuleFilter.SpecialisticOnly;
 
+            // Date range settings
+            if (CustomDatesRadioButton.IsChecked)
+            {
+                _exportOptions.UseCustomDateRange = true;
+                _exportOptions.StartDate = StartDatePicker.Date;
+                _exportOptions.EndDate = EndDatePicker.Date;
+            }
+            else
+            {
+                _exportOptions.UseCustomDateRange = false;
+                _exportOptions.StartDate = null;
+                _exportOptions.EndDate = null;
+            }
+
             // SMK format settings
             _exportOptions.UseSmkExactFormat = UseSmkExactFormatCheckBox.IsChecked;
             _exportOptions.SplitDutyHoursAndMinutes = true; // Always true for SMK format
@@ -101,7 +135,9 @@ namespace SledzSpecke.App.Views
                 FilePathLabel.Text = $"Ścieżka pliku: {filePath}";
                 ResultFrame.IsVisible = true;
 
-                await DisplayAlert("Sukces", "Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.", "OK");
+                await ScrollToResultFrame();
+
+                await DisplayAlert("Sukces", $"Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.\n\nFormat: {(_exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}", "OK");
             }
             catch (Exception ex)
             {
@@ -116,18 +152,32 @@ namespace SledzSpecke.App.Views
 
         private async Task ShowLoadingIndicator(bool isVisible)
         {
-            await Task.CompletedTask;
-            // In a real application, this would implement showing/hiding a loading indicator
+            LoadingOverlay.IsVisible = isVisible;
+
+            if (isVisible)
+            {
+                // Ensure UI is updated before continuing with long operation
+                await Task.Delay(50);
+            }
         }
 
         private async void OnOpenFileClicked(object sender, EventArgs e)
         {
             try
             {
+                string filePath = FilePathLabel.Text.Replace("Ścieżka pliku: ", "");
+
+                // Check if file exists
+                if (!File.Exists(filePath))
+                {
+                    await DisplayAlert("Błąd", "Plik nie istnieje lub został usunięty.", "OK");
+                    return;
+                }
+
                 // Try to open the file in the default application
                 await Launcher.OpenAsync(new OpenFileRequest
                 {
-                    File = new ReadOnlyFile(FilePathLabel.Text.Replace("Ścieżka pliku: ", ""))
+                    File = new ReadOnlyFile(filePath)
                 });
             }
             catch (Exception ex)
@@ -143,11 +193,26 @@ namespace SledzSpecke.App.Views
                 // Try to open the folder containing the file
                 string filePath = FilePathLabel.Text.Replace("Ścieżka pliku: ", "");
                 string folderPath = Path.GetDirectoryName(filePath);
+
+                if (!Directory.Exists(folderPath))
+                {
+                    await DisplayAlert("Błąd", "Folder nie istnieje lub został usunięty.", "OK");
+                    return;
+                }
+
                 await Launcher.OpenAsync(folderPath);
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Błąd", $"Nie udało się otworzyć folderu: {ex.Message}", "OK");
+            }
+        }
+
+        private async Task ScrollToResultFrame()
+        {
+            if (scrollView != null)
+            {
+                await scrollView.ScrollToAsync(ResultFrame, ScrollToPosition.Start, true);
             }
         }
     }

@@ -4,55 +4,166 @@
           x:Class="SledzSpecke.App.Views.CourseDetailsPage"
           Title="{Binding PageTitle}">
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
-            <Label Text="Dane kursu" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
-            <Label Text="Nazwa kursu" FontAttributes="Bold"/>
-            <Entry x:Name="CourseNameEntry" Placeholder="Wprowadź nazwę kursu" Text="{Binding Course.Name}"/>
-            <Label Text="Opis" FontAttributes="Bold"/>
-            <Editor x:Name="CourseDescriptionEditor" Placeholder="Wprowadź opis kursu" HeightRequest="100" Text="{Binding Course.Description}"/>
+        <VerticalStackLayout Padding="20" Spacing="0">
+            <!-- Page Header -->
+            <Label Text="Dane kursu" FontSize="22" FontAttributes="Bold" 
+                   HorizontalOptions="Center" Margin="0,0,0,20" 
+                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-            <Label Text="Czas trwania (dni)" FontAttributes="Bold"/>
-            <Entry x:Name="CourseDurationEntry" Placeholder="Wprowadź czas trwania w dniach" Keyboard="Numeric" Text="{Binding DurationDays}"/>
+            <!-- Main Form Content -->
+            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                   Padding="20" CornerRadius="10" Margin="0,0,0,20">
+                <VerticalStackLayout Spacing="15">
+                    <!-- Course Name Section -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa kursu" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="CourseNameEntry" Placeholder="Wprowadź nazwę kursu" 
+                                   Text="{Binding Course.Name}" 
+                                   Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Moduł" FontAttributes="Bold"/>
-            <Picker x:Name="ModulePicker" Title="Wybierz moduł" SelectedIndexChanged="OnModulePickerSelectedIndexChanged">
-                <Picker.Items>
-                    <x:String>Moduł podstawowy</x:String>
-                    <x:String>Moduł specjalistyczny</x:String>
-                </Picker.Items>
-            </Picker>
+                    <!-- Course Description Section -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Opis" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Editor x:Name="CourseDescriptionEditor" 
+                                    Placeholder="Wprowadź opis kursu" 
+                                    HeightRequest="100" 
+                                    Text="{Binding Course.Description}" 
+                                    Margin="10,5" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Status" FontAttributes="Bold"/>
-            <Picker x:Name="StatusPicker" Title="Wybierz status" SelectedIndexChanged="OnStatusPickerSelectedIndexChanged">
-                <Picker.Items>
-                    <x:String>Oczekujący</x:String>
-                    <x:String>Zaplanowany</x:String>
-                    <x:String>Zarejestrowany</x:String>
-                    <x:String>Ukończony</x:String>
-                </Picker.Items>
-            </Picker>
+                    <!-- Course Duration Section -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Czas trwania (dni)" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="CourseDurationEntry" 
+                                   Placeholder="Wprowadź czas trwania w dniach" 
+                                   Keyboard="Numeric" 
+                                   Text="{Binding DurationDays}" 
+                                   Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Data kursu" FontAttributes="Bold" IsVisible="{Binding IsDateVisible}"/>
-            <DatePicker x:Name="CourseDatePicker" IsVisible="{Binding IsDateVisible}" Date="{Binding CourseDate}"/>
+                    <!-- Module Selection Section -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Moduł" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Picker x:Name="ModulePicker" Title="Wybierz moduł" 
+                                    SelectedIndexChanged="OnModulePickerSelectedIndexChanged"
+                                    Margin="10,0" BackgroundColor="Transparent">
+                                <Picker.Items>
+                                    <x:String>Moduł podstawowy</x:String>
+                                    <x:String>Moduł specjalistyczny</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Data ukończenia" FontAttributes="Bold" IsVisible="{Binding IsCompletionDateVisible}"/>
-            <DatePicker x:Name="CompletionDatePicker" IsVisible="{Binding IsCompletionDateVisible}" Date="{Binding CompletionDate}"/>
+                    <!-- Status Selection Section -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Status" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Picker x:Name="StatusPicker" Title="Wybierz status" 
+                                    SelectedIndexChanged="OnStatusPickerSelectedIndexChanged"
+                                    Margin="10,0" BackgroundColor="Transparent">
+                                <Picker.Items>
+                                    <x:String>Oczekujący</x:String>
+                                    <x:String>Zaplanowany</x:String>
+                                    <x:String>Zarejestrowany</x:String>
+                                    <x:String>Ukończony</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <StackLayout Orientation="Horizontal" IsVisible="{Binding IsCompletionVisible}">
-                <CheckBox x:Name="ExamPassedCheckBox" IsChecked="{Binding Course.HasPassedExam}"/>
-                <Label Text="Zaliczony egzamin/sprawdzian" VerticalOptions="Center"/>
-            </StackLayout>
+                    <!-- Course Date Section - Only visible for Planned and Registered status -->
+                    <VerticalStackLayout Spacing="5" IsVisible="{Binding IsDateVisible}">
+                        <Label Text="Data kursu" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <DatePicker x:Name="CourseDatePicker" 
+                                        Date="{Binding CourseDate}" 
+                                        Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Załączniki" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Button Text="Dodaj certyfikat/zaświadczenie" Clicked="OnAddAttachmentClicked"/>
+                    <!-- Completion Date Section - Only visible for Completed status -->
+                    <VerticalStackLayout Spacing="5" IsVisible="{Binding IsCompletionDateVisible}">
+                        <Label Text="Data ukończenia" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <DatePicker x:Name="CompletionDatePicker" 
+                                        Date="{Binding CompletionDate}" 
+                                        Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Notatki" FontAttributes="Bold"/>
-            <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Course.Notes}"/>
+                    <!-- Exam Passed Checkbox - Only visible for Completed status -->
+                    <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding IsCompletionVisible}" 
+                          Margin="0,5,0,5">
+                        <CheckBox x:Name="ExamPassedCheckBox" 
+                                  IsChecked="{Binding Course.HasPassedExam}" 
+                                  Color="#24C1DE"/>
+                        <Label Text="Zaliczony egzamin/sprawdzian" 
+                               VerticalOptions="Center" Grid.Column="1"
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    </Grid>
 
-            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
-                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="#547E9E"/>
-                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
-            </StackLayout>
+                    <!-- Attachments Section -->
+                    <VerticalStackLayout Spacing="5" Margin="0,10,0,0">
+                        <Label Text="Załączniki" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Button Text="Dodaj certyfikat/zaświadczenie" 
+                                Clicked="OnAddAttachmentClicked"
+                                BackgroundColor="#149CD9" TextColor="White"
+                                HeightRequest="45" CornerRadius="8"/>
+                    </VerticalStackLayout>
+
+                    <!-- Notes Section -->
+                    <VerticalStackLayout Spacing="5" Margin="0,10,0,0">
+                        <Label Text="Notatki" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Editor x:Name="NotesEditor" 
+                                    Placeholder="Wprowadź dodatkowe informacje" 
+                                    HeightRequest="120" 
+                                    Text="{Binding Course.Notes}" 
+                                    Margin="10,5" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,0,0,20">
+                <Button Grid.Column="0" Text="Anuluj" 
+                        Clicked="OnCancelClicked" 
+                        BackgroundColor="#547E9E" TextColor="White"
+                        HeightRequest="50" CornerRadius="8"/>
+
+                <Button Grid.Column="1" Text="Zapisz" 
+                        Clicked="OnSaveClicked" 
+                        BackgroundColor="#082044" TextColor="White"
+                        HeightRequest="50" CornerRadius="8"/>
+            </Grid>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -5,51 +5,170 @@
           Title="Dodaj wykonanie procedury">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
-            <Label Text="{Binding ProcedureName}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
-
-            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="{Binding ProcedureType}" FontAttributes="Bold"/>
-                    <Label Text="{Binding CompletionStatus}"/>
+            <!-- Header with procedure name -->
+            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                   Padding="15" CornerRadius="10" Margin="0,0,0,10">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding ProcedureName}" FontSize="20" FontAttributes="Bold" 
+                           HorizontalOptions="Center" TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                             Margin="0,5,0,5"/>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Label Text="{Binding ProcedureType}" FontAttributes="Bold" Grid.Column="0"
+                               TextColor="{AppThemeBinding Light=#0D759C, Dark=#24C1DE}"/>
+                        <Label Text="{Binding CompletionStatus}" Grid.Column="2" HorizontalOptions="End"
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Frame>
 
-            <Label Text="Data wykonania" FontAttributes="Bold"/>
-            <DatePicker x:Name="DatePicker" Date="{Binding EntryDate}"/>
+            <!-- Main form with patient data -->
+            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                   Padding="15" CornerRadius="10" Margin="0,5,0,10">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Dane pacjenta" FontSize="16" FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-            <Label Text="Identyfikator pacjenta" FontAttributes="Bold"/>
-            <Entry x:Name="PatientIdEntry" Placeholder="Wprowadź identyfikator pacjenta" Text="{Binding PatientId}"/>
+                    <!-- Date -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Data wykonania" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <DatePicker x:Name="DatePicker" Date="{Binding EntryDate}"
+                                        Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Płeć pacjenta" FontAttributes="Bold"/>
-            <Picker x:Name="PatientGenderPicker" Title="Wybierz płeć pacjenta" SelectedItem="{Binding PatientGender}">
-                <Picker.Items>
-                    <x:String>Mężczyzna</x:String>
-                    <x:String>Kobieta</x:String>
-                </Picker.Items>
-            </Picker>
+                    <!-- Patient ID -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Identyfikator pacjenta" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="PatientIdEntry" Placeholder="Wprowadź identyfikator pacjenta" 
+                                   Text="{Binding PatientId}" Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Miejsce wykonania" FontAttributes="Bold"/>
-            <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce wykonania" Text="{Binding Location}"/>
+                    <!-- Patient Gender -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Płeć pacjenta" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Picker x:Name="PatientGenderPicker" Title="Wybierz płeć pacjenta" 
+                                    SelectedItem="{Binding PatientGender}" Margin="10,0" BackgroundColor="Transparent">
+                                <Picker.Items>
+                                    <x:String>Mężczyzna</x:String>
+                                    <x:String>Kobieta</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
 
-            <Label Text="Nadzorujący" FontAttributes="Bold"/>
-            <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko nadzorującego" Text="{Binding SupervisorName}"/>
+            <!-- Location data -->
+            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                   Padding="15" CornerRadius="10" Margin="0,5,0,10">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Dane wykonania" FontSize="16" FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-            <Label Text="Dane osoby wykonującej I asystę" FontAttributes="Bold"/>
-            <Entry x:Name="FirstAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej I asystę" Text="{Binding FirstAssistantData}"/>
+                    <!-- Location -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Miejsce wykonania" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="LocationEntry" Placeholder="Wprowadź miejsce wykonania" 
+                                   Text="{Binding Location}" Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Label Text="Dane osoby wykonującej II asystę" FontAttributes="Bold"/>
-            <Entry x:Name="SecondAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej II asystę" Text="{Binding SecondAssistantData}"/>
+                    <!-- Supervisor -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nadzorujący" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="SupervisorNameEntry" Placeholder="Wprowadź imię i nazwisko nadzorującego" 
+                                   Text="{Binding SupervisorName}" Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
 
-            <Label Text="Procedura z grupy" FontAttributes="Bold"/>
-            <Entry x:Name="ProcedureGroupEntry" Placeholder="Wprowadź procedurę z grupy" Text="{Binding ProcedureGroup}"/>
+            <!-- Assistant data -->
+            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                   Padding="15" CornerRadius="10" Margin="0,5,0,10">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Dane asystentów (SMK)" FontSize="16" FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-            <Label Text="Notatki" FontAttributes="Bold"/>
-            <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Notes}"/>
+                    <!-- First Assistant -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Dane osoby wykonującej I asystę" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="FirstAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej I asystę" 
+                                   Text="{Binding FirstAssistantData}" Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
-                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="#547E9E"/>
-                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
-            </StackLayout>
+                    <!-- Second Assistant -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Dane osoby wykonującej II asystę" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="SecondAssistantEntry" Placeholder="Wprowadź dane osoby wykonującej II asystę" 
+                                   Text="{Binding SecondAssistantData}" Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Procedure Group for SMK -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Procedura z grupy" FontAttributes="Bold" 
+                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                        <Label Text="Pole wymagane do eksportu SMK" FontSize="12" 
+                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                                StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <Entry x:Name="ProcedureGroupEntry" Placeholder="Wprowadź procedurę z grupy" 
+                                   Text="{Binding ProcedureGroup}" Margin="10,0" BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Notes -->
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Notatki" FontAttributes="Bold" 
+                        TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                        StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                    <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" 
+                            HeightRequest="100" Text="{Binding Notes}" 
+                            Margin="10,5" BackgroundColor="Transparent"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,15,0,20">
+                <Button Grid.Column="0" Text="Anuluj" Clicked="OnCancelClicked" 
+                        BackgroundColor="#547E9E" TextColor="White"
+                        HeightRequest="50" CornerRadius="8"/>
+                <Button Grid.Column="1" Text="Zapisz" Clicked="OnSaveClicked" 
+                        BackgroundColor="#082044" TextColor="White"
+                        HeightRequest="50" CornerRadius="8"/>
+            </Grid>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
