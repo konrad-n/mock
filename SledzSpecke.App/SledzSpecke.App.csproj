@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Remove="Converters\**" />
     <Compile Remove="Resources\Icons\**" />
+    <Compile Remove="Resources\Splash\**" />
     <Compile Remove="Services\Dialog\**" />
     <Compile Remove="Services\Navigation\**" />
     <Compile Remove="ViewModels\**" />
@@ -71,6 +72,7 @@
     <Compile Remove="Views\Settings\**" />
     <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
+    <EmbeddedResource Remove="Resources\Splash\**" />
     <EmbeddedResource Remove="Services\Dialog\**" />
     <EmbeddedResource Remove="Services\Navigation\**" />
     <EmbeddedResource Remove="ViewModels\**" />
@@ -79,6 +81,7 @@
     <EmbeddedResource Remove="Views\Settings\**" />
     <MauiCss Remove="Converters\**" />
     <MauiCss Remove="Resources\Icons\**" />
+    <MauiCss Remove="Resources\Splash\**" />
     <MauiCss Remove="Services\Dialog\**" />
     <MauiCss Remove="Services\Navigation\**" />
     <MauiCss Remove="ViewModels\**" />
@@ -87,6 +90,7 @@
     <MauiCss Remove="Views\Settings\**" />
     <MauiXaml Remove="Converters\**" />
     <MauiXaml Remove="Resources\Icons\**" />
+    <MauiXaml Remove="Resources\Splash\**" />
     <MauiXaml Remove="Services\Dialog\**" />
     <MauiXaml Remove="Services\Navigation\**" />
     <MauiXaml Remove="ViewModels\**" />
@@ -95,6 +99,7 @@
     <MauiXaml Remove="Views\Settings\**" />
     <None Remove="Converters\**" />
     <None Remove="Resources\Icons\**" />
+    <None Remove="Resources\Splash\**" />
     <None Remove="Services\Dialog\**" />
     <None Remove="Services\Navigation\**" />
     <None Remove="ViewModels\**" />
@@ -120,10 +125,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SledzSpecke.Core\SledzSpecke.Core.csproj" />
     <ProjectReference Include="..\SledzSpecke.Infrastructure\SledzSpecke.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\Splash\" />
   </ItemGroup>
 
   <ItemGroup>
