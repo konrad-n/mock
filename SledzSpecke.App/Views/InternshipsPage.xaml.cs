@@ -43,16 +43,16 @@ namespace SledzSpecke.App.Views
             // Ustawienie aktywnego przycisku
             if (moduleType == ModuleType.Basic)
             {
-                BasicModuleButton.BackgroundColor = Colors.DarkBlue;
+                BasicModuleButton.BackgroundColor = new Color(8,32,68);
                 BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = Colors.LightGray;
+                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);;
                 SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButton.BackgroundColor = Colors.LightGray;
+                BasicModuleButton.BackgroundColor = new Color(228,240,245);;
                 BasicModuleButton.TextColor = Colors.Black;
-                SpecialisticModuleButton.BackgroundColor = Colors.DarkBlue;
+                SpecialisticModuleButton.BackgroundColor = new Color(8,32,68);
                 SpecialisticModuleButton.TextColor = Colors.White;
             }
 
@@ -94,7 +94,7 @@ namespace SledzSpecke.App.Views
                     Color = internship.IsCompleted ? Colors.Green :
                             isCurrentInternship ? Colors.Blue :
                             internship.StartDate.HasValue ? Colors.Orange :
-                            Colors.Gray,
+                            new Color(84,126,158),
                     WidthRequest = 16,
                     HeightRequest = 16,
                     CornerRadius = 8,
@@ -131,7 +131,7 @@ namespace SledzSpecke.App.Views
                     TextColor = internship.IsCompleted ? Colors.Green :
                                 isCurrentInternship ? Colors.Blue :
                                 internship.StartDate.HasValue ? Colors.Orange :
-                                Colors.Gray
+                                new Color(84,126,158)
                 };
 
                 var locationLabel = new Label

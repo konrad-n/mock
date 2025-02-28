@@ -17,10 +17,29 @@
                 <Setter Property="BackgroundColor" Value="#F5F5F5" />
                 <Setter Property="BorderColor" Value="#9E9E9E" />
             </Style>
+
+            <!-- Style dla przycisków modułów -->
+            <Style x:Key="ModuleButtonActive" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#082044" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontAttributes" Value="Bold" />
+            </Style>
+            <Style x:Key="ModuleButtonInactive" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#E4E4E4" />
+                <Setter Property="TextColor" Value="#333333" />
+            </Style>
+
+            <!-- Style dla przycisków szczegółów -->
+            <Style x:Key="DetailsButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#24C1DE" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="HeightRequest" Value="35" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Margin" Value="0,5,0,0" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
-
-
 
     <Grid RowDefinitions="Auto,*">
         <Grid ColumnDefinitions="*,*" Padding="10">
@@ -28,13 +47,17 @@
                 Clicked="OnBasicModuleButtonClicked" 
                 Grid.Column="0" 
                 Margin="5"
-                x:Name="BasicModuleButton"/>
+                x:Name="BasicModuleButton"
+                BackgroundColor="#082044"
+                TextColor="White"/>
 
             <Button Text="Moduł specjalistyczny" 
                 Clicked="OnSpecialisticModuleButtonClicked" 
                 Grid.Column="1" 
                 Margin="5"
-                x:Name="SpecialisticModuleButton"/>
+                x:Name="SpecialisticModuleButton"
+                BackgroundColor="#E4E4E4"
+                TextColor="#333333"/>
         </Grid>
 
         <ScrollView Grid.Row="1">

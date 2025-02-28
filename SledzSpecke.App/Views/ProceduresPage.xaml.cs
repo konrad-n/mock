@@ -45,16 +45,16 @@ namespace SledzSpecke.App.Views
             // Ustawienie aktywnych przycisków
             if (moduleType == ModuleType.Basic)
             {
-                BasicModuleButton.BackgroundColor = Colors.DarkBlue;
+                BasicModuleButton.BackgroundColor = new Color(8,32,68);
                 BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = Colors.LightGray;
+                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);;
                 SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButton.BackgroundColor = Colors.LightGray;
+                BasicModuleButton.BackgroundColor = new Color(228,240,245);;
                 BasicModuleButton.TextColor = Colors.Black;
-                SpecialisticModuleButton.BackgroundColor = Colors.DarkBlue;
+                SpecialisticModuleButton.BackgroundColor = new Color(8,32,68);
                 SpecialisticModuleButton.TextColor = Colors.White;
             }
 
@@ -62,12 +62,12 @@ namespace SledzSpecke.App.Views
             {
                 TypeAButton.BackgroundColor = Colors.DarkGreen;
                 TypeAButton.TextColor = Colors.White;
-                TypeBButton.BackgroundColor = Colors.LightGray;
+                TypeBButton.BackgroundColor = new Color(228,240,245);;
                 TypeBButton.TextColor = Colors.Black;
             }
             else
             {
-                TypeAButton.BackgroundColor = Colors.LightGray;
+                TypeAButton.BackgroundColor = new Color(228,240,245);;
                 TypeAButton.TextColor = Colors.Black;
                 TypeBButton.BackgroundColor = Colors.DarkGreen;
                 TypeBButton.TextColor = Colors.White;
@@ -116,7 +116,7 @@ namespace SledzSpecke.App.Views
                         Padding = new Thickness(10),
                         Margin = new Thickness(0, 0, 0, 10),
                         CornerRadius = 5,
-                        BorderColor = procedure.CompletedCount >= procedure.RequiredCount ? Colors.Green : Colors.LightGray
+                        BorderColor = procedure.CompletedCount >= procedure.RequiredCount ? Colors.Green : new Color(228,240,245)
                     };
 
                     var progressBar = new ProgressBar

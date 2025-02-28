@@ -7,7 +7,7 @@
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Ustawienia aplikacji" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Dane specjalizacji" FontSize="16" FontAttributes="Bold"/>
 
@@ -22,7 +22,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Dane personalne" FontSize="16" FontAttributes="Bold"/>
 
@@ -40,7 +40,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Ustawienia aplikacji" FontSize="16" FontAttributes="Bold"/>
 
@@ -61,20 +61,20 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="SMK" FontSize="16" FontAttributes="Bold"/>
 
                     <Label Text="Ustawienia integracji z SMK" FontAttributes="Bold"/>
                     <Label Text="Aplikacja wspiera eksport danych dla Systemu Monitorowania Kształcenia (SMK)" FontSize="14"/>
 
-                    <Button Text="Konfiguruj integrację z SMK" Clicked="OnConfigureSMKClicked" BackgroundColor="Gray" TextColor="White"/>
+                    <Button Text="Konfiguruj integrację z SMK" Clicked="OnConfigureSMKClicked" BackgroundColor="#547E9E" TextColor="White"/>
                 </VerticalStackLayout>
             </Frame>
 
-            <Button Text="Zapisz zmiany" Clicked="OnSaveChangesClicked" BackgroundColor="DarkBlue" TextColor="White"/>
+            <Button Text="Zapisz zmiany" Clicked="OnSaveChangesClicked" BackgroundColor="#082044" TextColor="White"/>
 
-            <Button Text="Wyczyść wszystkie dane" Clicked="OnClearDataClicked" BackgroundColor="Red" TextColor="White" Margin="0,20,0,0"/>
+            <Button Text="Wyczyść wszystkie dane" Clicked="OnClearDataClicked" BackgroundColor="#D32F2F" TextColor="White" Margin="0,20,0,0"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

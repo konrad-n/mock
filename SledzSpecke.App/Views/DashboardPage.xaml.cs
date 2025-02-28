@@ -213,7 +213,7 @@ namespace SledzSpecke.App.Views
             if (upcomingEvents.Count > 0 && upcomingEvents.Count >= 1)
             {
                 UpcomingEvent1.Text = $"{upcomingEvents[0].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[0].Item2}";
-                UpcomingEvent1.TextColor = upcomingEvents[0].Item3 ? Colors.Red : Colors.DarkBlue;
+                UpcomingEvent1.TextColor = upcomingEvents[0].Item3 ? Colors.Red : new Color(8,32,68);
             }
             else
             {
@@ -223,7 +223,7 @@ namespace SledzSpecke.App.Views
             if (upcomingEvents.Count >= 2)
             {
                 UpcomingEvent2.Text = $"{upcomingEvents[1].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[1].Item2}";
-                UpcomingEvent2.TextColor = upcomingEvents[1].Item3 ? Colors.Red : Colors.DarkBlue;
+                UpcomingEvent2.TextColor = upcomingEvents[1].Item3 ? Colors.Red : new Color(8,32,68);
                 UpcomingEvent2.IsVisible = true;
             }
             else
@@ -234,7 +234,7 @@ namespace SledzSpecke.App.Views
             if (upcomingEvents.Count >= 3)
             {
                 UpcomingEvent3.Text = $"{upcomingEvents[2].Item1.ToString("dd.MM.yyyy")} - {upcomingEvents[2].Item2}";
-                UpcomingEvent3.TextColor = upcomingEvents[2].Item3 ? Colors.Red : Colors.DarkBlue;
+                UpcomingEvent3.TextColor = upcomingEvents[2].Item3 ? Colors.Red : new Color(8,32,68);
                 UpcomingEvent3.IsVisible = true;
             }
             else

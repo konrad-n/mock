@@ -98,7 +98,7 @@ namespace SledzSpecke.App.Views
                 }
                 else
                 {
-                    TotalHoursLabel.TextColor = Colors.DarkBlue;
+                    TotalHoursLabel.TextColor = new Color(8,32,68);
                 }
             }
             catch (Exception ex)
@@ -162,7 +162,7 @@ namespace SledzSpecke.App.Views
                             Padding = new Thickness(10),
                             Margin = new Thickness(0, 0, 0, 10),
                             CornerRadius = 5,
-                            BorderColor = dutyShift.Type == DutyType.Independent ? Colors.DarkBlue : Colors.DarkGreen
+                            BorderColor = dutyShift.Type == DutyType.Independent ? new Color(8, 32, 68) : Colors.DarkGreen
                         };
 
                         var dateLabel = new Label
@@ -176,7 +176,7 @@ namespace SledzSpecke.App.Views
                         {
                             Text = dutyShift.Type == DutyType.Independent ? "Samodzielny" : "Towarzyszący",
                             FontSize = 14,
-                            TextColor = dutyShift.Type == DutyType.Independent ? Colors.DarkBlue : Colors.DarkGreen
+                            TextColor = dutyShift.Type == DutyType.Independent ? new Color(8, 32, 68) : Colors.DarkGreen
                         };
 
                         var durationLabel = new Label

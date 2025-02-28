@@ -5,35 +5,35 @@
           Title="Dashboard">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout>
                     <Label Text="Specjalizacja: Hematologia" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                         <Frame BorderColor="LightBlue" Padding="10" Grid.Column="0" Grid.Row="0">
                             <VerticalStackLayout>
-                                <Label Text="Data rozpoczęcia" FontSize="14" TextColor="Gray"/>
+                                <Label Text="Data rozpoczęcia" FontSize="14" TextColor="#547E9E"/>
                                 <Label x:Name="StartDateLabel" Text="01-01-2023" FontSize="16" FontAttributes="Bold"/>
                             </VerticalStackLayout>
                         </Frame>
 
                         <Frame BorderColor="LightBlue" Padding="10" Grid.Column="1" Grid.Row="0">
                             <VerticalStackLayout>
-                                <Label Text="Przewidywana data zakończenia" FontSize="14" TextColor="Gray"/>
+                                <Label Text="Przewidywana data zakończenia" FontSize="14" TextColor="#547E9E"/>
                                 <Label x:Name="EndDateLabel" Text="01-01-2028" FontSize="16" FontAttributes="Bold"/>
                             </VerticalStackLayout>
                         </Frame>
 
                         <Frame BorderColor="LightBlue" Padding="10" Grid.Column="0" Grid.Row="1">
                             <VerticalStackLayout>
-                                <Label Text="Pozostało dni" FontSize="14" TextColor="Gray"/>
+                                <Label Text="Pozostało dni" FontSize="14" TextColor="#547E9E"/>
                                 <Label x:Name="DaysLeftLabel" Text="1825" FontSize="16" FontAttributes="Bold"/>
                             </VerticalStackLayout>
                         </Frame>
 
                         <Frame BorderColor="LightBlue" Padding="10" Grid.Column="1" Grid.Row="1">
                             <VerticalStackLayout>
-                                <Label Text="Obecny etap" FontSize="14" TextColor="Gray"/>
+                                <Label Text="Obecny etap" FontSize="14" TextColor="#547E9E"/>
                                 <Label x:Name="CurrentStageLabel" Text="Moduł podstawowy" FontSize="16" FontAttributes="Bold"/>
                             </VerticalStackLayout>
                         </Frame>
@@ -42,7 +42,7 @@
             </Frame>
 
             <Label Text="Postęp całościowy" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout>
                     <ProgressBar x:Name="TotalProgressBar" Progress="0.35" HeightRequest="15" Margin="0,0,0,5"/>
                     <Label x:Name="TotalProgressLabel" Text="35% ukończono" HorizontalOptions="Center"/>
@@ -51,7 +51,7 @@
 
             <Label Text="Postęp modułów" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="0" Grid.Row="0">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="0">
                     <VerticalStackLayout>
                         <Label Text="Moduł podstawowy" FontSize="14" FontAttributes="Bold"/>
                         <ProgressBar x:Name="BasicModuleProgressBar" Progress="0.6" HeightRequest="10" Margin="0,5,0,5"/>
@@ -59,7 +59,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="1" Grid.Row="0">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="0">
                     <VerticalStackLayout>
                         <Label Text="Moduł specjalistyczny" FontSize="14" FontAttributes="Bold"/>
                         <ProgressBar x:Name="SpecialisticModuleProgressBar" Progress="0.1" HeightRequest="10" Margin="0,5,0,5"/>
@@ -70,7 +70,7 @@
 
             <Label Text="Kategorie" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="0" Grid.Row="0" BackgroundColor="AliceBlue">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="0" BackgroundColor="AliceBlue">
                     <VerticalStackLayout>
                         <Label Text="Kursy" FontSize="16" FontAttributes="Bold"/>
                         <Label x:Name="CoursesLabel" Text="5/21 ukończonych" FontSize="14"/>
@@ -78,7 +78,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="1" Grid.Row="0" BackgroundColor="AliceBlue">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="0" BackgroundColor="AliceBlue">
                     <VerticalStackLayout>
                         <Label Text="Staże" FontSize="16" FontAttributes="Bold"/>
                         <Label x:Name="InternshipsLabel" Text="2/10 ukończonych" FontSize="14"/>
@@ -86,7 +86,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="0" Grid.Row="1" BackgroundColor="AliceBlue">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="1" BackgroundColor="AliceBlue">
                     <VerticalStackLayout>
                         <Label Text="Procedury A" FontSize="16" FontAttributes="Bold"/>
                         <Label x:Name="ProceduresALabel" Text="45/107 wykonanych" FontSize="14"/>
@@ -94,7 +94,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="1" Grid.Row="1" BackgroundColor="AliceBlue">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="1" BackgroundColor="AliceBlue">
                     <VerticalStackLayout>
                         <Label Text="Procedury B" FontSize="16" FontAttributes="Bold"/>
                         <Label x:Name="ProceduresBLabel" Text="25/96 wykonanych" FontSize="14"/>
@@ -102,7 +102,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="0" Grid.Row="2" BackgroundColor="AliceBlue">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="0" Grid.Row="2" BackgroundColor="AliceBlue">
                     <VerticalStackLayout>
                         <Label Text="Dyżury" FontSize="16" FontAttributes="Bold"/>
                         <Label x:Name="DutyShiftsLabel" Text="125/520 godzin" FontSize="14"/>
@@ -110,7 +110,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <Frame BorderColor="LightGray" Padding="10" Grid.Column="1" Grid.Row="2" BackgroundColor="AliceBlue">
+                <Frame BorderColor="#e4f0f5" Padding="10" Grid.Column="1" Grid.Row="2" BackgroundColor="AliceBlue">
                     <VerticalStackLayout>
                         <Label Text="Samokształcenie" FontSize="16" FontAttributes="Bold"/>
                         <Label x:Name="SelfEducationLabel" Text="5/18 dni" FontSize="14"/>
@@ -120,17 +120,17 @@
             </Grid>
 
             <Label Text="Najbliższe terminy" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
-                    <Label x:Name="UpcomingEvent1" Text="15.03.2023 - Kurs: Zaburzenia hemostazy" TextColor="DarkBlue"/>
-                    <Label x:Name="UpcomingEvent2" Text="01.04.2023 - Staż kierunkowy w laboratorium hematologicznym" TextColor="DarkBlue"/>
-                    <Label x:Name="UpcomingEvent3" Text="30.05.2023 - Koniec modułu podstawowego" TextColor="Red" FontAttributes="Bold"/>
+                    <Label x:Name="UpcomingEvent1" Text="15.03.2023 - Kurs: Zaburzenia hemostazy" TextColor="#082044"/>
+                    <Label x:Name="UpcomingEvent2" Text="01.04.2023 - Staż kierunkowy w laboratorium hematologicznym" TextColor="#082044"/>
+                    <Label x:Name="UpcomingEvent3" Text="30.05.2023 - Koniec modułu podstawowego" TextColor="#547E9E" FontAttributes="Bold"/>
                 </VerticalStackLayout>
             </Frame>
 
             <VerticalStackLayout Spacing="10" Margin="0,10,0,0">
-                <Button Text="Generuj raport do SMK" Clicked="OnGenerateReportButtonClicked" BackgroundColor="DarkBlue" TextColor="White"/>
-                <Button Text="Ustawienia" Clicked="OnSettingsButtonClicked" BackgroundColor="Gray" TextColor="White"/>
+                <Button Text="Generuj raport do SMK" Clicked="OnGenerateReportButtonClicked" BackgroundColor="#082044" TextColor="White"/>
+                <Button Text="Ustawienia" Clicked="OnSettingsButtonClicked" BackgroundColor="#547E9E" TextColor="White"/>
             </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>

@@ -7,7 +7,7 @@
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Eksport danych do SMK" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Wybierz typ eksportu" FontSize="16" FontAttributes="Bold"/>
 
@@ -18,7 +18,7 @@
             </Frame>
 
             <!-- Options for general export -->
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10" IsVisible="{Binding IsGeneralExportSelected}">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10" IsVisible="{Binding IsGeneralExportSelected}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Wybierz zakres danych do eksportu" FontSize="16" FontAttributes="Bold"/>
 
@@ -35,7 +35,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Wybierz format eksportu" FontSize="16" FontAttributes="Bold"/>
 
@@ -48,7 +48,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Wybierz moduł" FontSize="16" FontAttributes="Bold"/>
 
@@ -58,7 +58,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Zakres dat" FontSize="16" FontAttributes="Bold"/>
 
@@ -76,7 +76,7 @@
             </Frame>
 
             <!-- New section for SMK format options -->
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Opcje formatu SMK" FontSize="16" FontAttributes="Bold"/>
 
@@ -86,16 +86,16 @@
                     </StackLayout>
 
                     <Label Text="Zgodnie z instrukcją SMK, eksport będzie zawierał wszystkie wymagane kolumny w odpowiednim formacie." 
-                           FontSize="12" TextColor="Gray"/>
+                           FontSize="12" TextColor="#547E9E"/>
                 </VerticalStackLayout>
             </Frame>
 
-            <Button Text="Generuj raport" Clicked="OnGenerateReportClicked" BackgroundColor="DarkBlue" TextColor="White"/>
+            <Button Text="Generuj raport" Clicked="OnGenerateReportClicked" BackgroundColor="#082044" TextColor="White"/>
 
-            <Frame BorderColor="LightGray" Padding="15" CornerRadius="10" IsVisible="False" x:Name="ResultFrame">
+            <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10" IsVisible="False" x:Name="ResultFrame">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Raport został wygenerowany" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    <Label x:Name="FilePathLabel" Text="Ścieżka pliku: /Downloads/SMK_Export_20230301.xlsx" TextColor="Blue"/>
+                    <Label x:Name="FilePathLabel" Text="Ścieżka pliku: /Downloads/SMK_Export_20230301.xlsx" TextColor="#0d759c"/>
 
                     <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                         <Button Text="Otwórz plik" Clicked="OnOpenFileClicked" BackgroundColor="Green" TextColor="White"/>

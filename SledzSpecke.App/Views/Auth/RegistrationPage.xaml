@@ -26,7 +26,7 @@
 
             <ActivityIndicator x:Name="ActivityIndicator" IsRunning="False" HorizontalOptions="Center" Margin="0,10,0,10" />
 
-            <Label Text="Rejestrując się, akceptujesz regulamin aplikacji." HorizontalOptions="Center" FontSize="12" TextColor="Gray" />
+            <Label Text="Rejestrując się, akceptujesz regulamin aplikacji." HorizontalOptions="Center" FontSize="12" TextColor="#547E9E" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

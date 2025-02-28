@@ -44,8 +44,8 @@
             <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Notes}"/>
 
             <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
-                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="Gray"/>
-                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="DarkBlue" TextColor="White"/>
+                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="#547E9E"/>
+                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
             </StackLayout>
         </VerticalStackLayout>
     </ScrollView>

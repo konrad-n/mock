@@ -91,7 +91,7 @@ namespace SledzSpecke.App.Views
                         Padding = new Thickness(10),
                         Margin = new Thickness(0, 0, 0, 10),
                         CornerRadius = 5,
-                        BorderColor = education.IsRequired ? Colors.DarkBlue : Colors.DarkGreen
+                        BorderColor = education.IsRequired ? new Color(8, 32, 68) : Colors.DarkGreen
                     };
 
                     var titleLabel = new Label
@@ -105,7 +105,7 @@ namespace SledzSpecke.App.Views
                     {
                         Text = GetSelfEducationTypeName(education.Type),
                         FontSize = 14,
-                        TextColor = education.IsRequired ? Colors.DarkBlue : Colors.DarkGreen
+                        TextColor = education.IsRequired ? new Color(8, 32, 68) : Colors.DarkGreen
                     };
 
                     var dateLabel = new Label
@@ -130,7 +130,7 @@ namespace SledzSpecke.App.Views
                     {
                         Text = education.IsRequired ? "Wymagane w programie specjalizacji" : "Dodatkowe",
                         FontSize = 12,
-                        TextColor = education.IsRequired ? Colors.DarkBlue : Colors.Gray
+                        TextColor = education.IsRequired ? new Color(8, 32, 68) : new Color(84,126,158)
                     };
 
                     var editButton = new Button
