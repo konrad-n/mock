@@ -170,6 +170,7 @@ namespace SledzSpecke.App.Services
             return hashedPassword == storedHash;
         }
 
+        // Fragment do dodania w AuthenticationService.cs w metodzie SeedTestUserAsync
         public async Task<bool> SeedTestUserAsync()
         {
             try
@@ -240,9 +241,28 @@ namespace SledzSpecke.App.Services
                 };
                 await _databaseService.SaveUserSettingsAsync(settings);
 
+                // Zainicjuj dane szablonowe dla hematologii
+                await _databaseService.InitializeSpecializationTemplateDataAsync(specializationTypeId);
+
                 // Create specialization
                 _logger.LogInformation("Creating specialization for test user");
-                var specialization = SledzSpecke.Infrastructure.Database.Initialization.DataSeeder.SeedHematologySpecialization();
+                var specialization = new Specialization
+                {
+                    Name = "Hematologia",
+                    StartDate = DateTime.Now,
+                    ExpectedEndDate = DateTime.Now.AddYears(5),
+                    BaseDurationWeeks = 261,
+                    BasicModuleDurationWeeks = 104,
+                    SpecialisticModuleDurationWeeks = 157,
+                    VacationDaysPerYear = 26,
+                    SelfEducationDaysPerYear = 6,
+                    StatutoryHolidaysPerYear = 13,
+                    RequiredDutyHoursPerWeek = 10.0833,
+                    RequiresPublication = true,
+                    RequiredConferences = 3,
+                    SpecializationTypeId = specializationTypeId
+                };
+
                 await _databaseService.SaveAsync(specialization);
                 _logger.LogDebug("Specialization saved with ID: {Id}", specialization.Id);
 
@@ -250,9 +270,6 @@ namespace SledzSpecke.App.Services
                 _logger.LogInformation("Updating user settings with specialization ID");
                 settings.CurrentSpecializationId = specialization.Id;
                 await _databaseService.SaveUserSettingsAsync(settings);
-
-                // Save related data
-                await SaveRelatedDataAsync(specialization);
 
                 _logger.LogInformation("Test user seeded successfully");
                 return true;

@@ -8,6 +8,7 @@ using SledzSpecke.Infrastructure.Services;
 using System.Threading;
 using System;
 using SledzSpecke.Core.Models.Enums;
+using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.Infrastructure.Database
 {
@@ -288,7 +289,7 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        public async Task DeleteAllDataAsync()
+        public async Task<bool> DeleteAllDataAsync()
         {
             await EnsureInitializedAsync();
             try
@@ -303,10 +304,91 @@ namespace SledzSpecke.Infrastructure.Database
                 await _database.DeleteAllAsync<User>().ConfigureAwait(false);
                 await _database.DeleteAllAsync<UserSettings>().ConfigureAwait(false);
                 _logger.LogInformation("All data deleted from the database");
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting all data");
+                throw;
+            }
+        }
+
+        // Nowa metoda do sprawdzania, czy specjalizacja ma już wczytane dane szablonowe
+        public async Task<bool> HasSpecializationTemplateDataAsync(int specializationTypeId)
+        {
+            await EnsureInitializedAsync();
+            try
+            {
+                // Sprawdź czy istnieje specjalizacja o danym typie
+                var specialization = await _database.Table<Specialization>()
+                    .Where(s => s.SpecializationTypeId == specializationTypeId)
+                    .FirstOrDefaultAsync();
+
+                if (specialization == null)
+                    return false;
+
+                // Sprawdź czy istnieją kursy dla tej specjalizacji
+                var courses = await _database.Table<Course>()
+                    .Where(c => c.SpecializationId == specialization.Id)
+                    .CountAsync();
+
+                return courses > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking specialization template data");
+                return false;
+            }
+        }
+
+        // Nowa metoda do inicjowania danych szablonowych dla specjalizacji
+        public async Task InitializeSpecializationTemplateDataAsync(int specializationTypeId)
+        {
+            await EnsureInitializedAsync();
+            try
+            {
+                // Sprawdź, czy dane szablonowe już istnieją
+                if (await HasSpecializationTemplateDataAsync(specializationTypeId))
+                {
+                    _logger.LogInformation("Template data already exists for specialization type {SpecializationTypeId}", specializationTypeId);
+                    return;
+                }
+
+                _logger.LogInformation("Initializing template data for specialization type {SpecializationTypeId}", specializationTypeId);
+
+                // Tymczasowo użyjemy danych dla hematologii - w przyszłości dodać obsługę innych specjalizacji
+                var templateData = DataSeeder.SeedHematologySpecialization();
+                templateData.SpecializationTypeId = specializationTypeId;
+
+                // Zapisz specjalizację
+                await SaveAsync(templateData);
+
+                // Zapisz kursy
+                foreach (var course in templateData.RequiredCourses)
+                {
+                    course.SpecializationId = templateData.Id;
+                    await SaveAsync(course);
+                }
+
+                // Zapisz staże
+                foreach (var internship in templateData.RequiredInternships)
+                {
+                    internship.SpecializationId = templateData.Id;
+                    await SaveAsync(internship);
+                }
+
+                // Zapisz procedury
+                foreach (var procedure in templateData.RequiredProcedures)
+                {
+                    procedure.SpecializationId = templateData.Id;
+                    await SaveAsync(procedure);
+                }
+
+                _logger.LogInformation("Template data initialized successfully for specialization type {SpecializationTypeId}", specializationTypeId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing specialization template data");
                 throw;
             }
         }

@@ -1,6 +1,5 @@
 ﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
@@ -12,8 +11,27 @@ namespace SledzSpecke.App.Views
         public InternshipsPage()
         {
             InitializeComponent();
-            _specialization = DataSeeder.SeedHematologySpecialization();
-            DisplayInternships(_currentModule);
+            LoadDataAsync();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            LoadDataAsync();
+        }
+
+        private async void LoadDataAsync()
+        {
+            try
+            {
+                // Pobieramy dane z bazy, nie z seedera
+                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                DisplayInternships(_currentModule);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
+            }
         }
 
         private void DisplayInternships(ModuleType moduleType)
@@ -196,21 +214,16 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private void OnInternshipAdded(Internship internship)
+        private async void OnInternshipAdded(Internship internship)
         {
-            _specialization.RequiredInternships.Add(internship);
-            DisplayInternships(_currentModule);
+            await App.SpecializationService.SaveInternshipAsync(internship);
+            await LoadDataAsync();
         }
 
-        private void OnInternshipUpdated(Internship internship)
+        private async void OnInternshipUpdated(Internship internship)
         {
-            var existingInternship = _specialization.RequiredInternships.FirstOrDefault(i => i.Id == internship.Id);
-            if (existingInternship != null)
-            {
-                var index = _specialization.RequiredInternships.IndexOf(existingInternship);
-                _specialization.RequiredInternships[index] = internship;
-            }
-            DisplayInternships(_currentModule);
+            await App.SpecializationService.SaveInternshipAsync(internship);
+            await LoadDataAsync();
         }
     }
 }

@@ -35,72 +35,23 @@ namespace SledzSpecke.App.Services
                 if (specialization != null)
                 {
                     _specialization = specialization;
-
-                    // Load related data
-                    await LoadRelatedDataAsync(specialization);
-
                     return specialization;
                 }
 
-                // Try to load from file as fallback
-                if (File.Exists(_specializationFile))
-                {
-                    string json = await File.ReadAllTextAsync(_specializationFile);
-                    _specialization = JsonSerializer.Deserialize<Specialization>(json);
-
-                    // Save to database for future use
-                    await SaveSpecializationAsync(_specialization);
-                }
-                else
-                {
-                    // If nothing found, seed default data
-                    _specialization = DataSeeder.SeedHematologySpecialization();
-                    await SaveSpecializationAsync(_specialization);
-                }
+                // If nothing found, seed default data
+                _specialization = DataSeeder.SeedHematologySpecialization();
+                await SaveSpecializationAsync(_specialization);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading specialization data");
+
+                // W przypadku błędu, zwracamy nową instancję specjalizacji
                 _specialization = DataSeeder.SeedHematologySpecialization();
+                await SaveSpecializationAsync(_specialization);
             }
 
             return _specialization;
-        }
-
-        private async Task LoadRelatedDataAsync(Specialization specialization)
-        {
-            try
-            {
-                // Load courses
-                var courses = await _databaseService.GetAllAsync<Course>();
-                specialization.RequiredCourses = courses
-                    .Where(c => c.SpecializationId == specialization.Id)
-                    .ToList();
-
-                // Load internships
-                var internships = await _databaseService.GetAllAsync<Internship>();
-                specialization.RequiredInternships = internships
-                    .Where(i => i.SpecializationId == specialization.Id)
-                    .ToList();
-
-                // Load procedures
-                var procedures = await _databaseService.GetAllAsync<MedicalProcedure>();
-                specialization.RequiredProcedures = procedures
-                    .Where(p => p.SpecializationId == specialization.Id)
-                    .ToList();
-
-                // Load procedure entries
-                foreach (var procedure in specialization.RequiredProcedures)
-                {
-                    var entries = await _databaseService.GetEntriesForProcedureAsync(procedure.Id);
-                    procedure.Entries = entries;
-                    procedure.CompletedCount = entries.Count;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading related data for specialization");
-            }
         }
 
         public async Task SaveSpecializationAsync(Specialization specialization)
@@ -109,33 +60,14 @@ namespace SledzSpecke.App.Services
             {
                 _specialization = specialization;
 
+                // Inicjalizacja danych szablonowych jeśli potrzebne
+                if (!await _databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
+                {
+                    await _databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
+                }
+
                 // Save to database
                 await _databaseService.SaveAsync(specialization);
-
-                // Save related data
-                foreach (var course in specialization.RequiredCourses)
-                {
-                    course.SpecializationId = specialization.Id;
-                    await _databaseService.SaveAsync(course);
-                }
-
-                foreach (var internship in specialization.RequiredInternships)
-                {
-                    internship.SpecializationId = specialization.Id;
-                    await _databaseService.SaveAsync(internship);
-                }
-
-                foreach (var procedure in specialization.RequiredProcedures)
-                {
-                    procedure.SpecializationId = specialization.Id;
-                    await _databaseService.SaveAsync(procedure);
-
-                    foreach (var entry in procedure.Entries)
-                    {
-                        entry.ProcedureId = procedure.Id;
-                        await _databaseService.SaveAsync(entry);
-                    }
-                }
 
                 // Save user settings
                 var settings = await _databaseService.GetUserSettingsAsync();
@@ -211,6 +143,13 @@ namespace SledzSpecke.App.Services
         {
             try
             {
+                // Sprawdź, czy dane szablonowe już istnieją
+                if (!await _databaseService.HasSpecializationTemplateDataAsync(specializationTypeId))
+                {
+                    // Zainicjuj dane szablonowe
+                    await _databaseService.InitializeSpecializationTemplateDataAsync(specializationTypeId);
+                }
+
                 // Get specialization type
                 var specializationType = await _databaseService.GetByIdAsync<SpecializationType>(specializationTypeId);
                 if (specializationType == null)
@@ -246,9 +185,6 @@ namespace SledzSpecke.App.Services
                 settings.CurrentSpecializationId = newSpecialization.Id;
                 await _databaseService.SaveUserSettingsAsync(settings);
 
-                // Load required courses, internships, and procedures for this specialization
-                await LoadRequiredItemsForSpecializationAsync(newSpecialization);
-
                 _logger.LogInformation("Specialization initialized successfully for user {Username}", username);
                 return newSpecialization;
             }
@@ -257,23 +193,6 @@ namespace SledzSpecke.App.Services
                 _logger.LogError(ex, "Error initializing specialization for user");
                 return null;
             }
-        }
-
-        private async Task LoadRequiredItemsForSpecializationAsync(Specialization specialization)
-        {
-            // This would need to be expanded to load data for each specialization type
-            // For now, we'll use the default hematology data for all specializations
-
-            // TODO: Load specialization-specific data when available
-            var seededSpecialization = DataSeeder.SeedHematologySpecialization();
-
-            // Copy data to the new specialization
-            specialization.RequiredCourses = seededSpecialization.RequiredCourses;
-            specialization.RequiredInternships = seededSpecialization.RequiredInternships;
-            specialization.RequiredProcedures = seededSpecialization.RequiredProcedures;
-
-            // Save the data to database
-            await SaveSpecializationAsync(specialization);
         }
 
         public string GetSpecializationName()

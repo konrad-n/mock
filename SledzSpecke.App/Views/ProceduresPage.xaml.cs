@@ -1,6 +1,5 @@
 ﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
@@ -13,8 +12,27 @@ namespace SledzSpecke.App.Views
         public ProceduresPage()
         {
             InitializeComponent();
-            _specialization = DataSeeder.SeedHematologySpecialization();
-            DisplayProcedures(_currentModule, _currentProcedureType);
+            LoadDataAsync();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            LoadDataAsync();
+        }
+
+        private async void LoadDataAsync()
+        {
+            try
+            {
+                // Pobieramy dane z bazy, nie z seedera
+                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                DisplayProcedures(_currentModule, _currentProcedureType);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
+            }
         }
 
         private void DisplayProcedures(ModuleType moduleType, ProcedureType procedureType)
@@ -212,32 +230,22 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private void OnProcedureAdded(MedicalProcedure procedure)
+        private async void OnProcedureAdded(MedicalProcedure procedure)
         {
-            _specialization.RequiredProcedures.Add(procedure);
-            DisplayProcedures(_currentModule, _currentProcedureType);
+            await App.SpecializationService.SaveProcedureAsync(procedure);
+            await LoadDataAsync();
         }
 
-        private void OnProcedureUpdated(MedicalProcedure procedure)
+        private async void OnProcedureUpdated(MedicalProcedure procedure)
         {
-            var existingProcedure = _specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedure.Id);
-            if (existingProcedure != null)
-            {
-                var index = _specialization.RequiredProcedures.IndexOf(existingProcedure);
-                _specialization.RequiredProcedures[index] = procedure;
-            }
-            DisplayProcedures(_currentModule, _currentProcedureType);
+            await App.SpecializationService.SaveProcedureAsync(procedure);
+            await LoadDataAsync();
         }
 
-        private void OnProcedureEntryAdded(MedicalProcedure procedure, ProcedureEntry entry)
+        private async void OnProcedureEntryAdded(MedicalProcedure procedure, ProcedureEntry entry)
         {
-            var existingProcedure = _specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedure.Id);
-            if (existingProcedure != null)
-            {
-                existingProcedure.Entries.Add(entry);
-                existingProcedure.CompletedCount = existingProcedure.Entries.Count;
-            }
-            DisplayProcedures(_currentModule, _currentProcedureType);
+            await App.SpecializationService.AddProcedureEntryAsync(procedure, entry);
+            await LoadDataAsync();
         }
     }
 }

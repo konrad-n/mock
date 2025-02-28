@@ -1,6 +1,5 @@
 ﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Views
 {
@@ -12,8 +11,27 @@ namespace SledzSpecke.App.Views
         public CoursesPage()
         {
             InitializeComponent();
-            _specialization = DataSeeder.SeedHematologySpecialization();
-            DisplayCourses(_currentModule);
+            LoadDataAsync();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            LoadDataAsync();
+        }
+
+        private async void LoadDataAsync()
+        {
+            try
+            {
+                // Pobieramy dane z bazy, nie z seedera
+                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                DisplayCourses(_currentModule);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
+            }
         }
 
         private void DisplayCourses(ModuleType moduleType)
@@ -160,21 +178,16 @@ namespace SledzSpecke.App.Views
             }
         }
 
-        private void OnCourseAdded(Course course)
+        private async void OnCourseAdded(Course course)
         {
-            _specialization.RequiredCourses.Add(course);
-            DisplayCourses(_currentModule);
+            await App.SpecializationService.SaveCourseAsync(course);
+            await LoadDataAsync();
         }
 
-        private void OnCourseUpdated(Course course)
+        private async void OnCourseUpdated(Course course)
         {
-            var existingCourse = _specialization.RequiredCourses.FirstOrDefault(c => c.Id == course.Id);
-            if (existingCourse != null)
-            {
-                var index = _specialization.RequiredCourses.IndexOf(existingCourse);
-                _specialization.RequiredCourses[index] = course;
-            }
-            DisplayCourses(_currentModule);
+            await App.SpecializationService.SaveCourseAsync(course);
+            await LoadDataAsync();
         }
     }
 }

@@ -23,9 +23,9 @@ namespace SledzSpecke.App.Services
             {
                 // Get current specialization from database
                 var specialization = await _databaseService.GetCurrentSpecializationAsync();
-
                 if (specialization == null)
                 {
+                    _logger.LogInformation("No current specialization found. Creating default specialization.");
                     // Create default specialization if none exists
                     specialization = DataSeeder.SeedHematologySpecialization();
                     await SaveSpecializationAsync(specialization);
@@ -39,8 +39,8 @@ namespace SledzSpecke.App.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting specialization");
-                // Return default specialization in case of error
-                return DataSeeder.SeedHematologySpecialization();
+                // Nie zwracaj tutaj seedera - to zmniejszy spójność danych
+                throw;
             }
         }
 
@@ -71,6 +71,7 @@ namespace SledzSpecke.App.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading related data for specialization");
+                throw;
             }
         }
 
@@ -78,6 +79,19 @@ namespace SledzSpecke.App.Services
         {
             try
             {
+                // Sprawdź czy dane szablonowe istnieją, jeśli nie - zainicjuj je
+                if (!await _databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
+                {
+                    await _databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
+
+                    // Po inicjalizacji ponownie pobierz specjalizację
+                    specialization = await _databaseService.GetCurrentSpecializationAsync();
+                    if (specialization == null)
+                    {
+                        throw new Exception("Failed to initialize specialization template data");
+                    }
+                }
+
                 // Save specialization
                 await _databaseService.SaveAsync(specialization);
 
