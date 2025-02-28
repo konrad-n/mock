@@ -392,5 +392,35 @@ namespace SledzSpecke.Infrastructure.Database
                 throw;
             }
         }
+
+        public async Task<int> InsertAsync<T>(T item) where T : new()
+        {
+            await EnsureInitializedAsync();
+            try
+            {
+                _logger.LogDebug("Inserting new item of type {Type}", typeof(T).Name);
+                return await _database.InsertAsync(item).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error inserting item of type {Type}", typeof(T).Name);
+                throw;
+            }
+        }
+
+        public async Task<int> UpdateAsync<T>(T item) where T : new()
+        {
+            await EnsureInitializedAsync();
+            try
+            {
+                _logger.LogDebug("Updating item of type {Type}", typeof(T).Name);
+                return await _database.UpdateAsync(item).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating item of type {Type}", typeof(T).Name);
+                throw;
+            }
+        }
     }
 }

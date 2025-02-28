@@ -49,12 +49,24 @@ namespace SledzSpecke.App.Services
                 var userSettings = await _databaseService.GetUserSettingsAsync();
                 dutyShift.SpecializationId = userSettings.CurrentSpecializationId;
 
-                await _databaseService.SaveAsync(dutyShift);
-                _logger.LogInformation("Duty shift saved successfully");
+                _logger.LogDebug("Saving duty shift with ID: {Id} (0 means new record)", dutyShift.Id);
+
+                if (dutyShift.Id == 0)
+                {
+                    // Insert new record approach
+                    await _databaseService.InsertAsync(dutyShift);
+                    _logger.LogInformation("New duty shift inserted with ID: {Id}", dutyShift.Id);
+                }
+                else
+                {
+                    // Update existing record
+                    await _databaseService.UpdateAsync(dutyShift);
+                    _logger.LogInformation("Existing duty shift updated with ID: {Id}", dutyShift.Id);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving duty shift");
+                _logger.LogError(ex, "Error saving duty shift with ID: {Id}", dutyShift.Id);
                 throw;
             }
         }
@@ -114,15 +126,24 @@ namespace SledzSpecke.App.Services
             {
                 var dutyShifts = await GetAllDutyShiftsAsync();
 
-                // Calculate hours in last N weeks
-                var cutoffDate = DateTime.Now.AddDays(-7 * weeks);
-                var recentShifts = dutyShifts.Where(d => d.StartDate >= cutoffDate);
-
-                if (!recentShifts.Any())
+                if (!dutyShifts.Any())
                     return 0;
 
-                var totalHours = recentShifts.Sum(d => d.DurationHours);
-                return totalHours / weeks;
+                // Find the first and last duty dates
+                DateTime firstDate = dutyShifts.Min(d => d.StartDate.Date);
+                DateTime lastDate = dutyShifts.Max(d => d.StartDate.Date);
+
+                // Calculate number of weeks between first and last duty
+                double totalWeeks = Math.Max(1, (lastDate - firstDate).TotalDays / 7);
+
+                // If less than requested weeks, use actual number
+                totalWeeks = Math.Min(totalWeeks, weeks);
+
+                // Calculate total hours
+                double totalHours = dutyShifts.Sum(d => d.DurationHours);
+
+                // Return weekly average
+                return totalHours / totalWeeks;
             }
             catch (Exception ex)
             {

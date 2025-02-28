@@ -11,6 +11,7 @@ namespace SledzSpecke.App.Views
         public DutyShiftsPage()
         {
             InitializeComponent();
+            _dutyShifts = new List<DutyShift>();
             LoadDataAsync();
         }
 
@@ -31,8 +32,8 @@ namespace SledzSpecke.App.Views
                 var specialization = await App.SpecializationService.GetSpecializationAsync();
                 _totalRequiredHours = specialization.RequiredDutyHoursPerWeek * (specialization.BaseDurationWeeks / 52.0) * 52;
 
-                // Get weekly average
-                var weeklyAverage = await App.DutyShiftService.GetAverageWeeklyHoursAsync();
+                // Get weekly average - calculate from data not from service
+                double weeklyAverage = CalculateWeeklyAverage();
 
                 // Update UI
                 UpdateTotalHours();
@@ -43,140 +44,198 @@ namespace SledzSpecke.App.Views
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Failed to load duty shifts: {ex.Message}", "OK");
+                await DisplayAlert("Błąd", $"Nie udało się załadować dyżurów: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error loading duty shifts: {ex}");
+            }
+        }
+
+        private double CalculateWeeklyAverage()
+        {
+            try
+            {
+                if (_dutyShifts == null || _dutyShifts.Count == 0)
+                    return 0;
+
+                // Count actual weeks with duties
+                var dates = _dutyShifts.Select(d => d.StartDate.Date).Distinct().OrderBy(d => d).ToList();
+                if (dates.Count == 0)
+                    return 0;
+
+                DateTime firstDate = dates.First();
+                DateTime lastDate = dates.Last();
+
+                // Calculate number of weeks between first and last duty
+                double weeks = Math.Max(1, (lastDate - firstDate).TotalDays / 7);
+
+                // Calculate total hours
+                double totalHours = _dutyShifts.Sum(d => d.DurationHours);
+
+                // Return weekly average
+                return totalHours / weeks;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error calculating weekly average: {ex}");
+                return 0;
             }
         }
 
         private void UpdateTotalHours()
         {
-            double totalHours = _dutyShifts.Sum(d => d.DurationHours);
-            TotalHoursLabel.Text = $"{totalHours:F1}/{_totalRequiredHours:F0} godzin";
+            try
+            {
+                double totalHours = _dutyShifts?.Sum(d => d.DurationHours) ?? 0;
+                TotalHoursLabel.Text = $"{totalHours:F1}/{_totalRequiredHours:F0} godzin";
 
-            // Update color based on progress
-            if (totalHours >= _totalRequiredHours)
-            {
-                TotalHoursLabel.TextColor = Colors.Green;
+                // Update color based on progress
+                if (totalHours >= _totalRequiredHours)
+                {
+                    TotalHoursLabel.TextColor = Colors.Green;
+                }
+                else if (totalHours >= _totalRequiredHours * 0.75)
+                {
+                    TotalHoursLabel.TextColor = Colors.Orange;
+                }
+                else
+                {
+                    TotalHoursLabel.TextColor = Colors.DarkBlue;
+                }
             }
-            else if (totalHours >= _totalRequiredHours * 0.75)
+            catch (Exception ex)
             {
-                TotalHoursLabel.TextColor = Colors.Orange;
-            }
-            else
-            {
-                TotalHoursLabel.TextColor = Colors.DarkBlue;
+                System.Diagnostics.Debug.WriteLine($"Error updating total hours: {ex}");
+                TotalHoursLabel.Text = $"0.0/{_totalRequiredHours:F0} godzin";
             }
         }
 
         private void DisplayDutyShifts()
         {
-            DutyShiftsLayout.Children.Clear();
-
-            // Group duty shifts by month
-            var dutyShiftsByMonth = _dutyShifts
-                .OrderByDescending(d => d.StartDate)
-                .GroupBy(d => new { d.StartDate.Year, d.StartDate.Month })
-                .ToList();
-
-            foreach (var monthGroup in dutyShiftsByMonth)
+            try
             {
-                // Month header
-                var monthHeader = new Label
-                {
-                    Text = $"{GetMonthName(monthGroup.Key.Month)} {monthGroup.Key.Year}",
-                    FontSize = 18,
-                    FontAttributes = FontAttributes.Bold,
-                    Margin = new Thickness(0, 10, 0, 5)
-                };
-                DutyShiftsLayout.Children.Add(monthHeader);
+                DutyShiftsLayout.Children.Clear();
 
-                // Monthly total hours
-                var totalMonthHours = monthGroup.Sum(d => d.DurationHours);
-                var monthTotalLabel = new Label
+                if (_dutyShifts == null || _dutyShifts.Count == 0)
                 {
-                    Text = $"Łącznie: {totalMonthHours:F1} godzin",
-                    FontSize = 14,
-                    Margin = new Thickness(0, 0, 0, 10)
-                };
-                DutyShiftsLayout.Children.Add(monthTotalLabel);
-
-                foreach (var dutyShift in monthGroup)
-                {
-                    var frame = new Frame
+                    var emptyLabel = new Label
                     {
-                        Padding = new Thickness(10),
-                        Margin = new Thickness(0, 0, 0, 10),
-                        CornerRadius = 5,
-                        BorderColor = dutyShift.Type == DutyType.Independent ? Colors.DarkBlue : Colors.DarkGreen
+                        Text = "Brak dyżurów. Kliknij '+' aby dodać nowy dyżur.",
+                        HorizontalOptions = LayoutOptions.Center,
+                        VerticalOptions = LayoutOptions.Center,
+                        Margin = new Thickness(0, 20, 0, 0)
                     };
+                    DutyShiftsLayout.Children.Add(emptyLabel);
+                    return;
+                }
 
-                    var dateLabel = new Label
+                // Group duty shifts by month and year
+                var dutyShiftsByMonth = _dutyShifts
+                    .OrderByDescending(d => d.StartDate)
+                    .GroupBy(d => new { Year = d.StartDate.Year, Month = d.StartDate.Month })
+                    .ToList();
+
+                foreach (var monthGroup in dutyShiftsByMonth)
+                {
+                    // Month header
+                    var monthHeader = new Label
                     {
-                        Text = $"{dutyShift.StartDate.ToString("dd.MM.yyyy HH:mm")} - {dutyShift.EndDate.ToString("dd.MM.yyyy HH:mm")}",
+                        Text = $"{GetMonthName(monthGroup.Key.Month)} {monthGroup.Key.Year}",
+                        FontSize = 18,
                         FontAttributes = FontAttributes.Bold,
-                        FontSize = 16
+                        Margin = new Thickness(0, 10, 0, 5)
                     };
+                    DutyShiftsLayout.Children.Add(monthHeader);
 
-                    var typeLabel = new Label
+                    // Monthly total hours
+                    var totalMonthHours = monthGroup.Sum(d => d.DurationHours);
+                    var monthTotalLabel = new Label
                     {
-                        Text = dutyShift.Type == DutyType.Independent ? "Samodzielny" : "Towarzyszący",
+                        Text = $"Łącznie: {totalMonthHours:F1} godzin",
                         FontSize = 14,
-                        TextColor = dutyShift.Type == DutyType.Independent ? Colors.DarkBlue : Colors.DarkGreen
+                        Margin = new Thickness(0, 0, 0, 10)
                     };
+                    DutyShiftsLayout.Children.Add(monthTotalLabel);
 
-                    var durationLabel = new Label
+                    foreach (var dutyShift in monthGroup)
                     {
-                        Text = $"Czas trwania: {dutyShift.DurationHours:F1} godzin",
-                        FontSize = 14
-                    };
+                        var frame = new Frame
+                        {
+                            Padding = new Thickness(10),
+                            Margin = new Thickness(0, 0, 0, 10),
+                            CornerRadius = 5,
+                            BorderColor = dutyShift.Type == DutyType.Independent ? Colors.DarkBlue : Colors.DarkGreen
+                        };
 
-                    var locationLabel = new Label
-                    {
-                        Text = $"Miejsce: {dutyShift.Location}",
-                        FontSize = 14
-                    };
+                        var dateLabel = new Label
+                        {
+                            Text = $"{dutyShift.StartDate.ToString("dd.MM.yyyy HH:mm")} - {dutyShift.EndDate.ToString("dd.MM.yyyy HH:mm")}",
+                            FontAttributes = FontAttributes.Bold,
+                            FontSize = 16
+                        };
 
-                    var supervisorLabel = new Label
-                    {
-                        Text = $"Opiekun: {dutyShift.SupervisorName ?? "Brak"}",
-                        FontSize = 14,
-                        IsVisible = dutyShift.Type == DutyType.Accompanied && !string.IsNullOrEmpty(dutyShift.SupervisorName)
-                    };
+                        var typeLabel = new Label
+                        {
+                            Text = dutyShift.Type == DutyType.Independent ? "Samodzielny" : "Towarzyszący",
+                            FontSize = 14,
+                            TextColor = dutyShift.Type == DutyType.Independent ? Colors.DarkBlue : Colors.DarkGreen
+                        };
 
-                    var editButton = new Button
-                    {
-                        Text = "Edytuj",
-                        HeightRequest = 35,
-                        FontSize = 14,
-                        Margin = new Thickness(0, 5, 0, 0),
-                        CommandParameter = dutyShift.Id
-                    };
-                    editButton.Clicked += OnEditDutyShiftClicked;
+                        var durationLabel = new Label
+                        {
+                            Text = $"Czas trwania: {dutyShift.DurationHours:F1} godzin",
+                            FontSize = 14
+                        };
 
-                    var contentLayout = new VerticalStackLayout
-                    {
-                        Children = { dateLabel, typeLabel, durationLabel, locationLabel }
-                    };
+                        var locationLabel = new Label
+                        {
+                            Text = $"Miejsce: {dutyShift.Location}",
+                            FontSize = 14
+                        };
 
-                    if (supervisorLabel.IsVisible)
-                        contentLayout.Children.Add(supervisorLabel);
+                        var supervisorLabel = new Label
+                        {
+                            Text = $"Opiekun: {dutyShift.SupervisorName ?? "Brak"}",
+                            FontSize = 14,
+                            IsVisible = dutyShift.Type == DutyType.Accompanied && !string.IsNullOrEmpty(dutyShift.SupervisorName)
+                        };
 
-                    contentLayout.Children.Add(editButton);
+                        var editButton = new Button
+                        {
+                            Text = "Edytuj",
+                            HeightRequest = 35,
+                            FontSize = 14,
+                            Margin = new Thickness(0, 5, 0, 0),
+                            CommandParameter = dutyShift.Id
+                        };
+                        editButton.Clicked += OnEditDutyShiftClicked;
 
-                    frame.Content = contentLayout;
-                    DutyShiftsLayout.Children.Add(frame);
+                        var contentLayout = new VerticalStackLayout
+                        {
+                            Children = { dateLabel, typeLabel, durationLabel, locationLabel }
+                        };
+
+                        if (supervisorLabel.IsVisible)
+                            contentLayout.Children.Add(supervisorLabel);
+
+                        contentLayout.Children.Add(editButton);
+
+                        frame.Content = contentLayout;
+                        DutyShiftsLayout.Children.Add(frame);
+                    }
                 }
             }
-
-            if (_dutyShifts.Count == 0)
+            catch (Exception ex)
             {
-                var emptyLabel = new Label
+                System.Diagnostics.Debug.WriteLine($"Error displaying duty shifts: {ex}");
+                var errorLabel = new Label
                 {
-                    Text = "Brak dyżurów. Kliknij '+' aby dodać nowy dyżur.",
+                    Text = "Wystąpił błąd podczas wyświetlania dyżurów.",
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 20, 0, 0)
+                    Margin = new Thickness(0, 20, 0, 0),
+                    TextColor = Colors.Red
                 };
-                DutyShiftsLayout.Children.Add(emptyLabel);
+                DutyShiftsLayout.Children.Clear();
+                DutyShiftsLayout.Children.Add(errorLabel);
             }
         }
 
@@ -202,18 +261,34 @@ namespace SledzSpecke.App.Views
 
         private async void OnAddDutyShiftClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new DutyShiftDetailsPage(null, OnDutyShiftSaved));
+            try
+            {
+                await Navigation.PushAsync(new DutyShiftDetailsPage(null, OnDutyShiftSaved));
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się otworzyć strony dodawania dyżuru: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error navigating to DutyShiftDetailsPage: {ex}");
+            }
         }
 
         private async void OnEditDutyShiftClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is int dutyShiftId)
+            try
             {
-                var dutyShift = await App.DutyShiftService.GetDutyShiftAsync(dutyShiftId);
-                if (dutyShift != null)
+                if (sender is Button button && button.CommandParameter is int dutyShiftId)
                 {
-                    await Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, OnDutyShiftSaved));
+                    var dutyShift = await App.DutyShiftService.GetDutyShiftAsync(dutyShiftId);
+                    if (dutyShift != null)
+                    {
+                        await Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, OnDutyShiftSaved));
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", $"Nie udało się otworzyć strony edycji dyżuru: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error navigating to edit DutyShiftDetailsPage: {ex}");
             }
         }
 
@@ -225,11 +300,50 @@ namespace SledzSpecke.App.Views
                 await App.DutyShiftService.SaveDutyShiftAsync(dutyShift);
 
                 // Refresh data
-                await Task.Run(() => LoadDataAsync());
+                await LoadDataAsyncTask();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Failed to save duty shift: {ex.Message}", "OK");
+                await DisplayAlert("Błąd", $"Nie udało się zapisać dyżuru: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error saving duty shift: {ex}");
+            }
+        }
+
+        // Asynchronous method that returns a Task for better handling
+        private async Task LoadDataAsyncTask()
+        {
+            try
+            {
+                // Get all duty shifts from the database
+                _dutyShifts = await App.DutyShiftService.GetAllDutyShiftsAsync();
+
+                // Get specialization for required hours
+                var specialization = await App.SpecializationService.GetSpecializationAsync();
+                _totalRequiredHours = specialization.RequiredDutyHoursPerWeek * (specialization.BaseDurationWeeks / 52.0) * 52;
+
+                // Get weekly average - calculate from data not from service
+                double weeklyAverage = CalculateWeeklyAverage();
+
+                // Update UI on main thread
+                MainThread.BeginInvokeOnMainThread(() => {
+                    // Update total hours
+                    UpdateTotalHours();
+
+                    // Display duty shifts
+                    DisplayDutyShifts();
+
+                    // Update weekly hours label
+                    WeeklyHoursLabel.Text = $"{weeklyAverage:F1}h";
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading duty shifts: {ex}");
+
+                // Show error on main thread
+                MainThread.BeginInvokeOnMainThread(async () => {
+                    await DisplayAlert("Błąd", $"Nie udało się załadować dyżurów: {ex.Message}", "OK");
+                });
             }
         }
     }
