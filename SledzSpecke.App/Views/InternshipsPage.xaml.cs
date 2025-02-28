@@ -45,7 +45,7 @@ namespace SledzSpecke.App.Views
             {
                 BasicModuleButton.BackgroundColor = new Color(8,32,68);
                 BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);;
+                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);
                 SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else

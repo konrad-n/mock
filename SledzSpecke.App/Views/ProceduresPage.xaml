@@ -44,7 +44,7 @@
                         Grid.Column="0" 
                         Margin="0" HeightRequest="45" CornerRadius="8"
                         x:Name="TypeAButton"
-                        BackgroundColor="DarkGreen" TextColor="White"/>
+                        BackgroundColor="#0D759C" TextColor="White"/>
 
                     <Button Text="Kod B" 
                         Clicked="OnTypeBButtonClicked" 

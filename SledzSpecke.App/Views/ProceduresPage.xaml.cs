@@ -47,12 +47,12 @@ namespace SledzSpecke.App.Views
             {
                 BasicModuleButton.BackgroundColor = new Color(8,32,68);
                 BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);;
+                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);
                 SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButton.BackgroundColor = new Color(228,240,245);;
+                BasicModuleButton.BackgroundColor = new Color(228,240,245);
                 BasicModuleButton.TextColor = Colors.Black;
                 SpecialisticModuleButton.BackgroundColor = new Color(8,32,68);
                 SpecialisticModuleButton.TextColor = Colors.White;
@@ -60,16 +60,16 @@ namespace SledzSpecke.App.Views
 
             if (procedureType == ProcedureType.TypeA)
             {
-                TypeAButton.BackgroundColor = Colors.DarkGreen;
+                TypeAButton.BackgroundColor = new Color(13,117,156);
                 TypeAButton.TextColor = Colors.White;
-                TypeBButton.BackgroundColor = new Color(228,240,245);;
+                TypeBButton.BackgroundColor = new Color(228,240,245);
                 TypeBButton.TextColor = Colors.Black;
             }
             else
             {
-                TypeAButton.BackgroundColor = new Color(228,240,245);;
+                TypeAButton.BackgroundColor = new Color(228,240,245);
                 TypeAButton.TextColor = Colors.Black;
-                TypeBButton.BackgroundColor = Colors.DarkGreen;
+                TypeBButton.BackgroundColor = new Color(13, 117, 156);
                 TypeBButton.TextColor = Colors.White;
             }
 
