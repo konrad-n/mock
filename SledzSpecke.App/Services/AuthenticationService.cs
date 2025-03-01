@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SledzSpecke.App.Services
 {
-    public class AuthenticationService
+    public class AuthenticationService : IAuthenticationService
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<AuthenticationService> _logger;

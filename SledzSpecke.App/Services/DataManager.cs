@@ -6,7 +6,7 @@ using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Services
 {
-    public class DataManager
+    public class DataManager : IDataManager
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<DataManager> _logger;

@@ -1,11 +1,10 @@
-﻿// SledzSpecke.App/Services/AppSettings.cs
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Services
 {
-    public class AppSettings
+    public class AppSettings : IAppSettings
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<AppSettings> _logger;

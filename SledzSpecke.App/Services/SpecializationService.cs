@@ -6,7 +6,7 @@ using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.App.Services
 {
-    public class SpecializationService
+    public class SpecializationService : ISpecializationService
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<SpecializationService> _logger;

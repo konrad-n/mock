@@ -59,7 +59,7 @@
         Title="Zarządzanie nieobecnościami"
         Icon="absence.png"
         ContentTemplate="{DataTemplate views:AbsenceManagementPage}"
-        Route="SelfEducationPage" />
+        Route="AbsenceManagementPage" />
 
     <ShellContent
         Title="Eksport do SMK"

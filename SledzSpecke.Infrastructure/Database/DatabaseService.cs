@@ -12,7 +12,7 @@ using SledzSpecke.Infrastructure.Database.Initialization;
 
 namespace SledzSpecke.Infrastructure.Database
 {
-    public class DatabaseService
+    public class DatabaseService : IDatabaseService
     {
         private SQLiteAsyncConnection _database;
         private readonly ILogger<DatabaseService> _logger;

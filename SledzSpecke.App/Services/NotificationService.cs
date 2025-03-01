@@ -4,7 +4,7 @@ using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Services
 {
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<NotificationService> _logger;

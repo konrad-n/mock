@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SledzSpecke.App.Services
 {
-    public class ExportService
+    public class ExportService : IExportService
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<ExportService> _logger;

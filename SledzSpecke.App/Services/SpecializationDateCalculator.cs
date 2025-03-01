@@ -1,14 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SledzSpecke.App.Services
 {
-    public class SpecializationDateCalculator
+    public class SpecializationDateCalculator : ISpecializationDateCalculator
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<SpecializationDateCalculator> _logger;

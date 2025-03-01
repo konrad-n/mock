@@ -4,7 +4,7 @@ using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Services
 {
-    public class SelfEducationService
+    public class SelfEducationService : ISelfEducationService
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<SelfEducationService> _logger;

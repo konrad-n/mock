@@ -4,7 +4,7 @@ using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Services
 {
-    public class DutyShiftService
+    public class DutyShiftService : IDutyShiftService
     {
         private readonly DatabaseService _databaseService;
         private readonly ILogger<DutyShiftService> _logger;

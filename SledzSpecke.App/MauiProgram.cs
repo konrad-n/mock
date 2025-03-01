@@ -41,18 +41,18 @@ namespace SledzSpecke.App
             services.AddSingleton<IFileSystemService, MauiFileSystemService>();
 
             // Register database service
-            services.AddSingleton<DatabaseService>();
+            services.AddSingleton<IDatabaseService, DatabaseService>();
 
             // Register application services
-            services.AddSingleton<DataManager>();
-            services.AddSingleton<SpecializationService>();
-            services.AddSingleton<DutyShiftService>();
-            services.AddSingleton<SelfEducationService>();
-            services.AddSingleton<ExportService>();
-            services.AddSingleton<NotificationService>();
-            services.AddSingleton<AppSettings>();
-            services.AddSingleton<AuthenticationService>();
-            services.AddSingleton<SpecializationDateCalculator>();
+            services.AddSingleton<IDataManager, DataManager>();
+            services.AddSingleton<ISpecializationService, SpecializationService>();
+            services.AddSingleton<IDutyShiftService, DutyShiftService>();
+            services.AddSingleton<ISelfEducationService, SelfEducationService>();
+            services.AddSingleton<IExportService, ExportService>();
+            services.AddSingleton<INotificationService, NotificationService>();
+            services.AddSingleton<IAppSettings, AppSettings>();
+            services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
         }
 
         private static void RegisterPages(IServiceCollection services)
