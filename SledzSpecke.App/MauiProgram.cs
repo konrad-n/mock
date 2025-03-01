@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SledzSpecke.App.Features.Authentication.ViewModels;
 using SledzSpecke.App.Services;
 using SledzSpecke.App.Services.Implementations;
 using SledzSpecke.App.Views;
@@ -49,6 +50,9 @@ namespace SledzSpecke.App
             services.AddSingleton<IAppSettings, AppSettings>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
+
+            // Register ViewModels
+            services.AddTransient<LoginViewModel>();
         }
 
         private static void RegisterPages(IServiceCollection services)
