@@ -32,19 +32,14 @@ namespace SledzSpecke.App
             builder.Logging.AddDebug();
 #endif
 
-            var app = builder.Build();
-            return app;
+            return builder.Build();
         }
 
         private static void RegisterServices(IServiceCollection services)
         {
-            // Register file system service
+            // Register singleton services
             services.AddSingleton<IFileSystemService, MauiFileSystemService>();
-
-            // Register database service
             services.AddSingleton<IDatabaseService, DatabaseService>();
-
-            // Register application services
             services.AddSingleton<IDataManager, DataManager>();
             services.AddSingleton<ISpecializationService, SpecializationService>();
             services.AddSingleton<IDutyShiftService, DutyShiftService>();

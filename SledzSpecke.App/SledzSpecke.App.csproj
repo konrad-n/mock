@@ -183,7 +183,6 @@
     <Folder Include="Features\SelfEducation\ViewModels\" />
     <Folder Include="Features\Settings\ViewModels\" />
     <Folder Include="Features\SMKExport\ViewModels\" />
-    <Folder Include="Common\ViewModels\" />
   </ItemGroup>
 
 </Project>
