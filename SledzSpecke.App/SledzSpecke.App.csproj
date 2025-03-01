@@ -176,7 +176,6 @@
     <Folder Include="Features\Absences\ViewModels\" />
     <Folder Include="Features\Duties\ViewModels\" />
     <Folder Include="Features\Internships\ViewModels\" />
-    <Folder Include="Features\Procedures\ViewModels\" />
     <Folder Include="Features\SelfEducations\ViewModels\" />
     <Folder Include="Features\SMKExport\ViewModels\" />
   </ItemGroup>

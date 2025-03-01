@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Procedures.ViewModels"
           x:Class="SledzSpecke.App.Features.Procedures.Views.ProceduresPage"
-          Title="Procedury">
+          x:DataType="viewmodels:ProceduresViewModel"
+          Title="{Binding Title}">
     <Grid RowDefinitions="Auto,Auto,*">
         <!-- Filter section with visual improvements -->
         <Frame Grid.Row="0" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
@@ -18,14 +21,16 @@
                          Grid.Column="0" 
                          Margin="0" HeightRequest="45" CornerRadius="8"
                          x:Name="BasicModuleButton"
-                         BackgroundColor="#082044" TextColor="White"/>
+                         BackgroundColor="{Binding BasicModuleButtonBackgroundColor}" 
+                         TextColor="{Binding BasicModuleButtonTextColor}"/>
 
                     <Button Text="Moduł specjalistyczny" 
                         Clicked="OnSpecialisticModuleButtonClicked" 
                         Grid.Column="1" 
                         Margin="0" HeightRequest="45" CornerRadius="8"
                         x:Name="SpecialisticModuleButton"
-                        BackgroundColor="#e4f0f5" TextColor="#082044"/>
+                        BackgroundColor="{Binding SpecialisticModuleButtonBackgroundColor}" 
+                        TextColor="{Binding SpecialisticModuleButtonTextColor}"/>
                 </Grid>
             </VerticalStackLayout>
         </Frame>
@@ -44,14 +49,16 @@
                         Grid.Column="0" 
                         Margin="0" HeightRequest="45" CornerRadius="8"
                         x:Name="TypeAButton"
-                        BackgroundColor="#0D759C" TextColor="White"/>
+                        BackgroundColor="{Binding TypeAButtonBackgroundColor}" 
+                        TextColor="{Binding TypeAButtonTextColor}"/>
 
                     <Button Text="Kod B" 
                         Clicked="OnTypeBButtonClicked" 
                         Grid.Column="1" 
                         Margin="0" HeightRequest="45" CornerRadius="8"
                         x:Name="TypeBButton"
-                        BackgroundColor="#e4f0f5" TextColor="#082044"/>
+                        BackgroundColor="{Binding TypeBButtonBackgroundColor}" 
+                        TextColor="{Binding TypeBButtonTextColor}"/>
                 </Grid>
             </VerticalStackLayout>
         </Frame>
@@ -64,6 +71,7 @@
                    HorizontalOptions="Center" 
                    VerticalOptions="Center"
                    x:Name="NoSelectionLabel"
+                   IsVisible="{Binding IsProceduresEmpty}"
                    FontSize="16" TextColor="{AppThemeBinding Light=#082044, Dark=#95B8CE}"/>
 
                 <!-- Dynamic procedure content will be added here -->
@@ -92,4 +100,4 @@
             </ControlTemplate>
         </ResourceDictionary>
     </ContentPage.Resources>
-</ContentPage>
+</common:BaseContentPage>
