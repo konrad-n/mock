@@ -154,20 +154,23 @@ namespace SledzSpecke.App.Features.Absences.Views
                 return;
             }
 
-            // Update absence
-            _absence.StartDate = StartDate;
-            _absence.EndDate = EndDate;
-            _absence.DurationDays = int.Parse(DurationDays);
-            _absence.Description = Description;
-            _absence.AffectsSpecializationLength = AffectsSpecializationLength;
-            _absence.DocumentReference = DocumentReference;
-            _absence.Year = year;
-            _absence.IsApproved = IsApproved;
-            _absence.Type = (AbsenceType)AbsenceTypePicker.SelectedIndex;
+            // Upewnij się, że zawsze tworzysz NOWY obiekt Absence, nigdy nie modyfikuj istniejącego
+            var absence = new Absence
+            {
+                StartDate = StartDate,
+                EndDate = EndDate,
+                DurationDays = int.Parse(DurationDays),
+                Description = Description,
+                AffectsSpecializationLength = AffectsSpecializationLength,
+                DocumentReference = DocumentReference,
+                Year = year,
+                IsApproved = IsApproved,
+                Type = (AbsenceType)AbsenceTypePicker.SelectedIndex
+            };
 
             if (_onSaveCallback != null)
             {
-                _onSaveCallback(_absence);
+                _onSaveCallback(absence);
             }
 
             await Navigation.PopAsync();

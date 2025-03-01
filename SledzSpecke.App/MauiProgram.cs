@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SledzSpecke.App.Features.Absences.ViewModels;
 using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Features.Authentication.ViewModels;
 using SledzSpecke.App.Features.Authentication.Views;
@@ -83,6 +84,7 @@ namespace SledzSpecke.App
             services.AddTransient<DutyShiftsViewModel>();
             services.AddTransient<SelfEducationViewModel>();
             services.AddTransient<InternshipsViewModel>();
+            services.AddTransient<AbsenceManagementViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();
