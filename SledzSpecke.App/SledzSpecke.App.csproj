@@ -175,7 +175,6 @@
     <Folder Include="Common\Behaviors\" />
     <Folder Include="Features\Absences\ViewModels\" />
     <Folder Include="Features\Internships\ViewModels\" />
-    <Folder Include="Features\SelfEducations\ViewModels\" />
     <Folder Include="Features\SMKExport\ViewModels\" />
   </ItemGroup>
 

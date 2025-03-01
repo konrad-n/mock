@@ -11,6 +11,7 @@ using SledzSpecke.App.Features.Duties.Views;
 using SledzSpecke.App.Features.Internships.Views;
 using SledzSpecke.App.Features.Procedures.ViewModels;
 using SledzSpecke.App.Features.Procedures.Views;
+using SledzSpecke.App.Features.SelfEducations.ViewModels;
 using SledzSpecke.App.Features.SelfEducations.Views;
 using SledzSpecke.App.Features.Settings.ViewModels;
 using SledzSpecke.App.Features.Settings.Views;
@@ -79,6 +80,7 @@ namespace SledzSpecke.App
             services.AddTransient<CoursesViewModel>();
             services.AddTransient<ProceduresViewModel>();
             services.AddTransient<DutyShiftsViewModel>();
+            services.AddTransient<SelfEducationViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();
