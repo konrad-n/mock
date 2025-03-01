@@ -55,6 +55,7 @@
                    Margin="0,20,0,0" />
 
             <Button Text="Zarejestruj się" 
+                    Command="{Binding NavigateToRegistrationCommand}"
                     BackgroundColor="Transparent" 
                     TextColor="{StaticResource Primary}" />
         </VerticalStackLayout>

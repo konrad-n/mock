@@ -37,6 +37,7 @@ namespace SledzSpecke.App
             Routing.RegisterRoute(nameof(SelfEducationPage), typeof(SelfEducationPage));
             Routing.RegisterRoute(nameof(SMKExportPage), typeof(SMKExportPage));
             Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
+            Routing.RegisterRoute(nameof(RegistrationPage), typeof(RegistrationPage));
 
             try
             {

@@ -75,6 +75,7 @@ namespace SledzSpecke.App
             services.AddSingleton<IAppSettings, AppSettings>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
+            services.AddSingleton<INavigationService, NavigationService>();
 
             // Register ViewModels
             services.AddTransient<LoginViewModel>();
@@ -90,6 +91,7 @@ namespace SledzSpecke.App
             services.AddTransient<DutyShiftDetailsViewModel>();
             services.AddTransient<SMKExportViewModel>();
             services.AddTransient<AbsenceDetailsViewModel>();
+            services.AddTransient<RegistrationViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();

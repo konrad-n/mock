@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
+using SledzSpecke.App.Features.Authentication.Views;
 using SledzSpecke.App.Services;
 
 namespace SledzSpecke.App.Features.Authentication.ViewModels
@@ -9,6 +10,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
     public partial class LoginViewModel : ViewModelBase
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly INavigationService _navigationService;
 
         [ObservableProperty]
         private string _email;
@@ -28,11 +30,13 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             IAuthenticationService authenticationService,
             ILogger<LoginViewModel> logger,
             ISpecializationService specializationService,
-            IServiceProvider serviceProvider) : base(logger)
+            IServiceProvider serviceProvider,
+            INavigationService navigationService) : base(logger)
         {
             _authenticationService = authenticationService;
             _serviceProvider = serviceProvider;
             _specializationService = specializationService;
+            _navigationService = navigationService;
 
             // Dodaj debug log
             System.Diagnostics.Debug.WriteLine("LoginViewModel constructor called");
@@ -44,6 +48,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 #endif
             _specializationService = specializationService;
             _serviceProvider = serviceProvider;
+            _navigationService = navigationService;
         }
 
         [RelayCommand]
@@ -100,15 +105,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         [RelayCommand]
         private async Task NavigateToRegistrationAsync()
         {
-            try
-            {
-                await Shell.Current.GoToAsync("//registration");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error navigating to RegistrationPage");
-                ErrorMessage = "Nie można przejść do ekranu rejestracji.";
-            }
+            await _navigationService.NavigateToAsync<RegistrationPage>();
         }
     }
 }
