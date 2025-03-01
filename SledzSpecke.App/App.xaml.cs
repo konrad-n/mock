@@ -7,30 +7,29 @@ namespace SledzSpecke.App
 {
     public partial class App : Application
     {
-        // Statyczne serwisy jako properties (Tymczasowo!!!)
-        public static IAuthenticationService AuthenticationService => Current.Handler?.MauiContext?.Services.GetRequiredService<IAuthenticationService>();
-        public static IDatabaseService DatabaseService => Current.Handler?.MauiContext?.Services.GetRequiredService<IDatabaseService>();
-        public static IDataManager DataManager => Current.Handler?.MauiContext?.Services.GetRequiredService<IDataManager>();
-        public static ISpecializationService SpecializationService => Current.Handler?.MauiContext?.Services.GetRequiredService<ISpecializationService>();
-        public static IDutyShiftService DutyShiftService => Current.Handler?.MauiContext?.Services.GetRequiredService<IDutyShiftService>();
-        public static ISelfEducationService SelfEducationService => Current.Handler?.MauiContext?.Services.GetRequiredService<ISelfEducationService>();
-        public static IExportService ExportService => Current.Handler?.MauiContext?.Services.GetRequiredService<IExportService>();
-        public static INotificationService NotificationService => Current.Handler?.MauiContext?.Services.GetRequiredService<INotificationService>();
-        public static IAppSettings AppSettings => Current.Handler?.MauiContext?.Services.GetRequiredService<IAppSettings>();
-        public static ISpecializationDateCalculator SpecializationDateCalculator => Current.Handler?.MauiContext?.Services.GetRequiredService<ISpecializationDateCalculator>();
-
-
         private readonly ILogger<App> _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly INotificationService _notificationService;
+        private readonly IAppSettings _appSettings;
+        private readonly IDatabaseService _databaseService;
+        private readonly IAuthenticationService _authenticationService;
 
         public App(
             IServiceProvider serviceProvider,
-            ILogger<App> logger)
+            ILogger<App> logger,
+            INotificationService notificationService,
+            IAppSettings appSettings,
+            IDatabaseService databaseService,
+            IAuthenticationService authenticationService)
         {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _notificationService = notificationService;
+            _appSettings = appSettings;
+            _databaseService = databaseService;
+            _authenticationService = authenticationService;
 
             try
             {
@@ -50,16 +49,16 @@ namespace SledzSpecke.App
             {
                 _logger.LogInformation("Starting app initialization");
 
-                await DatabaseService.InitAsync();
+                await _databaseService.InitAsync();
                 _logger.LogDebug("Database initialized");
 
-                var userSeeded = await AuthenticationService.SeedTestUserAsync();
+                var userSeeded = await _authenticationService.SeedTestUserAsync();
                 _logger.LogDebug("Test user seeded: {Result}", userSeeded);
 
-                await AppSettings.LoadAsync();
+                await _appSettings.LoadAsync();
                 _logger.LogDebug("Settings loaded");
 
-                bool useDarkTheme = AppSettings.GetSetting<bool>("UseDarkTheme");
+                bool useDarkTheme = _appSettings.GetSetting<bool>("UseDarkTheme");
                 Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
                 _logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
 
@@ -84,7 +83,7 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = NotificationService.CheckAndScheduleNotificationsAsync();
+                _ = _notificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
@@ -96,7 +95,7 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = AppSettings.SaveAsync();
+                _ = _appSettings.SaveAsync();
             }
             catch (Exception ex)
             {
@@ -108,7 +107,7 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = NotificationService.CheckAndScheduleNotificationsAsync();
+                _ = _notificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
@@ -116,17 +115,20 @@ namespace SledzSpecke.App
             }
         }
 
-        // Dodaj metody pomocnicze do dostępu do serwisów
-        public static IServiceProvider GetServiceProvider(IElement element)
+        // Tymczasowa metoda pomocnicza do uzyskania serwisu
+        // Docelowo należy usunąć tę metodę, gdy wszystkie strony będą używać DI
+        public static TService GetService<TService>(IElement element) where TService : class
         {
-            return ((IServiceProvider)element.Handler?.MauiContext?.Services)
-                ?? throw new InvalidOperationException("Unable to get ServiceProvider");
-        }
+            if (element.Handler?.MauiContext == null)
+                throw new InvalidOperationException("Element handler is not initialized");
 
-        public static T GetService<T>(IElement element) where T : class
-        {
-            return GetServiceProvider(element).GetService<T>()
-                ?? throw new InvalidOperationException($"Service {typeof(T).Name} not found");
+            var services = element.Handler.MauiContext.Services;
+            var service = services.GetService<TService>();
+
+            if (service == null)
+                throw new InvalidOperationException($"Service {typeof(TService).Name} not found");
+
+            return service;
         }
     }
 }

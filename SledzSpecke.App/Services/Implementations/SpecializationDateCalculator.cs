@@ -9,9 +9,11 @@ namespace SledzSpecke.App.Services.Implementations
         private readonly IDatabaseService _databaseService;
         private readonly ILogger<SpecializationDateCalculator> _logger;
 
-        public SpecializationDateCalculator( ILogger<SpecializationDateCalculator> logger)
+        public SpecializationDateCalculator(
+            IDatabaseService databaseService,
+            ILogger<SpecializationDateCalculator> logger)
         {
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
             _logger = logger;
         }
 

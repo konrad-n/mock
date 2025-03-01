@@ -15,9 +15,11 @@ namespace SledzSpecke.App.Services.Implementations
 
         private Specialization _specialization;
 
-        public DataManager(ILogger<DataManager> logger)
+        public DataManager(
+            IDatabaseService databaseService,
+            ILogger<DataManager> logger)
         {
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
             _logger = logger;
 
             if (!Directory.Exists(_appDataFolder))

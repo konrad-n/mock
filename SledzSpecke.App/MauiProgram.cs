@@ -55,6 +55,19 @@ namespace SledzSpecke.App
         {
             services.AddSingleton<App>();
 
+            // Register services
+            services.AddSingleton<IFileSystemService, MauiFileSystemService>();
+            services.AddSingleton<IDatabaseService, DatabaseService>();
+            services.AddSingleton<IDataManager, DataManager>();
+            services.AddSingleton<ISpecializationService, SpecializationService>();
+            services.AddSingleton<IDutyShiftService, DutyShiftService>();
+            services.AddSingleton<ISelfEducationService, SelfEducationService>();
+            services.AddSingleton<IExportService, ExportService>();
+            services.AddSingleton<INotificationService, NotificationService>();
+            services.AddSingleton<IAppSettings, AppSettings>();
+            services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
+
             // Register ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<SettingsViewModel>();
@@ -79,19 +92,6 @@ namespace SledzSpecke.App
             services.AddTransient<SMKExportPage>();
             services.AddTransient<AbsenceManagementPage>();
             services.AddTransient<AbsenceDetailsPage>();
-
-            // Register services
-            services.AddSingleton<IFileSystemService, MauiFileSystemService>();
-            services.AddSingleton<IDatabaseService, DatabaseService>();
-            services.AddSingleton<IDataManager, DataManager>();
-            services.AddSingleton<ISpecializationService, SpecializationService>();
-            services.AddSingleton<IDutyShiftService, DutyShiftService>();
-            services.AddSingleton<ISelfEducationService, SelfEducationService>();
-            services.AddSingleton<IExportService, ExportService>();
-            services.AddSingleton<INotificationService, NotificationService>();
-            services.AddSingleton<IAppSettings, AppSettings>();
-            services.AddSingleton<IAuthenticationService, AuthenticationService>();
-            services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
 
             // Register shell last
             services.AddSingleton<AppShell>();

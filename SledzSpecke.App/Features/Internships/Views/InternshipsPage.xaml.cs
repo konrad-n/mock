@@ -10,9 +10,10 @@ namespace SledzSpecke.App.Features.Internships.Views
         private ModuleType _currentModule = ModuleType.Basic;
         private ISpecializationService _specializationService;
 
-        public InternshipsPage()
+        public InternshipsPage(
+            ISpecializationService specializationService)
         {
-            _specializationService = App.SpecializationService;
+            _specializationService = specializationService;
 
             InitializeComponent();
             LoadDataAsync();

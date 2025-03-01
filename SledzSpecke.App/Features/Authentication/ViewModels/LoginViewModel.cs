@@ -21,12 +21,18 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 
         [ObservableProperty]
         private string _errorMessage;
+        private ISpecializationService _specializationService;
+        private IServiceProvider _serviceProvider;
 
         public LoginViewModel(
             IAuthenticationService authenticationService,
-            ILogger<LoginViewModel> logger) : base(logger)
+            ILogger<LoginViewModel> logger,
+            ISpecializationService specializationService,
+            IServiceProvider serviceProvider) : base(logger)
         {
             _authenticationService = authenticationService;
+            _serviceProvider = serviceProvider;
+            _specializationService = specializationService;
 
             // Dodaj debug log
             System.Diagnostics.Debug.WriteLine("LoginViewModel constructor called");
@@ -36,6 +42,8 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             Password = "gucio";
             System.Diagnostics.Debug.WriteLine($"Debug values set: Email = {Email}, Password = {Password}");
 #endif
+            _specializationService = specializationService;
+            _serviceProvider = serviceProvider;
         }
 
         [RelayCommand]
@@ -62,7 +70,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 
                     try
                     {
-                        var appShell = new AppShell();
+                        var appShell = new AppShell(_authenticationService, _specializationService, _serviceProvider);
                         Application.Current.MainPage = appShell;
                         _logger.LogDebug("AppShell set as MainPage");
                     }

@@ -15,11 +15,14 @@ namespace SledzSpecke.App.Features.Absences.Views
         private ISpecializationDateCalculator _specializationDateCalculator;
         private IDatabaseService _databaseService;
 
-        public AbsenceManagementPage()
+        public AbsenceManagementPage(
+            ISpecializationService specializationService,
+            ISpecializationDateCalculator specializationDateCalculator,
+            IDatabaseService databaseService)
         {
-            _specializationService = App.SpecializationService;
-            _specializationDateCalculator = App.SpecializationDateCalculator;
-            _databaseService = App.DatabaseService;
+            _specializationService = specializationService;
+            _specializationDateCalculator = specializationDateCalculator;
+            _databaseService = databaseService;
 
             InitializeComponent();
             LoadDataAsync();
@@ -363,7 +366,7 @@ namespace SledzSpecke.App.Features.Absences.Views
 
         private async void OnAddAbsenceClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new AbsenceDetailsPage(null, OnAbsenceAdded));
+            await Navigation.PushAsync(new AbsenceDetailsPage(_databaseService, null, OnAbsenceAdded));
         }
 
         private async void OnEditAbsenceClicked(object sender, EventArgs e)
@@ -373,7 +376,7 @@ namespace SledzSpecke.App.Features.Absences.Views
                 var absence = _allAbsences.FirstOrDefault(a => a.Id == absenceId);
                 if (absence != null)
                 {
-                    await Navigation.PushAsync(new AbsenceDetailsPage(absence, OnAbsenceUpdated));
+                    await Navigation.PushAsync(new AbsenceDetailsPage(_databaseService, absence, OnAbsenceUpdated));
                 }
             }
         }
@@ -385,7 +388,7 @@ namespace SledzSpecke.App.Features.Absences.Views
                 var absence = _allAbsences.FirstOrDefault(a => a.Id == absenceId);
                 if (absence != null)
                 {
-                    await Navigation.PushAsync(new AbsenceDetailsPage(absence, OnAbsenceUpdated));
+                    await Navigation.PushAsync(new AbsenceDetailsPage(_databaseService, absence, OnAbsenceUpdated));
                 }
             }
         }

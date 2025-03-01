@@ -9,6 +9,7 @@ using SledzSpecke.App.Features.SMKExport.Views;
 using SledzSpecke.App.Services;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
+using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Dashboard.Views
 {
@@ -19,13 +20,23 @@ namespace SledzSpecke.App.Features.Dashboard.Views
         private ISpecializationDateCalculator _specializationDateCalculator;
         private IDutyShiftService _dutyShiftService;
         private ISelfEducationService _selfEducationService;
+        private IDatabaseService _databaseService;
+        private IExportService _exportService;
 
-        public DashboardPage()
+        public DashboardPage(
+            ISpecializationService specializationService,
+            ISpecializationDateCalculator specializationDateCalculator,
+            IDutyShiftService dutyShiftService,
+            ISelfEducationService selfEducationService,
+            IDatabaseService databaseService,
+            IExportService exportService)
         {
-            _specializationService = App.SpecializationService;
-            _specializationDateCalculator = App.SpecializationDateCalculator;
-            _dutyShiftService = App.DutyShiftService;
-            _selfEducationService = App.SelfEducationService;
+            _specializationService = specializationService;
+            _specializationDateCalculator = specializationDateCalculator;
+            _dutyShiftService = dutyShiftService;
+            _selfEducationService = selfEducationService;
+            _databaseService = databaseService;
+            _exportService = exportService;
 
             InitializeComponent();
             LoadSpecializationData();
@@ -289,22 +300,22 @@ namespace SledzSpecke.App.Features.Dashboard.Views
 
         private async void OnCoursesButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new CoursesPage());
+            await Navigation.PushAsync(new CoursesPage(_specializationService));
         }
 
         private async void OnInternshipsButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new InternshipsPage());
+            await Navigation.PushAsync(new InternshipsPage(_specializationService));
         }
 
         private async void OnProceduresButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ProceduresPage());
+            await Navigation.PushAsync(new ProceduresPage(_specializationService, _databaseService));
         }
 
         private async void OnDutyShiftsButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new DutyShiftsPage());
+            await Navigation.PushAsync(new DutyShiftsPage(_dutyShiftService, _specializationService));
         }
 
         private async void OnSelfEducationButtonClicked(object sender, EventArgs e)
@@ -314,7 +325,7 @@ namespace SledzSpecke.App.Features.Dashboard.Views
 
         private async void OnGenerateReportButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new SMKExportPage());
+            await Navigation.PushAsync(new SMKExportPage(_exportService));
         }
 
         private async void OnSettingsButtonClicked(object sender, EventArgs e)
@@ -324,7 +335,7 @@ namespace SledzSpecke.App.Features.Dashboard.Views
 
         private async void OnManageAbsencesClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new AbsenceManagementPage());
+            await Navigation.PushAsync(new AbsenceManagementPage(_specializationService, _specializationDateCalculator, _databaseService));
         }
     }
 }

@@ -11,10 +11,12 @@ namespace SledzSpecke.App.Features.Duties.Views
         private IDutyShiftService _dutyShiftService;
         private ISpecializationService _specializationService;
 
-        public DutyShiftsPage()
+        public DutyShiftsPage(
+            IDutyShiftService dutyShiftService,
+            ISpecializationService specializationService)
         {
-            _dutyShiftService = App.DutyShiftService;
-            _specializationService = App.SpecializationService;
+            _dutyShiftService = dutyShiftService;
+            _specializationService = specializationService;
 
             InitializeComponent();
             _dutyShifts = new List<DutyShift>();

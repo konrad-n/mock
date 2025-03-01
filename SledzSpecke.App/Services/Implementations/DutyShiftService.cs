@@ -9,9 +9,11 @@ namespace SledzSpecke.App.Services.Implementations
         private readonly IDatabaseService _databaseService;
         private readonly ILogger<DutyShiftService> _logger;
 
-        public DutyShiftService(ILogger<DutyShiftService> logger)
+        public DutyShiftService(
+            IDatabaseService databaseService,
+            ILogger<DutyShiftService> logger)
         {
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
             _logger = logger;
         }
 

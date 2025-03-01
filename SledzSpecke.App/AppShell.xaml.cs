@@ -14,13 +14,18 @@ namespace SledzSpecke.App
     {
         private readonly IAuthenticationService _authenticationService;
         private readonly ISpecializationService _specializationService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public AppShell()
+        public AppShell(
+            IAuthenticationService authenticationService,
+            ISpecializationService specializationService,
+            IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
-            _authenticationService = App.AuthenticationService;
-            _specializationService = App.SpecializationService;
+            _authenticationService = authenticationService;
+            _specializationService = specializationService;
+            _serviceProvider = serviceProvider;
 
             // Register routes for navigation
             Routing.RegisterRoute(nameof(CourseDetailsPage), typeof(CourseDetailsPage));
@@ -87,7 +92,7 @@ namespace SledzSpecke.App
             if (confirm)
             {
                 _authenticationService.Logout();
-                Application.Current.MainPage = new NavigationPage(App.GetService<LoginPage>(this));
+                Application.Current.MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
             }
         }
     }

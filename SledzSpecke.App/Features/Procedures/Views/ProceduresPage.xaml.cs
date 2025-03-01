@@ -1,6 +1,7 @@
 ﻿using SledzSpecke.App.Services;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
+using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Procedures.Views
 {
@@ -10,10 +11,14 @@ namespace SledzSpecke.App.Features.Procedures.Views
         private ModuleType _currentModule = ModuleType.Basic;
         private ProcedureType _currentProcedureType = ProcedureType.TypeA;
         private ISpecializationService _specializationService;
+        private IDatabaseService _databaseService;
 
-        public ProceduresPage()
+        public ProceduresPage(
+            ISpecializationService specializationService,
+            IDatabaseService databaseService)
         {
-            _specializationService = App.SpecializationService;
+            _specializationService = specializationService;
+            _databaseService = databaseService;
 
             InitializeComponent();
             LoadDataAsync();
@@ -229,7 +234,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 var procedure = _specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedureId);
                 if (procedure != null)
                 {
-                    await Navigation.PushAsync(new ProcedureEntryPage(procedure, OnProcedureEntryAdded));
+                    await Navigation.PushAsync(new ProcedureEntryPage(_databaseService, procedure, OnProcedureEntryAdded));
                 }
             }
         }

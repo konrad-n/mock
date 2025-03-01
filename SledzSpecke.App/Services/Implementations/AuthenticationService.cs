@@ -15,9 +15,11 @@ namespace SledzSpecke.App.Services.Implementations
         public bool IsAuthenticated => _currentUser != null;
         public User CurrentUser => _currentUser;
 
-        public AuthenticationService(IDatabaseService databaseService, ILogger<AuthenticationService> logger)
+        public AuthenticationService(
+            IDatabaseService databaseService,
+            ILogger<AuthenticationService> logger)
         {
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
             _logger = logger;
         }
 

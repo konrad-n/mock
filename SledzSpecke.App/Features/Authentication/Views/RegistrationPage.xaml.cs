@@ -9,10 +9,12 @@ namespace SledzSpecke.App.Features.Authentication.Views
         private IDataManager _dataManager;
         private IAuthenticationService _authenticationService;
 
-        public RegistrationPage()
+        public RegistrationPage(
+            IDataManager dataManager,
+            IAuthenticationService authenticationService)
         {
-            _dataManager = App.DataManager;
-            _authenticationService = App.AuthenticationService;
+            _dataManager = dataManager;
+            _authenticationService = authenticationService;
 
             InitializeComponent();
             LoadSpecializationTypes();

@@ -20,11 +20,14 @@ namespace SledzSpecke.App.Features.Absences.Views
         public string Year { get; set; }
         public bool IsApproved { get; set; }
 
-        public AbsenceDetailsPage(Absence absence, Action<Absence> onSaveCallback)
+        public AbsenceDetailsPage(
+            IDatabaseService databaseService,
+            Absence absence,
+            Action<Absence> onSaveCallback)
         {
             InitializeComponent();
 
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
 
             _onSaveCallback = onSaveCallback;
 

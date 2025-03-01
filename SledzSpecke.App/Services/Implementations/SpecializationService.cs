@@ -11,9 +11,11 @@ namespace SledzSpecke.App.Services.Implementations
         private readonly IDatabaseService _databaseService;
         private readonly ILogger<SpecializationService> _logger;
 
-        public SpecializationService(ILogger<SpecializationService> logger)
+        public SpecializationService(
+            IDatabaseService databaseService,
+            ILogger<SpecializationService> logger)
         {
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
             _logger = logger;
         }
 

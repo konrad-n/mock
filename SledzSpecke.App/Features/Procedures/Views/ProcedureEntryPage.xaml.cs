@@ -31,9 +31,12 @@ namespace SledzSpecke.App.Features.Procedures.Views
         public string ProcedureGroup { get; set; }
         public string Notes { get; set; }
 
-        public ProcedureEntryPage(MedicalProcedure procedure, Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
+        public ProcedureEntryPage(
+            IDatabaseService databaseService,
+            MedicalProcedure procedure,
+            Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
-            _databaseService = App.DatabaseService;
+            _databaseService = databaseService;
 
             InitializeComponent();
             _procedure = procedure;

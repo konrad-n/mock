@@ -12,9 +12,10 @@ namespace SledzSpecke.App.Features.SMKExport.Views
 
         public bool IsGeneralExportSelected => GeneralExportRadioButton.IsChecked;
 
-        public SMKExportPage()
+        public SMKExportPage(
+            IExportService exportService)
         {
-            _exportService = App.ExportService;
+            _exportService = exportService;
 
             InitializeComponent();
             SetupInitialState();
