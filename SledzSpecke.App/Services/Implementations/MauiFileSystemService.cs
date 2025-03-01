@@ -1,6 +1,6 @@
 ﻿using SledzSpecke.Infrastructure.Services;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Implementations
 {
     public class MauiFileSystemService : IFileSystemService
     {

@@ -1,4 +1,6 @@
-﻿namespace SledzSpecke.App.Services
+﻿using SledzSpecke.App.Services.Implementations;
+
+namespace SledzSpecke.App.Services
 {
     public interface ISpecializationDateCalculator
     {

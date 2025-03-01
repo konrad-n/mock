@@ -4,7 +4,7 @@ using SledzSpecke.Infrastructure.Database;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Implementations
 {
     public class AuthenticationService : IAuthenticationService
     {
@@ -192,7 +192,7 @@ namespace SledzSpecke.App.Services
                 if (types.Count == 0)
                 {
                     _logger.LogInformation("No specialization types found, adding them");
-                    var seedTypes = SledzSpecke.Infrastructure.Database.Initialization.SpecializationTypeSeeder.SeedSpecializationTypes();
+                    var seedTypes = Infrastructure.Database.Initialization.SpecializationTypeSeeder.SeedSpecializationTypes();
                     foreach (var type in seedTypes)
                     {
                         await _databaseService.SaveAsync(type);

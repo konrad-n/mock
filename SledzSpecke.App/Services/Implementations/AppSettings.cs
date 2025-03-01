@@ -2,7 +2,7 @@
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Implementations
 {
     public class AppSettings : IAppSettings
     {

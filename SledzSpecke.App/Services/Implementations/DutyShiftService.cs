@@ -2,7 +2,7 @@
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Implementations
 {
     public class DutyShiftService : IDutyShiftService
     {
@@ -105,7 +105,7 @@ namespace SledzSpecke.App.Services
             {
                 var dutyShifts = await GetAllDutyShiftsAsync();
                 return dutyShifts
-                    .GroupBy(d => new { Year = d.StartDate.Year, Month = d.StartDate.Month })
+                    .GroupBy(d => new { d.StartDate.Year, d.StartDate.Month })
                     .OrderByDescending(g => g.Key.Year)
                     .ThenByDescending(g => g.Key.Month)
                     .ToDictionary(

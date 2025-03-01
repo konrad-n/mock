@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using SledzSpecke.App.Services;
+using SledzSpecke.App.Services.Implementations;
 using SledzSpecke.App.Views.Auth;
 using SledzSpecke.Infrastructure.Database;
 

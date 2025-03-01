@@ -4,7 +4,7 @@ using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
 using SledzSpecke.Infrastructure.Database.Initialization;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Implementations
 {
     public class DataManager : IDataManager
     {

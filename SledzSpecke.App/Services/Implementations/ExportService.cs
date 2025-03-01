@@ -5,7 +5,7 @@ using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database;
 using System.Text;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Implementations
 {
     public class ExportService : IExportService
     {
@@ -240,7 +240,7 @@ namespace SledzSpecke.App.Services
                     string doctorName = settings.Username ?? "Lekarz";
 
                     string assistingDoctors = procedure.ProcedureType == ProcedureType.TypeA ?
-                        (string.IsNullOrEmpty(entry.FirstAssistantData) ? entry.SupervisorName : entry.FirstAssistantData) :
+                        string.IsNullOrEmpty(entry.FirstAssistantData) ? entry.SupervisorName : entry.FirstAssistantData :
                         doctorName;
 
                     // Add second assistant if available
@@ -252,7 +252,7 @@ namespace SledzSpecke.App.Services
                     procedureEntries.Add((
                         PatientName: entry.PatientId,
                         PatientGender: entry.PatientGender ?? "",
-                        Date: entry.Date,
+                        entry.Date,
                         PerformingDoctor: procedure.ProcedureType == ProcedureType.TypeA ? doctorName : entry.SupervisorName,
                         AssistingDoctors: assistingDoctors,
                         ProcedureGroup: procedureGroup
