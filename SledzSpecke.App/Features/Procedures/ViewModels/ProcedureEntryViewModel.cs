@@ -205,7 +205,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 // Create new entry
                 var procedureEntry = new ProcedureEntry
                 {
-                    Id = new Random().Next(1000, 9999), // Temporary ID
                     Date = EntryDate,
                     PatientId = PatientId,
                     PatientGender = PatientGender,

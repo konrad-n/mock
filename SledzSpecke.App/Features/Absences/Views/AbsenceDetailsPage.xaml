@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+            xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Absences.ViewModels"
             x:Class="SledzSpecke.App.Features.Absences.Views.AbsenceDetailsPage"
+            x:DataType="viewmodels:AbsenceDetailsViewModel"
             Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
@@ -22,6 +25,7 @@
                         <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
                             <Picker x:Name="AbsenceTypePicker" Title="Wybierz typ nieobecności" 
+                                    SelectedIndex="{Binding AbsenceTypeSelectedIndex}" 
                                     SelectedIndexChanged="OnAbsenceTypeChanged"
                                     Margin="10,0" BackgroundColor="Transparent">
                                 <Picker.Items>
@@ -137,18 +141,18 @@
 
             <!-- Action Buttons -->
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,10,0,20">
-                <Button Grid.Column="0" Text="Usuń" Clicked="OnDeleteClicked" 
+                <Button Grid.Column="0" Text="Usuń" Command="{Binding DeleteCommand}" 
                         BackgroundColor="#F44336" TextColor="White"
                         HeightRequest="50" CornerRadius="8" IsVisible="{Binding IsExistingAbsence}"/>
 
-                <Button Grid.Column="1" Text="Anuluj" Clicked="OnCancelClicked" 
+                <Button Grid.Column="1" Text="Anuluj" Command="{Binding CancelCommand}" 
                         BackgroundColor="#547E9E" TextColor="White"
                         HeightRequest="50" CornerRadius="8"/>
 
-                <Button Grid.Column="2" Text="Zapisz" Clicked="OnSaveClicked" 
+                <Button Grid.Column="2" Text="Zapisz" Command="{Binding SaveCommand}" 
                         BackgroundColor="#082044" TextColor="White"
                         HeightRequest="50" CornerRadius="8"/>
             </Grid>
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</common:BaseContentPage>
