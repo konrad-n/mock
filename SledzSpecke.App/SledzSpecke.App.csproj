@@ -175,7 +175,6 @@
     <Folder Include="Common\Behaviors\" />
     <Folder Include="Features\Absences\ViewModels\" />
     <Folder Include="Features\Courses\ViewModels\" />
-    <Folder Include="Features\Dashboard\ViewModels\" />
     <Folder Include="Features\Duties\ViewModels\" />
     <Folder Include="Features\Internships\ViewModels\" />
     <Folder Include="Features\Procedures\ViewModels\" />

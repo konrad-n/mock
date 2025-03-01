@@ -3,6 +3,7 @@ using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Features.Authentication.ViewModels;
 using SledzSpecke.App.Features.Authentication.Views;
 using SledzSpecke.App.Features.Courses.Views;
+using SledzSpecke.App.Features.Dashboard.ViewModels;
 using SledzSpecke.App.Features.Dashboard.Views;
 using SledzSpecke.App.Features.Duties.Views;
 using SledzSpecke.App.Features.Internships.Views;
@@ -71,6 +72,7 @@ namespace SledzSpecke.App
             // Register ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<SettingsViewModel>();
+            services.AddTransient<DashboardViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();
