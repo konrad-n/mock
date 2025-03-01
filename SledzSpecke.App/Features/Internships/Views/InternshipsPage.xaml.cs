@@ -1,235 +1,41 @@
-﻿using SledzSpecke.App.Services;
-using SledzSpecke.Core.Models;
-using SledzSpecke.Core.Models.Enums;
+﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Features.Internships.ViewModels;
 
 namespace SledzSpecke.App.Features.Internships.Views
 {
-    public partial class InternshipsPage : ContentPage
+    public partial class InternshipsPage : BaseContentPage
     {
-        private Specialization _specialization;
-        private ModuleType _currentModule = ModuleType.Basic;
-        private ISpecializationService _specializationService;
+        private InternshipsViewModel _viewModel;
 
-        public InternshipsPage(
-            ISpecializationService specializationService)
+        public InternshipsPage()
         {
-            _specializationService = specializationService;
-
             InitializeComponent();
-            LoadDataAsync();
+        }
+
+        protected override async Task InitializePageAsync()
+        {
+            try
+            {
+                _viewModel = GetRequiredService<InternshipsViewModel>();
+                BindingContext = _viewModel;
+                await _viewModel.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", "Nie udało się załadować danych staży.", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error in InternshipsPage: {ex}");
+            }
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            LoadDataAsync();
-        }
 
-        private async void LoadDataAsync()
-        {
-            try
+            // Refresh data when page appears
+            if (_viewModel != null)
             {
-                // Pobieramy dane z bazy, nie z seedera
-                _specialization = await _specializationService.GetSpecializationAsync();
-                DisplayInternships(_currentModule);
+                _viewModel.LoadDataAsync().ConfigureAwait(false);
             }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
-            }
-        }
-
-        private void DisplayInternships(ModuleType moduleType)
-        {
-            _currentModule = moduleType;
-            InternshipsLayout.Children.Clear();
-            NoModuleSelectedLabel.IsVisible = false;
-
-            // Ustawienie aktywnego przycisku
-            if (moduleType == ModuleType.Basic)
-            {
-                BasicModuleButton.BackgroundColor = new Color(8,32,68);
-                BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);
-                SpecialisticModuleButton.TextColor = Colors.Black;
-            }
-            else
-            {
-                BasicModuleButton.BackgroundColor = new Color(228,240,245);;
-                BasicModuleButton.TextColor = Colors.Black;
-                SpecialisticModuleButton.BackgroundColor = new Color(8,32,68);
-                SpecialisticModuleButton.TextColor = Colors.White;
-            }
-
-            var internships = _specialization.RequiredInternships
-                .Where(i => i.Module == moduleType)
-                .OrderBy(i => i.IsCompleted)
-                .ToList();
-
-            if (internships.Count == 0)
-            {
-                InternshipsLayout.Children.Add(new Label
-                {
-                    Text = "Brak staży do wyświetlenia",
-                    HorizontalOptions = LayoutOptions.Center,
-                    VerticalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 20, 0, 0)
-                });
-                return;
-            }
-
-            foreach (var internship in internships)
-            {
-                bool isCurrentInternship = internship.StartDate.HasValue &&
-                                           !internship.EndDate.HasValue;
-
-                var frame = new Frame
-                {
-                    Padding = new Thickness(10),
-                    Margin = new Thickness(0, 0, 0, 10),
-                    CornerRadius = 5,
-                    Style = internship.IsCompleted ? (Style)Resources["CompletedInternshipStyle"] :
-                            isCurrentInternship ? (Style)Resources["CurrentInternshipStyle"] :
-                            internship.StartDate.HasValue ? (Style)Resources["PlannedInternshipStyle"] :
-                            (Style)Resources["PendingInternshipStyle"]
-                };
-
-                var statusIndicator = new BoxView
-                {
-                    Color = internship.IsCompleted ? Colors.Green :
-                            isCurrentInternship ? Colors.Blue :
-                            internship.StartDate.HasValue ? Colors.Orange :
-                            new Color(84,126,158),
-                    WidthRequest = 16,
-                    HeightRequest = 16,
-                    CornerRadius = 8,
-                    VerticalOptions = LayoutOptions.Center
-                };
-
-                var titleLabel = new Label
-                {
-                    Text = internship.Name,
-                    FontAttributes = FontAttributes.Bold,
-                    FontSize = 16
-                };
-
-                var durationLabel = new Label
-                {
-                    Text = $"Czas trwania: {internship.DurationWeeks} tygodni ({internship.WorkingDays} dni roboczych)",
-                    FontSize = 14
-                };
-
-                string statusText;
-                if (internship.IsCompleted)
-                    statusText = "Ukończony";
-                else if (isCurrentInternship)
-                    statusText = $"W trakcie od: {internship.StartDate.Value.ToString("dd.MM.yyyy")}";
-                else if (internship.StartDate.HasValue)
-                    statusText = $"Zaplanowany na: {internship.StartDate.Value.ToString("dd.MM.yyyy")}";
-                else
-                    statusText = "Oczekujący";
-
-                var statusLabel = new Label
-                {
-                    Text = statusText,
-                    FontSize = 14,
-                    TextColor = internship.IsCompleted ? Colors.Green :
-                                isCurrentInternship ? Colors.Blue :
-                                internship.StartDate.HasValue ? Colors.Orange :
-                                new Color(84,126,158)
-                };
-
-                var locationLabel = new Label
-                {
-                    Text = !string.IsNullOrEmpty(internship.Location) ? $"Miejsce: {internship.Location}" : "Miejsce: Nieokreślone",
-                    FontSize = 14,
-                    IsVisible = !string.IsNullOrEmpty(internship.Location) || isCurrentInternship || internship.IsCompleted
-                };
-
-                var supervisorLabel = new Label
-                {
-                    Text = !string.IsNullOrEmpty(internship.SupervisorName) ? $"Kierownik: {internship.SupervisorName}" : "Kierownik: Nieokreślony",
-                    FontSize = 14,
-                    IsVisible = !string.IsNullOrEmpty(internship.SupervisorName) || isCurrentInternship || internship.IsCompleted
-                };
-
-                var detailsButton = new Button
-                {
-                    Text = "Szczegóły",
-                    HeightRequest = 35,
-                    FontSize = 14,
-                    Margin = new Thickness(0, 5, 0, 0),
-                    CommandParameter = internship.Id
-                };
-                detailsButton.Clicked += OnInternshipDetailsClicked;
-
-                var headerLayout = new Grid
-                {
-                    ColumnDefinitions = new ColumnDefinitionCollection
-                {
-                    new ColumnDefinition { Width = new GridLength(30) },
-                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
-                }
-                };
-                headerLayout.Add(statusIndicator, 0, 0);
-                headerLayout.Add(titleLabel, 1, 0);
-
-                var contentLayout = new VerticalStackLayout
-                {
-                    Children = { headerLayout, durationLabel, statusLabel }
-                };
-
-                if (locationLabel.IsVisible)
-                    contentLayout.Children.Add(locationLabel);
-
-                if (supervisorLabel.IsVisible)
-                    contentLayout.Children.Add(supervisorLabel);
-
-                contentLayout.Children.Add(detailsButton);
-
-                frame.Content = contentLayout;
-                InternshipsLayout.Children.Add(frame);
-            }
-        }
-
-        private void OnBasicModuleButtonClicked(object sender, EventArgs e)
-        {
-            DisplayInternships(ModuleType.Basic);
-        }
-
-        private void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
-        {
-            DisplayInternships(ModuleType.Specialistic);
-        }
-
-        private async void OnAddInternshipClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new InternshipDetailsPage(null, _currentModule, OnInternshipAdded));
-        }
-
-        private async void OnInternshipDetailsClicked(object sender, EventArgs e)
-        {
-            if (sender is Button button && button.CommandParameter is int internshipId)
-            {
-                var internship = _specialization.RequiredInternships.FirstOrDefault(i => i.Id == internshipId);
-                if (internship != null)
-                {
-                    await Navigation.PushAsync(new InternshipDetailsPage(internship, _currentModule, OnInternshipUpdated));
-                }
-            }
-        }
-
-        // Zmiana metod callback na async Task
-        private async Task OnInternshipAdded(Internship internship)
-        {
-            await _specializationService.SaveInternshipAsync(internship);
-            LoadDataAsync();
-        }
-
-        private async Task OnInternshipUpdated(Internship internship)
-        {
-            await _specializationService.SaveInternshipAsync(internship);
-            LoadDataAsync();
         }
     }
 }

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Internships.ViewModels"
+          xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
+          xmlns:models="clr-namespace:SledzSpecke.Core.Models;assembly=SledzSpecke.Core"
           x:Class="SledzSpecke.App.Features.Internships.Views.InternshipsPage"
-          Title="Staże">
+          x:DataType="viewmodels:InternshipsViewModel"
+          Title="{Binding Title}">
+
     <ContentPage.Resources>
         <ResourceDictionary>
             <Style x:Key="CompletedInternshipStyle" TargetType="Frame">
@@ -21,35 +27,104 @@
                 <Setter Property="BackgroundColor" Value="#F5F5F5" />
                 <Setter Property="BorderColor" Value="#9E9E9E" />
             </Style>
+
+            <converters:InternshipStatusTextConverter x:Key="InternshipStatusTextConverter" />
+            <converters:InternshipStatusColorConverter x:Key="InternshipStatusColorConverter" />
+            <converters:InternshipStatusStyleConverter x:Key="InternshipStatusStyleConverter" />
+            <converters:InternshipLocationVisibilityConverter x:Key="InternshipLocationVisibilityConverter" />
+            <converters:InternshipSupervisorVisibilityConverter x:Key="InternshipSupervisorVisibilityConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
+
     <Grid RowDefinitions="Auto,*">
         <Grid ColumnDefinitions="*,*" Padding="10">
             <Button Text="Moduł podstawowy" 
-                Clicked="OnBasicModuleButtonClicked" 
+                Command="{Binding SelectBasicModuleCommand}" 
                 Grid.Column="0" 
                 Margin="5"
-                x:Name="BasicModuleButton"/>
+                BackgroundColor="{Binding BasicModuleButtonBackgroundColor}"
+                TextColor="{Binding BasicModuleButtonTextColor}"/>
+
             <Button Text="Moduł specjalistyczny" 
-                Clicked="OnSpecialisticModuleButtonClicked" 
+                Command="{Binding SelectSpecialisticModuleCommand}" 
                 Grid.Column="1" 
                 Margin="5"
-                x:Name="SpecialisticModuleButton"/>
+                BackgroundColor="{Binding SpecialisticModuleButtonBackgroundColor}"
+                TextColor="{Binding SpecialisticModuleButtonTextColor}"/>
         </Grid>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="15" Spacing="10" x:Name="InternshipsLayout">
-                <Label Text="Wybierz moduł powyżej, aby zobaczyć staże" 
-                   HorizontalOptions="Center" 
-                   VerticalOptions="Center"
-                   x:Name="NoModuleSelectedLabel"/>
+            <VerticalStackLayout Padding="15" Spacing="10">
+                <Label Text="Brak staży do wyświetlenia" 
+                       HorizontalOptions="Center" 
+                       VerticalOptions="Center"
+                       Margin="0,20,0,0"
+                       IsVisible="{Binding IsNoInternshipsVisible}"/>
 
-                <!-- Tutaj będą dynamicznie dodawane elementy staży -->
+                <CollectionView ItemsSource="{Binding Internships}"
+                                IsVisible="{Binding IsNoInternshipsVisible, Converter={StaticResource InverseBoolConverter}}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Internship">
+                            <Frame Padding="10"
+                                   Margin="0,0,0,10"
+                                   CornerRadius="5"
+                                   Style="{Binding ., Converter={StaticResource InternshipStatusStyleConverter}, ConverterParameter={StaticResource Resources}}">
+                                <VerticalStackLayout>
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <BoxView Color="{Binding ., Converter={StaticResource InternshipStatusColorConverter}}"
+                                                 WidthRequest="16"
+                                                 HeightRequest="16"
+                                                 CornerRadius="8"
+                                                 VerticalOptions="Center"
+                                                 Grid.Column="0"
+                                                 Margin="0,0,10,0" />
+
+                                        <Label Text="{Binding Name}"
+                                               FontAttributes="Bold"
+                                               FontSize="16"
+                                               Grid.Column="1" />
+                                    </Grid>
+
+                                    <Label>
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Czas trwania: " />
+                                                <Span Text="{Binding DurationWeeks}" />
+                                                <Span Text=" tygodni (" />
+                                                <Span Text="{Binding WorkingDays}" />
+                                                <Span Text=" dni roboczych)" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+
+                                    <Label Text="{Binding ., Converter={StaticResource InternshipStatusTextConverter}}"
+                                           FontSize="14"
+                                           TextColor="{Binding ., Converter={StaticResource InternshipStatusColorConverter}}" />
+
+                                    <Label Text="{Binding Location, StringFormat='Miejsce: {0}'}"
+                                           FontSize="14"
+                                           IsVisible="{Binding ., Converter={StaticResource InternshipLocationVisibilityConverter}}" />
+
+                                    <Label Text="{Binding SupervisorName, StringFormat='Kierownik: {0}'}"
+                                           FontSize="14"
+                                           IsVisible="{Binding ., Converter={StaticResource InternshipSupervisorVisibilityConverter}}" />
+
+                                    <Button Text="Szczegóły"
+                                            HeightRequest="35"
+                                            FontSize="14"
+                                            Margin="0,5,0,0"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:InternshipsViewModel}}, Path=ViewInternshipDetailsCommand}"
+                                            CommandParameter="{Binding Id}" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Dodaj" Clicked="OnAddInternshipClicked" IconImageSource="add_icon.png" />
+        <ToolbarItem Text="Dodaj" Command="{Binding AddInternshipCommand}" IconImageSource="add_icon.png" />
     </ContentPage.ToolbarItems>
-</ContentPage>
+</common:BaseContentPage>
