@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Czat_z_AI.txt
 /Historia czatu - Detailed Task Plan for Resident Tracking App - Claude.txt
+
+**/FluentUI.cs
