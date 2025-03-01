@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-          x:Class=" SledzSpecke.App.Features.SMKExport.Views.SMKExportPage"
-          Title="Eksport do SMK">
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.SMKExport.ViewModels"
+          x:Class="SledzSpecke.App.Features.SMKExport.Views.SMKExportPage"
+          x:DataType="viewmodels:SMKExportViewModel"
+          Title="{Binding Title}">
     <!-- Use Grid as the root layout to properly handle the overlay -->
     <Grid>
         <!-- Main Content -->
         <ScrollView x:Name="scrollView">
-        <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Page Header -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+            <VerticalStackLayout Padding="20" Spacing="20">
+                <!-- Page Header -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=#F3F9FF, Dark=#0D365B}"
                    Padding="20" CornerRadius="10" Margin="0,0,0,10">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Eksport danych do SMK" FontSize="22" FontAttributes="Bold" 
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Eksport danych do SMK" FontSize="22" FontAttributes="Bold" 
                            HorizontalOptions="Center" TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                    <Label Text="Wygeneruj dane do importu w Systemie Monitorowania Kształcenia"
+                        <Label Text="Wygeneruj dane do importu w Systemie Monitorowania Kształcenia"
                            HorizontalOptions="Center" HorizontalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
-                </VerticalStackLayout>
-            </Frame>
+                    </VerticalStackLayout>
+                </Frame>
 
-                <!-- Result Frame - Initially Hidden -->
+                <!-- Result Frame - Shown when report is generated -->
                 <Frame BorderColor="#4CAF50" Padding="20" CornerRadius="10" 
-                       IsVisible="False" x:Name="ResultFrame"
+                       IsVisible="{Binding IsResultVisible}"
                        BackgroundColor="{AppThemeBinding Light=#F1FBF1, Dark=#0D3617}">
                     <VerticalStackLayout Spacing="15">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
@@ -35,18 +38,17 @@
                                TextColor="{AppThemeBinding Light=#1B5E20, Dark=#81C784}"/>
                         </Grid>
 
-                        <Label x:Name="FilePathLabel" 
-                               Text="Ścieżka pliku: /Downloads/SMK_Export_20230301.xlsx" 
+                        <Label Text="{Binding FilePath, StringFormat='Ścieżka pliku: {0}'}" 
                                TextColor="{AppThemeBinding Light=#0D759C, Dark=#4FC3F7}"/>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,10,0,0">
                             <Button Grid.Column="0" Text="Otwórz plik" 
-                    Clicked="OnOpenFileClicked" 
+                    Command="{Binding OpenFileCommand}" 
                     BackgroundColor="#4CAF50" TextColor="White"
                     HeightRequest="45" CornerRadius="8"/>
 
                             <Button Grid.Column="1" Text="Otwórz folder" 
-                    Clicked="OnOpenFolderClicked" 
+                    Command="{Binding OpenFolderCommand}" 
                     BackgroundColor="#78909C" TextColor="White"
                     HeightRequest="45" CornerRadius="8"/>
                         </Grid>
@@ -54,257 +56,257 @@
                 </Frame>
 
                 <!-- Export Type Selection with improved visuals -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Padding="20" CornerRadius="10">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Wybierz typ eksportu" FontSize="18" FontAttributes="Bold"
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Wybierz typ eksportu" FontSize="18" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-                    <!-- General Export Option with icon -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="GeneralExportRadioButton" 
-                                     IsChecked="True" 
+                        <!-- General Export Option with icon -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsGeneralExportSelected}" 
+                                     CheckedChanged="OnExportTypeChanged"
                                      GroupName="ExportTypeGroup" 
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <VerticalStackLayout Grid.Column="1" Spacing="3">
-                            <Label Text="Eksport ogólny" FontAttributes="Bold" FontSize="16"
+                            <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                <Label Text="Eksport ogólny" FontAttributes="Bold" FontSize="16"
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                            <Label Text="Eksport wszystkich danych specjalizacji w jednym pliku"
+                                <Label Text="Eksport wszystkich danych specjalizacji w jednym pliku"
                                    TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
-                        </VerticalStackLayout>
-                    </Grid>
+                            </VerticalStackLayout>
+                        </Grid>
 
-                    <!-- Procedures Export Option -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="ProcedureExportRadioButton" 
+                        <!-- Procedures Export Option -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsProcedureExportSelected}" 
+                                     CheckedChanged="OnExportTypeChanged"
                                      GroupName="ExportTypeGroup"
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <VerticalStackLayout Grid.Column="1" Spacing="3">
-                            <Label Text="Eksport procedur w formacie SMK" FontAttributes="Bold" FontSize="16"
+                            <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                <Label Text="Eksport procedur w formacie SMK" FontAttributes="Bold" FontSize="16"
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                            <Label Text="Format zgodny z wymaganiami importu procedur w SMK"
+                                <Label Text="Format zgodny z wymaganiami importu procedur w SMK"
                                    TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
-                        </VerticalStackLayout>
-                    </Grid>
+                            </VerticalStackLayout>
+                        </Grid>
 
-                    <!-- Duty Shifts Export Option -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="DutyShiftExportRadioButton" 
+                        <!-- Duty Shifts Export Option -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsDutyShiftExportSelected}" 
+                                     CheckedChanged="OnExportTypeChanged"
                                      GroupName="ExportTypeGroup"
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <VerticalStackLayout Grid.Column="1" Spacing="3">
-                            <Label Text="Eksport dyżurów w formacie SMK" FontAttributes="Bold" FontSize="16"
+                            <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                <Label Text="Eksport dyżurów w formacie SMK" FontAttributes="Bold" FontSize="16"
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                            <Label Text="Format zgodny z wymaganiami importu dyżurów w SMK"
+                                <Label Text="Format zgodny z wymaganiami importu dyżurów w SMK"
                                    TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
-                        </VerticalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- SMK Format Options -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <!-- SMK Format Options -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Padding="20" CornerRadius="10">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Opcje formatu SMK" FontSize="18" FontAttributes="Bold"
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Opcje formatu SMK" FontSize="18" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <CheckBox x:Name="UseSmkExactFormatCheckBox" IsChecked="True" 
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <CheckBox IsChecked="{Binding UseSmkExactFormat}" 
                                   Color="#24C1DE"
                                   Grid.Column="0"/>
-                        <VerticalStackLayout Grid.Column="1" Spacing="3">
-                            <Label Text="Użyj dokładnego formatu SMK" 
+                            <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                <Label Text="Użyj dokładnego formatu SMK" 
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                            <Label Text="Zgodnie z instrukcją SMK, eksport będzie zawierał wymagane kolumny" 
+                                <Label Text="Zgodnie z instrukcją SMK, eksport będzie zawierał wymagane kolumny" 
                                    FontSize="12" TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
-                        </VerticalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- General Export Options -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <!-- General Export Options -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Padding="20" CornerRadius="10" 
                    IsVisible="{Binding IsGeneralExportSelected}">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Zakres danych" FontSize="18" FontAttributes="Bold"
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Zakres danych" FontSize="18" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" 
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" 
                           ColumnSpacing="15" RowSpacing="15">
-                        <!-- Courses -->
-                        <CheckBox x:Name="CoursesCheckBox" IsChecked="True" 
+                            <!-- Courses -->
+                            <CheckBox IsChecked="{Binding IncludeCoursesChecked}" 
                                   Color="#24C1DE"
                                   Grid.Column="0" Grid.Row="0"/>
-                        <Label Text="Kursy" VerticalOptions="Center" 
+                            <Label Text="Kursy" VerticalOptions="Center" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1" Grid.Row="0"/>
 
-                        <!-- Internships -->
-                        <CheckBox x:Name="InternshipsCheckBox" IsChecked="True" 
+                            <!-- Internships -->
+                            <CheckBox IsChecked="{Binding IncludeInternshipsChecked}" 
                                   Color="#24C1DE"
                                   Grid.Column="0" Grid.Row="1"/>
-                        <Label Text="Staże" VerticalOptions="Center" 
+                            <Label Text="Staże" VerticalOptions="Center" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1" Grid.Row="1"/>
 
-                        <!-- Procedures -->
-                        <CheckBox x:Name="ProceduresCheckBox" IsChecked="True" 
+                            <!-- Procedures -->
+                            <CheckBox IsChecked="{Binding IncludeProceduresChecked}" 
                                   Color="#24C1DE"
                                   Grid.Column="0" Grid.Row="2"/>
-                        <Label Text="Procedury" VerticalOptions="Center" 
+                            <Label Text="Procedury" VerticalOptions="Center" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1" Grid.Row="2"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- Format Selection -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <!-- Format Selection -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Padding="20" CornerRadius="10">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Format eksportu" FontSize="18" FontAttributes="Bold"
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Format eksportu" FontSize="18" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-                    <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                        <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                             StrokeThickness="1" StrokeShape="RoundRectangle 8">
-                        <Picker x:Name="FormatPicker" Title="Wybierz format" SelectedIndex="0"
+                            <Picker SelectedIndex="{Binding FormatSelectedIndex}" Title="Wybierz format"
                                 Margin="10,0" BackgroundColor="Transparent">
-                            <Picker.Items>
-                                <x:String>Excel (.xlsx)</x:String>
-                                <x:String>CSV (.csv)</x:String>
-                            </Picker.Items>
-                        </Picker>
-                    </Border>
-                </VerticalStackLayout>
-            </Frame>
+                                <Picker.Items>
+                                    <x:String>Excel (.xlsx)</x:String>
+                                    <x:String>CSV (.csv)</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </Border>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- Module Selection -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <!-- Module Selection -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Padding="20" CornerRadius="10">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Wybierz moduł" FontSize="18" FontAttributes="Bold"
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Wybierz moduł" FontSize="18" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-                    <!-- All Modules -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="AllModulesRadioButton" 
-                                     IsChecked="True" 
+                        <!-- All Modules -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsAllModulesSelected}" 
                                      GroupName="ModuleGroup"
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <Label Text="Wszystkie moduły" VerticalOptions="Center"
+                            <Label Text="Wszystkie moduły" VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1"/>
-                    </Grid>
+                        </Grid>
 
-                    <!-- Basic Module -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="BasicModuleRadioButton" 
+                        <!-- Basic Module -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsBasicModuleSelected}" 
                                      GroupName="ModuleGroup"
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <Label Text="Tylko moduł podstawowy" VerticalOptions="Center"
+                            <Label Text="Tylko moduł podstawowy" VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1"/>
-                    </Grid>
+                        </Grid>
 
-                    <!-- Specialistic Module -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="SpecialisticModuleRadioButton" 
+                        <!-- Specialistic Module -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsSpecialisticModuleSelected}" 
                                      GroupName="ModuleGroup"
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <Label Text="Tylko moduł specjalistyczny" VerticalOptions="Center"
+                            <Label Text="Tylko moduł specjalistyczny" VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- Date Range Selection -->
-            <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <!-- Date Range Selection -->
+                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Padding="20" CornerRadius="10">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Zakres dat" FontSize="18" FontAttributes="Bold"
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="Zakres dat" FontSize="18" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
-                    <!-- All Dates -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="AllDatesRadioButton" 
-                                     IsChecked="True" 
+                        <!-- All Dates -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsAllDatesSelected}" 
                                      GroupName="DateGroup"
                                      VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <Label Text="Wszystkie daty" VerticalOptions="Center"
+                            <Label Text="Wszystkie daty" VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1"/>
-                    </Grid>
+                        </Grid>
 
-                    <!-- Custom Date Range -->
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
-                        <RadioButton x:Name="CustomDatesRadioButton" 
+                        <!-- Custom Date Range -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15">
+                            <RadioButton IsChecked="{Binding IsCustomDatesSelected}" 
                                      GroupName="DateGroup"
+                                     VerticalOptions="Center"
                                      CheckedChanged="OnCustomDatesCheckedChanged"
-                                     VerticalOptions="Center"
                                      Grid.Column="0"/>
-                        <Label Text="Niestandardowy zakres dat" VerticalOptions="Center"
+                            <Label Text="Niestandardowy zakres dat" VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"
                                Grid.Column="1"/>
-                    </Grid>
+                        </Grid>
 
-                    <!-- Date Pickers (initially hidden) -->
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" 
+                        <!-- Date Pickers -->
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" 
                           ColumnSpacing="15" RowSpacing="15" 
-                          IsVisible="False" x:Name="DateRangeGrid">
-                        <Label Text="Od:" VerticalOptions="Center" Grid.Column="0" Grid.Row="0"
+                          IsVisible="{Binding IsDateRangeVisible}">
+                            <Label Text="Od:" VerticalOptions="Center" Grid.Column="0" Grid.Row="0"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                        <Border Grid.Column="1" Grid.Row="0"
+                            <Border Grid.Column="1" Grid.Row="0"
                                 Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
-                            <DatePicker x:Name="StartDatePicker" Margin="10,0"
+                                <DatePicker Date="{Binding StartDate}" Margin="10,0"
                                         BackgroundColor="Transparent"/>
-                        </Border>
+                            </Border>
 
-                        <Label Text="Do:" VerticalOptions="Center" Grid.Column="0" Grid.Row="1"
+                            <Label Text="Do:" VerticalOptions="Center" Grid.Column="0" Grid.Row="1"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-                        <Border Grid.Column="1" Grid.Row="1"
+                            <Border Grid.Column="1" Grid.Row="1"
                                 Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
-                            <DatePicker x:Name="EndDatePicker" Margin="10,0"
+                                <DatePicker Date="{Binding EndDate}" Margin="10,0"
                                         BackgroundColor="Transparent"/>
-                        </Border>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                            </Border>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- Generate Report Button -->
-            <Button Text="Generuj raport" Clicked="OnGenerateReportClicked" 
+                <!-- Generate Report Button -->
+                <Button Text="Generuj raport" Command="{Binding GenerateReportCommand}" 
                     BackgroundColor="#082044" TextColor="White"
                     HeightRequest="55" CornerRadius="10" FontSize="16"
                     Margin="0,10,0,20"/>
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
 
-    <!-- Loading Indicator Overlay - Initially Hidden -->
-    <Grid x:Name="LoadingOverlay" IsVisible="false"
-              BackgroundColor="#80000000" 
-              InputTransparent="False">
-        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
-            <ActivityIndicator IsRunning="True" HeightRequest="50" WidthRequest="50" 
+        <!-- Loading Indicator Overlay -->
+        <Grid IsVisible="{Binding IsLoading}"
+          BackgroundColor="#80000000" 
+          InputTransparent="False">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
+                <ActivityIndicator IsRunning="{Binding IsLoading}" HeightRequest="50" WidthRequest="50" 
                                    Color="#24C1DE"/>
-            <Label Text="Generowanie raportu..." TextColor="White" FontSize="16"/>
-        </VerticalStackLayout>
+                <Label Text="Generowanie raportu..." TextColor="White" FontSize="16"/>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
-    </Grid>
-</ContentPage>
+</common:BaseContentPage>

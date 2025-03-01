@@ -173,7 +173,6 @@
   <ItemGroup>
     <Folder Include="Common\Controls\" />
     <Folder Include="Common\Behaviors\" />
-    <Folder Include="Features\SMKExport\ViewModels\" />
   </ItemGroup>
 
 </Project>

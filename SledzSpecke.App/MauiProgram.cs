@@ -17,6 +17,7 @@ using SledzSpecke.App.Features.SelfEducations.ViewModels;
 using SledzSpecke.App.Features.SelfEducations.Views;
 using SledzSpecke.App.Features.Settings.ViewModels;
 using SledzSpecke.App.Features.Settings.Views;
+using SledzSpecke.App.Features.SMKExport.ViewModels;
 using SledzSpecke.App.Features.SMKExport.Views;
 using SledzSpecke.App.Services;
 using SledzSpecke.App.Services.Implementations;
@@ -87,6 +88,7 @@ namespace SledzSpecke.App
             services.AddTransient<AbsenceManagementViewModel>();
             services.AddTransient<ProcedureEntryViewModel>();
             services.AddTransient<DutyShiftDetailsViewModel>();
+            services.AddTransient<SMKExportViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();
