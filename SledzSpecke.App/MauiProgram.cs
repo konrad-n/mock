@@ -85,6 +85,7 @@ namespace SledzSpecke.App
             services.AddTransient<SelfEducationViewModel>();
             services.AddTransient<InternshipsViewModel>();
             services.AddTransient<AbsenceManagementViewModel>();
+            services.AddTransient<ProcedureEntryViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();
