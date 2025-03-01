@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
           x:Class="SledzSpecke.App.Features.Settings.Views.SettingsPage"
-          Title="Ustawienia">
+    Title="Ustawienia">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Ustawienia aplikacji" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
@@ -12,13 +13,13 @@
                     <Label Text="Dane specjalizacji" FontSize="16" FontAttributes="Bold"/>
 
                     <Label Text="Nazwa specjalizacji" FontAttributes="Bold"/>
-                    <Entry x:Name="SpecializationNameEntry" Text="Hematologia" IsEnabled="False"/>
+                    <Entry x:Name="SpecializationNameEntry" Text="{Binding SpecializationName}" IsEnabled="False"/>
 
                     <Label Text="Data rozpoczęcia" FontAttributes="Bold"/>
-                    <DatePicker x:Name="StartDatePicker"/>
+                    <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}"/>
 
                     <Label Text="Czas trwania (w latach)" FontAttributes="Bold"/>
-                    <Entry x:Name="DurationYearsEntry" Text="5" Keyboard="Numeric" IsEnabled="False"/>
+                    <Entry x:Name="DurationYearsEntry" Text="{Binding DurationYears}" Keyboard="Numeric" IsEnabled="False"/>
                 </VerticalStackLayout>
             </Frame>
 
@@ -27,16 +28,16 @@
                     <Label Text="Dane personalne" FontSize="16" FontAttributes="Bold"/>
 
                     <Label Text="Imię i nazwisko" FontAttributes="Bold"/>
-                    <Entry x:Name="FullNameEntry" Placeholder="Wprowadź imię i nazwisko"/>
+                    <Entry x:Name="FullNameEntry" Placeholder="Wprowadź imię i nazwisko" Text="{Binding Username}"/>
 
                     <Label Text="Numer PWZ" FontAttributes="Bold"/>
-                    <Entry x:Name="MedicalLicenseNumberEntry" Placeholder="Wprowadź numer PWZ"/>
+                    <Entry x:Name="MedicalLicenseNumberEntry" Placeholder="Wprowadź numer PWZ" Text="{Binding MedicalLicenseNumber}"/>
 
                     <Label Text="Jednostka szkoląca" FontAttributes="Bold"/>
-                    <Entry x:Name="TrainingUnitEntry" Placeholder="Wprowadź nazwę jednostki szkolącej"/>
+                    <Entry x:Name="TrainingUnitEntry" Placeholder="Wprowadź nazwę jednostki szkolącej" Text="{Binding TrainingUnit}"/>
 
                     <Label Text="Kierownik specjalizacji" FontAttributes="Bold"/>
-                    <Entry x:Name="SupervisorEntry" Placeholder="Wprowadź imię i nazwisko kierownika"/>
+                    <Entry x:Name="SupervisorEntry" Placeholder="Wprowadź imię i nazwisko kierownika" Text="{Binding Supervisor}"/>
                 </VerticalStackLayout>
             </Frame>
 
@@ -46,17 +47,17 @@
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                         <Label Text="Powiadomienia" VerticalOptions="Center" Grid.Column="0"/>
-                        <Switch x:Name="NotificationsSwitch" IsToggled="True" Grid.Column="1"/>
+                        <Switch x:Name="NotificationsSwitch" IsToggled="{Binding EnableNotifications}" Grid.Column="1"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                         <Label Text="Automatyczna synchronizacja" VerticalOptions="Center" Grid.Column="0"/>
-                        <Switch x:Name="AutoSyncSwitch" IsToggled="True" Grid.Column="1"/>
+                        <Switch x:Name="AutoSyncSwitch" IsToggled="{Binding EnableAutoSync}" Grid.Column="1"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                         <Label Text="Motyw ciemny" VerticalOptions="Center" Grid.Column="0"/>
-                        <Switch x:Name="DarkThemeSwitch" IsToggled="False" Grid.Column="1"/>
+                        <Switch x:Name="DarkThemeSwitch" IsToggled="{Binding UseDarkTheme}" Grid.Column="1"/>
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
@@ -68,13 +69,23 @@
                     <Label Text="Ustawienia integracji z SMK" FontAttributes="Bold"/>
                     <Label Text="Aplikacja wspiera eksport danych dla Systemu Monitorowania Kształcenia (SMK)" FontSize="14"/>
 
-                    <Button Text="Konfiguruj integrację z SMK" Clicked="OnConfigureSMKClicked" BackgroundColor="#547E9E" TextColor="White"/>
+                    <Button Text="Konfiguruj integrację z SMK" 
+                            Clicked="OnConfigureSMKClicked" 
+                            BackgroundColor="#547E9E" 
+                            TextColor="White"/>
                 </VerticalStackLayout>
             </Frame>
 
-            <Button Text="Zapisz zmiany" Clicked="OnSaveChangesClicked" BackgroundColor="#082044" TextColor="White"/>
+            <Button Text="Zapisz zmiany" 
+                    Clicked="OnSaveChangesClicked" 
+                    BackgroundColor="#082044" 
+                    TextColor="White"/>
 
-            <Button Text="Wyczyść wszystkie dane" Clicked="OnClearDataClicked" BackgroundColor="#D32F2F" TextColor="White" Margin="0,20,0,0"/>
+            <Button Text="Wyczyść wszystkie dane" 
+                    Clicked="OnClearDataClicked" 
+                    BackgroundColor="#D32F2F" 
+                    TextColor="White" 
+                    Margin="0,20,0,0"/>
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</common:BaseContentPage>

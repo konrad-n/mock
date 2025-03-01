@@ -1,32 +1,62 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Authentication.ViewModels"
+             xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
              x:Class="SledzSpecke.App.Features.Authentication.Views.LoginPage"
              x:DataType="viewmodels:LoginViewModel"
              Title="{Binding Title}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
-            <Image Source="app_logo.png" HeightRequest="100" WidthRequest="100" HorizontalOptions="Center" />
+            <Image Source="app_logo.png" 
+                   HeightRequest="100" 
+                   WidthRequest="100" 
+                   HorizontalOptions="Center" />
 
-            <Label Text="ŚledzSpecke" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,20" TextColor="{StaticResource Primary}" />
+            <Label Text="ŚledzSpecke" 
+                   FontSize="28" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   Margin="0,0,0,20" 
+                   TextColor="{StaticResource Primary}" />
 
-            <Label Text="Zaloguj się do aplikacji" FontSize="20" HorizontalOptions="Center" Margin="0,0,0,20" />
+            <Label Text="Zaloguj się do aplikacji" 
+                   FontSize="20" 
+                   HorizontalOptions="Center" 
+                   Margin="0,0,0,20" />
 
-            <Entry Text="{Binding Email}" Placeholder="Adres email" Keyboard="Email" />
+            <Entry Text="{Binding Email, Mode=TwoWay}" 
+                   Placeholder="Adres email" 
+                   Keyboard="Email" />
 
-            <Entry Text="{Binding Password}" Placeholder="Hasło" IsPassword="True" />
+            <Entry Text="{Binding Password, Mode=TwoWay}" 
+                   Placeholder="Hasło" 
+                   IsPassword="True" />
 
-            <Button Command="{Binding LoginCommand}" Text="Zaloguj się" BackgroundColor="{StaticResource Primary}" TextColor="White" Margin="0,20,0,0" 
+            <Button Command="{Binding LoginCommand}" 
+                    Text="Zaloguj się" 
+                    BackgroundColor="{StaticResource Primary}" 
+                    TextColor="White" 
+                    Margin="0,20,0,0" 
                     IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}" />
 
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" Margin="0,10,0,10" />
+            <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                             IsVisible="{Binding IsLoading}" 
+                             HorizontalOptions="Center" 
+                             Margin="0,10,0,10" />
 
-            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" HorizontalOptions="Center" />
+            <Label Text="{Binding ErrorMessage}" 
+                   TextColor="Red" 
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" 
+                   HorizontalOptions="Center" />
 
-            <Label Text="Nie masz jeszcze konta?" HorizontalOptions="Center" Margin="0,20,0,0" />
+            <Label Text="Nie masz jeszcze konta?" 
+                   HorizontalOptions="Center" 
+                   Margin="0,20,0,0" />
 
-            <Button Command="{Binding NavigateToRegistrationCommand}" Text="Zarejestruj się" BackgroundColor="Transparent" TextColor="{StaticResource Primary}" />
+            <Button Text="Zarejestruj się" 
+                    BackgroundColor="Transparent" 
+                    TextColor="{StaticResource Primary}" />
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</common:BaseContentPage>

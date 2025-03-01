@@ -6,13 +6,13 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class AppSettings : IAppSettings
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<AppSettings> _logger;
         private UserSettings _settings;
 
-        public AppSettings(DatabaseService databaseService, ILogger<AppSettings> logger)
+        public AppSettings(ILogger<AppSettings> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
             _settings = new UserSettings();
         }

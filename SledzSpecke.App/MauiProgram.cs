@@ -8,6 +8,7 @@ using SledzSpecke.App.Features.Duties.Views;
 using SledzSpecke.App.Features.Internships.Views;
 using SledzSpecke.App.Features.Procedures.Views;
 using SledzSpecke.App.Features.SelfEducations.Views;
+using SledzSpecke.App.Features.Settings.ViewModels;
 using SledzSpecke.App.Features.Settings.Views;
 using SledzSpecke.App.Features.SMKExport.Views;
 using SledzSpecke.App.Services;
@@ -52,9 +53,14 @@ namespace SledzSpecke.App
 
         private static void RegisterServices(IServiceCollection services)
         {
-            services.AddSingleton<NavigationPage>();
+            services.AddSingleton<App>();
+
+            // Register ViewModels
+            services.AddTransient<LoginViewModel>();
+            services.AddTransient<SettingsViewModel>();
 
             // Register pages
+            services.AddSingleton<NavigationPage>();
             services.AddTransient<LoginPage>();
             services.AddTransient<RegistrationPage>();
             services.AddTransient<DashboardPage>();
@@ -86,9 +92,6 @@ namespace SledzSpecke.App
             services.AddSingleton<IAppSettings, AppSettings>();
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
-
-            // Register ViewModels
-            services.AddTransient<LoginViewModel>();
 
             // Register shell last
             services.AddSingleton<AppShell>();

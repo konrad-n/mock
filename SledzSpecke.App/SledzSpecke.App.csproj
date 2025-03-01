@@ -180,7 +180,6 @@
     <Folder Include="Features\Internships\ViewModels\" />
     <Folder Include="Features\Procedures\ViewModels\" />
     <Folder Include="Features\SelfEducations\ViewModels\" />
-    <Folder Include="Features\Settings\ViewModels\" />
     <Folder Include="Features\SMKExport\ViewModels\" />
   </ItemGroup>
 

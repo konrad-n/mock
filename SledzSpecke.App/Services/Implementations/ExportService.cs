@@ -9,12 +9,12 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class ExportService : IExportService
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<ExportService> _logger;
 
-        public ExportService(DatabaseService databaseService, ILogger<ExportService> logger)
+        public ExportService(ILogger<ExportService> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
         }
 

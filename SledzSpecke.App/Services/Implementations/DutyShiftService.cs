@@ -6,12 +6,12 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class DutyShiftService : IDutyShiftService
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<DutyShiftService> _logger;
 
-        public DutyShiftService(DatabaseService databaseService, ILogger<DutyShiftService> logger)
+        public DutyShiftService(ILogger<DutyShiftService> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
         }
 

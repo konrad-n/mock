@@ -27,11 +27,14 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             ILogger<LoginViewModel> logger) : base(logger)
         {
             _authenticationService = authenticationService;
-            Title = "Logowanie";
+
+            // Dodaj debug log
+            System.Diagnostics.Debug.WriteLine("LoginViewModel constructor called");
 
 #if DEBUG
             Email = "olo@pozakontrololo.com";
             Password = "gucio";
+            System.Diagnostics.Debug.WriteLine($"Debug values set: Email = {Email}, Password = {Password}");
 #endif
         }
 

@@ -6,12 +6,12 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class NotificationService : INotificationService
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<NotificationService> _logger;
 
-        public NotificationService(DatabaseService databaseService, ILogger<NotificationService> logger)
+        public NotificationService(ILogger<NotificationService> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
         }
 

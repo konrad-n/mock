@@ -8,16 +8,16 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class DataManager : IDataManager
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<DataManager> _logger;
         private static readonly string _appDataFolder = FileSystem.AppDataDirectory;
         private static readonly string _specializationFile = Path.Combine(_appDataFolder, "specialization.json");
 
         private Specialization _specialization;
 
-        public DataManager(DatabaseService databaseService, ILogger<DataManager> logger)
+        public DataManager(ILogger<DataManager> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
 
             if (!Directory.Exists(_appDataFolder))

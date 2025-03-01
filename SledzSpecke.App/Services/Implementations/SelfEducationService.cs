@@ -6,12 +6,12 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class SelfEducationService : ISelfEducationService
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<SelfEducationService> _logger;
 
-        public SelfEducationService(DatabaseService databaseService, ILogger<SelfEducationService> logger)
+        public SelfEducationService(ILogger<SelfEducationService> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
         }
 

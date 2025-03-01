@@ -8,16 +8,16 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly DatabaseService _databaseService;
+        private readonly IDatabaseService _databaseService;
         private readonly ILogger<AuthenticationService> _logger;
         private User _currentUser;
 
         public bool IsAuthenticated => _currentUser != null;
         public User CurrentUser => _currentUser;
 
-        public AuthenticationService(DatabaseService databaseService, ILogger<AuthenticationService> logger)
+        public AuthenticationService(IDatabaseService databaseService, ILogger<AuthenticationService> logger)
         {
-            _databaseService = databaseService;
+            _databaseService = App.DatabaseService;
             _logger = logger;
         }
 
