@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Courses.ViewModels"
+          xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
           x:Class="SledzSpecke.App.Features.Courses.Views.CoursesPage"
-          Title="Kursy">
+          x:DataType="viewmodels:CoursesViewModel"
+          Title="{Binding Title}">
     <ContentPage.Resources>
         <ResourceDictionary>
             <Style x:Key="CompletedCourseStyle" TargetType="Frame">
@@ -75,4 +79,4 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Dodaj" Clicked="OnAddCourseClicked" IconImageSource="add_icon.png" />
     </ContentPage.ToolbarItems>
-</ContentPage>
+</common:BaseContentPage>

@@ -2,8 +2,10 @@
 <common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
           xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Settings.ViewModels"
           x:Class="SledzSpecke.App.Features.Settings.Views.SettingsPage"
-    Title="Ustawienia">
+          x:DataType="viewmodels:SettingsViewModel"
+          Title="{Binding Title}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Ustawienia aplikacji" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
@@ -13,13 +15,13 @@
                     <Label Text="Dane specjalizacji" FontSize="16" FontAttributes="Bold"/>
 
                     <Label Text="Nazwa specjalizacji" FontAttributes="Bold"/>
-                    <Entry x:Name="SpecializationNameEntry" Text="{Binding SpecializationName}" IsEnabled="False"/>
+                    <Entry Text="{Binding SpecializationName}" IsEnabled="False"/>
 
                     <Label Text="Data rozpoczęcia" FontAttributes="Bold"/>
-                    <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}"/>
+                    <DatePicker Date="{Binding StartDate}"/>
 
                     <Label Text="Czas trwania (w latach)" FontAttributes="Bold"/>
-                    <Entry x:Name="DurationYearsEntry" Text="{Binding DurationYears}" Keyboard="Numeric" IsEnabled="False"/>
+                    <Entry Text="{Binding DurationYears}" Keyboard="Numeric" IsEnabled="False"/>
                 </VerticalStackLayout>
             </Frame>
 
@@ -28,16 +30,16 @@
                     <Label Text="Dane personalne" FontSize="16" FontAttributes="Bold"/>
 
                     <Label Text="Imię i nazwisko" FontAttributes="Bold"/>
-                    <Entry x:Name="FullNameEntry" Placeholder="Wprowadź imię i nazwisko" Text="{Binding Username}"/>
+                    <Entry Placeholder="Wprowadź imię i nazwisko" Text="{Binding Username}"/>
 
                     <Label Text="Numer PWZ" FontAttributes="Bold"/>
-                    <Entry x:Name="MedicalLicenseNumberEntry" Placeholder="Wprowadź numer PWZ" Text="{Binding MedicalLicenseNumber}"/>
+                    <Entry Placeholder="Wprowadź numer PWZ" Text="{Binding MedicalLicenseNumber}"/>
 
                     <Label Text="Jednostka szkoląca" FontAttributes="Bold"/>
-                    <Entry x:Name="TrainingUnitEntry" Placeholder="Wprowadź nazwę jednostki szkolącej" Text="{Binding TrainingUnit}"/>
+                    <Entry Placeholder="Wprowadź nazwę jednostki szkolącej" Text="{Binding TrainingUnit}"/>
 
                     <Label Text="Kierownik specjalizacji" FontAttributes="Bold"/>
-                    <Entry x:Name="SupervisorEntry" Placeholder="Wprowadź imię i nazwisko kierownika" Text="{Binding Supervisor}"/>
+                    <Entry Placeholder="Wprowadź imię i nazwisko kierownika" Text="{Binding Supervisor}"/>
                 </VerticalStackLayout>
             </Frame>
 
@@ -47,17 +49,17 @@
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                         <Label Text="Powiadomienia" VerticalOptions="Center" Grid.Column="0"/>
-                        <Switch x:Name="NotificationsSwitch" IsToggled="{Binding EnableNotifications}" Grid.Column="1"/>
+                        <Switch IsToggled="{Binding EnableNotifications}" Grid.Column="1"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                         <Label Text="Automatyczna synchronizacja" VerticalOptions="Center" Grid.Column="0"/>
-                        <Switch x:Name="AutoSyncSwitch" IsToggled="{Binding EnableAutoSync}" Grid.Column="1"/>
+                        <Switch IsToggled="{Binding EnableAutoSync}" Grid.Column="1"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
                         <Label Text="Motyw ciemny" VerticalOptions="Center" Grid.Column="0"/>
-                        <Switch x:Name="DarkThemeSwitch" IsToggled="{Binding UseDarkTheme}" Grid.Column="1"/>
+                        <Switch IsToggled="{Binding UseDarkTheme}" Grid.Column="1"/>
                     </Grid>
                 </VerticalStackLayout>
             </Frame>

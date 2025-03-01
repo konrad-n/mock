@@ -3,7 +3,7 @@ using SledzSpecke.App.Features.Settings.ViewModels;
 
 namespace SledzSpecke.App.Features.Settings.Views
 {
-    public partial class SettingsPage
+    public partial class SettingsPage : BaseContentPage
     {
         private SettingsViewModel _viewModel;
 
@@ -23,6 +23,7 @@ namespace SledzSpecke.App.Features.Settings.Views
             catch (Exception ex)
             {
                 await DisplayAlert("Błąd", "Nie udało się załadować ustawień.", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error in SettingsPage: {ex}");
             }
         }
 
@@ -58,7 +59,6 @@ namespace SledzSpecke.App.Features.Settings.Views
                 "Czy na pewno chcesz wyczyścić wszystkie dane? Ta operacja jest nieodwracalna.",
                 "Tak",
                 "Nie");
-
             if (answer)
             {
                 try

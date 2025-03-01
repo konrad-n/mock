@@ -1,70 +1,79 @@
-﻿using SledzSpecke.App.Services;
+﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Features.Courses.ViewModels;
+using SledzSpecke.App.Services;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Features.Courses.Views
 {
-    public partial class CoursesPage : ContentPage
+    public partial class CoursesPage : BaseContentPage
     {
-        private Specialization _specialization;
-        private ModuleType _currentModule = ModuleType.Basic;
-        private ISpecializationService _specializationService;
+        private CoursesViewModel _viewModel;
+        private readonly ISpecializationService _specializationService;
 
-        public CoursesPage(
-            ISpecializationService specializationService)
+        public CoursesPage(ISpecializationService specializationService)
         {
             _specializationService = specializationService;
-
             InitializeComponent();
-            LoadDataAsync();
+        }
+
+        protected override async Task InitializePageAsync()
+        {
+            try
+            {
+                _viewModel = GetRequiredService<CoursesViewModel>();
+                BindingContext = _viewModel;
+                await _viewModel.InitializeAsync();
+
+                // Po inicjalizacji wyświetl kursy dla domyślnego modułu
+                DisplayCourses(_viewModel.CurrentModule);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Błąd", "Nie udało się załadować danych kursów.", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error in CoursesPage: {ex}");
+            }
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            LoadDataAsync();
-        }
 
-        private async void LoadDataAsync()
-        {
-            try
+            // Odśwież dane kursów przy każdym pokazaniu strony
+            if (_viewModel != null)
             {
-                // Pobieramy dane z bazy, nie z seedera
-                _specialization = await _specializationService.GetSpecializationAsync();
-                DisplayCourses(_currentModule);
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Błąd", $"Nie udało się załadować danych: {ex.Message}", "OK");
+                _viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        DisplayCourses(_viewModel.CurrentModule);
+                    });
+                });
             }
         }
 
         private void DisplayCourses(ModuleType moduleType)
         {
-            _currentModule = moduleType;
             CoursesLayout.Children.Clear();
             NoModuleSelectedLabel.IsVisible = false;
 
             // Ustawienie aktywnego przycisku
             if (moduleType == ModuleType.Basic)
             {
-                BasicModuleButton.BackgroundColor = new Color(8,32,68);
+                BasicModuleButton.BackgroundColor = new Color(8, 32, 68);
                 BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = new Color(228,240,245);;
+                SpecialisticModuleButton.BackgroundColor = new Color(228, 240, 245);
                 SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButton.BackgroundColor = new Color(228,240,245);;
+                BasicModuleButton.BackgroundColor = new Color(228, 240, 245);
                 BasicModuleButton.TextColor = Colors.Black;
-                SpecialisticModuleButton.BackgroundColor = new Color(8,32,68);
+                SpecialisticModuleButton.BackgroundColor = new Color(8, 32, 68);
                 SpecialisticModuleButton.TextColor = Colors.White;
             }
 
-            var courses = _specialization.RequiredCourses
-                .Where(c => c.Module == moduleType)
-                .OrderBy(c => c.IsCompleted)
-                .ToList();
+            var courses = _viewModel.GetFilteredCourses();
 
             if (courses.Count == 0)
             {
@@ -94,7 +103,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                 {
                     Color = course.IsCompleted ? Colors.Green :
                             course.ScheduledDate.HasValue ? Colors.Orange :
-                            new Color(84,126,158),
+                            new Color(84, 126, 158),
                     WidthRequest = 16,
                     HeightRequest = 16,
                     CornerRadius = 8,
@@ -117,12 +126,13 @@ namespace SledzSpecke.App.Features.Courses.Views
                 var statusLabel = new Label
                 {
                     Text = course.IsCompleted ? "Ukończony" :
+                           course.IsAttended ? "Zarejestrowany" :
                            course.ScheduledDate.HasValue ? $"Zaplanowany na: {course.ScheduledDate.Value.ToString("dd.MM.yyyy")}" :
                            "Oczekujący",
                     FontSize = 14,
                     TextColor = course.IsCompleted ? Colors.Green :
                                 course.ScheduledDate.HasValue ? Colors.Orange :
-                                new Color(84,126,158)
+                                new Color(84, 126, 158)
                 };
 
                 var detailsButton = new Button
@@ -131,6 +141,8 @@ namespace SledzSpecke.App.Features.Courses.Views
                     HeightRequest = 35,
                     FontSize = 14,
                     Margin = new Thickness(0, 5, 0, 0),
+                    BackgroundColor = new Color(36, 193, 222),
+                    TextColor = Colors.White,
                     CommandParameter = course.Id
                 };
                 detailsButton.Clicked += OnCourseDetailsClicked;
@@ -138,10 +150,10 @@ namespace SledzSpecke.App.Features.Courses.Views
                 var headerLayout = new Grid
                 {
                     ColumnDefinitions = new ColumnDefinitionCollection
-                {
-                    new ColumnDefinition { Width = new GridLength(30) },
-                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
-                }
+                    {
+                        new ColumnDefinition { Width = new GridLength(30) },
+                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+                    }
                 };
                 headerLayout.Add(statusIndicator, 0, 0);
                 headerLayout.Add(titleLabel, 1, 0);
@@ -156,44 +168,48 @@ namespace SledzSpecke.App.Features.Courses.Views
             }
         }
 
-        private void OnBasicModuleButtonClicked(object sender, EventArgs e)
-        {
-            DisplayCourses(ModuleType.Basic);
-        }
-
-        private void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
-        {
-            DisplayCourses(ModuleType.Specialistic);
-        }
-
-        private async void OnAddCourseClicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new CourseDetailsPage(null, _currentModule, OnCourseAdded));
-        }
-
         private async void OnCourseDetailsClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is int courseId)
             {
-                var course = _specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
+                var course = _viewModel.Specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
                 {
-                    await Navigation.PushAsync(new CourseDetailsPage(course, _currentModule, OnCourseUpdated));
+                    await Navigation.PushAsync(new CourseDetailsPage(course, _viewModel.CurrentModule, OnCourseUpdated));
                 }
             }
         }
 
-        // Zmiana metod callback na async Task
+        private async void OnBasicModuleButtonClicked(object sender, EventArgs e)
+        {
+            _viewModel.SelectBasicModule();
+            DisplayCourses(_viewModel.CurrentModule);
+        }
+
+        private async void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
+        {
+            _viewModel.SelectSpecialisticModule();
+            DisplayCourses(_viewModel.CurrentModule);
+        }
+
+        private async void OnAddCourseClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new CourseDetailsPage(null, _viewModel.CurrentModule, OnCourseAdded));
+        }
+
+        // Metody callback zostają bez zmian, aby zachować pełną funkcjonalność
         private async Task OnCourseAdded(Course course)
         {
             await _specializationService.SaveCourseAsync(course);
-            LoadDataAsync();
+            await _viewModel.LoadSpecializationDataAsync();
+            DisplayCourses(_viewModel.CurrentModule);
         }
 
         private async Task OnCourseUpdated(Course course)
         {
             await _specializationService.SaveCourseAsync(course);
-            LoadDataAsync();
+            await _viewModel.LoadSpecializationDataAsync();
+            DisplayCourses(_viewModel.CurrentModule);
         }
     }
 }
