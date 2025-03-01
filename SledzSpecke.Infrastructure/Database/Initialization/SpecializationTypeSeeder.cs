@@ -25,7 +25,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 // The full list would include all 77 specializations from the requirements
                 new SpecializationType { Id = 28, Name = "Hematologia", BaseDurationWeeks = 261, BasicModuleDurationWeeks = 104, SpecialisticModuleDurationWeeks = 157, VacationDaysPerYear = 26, SelfEducationDaysPerYear = 6, StatutoryHolidaysPerYear = 13, RequiredDutyHoursPerWeek = 10.0833 },
                 
-                // ... all other specializations ...
+                // inne specjalizacje tutaj
                 
                 new SpecializationType { Id = 77, Name = "Zdrowie publiczne", BaseDurationWeeks = 208, BasicModuleDurationWeeks = 104, SpecialisticModuleDurationWeeks = 104, VacationDaysPerYear = 26, SelfEducationDaysPerYear = 6, StatutoryHolidaysPerYear = 13, RequiredDutyHoursPerWeek = 10.0833 }
             };
