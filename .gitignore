@@ -365,3 +365,6 @@ FodyWeavers.xsd
 /Historia czatu - Detailed Task Plan for Resident Tracking App - Claude.txt
 
 **/FluentUI.cs
+/SledzSpecke.App/Resources/Fonts/FluentUI.cs
+/SledzSpecke.App/Resources/Fonts/OpenSans-Regular.ttf
+/SledzSpecke.App/Resources/Fonts/OpenSans-Semibold.ttf
