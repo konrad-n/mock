@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Courses.ViewModels"
+          xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
           x:Class="SledzSpecke.App.Features.Courses.Views.CourseDetailsPage"
+          x:DataType="viewmodels:CourseDetailsViewModel"
           Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="0">
@@ -62,6 +66,7 @@
                         <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
                             <Picker x:Name="ModulePicker" Title="Wybierz moduł" 
+                                    SelectedIndex="{Binding ModulePickerSelectedIndex}"
                                     SelectedIndexChanged="OnModulePickerSelectedIndexChanged"
                                     Margin="10,0" BackgroundColor="Transparent">
                                 <Picker.Items>
@@ -79,6 +84,7 @@
                         <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8">
                             <Picker x:Name="StatusPicker" Title="Wybierz status" 
+                                    SelectedIndex="{Binding StatusPickerSelectedIndex}"
                                     SelectedIndexChanged="OnStatusPickerSelectedIndexChanged"
                                     Margin="10,0" BackgroundColor="Transparent">
                                 <Picker.Items>
@@ -131,7 +137,7 @@
                         <Label Text="Załączniki" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         <Button Text="Dodaj certyfikat/zaświadczenie" 
-                                Clicked="OnAddAttachmentClicked"
+                                Command="{Binding AddAttachmentCommand}"
                                 BackgroundColor="#149CD9" TextColor="White"
                                 HeightRequest="45" CornerRadius="8"/>
                     </VerticalStackLayout>
@@ -155,15 +161,15 @@
             <!-- Action Buttons -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,0,0,20">
                 <Button Grid.Column="0" Text="Anuluj" 
-                        Clicked="OnCancelClicked" 
+                        Command="{Binding CancelCommand}" 
                         BackgroundColor="#547E9E" TextColor="White"
                         HeightRequest="50" CornerRadius="8"/>
 
                 <Button Grid.Column="1" Text="Zapisz" 
-                        Clicked="OnSaveClicked" 
+                        Command="{Binding SaveCommand}" 
                         BackgroundColor="#082044" TextColor="White"
                         HeightRequest="50" CornerRadius="8"/>
             </Grid>
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</common:BaseContentPage>
