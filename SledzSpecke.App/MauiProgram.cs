@@ -6,6 +6,7 @@ using SledzSpecke.App.Features.Courses.ViewModels;
 using SledzSpecke.App.Features.Courses.Views;
 using SledzSpecke.App.Features.Dashboard.ViewModels;
 using SledzSpecke.App.Features.Dashboard.Views;
+using SledzSpecke.App.Features.Duties.ViewModels;
 using SledzSpecke.App.Features.Duties.Views;
 using SledzSpecke.App.Features.Internships.Views;
 using SledzSpecke.App.Features.Procedures.ViewModels;
@@ -77,6 +78,7 @@ namespace SledzSpecke.App
             services.AddTransient<DashboardViewModel>();
             services.AddTransient<CoursesViewModel>();
             services.AddTransient<ProceduresViewModel>();
+            services.AddTransient<DutyShiftsViewModel>();
 
             // Register pages
             services.AddSingleton<NavigationPage>();
