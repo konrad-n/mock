@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Internships.ViewModels"
+          xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
           x:Class="SledzSpecke.App.Features.Internships.Views.InternshipDetailsPage"
+          x:DataType="viewmodels:InternshipDetailsViewModel"
           Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
@@ -25,7 +29,9 @@
             </Grid>
 
             <Label Text="Moduł" FontAttributes="Bold"/>
-            <Picker x:Name="ModulePicker" Title="Wybierz moduł" SelectedIndexChanged="OnModulePickerSelectedIndexChanged">
+            <Picker x:Name="ModulePicker" Title="Wybierz moduł" 
+                    SelectedIndex="{Binding ModulePickerSelectedIndex}"
+                    SelectedIndexChanged="OnModulePickerSelectedIndexChanged">
                 <Picker.Items>
                     <x:String>Moduł podstawowy</x:String>
                     <x:String>Moduł specjalistyczny</x:String>
@@ -33,7 +39,9 @@
             </Picker>
 
             <Label Text="Status" FontAttributes="Bold"/>
-            <Picker x:Name="StatusPicker" Title="Wybierz status" SelectedIndexChanged="OnStatusPickerSelectedIndexChanged">
+            <Picker x:Name="StatusPicker" Title="Wybierz status" 
+                    SelectedIndex="{Binding StatusPickerSelectedIndex}"
+                    SelectedIndexChanged="OnStatusPickerSelectedIndexChanged">
                 <Picker.Items>
                     <x:String>Oczekujący</x:String>
                     <x:String>Zaplanowany</x:String>
@@ -63,9 +71,9 @@
             <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Internship.Notes}"/>
 
             <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
-                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="#547E9E"/>
-                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
+                <Button Text="Anuluj" Command="{Binding CancelCommand}" WidthRequest="120" BackgroundColor="#547E9E"/>
+                <Button Text="Zapisz" Command="{Binding SaveCommand}" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
             </StackLayout>
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</common:BaseContentPage>
