@@ -8,7 +8,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
         private SelfEducation _selfEducation;
         private Action<SelfEducation> _onSaveCallback;
         public string PageTitle { get; set; }
-        public string Title { get; set; }
+        public string SelfEducationTitle { get; set; }
         public DateTime StartDate { get; set; } = DateTime.Now;
         public DateTime EndDate { get; set; } = DateTime.Now.AddDays(1);
         public string DurationDays { get; set; } = "1";
@@ -42,7 +42,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
                 _selfEducation = selfEducation;
                 PageTitle = "Edytuj wydarzenie";
 
-                Title = selfEducation.Title;
+                SelfEducationTitle = selfEducation.Title;
                 StartDate = selfEducation.StartDate;
                 EndDate = selfEducation.EndDate;
                 DurationDays = selfEducation.DurationDays.ToString();
@@ -102,7 +102,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
         private async void OnSaveClicked(object sender, EventArgs e)
         {
             // Walidacja
-            if (string.IsNullOrWhiteSpace(Title))
+            if (string.IsNullOrWhiteSpace(SelfEducationTitle))
             {
                 await DisplayAlert("Błąd", "Tytuł wydarzenia jest wymagany.", "OK");
                 return;
@@ -133,7 +133,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             }
 
             // Aktualizacja wydarzenia
-            _selfEducation.Title = Title;
+            _selfEducation.Title = SelfEducationTitle;
             _selfEducation.StartDate = StartDate;
             _selfEducation.EndDate = EndDate;
             _selfEducation.DurationDays = durationDays;
