@@ -2,7 +2,7 @@
 using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database.Initialization;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProcedureDetailsPage : ContentPage
     {

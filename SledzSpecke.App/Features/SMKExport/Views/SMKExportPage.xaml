@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-          x:Class="SledzSpecke.App.Views.SMKExportPage"
+          x:Class=" SledzSpecke.App.Features.SMKExport.Views.SMKExportPage"
           Title="Eksport do SMK">
     <!-- Use Grid as the root layout to properly handle the overlay -->
     <Grid>

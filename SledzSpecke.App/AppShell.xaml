@@ -1,77 +1,87 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Shell
-    x:Class="SledzSpecke.App.AppShell"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:SledzSpecke.App"
-    xmlns:views="clr-namespace:SledzSpecke.App.Views"
-    Shell.FlyoutBehavior="Flyout"
-    FlyoutHeaderBehavior="Fixed"
-    FlyoutWidth="280"
-    Title="ŚledzSpecke">
-    <Shell.FlyoutHeader>
-        <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">
-            <VerticalStackLayout Padding="20" VerticalOptions="Center">
-                <Image Source="app_logo.png" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" />
-                <Label x:Name="UserNameLabel" Text="Imię i Nazwisko" FontSize="18" TextColor="White" HorizontalOptions="Center" Margin="0,10,0,0" />
-                <Label x:Name="SpecializationLabel" Text="Specjalizacja" FontSize="14" TextColor="White" HorizontalOptions="Center" />
-            </VerticalStackLayout>
-        </Grid>
-    </Shell.FlyoutHeader>
+<Shell  
+   x:Class="SledzSpecke.App.AppShell"  
+   xmlns="http://schemas.microsoft.com/dotnet/2021/maui"  
+   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"  
+   xmlns:local="clr-namespace:SledzSpecke.App"  
+   xmlns:absenceViews="clr-namespace:SledzSpecke.App.Features.Absences.Views"  
+   xmlns:authenticationViews="clr-namespace:SledzSpecke.App.Features.Authentication.Views"  
+   xmlns:coursesViews="clr-namespace:SledzSpecke.App.Features.Courses.Views"  
+   xmlns:dashboardViews="clr-namespace:SledzSpecke.App.Features.Dashboard.Views"  
+   xmlns:dutiesViews="clr-namespace:SledzSpecke.App.Features.Duties.Views"  
+   xmlns:internshipsViews="clr-namespace:SledzSpecke.App.Features.Internships.Views"  
+   xmlns:proceduresViews="clr-namespace:SledzSpecke.App.Features.Procedures.Views"  
+   xmlns:selfEducationViews="clr-namespace:SledzSpecke.App.Features.SelfEducations.Views"  
+   xmlns:smkExportViews="clr-namespace:SledzSpecke.App.Features.SMKExport.Views"  
+   xmlns:settingsViews="clr-namespace:SledzSpecke.App.Features.Settings.Views"  
+   
+   Shell.FlyoutBehavior="Flyout"  
+   FlyoutHeaderBehavior="Fixed"  
+   FlyoutWidth="280"  
+   Title="ŚledzSpecke">  
+   <Shell.FlyoutHeader>  
+       <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">  
+           <VerticalStackLayout Padding="20" VerticalOptions="Center">  
+               <Image Source="app_logo.png" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" />  
+               <Label x:Name="UserNameLabel" Text="Imię i Nazwisko" FontSize="18" TextColor="White" HorizontalOptions="Center" Margin="0,10,0,0" />  
+               <Label x:Name="SpecializationLabel" Text="Specjalizacja" FontSize="14" TextColor="White" HorizontalOptions="Center" />  
+           </VerticalStackLayout>  
+       </Grid>  
+   </Shell.FlyoutHeader>  
 
-    <ShellContent
-        Title="Dashboard"
-        Icon="dashboard.png"
-        ContentTemplate="{DataTemplate views:DashboardPage}"
-        Route="DashboardPage" />
+   <ShellContent  
+       Title="Dashboard"  
+       Icon="dashboard.png"  
+       ContentTemplate="{DataTemplate dashboardViews:DashboardPage}"  
+       Route="DashboardPage" />  
 
-    <ShellContent
-        Title="Kursy"
-        Icon="course.png"
-        ContentTemplate="{DataTemplate views:CoursesPage}"
-        Route="CoursesPage" />
+   <ShellContent  
+       Title="Kursy"  
+       Icon="course.png"  
+       ContentTemplate="{DataTemplate coursesViews:CoursesPage}"  
+       Route="CoursesPage" />  
 
-    <ShellContent
-        Title="Staże"
-        Icon="internship.png"
-        ContentTemplate="{DataTemplate views:InternshipsPage}"
-        Route="InternshipsPage" />
+   <ShellContent  
+       Title="Staże"  
+       Icon="internship.png"  
+       ContentTemplate="{DataTemplate internshipsViews:InternshipsPage}"  
+       Route="InternshipsPage" />  
 
-    <ShellContent
-        Title="Procedury"
-        Icon="procedure.png"
-        ContentTemplate="{DataTemplate views:ProceduresPage}"
-        Route="ProceduresPage" />
+   <ShellContent  
+       Title="Procedury"  
+       Icon="procedure.png"  
+       ContentTemplate="{DataTemplate proceduresViews:ProceduresPage}"  
+       Route="ProceduresPage" />  
 
-    <ShellContent
-        Title="Dyżury"
-        Icon="duty.png"
-        ContentTemplate="{DataTemplate views:DutyShiftsPage}"
-        Route="DutyShiftsPage" />
+   <ShellContent  
+       Title="Dyżury"  
+       Icon="duty.png"  
+       ContentTemplate="{DataTemplate dutiesViews:DutyShiftsPage}"  
+       Route="DutyShiftsPage" />  
 
-    <ShellContent
-        Title="Samokształcenie"
-        Icon="education.png"
-        ContentTemplate="{DataTemplate views:SelfEducationPage}"
-        Route="SelfEducationPage" />
+   <ShellContent  
+       Title="Samokształcenie"  
+       Icon="education.png"  
+       ContentTemplate="{DataTemplate selfEducationViews:SelfEducationPage}"  
+       Route="SelfEducationPage" />  
 
-    <ShellContent
-        Title="Zarządzanie nieobecnościami"
-        Icon="absence.png"
-        ContentTemplate="{DataTemplate views:AbsenceManagementPage}"
-        Route="AbsenceManagementPage" />
+   <ShellContent  
+       Title="Zarządzanie nieobecnościami"  
+       Icon="absence.png"  
+       ContentTemplate="{DataTemplate absenceViews:AbsenceManagementPage}"  
+       Route="AbsenceManagementPage" />  
 
-    <ShellContent
-        Title="Eksport do SMK"
-        Icon="export.png"
-        ContentTemplate="{DataTemplate views:SMKExportPage}"
-        Route="SMKExportPage" />
+   <ShellContent  
+       Title="Eksport do SMK"  
+       Icon="export.png"  
+       ContentTemplate="{DataTemplate smkExportViews:SMKExportPage}"  
+       Route="SMKExportPage" />  
 
-    <ShellContent
-        Title="Ustawienia"
-        Icon="settings.png"
-        ContentTemplate="{DataTemplate views:SettingsPage}"
-        Route="SettingsPage" />
+   <ShellContent  
+       Title="Ustawienia"  
+       Icon="settings.png"  
+       ContentTemplate="{DataTemplate settingsViews:SettingsPage}"  
+       Route="SettingsPage" />  
 
-    <MenuItem Text="Wyloguj" IconImageSource="logout.png" Clicked="OnLogoutClicked" />
+   <MenuItem Text="Wyloguj" IconImageSource="logout.png" Clicked="OnLogoutClicked" />  
 </Shell>

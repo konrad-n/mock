@@ -1,7 +1,7 @@
 ﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Internships.Views
 {
     public partial class InternshipDetailsPage : ContentPage
     {

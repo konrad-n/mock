@@ -1,14 +1,21 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Settings.Views
 {
     public partial class SettingsPage : ContentPage
     {
+        private readonly IAppSettings _appSettings;
+        private readonly IDataManager _dataManager;
         private Specialization _specialization;
 
         public SettingsPage()
         {
             InitializeComponent();
+
+            // Tymczasowo używamy statycznych serwisów
+            _appSettings = App.AppSettings;
+            _dataManager = App.DataManager;
             LoadSettings();
         }
 
@@ -16,7 +23,7 @@ namespace SledzSpecke.App.Views
         {
             try
             {
-                _specialization = await App.DataManager.LoadSpecializationAsync();
+                _specialization = await _dataManager.LoadSpecializationAsync();
 
                 // Załadowanie danych specjalizacji
                 SpecializationNameEntry.Text = _specialization.Name;
@@ -24,15 +31,15 @@ namespace SledzSpecke.App.Views
                 DurationYearsEntry.Text = (_specialization.BaseDurationWeeks / 52.0).ToString("F1");
 
                 // Załadowanie zapisanych danych personalnych
-                FullNameEntry.Text = App.AppSettings.GetSetting<string>("Username", "");
-                MedicalLicenseNumberEntry.Text = App.AppSettings.GetSetting<string>("MedicalLicenseNumber", "");
-                TrainingUnitEntry.Text = App.AppSettings.GetSetting<string>("TrainingUnit", "");
-                SupervisorEntry.Text = App.AppSettings.GetSetting<string>("Supervisor", "");
+                FullNameEntry.Text = _appSettings.GetSetting<string>("Username", "");
+                MedicalLicenseNumberEntry.Text = _appSettings.GetSetting<string>("MedicalLicenseNumber", "");
+                TrainingUnitEntry.Text = _appSettings.GetSetting<string>("TrainingUnit", "");
+                SupervisorEntry.Text = _appSettings.GetSetting<string>("Supervisor", "");
 
                 // Załadowanie ustawień aplikacji
-                NotificationsSwitch.IsToggled = App.AppSettings.GetSetting<bool>("EnableNotifications", true);
-                AutoSyncSwitch.IsToggled = App.AppSettings.GetSetting<bool>("EnableAutoSync", true);
-                DarkThemeSwitch.IsToggled = App.AppSettings.GetSetting<bool>("UseDarkTheme", false);
+                NotificationsSwitch.IsToggled = _appSettings.GetSetting<bool>("EnableNotifications", true);
+                AutoSyncSwitch.IsToggled = _appSettings.GetSetting<bool>("EnableAutoSync", true);
+                DarkThemeSwitch.IsToggled = _appSettings.GetSetting<bool>("UseDarkTheme", false);
             }
             catch (Exception ex)
             {

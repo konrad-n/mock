@@ -1,16 +1,20 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProceduresPage : ContentPage
     {
         private Specialization _specialization;
         private ModuleType _currentModule = ModuleType.Basic;
         private ProcedureType _currentProcedureType = ProcedureType.TypeA;
+        private ISpecializationService _specializationService;
 
         public ProceduresPage()
         {
+            _specializationService = App.SpecializationService;
+
             InitializeComponent();
             LoadDataAsync();
         }
@@ -26,7 +30,7 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Pobieramy dane z bazy, nie z seedera
-                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                _specialization = await _specializationService.GetSpecializationAsync();
                 DisplayProcedures(_currentModule, _currentProcedureType);
             }
             catch (Exception ex)
@@ -233,19 +237,19 @@ namespace SledzSpecke.App.Views
         // Zmiana metod callback na async Task
         private async Task OnProcedureAdded(MedicalProcedure procedure)
         {
-            await App.SpecializationService.SaveProcedureAsync(procedure);
+            await _specializationService.SaveProcedureAsync(procedure);
             LoadDataAsync();
         }
 
         private async Task OnProcedureUpdated(MedicalProcedure procedure)
         {
-            await App.SpecializationService.SaveProcedureAsync(procedure);
+            await _specializationService.SaveProcedureAsync(procedure);
             LoadDataAsync();
         }
 
         private async Task OnProcedureEntryAdded(MedicalProcedure procedure, ProcedureEntry entry)
         {
-            await App.SpecializationService.AddProcedureEntryAsync(procedure, entry);
+            await _specializationService.AddProcedureEntryAsync(procedure, entry);
             LoadDataAsync();
         }
     }

@@ -1,7 +1,7 @@
 ﻿using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Duties.Views
 {
     public partial class DutyShiftDetailsPage : ContentPage
     {

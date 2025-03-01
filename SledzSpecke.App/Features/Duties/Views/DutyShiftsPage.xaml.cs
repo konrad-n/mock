@@ -1,15 +1,21 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Duties.Views
 {
     public partial class DutyShiftsPage : ContentPage
     {
         private List<DutyShift> _dutyShifts;
         private double _totalRequiredHours;
+        private IDutyShiftService _dutyShiftService;
+        private ISpecializationService _specializationService;
 
         public DutyShiftsPage()
         {
+            _dutyShiftService = App.DutyShiftService;
+            _specializationService = App.SpecializationService;
+
             InitializeComponent();
             _dutyShifts = new List<DutyShift>();
             LoadDataAsync();
@@ -26,10 +32,10 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Get all duty shifts from the database
-                _dutyShifts = await App.DutyShiftService.GetAllDutyShiftsAsync();
+                _dutyShifts = await _dutyShiftService.GetAllDutyShiftsAsync();
 
                 // Get specialization for required hours
-                var specialization = await App.SpecializationService.GetSpecializationAsync();
+                var specialization = await _specializationService.GetSpecializationAsync();
                 _totalRequiredHours = specialization.RequiredDutyHoursPerWeek * (specialization.BaseDurationWeeks / 52.0) * 52;
 
                 // Get weekly average - calculate from data not from service
@@ -278,7 +284,7 @@ namespace SledzSpecke.App.Views
             {
                 if (sender is Button button && button.CommandParameter is int dutyShiftId)
                 {
-                    var dutyShift = await App.DutyShiftService.GetDutyShiftAsync(dutyShiftId);
+                    var dutyShift = await _dutyShiftService.GetDutyShiftAsync(dutyShiftId);
                     if (dutyShift != null)
                     {
                         await Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, OnDutyShiftSaved));
@@ -297,7 +303,7 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Save to database
-                await App.DutyShiftService.SaveDutyShiftAsync(dutyShift);
+                await _dutyShiftService.SaveDutyShiftAsync(dutyShift);
 
                 // Refresh data
                 await LoadDataAsyncTask();
@@ -315,10 +321,10 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Get all duty shifts from the database
-                _dutyShifts = await App.DutyShiftService.GetAllDutyShiftsAsync();
+                _dutyShifts = await _dutyShiftService.GetAllDutyShiftsAsync();
 
                 // Get specialization for required hours
-                var specialization = await App.SpecializationService.GetSpecializationAsync();
+                var specialization = await _specializationService.GetSpecializationAsync();
                 _totalRequiredHours = specialization.RequiredDutyHoursPerWeek * (specialization.BaseDurationWeeks / 52.0) * 52;
 
                 // Get weekly average - calculate from data not from service

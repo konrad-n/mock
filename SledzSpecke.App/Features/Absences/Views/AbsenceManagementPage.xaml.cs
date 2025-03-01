@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using SledzSpecke.App.Services;
 using SledzSpecke.Core.Models;
-using System.Collections.Generic;
-using System.Linq;
+using SledzSpecke.Infrastructure.Database;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Absences.Views
 {
     public partial class AbsenceManagementPage : ContentPage
     {
@@ -12,9 +11,16 @@ namespace SledzSpecke.App.Views
         private List<Absence> _filteredAbsences = new List<Absence>();
         private AbsenceType? _selectedAbsenceType = null;
         private int? _selectedYear = null;
+        private ISpecializationService _specializationService;
+        private ISpecializationDateCalculator _specializationDateCalculator;
+        private IDatabaseService _databaseService;
 
         public AbsenceManagementPage()
         {
+            _specializationService = App.SpecializationService;
+            _specializationDateCalculator = App.SpecializationDateCalculator;
+            _databaseService = App.DatabaseService;
+
             InitializeComponent();
             LoadDataAsync();
         }
@@ -30,12 +36,12 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Load specialization data
-                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                _specialization = await _specializationService.GetSpecializationAsync();
 
                 // Calculate dates
 
                 DateTime plannedEndDate = _specialization.StartDate.AddDays(_specialization.BaseDurationWeeks * 7);
-                DateTime actualEndDate = await App.SpecializationDateCalculator.CalculateExpectedEndDateAsync(_specialization.Id);
+                DateTime actualEndDate = await _specializationDateCalculator.CalculateExpectedEndDateAsync(_specialization.Id);
 
                 // Update UI with dates
                 PlannedEndDateLabel.Text = plannedEndDate.ToString("dd.MM.yyyy");
@@ -43,13 +49,13 @@ namespace SledzSpecke.App.Views
 
                 // Calculate self-education days
                 int currentYear = DateTime.Now.Year;
-                int remainingSelfEducationDays = await App.SpecializationDateCalculator.GetRemainingEducationDaysForYearAsync(_specialization.Id, currentYear);
+                int remainingSelfEducationDays = await _specializationDateCalculator.GetRemainingEducationDaysForYearAsync(_specialization.Id, currentYear);
                 int usedSelfEducationDays = _specialization.SelfEducationDaysPerYear - remainingSelfEducationDays;
 
                 SelfEducationDaysLabel.Text = $"{usedSelfEducationDays}/{_specialization.SelfEducationDaysPerYear}";
 
                 // Load absences
-                _allAbsences = await App.DatabaseService.QueryAsync<Absence>(
+                _allAbsences = await _databaseService.QueryAsync<Absence>(
                     "SELECT * FROM Absences WHERE SpecializationId = ? ORDER BY StartDate DESC",
                     _specialization.Id);
 
@@ -388,7 +394,7 @@ namespace SledzSpecke.App.Views
         {
             // Save absence
             absence.SpecializationId = _specialization.Id;
-            await App.DatabaseService.SaveAsync(absence);
+            await _databaseService.SaveAsync(absence);
 
             // Reload data
             LoadDataAsync();
@@ -398,7 +404,7 @@ namespace SledzSpecke.App.Views
         {
             // Update absence
             absence.SpecializationId = _specialization.Id;
-            await App.DatabaseService.SaveAsync(absence);
+            await _databaseService.SaveAsync(absence);
 
             // Reload data
             LoadDataAsync();

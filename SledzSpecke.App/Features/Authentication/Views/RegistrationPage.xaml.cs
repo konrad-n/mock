@@ -1,13 +1,19 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 
-namespace SledzSpecke.App.Views.Auth
+namespace SledzSpecke.App.Features.Authentication.Views
 {
     public partial class RegistrationPage : ContentPage
     {
         private List<SpecializationType> _specializationTypes;
+        private IDataManager _dataManager;
+        private IAuthenticationService _authenticationService;
 
         public RegistrationPage()
         {
+            _dataManager = App.DataManager;
+            _authenticationService = App.AuthenticationService;
+
             InitializeComponent();
             LoadSpecializationTypes();
         }
@@ -16,7 +22,7 @@ namespace SledzSpecke.App.Views.Auth
         {
             try
             {
-                _specializationTypes = await App.DataManager.GetAllSpecializationTypesAsync();
+                _specializationTypes = await _dataManager.GetAllSpecializationTypesAsync();
 
                 foreach (var type in _specializationTypes)
                 {
@@ -54,7 +60,7 @@ namespace SledzSpecke.App.Views.Auth
             {
                 int specializationTypeId = _specializationTypes[SpecializationPicker.SelectedIndex].Id;
 
-                bool result = await App.AuthenticationService.RegisterAsync(
+                bool result = await _authenticationService.RegisterAsync(
                     UsernameEntry.Text,
                     EmailEntry.Text,
                     PasswordEntry.Text,

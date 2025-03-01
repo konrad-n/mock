@@ -156,10 +156,10 @@
     <MauiXaml Update="Features\Procedures\Views\ProceduresPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Features\SelfEducation\Views\SelfEducationDetailsPage.xaml">
+    <MauiXaml Update="Features\SelfEducations\Views\SelfEducationDetailsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Features\SelfEducation\Views\SelfEducationPage.xaml">
+    <MauiXaml Update="Features\SelfEducations\Views\SelfEducationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Features\Settings\Views\SettingsPage.xaml">
@@ -179,7 +179,7 @@
     <Folder Include="Features\Duties\ViewModels\" />
     <Folder Include="Features\Internships\ViewModels\" />
     <Folder Include="Features\Procedures\ViewModels\" />
-    <Folder Include="Features\SelfEducation\ViewModels\" />
+    <Folder Include="Features\SelfEducations\ViewModels\" />
     <Folder Include="Features\Settings\ViewModels\" />
     <Folder Include="Features\SMKExport\ViewModels\" />
   </ItemGroup>

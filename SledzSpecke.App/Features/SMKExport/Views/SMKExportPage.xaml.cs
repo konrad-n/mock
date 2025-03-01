@@ -1,17 +1,21 @@
 ﻿using DocumentFormat.OpenXml.Vml.Spreadsheet;
+using SledzSpecke.App.Services;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.SMKExport.Views
 {
     public partial class SMKExportPage : ContentPage
     {
         private SMKExportOptions _exportOptions;
+        private IExportService _exportService;
 
         public bool IsGeneralExportSelected => GeneralExportRadioButton.IsChecked;
 
         public SMKExportPage()
         {
+            _exportService = App.ExportService;
+
             InitializeComponent();
             SetupInitialState();
 
@@ -129,7 +133,7 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Generate report
-                string filePath = await App.ExportService.ExportToSMKAsync(_exportOptions);
+                string filePath = await _exportService.ExportToSMKAsync(_exportOptions);
 
                 // Display file information
                 FilePathLabel.Text = $"Ścieżka pliku: {filePath}";

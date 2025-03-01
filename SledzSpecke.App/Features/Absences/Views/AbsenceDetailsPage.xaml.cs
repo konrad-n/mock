@@ -1,10 +1,12 @@
 ﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Absences.Views
 {
     public partial class AbsenceDetailsPage : ContentPage
     {
         private Absence _absence;
+        private IDatabaseService _databaseService;
         private Action<Absence> _onSaveCallback;
 
         public string PageTitle { get; set; }
@@ -21,6 +23,9 @@ namespace SledzSpecke.App.Views
         public AbsenceDetailsPage(Absence absence, Action<Absence> onSaveCallback)
         {
             InitializeComponent();
+
+            _databaseService = App.DatabaseService;
+
             _onSaveCallback = onSaveCallback;
 
             if (absence == null)
@@ -116,7 +121,7 @@ namespace SledzSpecke.App.Views
             {
                 try
                 {
-                    await App.DatabaseService.DeleteAsync(_absence);
+                    await _databaseService.DeleteAsync(_absence);
                     await Navigation.PopAsync();
                 }
                 catch (Exception ex)

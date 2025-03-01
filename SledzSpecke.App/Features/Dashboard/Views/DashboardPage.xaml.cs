@@ -1,14 +1,32 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Features.Absences.Views;
+using SledzSpecke.App.Features.Courses.Views;
+using SledzSpecke.App.Features.Duties.Views;
+using SledzSpecke.App.Features.Internships.Views;
+using SledzSpecke.App.Features.Procedures.Views;
+using SledzSpecke.App.Features.SelfEducations.Views;
+using SledzSpecke.App.Features.Settings.Views;
+using SledzSpecke.App.Features.SMKExport.Views;
+using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Dashboard.Views
 {
     public partial class DashboardPage : ContentPage
     {
         private Specialization _specialization;
+        private ISpecializationService _specializationService;
+        private ISpecializationDateCalculator _specializationDateCalculator;
+        private IDutyShiftService _dutyShiftService;
+        private ISelfEducationService _selfEducationService;
 
         public DashboardPage()
         {
+            _specializationService = App.SpecializationService;
+            _specializationDateCalculator = App.SpecializationDateCalculator;
+            _dutyShiftService = App.DutyShiftService;
+            _selfEducationService = App.SelfEducationService;
+
             InitializeComponent();
             LoadSpecializationData();
         }
@@ -23,7 +41,7 @@ namespace SledzSpecke.App.Views
         {
             try
             {
-                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                _specialization = await _specializationService.GetSpecializationAsync();
                 LoadDashboardData();
             }
             catch (Exception ex)
@@ -45,7 +63,7 @@ namespace SledzSpecke.App.Views
             DateTime actualEndDate = plannedEndDate;
             try
             {
-                actualEndDate = await App.SpecializationDateCalculator.CalculateExpectedEndDateAsync(_specialization.Id);
+                actualEndDate = await _specializationDateCalculator.CalculateExpectedEndDateAsync(_specialization.Id);
                 ActualEndDateLabel.Text = actualEndDate.ToString("dd-MM-yyyy");
 
                 // Zmień kolor tekstu na czerwony, jeśli data z nieobecnościami jest późniejsza
@@ -110,11 +128,11 @@ namespace SledzSpecke.App.Views
             ProceduresBLabel.Text = $"{completedProceduresTypeB}/{totalProceduresTypeB} wykonanych";
 
             // Get statistics from services
-            var totalDutyHours = await App.DutyShiftService.GetTotalDutyHoursAsync();
+            var totalDutyHours = await _dutyShiftService.GetTotalDutyHoursAsync();
             var requiredDutyHours = _specialization.RequiredDutyHoursPerWeek * (_specialization.BaseDurationWeeks / 52.0) * 52;
             DutyShiftsLabel.Text = $"{totalDutyHours:F1}/{requiredDutyHours:F0} godzin";
 
-            var totalSelfEducationDays = await App.SelfEducationService.GetTotalUsedDaysAsync();
+            var totalSelfEducationDays = await _selfEducationService.GetTotalUsedDaysAsync();
             var totalAllowedDays = _specialization.SelfEducationDaysPerYear * 3; // 3 years typical
             SelfEducationLabel.Text = $"{totalSelfEducationDays}/{totalAllowedDays} dni";
 

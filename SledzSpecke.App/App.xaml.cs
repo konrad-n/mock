@@ -1,77 +1,46 @@
 ﻿using Microsoft.Extensions.Logging;
-using SledzSpecke.App.Services.Implementations;
-using SledzSpecke.App.Views.Auth;
+using SledzSpecke.App.Features.Authentication.Views;
+using SledzSpecke.App.Services;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App
 {
     public partial class App : Application
     {
-        public static DatabaseService DatabaseService { get; private set; }
-        public static DataManager DataManager { get; private set; }
-        public static ExportService ExportService { get; private set; }
-        public static NotificationService NotificationService { get; private set; }
-        public static AppSettings AppSettings { get; private set; }
-        public static SpecializationService SpecializationService { get; private set; }
-        public static DutyShiftService DutyShiftService { get; private set; }
-        public static SelfEducationService SelfEducationService { get; private set; }
-        public static AuthenticationService AuthenticationService { get; private set; }
-        public static SpecializationDateCalculator SpecializationDateCalculator { get; private set; }
+        // Statyczne serwisy jako properties (Tymczasowo!!!)
+        public static IAuthenticationService AuthenticationService => Current.Handler?.MauiContext?.Services.GetRequiredService<IAuthenticationService>();
+        public static IDatabaseService DatabaseService => Current.Handler?.MauiContext?.Services.GetRequiredService<IDatabaseService>();
+        public static IDataManager DataManager => Current.Handler?.MauiContext?.Services.GetRequiredService<IDataManager>();
+        public static ISpecializationService SpecializationService => Current.Handler?.MauiContext?.Services.GetRequiredService<ISpecializationService>();
+        public static IDutyShiftService DutyShiftService => Current.Handler?.MauiContext?.Services.GetRequiredService<IDutyShiftService>();
+        public static ISelfEducationService SelfEducationService => Current.Handler?.MauiContext?.Services.GetRequiredService<ISelfEducationService>();
+        public static IExportService ExportService => Current.Handler?.MauiContext?.Services.GetRequiredService<IExportService>();
+        public static INotificationService NotificationService => Current.Handler?.MauiContext?.Services.GetRequiredService<INotificationService>();
+        public static IAppSettings AppSettings => Current.Handler?.MauiContext?.Services.GetRequiredService<IAppSettings>();
+        public static ISpecializationDateCalculator SpecializationDateCalculator => Current.Handler?.MauiContext?.Services.GetRequiredService<ISpecializationDateCalculator>();
 
-        private static readonly ILogger<App> _logger = LoggerFactory.Create(builder =>
-            builder.AddDebug()).CreateLogger<App>();
 
-        public App()
+        private readonly ILogger<App> _logger;
+        private readonly IServiceProvider _serviceProvider;
+
+        public App(
+            IServiceProvider serviceProvider,
+            ILogger<App> logger)
         {
             InitializeComponent();
 
+            _serviceProvider = serviceProvider;
+            _logger = logger;
+
             try
             {
-                // Create file system service
-                var fileSystemService = new MauiFileSystemService();
-
-                // Initialize services
-                DatabaseService = new DatabaseService(fileSystemService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<DatabaseService>());
-
-                DataManager = new DataManager(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<DataManager>());
-
-                ExportService = new ExportService(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<ExportService>());
-
-                NotificationService = new NotificationService(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<NotificationService>());
-
-                AppSettings = new AppSettings(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<AppSettings>());
-
-                SpecializationService = new SpecializationService(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<SpecializationService>());
-
-                DutyShiftService = new DutyShiftService(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<DutyShiftService>());
-
-                SelfEducationService = new SelfEducationService(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<SelfEducationService>());
-
-                AuthenticationService = new AuthenticationService(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<AuthenticationService>());
-
-                SpecializationDateCalculator = new SpecializationDateCalculator(DatabaseService, LoggerFactory.Create(builder =>
-                    builder.AddDebug()).CreateLogger<SpecializationDateCalculator>());
-
-                // Set a default MainPage immediately to prevent exceptions
-                MainPage = new NavigationPage(new LoginPage());
-
-                // Then initialize app async
+                MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
                 InitializeAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in App constructor");
-                // Set a default page in case of exception
-                MainPage = new NavigationPage(new LoginPage());
+                MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
             }
         }
 
@@ -81,27 +50,22 @@ namespace SledzSpecke.App
             {
                 _logger.LogInformation("Starting app initialization");
 
-                // Initialize database
                 await DatabaseService.InitAsync();
                 _logger.LogDebug("Database initialized");
 
-                // Seed test user
                 var userSeeded = await AuthenticationService.SeedTestUserAsync();
                 _logger.LogDebug("Test user seeded: {Result}", userSeeded);
 
-                // Load settings
                 await AppSettings.LoadAsync();
                 _logger.LogDebug("Settings loaded");
 
-                // Apply theme setting
                 bool useDarkTheme = AppSettings.GetSetting<bool>("UseDarkTheme");
                 Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
                 _logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
 
-                // Set initial page (using MainThread to ensure UI updates happen on the main thread)
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    MainPage = new NavigationPage(new LoginPage());
+                    MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
                 });
 
                 _logger.LogInformation("Application initialized successfully");
@@ -109,10 +73,9 @@ namespace SledzSpecke.App
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error initializing application");
-                // Ensure we have a valid page in case of error
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    MainPage = new NavigationPage(new LoginPage() { BackgroundColor = Colors.White });
+                    MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
                 });
             }
         }
@@ -121,7 +84,6 @@ namespace SledzSpecke.App
         {
             try
             {
-                // Check for notifications when app starts
                 _ = NotificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
@@ -134,7 +96,6 @@ namespace SledzSpecke.App
         {
             try
             {
-                // Save settings when app goes to sleep
                 _ = AppSettings.SaveAsync();
             }
             catch (Exception ex)
@@ -147,13 +108,25 @@ namespace SledzSpecke.App
         {
             try
             {
-                // Check for notifications when app resumes
                 _ = NotificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in OnResume");
             }
+        }
+
+        // Dodaj metody pomocnicze do dostępu do serwisów
+        public static IServiceProvider GetServiceProvider(IElement element)
+        {
+            return ((IServiceProvider)element.Handler?.MauiContext?.Services)
+                ?? throw new InvalidOperationException("Unable to get ServiceProvider");
+        }
+
+        public static T GetService<T>(IElement element) where T : class
+        {
+            return GetServiceProvider(element).GetService<T>()
+                ?? throw new InvalidOperationException($"Service {typeof(T).Name} not found");
         }
     }
 }

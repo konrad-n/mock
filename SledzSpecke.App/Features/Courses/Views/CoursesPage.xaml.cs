@@ -1,15 +1,19 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Courses.Views
 {
     public partial class CoursesPage : ContentPage
     {
         private Specialization _specialization;
         private ModuleType _currentModule = ModuleType.Basic;
+        private ISpecializationService _specializationService;
 
         public CoursesPage()
         {
+            _specializationService = App.SpecializationService;
+
             InitializeComponent();
             LoadDataAsync();
         }
@@ -25,7 +29,7 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Pobieramy dane z bazy, nie z seedera
-                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                _specialization = await _specializationService.GetSpecializationAsync();
                 DisplayCourses(_currentModule);
             }
             catch (Exception ex)
@@ -181,13 +185,13 @@ namespace SledzSpecke.App.Views
         // Zmiana metod callback na async Task
         private async Task OnCourseAdded(Course course)
         {
-            await App.SpecializationService.SaveCourseAsync(course);
+            await _specializationService.SaveCourseAsync(course);
             LoadDataAsync();
         }
 
         private async Task OnCourseUpdated(Course course)
         {
-            await App.SpecializationService.SaveCourseAsync(course);
+            await _specializationService.SaveCourseAsync(course);
             LoadDataAsync();
         }
     }

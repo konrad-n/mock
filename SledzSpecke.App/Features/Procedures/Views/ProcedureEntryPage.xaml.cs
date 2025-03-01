@@ -1,11 +1,13 @@
 ﻿using SledzSpecke.Core.Models;
+using SledzSpecke.Infrastructure.Database;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProcedureEntryPage : ContentPage
     {
         private MedicalProcedure _procedure;
         private Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
+        private IDatabaseService _databaseService;
 
         public string ProcedureName { get; set; }
         public string ProcedureType { get; set; }
@@ -31,6 +33,8 @@ namespace SledzSpecke.App.Views
 
         public ProcedureEntryPage(MedicalProcedure procedure, Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
+            _databaseService = App.DatabaseService;
+
             InitializeComponent();
             _procedure = procedure;
             _onSaveCallback = onSaveCallback;
@@ -86,7 +90,7 @@ namespace SledzSpecke.App.Views
                 {
                     try
                     {
-                        var internship = await App.DatabaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                        var internship = await _databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
                         if (internship != null)
                         {
                             ProcedureGroup = $"{procedure.Name} - {internship.Name}";
@@ -163,7 +167,7 @@ namespace SledzSpecke.App.Views
                 SecondAssistantData = SecondAssistantData,
                 ProcedureGroup = ProcedureGroup,
                 InternshipName = _procedure.InternshipId.HasValue ?
-                    (await App.DatabaseService.GetByIdAsync<Internship>(_procedure.InternshipId.Value))?.Name : "",
+                    (await _databaseService.GetByIdAsync<Internship>(_procedure.InternshipId.Value))?.Name : "",
                 Notes = Notes
             };
 

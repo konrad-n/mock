@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Authentication.ViewModels"
-             x:Class="SledzSpecke.App.Views.Auth.LoginPage"
+             x:Class="SledzSpecke.App.Features.Authentication.Views.LoginPage"
              x:DataType="viewmodels:LoginViewModel"
              Title="{Binding Title}">
     <ScrollView>

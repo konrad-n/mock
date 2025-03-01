@@ -1,15 +1,19 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.App.Services;
+using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 
-namespace SledzSpecke.App.Views
+namespace SledzSpecke.App.Features.Internships.Views
 {
     public partial class InternshipsPage : ContentPage
     {
         private Specialization _specialization;
         private ModuleType _currentModule = ModuleType.Basic;
+        private ISpecializationService _specializationService;
 
         public InternshipsPage()
         {
+            _specializationService = App.SpecializationService;
+
             InitializeComponent();
             LoadDataAsync();
         }
@@ -25,7 +29,7 @@ namespace SledzSpecke.App.Views
             try
             {
                 // Pobieramy dane z bazy, nie z seedera
-                _specialization = await App.SpecializationService.GetSpecializationAsync();
+                _specialization = await _specializationService.GetSpecializationAsync();
                 DisplayInternships(_currentModule);
             }
             catch (Exception ex)
@@ -217,13 +221,13 @@ namespace SledzSpecke.App.Views
         // Zmiana metod callback na async Task
         private async Task OnInternshipAdded(Internship internship)
         {
-            await App.SpecializationService.SaveInternshipAsync(internship);
+            await _specializationService.SaveInternshipAsync(internship);
             LoadDataAsync();
         }
 
         private async Task OnInternshipUpdated(Internship internship)
         {
-            await App.SpecializationService.SaveInternshipAsync(internship);
+            await _specializationService.SaveInternshipAsync(internship);
             LoadDataAsync();
         }
     }

@@ -1,13 +1,26 @@
-﻿using SledzSpecke.App.Views;
-using SledzSpecke.App.Views.Auth;
+﻿using SledzSpecke.App.Features.Authentication.Views;
+using SledzSpecke.App.Features.Courses.Views;
+using SledzSpecke.App.Features.Duties.Views;
+using SledzSpecke.App.Features.Internships.Views;
+using SledzSpecke.App.Features.Procedures.Views;
+using SledzSpecke.App.Features.SelfEducations.Views;
+using SledzSpecke.App.Features.Settings.Views;
+using SledzSpecke.App.Features.SMKExport.Views;
+using SledzSpecke.App.Services;
 
 namespace SledzSpecke.App
 {
     public partial class AppShell : Shell
     {
+        private readonly IAuthenticationService _authenticationService;
+        private readonly ISpecializationService _specializationService;
+
         public AppShell()
         {
             InitializeComponent();
+
+            _authenticationService = App.AuthenticationService;
+            _specializationService = App.SpecializationService;
 
             // Register routes for navigation
             Routing.RegisterRoute(nameof(CourseDetailsPage), typeof(CourseDetailsPage));
@@ -20,7 +33,6 @@ namespace SledzSpecke.App
             Routing.RegisterRoute(nameof(SMKExportPage), typeof(SMKExportPage));
             Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
 
-            // Set user information in flyout header
             try
             {
                 UpdateUserInfo();
@@ -28,7 +40,6 @@ namespace SledzSpecke.App
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error updating user info: {ex.Message}");
-                // Ustawienie wartości domyślnych w przypadku błędu
                 UserNameLabel.Text = "Użytkownik";
                 SpecializationLabel.Text = "Specjalizacja";
             }
@@ -36,21 +47,17 @@ namespace SledzSpecke.App
 
         private void UpdateUserInfo()
         {
-            // Get user info from Authentication service
-            if (App.AuthenticationService.IsAuthenticated)
+            if (_authenticationService.IsAuthenticated)
             {
-                UserNameLabel.Text = App.AuthenticationService.CurrentUser.Username;
+                UserNameLabel.Text = _authenticationService.CurrentUser.Username;
 
                 try
                 {
-                    // Pobierz nazwę specjalizacji asynchronicznie
                     Task.Run(async () =>
                     {
                         try
                         {
-                            var specialization = await App.SpecializationService.GetSpecializationAsync();
-
-                            // Upewnij się, że aktualizacja UI odbywa się na głównym wątku
+                            var specialization = await _specializationService.GetSpecializationAsync();
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
                                 SpecializationLabel.Text = specialization?.Name ?? "Brak specjalizacji";
@@ -59,7 +66,6 @@ namespace SledzSpecke.App
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"Error getting specialization: {ex.Message}");
-
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
                                 SpecializationLabel.Text = "Brak specjalizacji";
@@ -80,8 +86,8 @@ namespace SledzSpecke.App
             bool confirm = await DisplayAlert("Wylogowanie", "Czy na pewno chcesz się wylogować?", "Tak", "Nie");
             if (confirm)
             {
-                App.AuthenticationService.Logout();
-                Application.Current.MainPage = new NavigationPage(new LoginPage());
+                _authenticationService.Logout();
+                Application.Current.MainPage = new NavigationPage(App.GetService<LoginPage>(this));
             }
         }
     }
