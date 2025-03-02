@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
         private ModuleType _currentModule = ModuleType.Basic;
 
         [ObservableProperty]
-        private Specialization _specialization;
+        private Specialization specialization;
 
         [ObservableProperty]
         private bool _isModuleBasicSelected = true;

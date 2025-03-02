@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Services.Implementations
@@ -52,7 +53,7 @@ namespace SledzSpecke.App.Services.Implementations
                 // Check courses
                 foreach (var course in courses.Where(c => c.ScheduledDate.HasValue))
                 {
-                    int daysUntil = (course.ScheduledDate.Value.Date - today).Days;
+                    int daysUntil = (course.ScheduledDate!.Value.Date - today).Days;
 
                     if (daysUntil == 7) // 1 week before
                     {
@@ -60,8 +61,7 @@ namespace SledzSpecke.App.Services.Implementations
                             $"Zbliża się kurs: {course.Name}",
                             $"Kurs rozpoczyna się za tydzień ({course.ScheduledDate.Value:dd.MM.yyyy})",
                             course.Id,
-                            NotificationType.Course
-                        );
+                            NotificationType.Course);
                     }
                     else if (daysUntil == 1) // 1 day before
                     {
@@ -69,15 +69,14 @@ namespace SledzSpecke.App.Services.Implementations
                             $"Jutro rozpoczyna się kurs: {course.Name}",
                             $"Kurs rozpoczyna się jutro ({course.ScheduledDate.Value:dd.MM.yyyy})",
                             course.Id,
-                            NotificationType.Course
-                        );
+                            NotificationType.Course);
                     }
                 }
 
                 // Check internships
                 foreach (var internship in internships.Where(i => i.StartDate.HasValue))
                 {
-                    int daysUntil = (internship.StartDate.Value.Date - today).Days;
+                    int daysUntil = (internship.StartDate!.Value.Date - today).Days;
 
                     if (daysUntil == 7) // 1 week before
                     {
@@ -85,8 +84,7 @@ namespace SledzSpecke.App.Services.Implementations
                             $"Zbliża się staż: {internship.Name}",
                             $"Staż rozpoczyna się za tydzień ({internship.StartDate.Value:dd.MM.yyyy})",
                             internship.Id,
-                            NotificationType.Internship
-                        );
+                            NotificationType.Internship);
                     }
                     else if (daysUntil == 1) // 1 day before
                     {
@@ -94,8 +92,7 @@ namespace SledzSpecke.App.Services.Implementations
                             $"Jutro rozpoczyna się staż: {internship.Name}",
                             $"Staż rozpoczyna się jutro ({internship.StartDate.Value:dd.MM.yyyy})",
                             internship.Id,
-                            NotificationType.Internship
-                        );
+                            NotificationType.Internship);
                     }
                 }
 
@@ -111,8 +108,7 @@ namespace SledzSpecke.App.Services.Implementations
                             "Zbliża się koniec modułu podstawowego",
                             $"Moduł podstawowy kończy się za miesiąc ({endOfBasicModule:dd.MM.yyyy})",
                             0,
-                            NotificationType.ModuleEnd
-                        );
+                            NotificationType.ModuleEnd);
                     }
                     else if (daysUntilEnd == 7) // 1 week before
                     {
@@ -120,8 +116,7 @@ namespace SledzSpecke.App.Services.Implementations
                             "Zbliża się koniec modułu podstawowego",
                             $"Moduł podstawowy kończy się za tydzień ({endOfBasicModule:dd.MM.yyyy})",
                             0,
-                            NotificationType.ModuleEnd
-                        );
+                            NotificationType.ModuleEnd);
                     }
                 }
 
@@ -141,12 +136,15 @@ namespace SledzSpecke.App.Services.Implementations
                 // For MAUI, you could use Plugin.LocalNotification or similar
 
                 // For now, just log the notification
-                this.logger.LogInformation("Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
-                    title, message, type, itemId);
+                this.logger.LogInformation(
+                    "Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
+                    title,
+                    message,
+                    type,
+                    itemId);
 
                 // Example implementation for Android/iOS would go here
                 // This is where you would use the notification plugin to schedule the actual notification
-
                 await Task.CompletedTask; // Placeholder for async implementation
             }
             catch (Exception ex)
@@ -154,14 +152,5 @@ namespace SledzSpecke.App.Services.Implementations
                 this.logger.LogError(ex, "Error scheduling notification");
             }
         }
-    }
-
-    public enum NotificationType
-    {
-        Course,
-        Internship,
-        Duty,
-        Procedure,
-        ModuleEnd
     }
 }

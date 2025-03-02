@@ -11,11 +11,11 @@ namespace SledzSpecke.App.Services.Implementations
     {
         private readonly IDatabaseService databaseService;
         private readonly ILogger<AuthenticationService> logger;
-        private User _currentUser;
+        private User currentUser;
 
-        public bool IsAuthenticated => this._currentUser != null;
+        public bool IsAuthenticated => this.currentUser != null;
 
-        public User CurrentUser => this._currentUser;
+        public User CurrentUser => this.currentUser;
 
         public AuthenticationService(
             IDatabaseService databaseService,
@@ -47,7 +47,7 @@ namespace SledzSpecke.App.Services.Implementations
                     Email = email,
                     PasswordHash = passwordHash,
                     SpecializationTypeId = specializationTypeId,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 // Save user to database
@@ -59,7 +59,7 @@ namespace SledzSpecke.App.Services.Implementations
                     Username = username,
                     EnableNotifications = true,
                     EnableAutoSync = true,
-                    UseDarkTheme = false
+                    UseDarkTheme = false,
                 };
                 await this.databaseService.SaveUserSettingsAsync(settings);
 
@@ -102,7 +102,7 @@ namespace SledzSpecke.App.Services.Implementations
                 }
 
                 // Set current user
-                this._currentUser = user;
+                this.currentUser = user;
 
                 // Update last login
                 user.LastLoginAt = DateTime.UtcNow;
@@ -120,13 +120,13 @@ namespace SledzSpecke.App.Services.Implementations
 
         public void Logout()
         {
-            this._currentUser = null;
+            this.currentUser = null;
             this.logger.LogInformation("User logged out");
         }
 
         public async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
         {
-            if (this._currentUser == null)
+            if (this.currentUser == null)
             {
                 this.logger.LogWarning("Change password failed: No user is logged in");
                 return false;
@@ -135,7 +135,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Verify current password
-                bool isCurrentPasswordValid = this.VerifyPassword(currentPassword, this._currentUser.PasswordHash);
+                bool isCurrentPasswordValid = this.VerifyPassword(currentPassword, this.currentUser.PasswordHash);
                 if (!isCurrentPasswordValid)
                 {
                     this.logger.LogWarning("Change password failed: Invalid current password");
@@ -146,10 +146,10 @@ namespace SledzSpecke.App.Services.Implementations
                 string newPasswordHash = this.HashPassword(newPassword);
 
                 // Update password
-                this._currentUser.PasswordHash = newPasswordHash;
-                await this.databaseService.SaveAsync(this._currentUser);
+                this.currentUser.PasswordHash = newPasswordHash;
+                await this.databaseService.SaveAsync(this.currentUser);
 
-                this.logger.LogInformation("Password changed successfully for user {Username}", this._currentUser.Username);
+                this.logger.LogInformation("Password changed successfully for user {Username}", this.currentUser.Username);
                 return true;
             }
             catch (Exception ex)
@@ -159,22 +159,6 @@ namespace SledzSpecke.App.Services.Implementations
             }
         }
 
-        private string HashPassword(string password)
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(hashedBytes);
-            }
-        }
-
-        private bool VerifyPassword(string password, string storedHash)
-        {
-            string hashedPassword = this.HashPassword(password);
-            return hashedPassword == storedHash;
-        }
-
-        // Fragment do dodania w AuthenticationService.cs w metodzie SeedTestUserAsync
         public async Task<bool> SeedTestUserAsync()
         {
             try
@@ -226,7 +210,7 @@ namespace SledzSpecke.App.Services.Implementations
                     Email = "olo@pozakontrololo.com",
                     PasswordHash = this.HashPassword("gucio"),
                     SpecializationTypeId = specializationTypeId,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 // Save the user
@@ -241,7 +225,7 @@ namespace SledzSpecke.App.Services.Implementations
                     EnableNotifications = true,
                     EnableAutoSync = true,
                     UseDarkTheme = false,
-                    CurrentSpecializationId = 0 // Will be updated when specialization is created
+                    CurrentSpecializationId = 0, // Will be updated when specialization is created
                 };
                 await this.databaseService.SaveUserSettingsAsync(settings);
 
@@ -264,7 +248,7 @@ namespace SledzSpecke.App.Services.Implementations
                     RequiredDutyHoursPerWeek = 10.0833,
                     RequiresPublication = true,
                     RequiredConferences = 3,
-                    SpecializationTypeId = specializationTypeId
+                    SpecializationTypeId = specializationTypeId,
                 };
 
                 await this.databaseService.SaveAsync(specialization);
@@ -285,41 +269,19 @@ namespace SledzSpecke.App.Services.Implementations
             }
         }
 
-        private async Task SaveRelatedDataAsync(Specialization specialization)
+        private string HashPassword(string password)
         {
-            this.logger.LogInformation("Saving related data for specialization");
-
-            try
+            using (SHA256 sha256 = SHA256.Create())
             {
-                // Save courses
-                foreach (var course in specialization.RequiredCourses)
-                {
-                    course.SpecializationId = specialization.Id;
-                    await this.databaseService.SaveAsync(course);
-                }
-                this.logger.LogDebug("Saved {Count} courses", specialization.RequiredCourses.Count);
-
-                // Save internships
-                foreach (var internship in specialization.RequiredInternships)
-                {
-                    internship.SpecializationId = specialization.Id;
-                    await this.databaseService.SaveAsync(internship);
-                }
-                this.logger.LogDebug("Saved {Count} internships", specialization.RequiredInternships.Count);
-
-                // Save procedures
-                foreach (var procedure in specialization.RequiredProcedures)
-                {
-                    procedure.SpecializationId = specialization.Id;
-                    await this.databaseService.SaveAsync(procedure);
-                }
-                this.logger.LogDebug("Saved {Count} procedures", specialization.RequiredProcedures.Count);
+                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
             }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Error saving related data for specialization");
-                throw;
-            }
+        }
+
+        private bool VerifyPassword(string password, string storedHash)
+        {
+            string hashedPassword = this.HashPassword(password);
+            return hashedPassword == storedHash;
         }
     }
 }

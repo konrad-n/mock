@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         private readonly INavigationService navigationService;
 
         [ObservableProperty]
-        private List<SpecializationType> _specializationTypes;
+        private List<SpecializationType> specializationTypes;
 
         [ObservableProperty]
         private string _username;
@@ -30,7 +30,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         private string _confirmPassword;
 
         [ObservableProperty]
-        private int _specializationSelectedIndex = -1;
+        private int specializationSelectedIndex = -1;
 
         [ObservableProperty]
         private bool _isLoading;

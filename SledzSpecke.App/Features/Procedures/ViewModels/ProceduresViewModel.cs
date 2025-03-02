@@ -19,7 +19,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         private ProcedureType _currentProcedureType = ProcedureType.TypeA;
 
         [ObservableProperty]
-        private Specialization _specialization;
+        private Specialization specialization;
 
         [ObservableProperty]
         private bool _isProceduresEmpty = false;

@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         private readonly ISpecializationService specializationService;
 
         [ObservableProperty]
-        private Specialization _specialization;
+        private Specialization specialization;
 
         [ObservableProperty]
         private ModuleType _currentModule = ModuleType.Basic;

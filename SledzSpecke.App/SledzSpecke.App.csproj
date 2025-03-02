@@ -12,6 +12,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <!-- Allow Unsafe Code -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
     <!-- Display name -->
     <ApplicationTitle>SledzSpecke.App</ApplicationTitle>
 

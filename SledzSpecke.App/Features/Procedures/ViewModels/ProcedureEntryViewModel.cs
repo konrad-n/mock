@@ -214,7 +214,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                     SecondAssistantData = this.SecondAssistantData,
                     ProcedureGroup = this.ProcedureGroup,
                     InternshipName = this._procedure.InternshipId.HasValue ?
-                        (await this.databaseService.GetByIdAsync<Internship>(this._procedure.InternshipId.Value))?.Name : "",
+                        (await this.databaseService.GetByIdAsync<Internship>(this._procedure.InternshipId.Value))?.Name : string.Empty,
                     Notes = this.Notes
                 };
 

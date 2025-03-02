@@ -4,7 +4,6 @@ using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database;
-using System.Text;
 
 namespace SledzSpecke.App.Services.Implementations
 {
@@ -30,7 +29,7 @@ namespace SledzSpecke.App.Services.Implementations
 
                 if (specialization == null)
                 {
-                    throw new Exception("No active specialization found.");
+                    throw new OperationCanceledException("No active specialization found.");
                 }
 
                 string filePath = string.Empty;
@@ -83,17 +82,22 @@ namespace SledzSpecke.App.Services.Implementations
                 foreach (var course in courses.Where(c => this.FilterByModule(c.Module, options.ModuleFilter)))
                 {
                     if (!this.FilterByDate(course.CompletionDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
+                    {
                         continue;
+                    }
 
                     var courseData = new Dictionary<string, string>
                     {
                         ["Typ"] = "Kurs",
                         ["Nazwa"] = course.Name,
-                        ["Data rozpoczęcia"] = course.ScheduledDate?.ToString("dd.MM.yyyy") ?? "",
-                        ["Data zakończenia"] = course.CompletionDate?.ToString("dd.MM.yyyy") ?? "",
+                        ["Data rozpoczęcia"] = course.ScheduledDate?.ToString("dd.MM.yyyy")
+                            ?? string.Empty,
+                        ["Data zakończenia"] = course.CompletionDate?.ToString("dd.MM.yyyy")
+                            ?? string.Empty,
                         ["Status"] = this.GetStatusText(course.IsCompleted),
-                        ["Moduł"] = this.GetModuleText(course.Module)
+                        ["Moduł"] = this.GetModuleText(course.Module),
                     };
+
                     data.Add(courseData);
                 }
             }
@@ -103,18 +107,22 @@ namespace SledzSpecke.App.Services.Implementations
                 foreach (var internship in internships.Where(i => this.FilterByModule(i.Module, options.ModuleFilter)))
                 {
                     if (!this.FilterByDate(internship.EndDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
+                    {
                         continue;
+                    }
 
-                    var internshipData = new Dictionary<string, string>
+                    Dictionary<string, string> internshipData = new Dictionary<string, string>
                     {
                         ["Typ"] = "Staż",
                         ["Nazwa"] = internship.Name,
-                        ["Data rozpoczęcia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? "",
-                        ["Data zakończenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? "",
+                        ["Data rozpoczęcia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? string.Empty,
+                        ["Data zakończenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? string.Empty,
                         ["Status"] = this.GetStatusText(internship.IsCompleted),
                         ["Moduł"] = this.GetModuleText(internship.Module),
-                        ["Miejsce"] = internship.Location ?? "",
-                        ["Opiekun"] = internship.SupervisorName ?? ""
+                        ["Miejsce"] = internship.Location
+                            ?? string.Empty,
+                        ["Opiekun"] = internship.SupervisorName
+                            ?? string.Empty,
                     };
                     data.Add(internshipData);
                 }
@@ -131,19 +139,27 @@ namespace SledzSpecke.App.Services.Implementations
                 {
                     var entries = group.SelectMany(p => p.Entries).ToList();
 
-                    if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue &&
-                        !entries.Any(e => e.Date >= options.StartDate && e.Date <= options.EndDate))
+                    if (options.UseCustomDateRange
+                        && options.StartDate.HasValue
+                        && options.EndDate.HasValue
+                        && !entries.Any(e => e.Date >= options.StartDate && e.Date <= options.EndDate))
+                    {
                         continue;
+                    }
 
                     var procedureData = new Dictionary<string, string>
                     {
                         ["Typ"] = "Procedura",
                         ["Nazwa"] = group.Key.Name,
-                        ["Kod"] = group.Key.ProcedureType == ProcedureType.TypeA ? "A" : "B",
+                        ["Kod"] = group.Key.ProcedureType == ProcedureType.TypeA
+                            ? "A"
+                            : "B",
                         ["Wymagane"] = group.Sum(p => p.RequiredCount).ToString(),
                         ["Wykonane"] = group.Sum(p => p.CompletedCount).ToString(),
-                        ["Status"] = group.Sum(p => p.CompletedCount) >= group.Sum(p => p.RequiredCount) ? "Ukończono" : "W trakcie",
-                        ["Moduł"] = this.GetModuleText(group.Key.Module)
+                        ["Status"] = group.Sum(p => p.CompletedCount) >= group.Sum(p => p.RequiredCount)
+                            ? "Ukończono"
+                            : "W trakcie",
+                        ["Moduł"] = this.GetModuleText(group.Key.Module),
                     };
                     data.Add(procedureData);
                 }
@@ -174,7 +190,9 @@ namespace SledzSpecke.App.Services.Implementations
                     for (int colIndex = 0; colIndex < columns.Count; colIndex++)
                     {
                         string colName = columns[colIndex];
-                        worksheet.Cell(rowIndex + 2, colIndex + 1).Value = rowData.ContainsKey(colName) ? rowData[colName] : "";
+                        worksheet.Cell(rowIndex + 2, colIndex + 1).Value = rowData.ContainsKey(colName)
+                            ? rowData[colName]
+                            : string.Empty;
                     }
                 }
 
@@ -208,14 +226,18 @@ namespace SledzSpecke.App.Services.Implementations
                     "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
 
                 // Filter by date range if needed
-                if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue)
+                if (options.UseCustomDateRange
+                    && options.StartDate.HasValue
+                    && options.EndDate.HasValue)
                 {
                     entries = entries.Where(e => e.Date >= options.StartDate && e.Date <= options.EndDate).ToList();
                 }
 
                 // Skip if no entries
-                if (!entries.Any())
+                if (entries.Count == 0)
+                {
                     continue;
+                }
 
                 // Get internship name for the procedure group
                 string internshipName = "Nieokreślony";
@@ -234,17 +256,19 @@ namespace SledzSpecke.App.Services.Implementations
                     string procedureWithType = $"{procedure.Name} (Kod {(procedure.ProcedureType == ProcedureType.TypeA ? "A" : "B")})";
 
                     // Determine the procedure group - use the specific one if available
-                    string procedureGroup = !string.IsNullOrEmpty(entry.ProcedureGroup) ?
-                        entry.ProcedureGroup :
-                        $"{procedureWithType} - {internshipName}";
+                    string procedureGroup = !string.IsNullOrEmpty(entry.ProcedureGroup)
+                        ? entry.ProcedureGroup
+                        : $"{procedureWithType} - {internshipName}";
 
                     // Get the user settings for doctor's name
                     var settings = await this.databaseService.GetUserSettingsAsync();
                     string doctorName = settings.Username ?? "Lekarz";
 
-                    string assistingDoctors = procedure.ProcedureType == ProcedureType.TypeA ?
-                        string.IsNullOrEmpty(entry.FirstAssistantData) ? entry.SupervisorName : entry.FirstAssistantData :
-                        doctorName;
+                    string assistingDoctors = procedure.ProcedureType == ProcedureType.TypeA
+                        ? string.IsNullOrEmpty(entry.FirstAssistantData)
+                            ? entry.SupervisorName
+                            : entry.FirstAssistantData
+                        : doctorName;
 
                     // Add second assistant if available
                     if (!string.IsNullOrEmpty(entry.SecondAssistantData))
@@ -254,7 +278,7 @@ namespace SledzSpecke.App.Services.Implementations
 
                     procedureEntries.Add((
                         PatientName: entry.PatientId,
-                        PatientGender: entry.PatientGender ?? "",
+                        PatientGender: entry.PatientGender ?? string.Empty,
                         entry.Date,
                         PerformingDoctor: procedure.ProcedureType == ProcedureType.TypeA ? doctorName : entry.SupervisorName,
                         AssistingDoctors: assistingDoctors,
@@ -328,7 +352,9 @@ namespace SledzSpecke.App.Services.Implementations
                 "SELECT * FROM DutyShifts WHERE SpecializationId = ?", specialization.Id);
 
             // Filter by date range if needed
-            if (options.UseCustomDateRange && options.StartDate.HasValue && options.EndDate.HasValue)
+            if (options.UseCustomDateRange
+                && options.StartDate.HasValue
+                && options.EndDate.HasValue)
             {
                 dutyShifts = dutyShifts.Where(d => d.StartDate >= options.StartDate && d.StartDate <= options.EndDate).ToList();
             }
@@ -400,44 +426,6 @@ namespace SledzSpecke.App.Services.Implementations
             return filePath;
         }
 
-        private async Task<string> ExportToCsvAsync(List<Dictionary<string, string>> data, SmkExportOptions options)
-        {
-            // Create a unique filename
-            string fileName = $"SMK_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
-            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
-
-            // Ensure all rows have the same columns by finding all unique column names
-            var columns = data.SelectMany(d => d.Keys).Distinct().ToList();
-
-            using (var writer = new StreamWriter(filePath, false, Encoding.UTF8))
-            {
-                // Write header row
-                await writer.WriteLineAsync(string.Join(";", columns));
-
-                // Write data rows
-                foreach (var row in data)
-                {
-                    var rowValues = columns.Select(col => row.ContainsKey(col) ? this.EscapeCsvValue(row[col]) : "").ToList();
-                    await writer.WriteLineAsync(string.Join(";", rowValues));
-                }
-            }
-
-            return filePath;
-        }
-
-        private string EscapeCsvValue(string value)
-        {
-            if (string.IsNullOrEmpty(value)) return "";
-
-            // If the value contains a semicolon, quote, or newline, wrap it in quotes and escape any quotes
-            if (value.Contains(';') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
-            {
-                return $"\"{value.Replace("\"", "\"\"")}\"";
-            }
-
-            return value;
-        }
-
         private bool FilterByModule(ModuleType module, SmkExportModuleFilter filter)
         {
             return filter switch
@@ -452,25 +440,35 @@ namespace SledzSpecke.App.Services.Implementations
         private bool FilterByDate(DateTime? date, DateTime? startDate, DateTime? endDate)
         {
             if (!date.HasValue)
+            {
                 return true;
+            }
 
             if (startDate.HasValue && date < startDate)
+            {
                 return false;
+            }
 
             if (endDate.HasValue && date > endDate)
+            {
                 return false;
+            }
 
             return true;
         }
 
         private string GetStatusText(bool isCompleted)
         {
-            return isCompleted ? "Ukończono" : "W trakcie";
+            return isCompleted ?
+                "Ukończono" :
+                "W trakcie";
         }
 
         private string GetModuleText(ModuleType module)
         {
-            return module == ModuleType.Basic ? "Podstawowy" : "Specjalistyczny";
+            return module == ModuleType.Basic
+                ? "Podstawowy"
+                : "Specjalistyczny";
         }
     }
 }

@@ -32,16 +32,16 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         private string _durationText = "24 godziny";
 
         [ObservableProperty]
-        private string _location = "";
+        private string _location = string.Empty;
 
         [ObservableProperty]
-        private string _departmentName = ""; // For SMK
+        private string _departmentName = string.Empty; // For SMK
 
         [ObservableProperty]
-        private string _supervisorName = "";
+        private string _supervisorName = string.Empty;
 
         [ObservableProperty]
-        private string _notes = "";
+        private string _notes = string.Empty;
 
         [ObservableProperty]
         private bool _isSupervisorVisible;
@@ -85,10 +85,10 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 this.EndDate = dutyShift.EndDate.Date;
                 this.EndTime = dutyShift.EndDate.TimeOfDay;
 
-                this.Location = dutyShift.Location ?? "";
-                this.DepartmentName = dutyShift.DepartmentName ?? "";
-                this.SupervisorName = dutyShift.SupervisorName ?? "";
-                this.Notes = dutyShift.Notes ?? "";
+                this.Location = dutyShift.Location ?? string.Empty;
+                this.DepartmentName = dutyShift.DepartmentName ?? string.Empty;
+                this.SupervisorName = dutyShift.SupervisorName ?? string.Empty;
+                this.Notes = dutyShift.Notes ?? string.Empty;
 
                 this.DutyTypeSelectedIndex = dutyShift.Type == DutyType.Independent ? 0 : 1;
                 this.IsSupervisorVisible = dutyShift.Type == DutyType.Accompanied;

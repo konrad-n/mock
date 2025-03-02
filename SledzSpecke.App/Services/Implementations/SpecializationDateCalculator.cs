@@ -71,7 +71,9 @@ namespace SledzSpecke.App.Services.Implementations
                 // Pobierz wszystkie nieobecności związane z samokształceniem w danym roku
                 var educationLeaves = await this.databaseService.QueryAsync<Absence>(
                     "SELECT * FROM Absences WHERE SpecializationId = ? AND Type = ? AND Year = ?",
-                    specializationId, AbsenceType.SelfEducationLeave, year);
+                    specializationId,
+                    AbsenceType.SelfEducationLeave,
+                    year);
 
                 // Oblicz sumę wykorzystanych dni samokształcenia
                 int usedDays = educationLeaves.Sum(a => a.DurationDays);
@@ -111,7 +113,7 @@ namespace SledzSpecke.App.Services.Implementations
                     Title = "Rozpoczęcie specjalizacji",
                     Description = "Data rozpoczęcia szkolenia specjalizacyjnego",
                     Type = DateType.Start,
-                    IsPast = specialization.StartDate < now
+                    IsPast = specialization.StartDate < now,
                 });
 
                 // Dodaj datę zakończenia modułu podstawowego
@@ -123,7 +125,7 @@ namespace SledzSpecke.App.Services.Implementations
                     Description = "Planowana data zakończenia modułu podstawowego",
                     Type = DateType.ModuleEnd,
                     IsPast = basicModuleEndDate < now,
-                    DaysRemaining = (int)Math.Max(0, (basicModuleEndDate - now).TotalDays)
+                    DaysRemaining = (int)Math.Max(0, (basicModuleEndDate - now).TotalDays),
                 });
 
                 // Oblicz i dodaj oczekiwaną datę zakończenia specjalizacji
@@ -135,7 +137,7 @@ namespace SledzSpecke.App.Services.Implementations
                     Description = "Oczekiwana data zakończenia specjalizacji z uwzględnieniem nieobecności",
                     Type = DateType.End,
                     IsPast = expectedEndDate < now,
-                    DaysRemaining = (int)Math.Max(0, (expectedEndDate - now).TotalDays)
+                    DaysRemaining = (int)Math.Max(0, (expectedEndDate - now).TotalDays),
                 });
 
                 // Dodaj terminy kursów
@@ -155,7 +157,7 @@ namespace SledzSpecke.App.Services.Implementations
                             Type = DateType.Course,
                             IsPast = course.ScheduledDate.Value < now,
                             DaysRemaining = (int)Math.Max(0, (course.ScheduledDate.Value - now).TotalDays),
-                            RelatedItemId = course.Id
+                            RelatedItemId = course.Id,
                         });
                     }
                 }
@@ -177,7 +179,7 @@ namespace SledzSpecke.App.Services.Implementations
                             Type = DateType.Internship,
                             IsPast = internship.StartDate.Value < now,
                             DaysRemaining = (int)Math.Max(0, (internship.StartDate.Value - now).TotalDays),
-                            RelatedItemId = internship.Id
+                            RelatedItemId = internship.Id,
                         });
                     }
                 }
@@ -188,7 +190,7 @@ namespace SledzSpecke.App.Services.Implementations
                 if (remainingEducationDays > 0)
                 {
                     // Data końca roku lub 2 tygodnie przed nią, jeśli jest mniej niż 2 tygodnie do końca roku
-                    DateTime yearEndWarningDate = new DateTime(currentYear, 12, 31).AddDays(-14);
+                    DateTime yearEndWarningDate = new DateTime(currentYear, 12, 31, 0, 0, 0, DateTimeKind.Local).AddDays(-14);
                     if (now > yearEndWarningDate)
                     {
                         yearEndWarningDate = now;
@@ -201,7 +203,7 @@ namespace SledzSpecke.App.Services.Implementations
                         Description = $"Pozostało {remainingEducationDays} dni samokształcenia w {currentYear} roku",
                         Type = DateType.Warning,
                         IsPast = false,
-                        DaysRemaining = (int)(new DateTime(currentYear, 12, 31) - now).TotalDays
+                        DaysRemaining = (int)(new DateTime(currentYear, 12, 31, 0, 0, 0, DateTimeKind.Local) - now).TotalDays,
                     });
                 }
 
@@ -213,28 +215,5 @@ namespace SledzSpecke.App.Services.Implementations
                 throw;
             }
         }
-    }
-
-    public class SpecializationDateInfo
-    {
-        public DateTime Date { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public DateType Type { get; set; }
-        public bool IsPast { get; set; }
-        public int DaysRemaining { get; set; }
-        public int? RelatedItemId { get; set; }
-    }
-
-    public enum DateType
-    {
-        Start,
-        End,
-        ModuleEnd,
-        Course,
-        Internship,
-        Warning,
-        Deadline,
-        Other
     }
 }

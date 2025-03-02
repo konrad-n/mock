@@ -93,37 +93,58 @@ namespace SledzSpecke.App.Services.Implementations
                 case "Username":
                     // Use null-conditional operator to avoid null assignments
                     if (value is string username)
+                    {
                         this.settings.Username = username;
+                    }
+
                     break;
 
                 case "MedicalLicenseNumber":
                     if (value is string licenseNumber)
+                    {
                         this.settings.MedicalLicenseNumber = licenseNumber;
+                    }
+
                     break;
 
                 case "TrainingUnit":
                     if (value is string trainingUnit)
+                    {
                         this.settings.TrainingUnit = trainingUnit;
+                    }
+
                     break;
 
                 case "Supervisor":
                     if (value is string supervisor)
+                    {
                         this.settings.Supervisor = supervisor;
+                    }
+
                     break;
 
                 case "EnableNotifications":
                     if (value is bool boolValue)
+                    {
                         this.settings.EnableNotifications = boolValue;
+                    }
+
                     break;
 
                 case "EnableAutoSync":
                     if (value is bool autoSyncValue)
+                    {
                         this.settings.EnableAutoSync = autoSyncValue;
+                    }
+
                     break;
 
                 case "UseDarkTheme":
                     if (value is bool darkThemeValue)
+                    {
                         this.settings.UseDarkTheme = darkThemeValue;
+                    }
+
                     break;
             }
         }

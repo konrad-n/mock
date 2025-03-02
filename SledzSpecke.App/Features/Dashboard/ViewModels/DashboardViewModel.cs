@@ -14,7 +14,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
         private readonly ISpecializationDateCalculator specializationDateCalculator;
         private readonly IDutyShiftService dutyShiftService;
         private readonly ISelfEducationService _selfEducationService;
-        private Specialization _specialization;
+        private Specialization specialization;
 
         [ObservableProperty]
         private string _startDateLabel;
@@ -125,7 +125,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
 
         private async Task LoadSpecializationDataAsync()
         {
-            this._specialization = await this.specializationService.GetSpecializationAsync();
+            this.specialization = await this.specializationService.GetSpecializationAsync();
 
             await this.LoadDashboardDataAsync();
         }
@@ -133,17 +133,17 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
         private async Task LoadDashboardDataAsync()
         {
             // Podstawowe informacje o specjalizacji
-            this.StartDateLabel = this._specialization.StartDate.ToString("dd-MM-yyyy");
+            this.StartDateLabel = this.specialization.StartDate.ToString("dd-MM-yyyy");
 
             // Oblicz datę zakończenia bez nieobecności (zgodnie z programem)
-            DateTime plannedEndDate = this._specialization.StartDate.AddDays(this._specialization.BaseDurationWeeks * 7);
+            DateTime plannedEndDate = this.specialization.StartDate.AddDays(this.specialization.BaseDurationWeeks * 7);
             this.PlannedEndDateLabel = plannedEndDate.ToString("dd-MM-yyyy");
 
             // Inicjalizacja domyślną wartością
             DateTime actualEndDate = plannedEndDate;
             try
             {
-                actualEndDate = await this.specializationDateCalculator.CalculateExpectedEndDateAsync(this._specialization.Id);
+                actualEndDate = await this.specializationDateCalculator.CalculateExpectedEndDateAsync(this.specialization.Id);
                 this.ActualEndDateLabel = actualEndDate.ToString("dd-MM-yyyy");
             }
             catch (Exception ex)
@@ -158,8 +158,8 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             this.DaysLeftLabel = daysLeft > 0 ? daysLeft.ToString() : "0";
 
             // Określenie obecnego etapu
-            var daysSinceStart = (DateTime.Now - this._specialization.StartDate).Days;
-            if (daysSinceStart < (this._specialization.BasicModuleDurationWeeks * 7))
+            var daysSinceStart = (DateTime.Now - this.specialization.StartDate).Days;
+            if (daysSinceStart < (this.specialization.BasicModuleDurationWeeks * 7))
             {
                 this.CurrentStageLabel = "Moduł podstawowy";
             }
@@ -169,7 +169,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             }
 
             // Ogólny postęp
-            var totalProgress = this._specialization.GetCompletionPercentage() / 100;
+            var totalProgress = this.specialization.GetCompletionPercentage() / 100;
             this.TotalProgressBarValue = totalProgress;
             this.TotalProgressLabel = $"{(totalProgress * 100):F0}% ukończono";
 
@@ -183,29 +183,29 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             this.SpecialisticModuleProgressLabel = $"{(specialisticModuleProgress * 100):F0}%";
 
             // Statystyki kategorii
-            var completedCourses = this._specialization.RequiredCourses.Count(c => c.IsCompleted);
-            this.CoursesLabel = $"{completedCourses}/{this._specialization.RequiredCourses.Count} ukończonych";
+            var completedCourses = this.specialization.RequiredCourses.Count(c => c.IsCompleted);
+            this.CoursesLabel = $"{completedCourses}/{this.specialization.RequiredCourses.Count} ukończonych";
 
-            var completedInternships = this._specialization.RequiredInternships.Count(i => i.IsCompleted);
-            this.InternshipsLabel = $"{completedInternships}/{this._specialization.RequiredInternships.Count} ukończonych";
+            var completedInternships = this.specialization.RequiredInternships.Count(i => i.IsCompleted);
+            this.InternshipsLabel = $"{completedInternships}/{this.specialization.RequiredInternships.Count} ukończonych";
 
-            var proceduresTypeA = this._specialization.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).ToList();
+            var proceduresTypeA = this.specialization.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).ToList();
             var totalProceduresTypeA = proceduresTypeA.Sum(p => p.RequiredCount);
             var completedProceduresTypeA = proceduresTypeA.Sum(p => p.CompletedCount);
             this.ProceduresALabel = $"{completedProceduresTypeA}/{totalProceduresTypeA} wykonanych";
 
-            var proceduresTypeB = this._specialization.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).ToList();
+            var proceduresTypeB = this.specialization.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).ToList();
             var totalProceduresTypeB = proceduresTypeB.Sum(p => p.RequiredCount);
             var completedProceduresTypeB = proceduresTypeB.Sum(p => p.CompletedCount);
             this.ProceduresBLabel = $"{completedProceduresTypeB}/{totalProceduresTypeB} wykonanych";
 
             // Get statistics from services
             var totalDutyHours = await this.dutyShiftService.GetTotalDutyHoursAsync();
-            var requiredDutyHours = this._specialization.RequiredDutyHoursPerWeek * (this._specialization.BaseDurationWeeks / 52.0) * 52;
+            var requiredDutyHours = this.specialization.RequiredDutyHoursPerWeek * (this.specialization.BaseDurationWeeks / 52.0) * 52;
             this.DutyShiftsLabel = $"{totalDutyHours:F1}/{requiredDutyHours:F0} godzin";
 
             var totalSelfEducationDays = await this._selfEducationService.GetTotalUsedDaysAsync();
-            var totalAllowedDays = this._specialization.SelfEducationDaysPerYear * 3; // 3 years typical
+            var totalAllowedDays = this.specialization.SelfEducationDaysPerYear * 3; // 3 years typical
             this.SelfEducationLabel = $"{totalSelfEducationDays}/{totalAllowedDays} dni";
 
             // Show upcoming events
@@ -214,9 +214,9 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
 
         private double GetBasicModuleProgress()
         {
-            var basicCourses = this._specialization.RequiredCourses.Where(c => c.Module == ModuleType.Basic);
-            var basicInternships = this._specialization.RequiredInternships.Where(i => i.Module == ModuleType.Basic);
-            var basicProcedures = this._specialization.RequiredProcedures.Where(p => p.Module == ModuleType.Basic);
+            var basicCourses = this.specialization.RequiredCourses.Where(c => c.Module == ModuleType.Basic);
+            var basicInternships = this.specialization.RequiredInternships.Where(i => i.Module == ModuleType.Basic);
+            var basicProcedures = this.specialization.RequiredProcedures.Where(p => p.Module == ModuleType.Basic);
 
             var completedCourses = basicCourses.Count(c => c.IsCompleted);
             var totalCourses = basicCourses.Count();
@@ -248,9 +248,9 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
 
         private double GetSpecialisticModuleProgress()
         {
-            var specCourses = this._specialization.RequiredCourses.Where(c => c.Module == ModuleType.Specialistic);
-            var specInternships = this._specialization.RequiredInternships.Where(i => i.Module == ModuleType.Specialistic);
-            var specProcedures = this._specialization.RequiredProcedures.Where(p => p.Module == ModuleType.Specialistic);
+            var specCourses = this.specialization.RequiredCourses.Where(c => c.Module == ModuleType.Specialistic);
+            var specInternships = this.specialization.RequiredInternships.Where(i => i.Module == ModuleType.Specialistic);
+            var specProcedures = this.specialization.RequiredProcedures.Where(p => p.Module == ModuleType.Specialistic);
 
             var completedCourses = specCourses.Count(c => c.IsCompleted);
             var totalCourses = specCourses.Count();
@@ -286,7 +286,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             var upcomingEvents = new List<(DateTime Date, string Description, bool IsImportant)>();
 
             // Add courses
-            foreach (var course in this._specialization.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
+            foreach (var course in this.specialization.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
             {
                 if (course.ScheduledDate.Value >= today)
                 {
@@ -299,7 +299,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             }
 
             // Add internships
-            foreach (var internship in this._specialization.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
+            foreach (var internship in this.specialization.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
             {
                 if (internship.StartDate.Value >= today)
                 {
@@ -312,7 +312,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             }
 
             // Add end of basic module (if in future)
-            var endOfBasicModule = this._specialization.StartDate.AddDays(this._specialization.BasicModuleDurationWeeks * 7);
+            var endOfBasicModule = this.specialization.StartDate.AddDays(this.specialization.BasicModuleDurationWeeks * 7);
             if (endOfBasicModule >= today)
             {
                 upcomingEvents.Add((

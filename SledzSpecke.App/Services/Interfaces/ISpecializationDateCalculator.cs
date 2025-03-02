@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Services.Implementations;
+﻿using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Services.Interfaces
 {

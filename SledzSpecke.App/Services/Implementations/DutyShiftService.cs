@@ -130,7 +130,9 @@ namespace SledzSpecke.App.Services.Implementations
                 var dutyShifts = await this.GetAllDutyShiftsAsync();
 
                 if (!dutyShifts.Any())
+                {
                     return 0;
+                }
 
                 // Find the first and last duty dates
                 DateTime firstDate = dutyShifts.Min(d => d.StartDate.Date);

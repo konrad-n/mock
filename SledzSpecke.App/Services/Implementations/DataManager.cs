@@ -11,10 +11,10 @@ namespace SledzSpecke.App.Services.Implementations
     {
         private readonly IDatabaseService databaseService;
         private readonly ILogger<DataManager> logger;
-        private static readonly string _appDataFolder = FileSystem.AppDataDirectory;
-        private static readonly string _specializationFile = Path.Combine(_appDataFolder, "specialization.json");
+        private static readonly string appDataFolder = FileSystem.AppDataDirectory;
+        private static readonly string specializationFile = Path.Combine(appDataFolder, "specialization.json");
 
-        private Specialization _specialization;
+        private Specialization specialization;
 
         public DataManager(
             IDatabaseService databaseService,
@@ -23,9 +23,9 @@ namespace SledzSpecke.App.Services.Implementations
             this.databaseService = databaseService;
             this.logger = logger;
 
-            if (!Directory.Exists(_appDataFolder))
+            if (!Directory.Exists(appDataFolder))
             {
-                Directory.CreateDirectory(_appDataFolder);
+                Directory.CreateDirectory(appDataFolder);
             }
         }
 
@@ -34,34 +34,35 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // First try to get from database
-                var specialization = await this.databaseService.GetCurrentSpecializationAsync();
-                if (specialization != null)
+                var currentSpecialization = await this.databaseService.GetCurrentSpecializationAsync();
+                if (currentSpecialization != null)
                 {
-                    this._specialization = specialization;
-                    return specialization;
+                    this.specialization = currentSpecialization;
+
+                    return currentSpecialization;
                 }
 
                 // If nothing found, seed default data
-                this._specialization = DataSeeder.SeedHematologySpecialization();
-                await this.SaveSpecializationAsync(this._specialization);
+                this.specialization = DataSeeder.SeedHematologySpecialization();
+                await this.SaveSpecializationAsync(this.specialization);
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error loading specialization data");
 
                 // W przypadku błędu, zwracamy nową instancję specjalizacji
-                this._specialization = DataSeeder.SeedHematologySpecialization();
-                await this.SaveSpecializationAsync(this._specialization);
+                this.specialization = DataSeeder.SeedHematologySpecialization();
+                await this.SaveSpecializationAsync(this.specialization);
             }
 
-            return this._specialization;
+            return this.specialization;
         }
 
         public async Task SaveSpecializationAsync(Specialization specialization)
         {
             try
             {
-                this._specialization = specialization;
+                this.specialization = specialization;
 
                 // Inicjalizacja danych szablonowych jeśli potrzebne
                 if (!await this.databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
@@ -80,9 +81,9 @@ namespace SledzSpecke.App.Services.Implementations
                 // Save to file as backup
                 string json = JsonSerializer.Serialize(specialization, new JsonSerializerOptions
                 {
-                    WriteIndented = true
+                    WriteIndented = true,
                 });
-                await File.WriteAllTextAsync(_specializationFile, json);
+                await File.WriteAllTextAsync(specializationFile, json);
 
                 this.logger.LogInformation("Specialization saved successfully");
             }
@@ -101,12 +102,12 @@ namespace SledzSpecke.App.Services.Implementations
                 await this.databaseService.DeleteAllDataAsync();
 
                 // Delete file backup
-                if (File.Exists(_specializationFile))
+                if (File.Exists(specializationFile))
                 {
-                    File.Delete(_specializationFile);
+                    File.Delete(specializationFile);
                 }
 
-                this._specialization = null;
+                this.specialization = null;
                 this.logger.LogInformation("All data deleted successfully");
                 return true;
             }
@@ -176,7 +177,7 @@ namespace SledzSpecke.App.Services.Implementations
                     RequiredDutyHoursPerWeek = specializationType.RequiredDutyHoursPerWeek,
                     RequiresPublication = specializationType.RequiresPublication,
                     RequiredConferences = specializationType.RequiredConferences,
-                    SpecializationTypeId = specializationType.Id
+                    SpecializationTypeId = specializationType.Id,
                 };
 
                 // Save specialization to database
@@ -200,7 +201,7 @@ namespace SledzSpecke.App.Services.Implementations
 
         public string GetSpecializationName()
         {
-            return this._specialization?.Name ?? "Brak specjalizacji";
+            return this.specialization?.Name ?? "Brak specjalizacji";
         }
     }
 }

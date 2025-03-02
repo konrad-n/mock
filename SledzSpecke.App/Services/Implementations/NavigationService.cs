@@ -44,7 +44,8 @@ namespace SledzSpecke.App.Services.Implementations
             }
         }
 
-        public async Task NavigateToAsync<T>() where T : Page
+        public async Task NavigateToAsync<T>()
+            where T : Page
         {
             await this.NavigateToAsync(typeof(T));
         }

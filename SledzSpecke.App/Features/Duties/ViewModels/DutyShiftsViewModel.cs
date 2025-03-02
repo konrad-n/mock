@@ -13,7 +13,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
     {
         private readonly IDutyShiftService dutyShiftService;
         private readonly ISpecializationService specializationService;
-        private Specialization _specialization;
+        private Specialization specialization;
         private double _totalRequiredHours;
 
         [ObservableProperty]
@@ -69,8 +69,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 this.DutyShifts = new ObservableCollection<DutyShift>(dutyShifts);
 
                 // Get specialization for required hours
-                this._specialization = await this.specializationService.GetSpecializationAsync();
-                this._totalRequiredHours = this._specialization.RequiredDutyHoursPerWeek * (this._specialization.BaseDurationWeeks / 52.0) * 52;
+                this.specialization = await this.specializationService.GetSpecializationAsync();
+                this._totalRequiredHours = this.specialization.RequiredDutyHoursPerWeek * (this.specialization.BaseDurationWeeks / 52.0) * 52;
 
                 // Get weekly average
                 double weeklyAverage = this.CalculateWeeklyAverage();

@@ -11,71 +11,71 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
     public partial class SMKExportViewModel : ViewModelBase
     {
         private readonly IExportService exportService;
-        private SmkExportOptions _exportOptions;
+        private SmkExportOptions exportOptions;
 
         [ObservableProperty]
-        private bool _isGeneralExportSelected = true;
+        private bool isGeneralExportSelected = true;
 
         [ObservableProperty]
-        private bool _isProcedureExportSelected;
+        private bool isProcedureExportSelected;
 
         [ObservableProperty]
-        private bool _isDutyShiftExportSelected;
+        private bool isDutyShiftExportSelected;
 
         [ObservableProperty]
-        private bool _useSmkExactFormat = true;
+        private bool useSmkExactFormat = true;
 
         [ObservableProperty]
-        private bool _includeCoursesChecked = true;
+        private bool includeCoursesChecked = true;
 
         [ObservableProperty]
-        private bool _includeInternshipsChecked = true;
+        private bool includeInternshipsChecked = true;
 
         [ObservableProperty]
-        private bool _includeProceduresChecked = true;
+        private bool includeProceduresChecked = true;
 
         [ObservableProperty]
-        private int _formatSelectedIndex;
+        private int formatSelectedIndex;
 
         [ObservableProperty]
-        private bool _isAllModulesSelected = true;
+        private bool isAllModulesSelected = true;
 
         [ObservableProperty]
-        private bool _isBasicModuleSelected;
+        private bool isBasicModuleSelected;
 
         [ObservableProperty]
-        private bool _isSpecialisticModuleSelected;
+        private bool isSpecialisticModuleSelected;
 
         [ObservableProperty]
-        private bool _isAllDatesSelected = true;
+        private bool isAllDatesSelected = true;
 
         [ObservableProperty]
-        private bool _isCustomDatesSelected;
+        private bool isCustomDatesSelected;
 
         [ObservableProperty]
-        private DateTime _startDate = DateTime.Now.AddMonths(-3);
+        private DateTime startDate = DateTime.Now.AddMonths(-3);
 
         [ObservableProperty]
-        private DateTime _endDate = DateTime.Now;
+        private DateTime endDate = DateTime.Now;
 
         [ObservableProperty]
-        private bool _isDateRangeVisible;
+        private bool isDateRangeVisible;
 
         [ObservableProperty]
-        private bool _isLoading;
+        private bool isLoading;
 
         [ObservableProperty]
-        private bool _isResultVisible;
+        private bool isResultVisible;
 
         [ObservableProperty]
-        private string _filePath;
+        private string filePath;
 
         public SMKExportViewModel(
             IExportService exportService,
             ILogger<SMKExportViewModel> logger) : base(logger)
         {
             this.exportService = exportService;
-            this._exportOptions = new SmkExportOptions();
+            this.exportOptions = new SmkExportOptions();
             this.Title = "Eksport do SMK";
         }
 
@@ -87,7 +87,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 
         private void SetupInitialState()
         {
-            this._exportOptions = new SmkExportOptions();
+            this.exportOptions = new SmkExportOptions();
             this.IsGeneralExportSelected = true;
             this.IsProcedureExportSelected = false;
             this.IsDutyShiftExportSelected = false;
@@ -170,7 +170,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
                 }
 
                 // Set export options
-                this._exportOptions = new SmkExportOptions
+                this.exportOptions = new SmkExportOptions
                 {
                     ExportType = this.IsGeneralExportSelected ? SmkExportType.General :
                                   this.IsProcedureExportSelected ? SmkExportType.Procedures :
@@ -198,14 +198,14 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
                 this.IsLoading = true;
 
                 // Generate report
-                this.FilePath = await this.exportService.ExportToSMKAsync(this._exportOptions);
+                this.FilePath = await this.exportService.ExportToSMKAsync(this.exportOptions);
 
                 // Show result
                 this.IsResultVisible = true;
 
                 await Application.Current.MainPage.DisplayAlert(
                     "Sukces",
-                    $"Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.\n\nFormat: {(this._exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}",
+                    $"Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.\n\nFormat: {(this.exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}",
                     "OK");
             }
             catch (Exception ex)

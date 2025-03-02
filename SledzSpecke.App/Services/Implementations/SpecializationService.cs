@@ -29,6 +29,7 @@ namespace SledzSpecke.App.Services.Implementations
                 if (specialization == null)
                 {
                     this.logger.LogInformation("No current specialization found. Creating default specialization.");
+
                     // Create default specialization if none exists
                     specialization = DataSeeder.SeedHematologySpecialization();
                     await this.SaveSpecializationAsync(specialization);
@@ -42,38 +43,8 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error getting specialization");
+
                 // Nie zwracaj tutaj seedera - to zmniejszy spójność danych
-                throw;
-            }
-        }
-
-        private async Task LoadRelatedDataAsync(Specialization specialization)
-        {
-            try
-            {
-                // Load courses
-                var courses = await this.databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
-                specialization.RequiredCourses = courses;
-
-                // Load internships
-                var internships = await this.databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
-                specialization.RequiredInternships = internships;
-
-                // Load procedures
-                var procedures = await this.databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
-                specialization.RequiredProcedures = procedures;
-
-                // Load procedure entries
-                foreach (var procedure in specialization.RequiredProcedures)
-                {
-                    var entries = await this.databaseService.QueryAsync<ProcedureEntry>("SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
-                    procedure.Entries = entries;
-                    procedure.CompletedCount = entries.Count;
-                }
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Error loading related data for specialization");
                 throw;
             }
         }
@@ -117,6 +88,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 var specialization = await this.GetSpecializationAsync();
+
                 return specialization.RequiredCourses
                     .Where(c => c.Module == moduleType)
                     .ToList();
@@ -124,6 +96,7 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error getting courses");
+
                 return new List<Course>();
             }
         }
@@ -140,6 +113,7 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error getting internships");
+
                 return new List<Internship>();
             }
         }
@@ -149,6 +123,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 var specialization = await this.GetSpecializationAsync();
+
                 return specialization.RequiredProcedures
                     .Where(p => p.Module == moduleType && p.ProcedureType == procedureType)
                     .ToList();
@@ -156,6 +131,7 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error getting procedures");
+
                 return new List<MedicalProcedure>();
             }
         }
@@ -277,6 +253,37 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error adding procedure entry");
+                throw;
+            }
+        }
+
+        private async Task LoadRelatedDataAsync(Specialization specialization)
+        {
+            try
+            {
+                // Load courses
+                var courses = await this.databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
+                specialization.RequiredCourses = courses;
+
+                // Load internships
+                var internships = await this.databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
+                specialization.RequiredInternships = internships;
+
+                // Load procedures
+                var procedures = await this.databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+                specialization.RequiredProcedures = procedures;
+
+                // Load procedure entries
+                foreach (var procedure in specialization.RequiredProcedures)
+                {
+                    var entries = await this.databaseService.QueryAsync<ProcedureEntry>("SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
+                    procedure.Entries = entries;
+                    procedure.CompletedCount = entries.Count;
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error loading related data for specialization");
                 throw;
             }
         }
