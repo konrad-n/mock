@@ -152,7 +152,7 @@ namespace SledzSpecke.App
                 this.logger.LogDebug("Settings loaded");
 
                 bool useDarkTheme = this.appSettings.GetSetting<bool>("UseDarkTheme");
-                Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
+                Application.Current!.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
                 this.logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
 
                 MainThread.BeginInvokeOnMainThread(() =>
