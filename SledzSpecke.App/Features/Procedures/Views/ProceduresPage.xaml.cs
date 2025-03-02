@@ -10,14 +10,12 @@ namespace SledzSpecke.App.Features.Procedures.Views
     public partial class ProceduresPage : BaseContentPage
     {
         private ProceduresViewModel _viewModel;
-        private readonly ISpecializationService _specializationService;
         private readonly IDatabaseService _databaseService;
 
         public ProceduresPage(
             ISpecializationService specializationService,
             IDatabaseService databaseService)
         {
-            this._specializationService = specializationService;
             this._databaseService = databaseService;
             this.InitializeComponent();
         }

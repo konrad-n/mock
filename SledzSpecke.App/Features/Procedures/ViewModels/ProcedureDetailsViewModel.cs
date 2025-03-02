@@ -1,18 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using System.Collections.ObjectModel;
 
 namespace SledzSpecke.App.Features.Procedures.ViewModels
 {
     public partial class ProcedureDetailsViewModel : ViewModelBase
     {
         private MedicalProcedure _procedure;
-        private ModuleType _currentModule;
-        private ProcedureType _currentProcedureType;
         private Func<MedicalProcedure, Task> _onSaveCallback;
         private List<Internship> _internships;
 
@@ -55,8 +53,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             List<Internship> internships)
         {
             this._procedure = procedure ?? new MedicalProcedure();
-            this._currentModule = currentModule;
-            this._currentProcedureType = currentProcedureType;
             this._onSaveCallback = onSaveCallback;
             this._internships = internships;
 

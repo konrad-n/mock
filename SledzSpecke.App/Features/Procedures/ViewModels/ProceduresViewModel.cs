@@ -11,7 +11,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
     public partial class ProceduresViewModel : ViewModelBase
     {
         private readonly ISpecializationService _specializationService;
-        private readonly IDatabaseService _databaseService;
 
         [ObservableProperty]
         private ModuleType _currentModule = ModuleType.Basic;
@@ -51,11 +50,9 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
         public ProceduresViewModel(
             ISpecializationService specializationService,
-            IDatabaseService databaseService,
             ILogger<ProceduresViewModel> logger) : base(logger)
         {
             this._specializationService = specializationService;
-            this._databaseService = databaseService;
             this.Title = "Procedury";
         }
 
