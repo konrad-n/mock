@@ -45,10 +45,10 @@
        so you can run on an x86_64 emulator (and optionally arm64, x86, etc.).
   -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android35.0'">
-    <!-- Include whichever ABIs you actually need -->
-    <AndroidSupportedAbis>arm64-v8a;armeabi-v7a;x86_64;x86</AndroidSupportedAbis>
+    <!-- Zastąpienie przestarzałego AndroidSupportedAbis przez RuntimeIdentifiers -->
+    <RuntimeIdentifiers>android-arm64;android-arm;android-x64;android-x86</RuntimeIdentifiers>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <!-- App Icon -->
     <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="559,559" />
