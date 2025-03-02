@@ -9,7 +9,7 @@ namespace SledzSpecke.App.Services.Implementations
     {
         private readonly IDatabaseService databaseService;
         private readonly ILogger<AppSettings> logger;
-        private UserSettings _settings;
+        private UserSettings settings;
 
         public AppSettings(
             IDatabaseService databaseService,
@@ -17,20 +17,21 @@ namespace SledzSpecke.App.Services.Implementations
         {
             this.databaseService = databaseService;
             this.logger = logger;
-            this._settings = new UserSettings();
+            this.settings = new UserSettings();
         }
 
         public async Task LoadAsync()
         {
             try
             {
-                this._settings = await this.databaseService.GetUserSettingsAsync();
+                var loadedSettings = await this.databaseService.GetUserSettingsAsync();
+                this.settings = loadedSettings ?? new UserSettings();
                 this.logger.LogInformation("Settings loaded successfully");
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error loading settings");
-                this._settings = new UserSettings(); // Use default settings in case of error
+                this.settings = new UserSettings(); // Use default settings in case of error
             }
         }
 
@@ -38,7 +39,7 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                await this.databaseService.SaveUserSettingsAsync(this._settings);
+                await this.databaseService.SaveUserSettingsAsync(this.settings);
                 this.logger.LogInformation("Settings saved successfully");
             }
             catch (Exception ex)
@@ -50,25 +51,39 @@ namespace SledzSpecke.App.Services.Implementations
 
         public T GetSetting<T>(string key, T defaultValue = default)
         {
-            switch (key)
+            // Use pattern matching and null coalescing to handle potential nulls
+            return key switch
             {
-                case "Username":
-                    return (T)(object)this._settings.Username;
-                case "MedicalLicenseNumber":
-                    return (T)(object)this._settings.MedicalLicenseNumber;
-                case "TrainingUnit":
-                    return (T)(object)this._settings.TrainingUnit;
-                case "Supervisor":
-                    return (T)(object)this._settings.Supervisor;
-                case "EnableNotifications":
-                    return (T)(object)this._settings.EnableNotifications;
-                case "EnableAutoSync":
-                    return (T)(object)this._settings.EnableAutoSync;
-                case "UseDarkTheme":
-                    return (T)(object)this._settings.UseDarkTheme;
-                default:
-                    return defaultValue;
-            }
+                "Username" => this.settings.Username is not null && typeof(T) == typeof(string)
+                    ? (T)(object)this.settings.Username
+                    : defaultValue,
+
+                "MedicalLicenseNumber" => this.settings.MedicalLicenseNumber is not null && typeof(T) == typeof(string)
+                    ? (T)(object)this.settings.MedicalLicenseNumber
+                    : defaultValue,
+
+                "TrainingUnit" => this.settings.TrainingUnit is not null && typeof(T) == typeof(string)
+                    ? (T)(object)this.settings.TrainingUnit
+                    : defaultValue,
+
+                "Supervisor" => this.settings.Supervisor is not null && typeof(T) == typeof(string)
+                    ? (T)(object)this.settings.Supervisor
+                    : defaultValue,
+
+                "EnableNotifications" => typeof(T) == typeof(bool)
+                    ? (T)(object)this.settings.EnableNotifications
+                    : defaultValue,
+
+                "EnableAutoSync" => typeof(T) == typeof(bool)
+                    ? (T)(object)this.settings.EnableAutoSync
+                    : defaultValue,
+
+                "UseDarkTheme" => typeof(T) == typeof(bool)
+                    ? (T)(object)this.settings.UseDarkTheme
+                    : defaultValue,
+
+                _ => defaultValue
+            };
         }
 
         public void SetSetting<T>(string key, T value)
@@ -76,35 +91,76 @@ namespace SledzSpecke.App.Services.Implementations
             switch (key)
             {
                 case "Username":
-                    this._settings.Username = value as string;
+                    // Use null-conditional operator to avoid null assignments
+                    if (value is string username)
+                        this.settings.Username = username;
                     break;
+
                 case "MedicalLicenseNumber":
-                    this._settings.MedicalLicenseNumber = value as string;
+                    if (value is string licenseNumber)
+                        this.settings.MedicalLicenseNumber = licenseNumber;
                     break;
+
                 case "TrainingUnit":
-                    this._settings.TrainingUnit = value as string;
+                    if (value is string trainingUnit)
+                        this.settings.TrainingUnit = trainingUnit;
                     break;
+
                 case "Supervisor":
-                    this._settings.Supervisor = value as string;
+                    if (value is string supervisor)
+                        this.settings.Supervisor = supervisor;
                     break;
+
                 case "EnableNotifications":
                     if (value is bool boolValue)
-                        this._settings.EnableNotifications = boolValue;
+                        this.settings.EnableNotifications = boolValue;
                     break;
+
                 case "EnableAutoSync":
                     if (value is bool autoSyncValue)
-                        this._settings.EnableAutoSync = autoSyncValue;
+                        this.settings.EnableAutoSync = autoSyncValue;
                     break;
+
                 case "UseDarkTheme":
                     if (value is bool darkThemeValue)
-                        this._settings.UseDarkTheme = darkThemeValue;
+                        this.settings.UseDarkTheme = darkThemeValue;
                     break;
             }
         }
 
         public void RemoveSetting(string key)
         {
-            this.SetSetting<object>(key, null);
+            // Handle string properties separately from bool properties
+            switch (key)
+            {
+                case "Username":
+                    this.settings.Username = string.Empty;
+                    break;
+
+                case "MedicalLicenseNumber":
+                    this.settings.MedicalLicenseNumber = string.Empty;
+                    break;
+
+                case "TrainingUnit":
+                    this.settings.TrainingUnit = string.Empty;
+                    break;
+
+                case "Supervisor":
+                    this.settings.Supervisor = string.Empty;
+                    break;
+
+                case "EnableNotifications":
+                    this.settings.EnableNotifications = false;
+                    break;
+
+                case "EnableAutoSync":
+                    this.settings.EnableAutoSync = false;
+                    break;
+
+                case "UseDarkTheme":
+                    this.settings.UseDarkTheme = false;
+                    break;
+            }
         }
     }
 }
