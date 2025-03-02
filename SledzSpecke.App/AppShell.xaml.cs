@@ -6,16 +6,15 @@ using SledzSpecke.App.Features.Procedures.Views;
 using SledzSpecke.App.Features.SelfEducations.Views;
 using SledzSpecke.App.Features.Settings.Views;
 using SledzSpecke.App.Features.SMKExport.Views;
-using SledzSpecke.App.Services;
 using SledzSpecke.App.Services.Interfaces;
 
 namespace SledzSpecke.App
 {
     public partial class AppShell : Shell
     {
-        private readonly IAuthenticationService _authenticationService;
-        private readonly ISpecializationService _specializationService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IAuthenticationService authenticationService;
+        private readonly ISpecializationService specializationService;
+        private readonly IServiceProvider serviceProvider;
 
         public AppShell(
             IAuthenticationService authenticationService,
@@ -24,9 +23,9 @@ namespace SledzSpecke.App
         {
             this.InitializeComponent();
 
-            this._authenticationService = authenticationService;
-            this._specializationService = specializationService;
-            this._serviceProvider = serviceProvider;
+            this.authenticationService = authenticationService;
+            this.specializationService = specializationService;
+            this.serviceProvider = serviceProvider;
 
             // Register routes for navigation
             Routing.RegisterRoute(nameof(CourseDetailsPage), typeof(CourseDetailsPage));
@@ -54,9 +53,9 @@ namespace SledzSpecke.App
 
         private void UpdateUserInfo()
         {
-            if (this._authenticationService.IsAuthenticated)
+            if (this.authenticationService.IsAuthenticated)
             {
-                this.UserNameLabel.Text = this. _authenticationService.CurrentUser.Username;
+                this.UserNameLabel.Text = this. authenticationService.CurrentUser.Username;
 
                 try
                 {
@@ -64,7 +63,7 @@ namespace SledzSpecke.App
                     {
                         try
                         {
-                            var specialization = await this._specializationService.GetSpecializationAsync();
+                            var specialization = await this.specializationService.GetSpecializationAsync();
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
                                 this.SpecializationLabel.Text = specialization?.Name ?? "Brak specjalizacji";
@@ -93,8 +92,8 @@ namespace SledzSpecke.App
             bool confirm = await this.DisplayAlert("Wylogowanie", "Czy na pewno chcesz się wylogować?", "Tak", "Nie");
             if (confirm)
             {
-                this._authenticationService.Logout();
-                Application.Current.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
+                this.authenticationService.Logout();
+                Application.Current.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
             }
         }
     }

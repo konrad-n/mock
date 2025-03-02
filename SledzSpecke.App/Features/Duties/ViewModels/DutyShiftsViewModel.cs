@@ -11,8 +11,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 {
     public partial class DutyShiftsViewModel : ViewModelBase
     {
-        private readonly IDutyShiftService _dutyShiftService;
-        private readonly ISpecializationService _specializationService;
+        private readonly IDutyShiftService dutyShiftService;
+        private readonly ISpecializationService specializationService;
         private Specialization _specialization;
         private double _totalRequiredHours;
 
@@ -36,8 +36,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             ISpecializationService specializationService,
             ILogger<DutyShiftsViewModel> logger) : base(logger)
         {
-            this._dutyShiftService = dutyShiftService;
-            this._specializationService = specializationService;
+            this.dutyShiftService = dutyShiftService;
+            this.specializationService = specializationService;
             this.DutyShifts = new ObservableCollection<DutyShift>();
             this.GroupedDutyShifts = new ObservableCollection<GroupedDutyShifts>();
             this.Title = "Dyżury";
@@ -52,7 +52,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading duty shifts data");
+                this.logger.LogError(ex, "Error loading duty shifts data");
             }
             finally
             {
@@ -65,11 +65,11 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 // Get all duty shifts from the database
-                var dutyShifts = await this._dutyShiftService.GetAllDutyShiftsAsync();
+                var dutyShifts = await this.dutyShiftService.GetAllDutyShiftsAsync();
                 this.DutyShifts = new ObservableCollection<DutyShift>(dutyShifts);
 
                 // Get specialization for required hours
-                this._specialization = await this._specializationService.GetSpecializationAsync();
+                this._specialization = await this.specializationService.GetSpecializationAsync();
                 this._totalRequiredHours = this._specialization.RequiredDutyHoursPerWeek * (this._specialization.BaseDurationWeeks / 52.0) * 52;
 
                 // Get weekly average
@@ -87,7 +87,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading duty shifts");
+                this.logger.LogError(ex, "Error loading duty shifts");
                 throw;
             }
         }
@@ -118,7 +118,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error calculating weekly average");
+                this.logger.LogError(ex, "Error calculating weekly average");
                 return 0;
             }
         }
@@ -132,7 +132,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating total hours");
+                this.logger.LogError(ex, "Error updating total hours");
                 this.TotalHoursLabel = $"0.0/{this._totalRequiredHours:F0} godzin";
             }
         }
@@ -163,7 +163,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error grouping duty shifts");
+                this.logger.LogError(ex, "Error grouping duty shifts");
             }
         }
 
@@ -198,14 +198,14 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 // Save to database
-                await this._dutyShiftService.SaveDutyShiftAsync(dutyShift);
+                await this.dutyShiftService.SaveDutyShiftAsync(dutyShift);
 
                 // Refresh data
                 await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving duty shift");
+                this.logger.LogError(ex, "Error saving duty shift");
                 throw;
             }
         }
@@ -215,7 +215,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             try
             {
-                var dutyShift = await this._dutyShiftService.GetDutyShiftAsync(dutyShiftId);
+                var dutyShift = await this.dutyShiftService.GetDutyShiftAsync(dutyShiftId);
                 if (dutyShift != null)
                 {
                     await Shell.Current.Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, this.OnDutyShiftSaved));
@@ -223,7 +223,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error navigating to edit duty shift page");
+                this.logger.LogError(ex, "Error navigating to edit duty shift page");
                 throw;
             }
         }

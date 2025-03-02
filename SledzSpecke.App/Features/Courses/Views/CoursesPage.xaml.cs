@@ -9,11 +9,11 @@ namespace SledzSpecke.App.Features.Courses.Views
     public partial class CoursesPage : BaseContentPage
     {
         private CoursesViewModel _viewModel;
-        private readonly ISpecializationService _specializationService;
+        private readonly ISpecializationService specializationService;
 
         public CoursesPage(ISpecializationService specializationService)
         {
-            this._specializationService = specializationService;
+            this.specializationService = specializationService;
             this.InitializeComponent();
         }
 
@@ -199,14 +199,14 @@ namespace SledzSpecke.App.Features.Courses.Views
 
         private async Task OnCourseAdded(Course course)
         {
-            await this._specializationService.SaveCourseAsync(course);
+            await this.specializationService.SaveCourseAsync(course);
             await this._viewModel.LoadSpecializationDataAsync();
             this.DisplayCourses(this._viewModel.CurrentModule);
         }
 
         private async Task OnCourseUpdated(Course course)
         {
-            await this._specializationService.SaveCourseAsync(course);
+            await this.specializationService.SaveCourseAsync(course);
             await this._viewModel.LoadSpecializationDataAsync();
             this.DisplayCourses(this._viewModel.CurrentModule);
         }

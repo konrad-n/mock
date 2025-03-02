@@ -9,7 +9,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 {
     public partial class CoursesViewModel : ViewModelBase
     {
-        private readonly ISpecializationService _specializationService;
+        private readonly ISpecializationService specializationService;
 
         [ObservableProperty]
         private ModuleType _currentModule = ModuleType.Basic;
@@ -30,7 +30,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             ISpecializationService specializationService,
             ILogger<CoursesViewModel> logger) : base(logger)
         {
-            this._specializationService = specializationService;
+            this.specializationService = specializationService;
             this.Title = "Kursy";
         }
 
@@ -43,7 +43,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading courses data");
+                this.logger.LogError(ex, "Error loading courses data");
             }
             finally
             {
@@ -53,7 +53,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 
         public async Task LoadSpecializationDataAsync()
         {
-            this.Specialization = await this._specializationService.GetSpecializationAsync();
+            this.Specialization = await this.specializationService.GetSpecializationAsync();
         }
 
         public void SelectBasicModule()

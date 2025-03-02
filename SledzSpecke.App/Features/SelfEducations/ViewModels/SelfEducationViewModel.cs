@@ -48,7 +48,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading self-education data");
+                this.logger.LogError(ex, "Error loading self-education data");
             }
             finally
             {
@@ -84,7 +84,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading self-education data");
+                this.logger.LogError(ex, "Error loading self-education data");
                 throw;
             }
         }
@@ -110,7 +110,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error grouping education events by year");
+                this.logger.LogError(ex, "Error grouping education events by year");
             }
         }
 
@@ -146,7 +146,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error adding self-education event");
+                this.logger.LogError(ex, "Error adding self-education event");
             }
         }
 
@@ -169,7 +169,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating self-education event");
+                this.logger.LogError(ex, "Error updating self-education event");
             }
         }
 

@@ -7,27 +7,27 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class SelfEducationService : ISelfEducationService
     {
-        private readonly IDatabaseService _databaseService;
-        private readonly ILogger<SelfEducationService> _logger;
+        private readonly IDatabaseService databaseService;
+        private readonly ILogger<SelfEducationService> logger;
 
         public SelfEducationService(
             IDatabaseService databaseService,
             ILogger<SelfEducationService> logger)
         {
-            this._databaseService = databaseService;
-            this._logger = logger;
+            this.databaseService = databaseService;
+            this.logger = logger;
         }
 
         public async Task<List<SelfEducation>> GetAllSelfEducationAsync()
         {
             try
             {
-                var userSettings = await this._databaseService.GetUserSettingsAsync();
-                return await this._databaseService.QueryAsync<SelfEducation>("SELECT * FROM SelfEducation WHERE SpecializationId = ? ORDER BY StartDate DESC", userSettings.CurrentSpecializationId);
+                var userSettings = await this.databaseService.GetUserSettingsAsync();
+                return await this.databaseService.QueryAsync<SelfEducation>("SELECT * FROM SelfEducation WHERE SpecializationId = ? ORDER BY StartDate DESC", userSettings.CurrentSpecializationId);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting self-education activities");
+                this.logger.LogError(ex, "Error getting self-education activities");
                 return new List<SelfEducation>();
             }
         }
@@ -36,11 +36,11 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                return await this._databaseService.GetByIdAsync<SelfEducation>(id);
+                return await this.databaseService.GetByIdAsync<SelfEducation>(id);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting self-education with ID {Id}", id);
+                this.logger.LogError(ex, "Error getting self-education with ID {Id}", id);
                 return null;
             }
         }
@@ -49,15 +49,15 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var userSettings = await this._databaseService.GetUserSettingsAsync();
+                var userSettings = await this.databaseService.GetUserSettingsAsync();
                 selfEducation.SpecializationId = userSettings.CurrentSpecializationId;
 
-                await this._databaseService.SaveAsync(selfEducation);
-                this._logger.LogInformation("Self-education saved successfully");
+                await this.databaseService.SaveAsync(selfEducation);
+                this.logger.LogInformation("Self-education saved successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving self-education");
+                this.logger.LogError(ex, "Error saving self-education");
                 throw;
             }
         }
@@ -66,12 +66,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                await this._databaseService.DeleteAsync(selfEducation);
-                this._logger.LogInformation("Self-education deleted successfully");
+                await this.databaseService.DeleteAsync(selfEducation);
+                this.logger.LogInformation("Self-education deleted successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error deleting self-education");
+                this.logger.LogError(ex, "Error deleting self-education");
                 throw;
             }
         }
@@ -85,7 +85,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error calculating total self-education days");
+                this.logger.LogError(ex, "Error calculating total self-education days");
                 return 0;
             }
         }
@@ -105,7 +105,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error calculating yearly self-education days");
+                this.logger.LogError(ex, "Error calculating yearly self-education days");
                 return new Dictionary<int, int>();
             }
         }
@@ -114,12 +114,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this.databaseService.GetCurrentSpecializationAsync();
                 return specialization?.SelfEducationDaysPerYear ?? 6; // Default to 6 days if not specified
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting yearly self-education allowance");
+                this.logger.LogError(ex, "Error getting yearly self-education allowance");
                 return 6; // Default to 6 days in case of error
             }
         }

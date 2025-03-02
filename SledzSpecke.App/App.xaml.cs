@@ -7,12 +7,12 @@ namespace SledzSpecke.App
 {
     public partial class App : Application
     {
-        private readonly ILogger<App> _logger;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly INotificationService _notificationService;
-        private readonly IAppSettings _appSettings;
-        private readonly IDatabaseService _databaseService;
-        private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<App> logger;
+        private readonly IServiceProvider serviceProvider;
+        private readonly INotificationService notificationService;
+        private readonly IAppSettings appSettings;
+        private readonly IDatabaseService databaseService;
+        private readonly IAuthenticationService authenticationService;
 
         public App(
             IServiceProvider serviceProvider,
@@ -24,22 +24,22 @@ namespace SledzSpecke.App
         {
             this.InitializeComponent();
 
-            this._serviceProvider = serviceProvider;
-            this._logger = logger;
-            this._notificationService = notificationService;
-            this._appSettings = appSettings;
-            this._databaseService = databaseService;
-            this._authenticationService = authenticationService;
+            this.serviceProvider = serviceProvider;
+            this.logger = logger;
+            this.notificationService = notificationService;
+            this.appSettings = appSettings;
+            this.databaseService = databaseService;
+            this.authenticationService = authenticationService;
 
             try
             {
-                this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
+                this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
                 _ = this.InitializeAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error in App constructor");
-                this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
+                this.logger.LogError(ex, "Error in App constructor");
+                this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
             }
         }
 
@@ -47,34 +47,34 @@ namespace SledzSpecke.App
         {
             try
             {
-                this._logger.LogInformation("Starting app initialization");
+                this.logger.LogInformation("Starting app initialization");
 
-                await this._databaseService.InitAsync();
-                this._logger.LogDebug("Database initialized");
+                await this.databaseService.InitAsync();
+                this.logger.LogDebug("Database initialized");
 
-                var userSeeded = await this._authenticationService.SeedTestUserAsync();
-                this._logger.LogDebug("Test user seeded: {Result}", userSeeded);
+                var userSeeded = await this.authenticationService.SeedTestUserAsync();
+                this.logger.LogDebug("Test user seeded: {Result}", userSeeded);
 
-                await this._appSettings.LoadAsync();
-                this._logger.LogDebug("Settings loaded");
+                await this.appSettings.LoadAsync();
+                this.logger.LogDebug("Settings loaded");
 
-                bool useDarkTheme = this._appSettings.GetSetting<bool>("UseDarkTheme");
+                bool useDarkTheme = this.appSettings.GetSetting<bool>("UseDarkTheme");
                 Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
-                this._logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
+                this.logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
+                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
                 });
 
-                this._logger.LogInformation("Application initialized successfully");
+                this.logger.LogInformation("Application initialized successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error initializing application");
+                this.logger.LogError(ex, "Error initializing application");
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
+                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
                 });
             }
         }
@@ -83,11 +83,11 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = this._notificationService.CheckAndScheduleNotificationsAsync();
+                _ = this.notificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error in OnStart");
+                this.logger.LogError(ex, "Error in OnStart");
             }
         }
 
@@ -95,11 +95,11 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = this._appSettings.SaveAsync();
+                _ = this.appSettings.SaveAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error in OnSleep");
+                this.logger.LogError(ex, "Error in OnSleep");
             }
         }
 
@@ -107,11 +107,11 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = this._notificationService.CheckAndScheduleNotificationsAsync();
+                _ = this.notificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error in OnResume");
+                this.logger.LogError(ex, "Error in OnResume");
             }
         }
 

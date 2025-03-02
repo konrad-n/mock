@@ -231,7 +231,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading absences data");
+                this.logger.LogError(ex, "Error loading absences data");
             }
             finally
             {
@@ -284,7 +284,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading absence data"); // Nie rzucaj wyjątku ponownie, tylko zaloguj błąd
+                this.logger.LogError(ex, "Error loading absence data"); // Nie rzucaj wyjątku ponownie, tylko zaloguj błąd
             }
         }
 
@@ -414,14 +414,14 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 await this.databaseService.InsertAsync(absence);
 
                 // Dla pewności, dodaj log który pokazuje nowe ID
-                this._logger.LogInformation("Added new absence with ID: {AbsenceId}", absence.Id);
+                this.logger.LogInformation("Added new absence with ID: {AbsenceId}", absence.Id);
 
                 // Reload data
                 await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error adding absence");
+                this.logger.LogError(ex, "Error adding absence");
                 var window = Application.Current?.Windows[0];
                 var page = window?.Page;
 

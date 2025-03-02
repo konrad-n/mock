@@ -9,7 +9,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 {
     public partial class ProcedureEntryViewModel : ViewModelBase
     {
-        private readonly IDatabaseService _databaseService;
+        private readonly IDatabaseService databaseService;
         private Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
         private MedicalProcedure _procedure;
 
@@ -80,7 +80,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             IDatabaseService databaseService,
             ILogger<ProcedureEntryViewModel> logger) : base(logger)
         {
-            this._databaseService = databaseService;
+            this.databaseService = databaseService;
             this.Title = "Dodaj wykonanie procedury";
         }
 
@@ -140,7 +140,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 {
                     try
                     {
-                        var internship = await this._databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                        var internship = await this.databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
                         if (internship != null)
                         {
                             this.ProcedureGroup = $"{procedure.Name} - {internship.Name}";
@@ -149,7 +149,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(ex, "Error getting internship name");
+                        this.logger.LogError(ex, "Error getting internship name");
                     }
                 });
             }
@@ -214,7 +214,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                     SecondAssistantData = this.SecondAssistantData,
                     ProcedureGroup = this.ProcedureGroup,
                     InternshipName = this._procedure.InternshipId.HasValue ?
-                        (await this._databaseService.GetByIdAsync<Internship>(this._procedure.InternshipId.Value))?.Name : "",
+                        (await this.databaseService.GetByIdAsync<Internship>(this._procedure.InternshipId.Value))?.Name : "",
                     Notes = this.Notes
                 };
 
@@ -227,7 +227,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving procedure entry");
+                this.logger.LogError(ex, "Error saving procedure entry");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił błąd podczas zapisywania: {ex.Message}", "OK");
             }
         }

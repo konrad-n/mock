@@ -9,10 +9,10 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 {
     public partial class LoginViewModel : ViewModelBase
     {
-        private readonly IAuthenticationService _authenticationService;
-        private readonly INavigationService _navigationService;
-        private readonly ISpecializationService _specializationService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IAuthenticationService authenticationService;
+        private readonly INavigationService navigationService;
+        private readonly ISpecializationService specializationService;
+        private readonly IServiceProvider serviceProvider;
 
         [ObservableProperty]
         private string _email;
@@ -33,10 +33,10 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             IServiceProvider serviceProvider,
             INavigationService navigationService) : base(logger)
         {
-            this._authenticationService = authenticationService;
-            this._specializationService = specializationService;
-            this._serviceProvider = serviceProvider;
-            this._navigationService = navigationService;
+            this.authenticationService = authenticationService;
+            this.specializationService = specializationService;
+            this.serviceProvider = serviceProvider;
+            this.navigationService = navigationService;
 
             // Dodaj debug log
             System.Diagnostics.Debug.WriteLine("LoginViewModel constructor called");
@@ -62,35 +62,35 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
                 this.IsLoading = true;
                 this.ErrorMessage = string.Empty;
 
-                this._logger.LogInformation("Login attempt for {Email}", this.Email);
+                this.logger.LogInformation("Login attempt for {Email}", this.Email);
 
-                bool result = await this._authenticationService.LoginAsync(this.Email, this.Password);
+                bool result = await this.authenticationService.LoginAsync(this.Email, this.Password);
 
                 if (result)
                 {
-                    this._logger.LogInformation("Login successful for {Email}", this.Email);
+                    this.logger.LogInformation("Login successful for {Email}", this.Email);
 
                     try
                     {
-                        var appShell = new AppShell(this._authenticationService, this._specializationService, this._serviceProvider);
+                        var appShell = new AppShell(this.authenticationService, this.specializationService, this.serviceProvider);
                         Application.Current.MainPage = appShell;
-                        this._logger.LogDebug("AppShell set as MainPage");
+                        this.logger.LogDebug("AppShell set as MainPage");
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(ex, "Error setting AppShell as MainPage");
+                        this.logger.LogError(ex, "Error setting AppShell as MainPage");
                         this.ErrorMessage = "Logowanie powiodło się, ale wystąpił problem z uruchomieniem głównego ekranu aplikacji.";
                     }
                 }
                 else
                 {
-                    this._logger.LogWarning("Login failed for {Email}", this.Email);
+                    this.logger.LogWarning("Login failed for {Email}", this.Email);
                     this.ErrorMessage = "Nieprawidłowy adres email lub hasło.";
                 }
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error during login for {Email}", this.Email);
+                this.logger.LogError(ex, "Error during login for {Email}", this.Email);
                 this.ErrorMessage = $"Wystąpił problem podczas próby logowania. Szczegóły błędu: {ex.Message}";
             }
             finally
@@ -102,7 +102,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         [RelayCommand]
         private async Task NavigateToRegistrationAsync()
         {
-            await this._navigationService.NavigateToAsync<RegistrationPage>();
+            await this.navigationService.NavigateToAsync<RegistrationPage>();
         }
     }
 }

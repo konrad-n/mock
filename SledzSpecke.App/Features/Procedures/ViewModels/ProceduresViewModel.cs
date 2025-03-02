@@ -10,7 +10,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 {
     public partial class ProceduresViewModel : ViewModelBase
     {
-        private readonly ISpecializationService _specializationService;
+        private readonly ISpecializationService specializationService;
 
         [ObservableProperty]
         private ModuleType _currentModule = ModuleType.Basic;
@@ -52,7 +52,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             ISpecializationService specializationService,
             ILogger<ProceduresViewModel> logger) : base(logger)
         {
-            this._specializationService = specializationService;
+            this.specializationService = specializationService;
             this.Title = "Procedury";
         }
 
@@ -66,7 +66,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading procedures data");
+                this.logger.LogError(ex, "Error loading procedures data");
             }
             finally
             {
@@ -76,7 +76,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
         public async Task LoadSpecializationDataAsync()
         {
-            this.Specialization = await this._specializationService.GetSpecializationAsync();
+            this.Specialization = await this.specializationService.GetSpecializationAsync();
         }
 
         public void UpdateButtonStyles()
@@ -116,13 +116,13 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
         public async Task SaveProcedureAsync(MedicalProcedure procedure)
         {
-            await this._specializationService.SaveProcedureAsync(procedure);
+            await this.specializationService.SaveProcedureAsync(procedure);
             await this.LoadSpecializationDataAsync();
         }
 
         public async Task AddProcedureEntryAsync(MedicalProcedure procedure, ProcedureEntry entry)
         {
-            await this._specializationService.AddProcedureEntryAsync(procedure, entry);
+            await this.specializationService.AddProcedureEntryAsync(procedure, entry);
             await this.LoadSpecializationDataAsync();
         }
     }

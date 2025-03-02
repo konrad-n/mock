@@ -10,7 +10,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 {
     public partial class SMKExportViewModel : ViewModelBase
     {
-        private readonly IExportService _exportService;
+        private readonly IExportService exportService;
         private SMKExportOptions _exportOptions;
 
         [ObservableProperty]
@@ -74,7 +74,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             IExportService exportService,
             ILogger<SMKExportViewModel> logger) : base(logger)
         {
-            this._exportService = exportService;
+            this.exportService = exportService;
             this._exportOptions = new SMKExportOptions();
             this.Title = "Eksport do SMK";
         }
@@ -198,7 +198,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
                 this.IsLoading = true;
 
                 // Generate report
-                this.FilePath = await this._exportService.ExportToSMKAsync(this._exportOptions);
+                this.FilePath = await this.exportService.ExportToSMKAsync(this._exportOptions);
 
                 // Show result
                 this.IsResultVisible = true;
@@ -210,7 +210,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error generating SMK export");
+                this.logger.LogError(ex, "Error generating SMK export");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas generowania raportu: {ex.Message}", "OK");
             }
             finally
@@ -242,7 +242,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error opening file");
+                this.logger.LogError(ex, "Error opening file");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Nie udało się otworzyć pliku: {ex.Message}", "OK");
             }
         }
@@ -265,7 +265,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error opening folder");
+                this.logger.LogError(ex, "Error opening folder");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Nie udało się otworzyć folderu: {ex.Message}", "OK");
             }
         }

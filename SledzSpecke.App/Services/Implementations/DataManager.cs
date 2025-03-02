@@ -9,8 +9,8 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class DataManager : IDataManager
     {
-        private readonly IDatabaseService _databaseService;
-        private readonly ILogger<DataManager> _logger;
+        private readonly IDatabaseService databaseService;
+        private readonly ILogger<DataManager> logger;
         private static readonly string _appDataFolder = FileSystem.AppDataDirectory;
         private static readonly string _specializationFile = Path.Combine(_appDataFolder, "specialization.json");
 
@@ -20,8 +20,8 @@ namespace SledzSpecke.App.Services.Implementations
             IDatabaseService databaseService,
             ILogger<DataManager> logger)
         {
-            this._databaseService = databaseService;
-            this._logger = logger;
+            this.databaseService = databaseService;
+            this.logger = logger;
 
             if (!Directory.Exists(_appDataFolder))
             {
@@ -34,7 +34,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // First try to get from database
-                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this.databaseService.GetCurrentSpecializationAsync();
                 if (specialization != null)
                 {
                     this._specialization = specialization;
@@ -47,7 +47,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading specialization data");
+                this.logger.LogError(ex, "Error loading specialization data");
 
                 // W przypadku błędu, zwracamy nową instancję specjalizacji
                 this._specialization = DataSeeder.SeedHematologySpecialization();
@@ -64,18 +64,18 @@ namespace SledzSpecke.App.Services.Implementations
                 this._specialization = specialization;
 
                 // Inicjalizacja danych szablonowych jeśli potrzebne
-                if (!await this._databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
+                if (!await this.databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
                 {
-                    await this._databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
+                    await this.databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
                 }
 
                 // Save to database
-                await this._databaseService.SaveAsync(specialization);
+                await this.databaseService.SaveAsync(specialization);
 
                 // Save user settings
-                var settings = await this._databaseService.GetUserSettingsAsync();
+                var settings = await this.databaseService.GetUserSettingsAsync();
                 settings.CurrentSpecializationId = specialization.Id;
-                await this._databaseService.SaveUserSettingsAsync(settings);
+                await this.databaseService.SaveUserSettingsAsync(settings);
 
                 // Save to file as backup
                 string json = JsonSerializer.Serialize(specialization, new JsonSerializerOptions
@@ -84,11 +84,11 @@ namespace SledzSpecke.App.Services.Implementations
                 });
                 await File.WriteAllTextAsync(_specializationFile, json);
 
-                this._logger.LogInformation("Specialization saved successfully");
+                this.logger.LogInformation("Specialization saved successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving specialization data");
+                this.logger.LogError(ex, "Error saving specialization data");
                 throw;
             }
         }
@@ -98,7 +98,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Delete from database
-                await this._databaseService.DeleteAllDataAsync();
+                await this.databaseService.DeleteAllDataAsync();
 
                 // Delete file backup
                 if (File.Exists(_specializationFile))
@@ -107,12 +107,12 @@ namespace SledzSpecke.App.Services.Implementations
                 }
 
                 this._specialization = null;
-                this._logger.LogInformation("All data deleted successfully");
+                this.logger.LogInformation("All data deleted successfully");
                 return true;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error deleting all data");
+                this.logger.LogError(ex, "Error deleting all data");
                 return false;
             }
         }
@@ -121,7 +121,7 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var types = await this._databaseService.GetAllAsync<SpecializationType>();
+                var types = await this.databaseService.GetAllAsync<SpecializationType>();
 
                 if (types.Count == 0)
                 {
@@ -129,7 +129,7 @@ namespace SledzSpecke.App.Services.Implementations
                     types = SpecializationTypeSeeder.SeedSpecializationTypes();
                     foreach (var type in types)
                     {
-                        await this._databaseService.SaveAsync(type);
+                        await this.databaseService.SaveAsync(type);
                     }
                 }
 
@@ -137,7 +137,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting specialization types");
+                this.logger.LogError(ex, "Error getting specialization types");
                 return SpecializationTypeSeeder.SeedSpecializationTypes();
             }
         }
@@ -147,17 +147,17 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Sprawdź, czy dane szablonowe już istnieją
-                if (!await this._databaseService.HasSpecializationTemplateDataAsync(specializationTypeId))
+                if (!await this.databaseService.HasSpecializationTemplateDataAsync(specializationTypeId))
                 {
                     // Zainicjuj dane szablonowe
-                    await this._databaseService.InitializeSpecializationTemplateDataAsync(specializationTypeId);
+                    await this.databaseService.InitializeSpecializationTemplateDataAsync(specializationTypeId);
                 }
 
                 // Get specialization type
-                var specializationType = await this._databaseService.GetByIdAsync<SpecializationType>(specializationTypeId);
+                var specializationType = await this.databaseService.GetByIdAsync<SpecializationType>(specializationTypeId);
                 if (specializationType == null)
                 {
-                    this._logger.LogError("Specialization type with ID {Id} not found", specializationTypeId);
+                    this.logger.LogError("Specialization type with ID {Id} not found", specializationTypeId);
                     return null;
                 }
 
@@ -180,20 +180,20 @@ namespace SledzSpecke.App.Services.Implementations
                 };
 
                 // Save specialization to database
-                await this._databaseService.SaveAsync(newSpecialization);
+                await this.databaseService.SaveAsync(newSpecialization);
 
                 // Update user settings
-                var settings = await this._databaseService.GetUserSettingsAsync();
+                var settings = await this.databaseService.GetUserSettingsAsync();
                 settings.Username = username;
                 settings.CurrentSpecializationId = newSpecialization.Id;
-                await this._databaseService.SaveUserSettingsAsync(settings);
+                await this.databaseService.SaveUserSettingsAsync(settings);
 
-                this._logger.LogInformation("Specialization initialized successfully for user {Username}", username);
+                this.logger.LogInformation("Specialization initialized successfully for user {Username}", username);
                 return newSpecialization;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error initializing specialization for user");
+                this.logger.LogError(ex, "Error initializing specialization for user");
                 return null;
             }
         }

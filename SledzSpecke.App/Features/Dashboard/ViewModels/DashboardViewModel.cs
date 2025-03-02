@@ -10,9 +10,9 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
 {
     public partial class DashboardViewModel : ViewModelBase
     {
-        private readonly ISpecializationService _specializationService;
-        private readonly ISpecializationDateCalculator _specializationDateCalculator;
-        private readonly IDutyShiftService _dutyShiftService;
+        private readonly ISpecializationService specializationService;
+        private readonly ISpecializationDateCalculator specializationDateCalculator;
+        private readonly IDutyShiftService dutyShiftService;
         private readonly ISelfEducationService _selfEducationService;
         private Specialization _specialization;
 
@@ -98,9 +98,9 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             ISelfEducationService selfEducationService,
             ILogger<DashboardViewModel> logger) : base(logger)
         {
-            this._specializationService = specializationService;
-            this._specializationDateCalculator = specializationDateCalculator;
-            this._dutyShiftService = dutyShiftService;
+            this.specializationService = specializationService;
+            this.specializationDateCalculator = specializationDateCalculator;
+            this.dutyShiftService = dutyShiftService;
             this._selfEducationService = selfEducationService;
 
             this.Title = "Dashboard";
@@ -115,7 +115,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading dashboard data");
+                this.logger.LogError(ex, "Error loading dashboard data");
             }
             finally
             {
@@ -125,7 +125,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
 
         private async Task LoadSpecializationDataAsync()
         {
-            this._specialization = await this._specializationService.GetSpecializationAsync();
+            this._specialization = await this.specializationService.GetSpecializationAsync();
 
             await this.LoadDashboardDataAsync();
         }
@@ -143,14 +143,14 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             DateTime actualEndDate = plannedEndDate;
             try
             {
-                actualEndDate = await this._specializationDateCalculator.CalculateExpectedEndDateAsync(this._specialization.Id);
+                actualEndDate = await this.specializationDateCalculator.CalculateExpectedEndDateAsync(this._specialization.Id);
                 this.ActualEndDateLabel = actualEndDate.ToString("dd-MM-yyyy");
             }
             catch (Exception ex)
             {
                 // W przypadku błędu, pokazujemy planowaną datę
                 this.ActualEndDateLabel = plannedEndDate.ToString("dd-MM-yyyy");
-                this._logger.LogError(ex, "Error calculating actual end date");
+                this.logger.LogError(ex, "Error calculating actual end date");
             }
 
             // Oblicz pozostałe dni, używając daty z nieobecnościami
@@ -200,7 +200,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             this.ProceduresBLabel = $"{completedProceduresTypeB}/{totalProceduresTypeB} wykonanych";
 
             // Get statistics from services
-            var totalDutyHours = await this._dutyShiftService.GetTotalDutyHoursAsync();
+            var totalDutyHours = await this.dutyShiftService.GetTotalDutyHoursAsync();
             var requiredDutyHours = this._specialization.RequiredDutyHoursPerWeek * (this._specialization.BaseDurationWeeks / 52.0) * 52;
             this.DutyShiftsLabel = $"{totalDutyHours:F1}/{requiredDutyHours:F0} godzin";
 

@@ -12,7 +12,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
 {
     public partial class InternshipsViewModel : ViewModelBase
     {
-        private readonly ISpecializationService _specializationService;
+        private readonly ISpecializationService specializationService;
 
         [ObservableProperty]
         private Specialization _specialization;
@@ -42,7 +42,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             ISpecializationService specializationService,
             ILogger<InternshipsViewModel> logger) : base(logger)
         {
-            this._specializationService = specializationService;
+            this.specializationService = specializationService;
             this.Internships = new ObservableCollection<Internship>();
             this.Title = "Staże";
         }
@@ -56,7 +56,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             }
             catch (Exception ex)
             {
-                base._logger.LogError(ex, "Error loading internships data");
+                base.logger.LogError(ex, "Error loading internships data");
             }
             finally
             {
@@ -68,12 +68,12 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             try
             {
-                this.Specialization = await this._specializationService.GetSpecializationAsync();
+                this.Specialization = await this.specializationService.GetSpecializationAsync();
                 this.DisplayInternships(this.CurrentModule);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading specialization data");
+                this.logger.LogError(ex, "Error loading specialization data");
                 throw;
             }
         }
@@ -142,12 +142,12 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             try
             {
-                await this._specializationService.SaveInternshipAsync(internship);
+                await this.specializationService.SaveInternshipAsync(internship);
                 await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error adding internship");
+                this.logger.LogError(ex, "Error adding internship");
                 throw;
             }
         }
@@ -156,12 +156,12 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             try
             {
-                await this._specializationService.SaveInternshipAsync(internship);
+                await this.specializationService.SaveInternshipAsync(internship);
                 await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating internship");
+                this.logger.LogError(ex, "Error updating internship");
                 throw;
             }
         }

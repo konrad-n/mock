@@ -10,8 +10,8 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
 {
     public partial class SettingsViewModel : ViewModelBase
     {
-        private readonly IAppSettings _appSettings;
-        private readonly IDataManager _dataManager;
+        private readonly IAppSettings appSettings;
+        private readonly IDataManager dataManager;
         private Specialization _specialization;
 
         [ObservableProperty]
@@ -49,15 +49,15 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
             IDataManager dataManager,
             ILogger<SettingsViewModel> logger) : base(logger)
         {
-            this._appSettings = appSettings;
-            this._dataManager = dataManager;
+            this.appSettings = appSettings;
+            this.dataManager = dataManager;
         }
 
         public async Task InitializeAsync()
         {
             try
             {
-                this._specialization = await this._dataManager.LoadSpecializationAsync();
+                this._specialization = await this.dataManager.LoadSpecializationAsync();
                 if (this._specialization == null)
                 {
                     throw new InvalidOperationException("Nie udało się załadować danych specjalizacji.");
@@ -69,19 +69,19 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
                 this.DurationYears = ((this._specialization.ExpectedEndDate - this._specialization.StartDate).Days / 365).ToString();
 
                 // Dane użytkownika
-                this.Username = this._appSettings.GetSetting<string>("Username", "");
-                this.MedicalLicenseNumber = this._appSettings.GetSetting<string>("MedicalLicenseNumber", "");
-                this.TrainingUnit = this._appSettings.GetSetting<string>("TrainingUnit", "");
-                this.Supervisor = this._appSettings.GetSetting<string>("Supervisor", "");
+                this.Username = this.appSettings.GetSetting<string>("Username", "");
+                this.MedicalLicenseNumber = this.appSettings.GetSetting<string>("MedicalLicenseNumber", "");
+                this.TrainingUnit = this.appSettings.GetSetting<string>("TrainingUnit", "");
+                this.Supervisor = this.appSettings.GetSetting<string>("Supervisor", "");
 
                 // Ustawienia aplikacji
-                this.EnableNotifications = this._appSettings.GetSetting<bool>("EnableNotifications", true);
-                this.EnableAutoSync = this._appSettings.GetSetting<bool>("EnableAutoSync", true);
-                this.UseDarkTheme = this._appSettings.GetSetting<bool>("UseDarkTheme", false);
+                this.EnableNotifications = this.appSettings.GetSetting<bool>("EnableNotifications", true);
+                this.EnableAutoSync = this.appSettings.GetSetting<bool>("EnableAutoSync", true);
+                this.UseDarkTheme = this.appSettings.GetSetting<bool>("UseDarkTheme", false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error initializing settings");
+                this.logger.LogError(ex, "Error initializing settings");
                 throw;
             }
         }
@@ -102,28 +102,28 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
                 this._specialization.ExpectedEndDate = this.StartDate.AddYears(5);
 
                 // Zapisanie specialization
-                await this._dataManager.SaveSpecializationAsync(this._specialization);
+                await this.dataManager.SaveSpecializationAsync(this._specialization);
 
                 // Aktualizacja ustawień użytkownika
-                this._appSettings.SetSetting("Username", this.Username);
-                this._appSettings.SetSetting("MedicalLicenseNumber", this.MedicalLicenseNumber);
-                this._appSettings.SetSetting("TrainingUnit", this.TrainingUnit);
-                this._appSettings.SetSetting("Supervisor", this.Supervisor);
+                this.appSettings.SetSetting("Username", this.Username);
+                this.appSettings.SetSetting("MedicalLicenseNumber", this.MedicalLicenseNumber);
+                this.appSettings.SetSetting("TrainingUnit", this.TrainingUnit);
+                this.appSettings.SetSetting("Supervisor", this.Supervisor);
 
                 // Aktualizacja ustawień aplikacji
-                this._appSettings.SetSetting("EnableNotifications", this.EnableNotifications);
-                this._appSettings.SetSetting("EnableAutoSync", this.EnableAutoSync);
-                this._appSettings.SetSetting("UseDarkTheme", this.UseDarkTheme);
+                this.appSettings.SetSetting("EnableNotifications", this.EnableNotifications);
+                this.appSettings.SetSetting("EnableAutoSync", this.EnableAutoSync);
+                this.appSettings.SetSetting("UseDarkTheme", this.UseDarkTheme);
 
                 // Zapisanie ustawień
-                await this._appSettings.SaveAsync();
+                await this.appSettings.SaveAsync();
 
                 // Zastosowanie ustawień motywu
                 Application.Current.UserAppTheme = this.UseDarkTheme ? AppTheme.Dark : AppTheme.Light;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving settings");
+                this.logger.LogError(ex, "Error saving settings");
                 throw;
             }
         }
@@ -133,13 +133,13 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
         {
             try
             {
-                bool success = await this._dataManager.DeleteAllDataAsync();
+                bool success = await this.dataManager.DeleteAllDataAsync();
                 if (!success)
                     throw new Exception("Failed to delete data");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error clearing data");
+                this.logger.LogError(ex, "Error clearing data");
                 throw;
             }
         }

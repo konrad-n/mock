@@ -103,7 +103,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             // Sprawdź czy _dutyShift nie jest null
             if (this._dutyShift == null)
             {
-                this._logger?.LogWarning("Próba aktualizacji typu dyżuru gdy _dutyShift jest null");
+                this.logger?.LogWarning("Próba aktualizacji typu dyżuru gdy _dutyShift jest null");
                 return;
             }
 
@@ -178,7 +178,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating duration text");
+                this.logger.LogError(ex, "Error updating duration text");
                 this.DurationText = "Błąd obliczania czasu";
             }
         }
@@ -244,7 +244,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving duty shift");
+                this.logger.LogError(ex, "Error saving duty shift");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas zapisywania dyżuru: {ex.Message}", "OK");
             }
         }

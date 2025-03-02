@@ -7,15 +7,15 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class NotificationService : INotificationService
     {
-        private readonly IDatabaseService _databaseService;
-        private readonly ILogger<NotificationService> _logger;
+        private readonly IDatabaseService databaseService;
+        private readonly ILogger<NotificationService> logger;
 
         public NotificationService(
             IDatabaseService databaseService,
             ILogger<NotificationService> logger)
         {
-            this._databaseService = databaseService;
-            this._logger = logger;
+            this.databaseService = databaseService;
+            this.logger = logger;
         }
 
         public async Task CheckAndScheduleNotificationsAsync()
@@ -23,27 +23,27 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Check if notifications are enabled
-                var settings = await this._databaseService.GetUserSettingsAsync();
+                var settings = await this.databaseService.GetUserSettingsAsync();
                 if (!settings.EnableNotifications)
                 {
-                    this._logger.LogInformation("Notifications are disabled. Skipping notification check.");
+                    this.logger.LogInformation("Notifications are disabled. Skipping notification check.");
                     return;
                 }
 
                 // Get current specialization
-                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this.databaseService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    this._logger.LogWarning("No active specialization found. Cannot schedule notifications.");
+                    this.logger.LogWarning("No active specialization found. Cannot schedule notifications.");
                     return;
                 }
 
                 // Load related data
-                var courses = await this._databaseService.QueryAsync<Course>(
+                var courses = await this.databaseService.QueryAsync<Course>(
                     "SELECT * FROM Courses WHERE SpecializationId = ? AND IsCompleted = 0",
                     specialization.Id);
 
-                var internships = await this._databaseService.QueryAsync<Internship>(
+                var internships = await this.databaseService.QueryAsync<Internship>(
                     "SELECT * FROM Internships WHERE SpecializationId = ? AND IsCompleted = 0",
                     specialization.Id);
 
@@ -125,11 +125,11 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                 }
 
-                this._logger.LogInformation("Notification check completed successfully");
+                this.logger.LogInformation("Notification check completed successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error checking and scheduling notifications");
+                this.logger.LogError(ex, "Error checking and scheduling notifications");
             }
         }
 
@@ -141,7 +141,7 @@ namespace SledzSpecke.App.Services.Implementations
                 // For MAUI, you could use Plugin.LocalNotification or similar
 
                 // For now, just log the notification
-                this._logger.LogInformation("Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
+                this.logger.LogInformation("Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
                     title, message, type, itemId);
 
                 // Example implementation for Android/iOS would go here
@@ -151,7 +151,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error scheduling notification");
+                this.logger.LogError(ex, "Error scheduling notification");
             }
         }
     }

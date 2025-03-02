@@ -291,7 +291,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error deleting absence");
+                    this.logger.LogError(ex, "Error deleting absence");
                     await page.DisplayAlert(
                         "Błąd",
                         $"Nie udało się usunąć nieobecności: {ex.Message}",

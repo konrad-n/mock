@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Common.ViewModels
 {
     public abstract partial class ViewModelBase : ObservableObject
     {
-        protected readonly ILogger _logger;
+        protected readonly ILogger logger;
 
         [ObservableProperty]
         private bool _isBusy;
@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Common.ViewModels
 
         protected ViewModelBase(ILogger logger)
         {
-            this._logger = logger;
+            this.logger = logger;
         }
 
         public virtual Task InitializeAsync()

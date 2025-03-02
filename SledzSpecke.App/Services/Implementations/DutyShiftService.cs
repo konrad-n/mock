@@ -7,27 +7,27 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class DutyShiftService : IDutyShiftService
     {
-        private readonly IDatabaseService _databaseService;
-        private readonly ILogger<DutyShiftService> _logger;
+        private readonly IDatabaseService databaseService;
+        private readonly ILogger<DutyShiftService> logger;
 
         public DutyShiftService(
             IDatabaseService databaseService,
             ILogger<DutyShiftService> logger)
         {
-            this._databaseService = databaseService;
-            this._logger = logger;
+            this.databaseService = databaseService;
+            this.logger = logger;
         }
 
         public async Task<List<DutyShift>> GetAllDutyShiftsAsync()
         {
             try
             {
-                var userSettings = await this._databaseService.GetUserSettingsAsync();
-                return await this._databaseService.QueryAsync<DutyShift>("SELECT * FROM DutyShifts WHERE SpecializationId = ? ORDER BY StartDate DESC", userSettings.CurrentSpecializationId);
+                var userSettings = await this.databaseService.GetUserSettingsAsync();
+                return await this.databaseService.QueryAsync<DutyShift>("SELECT * FROM DutyShifts WHERE SpecializationId = ? ORDER BY StartDate DESC", userSettings.CurrentSpecializationId);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting duty shifts");
+                this.logger.LogError(ex, "Error getting duty shifts");
                 return new List<DutyShift>();
             }
         }
@@ -36,11 +36,11 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                return await this._databaseService.GetByIdAsync<DutyShift>(id);
+                return await this.databaseService.GetByIdAsync<DutyShift>(id);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting duty shift with ID {Id}", id);
+                this.logger.LogError(ex, "Error getting duty shift with ID {Id}", id);
                 return null;
             }
         }
@@ -49,27 +49,27 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var userSettings = await this._databaseService.GetUserSettingsAsync();
+                var userSettings = await this.databaseService.GetUserSettingsAsync();
                 dutyShift.SpecializationId = userSettings.CurrentSpecializationId;
 
-                this._logger.LogDebug("Saving duty shift with ID: {Id} (0 means new record)", dutyShift.Id);
+                this.logger.LogDebug("Saving duty shift with ID: {Id} (0 means new record)", dutyShift.Id);
 
                 if (dutyShift.Id == 0)
                 {
                     // Insert new record approach
-                    await this._databaseService.InsertAsync(dutyShift);
-                    this._logger.LogInformation("New duty shift inserted with ID: {Id}", dutyShift.Id);
+                    await this.databaseService.InsertAsync(dutyShift);
+                    this.logger.LogInformation("New duty shift inserted with ID: {Id}", dutyShift.Id);
                 }
                 else
                 {
                     // Update existing record
-                    await this._databaseService.UpdateAsync(dutyShift);
-                    this._logger.LogInformation("Existing duty shift updated with ID: {Id}", dutyShift.Id);
+                    await this.databaseService.UpdateAsync(dutyShift);
+                    this.logger.LogInformation("Existing duty shift updated with ID: {Id}", dutyShift.Id);
                 }
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving duty shift with ID: {Id}", dutyShift.Id);
+                this.logger.LogError(ex, "Error saving duty shift with ID: {Id}", dutyShift.Id);
                 throw;
             }
         }
@@ -78,12 +78,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                await this._databaseService.DeleteAsync(dutyShift);
-                this._logger.LogInformation("Duty shift deleted successfully");
+                await this.databaseService.DeleteAsync(dutyShift);
+                this.logger.LogInformation("Duty shift deleted successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error deleting duty shift");
+                this.logger.LogError(ex, "Error deleting duty shift");
                 throw;
             }
         }
@@ -97,7 +97,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error calculating total duty hours");
+                this.logger.LogError(ex, "Error calculating total duty hours");
                 return 0;
             }
         }
@@ -118,7 +118,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error calculating monthly duty hours");
+                this.logger.LogError(ex, "Error calculating monthly duty hours");
                 return new Dictionary<string, double>();
             }
         }
@@ -150,7 +150,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error calculating average weekly hours");
+                this.logger.LogError(ex, "Error calculating average weekly hours");
                 return 0;
             }
         }

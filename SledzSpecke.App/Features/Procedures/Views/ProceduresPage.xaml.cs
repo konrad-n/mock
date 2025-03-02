@@ -10,13 +10,13 @@ namespace SledzSpecke.App.Features.Procedures.Views
     public partial class ProceduresPage : BaseContentPage
     {
         private ProceduresViewModel _viewModel;
-        private readonly IDatabaseService _databaseService;
+        private readonly IDatabaseService databaseService;
 
         public ProceduresPage(
             ISpecializationService specializationService,
             IDatabaseService databaseService)
         {
-            this._databaseService = databaseService;
+            this.databaseService = databaseService;
             this.InitializeComponent();
         }
 
@@ -238,7 +238,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 var procedure = this._viewModel.Specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedureId);
                 if (procedure != null)
                 {
-                    await this.Navigation.PushAsync(new ProcedureEntryPage(this._databaseService, procedure, this.OnProcedureEntryAdded));
+                    await this.Navigation.PushAsync(new ProcedureEntryPage(this.databaseService, procedure, this.OnProcedureEntryAdded));
                 }
             }
         }

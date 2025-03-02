@@ -130,7 +130,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error adding attachment");
+                this.logger.LogError(ex, "Error adding attachment");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem z wyborem pliku: {ex.Message}", "OK");
             }
         }

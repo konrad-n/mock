@@ -7,16 +7,16 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class AppSettings : IAppSettings
     {
-        private readonly IDatabaseService _databaseService;
-        private readonly ILogger<AppSettings> _logger;
+        private readonly IDatabaseService databaseService;
+        private readonly ILogger<AppSettings> logger;
         private UserSettings _settings;
 
         public AppSettings(
             IDatabaseService databaseService,
             ILogger<AppSettings> logger)
         {
-            this._databaseService = databaseService;
-            this._logger = logger;
+            this.databaseService = databaseService;
+            this.logger = logger;
             this._settings = new UserSettings();
         }
 
@@ -24,12 +24,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                this._settings = await this._databaseService.GetUserSettingsAsync();
-                this._logger.LogInformation("Settings loaded successfully");
+                this._settings = await this.databaseService.GetUserSettingsAsync();
+                this.logger.LogInformation("Settings loaded successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading settings");
+                this.logger.LogError(ex, "Error loading settings");
                 this._settings = new UserSettings(); // Use default settings in case of error
             }
         }
@@ -38,12 +38,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                await this._databaseService.SaveUserSettingsAsync(this._settings);
-                this._logger.LogInformation("Settings saved successfully");
+                await this.databaseService.SaveUserSettingsAsync(this._settings);
+                this.logger.LogInformation("Settings saved successfully");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error saving settings");
+                this.logger.LogError(ex, "Error saving settings");
                 throw;
             }
         }

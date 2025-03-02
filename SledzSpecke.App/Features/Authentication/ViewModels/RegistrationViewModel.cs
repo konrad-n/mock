@@ -10,9 +10,9 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 {
     public partial class RegistrationViewModel : ViewModelBase
     {
-        private readonly IDataManager _dataManager;
-        private readonly IAuthenticationService _authenticationService;
-        private readonly INavigationService _navigationService;
+        private readonly IDataManager dataManager;
+        private readonly IAuthenticationService authenticationService;
+        private readonly INavigationService navigationService;
 
         [ObservableProperty]
         private List<SpecializationType> _specializationTypes;
@@ -44,11 +44,11 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             ILogger<RegistrationViewModel> logger,
             INavigationService navigationService) : base(logger)
         {
-            this._dataManager = dataManager;
-            this._authenticationService = authenticationService;
+            this.dataManager = dataManager;
+            this.authenticationService = authenticationService;
             this.SpecializationTypes = new List<SpecializationType>();
             this.Title = "Rejestracja";
-            this._navigationService = navigationService;
+            this.navigationService = navigationService;
         }
 
         public override async Task InitializeAsync()
@@ -60,11 +60,11 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         {
             try
             {
-                this.SpecializationTypes = await this._dataManager.GetAllSpecializationTypesAsync();
+                this.SpecializationTypes = await this.dataManager.GetAllSpecializationTypesAsync();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading specialization types");
+                this.logger.LogError(ex, "Error loading specialization types");
                 this.ErrorMessage = $"Nie udało się załadować listy specjalizacji: {ex.Message}";
             }
         }
@@ -96,7 +96,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             {
                 int specializationTypeId = this.SpecializationTypes[this.SpecializationSelectedIndex].Id;
 
-                bool result = await this._authenticationService.RegisterAsync(
+                bool result = await this.authenticationService.RegisterAsync(
                     this.Username,
                     this.Email,
                     this.Password,
@@ -104,12 +104,12 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 
                 if (result)
                 {
-                    await this._navigationService.DisplayAlertAsync(
+                    await this.navigationService.DisplayAlertAsync(
                         "Sukces",
                         "Rejestracja zakończona pomyślnie. Możesz się teraz zalogować.",
                         "OK");
 
-                    await this._navigationService.PopAsync();
+                    await this.navigationService.PopAsync();
                 }
                 else
                 {
@@ -118,7 +118,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error during registration");
+                this.logger.LogError(ex, "Error during registration");
                 this.ErrorMessage = $"Wystąpił problem podczas rejestracji: {ex.Message}";
             }
             finally

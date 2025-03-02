@@ -10,15 +10,15 @@ namespace SledzSpecke.App.Services.Implementations
 {
     public class ExportService : IExportService
     {
-        private readonly IDatabaseService _databaseService;
-        private readonly ILogger<ExportService> _logger;
+        private readonly IDatabaseService databaseService;
+        private readonly ILogger<ExportService> logger;
 
         public ExportService(
             IDatabaseService databaseService,
             ILogger<ExportService> logger)
         {
-            this._databaseService = databaseService;
-            this._logger = logger;
+            this.databaseService = databaseService;
+            this.logger = logger;
         }
 
         public async Task<string> ExportToSMKAsync(SMKExportOptions options)
@@ -26,7 +26,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Get current specialization with all related data
-                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this.databaseService.GetCurrentSpecializationAsync();
 
                 if (specialization == null)
                 {
@@ -49,12 +49,12 @@ namespace SledzSpecke.App.Services.Implementations
                     filePath = await this.ExportDutyShiftsToExcelAsync(specialization, options);
                 }
 
-                this._logger.LogInformation("Export completed successfully. File saved at: {FilePath}", filePath);
+                this.logger.LogInformation("Export completed successfully. File saved at: {FilePath}", filePath);
                 return filePath;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error during export");
+                this.logger.LogError(ex, "Error during export");
                 throw;
             }
         }
@@ -62,14 +62,14 @@ namespace SledzSpecke.App.Services.Implementations
         private async Task<string> ExportGeneralToExcelAsync(Specialization specialization, SMKExportOptions options)
         {
             // Load related data
-            var courses = await this._databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
-            var internships = await this._databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
-            var procedures = await this._databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+            var courses = await this.databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
+            var internships = await this.databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
+            var procedures = await this.databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
 
             // Load procedure entries
             foreach (var procedure in procedures)
             {
-                procedure.Entries = await this._databaseService.QueryAsync<ProcedureEntry>(
+                procedure.Entries = await this.databaseService.QueryAsync<ProcedureEntry>(
                     "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
                 procedure.CompletedCount = procedure.Entries.Count;
             }
@@ -195,7 +195,7 @@ namespace SledzSpecke.App.Services.Implementations
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Load procedures and entries
-            var procedures = await this._databaseService.QueryAsync<MedicalProcedure>(
+            var procedures = await this.databaseService.QueryAsync<MedicalProcedure>(
                 "SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
 
             // Collect all procedure entries in the format required by SMK
@@ -204,7 +204,7 @@ namespace SledzSpecke.App.Services.Implementations
             foreach (var procedure in procedures.Where(p => this.FilterByModule(p.Module, options.ModuleFilter)))
             {
                 // Load entries for this procedure
-                var entries = await this._databaseService.QueryAsync<ProcedureEntry>(
+                var entries = await this.databaseService.QueryAsync<ProcedureEntry>(
                     "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
 
                 // Filter by date range if needed
@@ -221,7 +221,7 @@ namespace SledzSpecke.App.Services.Implementations
                 string internshipName = "Nieokreślony";
                 if (procedure.InternshipId.HasValue)
                 {
-                    var internship = await this._databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                    var internship = await this.databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
                     if (internship != null)
                     {
                         internshipName = internship.Name;
@@ -239,7 +239,7 @@ namespace SledzSpecke.App.Services.Implementations
                         $"{procedureWithType} - {internshipName}";
 
                     // Get the user settings for doctor's name
-                    var settings = await this._databaseService.GetUserSettingsAsync();
+                    var settings = await this.databaseService.GetUserSettingsAsync();
                     string doctorName = settings.Username ?? "Lekarz";
 
                     string assistingDoctors = procedure.ProcedureType == ProcedureType.TypeA ?
@@ -324,7 +324,7 @@ namespace SledzSpecke.App.Services.Implementations
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Load duty shifts
-            var dutyShifts = await this._databaseService.QueryAsync<DutyShift>(
+            var dutyShifts = await this.databaseService.QueryAsync<DutyShift>(
                 "SELECT * FROM DutyShifts WHERE SpecializationId = ?", specialization.Id);
 
             // Filter by date range if needed
