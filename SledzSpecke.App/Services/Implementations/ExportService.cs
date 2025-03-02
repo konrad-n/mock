@@ -17,8 +17,8 @@ namespace SledzSpecke.App.Services.Implementations
             IDatabaseService databaseService,
             ILogger<ExportService> logger)
         {
-            _databaseService = databaseService;
-            _logger = logger;
+            this._databaseService = databaseService;
+            this._logger = logger;
         }
 
         public async Task<string> ExportToSMKAsync(SMKExportOptions options)
@@ -26,7 +26,7 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Get current specialization with all related data
-                var specialization = await _databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
 
                 if (specialization == null)
                 {
@@ -38,23 +38,23 @@ namespace SledzSpecke.App.Services.Implementations
                 // Export based on selected type
                 if (options.ExportType == SMKExportType.General)
                 {
-                    filePath = await ExportGeneralToExcelAsync(specialization, options);
+                    filePath = await this.ExportGeneralToExcelAsync(specialization, options);
                 }
                 else if (options.ExportType == SMKExportType.Procedures)
                 {
-                    filePath = await ExportProceduresToExcelAsync(specialization, options);
+                    filePath = await this.ExportProceduresToExcelAsync(specialization, options);
                 }
                 else if (options.ExportType == SMKExportType.DutyShifts)
                 {
-                    filePath = await ExportDutyShiftsToExcelAsync(specialization, options);
+                    filePath = await this.ExportDutyShiftsToExcelAsync(specialization, options);
                 }
 
-                _logger.LogInformation("Export completed successfully. File saved at: {FilePath}", filePath);
+                this._logger.LogInformation("Export completed successfully. File saved at: {FilePath}", filePath);
                 return filePath;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during export");
+                this._logger.LogError(ex, "Error during export");
                 throw;
             }
         }
@@ -62,14 +62,14 @@ namespace SledzSpecke.App.Services.Implementations
         private async Task<string> ExportGeneralToExcelAsync(Specialization specialization, SMKExportOptions options)
         {
             // Load related data
-            var courses = await _databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
-            var internships = await _databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
-            var procedures = await _databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+            var courses = await this._databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
+            var internships = await this._databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
+            var procedures = await this._databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
 
             // Load procedure entries
             foreach (var procedure in procedures)
             {
-                procedure.Entries = await _databaseService.QueryAsync<ProcedureEntry>(
+                procedure.Entries = await this._databaseService.QueryAsync<ProcedureEntry>(
                     "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
                 procedure.CompletedCount = procedure.Entries.Count;
             }
@@ -80,9 +80,9 @@ namespace SledzSpecke.App.Services.Implementations
             // Filter data based on options
             if (options.IncludeCourses)
             {
-                foreach (var course in courses.Where(c => FilterByModule(c.Module, options.ModuleFilter)))
+                foreach (var course in courses.Where(c => this.FilterByModule(c.Module, options.ModuleFilter)))
                 {
-                    if (!FilterByDate(course.CompletionDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
+                    if (!this.FilterByDate(course.CompletionDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
                         continue;
 
                     var courseData = new Dictionary<string, string>
@@ -91,8 +91,8 @@ namespace SledzSpecke.App.Services.Implementations
                         ["Nazwa"] = course.Name,
                         ["Data rozpoczęcia"] = course.ScheduledDate?.ToString("dd.MM.yyyy") ?? "",
                         ["Data zakończenia"] = course.CompletionDate?.ToString("dd.MM.yyyy") ?? "",
-                        ["Status"] = GetStatusText(course.IsCompleted),
-                        ["Moduł"] = GetModuleText(course.Module)
+                        ["Status"] = this.GetStatusText(course.IsCompleted),
+                        ["Moduł"] = this.GetModuleText(course.Module)
                     };
                     data.Add(courseData);
                 }
@@ -100,9 +100,9 @@ namespace SledzSpecke.App.Services.Implementations
 
             if (options.IncludeInternships)
             {
-                foreach (var internship in internships.Where(i => FilterByModule(i.Module, options.ModuleFilter)))
+                foreach (var internship in internships.Where(i => this.FilterByModule(i.Module, options.ModuleFilter)))
                 {
-                    if (!FilterByDate(internship.EndDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
+                    if (!this.FilterByDate(internship.EndDate, options.UseCustomDateRange ? options.StartDate : null, options.UseCustomDateRange ? options.EndDate : null))
                         continue;
 
                     var internshipData = new Dictionary<string, string>
@@ -111,8 +111,8 @@ namespace SledzSpecke.App.Services.Implementations
                         ["Nazwa"] = internship.Name,
                         ["Data rozpoczęcia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? "",
                         ["Data zakończenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? "",
-                        ["Status"] = GetStatusText(internship.IsCompleted),
-                        ["Moduł"] = GetModuleText(internship.Module),
+                        ["Status"] = this.GetStatusText(internship.IsCompleted),
+                        ["Moduł"] = this.GetModuleText(internship.Module),
                         ["Miejsce"] = internship.Location ?? "",
                         ["Opiekun"] = internship.SupervisorName ?? ""
                     };
@@ -123,7 +123,7 @@ namespace SledzSpecke.App.Services.Implementations
             if (options.IncludeProcedures)
             {
                 var proceduresGrouped = procedures
-                    .Where(p => FilterByModule(p.Module, options.ModuleFilter))
+                    .Where(p => this.FilterByModule(p.Module, options.ModuleFilter))
                     .GroupBy(p => new { p.Name, p.ProcedureType, p.Module })
                     .ToList();
 
@@ -143,7 +143,7 @@ namespace SledzSpecke.App.Services.Implementations
                         ["Wymagane"] = group.Sum(p => p.RequiredCount).ToString(),
                         ["Wykonane"] = group.Sum(p => p.CompletedCount).ToString(),
                         ["Status"] = group.Sum(p => p.CompletedCount) >= group.Sum(p => p.RequiredCount) ? "Ukończono" : "W trakcie",
-                        ["Moduł"] = GetModuleText(group.Key.Module)
+                        ["Moduł"] = this.GetModuleText(group.Key.Module)
                     };
                     data.Add(procedureData);
                 }
@@ -195,16 +195,16 @@ namespace SledzSpecke.App.Services.Implementations
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Load procedures and entries
-            var procedures = await _databaseService.QueryAsync<MedicalProcedure>(
+            var procedures = await this._databaseService.QueryAsync<MedicalProcedure>(
                 "SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
 
             // Collect all procedure entries in the format required by SMK
             var procedureEntries = new List<(string PatientName, string PatientGender, DateTime Date, string PerformingDoctor, string AssistingDoctors, string ProcedureGroup)>();
 
-            foreach (var procedure in procedures.Where(p => FilterByModule(p.Module, options.ModuleFilter)))
+            foreach (var procedure in procedures.Where(p => this.FilterByModule(p.Module, options.ModuleFilter)))
             {
                 // Load entries for this procedure
-                var entries = await _databaseService.QueryAsync<ProcedureEntry>(
+                var entries = await this._databaseService.QueryAsync<ProcedureEntry>(
                     "SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
 
                 // Filter by date range if needed
@@ -221,7 +221,7 @@ namespace SledzSpecke.App.Services.Implementations
                 string internshipName = "Nieokreślony";
                 if (procedure.InternshipId.HasValue)
                 {
-                    var internship = await _databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                    var internship = await this._databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
                     if (internship != null)
                     {
                         internshipName = internship.Name;
@@ -239,7 +239,7 @@ namespace SledzSpecke.App.Services.Implementations
                         $"{procedureWithType} - {internshipName}";
 
                     // Get the user settings for doctor's name
-                    var settings = await _databaseService.GetUserSettingsAsync();
+                    var settings = await this._databaseService.GetUserSettingsAsync();
                     string doctorName = settings.Username ?? "Lekarz";
 
                     string assistingDoctors = procedure.ProcedureType == ProcedureType.TypeA ?
@@ -324,7 +324,7 @@ namespace SledzSpecke.App.Services.Implementations
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Load duty shifts
-            var dutyShifts = await _databaseService.QueryAsync<DutyShift>(
+            var dutyShifts = await this._databaseService.QueryAsync<DutyShift>(
                 "SELECT * FROM DutyShifts WHERE SpecializationId = ?", specialization.Id);
 
             // Filter by date range if needed
@@ -417,7 +417,7 @@ namespace SledzSpecke.App.Services.Implementations
                 // Write data rows
                 foreach (var row in data)
                 {
-                    var rowValues = columns.Select(col => row.ContainsKey(col) ? EscapeCsvValue(row[col]) : "").ToList();
+                    var rowValues = columns.Select(col => row.ContainsKey(col) ? this.EscapeCsvValue(row[col]) : "").ToList();
                     await writer.WriteLineAsync(string.Join(";", rowValues));
                 }
             }

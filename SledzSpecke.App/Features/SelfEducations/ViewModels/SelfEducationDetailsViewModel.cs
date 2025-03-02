@@ -42,77 +42,77 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         [ObservableProperty]
         private int _typePickerSelectedIndex;
 
-        public SelfEducation SelfEducation => _selfEducation;
+        public SelfEducation SelfEducation => this._selfEducation;
 
         public SelfEducationDetailsViewModel(ILogger<SelfEducationDetailsViewModel> logger) : base(logger)
         {
-            Title = "Szczegóły wydarzenia";
+            this.Title = "Szczegóły wydarzenia";
         }
 
         public void Initialize(SelfEducation selfEducation, Action<SelfEducation> onSaveCallback)
         {
-            _onSaveCallback = onSaveCallback;
+            this._onSaveCallback = onSaveCallback;
 
             if (selfEducation == null)
             {
                 // Nowe wydarzenie
-                _selfEducation = new SelfEducation
+                this._selfEducation = new SelfEducation
                 {
                     Id = new Random().Next(1000, 9999), // Tymczasowe ID
-                    StartDate = StartDate,
-                    EndDate = EndDate,
+                    StartDate = this.StartDate,
+                    EndDate = this.EndDate,
                     DurationDays = 1,
                     Type = SelfEducationType.Conference
                 };
-                PageTitle = "Dodaj wydarzenie";
-                TypePickerSelectedIndex = 0; // Konferencja
+                this.PageTitle = "Dodaj wydarzenie";
+                this.TypePickerSelectedIndex = 0; // Konferencja
             }
             else
             {
                 // Edycja istniejącego wydarzenia
-                _selfEducation = selfEducation;
-                PageTitle = "Edytuj wydarzenie";
+                this._selfEducation = selfEducation;
+                this.PageTitle = "Edytuj wydarzenie";
 
-                SelfEducationTitle = selfEducation.Title;
-                StartDate = selfEducation.StartDate;
-                EndDate = selfEducation.EndDate;
-                DurationDays = selfEducation.DurationDays.ToString();
-                Location = selfEducation.Location;
-                Organizer = selfEducation.Organizer;
-                IsRequired = selfEducation.IsRequired;
-                Notes = selfEducation.Notes;
+                this.SelfEducationTitle = selfEducation.Title;
+                this.StartDate = selfEducation.StartDate;
+                this.EndDate = selfEducation.EndDate;
+                this.DurationDays = selfEducation.DurationDays.ToString();
+                this.Location = selfEducation.Location;
+                this.Organizer = selfEducation.Organizer;
+                this.IsRequired = selfEducation.IsRequired;
+                this.Notes = selfEducation.Notes;
 
-                TypePickerSelectedIndex = (int)selfEducation.Type;
+                this.TypePickerSelectedIndex = (int)selfEducation.Type;
             }
 
-            UpdateDurationDays();
+            this.UpdateDurationDays();
         }
 
         [RelayCommand]
         public void UpdateType(int selectedIndex)
         {
-            if (_selfEducation != null)
+            if (this._selfEducation != null)
             {
-                _selfEducation.Type = (SelfEducationType)selectedIndex;
+                this._selfEducation.Type = (SelfEducationType)selectedIndex;
             }
         }
 
         [RelayCommand]
         public void UpdateDate()
         {
-            UpdateDurationDays();
+            this.UpdateDurationDays();
         }
 
         private void UpdateDurationDays()
         {
-            if (EndDate >= StartDate)
+            if (this.EndDate >= this.StartDate)
             {
-                TimeSpan duration = EndDate - StartDate;
-                DurationDays = (duration.Days + 1).ToString();
+                TimeSpan duration = this.EndDate - this.StartDate;
+                this.DurationDays = (duration.Days + 1).ToString();
             }
             else
             {
-                DurationDays = "1";
+                this.DurationDays = "1";
             }
         }
 
@@ -124,13 +124,13 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 var fileResult = await FilePicker.PickAsync();
                 if (fileResult != null)
                 {
-                    _selfEducation.CertificateFilePath = fileResult.FullPath;
+                    this._selfEducation.CertificateFilePath = fileResult.FullPath;
                     await Application.Current.MainPage.DisplayAlert("Sukces", "Plik został dodany pomyślnie.", "OK");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding attachment");
+                this._logger.LogError(ex, "Error adding attachment");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem z wyborem pliku: {ex.Message}", "OK");
             }
         }
@@ -145,47 +145,47 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         private async Task SaveAsync()
         {
             // Walidacja
-            if (string.IsNullOrWhiteSpace(SelfEducationTitle))
+            if (string.IsNullOrWhiteSpace(this.SelfEducationTitle))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Tytuł wydarzenia jest wymagany.", "OK");
                 return;
             }
 
-            if (EndDate < StartDate)
+            if (this.EndDate < this.StartDate)
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Data zakończenia musi być późniejsza lub równa dacie rozpoczęcia.", "OK");
                 return;
             }
 
-            if (!int.TryParse(DurationDays, out int durationDays) || durationDays <= 0)
+            if (!int.TryParse(this.DurationDays, out int durationDays) || durationDays <= 0)
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawną liczbę dni.", "OK");
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(Location))
+            if (string.IsNullOrWhiteSpace(this.Location))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce wydarzenia jest wymagane.", "OK");
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(Organizer))
+            if (string.IsNullOrWhiteSpace(this.Organizer))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa organizatora jest wymagana.", "OK");
                 return;
             }
 
             // Aktualizacja wydarzenia
-            _selfEducation.Title = SelfEducationTitle;
-            _selfEducation.StartDate = StartDate;
-            _selfEducation.EndDate = EndDate;
-            _selfEducation.DurationDays = durationDays;
-            _selfEducation.Location = Location;
-            _selfEducation.Organizer = Organizer;
-            _selfEducation.IsRequired = IsRequired;
-            _selfEducation.Notes = Notes;
+            this._selfEducation.Title = this.SelfEducationTitle;
+            this._selfEducation.StartDate = this.StartDate;
+            this._selfEducation.EndDate = this.EndDate;
+            this._selfEducation.DurationDays = durationDays;
+            this._selfEducation.Location = this.Location;
+            this._selfEducation.Organizer = this.Organizer;
+            this._selfEducation.IsRequired = this.IsRequired;
+            this._selfEducation.Notes = this.Notes;
 
-            _onSaveCallback?.Invoke(_selfEducation);
+            this._onSaveCallback?.Invoke(this._selfEducation);
             await Shell.Current.Navigation.PopAsync();
         }
     }

@@ -10,18 +10,18 @@ namespace SledzSpecke.App.Services.Implementations
 
         public NavigationService(IServiceProvider serviceProvider, ILogger<NavigationService> logger)
         {
-            _serviceProvider = serviceProvider;
-            _logger = logger;
+            this._serviceProvider = serviceProvider;
+            this._logger = logger;
         }
 
         public async Task NavigateToAsync(Type pageType)
         {
             try
             {
-                var page = _serviceProvider.GetService(pageType) as Page;
+                var page = this._serviceProvider.GetService(pageType) as Page;
                 if (page == null)
                 {
-                    _logger.LogWarning("Could not resolve page of type {PageType}", pageType.Name);
+                    this._logger.LogWarning("Could not resolve page of type {PageType}", pageType.Name);
                     return;
                 }
 
@@ -40,13 +40,13 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Navigation failed");
+                this._logger.LogError(ex, "Navigation failed");
             }
         }
 
         public async Task NavigateToAsync<T>() where T : Page
         {
-            await NavigateToAsync(typeof(T));
+            await this.NavigateToAsync(typeof(T));
         }
 
         public async Task PopAsync()
@@ -64,7 +64,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Navigation pop failed");
+                this._logger.LogError(ex, "Navigation pop failed");
             }
         }
 

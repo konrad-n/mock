@@ -43,76 +43,76 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         [ObservableProperty]
         private int _statusPickerSelectedIndex;
 
-        public Internship Internship => _internship;
+        public Internship Internship => this._internship;
 
         public InternshipDetailsViewModel(ILogger<InternshipDetailsViewModel> logger) : base(logger)
         {
-            Title = "Szczegóły stażu";
+            this.Title = "Szczegóły stażu";
         }
 
         public void Initialize(Internship internship, ModuleType currentModule, Func<Internship, Task> onSaveCallback)
         {
-            _currentModule = currentModule;
-            _onSaveCallback = onSaveCallback;
+            this._currentModule = currentModule;
+            this._onSaveCallback = onSaveCallback;
 
             if (internship == null)
             {
                 // Nowy staż
-                _internship = new Internship
+                this._internship = new Internship
                 {
                     Id = new Random().Next(1000, 9999), // Tymczasowe ID
                     Module = currentModule,
                     IsRequired = true
                 };
-                PageTitle = "Dodaj staż";
-                ModulePickerSelectedIndex = currentModule == ModuleType.Basic ? 0 : 1;
-                StatusPickerSelectedIndex = 0; // Domyślnie "Oczekujący"
+                this.PageTitle = "Dodaj staż";
+                this.ModulePickerSelectedIndex = currentModule == ModuleType.Basic ? 0 : 1;
+                this.StatusPickerSelectedIndex = 0; // Domyślnie "Oczekujący"
             }
             else
             {
                 // Edycja istniejącego stażu
-                _internship = internship;
-                PageTitle = "Szczegóły stażu";
-                DurationWeeks = internship.DurationWeeks.ToString();
-                WorkingDays = internship.WorkingDays.ToString();
+                this._internship = internship;
+                this.PageTitle = "Szczegóły stażu";
+                this.DurationWeeks = internship.DurationWeeks.ToString();
+                this.WorkingDays = internship.WorkingDays.ToString();
 
                 // Ustawienie pickerów
-                ModulePickerSelectedIndex = internship.Module == ModuleType.Basic ? 0 : 1;
+                this.ModulePickerSelectedIndex = internship.Module == ModuleType.Basic ? 0 : 1;
 
                 // Ustawienie statusu
                 if (internship.IsCompleted)
                 {
-                    StatusPickerSelectedIndex = 3; // Ukończony
-                    IsStartDateVisible = true;
-                    IsEndDateVisible = true;
-                    IsCompletionVisible = true;
+                    this.StatusPickerSelectedIndex = 3; // Ukończony
+                    this.IsStartDateVisible = true;
+                    this.IsEndDateVisible = true;
+                    this.IsCompletionVisible = true;
                     if (internship.StartDate.HasValue)
-                        StartDate = internship.StartDate.Value;
+                        this.StartDate = internship.StartDate.Value;
                     if (internship.EndDate.HasValue)
-                        EndDate = internship.EndDate.Value;
+                        this.EndDate = internship.EndDate.Value;
                 }
                 else if (internship.StartDate.HasValue && !internship.EndDate.HasValue)
                 {
-                    StatusPickerSelectedIndex = 2; // W trakcie
-                    IsStartDateVisible = true;
-                    IsEndDateVisible = false;
-                    IsCompletionVisible = false;
-                    StartDate = internship.StartDate.Value;
+                    this.StatusPickerSelectedIndex = 2; // W trakcie
+                    this.IsStartDateVisible = true;
+                    this.IsEndDateVisible = false;
+                    this.IsCompletionVisible = false;
+                    this.StartDate = internship.StartDate.Value;
                 }
                 else if (internship.StartDate.HasValue)
                 {
-                    StatusPickerSelectedIndex = 1; // Zaplanowany
-                    IsStartDateVisible = true;
-                    IsEndDateVisible = false;
-                    IsCompletionVisible = false;
-                    StartDate = internship.StartDate.Value;
+                    this.StatusPickerSelectedIndex = 1; // Zaplanowany
+                    this.IsStartDateVisible = true;
+                    this.IsEndDateVisible = false;
+                    this.IsCompletionVisible = false;
+                    this.StartDate = internship.StartDate.Value;
                 }
                 else
                 {
-                    StatusPickerSelectedIndex = 0; // Oczekujący
-                    IsStartDateVisible = false;
-                    IsEndDateVisible = false;
-                    IsCompletionVisible = false;
+                    this.StatusPickerSelectedIndex = 0; // Oczekujący
+                    this.IsStartDateVisible = false;
+                    this.IsEndDateVisible = false;
+                    this.IsCompletionVisible = false;
                 }
             }
         }
@@ -120,50 +120,50 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         [RelayCommand]
         public void UpdateModuleType(int selectedIndex)
         {
-            if (_internship != null)
+            if (this._internship != null)
             {
-                _internship.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
+                this._internship.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
             }
         }
 
         [RelayCommand]
         public void UpdateStatus(int selectedIndex)
         {
-            if (_internship == null) return;
+            if (this._internship == null) return;
 
             switch (selectedIndex)
             {
                 case 0: // Oczekujący
-                    IsStartDateVisible = false;
-                    IsEndDateVisible = false;
-                    IsCompletionVisible = false;
-                    _internship.StartDate = null;
-                    _internship.EndDate = null;
-                    _internship.IsCompleted = false;
+                    this.IsStartDateVisible = false;
+                    this.IsEndDateVisible = false;
+                    this.IsCompletionVisible = false;
+                    this._internship.StartDate = null;
+                    this._internship.EndDate = null;
+                    this._internship.IsCompleted = false;
                     break;
                 case 1: // Zaplanowany
-                    IsStartDateVisible = true;
-                    IsEndDateVisible = false;
-                    IsCompletionVisible = false;
-                    _internship.StartDate = StartDate;
-                    _internship.EndDate = null;
-                    _internship.IsCompleted = false;
+                    this.IsStartDateVisible = true;
+                    this.IsEndDateVisible = false;
+                    this.IsCompletionVisible = false;
+                    this._internship.StartDate = this.StartDate;
+                    this._internship.EndDate = null;
+                    this._internship.IsCompleted = false;
                     break;
                 case 2: // W trakcie
-                    IsStartDateVisible = true;
-                    IsEndDateVisible = false;
-                    IsCompletionVisible = false;
-                    _internship.StartDate = StartDate;
-                    _internship.EndDate = null;
-                    _internship.IsCompleted = false;
+                    this.IsStartDateVisible = true;
+                    this.IsEndDateVisible = false;
+                    this.IsCompletionVisible = false;
+                    this._internship.StartDate = this.StartDate;
+                    this._internship.EndDate = null;
+                    this._internship.IsCompleted = false;
                     break;
                 case 3: // Ukończony
-                    IsStartDateVisible = true;
-                    IsEndDateVisible = true;
-                    IsCompletionVisible = true;
-                    _internship.StartDate = StartDate;
-                    _internship.EndDate = EndDate;
-                    _internship.IsCompleted = true;
+                    this.IsStartDateVisible = true;
+                    this.IsEndDateVisible = true;
+                    this.IsCompletionVisible = true;
+                    this._internship.StartDate = this.StartDate;
+                    this._internship.EndDate = this.EndDate;
+                    this._internship.IsCompleted = true;
                     break;
             }
         }
@@ -178,41 +178,41 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         private async Task SaveAsync()
         {
             // Walidacja
-            if (string.IsNullOrWhiteSpace(_internship.Name))
+            if (string.IsNullOrWhiteSpace(this._internship.Name))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa stażu jest wymagana.", "OK");
                 return;
             }
 
-            if (!int.TryParse(DurationWeeks, out int durationWeeks) || durationWeeks <= 0)
+            if (!int.TryParse(this.DurationWeeks, out int durationWeeks) || durationWeeks <= 0)
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawny czas trwania stażu (tygodnie).", "OK");
                 return;
             }
 
-            if (!int.TryParse(WorkingDays, out int workingDays) || workingDays <= 0)
+            if (!int.TryParse(this.WorkingDays, out int workingDays) || workingDays <= 0)
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawną liczbę dni roboczych.", "OK");
                 return;
             }
 
-            _internship.DurationWeeks = durationWeeks;
-            _internship.WorkingDays = workingDays;
+            this._internship.DurationWeeks = durationWeeks;
+            this._internship.WorkingDays = workingDays;
 
             // Dodatkowe ustawienia w zależności od statusu
-            if (IsStartDateVisible && _internship.StartDate == null)
+            if (this.IsStartDateVisible && this._internship.StartDate == null)
             {
-                _internship.StartDate = StartDate;
+                this._internship.StartDate = this.StartDate;
             }
 
-            if (IsEndDateVisible && _internship.EndDate == null)
+            if (this.IsEndDateVisible && this._internship.EndDate == null)
             {
-                _internship.EndDate = EndDate;
+                this._internship.EndDate = this.EndDate;
             }
 
-            if (_onSaveCallback != null)
+            if (this._onSaveCallback != null)
             {
-                await _onSaveCallback(_internship);
+                await this._onSaveCallback(this._internship);
             }
 
             await Shell.Current.Navigation.PopAsync();

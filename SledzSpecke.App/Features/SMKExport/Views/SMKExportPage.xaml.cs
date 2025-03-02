@@ -9,20 +9,20 @@ namespace SledzSpecke.App.Features.SMKExport.Views
 
         public SMKExportPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<SMKExportViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<SMKExportViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować strony eksportu SMK.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony eksportu SMK.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in SMKExportPage: {ex}");
             }
         }
@@ -61,7 +61,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
                     }
                 }
 
-                _viewModel.ChangeExportTypeCommand.Execute(exportTypeIndex);
+                this._viewModel.ChangeExportTypeCommand.Execute(exportTypeIndex);
             }
         }
 
@@ -69,7 +69,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
         {
             if (sender is RadioButton rb)
             {
-                _viewModel.ToggleCustomDatesCommand.Execute(rb.IsChecked);
+                this._viewModel.ToggleCustomDatesCommand.Execute(rb.IsChecked);
             }
         }
     }

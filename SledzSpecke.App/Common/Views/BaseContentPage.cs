@@ -12,22 +12,22 @@
 
         protected BaseContentPage()
         {
-            Loaded += OnPageLoaded;
+            this.Loaded += this.OnPageLoaded;
         }
 
         protected override void OnHandlerChanged()
         {
             base.OnHandlerChanged();
-            if (Handler != null)
+            if (this.Handler != null)
             {
-                ServiceProvider = Handler.MauiContext?.Services
+                this.ServiceProvider = this.Handler.MauiContext?.Services
                     ?? throw new InvalidOperationException("No service provider available.");
             }
         }
 
         private void OnPageLoaded(object sender, EventArgs e)
         {
-            InitializePageAsync();
+            this.InitializePageAsync();
         }
 
         protected virtual Task InitializePageAsync()
@@ -37,10 +37,10 @@
 
         protected T GetRequiredService<T>() where T : class
         {
-            if (ServiceProvider == null)
+            if (this.ServiceProvider == null)
                 throw new InvalidOperationException("Service Provider not initialized");
 
-            return ServiceProvider.GetRequiredService<T>();
+            return this.ServiceProvider.GetRequiredService<T>();
         }
     }
 }

@@ -42,25 +42,25 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             ISpecializationService specializationService,
             ILogger<InternshipsViewModel> logger) : base(logger)
         {
-            _specializationService = specializationService;
-            Internships = new ObservableCollection<Internship>();
-            Title = "Staże";
+            this._specializationService = specializationService;
+            this.Internships = new ObservableCollection<Internship>();
+            this.Title = "Staże";
         }
 
         public override async Task InitializeAsync()
         {
             try
             {
-                IsBusy = true;
-                await LoadDataAsync();
+                this.IsBusy = true;
+                await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading internships data");
+                base._logger.LogError(ex, "Error loading internships data");
             }
             finally
             {
-                IsBusy = false;
+                this.IsBusy = false;
             }
         }
 
@@ -68,73 +68,73 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             try
             {
-                Specialization = await _specializationService.GetSpecializationAsync();
-                DisplayInternships(CurrentModule);
+                this.Specialization = await this._specializationService.GetSpecializationAsync();
+                this.DisplayInternships(this.CurrentModule);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading specialization data");
+                this._logger.LogError(ex, "Error loading specialization data");
                 throw;
             }
         }
 
         public void DisplayInternships(ModuleType moduleType)
         {
-            CurrentModule = moduleType;
-            UpdateModuleButtons();
+            this.CurrentModule = moduleType;
+            this.UpdateModuleButtons();
 
-            var filteredInternships = Specialization?.RequiredInternships
+            var filteredInternships = this.Specialization?.RequiredInternships
                 .Where(i => i.Module == moduleType)
                 .OrderBy(i => i.IsCompleted)
                 .ToList() ?? new List<Internship>();
 
-            Internships = new ObservableCollection<Internship>(filteredInternships);
-            IsNoInternshipsVisible = Internships.Count == 0;
+            this.Internships = new ObservableCollection<Internship>(filteredInternships);
+            this.IsNoInternshipsVisible = this.Internships.Count == 0;
         }
 
         private void UpdateModuleButtons()
         {
-            if (CurrentModule == ModuleType.Basic)
+            if (this.CurrentModule == ModuleType.Basic)
             {
-                BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
-                BasicModuleButtonTextColor = Colors.White;
-                SpecialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
-                SpecialisticModuleButtonTextColor = Colors.Black;
+                this.BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
+                this.BasicModuleButtonTextColor = Colors.White;
+                this.SpecialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
+                this.SpecialisticModuleButtonTextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButtonBackgroundColor = new Color(228, 240, 245);
-                BasicModuleButtonTextColor = Colors.Black;
-                SpecialisticModuleButtonBackgroundColor = new Color(8, 32, 68);
-                SpecialisticModuleButtonTextColor = Colors.White;
+                this.BasicModuleButtonBackgroundColor = new Color(228, 240, 245);
+                this.BasicModuleButtonTextColor = Colors.Black;
+                this.SpecialisticModuleButtonBackgroundColor = new Color(8, 32, 68);
+                this.SpecialisticModuleButtonTextColor = Colors.White;
             }
         }
 
         [RelayCommand]
         private void SelectBasicModule()
         {
-            DisplayInternships(ModuleType.Basic);
+            this.DisplayInternships(ModuleType.Basic);
         }
 
         [RelayCommand]
         private void SelectSpecialisticModule()
         {
-            DisplayInternships(ModuleType.Specialistic);
+            this.DisplayInternships(ModuleType.Specialistic);
         }
 
         [RelayCommand]
         private async Task AddInternshipAsync()
         {
-            await Shell.Current.Navigation.PushAsync(new InternshipDetailsPage(null, CurrentModule, OnInternshipAdded));
+            await Shell.Current.Navigation.PushAsync(new InternshipDetailsPage(null, this.CurrentModule, this.OnInternshipAdded));
         }
 
         [RelayCommand]
         private async Task ViewInternshipDetailsAsync(int internshipId)
         {
-            var internship = Specialization.RequiredInternships.FirstOrDefault(i => i.Id == internshipId);
+            var internship = this.Specialization.RequiredInternships.FirstOrDefault(i => i.Id == internshipId);
             if (internship != null)
             {
-                await Shell.Current.Navigation.PushAsync(new InternshipDetailsPage(internship, CurrentModule, OnInternshipUpdated));
+                await Shell.Current.Navigation.PushAsync(new InternshipDetailsPage(internship, this.CurrentModule, this.OnInternshipUpdated));
             }
         }
 
@@ -142,12 +142,12 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             try
             {
-                await _specializationService.SaveInternshipAsync(internship);
-                await LoadDataAsync();
+                await this._specializationService.SaveInternshipAsync(internship);
+                await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving new internship");
+                this._logger.LogError(ex, "Error adding internship");
                 throw;
             }
         }
@@ -156,12 +156,12 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             try
             {
-                await _specializationService.SaveInternshipAsync(internship);
-                await LoadDataAsync();
+                await this._specializationService.SaveInternshipAsync(internship);
+                await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating internship");
+                this._logger.LogError(ex, "Error updating internship");
                 throw;
             }
         }
@@ -175,7 +175,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             if (internship.IsCompleted)
                 return Colors.Green;
-            if (IsCurrentInternship(internship))
+            if (this.IsCurrentInternship(internship))
                 return Colors.Blue;
             if (internship.StartDate.HasValue)
                 return Colors.Orange;
@@ -186,7 +186,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             if (internship.IsCompleted)
                 return "Ukończony";
-            if (IsCurrentInternship(internship))
+            if (this.IsCurrentInternship(internship))
                 return $"W trakcie od: {internship.StartDate?.ToString("dd.MM.yyyy")}";
             if (internship.StartDate.HasValue)
                 return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";

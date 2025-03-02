@@ -50,18 +50,18 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             IDatabaseService databaseService,
             ILogger<AbsenceDetailsViewModel> logger) : base(logger)
         {
-            _databaseService = databaseService;
-            Title = "Nieobecność";
+            this._databaseService = databaseService;
+            this.Title = "Nieobecność";
         }
 
         public void Initialize(Absence absence, Action<Absence> onSaveCallback)
         {
-            _onSaveCallback = onSaveCallback;
+            this._onSaveCallback = onSaveCallback;
 
             if (absence == null)
             {
                 // Nowa nieobecność
-                _absence = new Absence
+                this._absence = new Absence
                 {
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now,
@@ -69,75 +69,75 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                     Year = DateTime.Now.Year,
                     AffectsSpecializationLength = true
                 };
-                PageTitle = "Dodaj nieobecność";
-                IsExistingAbsence = false;
-                AbsenceTypeSelectedIndex = 0;
-                Year = DateTime.Now.Year.ToString();
-                CalculateDuration();
+                this.PageTitle = "Dodaj nieobecność";
+                this.IsExistingAbsence = false;
+                this.AbsenceTypeSelectedIndex = 0;
+                this.Year = DateTime.Now.Year.ToString();
+                this.CalculateDuration();
             }
             else
             {
                 // Edycja istniejącej nieobecności
-                _absence = absence;
-                PageTitle = "Edytuj nieobecność";
-                IsExistingAbsence = true;
+                this._absence = absence;
+                this.PageTitle = "Edytuj nieobecność";
+                this.IsExistingAbsence = true;
 
-                StartDate = absence.StartDate;
-                EndDate = absence.EndDate;
-                DurationDays = absence.DurationDays.ToString();
-                Description = absence.Description;
-                AffectsSpecializationLength = absence.AffectsSpecializationLength;
-                DocumentReference = absence.DocumentReference;
-                Year = absence.Year.ToString();
-                IsApproved = absence.IsApproved;
+                this.StartDate = absence.StartDate;
+                this.EndDate = absence.EndDate;
+                this.DurationDays = absence.DurationDays.ToString();
+                this.Description = absence.Description;
+                this.AffectsSpecializationLength = absence.AffectsSpecializationLength;
+                this.DocumentReference = absence.DocumentReference;
+                this.Year = absence.Year.ToString();
+                this.IsApproved = absence.IsApproved;
 
                 // Set absence type picker
-                AbsenceTypeSelectedIndex = (int)absence.Type;
+                this.AbsenceTypeSelectedIndex = (int)absence.Type;
             }
         }
 
         [RelayCommand]
         private void UpdateAbsenceType(int index)
         {
-            _absence.Type = (AbsenceType)index;
+            this._absence.Type = (AbsenceType)index;
 
             // Set default values based on type
-            switch (_absence.Type)
+            switch (this._absence.Type)
             {
                 case AbsenceType.SelfEducationLeave:
                     // Self-education leave typically affects specialization length
-                    AffectsSpecializationLength = false;
+                    this.AffectsSpecializationLength = false;
                     break;
                 case AbsenceType.SickLeave:
                 case AbsenceType.MaternityLeave:
                 case AbsenceType.ParentalLeave:
                     // These types typically extend the specialization
-                    AffectsSpecializationLength = true;
+                    this.AffectsSpecializationLength = true;
                     break;
                 case AbsenceType.VacationLeave:
                     // Vacation leave typically doesn't affect specialization length
-                    AffectsSpecializationLength = false;
+                    this.AffectsSpecializationLength = false;
                     break;
             }
         }
 
         public void CalculateDuration()
         {
-            if (EndDate >= StartDate)
+            if (this.EndDate >= this.StartDate)
             {
-                int days = (EndDate - StartDate).Days + 1;
-                DurationDays = days.ToString();
+                int days = (this.EndDate - this.StartDate).Days + 1;
+                this.DurationDays = days.ToString();
             }
             else
             {
-                DurationDays = "0";
+                this.DurationDays = "0";
             }
         }
 
         [RelayCommand]
         private async Task DeleteAsync()
         {
-            if (!IsExistingAbsence)
+            if (!this.IsExistingAbsence)
                 return;
 
             bool confirm = await Application.Current.MainPage.DisplayAlert(
@@ -150,12 +150,12 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             {
                 try
                 {
-                    await _databaseService.DeleteAsync(_absence);
+                    await this._databaseService.DeleteAsync(this._absence);
                     await Shell.Current.Navigation.PopAsync();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error deleting absence");
+                    this._logger.LogError(ex, "Error deleting absence");
                     await Application.Current.MainPage.DisplayAlert(
                         "Błąd",
                         $"Nie udało się usunąć nieobecności: {ex.Message}",
@@ -174,7 +174,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         private async Task SaveAsync()
         {
             // Validation
-            if (StartDate > EndDate)
+            if (this.StartDate > this.EndDate)
             {
                 await Application.Current.MainPage.DisplayAlert(
                     "Błąd",
@@ -183,7 +183,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 return;
             }
 
-            if (!int.TryParse(Year, out int year))
+            if (!int.TryParse(this.Year, out int year))
             {
                 await Application.Current.MainPage.DisplayAlert(
                     "Błąd",
@@ -195,20 +195,20 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             // Upewnij się, że zawsze tworzysz NOWY obiekt Absence, nigdy nie modyfikuj istniejącego
             var absence = new Absence
             {
-                StartDate = StartDate,
-                EndDate = EndDate,
-                DurationDays = int.Parse(DurationDays),
-                Description = Description,
-                AffectsSpecializationLength = AffectsSpecializationLength,
-                DocumentReference = DocumentReference,
+                StartDate = this.StartDate,
+                EndDate = this.EndDate,
+                DurationDays = int.Parse(this.DurationDays),
+                Description = this.Description,
+                AffectsSpecializationLength = this.AffectsSpecializationLength,
+                DocumentReference = this.DocumentReference,
                 Year = year,
-                IsApproved = IsApproved,
-                Type = (AbsenceType)AbsenceTypeSelectedIndex
+                IsApproved = this.IsApproved,
+                Type = (AbsenceType)this.AbsenceTypeSelectedIndex
             };
 
-            if (_onSaveCallback != null)
+            if (this._onSaveCallback != null)
             {
-                _onSaveCallback(absence);
+                this._onSaveCallback(absence);
             }
 
             await Shell.Current.Navigation.PopAsync();

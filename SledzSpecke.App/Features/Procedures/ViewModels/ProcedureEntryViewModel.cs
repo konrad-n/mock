@@ -80,57 +80,57 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             IDatabaseService databaseService,
             ILogger<ProcedureEntryViewModel> logger) : base(logger)
         {
-            _databaseService = databaseService;
-            Title = "Dodaj wykonanie procedury";
+            this._databaseService = databaseService;
+            this.Title = "Dodaj wykonanie procedury";
         }
 
         public void Initialize(MedicalProcedure procedure, Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
-            _procedure = procedure;
-            _onSaveCallback = onSaveCallback;
+            this._procedure = procedure;
+            this._onSaveCallback = onSaveCallback;
 
-            ProcedureName = procedure.Name;
+            this.ProcedureName = procedure.Name;
 
             // Set type-specific properties based on procedure type
             if (procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeA)
             {
-                ProcedureType = "Kod A - wykonywanie samodzielne";
-                ProcedureTypeColor = Color.FromArgb("#2196F3"); // Blue for Type A
-                ProcedureTypeBorderColor = Color.FromArgb("#1976D2");
-                SupervisorLabel = "Nadzorujący (opcjonalnie)";
-                SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego (jeśli dotyczy)";
-                FirstAssistantLabel = "Dane osoby wykonującej I asystę";
-                FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej I asystę";
+                this.ProcedureType = "Kod A - wykonywanie samodzielne";
+                this.ProcedureTypeColor = Color.FromArgb("#2196F3"); // Blue for Type A
+                this.ProcedureTypeBorderColor = Color.FromArgb("#1976D2");
+                this.SupervisorLabel = "Nadzorujący (opcjonalnie)";
+                this.SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego (jeśli dotyczy)";
+                this.FirstAssistantLabel = "Dane osoby wykonującej I asystę";
+                this.FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej I asystę";
             }
             else
             {
-                ProcedureType = "Kod B - pierwsza asysta";
-                ProcedureTypeColor = Color.FromArgb("#4CAF50"); // Green for Type B
-                ProcedureTypeBorderColor = Color.FromArgb("#388E3C");
-                SupervisorLabel = "Nadzorujący (wymagane)";
-                SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego";
-                FirstAssistantLabel = "Dane osoby wykonującej procedurę";
-                FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej procedurę";
+                this.ProcedureType = "Kod B - pierwsza asysta";
+                this.ProcedureTypeColor = Color.FromArgb("#4CAF50"); // Green for Type B
+                this.ProcedureTypeBorderColor = Color.FromArgb("#388E3C");
+                this.SupervisorLabel = "Nadzorujący (wymagane)";
+                this.SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego";
+                this.FirstAssistantLabel = "Dane osoby wykonującej procedurę";
+                this.FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej procedurę";
             }
 
             // Calculate and set completion information
-            CompletionStatus = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount}";
+            this.CompletionStatus = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount}";
             int remaining = procedure.RequiredCount - procedure.CompletedCount;
-            RemainingText = $"Pozostało: {remaining}";
-            CompletionProgress = (double)procedure.CompletedCount / procedure.RequiredCount;
+            this.RemainingText = $"Pozostało: {remaining}";
+            this.CompletionProgress = (double)procedure.CompletedCount / procedure.RequiredCount;
 
             // Set progress color based on completion
-            if (CompletionProgress >= 1.0)
+            if (this.CompletionProgress >= 1.0)
             {
-                ProgressColor = Color.FromArgb("#4CAF50"); // Green when complete
+                this.ProgressColor = Color.FromArgb("#4CAF50"); // Green when complete
             }
-            else if (CompletionProgress >= 0.7)
+            else if (this.CompletionProgress >= 0.7)
             {
-                ProgressColor = Color.FromArgb("#FFB74D"); // Orange when nearly complete
+                this.ProgressColor = Color.FromArgb("#FFB74D"); // Orange when nearly complete
             }
             else
             {
-                ProgressColor = Color.FromArgb("#2196F3"); // Blue for in progress
+                this.ProgressColor = Color.FromArgb("#2196F3"); // Blue for in progress
             }
 
             // Get internship name if available
@@ -140,16 +140,16 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 {
                     try
                     {
-                        var internship = await _databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
+                        var internship = await this._databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
                         if (internship != null)
                         {
-                            ProcedureGroup = $"{procedure.Name} - {internship.Name}";
-                            OnPropertyChanged(nameof(ProcedureGroup));
+                            this.ProcedureGroup = $"{procedure.Name} - {internship.Name}";
+                            this.OnPropertyChanged(nameof(this.ProcedureGroup));
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error getting internship name");
+                        this._logger.LogError(ex, "Error getting internship name");
                     }
                 });
             }
@@ -172,31 +172,31 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         }
 
         [RelayCommand]
-        private async Task SaveAsync()
+        private async Task SaveEntryAsync()
         {
             try
             {
                 // Validation
-                if (string.IsNullOrWhiteSpace(PatientId))
+                if (string.IsNullOrWhiteSpace(this.PatientId))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Identyfikator pacjenta jest wymagany.", "OK");
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(PatientGender))
+                if (string.IsNullOrWhiteSpace(this.PatientGender))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Płeć pacjenta jest wymagana.", "OK");
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(Location))
+                if (string.IsNullOrWhiteSpace(this.Location))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce wykonania jest wymagane.", "OK");
                     return;
                 }
 
                 // For type B (assistance) supervisor is required
-                if (_procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(SupervisorName))
+                if (this._procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla procedury typu B.", "OK");
                     return;
@@ -205,29 +205,29 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 // Create new entry
                 var procedureEntry = new ProcedureEntry
                 {
-                    Date = EntryDate,
-                    PatientId = PatientId,
-                    PatientGender = PatientGender,
-                    Location = Location,
-                    SupervisorName = SupervisorName,
-                    FirstAssistantData = FirstAssistantData,
-                    SecondAssistantData = SecondAssistantData,
-                    ProcedureGroup = ProcedureGroup,
-                    InternshipName = _procedure.InternshipId.HasValue ?
-                        (await _databaseService.GetByIdAsync<Internship>(_procedure.InternshipId.Value))?.Name : "",
-                    Notes = Notes
+                    Date = this.EntryDate,
+                    PatientId = this.PatientId,
+                    PatientGender = this.PatientGender,
+                    Location = this.Location,
+                    SupervisorName = this.SupervisorName,
+                    FirstAssistantData = this.FirstAssistantData,
+                    SecondAssistantData = this.SecondAssistantData,
+                    ProcedureGroup = this.ProcedureGroup,
+                    InternshipName = this._procedure.InternshipId.HasValue ?
+                        (await this._databaseService.GetByIdAsync<Internship>(this._procedure.InternshipId.Value))?.Name : "",
+                    Notes = this.Notes
                 };
 
-                if (_onSaveCallback != null)
+                if (this._onSaveCallback != null)
                 {
-                    await _onSaveCallback(_procedure, procedureEntry);
+                    await this._onSaveCallback(this._procedure, procedureEntry);
                 }
 
                 await Shell.Current.Navigation.PopAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving procedure entry");
+                this._logger.LogError(ex, "Error saving procedure entry");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił błąd podczas zapisywania: {ex.Message}", "OK");
             }
         }

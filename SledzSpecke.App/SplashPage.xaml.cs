@@ -4,7 +4,7 @@ public partial class SplashPage : ContentPage
 {
     public SplashPage()
     {
-        InitializeComponent();
+        this.InitializeComponent();
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
@@ -18,7 +18,7 @@ public partial class SplashPage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Initialization error: {ex.Message}");
-            await DisplayAlert("Błąd", "Nie udało się zainicjalizować aplikacji", "OK");
+            await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować aplikacji", "OK");
         }
     }
 }

@@ -9,20 +9,20 @@ namespace SledzSpecke.App.Features.Absences.Views
 
         public AbsenceManagementPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<AbsenceManagementViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<AbsenceManagementViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować danych nieobecności.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się załadować danych nieobecności.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in AbsenceManagementPage: {ex}");
             }
         }
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.Absences.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.LoadDataAsync().ConfigureAwait(false);
+                this._viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
 
@@ -42,7 +42,7 @@ namespace SledzSpecke.App.Features.Absences.Views
         {
             if (sender is Picker picker)
             {
-                _viewModel.FilterByAbsenceTypeCommand.Execute(picker.SelectedIndex);
+                this._viewModel.FilterByAbsenceTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
@@ -50,7 +50,7 @@ namespace SledzSpecke.App.Features.Absences.Views
         {
             if (sender is Picker picker)
             {
-                _viewModel.FilterByYearCommand.Execute(picker.SelectedIndex);
+                this._viewModel.FilterByYearCommand.Execute(picker.SelectedIndex);
             }
         }
     }

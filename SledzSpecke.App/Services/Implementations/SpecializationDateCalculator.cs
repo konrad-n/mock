@@ -14,8 +14,8 @@ namespace SledzSpecke.App.Services.Implementations
             IDatabaseService databaseService,
             ILogger<SpecializationDateCalculator> logger)
         {
-            _databaseService = databaseService;
-            _logger = logger;
+            this._databaseService = databaseService;
+            this._logger = logger;
         }
 
         /// <summary>
@@ -25,14 +25,14 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await _databaseService.GetByIdAsync<Specialization>(specializationId);
+                var specialization = await this._databaseService.GetByIdAsync<Specialization>(specializationId);
                 if (specialization == null)
                 {
                     throw new ArgumentException("Nie znaleziono specjalizacji o podanym ID");
                 }
 
                 // Pobierz wszystkie nieobecności, które wydłużają specjalizację
-                var absences = await _databaseService.QueryAsync<Absence>(
+                var absences = await this._databaseService.QueryAsync<Absence>(
                     "SELECT * FROM Absences WHERE SpecializationId = ? AND AffectsSpecializationLength = 1",
                     specializationId);
 
@@ -49,7 +49,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Błąd podczas obliczania oczekiwanej daty zakończenia specjalizacji");
+                this._logger.LogError(ex, "Błąd podczas obliczania oczekiwanej daty zakończenia specjalizacji");
                 throw;
             }
         }
@@ -61,14 +61,14 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await _databaseService.GetByIdAsync<Specialization>(specializationId);
+                var specialization = await this._databaseService.GetByIdAsync<Specialization>(specializationId);
                 if (specialization == null)
                 {
                     throw new ArgumentException("Nie znaleziono specjalizacji o podanym ID");
                 }
 
                 // Pobierz wszystkie nieobecności związane z samokształceniem w danym roku
-                var educationLeaves = await _databaseService.QueryAsync<Absence>(
+                var educationLeaves = await this._databaseService.QueryAsync<Absence>(
                     "SELECT * FROM Absences WHERE SpecializationId = ? AND Type = ? AND Year = ?",
                     specializationId, AbsenceType.SelfEducationLeave, year);
 
@@ -82,7 +82,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Błąd podczas obliczania dostępnych dni samokształcenia");
+                this._logger.LogError(ex, "Błąd podczas obliczania dostępnych dni samokształcenia");
                 throw;
             }
         }
@@ -94,7 +94,7 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await _databaseService.GetByIdAsync<Specialization>(specializationId);
+                var specialization = await this._databaseService.GetByIdAsync<Specialization>(specializationId);
                 if (specialization == null)
                 {
                     throw new ArgumentException("Nie znaleziono specjalizacji o podanym ID");
@@ -138,7 +138,7 @@ namespace SledzSpecke.App.Services.Implementations
                 });
 
                 // Dodaj terminy kursów
-                var courses = await _databaseService.QueryAsync<Course>(
+                var courses = await this._databaseService.QueryAsync<Course>(
                     "SELECT * FROM Courses WHERE SpecializationId = ? AND ScheduledDate IS NOT NULL AND IsCompleted = 0",
                     specializationId);
 
@@ -160,7 +160,7 @@ namespace SledzSpecke.App.Services.Implementations
                 }
 
                 // Dodaj terminy staży
-                var internships = await _databaseService.QueryAsync<Internship>(
+                var internships = await this._databaseService.QueryAsync<Internship>(
                     "SELECT * FROM Internships WHERE SpecializationId = ? AND StartDate IS NOT NULL AND IsCompleted = 0",
                     specializationId);
 
@@ -183,7 +183,7 @@ namespace SledzSpecke.App.Services.Implementations
 
                 // Dodaj ostrzeżenie o kończących się dniach samokształcenia
                 int currentYear = DateTime.Now.Year;
-                int remainingEducationDays = await GetRemainingEducationDaysForYearAsync(specializationId, currentYear);
+                int remainingEducationDays = await this.GetRemainingEducationDaysForYearAsync(specializationId, currentYear);
                 if (remainingEducationDays > 0)
                 {
                     // Data końca roku lub 2 tygodnie przed nią, jeśli jest mniej niż 2 tygodnie do końca roku
@@ -208,7 +208,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Błąd podczas generowania ważnych dat specjalizacji");
+                this._logger.LogError(ex, "Błąd podczas generowania ważnych dat specjalizacji");
                 throw;
             }
         }

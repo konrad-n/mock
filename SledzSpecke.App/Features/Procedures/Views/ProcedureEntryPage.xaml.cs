@@ -17,25 +17,25 @@ namespace SledzSpecke.App.Features.Procedures.Views
             MedicalProcedure procedure,
             Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
-            InitializeComponent();
-            _databaseService = databaseService;
-            _procedure = procedure;
-            _onSaveCallback = onSaveCallback;
+            this.InitializeComponent();
+            this._databaseService = databaseService;
+            this._procedure = procedure;
+            this._onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<ProcedureEntryViewModel>();
-                BindingContext = _viewModel;
+                this._viewModel = this.GetRequiredService<ProcedureEntryViewModel>();
+                this.BindingContext = this._viewModel;
 
                 // Initialize ViewModel with procedure and callback
-                _viewModel.Initialize(_procedure, _onSaveCallback);
+                this._viewModel.Initialize(this._procedure, this._onSaveCallback);
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować formularza procedury.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować formularza procedury.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in ProcedureEntryPage: {ex}");
             }
         }

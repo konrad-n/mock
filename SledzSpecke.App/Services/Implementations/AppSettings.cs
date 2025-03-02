@@ -15,22 +15,22 @@ namespace SledzSpecke.App.Services.Implementations
             IDatabaseService databaseService,
             ILogger<AppSettings> logger)
         {
-            _databaseService = databaseService;
-            _logger = logger;
-            _settings = new UserSettings();
+            this._databaseService = databaseService;
+            this._logger = logger;
+            this._settings = new UserSettings();
         }
 
         public async Task LoadAsync()
         {
             try
             {
-                _settings = await _databaseService.GetUserSettingsAsync();
-                _logger.LogInformation("Settings loaded successfully");
+                this._settings = await this._databaseService.GetUserSettingsAsync();
+                this._logger.LogInformation("Settings loaded successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading settings");
-                _settings = new UserSettings(); // Use default settings in case of error
+                this._logger.LogError(ex, "Error loading settings");
+                this._settings = new UserSettings(); // Use default settings in case of error
             }
         }
 
@@ -38,12 +38,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                await _databaseService.SaveUserSettingsAsync(_settings);
-                _logger.LogInformation("Settings saved successfully");
+                await this._databaseService.SaveUserSettingsAsync(this._settings);
+                this._logger.LogInformation("Settings saved successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving settings");
+                this._logger.LogError(ex, "Error saving settings");
                 throw;
             }
         }
@@ -53,19 +53,19 @@ namespace SledzSpecke.App.Services.Implementations
             switch (key)
             {
                 case "Username":
-                    return (T)(object)_settings.Username;
+                    return (T)(object)this._settings.Username;
                 case "MedicalLicenseNumber":
-                    return (T)(object)_settings.MedicalLicenseNumber;
+                    return (T)(object)this._settings.MedicalLicenseNumber;
                 case "TrainingUnit":
-                    return (T)(object)_settings.TrainingUnit;
+                    return (T)(object)this._settings.TrainingUnit;
                 case "Supervisor":
-                    return (T)(object)_settings.Supervisor;
+                    return (T)(object)this._settings.Supervisor;
                 case "EnableNotifications":
-                    return (T)(object)_settings.EnableNotifications;
+                    return (T)(object)this._settings.EnableNotifications;
                 case "EnableAutoSync":
-                    return (T)(object)_settings.EnableAutoSync;
+                    return (T)(object)this._settings.EnableAutoSync;
                 case "UseDarkTheme":
-                    return (T)(object)_settings.UseDarkTheme;
+                    return (T)(object)this._settings.UseDarkTheme;
                 default:
                     return defaultValue;
             }
@@ -76,35 +76,35 @@ namespace SledzSpecke.App.Services.Implementations
             switch (key)
             {
                 case "Username":
-                    _settings.Username = value as string;
+                    this._settings.Username = value as string;
                     break;
                 case "MedicalLicenseNumber":
-                    _settings.MedicalLicenseNumber = value as string;
+                    this._settings.MedicalLicenseNumber = value as string;
                     break;
                 case "TrainingUnit":
-                    _settings.TrainingUnit = value as string;
+                    this._settings.TrainingUnit = value as string;
                     break;
                 case "Supervisor":
-                    _settings.Supervisor = value as string;
+                    this._settings.Supervisor = value as string;
                     break;
                 case "EnableNotifications":
                     if (value is bool boolValue)
-                        _settings.EnableNotifications = boolValue;
+                        this._settings.EnableNotifications = boolValue;
                     break;
                 case "EnableAutoSync":
                     if (value is bool autoSyncValue)
-                        _settings.EnableAutoSync = autoSyncValue;
+                        this._settings.EnableAutoSync = autoSyncValue;
                     break;
                 case "UseDarkTheme":
                     if (value is bool darkThemeValue)
-                        _settings.UseDarkTheme = darkThemeValue;
+                        this._settings.UseDarkTheme = darkThemeValue;
                     break;
             }
         }
 
         public void RemoveSetting(string key)
         {
-            SetSetting<object>(key, null);
+            this.SetSetting<object>(key, null);
         }
     }
 }

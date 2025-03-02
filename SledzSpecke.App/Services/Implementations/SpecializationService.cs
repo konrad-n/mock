@@ -16,8 +16,8 @@ namespace SledzSpecke.App.Services.Implementations
             IDatabaseService databaseService,
             ILogger<SpecializationService> logger)
         {
-            _databaseService = databaseService;
-            _logger = logger;
+            this._databaseService = databaseService;
+            this._logger = logger;
         }
 
         public async Task<Specialization> GetSpecializationAsync()
@@ -25,23 +25,23 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Get current specialization from database
-                var specialization = await _databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    _logger.LogInformation("No current specialization found. Creating default specialization.");
+                    this._logger.LogInformation("No current specialization found. Creating default specialization.");
                     // Create default specialization if none exists
                     specialization = DataSeeder.SeedHematologySpecialization();
-                    await SaveSpecializationAsync(specialization);
+                    await this.SaveSpecializationAsync(specialization);
                 }
 
                 // Load related data
-                await LoadRelatedDataAsync(specialization);
+                await this.LoadRelatedDataAsync(specialization);
 
                 return specialization;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting specialization");
+                this._logger.LogError(ex, "Error getting specialization");
                 // Nie zwracaj tutaj seedera - to zmniejszy spójność danych
                 throw;
             }
@@ -52,28 +52,28 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Load courses
-                var courses = await _databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
+                var courses = await this._databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
                 specialization.RequiredCourses = courses;
 
                 // Load internships
-                var internships = await _databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
+                var internships = await this._databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
                 specialization.RequiredInternships = internships;
 
                 // Load procedures
-                var procedures = await _databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
+                var procedures = await this._databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
                 specialization.RequiredProcedures = procedures;
 
                 // Load procedure entries
                 foreach (var procedure in specialization.RequiredProcedures)
                 {
-                    var entries = await _databaseService.QueryAsync<ProcedureEntry>("SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
+                    var entries = await this._databaseService.QueryAsync<ProcedureEntry>("SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);
                     procedure.Entries = entries;
                     procedure.CompletedCount = entries.Count;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading related data for specialization");
+                this._logger.LogError(ex, "Error loading related data for specialization");
                 throw;
             }
         }
@@ -83,12 +83,12 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Sprawdź czy dane szablonowe istnieją, jeśli nie - zainicjuj je
-                if (!await _databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
+                if (!await this._databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
                 {
-                    await _databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
+                    await this._databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
 
                     // Po inicjalizacji ponownie pobierz specjalizację
-                    specialization = await _databaseService.GetCurrentSpecializationAsync();
+                    specialization = await this._databaseService.GetCurrentSpecializationAsync();
                     if (specialization == null)
                     {
                         throw new Exception("Failed to initialize specialization template data");
@@ -96,18 +96,18 @@ namespace SledzSpecke.App.Services.Implementations
                 }
 
                 // Save specialization
-                await _databaseService.SaveAsync(specialization);
+                await this._databaseService.SaveAsync(specialization);
 
                 // Update user settings
-                var settings = await _databaseService.GetUserSettingsAsync();
+                var settings = await this._databaseService.GetUserSettingsAsync();
                 settings.CurrentSpecializationId = specialization.Id;
-                await _databaseService.SaveUserSettingsAsync(settings);
+                await this._databaseService.SaveUserSettingsAsync(settings);
 
-                _logger.LogInformation("Specialization saved successfully");
+                this._logger.LogInformation("Specialization saved successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving specialization");
+                this._logger.LogError(ex, "Error saving specialization");
                 throw;
             }
         }
@@ -116,14 +116,14 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await GetSpecializationAsync();
+                var specialization = await this.GetSpecializationAsync();
                 return specialization.RequiredCourses
                     .Where(c => c.Module == moduleType)
                     .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting courses");
+                this._logger.LogError(ex, "Error getting courses");
                 return new List<Course>();
             }
         }
@@ -132,14 +132,14 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await GetSpecializationAsync();
+                var specialization = await this.GetSpecializationAsync();
                 return specialization.RequiredInternships
                     .Where(i => i.Module == moduleType)
                     .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting internships");
+                this._logger.LogError(ex, "Error getting internships");
                 return new List<Internship>();
             }
         }
@@ -148,14 +148,14 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await GetSpecializationAsync();
+                var specialization = await this.GetSpecializationAsync();
                 return specialization.RequiredProcedures
                     .Where(p => p.Module == moduleType && p.ProcedureType == procedureType)
                     .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting procedures");
+                this._logger.LogError(ex, "Error getting procedures");
                 return new List<MedicalProcedure>();
             }
         }
@@ -164,10 +164,10 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await GetSpecializationAsync();
+                var specialization = await this.GetSpecializationAsync();
                 course.SpecializationId = specialization.Id;
 
-                await _databaseService.SaveAsync(course);
+                await this._databaseService.SaveAsync(course);
 
                 var existingCourse = specialization.RequiredCourses.FirstOrDefault(c => c.Id == course.Id);
                 if (existingCourse != null)
@@ -182,11 +182,11 @@ namespace SledzSpecke.App.Services.Implementations
                     specialization.RequiredCourses.Add(course);
                 }
 
-                _logger.LogInformation("Course saved successfully");
+                this._logger.LogInformation("Course saved successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving course");
+                this._logger.LogError(ex, "Error saving course");
                 throw;
             }
         }
@@ -195,10 +195,10 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await GetSpecializationAsync();
+                var specialization = await this.GetSpecializationAsync();
                 internship.SpecializationId = specialization.Id;
 
-                await _databaseService.SaveAsync(internship);
+                await this._databaseService.SaveAsync(internship);
 
                 var existingInternship = specialization.RequiredInternships.FirstOrDefault(i => i.Id == internship.Id);
                 if (existingInternship != null)
@@ -213,11 +213,11 @@ namespace SledzSpecke.App.Services.Implementations
                     specialization.RequiredInternships.Add(internship);
                 }
 
-                _logger.LogInformation("Internship saved successfully");
+                this._logger.LogInformation("Internship saved successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving internship");
+                this._logger.LogError(ex, "Error saving internship");
                 throw;
             }
         }
@@ -226,16 +226,16 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                var specialization = await GetSpecializationAsync();
+                var specialization = await this.GetSpecializationAsync();
                 procedure.SpecializationId = specialization.Id;
 
-                await _databaseService.SaveAsync(procedure);
+                await this._databaseService.SaveAsync(procedure);
 
                 // Save procedure entries
                 foreach (var entry in procedure.Entries)
                 {
                     entry.ProcedureId = procedure.Id;
-                    await _databaseService.SaveAsync(entry);
+                    await this._databaseService.SaveAsync(entry);
                 }
 
                 var existingProcedure = specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedure.Id);
@@ -251,11 +251,11 @@ namespace SledzSpecke.App.Services.Implementations
                     specialization.RequiredProcedures.Add(procedure);
                 }
 
-                _logger.LogInformation("Procedure saved successfully");
+                this._logger.LogInformation("Procedure saved successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving procedure");
+                this._logger.LogError(ex, "Error saving procedure");
                 throw;
             }
         }
@@ -265,18 +265,18 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 entry.ProcedureId = procedure.Id;
-                await _databaseService.SaveAsync(entry);
+                await this._databaseService.SaveAsync(entry);
 
                 // Update procedure
                 procedure.Entries.Add(entry);
                 procedure.CompletedCount = procedure.Entries.Count;
-                await _databaseService.SaveAsync(procedure);
+                await this._databaseService.SaveAsync(procedure);
 
-                _logger.LogInformation("Procedure entry added successfully");
+                this._logger.LogInformation("Procedure entry added successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding procedure entry");
+                this._logger.LogError(ex, "Error adding procedure entry");
                 throw;
             }
         }

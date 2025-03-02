@@ -8,23 +8,23 @@ namespace SledzSpecke.App.Features.Authentication.Views
 
         public LoginPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<LoginViewModel>();
+                this._viewModel = this.GetRequiredService<LoginViewModel>();
 
                 // Dodaj debug log
-                System.Diagnostics.Debug.WriteLine($"Debug mode: Email = {_viewModel.Email}, Password = {_viewModel.Password}");
+                System.Diagnostics.Debug.WriteLine($"Debug mode: Email = {this._viewModel.Email}, Password = {this._viewModel.Password}");
 
-                BindingContext = _viewModel;
+                this.BindingContext = this._viewModel;
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować strony logowania.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony logowania.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in LoginPage: {ex}");
             }
         }

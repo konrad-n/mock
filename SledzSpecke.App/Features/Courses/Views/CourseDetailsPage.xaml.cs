@@ -14,42 +14,42 @@ namespace SledzSpecke.App.Features.Courses.Views
 
         public CourseDetailsPage(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {
-            InitializeComponent();
-            _course = course;
-            _currentModule = currentModule;
-            _onSaveCallback = onSaveCallback;
+            this.InitializeComponent();
+            this._course = course;
+            this._currentModule = currentModule;
+            this._onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<CourseDetailsViewModel>();
+                this._viewModel = this.GetRequiredService<CourseDetailsViewModel>();
                 // Najpierw inicjalizujemy ViewModel
-                _viewModel.Initialize(_course, _currentModule, _onSaveCallback);
+                this._viewModel.Initialize(this._course, this._currentModule, this._onSaveCallback);
                 // Dopiero potem ustawiamy BindingContext
-                BindingContext = _viewModel;
+                this.BindingContext = this._viewModel;
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów kursu.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów kursu.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in CourseDetailsPage: {ex}");
             }
         }
 
         private void OnModulePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && _viewModel != null && _viewModel.Course != null)
+            if (sender is Picker picker && this._viewModel != null && this._viewModel.Course != null)
             {
-                _viewModel.UpdateModuleTypeCommand.Execute(picker.SelectedIndex);
+                this._viewModel.UpdateModuleTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnStatusPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && _viewModel != null && _viewModel.Course != null)
+            if (sender is Picker picker && this._viewModel != null && this._viewModel.Course != null)
             {
-                _viewModel.UpdateStatusCommand.Execute(picker.SelectedIndex);
+                this._viewModel.UpdateStatusCommand.Execute(picker.SelectedIndex);
             }
         }
     }

@@ -51,49 +51,49 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
         public DutyShiftDetailsViewModel(ILogger<DutyShiftDetailsViewModel> logger) : base(logger)
         {
-            Title = "Szczegóły dyżuru";
+            this.Title = "Szczegóły dyżuru";
         }
 
         public void Initialize(DutyShift dutyShift, Func<DutyShift, Task> onSaveCallback)
         {
-            _onSaveCallback = onSaveCallback;
+            this._onSaveCallback = onSaveCallback;
 
             if (dutyShift == null)
             {
                 // New duty shift
-                _isNewDutyShift = true;
-                _dutyShift = new DutyShift
+                this._isNewDutyShift = true;
+                this._dutyShift = new DutyShift
                 {
-                    StartDate = DateTime.Now.Date.Add(StartTime),
-                    EndDate = DateTime.Now.Date.AddDays(1).Add(EndTime),
+                    StartDate = DateTime.Now.Date.Add(this.StartTime),
+                    EndDate = DateTime.Now.Date.AddDays(1).Add(this.EndTime),
                     DurationHours = 24,
                     Type = DutyType.Independent
                 };
-                PageTitle = "Dodaj dyżur";
-                DutyTypeSelectedIndex = 0; // Independent
-                IsSupervisorVisible = false;
+                this.PageTitle = "Dodaj dyżur";
+                this.DutyTypeSelectedIndex = 0; // Independent
+                this.IsSupervisorVisible = false;
             }
             else
             {
                 // Edit existing duty shift
-                _isNewDutyShift = false;
-                _dutyShift = dutyShift;
-                PageTitle = "Edytuj dyżur";
+                this._isNewDutyShift = false;
+                this._dutyShift = dutyShift;
+                this.PageTitle = "Edytuj dyżur";
 
-                StartDate = dutyShift.StartDate.Date;
-                StartTime = dutyShift.StartDate.TimeOfDay;
-                EndDate = dutyShift.EndDate.Date;
-                EndTime = dutyShift.EndDate.TimeOfDay;
+                this.StartDate = dutyShift.StartDate.Date;
+                this.StartTime = dutyShift.StartDate.TimeOfDay;
+                this.EndDate = dutyShift.EndDate.Date;
+                this.EndTime = dutyShift.EndDate.TimeOfDay;
 
-                Location = dutyShift.Location ?? "";
-                DepartmentName = dutyShift.DepartmentName ?? "";
-                SupervisorName = dutyShift.SupervisorName ?? "";
-                Notes = dutyShift.Notes ?? "";
+                this.Location = dutyShift.Location ?? "";
+                this.DepartmentName = dutyShift.DepartmentName ?? "";
+                this.SupervisorName = dutyShift.SupervisorName ?? "";
+                this.Notes = dutyShift.Notes ?? "";
 
-                DutyTypeSelectedIndex = dutyShift.Type == DutyType.Independent ? 0 : 1;
-                IsSupervisorVisible = dutyShift.Type == DutyType.Accompanied;
+                this.DutyTypeSelectedIndex = dutyShift.Type == DutyType.Independent ? 0 : 1;
+                this.IsSupervisorVisible = dutyShift.Type == DutyType.Accompanied;
 
-                UpdateDurationText();
+                this.UpdateDurationText();
             }
         }
 
@@ -101,14 +101,14 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         private void UpdateDutyType(int index)
         {
             // Sprawdź czy _dutyShift nie jest null
-            if (_dutyShift == null)
+            if (this._dutyShift == null)
             {
-                _logger?.LogWarning("Próba aktualizacji typu dyżuru gdy _dutyShift jest null");
+                this._logger?.LogWarning("Próba aktualizacji typu dyżuru gdy _dutyShift jest null");
                 return;
             }
 
-            _dutyShift.Type = index == 0 ? DutyType.Independent : DutyType.Accompanied;
-            IsSupervisorVisible = _dutyShift.Type == DutyType.Accompanied;
+            this._dutyShift.Type = index == 0 ? DutyType.Independent : DutyType.Accompanied;
+            this.IsSupervisorVisible = this._dutyShift.Type == DutyType.Accompanied;
         }
 
         public void UpdateDurationText()
@@ -116,18 +116,18 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 // Sprawdź czy _dutyShift nie jest null
-                if (_dutyShift == null)
+                if (this._dutyShift == null)
                 {
-                    DurationText = "Wczytywanie...";
+                    this.DurationText = "Wczytywanie...";
                     return;
                 }
 
-                var startDateTime = StartDate.Date.Add(StartTime);
-                var endDateTime = EndDate.Date.Add(EndTime);
+                var startDateTime = this.StartDate.Date.Add(this.StartTime);
+                var endDateTime = this.EndDate.Date.Add(this.EndTime);
 
                 if (endDateTime <= startDateTime)
                 {
-                    DurationText = "Nieprawidłowy zakres czasu";
+                    this.DurationText = "Nieprawidłowy zakres czasu";
                     return;
                 }
 
@@ -136,7 +136,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 // Warn about long duty shifts
                 if (duration.TotalHours > 24)
                 {
-                    MainThread.BeginInvokeOnMainThread(async () => {
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
                         bool continueAnyway = await Application.Current.MainPage.DisplayAlert(
                             "Uwaga",
                             "Dyżur przekracza 24 godziny. Dyżury powinny zazwyczaj trwać maksymalnie 24 godziny. Czy na pewno chcesz kontynuować?",
@@ -146,17 +147,17 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                         if (!continueAnyway)
                         {
                             // Reset to 24 hours duty
-                            EndDate = StartDate.Date.AddDays(1);
-                            EndTime = StartTime;
-                            OnPropertyChanged(nameof(EndDate));
-                            OnPropertyChanged(nameof(EndTime));
-                            UpdateDurationText();
+                            this.EndDate = this.StartDate.Date.AddDays(1);
+                            this.EndTime = this.StartTime;
+                            this.OnPropertyChanged(nameof(this.EndDate));
+                            this.OnPropertyChanged(nameof(this.EndTime));
+                            this.UpdateDurationText();
                             return;
                         }
                     });
                 }
 
-                _dutyShift.DurationHours = duration.TotalHours;
+                this._dutyShift.DurationHours = duration.TotalHours;
 
                 // Format according to SMK requirements - split into hours and minutes
                 int hours = (int)Math.Floor(duration.TotalHours);
@@ -164,21 +165,21 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
                 if (duration.TotalHours < 24)
                 {
-                    DurationText = $"{hours} godz. {minutes} min.";
+                    this.DurationText = $"{hours} godz. {minutes} min.";
                 }
                 else
                 {
                     var days = Math.Floor(duration.TotalDays);
                     var remainingHours = hours - (days * 24);
-                    DurationText = days > 0
+                    this.DurationText = days > 0
                         ? $"{days} dni {remainingHours} godz. {minutes} min."
                         : $"{hours} godz. {minutes} min.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating duration text");
-                DurationText = "Błąd obliczania czasu";
+                this._logger.LogError(ex, "Error updating duration text");
+                this.DurationText = "Błąd obliczania czasu";
             }
         }
 
@@ -194,14 +195,14 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 // Validation
-                if (string.IsNullOrWhiteSpace(Location))
+                if (string.IsNullOrWhiteSpace(this.Location))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce dyżuru jest wymagane.", "OK");
                     return;
                 }
 
-                var startDateTime = StartDate.Date.Add(StartTime);
-                var endDateTime = EndDate.Date.Add(EndTime);
+                var startDateTime = this.StartDate.Date.Add(this.StartTime);
+                var endDateTime = this.EndDate.Date.Add(this.EndTime);
 
                 if (endDateTime <= startDateTime)
                 {
@@ -210,7 +211,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 }
 
                 // For accompanied type, supervisor is required
-                if (_dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(SupervisorName))
+                if (this._dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla dyżuru towarzyszącego.", "OK");
                     return;
@@ -222,28 +223,28 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     StartDate = startDateTime,
                     EndDate = endDateTime,
                     DurationHours = (endDateTime - startDateTime).TotalHours,
-                    Location = Location,
-                    DepartmentName = DepartmentName,
-                    SupervisorName = SupervisorName,
-                    Notes = Notes,
-                    Type = _dutyShift.Type
+                    Location = this.Location,
+                    DepartmentName = this.DepartmentName,
+                    SupervisorName = this.SupervisorName,
+                    Notes = this.Notes,
+                    Type = this._dutyShift.Type
                 };
 
                 // Only set the ID if we're editing an existing duty shift
-                if (!_isNewDutyShift)
+                if (!this._isNewDutyShift)
                 {
-                    dutyShiftToSave.Id = _dutyShift.Id;
+                    dutyShiftToSave.Id = this._dutyShift.Id;
                 }
 
-                if (_onSaveCallback != null)
+                if (this._onSaveCallback != null)
                 {
-                    await _onSaveCallback(dutyShiftToSave);
+                    await this._onSaveCallback(dutyShiftToSave);
                 }
                 await Shell.Current.Navigation.PopAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving duty shift");
+                this._logger.LogError(ex, "Error saving duty shift");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas zapisywania dyżuru: {ex.Message}", "OK");
             }
         }

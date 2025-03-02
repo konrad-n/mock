@@ -9,20 +9,20 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
 
         public SelfEducationPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<SelfEducationViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<SelfEducationViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować danych samokształcenia.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się załadować danych samokształcenia.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in SelfEducationPage: {ex}");
             }
         }
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.LoadDataAsync().ConfigureAwait(false);
+                this._viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
     }

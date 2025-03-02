@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Common.ViewModels
 
         protected ViewModelBase(ILogger logger)
         {
-            _logger = logger;
+            this._logger = logger;
         }
 
         public virtual Task InitializeAsync()

@@ -34,79 +34,76 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             IServiceProvider serviceProvider,
             INavigationService navigationService) : base(logger)
         {
-            _authenticationService = authenticationService;
-            _serviceProvider = serviceProvider;
-            _specializationService = specializationService;
-            _navigationService = navigationService;
+            this._authenticationService = authenticationService;
+            this._specializationService = specializationService;
+            this._serviceProvider = serviceProvider;
+            this._navigationService = navigationService;
 
             // Dodaj debug log
             System.Diagnostics.Debug.WriteLine("LoginViewModel constructor called");
 
 #if DEBUG
-            Email = "olo@pozakontrololo.com";
-            Password = "gucio";
-            System.Diagnostics.Debug.WriteLine($"Debug values set: Email = {Email}, Password = {Password}");
+            this.Email = "olo@pozakontrololo.com";
+            this.Password = "gucio";
+            System.Diagnostics.Debug.WriteLine($"Debug values set: Email = {this.Email}, Password = {this.Password}");
 #endif
-            _specializationService = specializationService;
-            _serviceProvider = serviceProvider;
-            _navigationService = navigationService;
         }
 
         [RelayCommand]
         private async Task LoginAsync()
         {
-            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+            if (string.IsNullOrWhiteSpace(this.Email) || string.IsNullOrWhiteSpace(this.Password))
             {
-                ErrorMessage = "Proszę wprowadzić adres email i hasło.";
+                this.ErrorMessage = "Proszę wprowadzić adres email i hasło.";
                 return;
             }
 
             try
             {
-                IsLoading = true;
-                ErrorMessage = string.Empty;
+                this.IsLoading = true;
+                this.ErrorMessage = string.Empty;
 
-                _logger.LogInformation("Login attempt for {Email}", Email);
+                this._logger.LogInformation("Login attempt for {Email}", this.Email);
 
-                bool result = await _authenticationService.LoginAsync(Email, Password);
+                bool result = await this._authenticationService.LoginAsync(this.Email, this.Password);
 
                 if (result)
                 {
-                    _logger.LogInformation("Login successful for {Email}", Email);
+                    this._logger.LogInformation("Login successful for {Email}", this.Email);
 
                     try
                     {
-                        var appShell = new AppShell(_authenticationService, _specializationService, _serviceProvider);
+                        var appShell = new AppShell(this._authenticationService, this._specializationService, this._serviceProvider);
                         Application.Current.MainPage = appShell;
-                        _logger.LogDebug("AppShell set as MainPage");
+                        this._logger.LogDebug("AppShell set as MainPage");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error setting AppShell as MainPage");
-                        ErrorMessage = "Logowanie powiodło się, ale wystąpił problem z uruchomieniem głównego ekranu aplikacji.";
+                        this._logger.LogError(ex, "Error setting AppShell as MainPage");
+                        this.ErrorMessage = "Logowanie powiodło się, ale wystąpił problem z uruchomieniem głównego ekranu aplikacji.";
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("Login failed for {Email}", Email);
-                    ErrorMessage = "Nieprawidłowy adres email lub hasło.";
+                    this._logger.LogWarning("Login failed for {Email}", this.Email);
+                    this.ErrorMessage = "Nieprawidłowy adres email lub hasło.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login for {Email}", Email);
-                ErrorMessage = $"Wystąpił problem podczas próby logowania. Szczegóły błędu: {ex.Message}";
+                this._logger.LogError(ex, "Error during login for {Email}", this.Email);
+                this.ErrorMessage = $"Wystąpił problem podczas próby logowania. Szczegóły błędu: {ex.Message}";
             }
             finally
             {
-                IsLoading = false;
+                this.IsLoading = false;
             }
         }
 
         [RelayCommand]
         private async Task NavigateToRegistrationAsync()
         {
-            await _navigationService.NavigateToAsync<RegistrationPage>();
+            await this._navigationService.NavigateToAsync<RegistrationPage>();
         }
     }
 }

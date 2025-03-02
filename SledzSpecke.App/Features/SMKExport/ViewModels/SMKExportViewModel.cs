@@ -74,38 +74,38 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             IExportService exportService,
             ILogger<SMKExportViewModel> logger) : base(logger)
         {
-            _exportService = exportService;
-            _exportOptions = new SMKExportOptions();
-            Title = "Eksport do SMK";
+            this._exportService = exportService;
+            this._exportOptions = new SMKExportOptions();
+            this.Title = "Eksport do SMK";
         }
 
         public override Task InitializeAsync()
         {
-            SetupInitialState();
+            this.SetupInitialState();
             return Task.CompletedTask;
         }
 
         private void SetupInitialState()
         {
-            _exportOptions = new SMKExportOptions();
-            IsGeneralExportSelected = true;
-            IsProcedureExportSelected = false;
-            IsDutyShiftExportSelected = false;
-            UseSmkExactFormat = true;
-            IncludeCoursesChecked = true;
-            IncludeInternshipsChecked = true;
-            IncludeProceduresChecked = true;
-            FormatSelectedIndex = 0;
-            IsAllModulesSelected = true;
-            IsBasicModuleSelected = false;
-            IsSpecialisticModuleSelected = false;
-            IsAllDatesSelected = true;
-            IsCustomDatesSelected = false;
-            StartDate = DateTime.Now.AddMonths(-3);
-            EndDate = DateTime.Now;
-            IsDateRangeVisible = false;
-            IsLoading = false;
-            IsResultVisible = false;
+            this._exportOptions = new SMKExportOptions();
+            this.IsGeneralExportSelected = true;
+            this.IsProcedureExportSelected = false;
+            this.IsDutyShiftExportSelected = false;
+            this.UseSmkExactFormat = true;
+            this.IncludeCoursesChecked = true;
+            this.IncludeInternshipsChecked = true;
+            this.IncludeProceduresChecked = true;
+            this.FormatSelectedIndex = 0;
+            this.IsAllModulesSelected = true;
+            this.IsBasicModuleSelected = false;
+            this.IsSpecialisticModuleSelected = false;
+            this.IsAllDatesSelected = true;
+            this.IsCustomDatesSelected = false;
+            this.StartDate = DateTime.Now.AddMonths(-3);
+            this.EndDate = DateTime.Now;
+            this.IsDateRangeVisible = false;
+            this.IsLoading = false;
+            this.IsResultVisible = false;
         }
 
         [RelayCommand]
@@ -114,21 +114,21 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             switch (exportTypeIndex)
             {
                 case 0: // General
-                    IsGeneralExportSelected = true;
-                    IsProcedureExportSelected = false;
-                    IsDutyShiftExportSelected = false;
+                    this.IsGeneralExportSelected = true;
+                    this.IsProcedureExportSelected = false;
+                    this.IsDutyShiftExportSelected = false;
                     break;
                 case 1: // Procedures
-                    IsGeneralExportSelected = false;
-                    IsProcedureExportSelected = true;
-                    IsDutyShiftExportSelected = false;
-                    UseSmkExactFormat = true;
+                    this.IsGeneralExportSelected = false;
+                    this.IsProcedureExportSelected = true;
+                    this.IsDutyShiftExportSelected = false;
+                    this.UseSmkExactFormat = true;
                     break;
                 case 2: // Duty Shifts
-                    IsGeneralExportSelected = false;
-                    IsProcedureExportSelected = false;
-                    IsDutyShiftExportSelected = true;
-                    UseSmkExactFormat = true;
+                    this.IsGeneralExportSelected = false;
+                    this.IsProcedureExportSelected = false;
+                    this.IsDutyShiftExportSelected = true;
+                    this.UseSmkExactFormat = true;
                     break;
             }
         }
@@ -136,16 +136,16 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
         [RelayCommand]
         private void ToggleCustomDates(bool isChecked)
         {
-            IsDateRangeVisible = isChecked;
+            this.IsDateRangeVisible = isChecked;
             if (isChecked)
             {
-                IsAllDatesSelected = false;
-                IsCustomDatesSelected = true;
+                this.IsAllDatesSelected = false;
+                this.IsCustomDatesSelected = true;
             }
             else
             {
-                IsAllDatesSelected = true;
-                IsCustomDatesSelected = false;
+                this.IsAllDatesSelected = true;
+                this.IsCustomDatesSelected = false;
             }
         }
 
@@ -155,68 +155,68 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             try
             {
                 // Validate selections
-                if (IsCustomDatesSelected && StartDate > EndDate)
+                if (this.IsCustomDatesSelected && this.StartDate > this.EndDate)
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd zakresu dat", "Data początkowa nie może być późniejsza niż data końcowa.", "OK");
                     return;
                 }
 
                 // If general export selected, ensure at least one category is selected
-                if (IsGeneralExportSelected &&
-                    !IncludeCoursesChecked && !IncludeInternshipsChecked && !IncludeProceduresChecked)
+                if (this.IsGeneralExportSelected &&
+                    !this.IncludeCoursesChecked && !this.IncludeInternshipsChecked && !this.IncludeProceduresChecked)
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd wyboru zakresu", "Wybierz przynajmniej jedną kategorię danych do eksportu.", "OK");
                     return;
                 }
 
                 // Set export options
-                _exportOptions = new SMKExportOptions
+                this._exportOptions = new SMKExportOptions
                 {
-                    ExportType = IsGeneralExportSelected ? SMKExportType.General :
-                                  IsProcedureExportSelected ? SMKExportType.Procedures :
+                    ExportType = this.IsGeneralExportSelected ? SMKExportType.General :
+                                  this.IsProcedureExportSelected ? SMKExportType.Procedures :
                                   SMKExportType.DutyShifts,
 
-                    IncludeCourses = IncludeCoursesChecked,
-                    IncludeInternships = IncludeInternshipsChecked,
-                    IncludeProcedures = IncludeProceduresChecked,
+                    IncludeCourses = this.IncludeCoursesChecked,
+                    IncludeInternships = this.IncludeInternshipsChecked,
+                    IncludeProcedures = this.IncludeProceduresChecked,
 
-                    Format = FormatSelectedIndex == 0 ? ExportFormat.Excel : ExportFormat.CSV,
+                    Format = this.FormatSelectedIndex == 0 ? ExportFormat.Excel : ExportFormat.CSV,
 
-                    ModuleFilter = IsAllModulesSelected ? SMKExportModuleFilter.All :
-                                   IsBasicModuleSelected ? SMKExportModuleFilter.BasicOnly :
+                    ModuleFilter = this.IsAllModulesSelected ? SMKExportModuleFilter.All :
+                                   this.IsBasicModuleSelected ? SMKExportModuleFilter.BasicOnly :
                                    SMKExportModuleFilter.SpecialisticOnly,
 
-                    UseCustomDateRange = IsCustomDatesSelected,
-                    StartDate = IsCustomDatesSelected ? StartDate : null,
-                    EndDate = IsCustomDatesSelected ? EndDate : null,
+                    UseCustomDateRange = this.IsCustomDatesSelected,
+                    StartDate = this.IsCustomDatesSelected ? this.StartDate : null,
+                    EndDate = this.IsCustomDatesSelected ? this.EndDate : null,
 
-                    UseSmkExactFormat = UseSmkExactFormat,
+                    UseSmkExactFormat = this.UseSmkExactFormat,
                     SplitDutyHoursAndMinutes = true // Always true for SMK format
                 };
 
                 // Show loading indicator
-                IsLoading = true;
+                this.IsLoading = true;
 
                 // Generate report
-                FilePath = await _exportService.ExportToSMKAsync(_exportOptions);
+                this.FilePath = await this._exportService.ExportToSMKAsync(this._exportOptions);
 
                 // Show result
-                IsResultVisible = true;
+                this.IsResultVisible = true;
 
                 await Application.Current.MainPage.DisplayAlert(
                     "Sukces",
-                    $"Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.\n\nFormat: {(_exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}",
+                    $"Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.\n\nFormat: {(this._exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}",
                     "OK");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating SMK export");
+                this._logger.LogError(ex, "Error generating SMK export");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas generowania raportu: {ex.Message}", "OK");
             }
             finally
             {
                 // Hide loading indicator
-                IsLoading = false;
+                this.IsLoading = false;
             }
         }
 
@@ -225,7 +225,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
         {
             try
             {
-                string filePath = FilePath;
+                string filePath = this.FilePath;
 
                 // Check if file exists
                 if (!File.Exists(filePath))
@@ -242,7 +242,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error opening file");
+                this._logger.LogError(ex, "Error opening file");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Nie udało się otworzyć pliku: {ex.Message}", "OK");
             }
         }
@@ -253,7 +253,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             try
             {
                 // Try to open the folder containing the file
-                string folderPath = Path.GetDirectoryName(FilePath);
+                string folderPath = Path.GetDirectoryName(this.FilePath);
 
                 if (!Directory.Exists(folderPath))
                 {
@@ -265,7 +265,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error opening folder");
+                this._logger.LogError(ex, "Error opening folder");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Nie udało się otworzyć folderu: {ex.Message}", "OK");
             }
         }

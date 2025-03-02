@@ -5,6 +5,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Factories\**" />
     <Compile Remove="Helpers\**" />
@@ -21,6 +26,10 @@
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="SQLiteNetExtensions" Version="2.1.0" />
     <PackageReference Include="SQLiteNetExtensions.Async" Version="2.1.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
   </ItemGroup>
 

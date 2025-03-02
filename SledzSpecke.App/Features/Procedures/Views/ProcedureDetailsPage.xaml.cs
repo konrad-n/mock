@@ -17,52 +17,52 @@ namespace SledzSpecke.App.Features.Procedures.Views
 
         public ProcedureDetailsPage(MedicalProcedure procedure, ModuleType currentModule, ProcedureType currentProcedureType, Func<MedicalProcedure, Task> onSaveCallback)
         {
-            InitializeComponent();
-            _procedure = procedure;
-            _currentModule = currentModule;
-            _currentProcedureType = currentProcedureType;
-            _onSaveCallback = onSaveCallback;
-            _internships = DataSeeder.SeedHematologySpecialization().RequiredInternships.ToList();
+            this.InitializeComponent();
+            this._procedure = procedure;
+            this._currentModule = currentModule;
+            this._currentProcedureType = currentProcedureType;
+            this._onSaveCallback = onSaveCallback;
+            this._internships = DataSeeder.SeedHematologySpecialization().RequiredInternships.ToList();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<ProcedureDetailsViewModel>();
-                // Najpierw inicjalizujemy ViewModel
-                _viewModel.Initialize(_procedure, _currentModule, _currentProcedureType, _onSaveCallback, _internships);
-                // Dopiero potem ustawiamy BindingContext
-                BindingContext = _viewModel;
+                this._viewModel = this.GetRequiredService<ProcedureDetailsViewModel>();
+                this.BindingContext = this._viewModel;
+
+                // Initialize ViewModel with procedure and callback
+                this._viewModel.Initialize(this._procedure, this._currentModule, this._currentProcedureType, this._onSaveCallback, this._internships);
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów procedury.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować formularza procedury.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in ProcedureDetailsPage: {ex}");
             }
         }
 
         private void OnProcedureTypePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && _viewModel != null && _viewModel.Procedure != null)
+            if (sender is Picker picker && this._viewModel != null && this._viewModel.Procedure != null)
             {
-                _viewModel.UpdateProcedureTypeCommand.Execute(picker.SelectedIndex);
+                this._viewModel.UpdateProcedureTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnModulePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && _viewModel != null && _viewModel.Procedure != null)
+            if (sender is Picker picker && this._viewModel != null && this._viewModel.Procedure != null)
             {
-                _viewModel.UpdateModuleCommand.Execute(picker.SelectedIndex);
+                this._viewModel.UpdateModuleCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnInternshipPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && _viewModel != null && _viewModel.Procedure != null)
+            if (sender is Picker picker && this._viewModel != null && this._viewModel.Procedure != null)
             {
-                _viewModel.UpdateInternshipCommand.Execute(picker.SelectedIndex);
+                this._viewModel.UpdateInternshipCommand.Execute(picker.SelectedIndex);
             }
         }
     }

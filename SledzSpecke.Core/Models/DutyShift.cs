@@ -18,10 +18,10 @@ namespace SledzSpecke.Core.Models
 
         // New fields for SMK export format requirements
         [Ignore]
-        public int DurationHoursInt => (int)Math.Floor(DurationHours);
+        public int DurationHoursInt => (int)Math.Floor(this.DurationHours);
 
         [Ignore]
-        public int DurationMinutes => (int)Math.Round((DurationHours - DurationHoursInt) * 60);
+        public int DurationMinutes => (int)Math.Round((this.DurationHours - this.DurationHoursInt) * 60);
 
         public DutyType Type { get; set; }
 

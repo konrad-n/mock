@@ -22,11 +22,11 @@ namespace SledzSpecke.App
             ISpecializationService specializationService,
             IServiceProvider serviceProvider)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            _authenticationService = authenticationService;
-            _specializationService = specializationService;
-            _serviceProvider = serviceProvider;
+            this._authenticationService = authenticationService;
+            this._specializationService = specializationService;
+            this._serviceProvider = serviceProvider;
 
             // Register routes for navigation
             Routing.RegisterRoute(nameof(CourseDetailsPage), typeof(CourseDetailsPage));
@@ -42,21 +42,21 @@ namespace SledzSpecke.App
 
             try
             {
-                UpdateUserInfo();
+                this.UpdateUserInfo();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error updating user info: {ex.Message}");
-                UserNameLabel.Text = "Użytkownik";
-                SpecializationLabel.Text = "Specjalizacja";
+                this.UserNameLabel.Text = "Użytkownik";
+                this.SpecializationLabel.Text = "Specjalizacja";
             }
         }
 
         private void UpdateUserInfo()
         {
-            if (_authenticationService.IsAuthenticated)
+            if (this._authenticationService.IsAuthenticated)
             {
-                UserNameLabel.Text = _authenticationService.CurrentUser.Username;
+                this.UserNameLabel.Text = this. _authenticationService.CurrentUser.Username;
 
                 try
                 {
@@ -64,10 +64,10 @@ namespace SledzSpecke.App
                     {
                         try
                         {
-                            var specialization = await _specializationService.GetSpecializationAsync();
+                            var specialization = await this._specializationService.GetSpecializationAsync();
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                SpecializationLabel.Text = specialization?.Name ?? "Brak specjalizacji";
+                                this.SpecializationLabel.Text = specialization?.Name ?? "Brak specjalizacji";
                             });
                         }
                         catch (Exception ex)
@@ -75,7 +75,7 @@ namespace SledzSpecke.App
                             System.Diagnostics.Debug.WriteLine($"Error getting specialization: {ex.Message}");
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                SpecializationLabel.Text = "Brak specjalizacji";
+                                this.SpecializationLabel.Text = "Brak specjalizacji";
                             });
                         }
                     });
@@ -83,18 +83,18 @@ namespace SledzSpecke.App
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error in task: {ex.Message}");
-                    SpecializationLabel.Text = "Brak specjalizacji";
+                    this.SpecializationLabel.Text = "Brak specjalizacji";
                 }
             }
         }
 
         private async void OnLogoutClicked(object sender, EventArgs e)
         {
-            bool confirm = await DisplayAlert("Wylogowanie", "Czy na pewno chcesz się wylogować?", "Tak", "Nie");
+            bool confirm = await this.DisplayAlert("Wylogowanie", "Czy na pewno chcesz się wylogować?", "Tak", "Nie");
             if (confirm)
             {
-                _authenticationService.Logout();
-                Application.Current.MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
+                this._authenticationService.Logout();
+                Application.Current.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
             }
         }
     }

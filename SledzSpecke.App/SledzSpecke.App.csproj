@@ -34,6 +34,11 @@
     <MtouchLink>SdkOnly</MtouchLink>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
   <!-- 
        ADDED: Explicitly setting the Android ABIs for net9.0-android35.0 
        so you can run on an x86_64 emulator (and optionally arm64, x86, etc.).
@@ -101,6 +106,10 @@
     <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.40" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

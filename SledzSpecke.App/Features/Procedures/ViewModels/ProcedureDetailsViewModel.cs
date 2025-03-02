@@ -43,116 +43,116 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         [ObservableProperty]
         private List<Internship> _filteredInternships = new();
 
-        public MedicalProcedure Procedure => _procedure;
+        public MedicalProcedure Procedure => this._procedure;
 
         public ProcedureDetailsViewModel(ILogger<ProcedureDetailsViewModel> logger) : base(logger)
         {
-            Title = "Szczegóły procedury";
+            this.Title = "Szczegóły procedury";
         }
 
         public void Initialize(MedicalProcedure procedure, ModuleType currentModule,
             ProcedureType currentProcedureType, Func<MedicalProcedure, Task> onSaveCallback,
             List<Internship> internships)
         {
-            _currentModule = currentModule;
-            _currentProcedureType = currentProcedureType;
-            _onSaveCallback = onSaveCallback;
-            _internships = internships;
+            this._procedure = procedure ?? new MedicalProcedure();
+            this._currentModule = currentModule;
+            this._currentProcedureType = currentProcedureType;
+            this._onSaveCallback = onSaveCallback;
+            this._internships = internships;
 
             if (procedure == null)
             {
                 // Nowa procedura
-                _procedure = new MedicalProcedure
+                this._procedure = new MedicalProcedure
                 {
                     Id = new Random().Next(1000, 9999), // Tymczasowe ID
                     Module = currentModule,
                     ProcedureType = currentProcedureType,
                     CompletedCount = 0
                 };
-                PageTitle = "Dodaj procedurę";
-                RequiredCount = "1";
-                CompletedCount = "0";
+                this.PageTitle = "Dodaj procedurę";
+                this.RequiredCount = "1";
+                this.CompletedCount = "0";
             }
             else
             {
                 // Edycja istniejącej procedury
-                _procedure = procedure;
-                PageTitle = "Szczegóły procedury";
-                RequiredCount = procedure.RequiredCount.ToString();
-                CompletedCount = procedure.CompletedCount.ToString();
-                Notes = procedure.Description;
+                this.PageTitle = "Szczegóły procedury";
+                this.RequiredCount = procedure.RequiredCount.ToString();
+                this.CompletedCount = procedure.CompletedCount.ToString();
+                this.Notes = procedure.Description;
             }
 
             // Ustawienie pickerów
-            ProcedureTypePickerSelectedIndex = _procedure.ProcedureType == ProcedureType.TypeA ? 0 : 1;
-            ModulePickerSelectedIndex = _procedure.Module == ModuleType.Basic ? 0 : 1;
+            this.ProcedureTypePickerSelectedIndex = this._procedure.ProcedureType == ProcedureType.TypeA ? 0 : 1;
+            this.ModulePickerSelectedIndex = this._procedure.Module == ModuleType.Basic ? 0 : 1;
 
             // Wypełnienie pickera stażów
-            LoadInternships(_procedure.Module);
+            this.LoadInternships(this._procedure.Module);
         }
 
         private void LoadInternships(ModuleType moduleType)
         {
-            InternshipItems.Clear();
-            FilteredInternships = _internships.Where(i => i.Module == moduleType).ToList();
+            this.InternshipItems.Clear();
+            this.FilteredInternships = this._internships.Where(i => i.Module == moduleType).ToList();
 
-            foreach (var internship in FilteredInternships)
+            foreach (var internship in this.FilteredInternships)
             {
-                InternshipItems.Add(internship.Name);
+                this.InternshipItems.Add(internship.Name);
             }
 
             // Jeśli edytujemy procedurę, ustawiamy wybrany staż
-            if (_procedure.InternshipId.HasValue)
+            if (this._procedure.InternshipId.HasValue)
             {
-                int index = FilteredInternships.FindIndex(i => i.Id == _procedure.InternshipId);
+                int index = this.FilteredInternships.FindIndex(i => i.Id == this._procedure.InternshipId);
                 if (index >= 0)
                 {
-                    InternshipPickerSelectedIndex = index;
+                    this.InternshipPickerSelectedIndex = index;
                 }
                 else
                 {
                     // Staż nie należy do wybranego modułu, więc ustawiamy pusty
-                    InternshipPickerSelectedIndex = -1;
+                    this.InternshipPickerSelectedIndex = -1;
                     // Czyścimy przypisanie stażu
-                    _procedure.InternshipId = null;
+                    this._procedure.InternshipId = null;
                 }
             }
             else
             {
-                InternshipPickerSelectedIndex = -1;
+                this.InternshipPickerSelectedIndex = -1;
             }
         }
 
         [RelayCommand]
         public void UpdateProcedureType(int selectedIndex)
         {
-            if (_procedure != null)
+            if (this._procedure != null)
             {
-                _procedure.ProcedureType = selectedIndex == 0 ? ProcedureType.TypeA : ProcedureType.TypeB;
+                this._procedure.ProcedureType = selectedIndex == 0 ? ProcedureType.TypeA : ProcedureType.TypeB;
             }
         }
 
         [RelayCommand]
         public void UpdateModule(int selectedIndex)
         {
-            if (_procedure != null)
+            if (this._procedure != null)
             {
-                _procedure.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
+                this._procedure.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
 
                 // Przy zmianie modułu zapamiętujemy aktualny identyfikator stażu
-                int? currentInternshipId = _procedure.InternshipId;
+                int? currentInternshipId = this._procedure.InternshipId;
 
                 // Ładujemy nową listę stażów
-                LoadInternships(_procedure.Module);
+                this.LoadInternships(this._procedure.Module);
 
                 // Jeśli staż należy do nowego modułu, ustawiamy go ponownie
                 if (currentInternshipId.HasValue)
                 {
-                    int index = FilteredInternships.FindIndex(i => i.Id == currentInternshipId.Value);
+                    int index = this.FilteredInternships.FindIndex(i => i.Id == currentInternshipId.Value);
                     if (index >= 0)
                     {
-                        InternshipPickerSelectedIndex = index;
-                        _procedure.InternshipId = currentInternshipId;
+                        this.InternshipPickerSelectedIndex = index;
+                        this._procedure.InternshipId = currentInternshipId;
                     }
                 }
             }
@@ -161,14 +161,14 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         [RelayCommand]
         public void UpdateInternship(int selectedIndex)
         {
-            if (_procedure != null && selectedIndex >= 0 && selectedIndex < FilteredInternships.Count)
+            if (this._procedure != null && selectedIndex >= 0 && selectedIndex < this.FilteredInternships.Count)
             {
-                _procedure.InternshipId = FilteredInternships[selectedIndex].Id;
+                this._procedure.InternshipId = this.FilteredInternships[selectedIndex].Id;
             }
-            else if (_procedure != null)
+            else if (this._procedure != null)
             {
                 // Brak wyboru stażu
-                _procedure.InternshipId = null;
+                this._procedure.InternshipId = null;
             }
         }
 
@@ -182,34 +182,34 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         private async Task SaveAsync()
         {
             // Walidacja
-            if (string.IsNullOrWhiteSpace(_procedure.Name))
+            if (string.IsNullOrWhiteSpace(this._procedure.Name))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa procedury jest wymagana.", "OK");
                 return;
             }
 
-            if (!int.TryParse(RequiredCount, out int requiredCount) || requiredCount <= 0)
+            if (!int.TryParse(this.RequiredCount, out int requiredCount) || requiredCount <= 0)
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawną wymaganą liczbę procedur.", "OK");
                 return;
             }
 
-            if (InternshipPickerSelectedIndex < 0 ||
-                InternshipPickerSelectedIndex >= FilteredInternships.Count)
+            if (this.InternshipPickerSelectedIndex < 0 ||
+                this.InternshipPickerSelectedIndex >= this.FilteredInternships.Count)
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Wybierz staż, w ramach którego wykonywana jest procedura.", "OK");
                 return;
             }
 
-            _procedure.RequiredCount = requiredCount;
-            _procedure.Description = Notes;
+            this._procedure.RequiredCount = requiredCount;
+            this._procedure.Description = this.Notes;
 
             // Upewniamy się, że przypisany jest poprawny staż
-            _procedure.InternshipId = FilteredInternships[InternshipPickerSelectedIndex].Id;
+            this._procedure.InternshipId = this.FilteredInternships[this.InternshipPickerSelectedIndex].Id;
 
-            if (_onSaveCallback != null)
+            if (this._onSaveCallback != null)
             {
-                await _onSaveCallback(_procedure);
+                await this._onSaveCallback(this._procedure);
             }
 
             await Shell.Current.Navigation.PopAsync();

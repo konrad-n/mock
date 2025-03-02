@@ -44,28 +44,28 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             ILogger<RegistrationViewModel> logger,
             INavigationService navigationService) : base(logger)
         {
-            _dataManager = dataManager;
-            _authenticationService = authenticationService;
-            SpecializationTypes = new List<SpecializationType>();
-            Title = "Rejestracja";
-            _navigationService = navigationService;
+            this._dataManager = dataManager;
+            this._authenticationService = authenticationService;
+            this.SpecializationTypes = new List<SpecializationType>();
+            this.Title = "Rejestracja";
+            this._navigationService = navigationService;
         }
 
         public override async Task InitializeAsync()
         {
-            await LoadSpecializationTypesAsync();
+            await this.LoadSpecializationTypesAsync();
         }
 
         private async Task LoadSpecializationTypesAsync()
         {
             try
             {
-                SpecializationTypes = await _dataManager.GetAllSpecializationTypesAsync();
+                this.SpecializationTypes = await this._dataManager.GetAllSpecializationTypesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading specialization types");
-                ErrorMessage = $"Nie udało się załadować listy specjalizacji: {ex.Message}";
+                this._logger.LogError(ex, "Error loading specialization types");
+                this.ErrorMessage = $"Nie udało się załadować listy specjalizacji: {ex.Message}";
             }
         }
 
@@ -73,57 +73,57 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         public async Task RegisterAsync()
         {
             // Validation
-            if (string.IsNullOrWhiteSpace(Username) ||
-                string.IsNullOrWhiteSpace(Email) ||
-                string.IsNullOrWhiteSpace(Password) ||
-                string.IsNullOrWhiteSpace(ConfirmPassword) ||
-                SpecializationSelectedIndex == -1)
+            if (string.IsNullOrWhiteSpace(this.Username) ||
+                string.IsNullOrWhiteSpace(this.Email) ||
+                string.IsNullOrWhiteSpace(this.Password) ||
+                string.IsNullOrWhiteSpace(this.ConfirmPassword) ||
+                this.SpecializationSelectedIndex == -1)
             {
-                ErrorMessage = "Proszę wypełnić wszystkie pola formularza.";
+                this.ErrorMessage = "Proszę wypełnić wszystkie pola formularza.";
                 return;
             }
 
-            if (Password != ConfirmPassword)
+            if (this.Password != this.ConfirmPassword)
             {
-                ErrorMessage = "Hasła nie są identyczne.";
+                this.ErrorMessage = "Hasła nie są identyczne.";
                 return;
             }
 
-            IsLoading = true;
-            ErrorMessage = string.Empty;
+            this.IsLoading = true;
+            this.ErrorMessage = string.Empty;
 
             try
             {
-                int specializationTypeId = SpecializationTypes[SpecializationSelectedIndex].Id;
+                int specializationTypeId = this.SpecializationTypes[this.SpecializationSelectedIndex].Id;
 
-                bool result = await _authenticationService.RegisterAsync(
-                    Username,
-                    Email,
-                    Password,
+                bool result = await this._authenticationService.RegisterAsync(
+                    this.Username,
+                    this.Email,
+                    this.Password,
                     specializationTypeId);
 
                 if (result)
                 {
-                    await _navigationService.DisplayAlertAsync(
+                    await this._navigationService.DisplayAlertAsync(
                         "Sukces",
                         "Rejestracja zakończona pomyślnie. Możesz się teraz zalogować.",
                         "OK");
 
-                    await _navigationService.PopAsync();
+                    await this._navigationService.PopAsync();
                 }
                 else
                 {
-                    ErrorMessage = "Użytkownik o podanym adresie email już istnieje.";
+                    this.ErrorMessage = "Użytkownik o podanym adresie email już istnieje.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during registration");
-                ErrorMessage = $"Wystąpił problem podczas rejestracji: {ex.Message}";
+                this._logger.LogError(ex, "Error during registration");
+                this.ErrorMessage = $"Wystąpił problem podczas rejestracji: {ex.Message}";
             }
             finally
             {
-                IsLoading = false;
+                this.IsLoading = false;
             }
         }
     }

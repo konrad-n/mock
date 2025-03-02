@@ -17,25 +17,25 @@ namespace SledzSpecke.App.Features.Procedures.Views
             ISpecializationService specializationService,
             IDatabaseService databaseService)
         {
-            _specializationService = specializationService;
-            _databaseService = databaseService;
-            InitializeComponent();
+            this._specializationService = specializationService;
+            this._databaseService = databaseService;
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<ProceduresViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<ProceduresViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
 
                 // Po inicjalizacji wyświetl procedury
-                DisplayProcedures();
+                this.DisplayProcedures();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować danych procedur.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony procedur.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in ProceduresPage: {ex}");
             }
         }
@@ -45,13 +45,13 @@ namespace SledzSpecke.App.Features.Procedures.Views
             base.OnAppearing();
 
             // Odśwież dane procedur przy każdym pokazaniu strony
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
+                this._viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        DisplayProcedures();
+                        this.DisplayProcedures();
                     });
                 });
             }
@@ -59,21 +59,23 @@ namespace SledzSpecke.App.Features.Procedures.Views
 
         private void DisplayProcedures()
         {
-            ProceduresLayout.Children.Clear();
-            NoSelectionLabel.IsVisible = false;
+            this.ProceduresLayout.Children.Clear();
+            this.NoSelectionLabel.IsVisible = false;
 
-            if (_viewModel.Specialization == null)
+            if (this._viewModel.Specialization == null)
                 return;
 
-            var procedures = _viewModel.Specialization.RequiredProcedures
-                .Where(p => p.Module == _viewModel.CurrentModule && p.ProcedureType == _viewModel.CurrentProcedureType)
-                .OrderBy(p => p.InternshipId)
-                .ThenBy(p => p.Name)
+            // Filter procedures by module and type
+            var procedures = this._viewModel.Specialization.RequiredProcedures
+                .Where(p => p.Module == this._viewModel.CurrentModule && p.ProcedureType == this._viewModel.CurrentProcedureType)
+                .OrderBy(p => p.Name)
                 .ToList();
+
+            this._viewModel.IsProceduresEmpty = procedures.Count == 0;
 
             if (procedures.Count == 0)
             {
-                ProceduresLayout.Children.Add(new Label
+                this.ProceduresLayout.Children.Add(new Label
                 {
                     Text = "Brak procedur do wyświetlenia",
                     HorizontalOptions = LayoutOptions.Center,
@@ -89,11 +91,11 @@ namespace SledzSpecke.App.Features.Procedures.Views
             foreach (var group in proceduresByInternship)
             {
                 var internshipId = group.Key;
-                var internshipName = _viewModel.Specialization.RequiredInternships
+                var internshipName = this._viewModel.Specialization.RequiredInternships
                     .FirstOrDefault(i => i.Id == internshipId)?.Name ?? "Nieokreślony staż";
 
                 // Nagłówek stażu
-                ProceduresLayout.Children.Add(new Label
+                this.ProceduresLayout.Children.Add(new Label
                 {
                     Text = internshipName,
                     FontSize = 18,
@@ -139,7 +141,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                         Margin = new Thickness(0, 5, 0, 0),
                         CommandParameter = procedure.Id
                     };
-                    addEntryButton.Clicked += OnAddProcedureEntryClicked;
+                    addEntryButton.Clicked += this.OnAddProcedureEntryClicked;
 
                     var detailsButton = new Button
                     {
@@ -149,7 +151,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                         Margin = new Thickness(0, 5, 0, 0),
                         CommandParameter = procedure.Id
                     };
-                    detailsButton.Clicked += OnProcedureDetailsClicked;
+                    detailsButton.Clicked += this.OnProcedureDetailsClicked;
 
                     var buttonsLayout = new Grid
                     {
@@ -168,7 +170,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                     };
 
                     frame.Content = contentLayout;
-                    ProceduresLayout.Children.Add(frame);
+                    this.ProceduresLayout.Children.Add(frame);
                 }
             }
         }
@@ -176,57 +178,57 @@ namespace SledzSpecke.App.Features.Procedures.Views
         // Obsługa przycisków filtrów
         private void OnBasicModuleButtonClicked(object sender, EventArgs e)
         {
-            if (_viewModel.CurrentModule != ModuleType.Basic)
+            if (this._viewModel.CurrentModule != ModuleType.Basic)
             {
-                _viewModel.CurrentModule = ModuleType.Basic;
-                _viewModel.UpdateButtonStyles();
-                DisplayProcedures();
+                this._viewModel.CurrentModule = ModuleType.Basic;
+                this._viewModel.UpdateButtonStyles();
+                this.DisplayProcedures();
             }
         }
 
         private void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
         {
-            if (_viewModel.CurrentModule != ModuleType.Specialistic)
+            if (this._viewModel.CurrentModule != ModuleType.Specialistic)
             {
-                _viewModel.CurrentModule = ModuleType.Specialistic;
-                _viewModel.UpdateButtonStyles();
-                DisplayProcedures();
+                this._viewModel.CurrentModule = ModuleType.Specialistic;
+                this._viewModel.UpdateButtonStyles();
+                this.DisplayProcedures();
             }
         }
 
         private void OnTypeAButtonClicked(object sender, EventArgs e)
         {
-            if (_viewModel.CurrentProcedureType != ProcedureType.TypeA)
+            if (this._viewModel.CurrentProcedureType != ProcedureType.TypeA)
             {
-                _viewModel.CurrentProcedureType = ProcedureType.TypeA;
-                _viewModel.UpdateButtonStyles();
-                DisplayProcedures();
+                this._viewModel.CurrentProcedureType = ProcedureType.TypeA;
+                this._viewModel.UpdateButtonStyles();
+                this.DisplayProcedures();
             }
         }
 
         private void OnTypeBButtonClicked(object sender, EventArgs e)
         {
-            if (_viewModel.CurrentProcedureType != ProcedureType.TypeB)
+            if (this._viewModel.CurrentProcedureType != ProcedureType.TypeB)
             {
-                _viewModel.CurrentProcedureType = ProcedureType.TypeB;
-                _viewModel.UpdateButtonStyles();
-                DisplayProcedures();
+                this._viewModel.CurrentProcedureType = ProcedureType.TypeB;
+                this._viewModel.UpdateButtonStyles();
+                this.DisplayProcedures();
             }
         }
 
         private async void OnAddProcedureClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new ProcedureDetailsPage(null, _viewModel.CurrentModule, _viewModel.CurrentProcedureType, OnProcedureAdded));
+            await this.Navigation.PushAsync(new ProcedureDetailsPage(null, this._viewModel.CurrentModule, this._viewModel.CurrentProcedureType, this.OnProcedureAdded));
         }
 
         private async void OnProcedureDetailsClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is int procedureId)
             {
-                var procedure = _viewModel.Specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedureId);
+                var procedure = this._viewModel.Specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedureId);
                 if (procedure != null)
                 {
-                    await Navigation.PushAsync(new ProcedureDetailsPage(procedure, _viewModel.CurrentModule, _viewModel.CurrentProcedureType, OnProcedureUpdated));
+                    await this.Navigation.PushAsync(new ProcedureDetailsPage(procedure, this._viewModel.CurrentModule, this._viewModel.CurrentProcedureType, this.OnProcedureUpdated));
                 }
             }
         }
@@ -235,10 +237,10 @@ namespace SledzSpecke.App.Features.Procedures.Views
         {
             if (sender is Button button && button.CommandParameter is int procedureId)
             {
-                var procedure = _viewModel.Specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedureId);
+                var procedure = this._viewModel.Specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedureId);
                 if (procedure != null)
                 {
-                    await Navigation.PushAsync(new ProcedureEntryPage(_databaseService, procedure, OnProcedureEntryAdded));
+                    await this.Navigation.PushAsync(new ProcedureEntryPage(this._databaseService, procedure, this.OnProcedureEntryAdded));
                 }
             }
         }
@@ -246,20 +248,20 @@ namespace SledzSpecke.App.Features.Procedures.Views
         // Callback methods
         private async Task OnProcedureAdded(MedicalProcedure procedure)
         {
-            await _viewModel.SaveProcedureAsync(procedure);
-            DisplayProcedures();
+            await this._viewModel.SaveProcedureAsync(procedure);
+            this.DisplayProcedures();
         }
 
         private async Task OnProcedureUpdated(MedicalProcedure procedure)
         {
-            await _viewModel.SaveProcedureAsync(procedure);
-            DisplayProcedures();
+            await this._viewModel.SaveProcedureAsync(procedure);
+            this.DisplayProcedures();
         }
 
         private async Task OnProcedureEntryAdded(MedicalProcedure procedure, ProcedureEntry entry)
         {
-            await _viewModel.AddProcedureEntryAsync(procedure, entry);
-            DisplayProcedures();
+            await this._viewModel.AddProcedureEntryAsync(procedure, entry);
+            this.DisplayProcedures();
         }
     }
 }

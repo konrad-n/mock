@@ -9,20 +9,20 @@ namespace SledzSpecke.App.Features.Dashboard.Views
 
         public DashboardPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<DashboardViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<DashboardViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować danych na pulpicie.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się załadować danych na pulpicie.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in DashboardPage: {ex}");
             }
         }

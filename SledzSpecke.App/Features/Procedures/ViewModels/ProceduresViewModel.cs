@@ -54,79 +54,79 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             IDatabaseService databaseService,
             ILogger<ProceduresViewModel> logger) : base(logger)
         {
-            _specializationService = specializationService;
-            _databaseService = databaseService;
-            Title = "Procedury";
+            this._specializationService = specializationService;
+            this._databaseService = databaseService;
+            this.Title = "Procedury";
         }
 
         public override async Task InitializeAsync()
         {
             try
             {
-                IsBusy = true;
-                await LoadSpecializationDataAsync();
-                UpdateButtonStyles();
+                this.IsBusy = true;
+                await this.LoadSpecializationDataAsync();
+                this.UpdateButtonStyles();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading procedures data");
+                this._logger.LogError(ex, "Error loading procedures data");
             }
             finally
             {
-                IsBusy = false;
+                this.IsBusy = false;
             }
         }
 
         public async Task LoadSpecializationDataAsync()
         {
-            Specialization = await _specializationService.GetSpecializationAsync();
+            this.Specialization = await this._specializationService.GetSpecializationAsync();
         }
 
         public void UpdateButtonStyles()
         {
             // Module buttons
-            if (CurrentModule == ModuleType.Basic)
+            if (this.CurrentModule == ModuleType.Basic)
             {
-                BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
-                BasicModuleButtonTextColor = Colors.White;
-                SpecialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
-                SpecialisticModuleButtonTextColor = Colors.Black;
+                this.BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
+                this.BasicModuleButtonTextColor = Colors.White;
+                this.SpecialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
+                this.SpecialisticModuleButtonTextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButtonBackgroundColor = new Color(228, 240, 245);
-                BasicModuleButtonTextColor = Colors.Black;
-                SpecialisticModuleButtonBackgroundColor = new Color(8, 32, 68);
-                SpecialisticModuleButtonTextColor = Colors.White;
+                this.BasicModuleButtonBackgroundColor = new Color(228, 240, 245);
+                this.BasicModuleButtonTextColor = Colors.Black;
+                this.SpecialisticModuleButtonBackgroundColor = new Color(8, 32, 68);
+                this.SpecialisticModuleButtonTextColor = Colors.White;
             }
 
             // Type buttons
-            if (CurrentProcedureType == ProcedureType.TypeA)
+            if (this.CurrentProcedureType == ProcedureType.TypeA)
             {
-                TypeAButtonBackgroundColor = new Color(13, 117, 156);
-                TypeAButtonTextColor = Colors.White;
-                TypeBButtonBackgroundColor = new Color(228, 240, 245);
-                TypeBButtonTextColor = Colors.Black;
+                this.TypeAButtonBackgroundColor = new Color(13, 117, 156);
+                this.TypeAButtonTextColor = Colors.White;
+                this.TypeBButtonBackgroundColor = new Color(228, 240, 245);
+                this.TypeBButtonTextColor = Colors.Black;
             }
             else
             {
-                TypeAButtonBackgroundColor = new Color(228, 240, 245);
-                TypeAButtonTextColor = Colors.Black;
-                TypeBButtonBackgroundColor = new Color(13, 117, 156);
-                TypeBButtonTextColor = Colors.White;
+                this.TypeAButtonBackgroundColor = new Color(228, 240, 245);
+                this.TypeAButtonTextColor = Colors.Black;
+                this.TypeBButtonBackgroundColor = new Color(13, 117, 156);
+                this.TypeBButtonTextColor = Colors.White;
             }
         }
 
         public async Task SaveProcedureAsync(MedicalProcedure procedure)
         {
-            await _specializationService.SaveProcedureAsync(procedure);
-            await LoadSpecializationDataAsync();
+            await this._specializationService.SaveProcedureAsync(procedure);
+            await this.LoadSpecializationDataAsync();
         }
 
         public async Task AddProcedureEntryAsync(MedicalProcedure procedure, ProcedureEntry entry)
         {
-            await _specializationService.AddProcedureEntryAsync(procedure, entry);
-            await LoadSpecializationDataAsync();
+            await this._specializationService.AddProcedureEntryAsync(procedure, entry);
+            await this.LoadSpecializationDataAsync();
         }
     }
 }

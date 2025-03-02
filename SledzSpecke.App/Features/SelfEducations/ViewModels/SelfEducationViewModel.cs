@@ -33,26 +33,26 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             ISelfEducationService selfEducationService,
             ILogger<SelfEducationViewModel> logger) : base(logger)
         {
-            _selfEducationService = selfEducationService;
-            SelfEducationList = new ObservableCollection<SelfEducation>();
-            EducationByYear = new ObservableCollection<YearlyEducationGroup>();
-            Title = "Samokształcenie";
+            this._selfEducationService = selfEducationService;
+            this.SelfEducationList = new ObservableCollection<SelfEducation>();
+            this.EducationByYear = new ObservableCollection<YearlyEducationGroup>();
+            this.Title = "Samokształcenie";
         }
 
         public override async Task InitializeAsync()
         {
             try
             {
-                IsBusy = true;
-                await LoadDataAsync();
+                this.IsBusy = true;
+                await  this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading self-education data");
+                this._logger.LogError(ex, "Error loading self-education data");
             }
             finally
             {
-                IsBusy = false;
+                this.IsBusy = false;
             }
         }
 
@@ -61,30 +61,30 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             try
             {
                 // Get all self-education events
-                var events = await _selfEducationService.GetAllSelfEducationAsync();
-                SelfEducationList = new ObservableCollection<SelfEducation>(events);
+                var events = await this._selfEducationService.GetAllSelfEducationAsync();
+                this.SelfEducationList = new ObservableCollection<SelfEducation>(events);
 
                 // Update used days label
-                var totalUsedDays = await _selfEducationService.GetTotalUsedDaysAsync();
-                var yearlyAllowance = await _selfEducationService.GetYearlyAllowanceAsync();
+                var totalUsedDays = await this._selfEducationService.GetTotalUsedDaysAsync();
+                var yearlyAllowance = await this._selfEducationService.GetYearlyAllowanceAsync();
                 var totalAllowedDays = yearlyAllowance * 3; // 3 years typical
-                UsedDaysLabel = $"{totalUsedDays}/{totalAllowedDays}";
+                this.UsedDaysLabel = $"{totalUsedDays}/{totalAllowedDays}";
 
                 // Get yearly used days and update label
                 var currentYear = DateTime.Now.Year;
-                var yearlyUsedDays = await _selfEducationService.GetYearlyUsedDaysAsync();
+                var yearlyUsedDays = await this._selfEducationService.GetYearlyUsedDaysAsync();
                 var usedDaysThisYear = yearlyUsedDays.ContainsKey(currentYear) ? yearlyUsedDays[currentYear] : 0;
-                YearlyDaysLabel = $"{usedDaysThisYear} dni";
+                this.YearlyDaysLabel = $"{usedDaysThisYear} dni";
 
                 // Group education events by year
-                GroupEducationEventsByYear();
+                this.GroupEducationEventsByYear();
 
                 // Show/hide "no events" message
-                NoEventsVisible = SelfEducationList.Count == 0;
+                this.NoEventsVisible = this.SelfEducationList.Count == 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading self-education data");
+                this._logger.LogError(ex, "Error loading self-education data");
                 throw;
             }
         }
@@ -93,9 +93,9 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         {
             try
             {
-                EducationByYear.Clear();
+                this.EducationByYear.Clear();
 
-                var groupedEvents = SelfEducationList
+                var groupedEvents = this.SelfEducationList
                     .OrderByDescending(s => s.StartDate)
                     .GroupBy(s => s.StartDate.Year)
                     .ToList();
@@ -105,28 +105,28 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                     var totalYearDays = yearGroup.Sum(s => s.DurationDays);
                     var yearEvents = new ObservableCollection<SelfEducation>(yearGroup.OrderByDescending(s => s.StartDate));
                     var yearInfo = new YearlyEducationGroup(yearGroup.Key, totalYearDays, yearEvents);
-                    EducationByYear.Add(yearInfo);
+                    this.EducationByYear.Add(yearInfo);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error grouping education events by year");
+                this._logger.LogError(ex, "Error grouping education events by year");
             }
         }
 
         [RelayCommand]
         private async Task AddSelfEducationAsync()
         {
-            await Shell.Current.Navigation.PushAsync(new SelfEducationDetailsPage(null, OnSelfEducationAdded));
+            await Shell.Current.Navigation.PushAsync(new SelfEducationDetailsPage(null, this.OnSelfEducationAdded));
         }
 
         [RelayCommand]
         private async Task EditSelfEducationAsync(int educationId)
         {
-            var selfEducation = SelfEducationList.FirstOrDefault(s => s.Id == educationId);
+            var selfEducation = this.SelfEducationList.FirstOrDefault(s => s.Id == educationId);
             if (selfEducation != null)
             {
-                await Shell.Current.Navigation.PushAsync(new SelfEducationDetailsPage(selfEducation, OnSelfEducationUpdated));
+                await Shell.Current.Navigation.PushAsync(new SelfEducationDetailsPage(selfEducation, this.OnSelfEducationUpdated));
             }
         }
 
@@ -135,18 +135,18 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             try
             {
                 // Generowanie nowego ID
-                selfEducation.Id = SelfEducationList.Count > 0 ? SelfEducationList.Max(s => s.Id) + 1 : 1;
-                SelfEducationList.Add(selfEducation);
+                selfEducation.Id = this.SelfEducationList.Count > 0 ? this.SelfEducationList.Max(s => s.Id) + 1 : 1;
+                this.SelfEducationList.Add(selfEducation);
 
                 // Save to database
-                _selfEducationService.SaveSelfEducationAsync(selfEducation);
+                this._selfEducationService.SaveSelfEducationAsync(selfEducation);
 
                 // Refresh view
-                LoadDataAsync().ConfigureAwait(false);
+                this.LoadDataAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding self-education event");
+                this._logger.LogError(ex, "Error adding self-education event");
             }
         }
 
@@ -154,22 +154,22 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         {
             try
             {
-                var existingSelfEducation = SelfEducationList.FirstOrDefault(s => s.Id == selfEducation.Id);
+                var existingSelfEducation = this.SelfEducationList.FirstOrDefault(s => s.Id == selfEducation.Id);
                 if (existingSelfEducation != null)
                 {
-                    var index = SelfEducationList.IndexOf(existingSelfEducation);
-                    SelfEducationList[index] = selfEducation;
+                    var index = this.SelfEducationList.IndexOf(existingSelfEducation);
+                    this.SelfEducationList[index] = selfEducation;
                 }
 
                 // Save to database
-                _selfEducationService.SaveSelfEducationAsync(selfEducation);
+                this._selfEducationService.SaveSelfEducationAsync(selfEducation);
 
                 // Refresh view
-                LoadDataAsync().ConfigureAwait(false);
+                this.LoadDataAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating self-education event");
+                this._logger.LogError(ex, "Error updating self-education event");
             }
         }
 
@@ -197,10 +197,10 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
 
         public YearlyEducationGroup(int year, int totalDays, ObservableCollection<SelfEducation> items) : base(items)
         {
-            Year = year;
-            TotalDays = totalDays;
-            Header = $"Rok {year}";
-            Summary = $"Wykorzystano: {totalDays}/6 dni";
+            this.Year = year;
+            this.TotalDays = totalDays;
+            this.Header = $"Rok {year}";
+            this.Summary = $"Wykorzystano: {totalDays}/6 dni";
         }
     }
 }

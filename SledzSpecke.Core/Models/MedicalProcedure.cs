@@ -31,6 +31,6 @@ namespace SledzSpecke.Core.Models
         [Ignore]
         public List<ProcedureEntry> Entries { get; set; } = new List<ProcedureEntry>();
 
-        public double CompletionPercentage => RequiredCount > 0 ? (CompletedCount * 100.0 / RequiredCount) : 0;
+        public double CompletionPercentage => this.RequiredCount > 0 ? (this.CompletedCount * 100.0 / this.RequiredCount) : 0;
     }
 }

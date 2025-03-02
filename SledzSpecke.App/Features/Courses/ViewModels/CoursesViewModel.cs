@@ -30,52 +30,52 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             ISpecializationService specializationService,
             ILogger<CoursesViewModel> logger) : base(logger)
         {
-            _specializationService = specializationService;
-            Title = "Kursy";
+            this._specializationService = specializationService;
+            this.Title = "Kursy";
         }
 
         public override async Task InitializeAsync()
         {
             try
             {
-                IsBusy = true;
-                await LoadSpecializationDataAsync();
+                this.IsBusy = true;
+                await this.LoadSpecializationDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading courses data");
+                this._logger.LogError(ex, "Error loading courses data");
             }
             finally
             {
-                IsBusy = false;
+                this.IsBusy = false;
             }
         }
 
         public async Task LoadSpecializationDataAsync()
         {
-            Specialization = await _specializationService.GetSpecializationAsync();
+            this.Specialization = await this._specializationService.GetSpecializationAsync();
         }
 
         public void SelectBasicModule()
         {
-            IsModuleBasicSelected = true;
-            IsModuleSpecialisticSelected = false;
-            CurrentModule = ModuleType.Basic;
+            this.IsModuleBasicSelected = true;
+            this.IsModuleSpecialisticSelected = false;
+            this.CurrentModule = ModuleType.Basic;
         }
 
         public void SelectSpecialisticModule()
         {
-            IsModuleBasicSelected = false;
-            IsModuleSpecialisticSelected = true;
-            CurrentModule = ModuleType.Specialistic;
+            this.IsModuleBasicSelected = false;
+            this.IsModuleSpecialisticSelected = true;
+            this.CurrentModule = ModuleType.Specialistic;
         }
 
         public List<Course> GetFilteredCourses()
         {
-            if (Specialization == null) return new List<Course>();
+            if (this.Specialization == null) return new List<Course>();
 
-            return Specialization.RequiredCourses
-                .Where(c => c.Module == CurrentModule)
+            return this.Specialization.RequiredCourses
+                .Where(c => c.Module == this.CurrentModule)
                 .OrderBy(c => c.IsCompleted)
                 .ToList();
         }

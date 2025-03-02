@@ -17,40 +17,40 @@ namespace SledzSpecke.App.Features.Absences.Views
             Absence absence,
             Action<Absence> onSaveCallback)
         {
-            InitializeComponent();
-            _databaseService = databaseService;
-            _absence = absence;
-            _onSaveCallback = onSaveCallback;
+            this.InitializeComponent();
+            this._databaseService = databaseService;
+            this._absence = absence;
+            this._onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<AbsenceDetailsViewModel>();
-                _viewModel.Initialize(_absence, _onSaveCallback);
-                BindingContext = _viewModel;
+                this._viewModel = this.GetRequiredService<AbsenceDetailsViewModel>();
+                this._viewModel.Initialize(this._absence, this._onSaveCallback);
+                this.BindingContext = this._viewModel;
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów nieobecności.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów nieobecności.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in AbsenceDetailsPage: {ex}");
             }
         }
 
         private void OnAbsenceTypeChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && _viewModel != null)
+            if (sender is Picker picker && this._viewModel != null)
             {
-                _viewModel.UpdateAbsenceTypeCommand.Execute(picker.SelectedIndex);
+                this._viewModel.UpdateAbsenceTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnDateSelected(object sender, DateChangedEventArgs e)
         {
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.CalculateDuration();
+                this._viewModel.CalculateDuration();
             }
         }
     }

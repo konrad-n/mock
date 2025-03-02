@@ -1,0 +1,10 @@
+# top-most EditorConfig file
+root = true
+
+# C# files
+[*.cs]
+# Require "this." for instance members
+dotnet_diagnostic.SA1101.severity = error
+
+# Disable SA1200 (Using Directives Must Be Placed Correctly)
+dotnet_diagnostic.SA1200.severity = none

@@ -9,29 +9,29 @@ namespace SledzSpecke.App.Features.Authentication.Views
 
         public RegistrationPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<RegistrationViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<RegistrationViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się zainicjalizować strony rejestracji.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony rejestracji.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in RegistrationPage: {ex}");
             }
         }
 
         private async void OnRegisterClicked(object sender, EventArgs e)
         {
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                await _viewModel.RegisterAsync();
+                await this._viewModel.RegisterAsync();
             }
         }
     }

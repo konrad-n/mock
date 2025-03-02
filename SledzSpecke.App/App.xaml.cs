@@ -22,24 +22,24 @@ namespace SledzSpecke.App
             IDatabaseService databaseService,
             IAuthenticationService authenticationService)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            _serviceProvider = serviceProvider;
-            _logger = logger;
-            _notificationService = notificationService;
-            _appSettings = appSettings;
-            _databaseService = databaseService;
-            _authenticationService = authenticationService;
+            this._serviceProvider = serviceProvider;
+            this._logger = logger;
+            this._notificationService = notificationService;
+            this._appSettings = appSettings;
+            this._databaseService = databaseService;
+            this._authenticationService = authenticationService;
 
             try
             {
-                MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
-                _ = InitializeAsync();
+                this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
+                _ = this.InitializeAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in App constructor");
-                MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
+                this._logger.LogError(ex, "Error in App constructor");
+                this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
             }
         }
 
@@ -47,34 +47,34 @@ namespace SledzSpecke.App
         {
             try
             {
-                _logger.LogInformation("Starting app initialization");
+                this._logger.LogInformation("Starting app initialization");
 
-                await _databaseService.InitAsync();
-                _logger.LogDebug("Database initialized");
+                await this._databaseService.InitAsync();
+                this._logger.LogDebug("Database initialized");
 
-                var userSeeded = await _authenticationService.SeedTestUserAsync();
-                _logger.LogDebug("Test user seeded: {Result}", userSeeded);
+                var userSeeded = await this._authenticationService.SeedTestUserAsync();
+                this._logger.LogDebug("Test user seeded: {Result}", userSeeded);
 
-                await _appSettings.LoadAsync();
-                _logger.LogDebug("Settings loaded");
+                await this._appSettings.LoadAsync();
+                this._logger.LogDebug("Settings loaded");
 
-                bool useDarkTheme = _appSettings.GetSetting<bool>("UseDarkTheme");
+                bool useDarkTheme = this._appSettings.GetSetting<bool>("UseDarkTheme");
                 Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
-                _logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
+                this._logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
+                    this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
                 });
 
-                _logger.LogInformation("Application initialized successfully");
+                this._logger.LogInformation("Application initialized successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error initializing application");
+                this._logger.LogError(ex, "Error initializing application");
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
+                    this.MainPage = new NavigationPage(this._serviceProvider.GetRequiredService<LoginPage>());
                 });
             }
         }
@@ -83,11 +83,11 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = _notificationService.CheckAndScheduleNotificationsAsync();
+                _ = this._notificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in OnStart");
+                this._logger.LogError(ex, "Error in OnStart");
             }
         }
 
@@ -95,11 +95,11 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = _appSettings.SaveAsync();
+                _ = this._appSettings.SaveAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in OnSleep");
+                this._logger.LogError(ex, "Error in OnSleep");
             }
         }
 
@@ -107,11 +107,11 @@ namespace SledzSpecke.App
         {
             try
             {
-                _ = _notificationService.CheckAndScheduleNotificationsAsync();
+                _ = this._notificationService.CheckAndScheduleNotificationsAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in OnResume");
+                this._logger.LogError(ex, "Error in OnResume");
             }
         }
 

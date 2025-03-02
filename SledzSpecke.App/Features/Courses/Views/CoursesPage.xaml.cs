@@ -13,24 +13,24 @@ namespace SledzSpecke.App.Features.Courses.Views
 
         public CoursesPage(ISpecializationService specializationService)
         {
-            _specializationService = specializationService;
-            InitializeComponent();
+            this._specializationService = specializationService;
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<CoursesViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<CoursesViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
 
                 // Po inicjalizacji wyświetl kursy dla domyślnego modułu
-                DisplayCourses(_viewModel.CurrentModule);
+                this.DisplayCourses(this._viewModel.CurrentModule);
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować danych kursów.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się załadować danych kursów.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in CoursesPage: {ex}");
             }
         }
@@ -40,13 +40,13 @@ namespace SledzSpecke.App.Features.Courses.Views
             base.OnAppearing();
 
             // Odśwież dane kursów przy każdym pokazaniu strony
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
+                this._viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        DisplayCourses(_viewModel.CurrentModule);
+                        this.DisplayCourses(this._viewModel.CurrentModule);
                     });
                 });
             }
@@ -54,30 +54,30 @@ namespace SledzSpecke.App.Features.Courses.Views
 
         private void DisplayCourses(ModuleType moduleType)
         {
-            CoursesLayout.Children.Clear();
-            NoModuleSelectedLabel.IsVisible = false;
+            this.CoursesLayout.Children.Clear();
+            this.NoModuleSelectedLabel.IsVisible = false;
 
             // Ustawienie aktywnego przycisku
             if (moduleType == ModuleType.Basic)
             {
-                BasicModuleButton.BackgroundColor = new Color(8, 32, 68);
-                BasicModuleButton.TextColor = Colors.White;
-                SpecialisticModuleButton.BackgroundColor = new Color(228, 240, 245);
-                SpecialisticModuleButton.TextColor = Colors.Black;
+                this.BasicModuleButton.BackgroundColor = new Color(8, 32, 68);
+                this.BasicModuleButton.TextColor = Colors.White;
+                this.SpecialisticModuleButton.BackgroundColor = new Color(228, 240, 245);
+                this.SpecialisticModuleButton.TextColor = Colors.Black;
             }
             else
             {
-                BasicModuleButton.BackgroundColor = new Color(228, 240, 245);
-                BasicModuleButton.TextColor = Colors.Black;
-                SpecialisticModuleButton.BackgroundColor = new Color(8, 32, 68);
-                SpecialisticModuleButton.TextColor = Colors.White;
+                this.BasicModuleButton.BackgroundColor = new Color(228, 240, 245);
+                this.BasicModuleButton.TextColor = Colors.Black;
+                this.SpecialisticModuleButton.BackgroundColor = new Color(8, 32, 68);
+                this.SpecialisticModuleButton.TextColor = Colors.White;
             }
 
-            var courses = _viewModel.GetFilteredCourses();
+            var courses = this._viewModel.GetFilteredCourses();
 
             if (courses.Count == 0)
             {
-                CoursesLayout.Children.Add(new Label
+                this.CoursesLayout.Children.Add(new Label
                 {
                     Text = "Brak kursów do wyświetlenia",
                     HorizontalOptions = LayoutOptions.Center,
@@ -94,9 +94,9 @@ namespace SledzSpecke.App.Features.Courses.Views
                     Padding = new Thickness(10),
                     Margin = new Thickness(0, 0, 0, 10),
                     CornerRadius = 5,
-                    Style = course.IsCompleted ? (Style)Resources["CompletedCourseStyle"] :
-                            course.ScheduledDate.HasValue ? (Style)Resources["PlannedCourseStyle"] :
-                            (Style)Resources["PendingCourseStyle"]
+                    Style = course.IsCompleted ? (Style)this.Resources["CompletedCourseStyle"] :
+                            course.ScheduledDate.HasValue ? (Style)this.Resources["PlannedCourseStyle"] :
+                            (Style)this.Resources["PendingCourseStyle"]
                 };
 
                 var statusIndicator = new BoxView
@@ -145,7 +145,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                     TextColor = Colors.White,
                     CommandParameter = course.Id
                 };
-                detailsButton.Clicked += OnCourseDetailsClicked;
+                detailsButton.Clicked += this.OnCourseDetailsClicked;
 
                 var headerLayout = new Grid
                 {
@@ -164,7 +164,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                 };
 
                 frame.Content = contentLayout;
-                CoursesLayout.Children.Add(frame);
+                this.CoursesLayout.Children.Add(frame);
             }
         }
 
@@ -172,44 +172,43 @@ namespace SledzSpecke.App.Features.Courses.Views
         {
             if (sender is Button button && button.CommandParameter is int courseId)
             {
-                var course = _viewModel.Specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
+                var course = this._viewModel.Specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
                 {
-                    await Navigation.PushAsync(new CourseDetailsPage(course, _viewModel.CurrentModule, OnCourseUpdated));
+                    await this.Navigation.PushAsync(new CourseDetailsPage(course, this._viewModel.CurrentModule, this.OnCourseUpdated));
                 }
             }
         }
 
         private async void OnBasicModuleButtonClicked(object sender, EventArgs e)
         {
-            _viewModel.SelectBasicModule();
-            DisplayCourses(_viewModel.CurrentModule);
+            this._viewModel.SelectBasicModule();
+            this.DisplayCourses(this._viewModel.CurrentModule);
         }
 
         private async void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
         {
-            _viewModel.SelectSpecialisticModule();
-            DisplayCourses(_viewModel.CurrentModule);
+            this._viewModel.SelectSpecialisticModule();
+            this.DisplayCourses(this._viewModel.CurrentModule);
         }
 
         private async void OnAddCourseClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new CourseDetailsPage(null, _viewModel.CurrentModule, OnCourseAdded));
+            await this.Navigation.PushAsync(new CourseDetailsPage(null, this._viewModel.CurrentModule, this.OnCourseAdded));
         }
 
-        // Metody callback zostają bez zmian, aby zachować pełną funkcjonalność
         private async Task OnCourseAdded(Course course)
         {
-            await _specializationService.SaveCourseAsync(course);
-            await _viewModel.LoadSpecializationDataAsync();
-            DisplayCourses(_viewModel.CurrentModule);
+            await this._specializationService.SaveCourseAsync(course);
+            await this._viewModel.LoadSpecializationDataAsync();
+            this.DisplayCourses(this._viewModel.CurrentModule);
         }
 
         private async Task OnCourseUpdated(Course course)
         {
-            await _specializationService.SaveCourseAsync(course);
-            await _viewModel.LoadSpecializationDataAsync();
-            DisplayCourses(_viewModel.CurrentModule);
+            await this._specializationService.SaveCourseAsync(course);
+            await this._viewModel.LoadSpecializationDataAsync();
+            this.DisplayCourses(this._viewModel.CurrentModule);
         }
     }
 }

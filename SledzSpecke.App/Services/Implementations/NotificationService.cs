@@ -14,8 +14,8 @@ namespace SledzSpecke.App.Services.Implementations
             IDatabaseService databaseService,
             ILogger<NotificationService> logger)
         {
-            _databaseService = databaseService;
-            _logger = logger;
+            this._databaseService = databaseService;
+            this._logger = logger;
         }
 
         public async Task CheckAndScheduleNotificationsAsync()
@@ -23,27 +23,27 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 // Check if notifications are enabled
-                var settings = await _databaseService.GetUserSettingsAsync();
+                var settings = await this._databaseService.GetUserSettingsAsync();
                 if (!settings.EnableNotifications)
                 {
-                    _logger.LogInformation("Notifications are disabled. Skipping notification check.");
+                    this._logger.LogInformation("Notifications are disabled. Skipping notification check.");
                     return;
                 }
 
                 // Get current specialization
-                var specialization = await _databaseService.GetCurrentSpecializationAsync();
+                var specialization = await this._databaseService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    _logger.LogWarning("No active specialization found. Cannot schedule notifications.");
+                    this._logger.LogWarning("No active specialization found. Cannot schedule notifications.");
                     return;
                 }
 
                 // Load related data
-                var courses = await _databaseService.QueryAsync<Course>(
+                var courses = await this._databaseService.QueryAsync<Course>(
                     "SELECT * FROM Courses WHERE SpecializationId = ? AND IsCompleted = 0",
                     specialization.Id);
 
-                var internships = await _databaseService.QueryAsync<Internship>(
+                var internships = await this._databaseService.QueryAsync<Internship>(
                     "SELECT * FROM Internships WHERE SpecializationId = ? AND IsCompleted = 0",
                     specialization.Id);
 
@@ -56,7 +56,7 @@ namespace SledzSpecke.App.Services.Implementations
 
                     if (daysUntil == 7) // 1 week before
                     {
-                        await ScheduleNotificationAsync(
+                        await this.ScheduleNotificationAsync(
                             $"Zbliża się kurs: {course.Name}",
                             $"Kurs rozpoczyna się za tydzień ({course.ScheduledDate.Value:dd.MM.yyyy})",
                             course.Id,
@@ -65,7 +65,7 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                     else if (daysUntil == 1) // 1 day before
                     {
-                        await ScheduleNotificationAsync(
+                        await this.ScheduleNotificationAsync(
                             $"Jutro rozpoczyna się kurs: {course.Name}",
                             $"Kurs rozpoczyna się jutro ({course.ScheduledDate.Value:dd.MM.yyyy})",
                             course.Id,
@@ -81,7 +81,7 @@ namespace SledzSpecke.App.Services.Implementations
 
                     if (daysUntil == 7) // 1 week before
                     {
-                        await ScheduleNotificationAsync(
+                        await this.ScheduleNotificationAsync(
                             $"Zbliża się staż: {internship.Name}",
                             $"Staż rozpoczyna się za tydzień ({internship.StartDate.Value:dd.MM.yyyy})",
                             internship.Id,
@@ -90,7 +90,7 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                     else if (daysUntil == 1) // 1 day before
                     {
-                        await ScheduleNotificationAsync(
+                        await this.ScheduleNotificationAsync(
                             $"Jutro rozpoczyna się staż: {internship.Name}",
                             $"Staż rozpoczyna się jutro ({internship.StartDate.Value:dd.MM.yyyy})",
                             internship.Id,
@@ -107,7 +107,7 @@ namespace SledzSpecke.App.Services.Implementations
 
                     if (daysUntilEnd == 30) // 1 month before
                     {
-                        await ScheduleNotificationAsync(
+                        await this.ScheduleNotificationAsync(
                             "Zbliża się koniec modułu podstawowego",
                             $"Moduł podstawowy kończy się za miesiąc ({endOfBasicModule:dd.MM.yyyy})",
                             0,
@@ -116,7 +116,7 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                     else if (daysUntilEnd == 7) // 1 week before
                     {
-                        await ScheduleNotificationAsync(
+                        await this.ScheduleNotificationAsync(
                             "Zbliża się koniec modułu podstawowego",
                             $"Moduł podstawowy kończy się za tydzień ({endOfBasicModule:dd.MM.yyyy})",
                             0,
@@ -125,11 +125,11 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                 }
 
-                _logger.LogInformation("Notification check completed successfully");
+                this._logger.LogInformation("Notification check completed successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking and scheduling notifications");
+                this._logger.LogError(ex, "Error checking and scheduling notifications");
             }
         }
 
@@ -141,7 +141,7 @@ namespace SledzSpecke.App.Services.Implementations
                 // For MAUI, you could use Plugin.LocalNotification or similar
 
                 // For now, just log the notification
-                _logger.LogInformation("Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
+                this._logger.LogInformation("Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
                     title, message, type, itemId);
 
                 // Example implementation for Android/iOS would go here
@@ -151,7 +151,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error scheduling notification");
+                this._logger.LogError(ex, "Error scheduling notification");
             }
         }
     }

@@ -55,31 +55,31 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             IDatabaseService databaseService,
             ILogger<AbsenceManagementViewModel> logger) : base(logger)
         {
-            _specializationService = specializationService;
-            _specializationDateCalculator = specializationDateCalculator;
-            _databaseService = databaseService;
+            this._specializationService = specializationService;
+            this._specializationDateCalculator = specializationDateCalculator;
+            this._databaseService = databaseService;
 
-            AllAbsences = new ObservableCollection<Absence>();
-            FilteredAbsences = new ObservableCollection<Absence>();
-            AvailableYears = new ObservableCollection<int>();
+            this.AllAbsences = new ObservableCollection<Absence>();
+            this.FilteredAbsences = new ObservableCollection<Absence>();
+            this.AvailableYears = new ObservableCollection<int>();
 
-            Title = "Nieobecności i urlopy";
+            this.Title = "Nieobecności i urlopy";
         }
 
         public override async Task InitializeAsync()
         {
             try
             {
-                IsBusy = true;
-                await LoadDataAsync();
+                this.IsBusy = true;
+                await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading absences data");
+                this._logger.LogError(ex, "Error loading absences data");
             }
             finally
             {
-                IsBusy = false;
+                this.IsBusy = false;
             }
         }
 
@@ -88,43 +88,43 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             try
             {
                 // Load specialization data
-                Specialization = await _specializationService.GetSpecializationAsync();
+                this.Specialization = await this._specializationService.GetSpecializationAsync();
 
                 // Calculate dates
-                DateTime plannedEndDate = Specialization.StartDate.AddDays(Specialization.BaseDurationWeeks * 7);
-                DateTime actualEndDate = await _specializationDateCalculator.CalculateExpectedEndDateAsync(Specialization.Id);
+                DateTime plannedEndDate = this.Specialization.StartDate.AddDays(this.Specialization.BaseDurationWeeks * 7);
+                DateTime actualEndDate = await this._specializationDateCalculator.CalculateExpectedEndDateAsync(this.Specialization.Id);
 
                 // Update UI with dates
-                PlannedEndDateLabel = plannedEndDate.ToString("dd.MM.yyyy");
-                ActualEndDateLabel = actualEndDate.ToString("dd.MM.yyyy");
+                this.PlannedEndDateLabel = plannedEndDate.ToString("dd.MM.yyyy");
+                this.ActualEndDateLabel = actualEndDate.ToString("dd.MM.yyyy");
 
                 // Calculate self-education days
                 int currentYear = DateTime.Now.Year;
-                int remainingSelfEducationDays = await _specializationDateCalculator.GetRemainingEducationDaysForYearAsync(Specialization.Id, currentYear);
-                int usedSelfEducationDays = Specialization.SelfEducationDaysPerYear - remainingSelfEducationDays;
+                int remainingSelfEducationDays = await this._specializationDateCalculator.GetRemainingEducationDaysForYearAsync(this.Specialization.Id, currentYear);
+                int usedSelfEducationDays = this.Specialization.SelfEducationDaysPerYear - remainingSelfEducationDays;
 
-                SelfEducationDaysLabel = $"{usedSelfEducationDays}/{Specialization.SelfEducationDaysPerYear}";
+                this.SelfEducationDaysLabel = $"{usedSelfEducationDays}/{this.Specialization.SelfEducationDaysPerYear}";
 
                 // Load absences
-                var absences = await _databaseService.QueryAsync<Absence>(
+                var absences = await this._databaseService.QueryAsync<Absence>(
                     "SELECT * FROM Absences WHERE SpecializationId = ? ORDER BY StartDate DESC",
-                    Specialization.Id);
+                    this.Specialization.Id);
 
-                AllAbsences = new ObservableCollection<Absence>(absences);
+                this.AllAbsences = new ObservableCollection<Absence>(absences);
 
                 // Update total absence days
-                int totalAbsenceDays = AllAbsences.Sum(a => a.DurationDays);
-                TotalAbsenceDaysLabel = totalAbsenceDays.ToString();
+                int totalAbsenceDays = this.AllAbsences.Sum(a => a.DurationDays);
+                this.TotalAbsenceDaysLabel = totalAbsenceDays.ToString();
 
                 // Setup filter year picker
-                SetupYearFilter();
+                this.SetupYearFilter();
 
                 // Apply filters and display absences
-                ApplyFiltersAndDisplayAbsences();
+                this.ApplyFiltersAndDisplayAbsences();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading absence data");
+                this._logger.LogError(ex, "Error loading absence data");
                 throw;
             }
         }
@@ -132,61 +132,61 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         private void SetupYearFilter()
         {
             // Get unique years from absences
-            var years = AllAbsences
+            var years = this.AllAbsences
                 .Select(a => a.Year)
                 .Distinct()
                 .OrderBy(y => y)
                 .ToList();
 
-            AvailableYears.Clear();
+            this.AvailableYears.Clear();
 
             // All years
-            AvailableYears.Add(0); // 0 represents "All years"
+            this.AvailableYears.Add(0); // 0 represents "All years"
 
             // Add individual years
             foreach (var year in years)
             {
-                AvailableYears.Add(year);
+                this.AvailableYears.Add(year);
             }
         }
 
         public void ApplyFiltersAndDisplayAbsences()
         {
             // Filter absences
-            var filtered = AllAbsences.AsEnumerable();
+            var filtered = this.AllAbsences.AsEnumerable();
 
             // Filter by type if selected
-            if (SelectedAbsenceType.HasValue)
+            if (this.SelectedAbsenceType.HasValue)
             {
-                filtered = filtered.Where(a => a.Type == SelectedAbsenceType.Value);
+                filtered = filtered.Where(a => a.Type == this.SelectedAbsenceType.Value);
             }
 
             // Filter by year if selected
-            if (SelectedYear.HasValue && SelectedYear.Value > 0)
+            if (this.SelectedYear.HasValue && this.SelectedYear.Value > 0)
             {
-                filtered = filtered.Where(a => a.Year == SelectedYear.Value);
+                filtered = filtered.Where(a => a.Year == this.SelectedYear.Value);
             }
 
             // Update filtered absences
-            FilteredAbsences = new ObservableCollection<Absence>(filtered);
+            this.FilteredAbsences = new ObservableCollection<Absence>(filtered);
 
             // Show/hide no absences message
-            IsNoAbsencesVisible = FilteredAbsences.Count == 0;
+            this.IsNoAbsencesVisible = this.FilteredAbsences.Count == 0;
         }
 
         [RelayCommand]
         private async Task AddAbsenceAsync()
         {
-            await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(_databaseService, null, OnAbsenceAdded));
+            await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(this._databaseService, null, this.OnAbsenceAdded));
         }
 
         [RelayCommand]
         private async Task EditAbsenceAsync(int absenceId)
         {
-            var absence = AllAbsences.FirstOrDefault(a => a.Id == absenceId);
+            var absence = this.AllAbsences.FirstOrDefault(a => a.Id == absenceId);
             if (absence != null)
             {
-                await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(_databaseService, absence, OnAbsenceUpdated));
+                await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(this._databaseService, absence, this.OnAbsenceUpdated));
             }
         }
 
@@ -194,7 +194,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         private void FilterByAbsenceType(int typeIndex)
         {
             // Map picker index to absence type
-            SelectedAbsenceType = typeIndex switch
+            this.SelectedAbsenceType = typeIndex switch
             {
                 1 => AbsenceType.SickLeave,
                 2 => AbsenceType.VacationLeave,
@@ -204,15 +204,15 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 _ => null  // No filter (all types)
             };
 
-            ApplyFiltersAndDisplayAbsences();
+            this.ApplyFiltersAndDisplayAbsences();
         }
 
         [RelayCommand]
         private void FilterByYear(int yearIndex)
         {
             // Year index 0 means "All years"
-            SelectedYear = yearIndex > 0 ? AvailableYears[yearIndex] : null;
-            ApplyFiltersAndDisplayAbsences();
+            this.SelectedYear = yearIndex > 0 ? this.AvailableYears[yearIndex] : null;
+            this.ApplyFiltersAndDisplayAbsences();
         }
 
         private async void OnAbsenceAdded(Absence absence)
@@ -220,24 +220,24 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             try
             {
                 // Save absence
-                absence.SpecializationId = Specialization.Id;
+                absence.SpecializationId = this.Specialization.Id;
 
                 // Ustaw Id na 0 (lub null), aby wymusić wstawienie nowego rekordu
                 absence.Id = 0;
 
                 // Użyj metody specyficznej do wstawiania (insert) nowego rekordu
                 // zamiast metody SaveAsync, która może używać ID do decydowania czy wykonać update
-                await _databaseService.InsertAsync(absence);
+                await this._databaseService.InsertAsync(absence);
 
                 // Dla pewności, dodaj log który pokazuje nowe ID
-                _logger.LogInformation($"Added new absence with ID: {absence.Id}");
+                this._logger.LogInformation($"Added new absence with ID: {absence.Id}");
 
                 // Reload data
-                await LoadDataAsync();
+                await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding absence");
+                this._logger.LogError(ex, "Error adding absence");
                 await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas dodawania nieobecności: {ex.Message}", "OK");
             }
         }
@@ -245,11 +245,11 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         private async void OnAbsenceUpdated(Absence absence)
         {
             // Update absence
-            absence.SpecializationId = Specialization.Id;
-            await _databaseService.SaveAsync(absence);
+            absence.SpecializationId = this.Specialization.Id;
+            await this._databaseService.SaveAsync(absence);
 
             // Reload data
-            await LoadDataAsync();
+            await this.LoadDataAsync();
         }
 
         public string GetAbsenceTypeText(AbsenceType type)

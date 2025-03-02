@@ -50,22 +50,22 @@ namespace SledzSpecke.Core.Models
 
         public double GetCompletionPercentage()
         {
-            double coursesPercentage = RequiredCourses.Count > 0
-                ? RequiredCourses.Count(c => c.IsCompleted) * 100.0 / RequiredCourses.Count
+            double coursesPercentage = this.RequiredCourses.Count > 0
+                ? this.RequiredCourses.Count(c => c.IsCompleted) * 100.0 / this.RequiredCourses.Count
                 : 0;
 
-            double internshipsPercentage = RequiredInternships.Count > 0
-                ? RequiredInternships.Count(i => i.IsCompleted) * 100.0 / RequiredInternships.Count
+            double internshipsPercentage = this.RequiredInternships.Count > 0
+                ? this.RequiredInternships.Count(i => i.IsCompleted) * 100.0 / this.RequiredInternships.Count
                 : 0;
 
-            double proceduresTypeAPercentage = RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).Sum(p => p.RequiredCount) > 0
-                ? RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).Sum(p => p.CompletedCount) * 100.0 /
-                  RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).Sum(p => p.RequiredCount)
+            double proceduresTypeAPercentage = this.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).Sum(p => p.RequiredCount) > 0
+                ? this.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).Sum(p => p.CompletedCount) * 100.0 /
+                  this.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).Sum(p => p.RequiredCount)
                 : 0;
 
-            double proceduresTypeBPercentage = RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).Sum(p => p.RequiredCount) > 0
-                ? RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).Sum(p => p.CompletedCount) * 100.0 /
-                  RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).Sum(p => p.RequiredCount)
+            double proceduresTypeBPercentage = this.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).Sum(p => p.RequiredCount) > 0
+                ? this.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).Sum(p => p.CompletedCount) * 100.0 /
+                  this.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeB).Sum(p => p.RequiredCount)
                 : 0;
 
             return (coursesPercentage + internshipsPercentage + proceduresTypeAPercentage + proceduresTypeBPercentage) / 4;
@@ -76,15 +76,15 @@ namespace SledzSpecke.Core.Models
             var dates = new List<DateTime>();
 
             // Add course dates
-            foreach (var course in RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
+            foreach (var course in this.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
                 dates.Add(course.ScheduledDate.Value);
 
             // Add internship dates
-            foreach (var internship in RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
+            foreach (var internship in this.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
                 dates.Add(internship.StartDate.Value);
 
             // Add end of basic module
-            var endOfBasicModule = StartDate.AddDays(BasicModuleDurationWeeks * 7);
+            var endOfBasicModule = this.StartDate.AddDays(this.BasicModuleDurationWeeks * 7);
             if (endOfBasicModule > DateTime.Now)
                 dates.Add(endOfBasicModule);
 

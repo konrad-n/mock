@@ -9,20 +9,20 @@ namespace SledzSpecke.App.Features.Duties.Views
 
         public DutyShiftsPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<DutyShiftsViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<DutyShiftsViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować dyżurów.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się załadować dyżurów.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in DutyShiftsPage: {ex}");
             }
         }
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.Duties.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.LoadDataAsync().ConfigureAwait(false);
+                this._viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
     }

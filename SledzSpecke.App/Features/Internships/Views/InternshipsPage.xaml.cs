@@ -9,20 +9,20 @@ namespace SledzSpecke.App.Features.Internships.Views
 
         public InternshipsPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override async Task InitializePageAsync()
         {
             try
             {
-                _viewModel = GetRequiredService<InternshipsViewModel>();
-                BindingContext = _viewModel;
-                await _viewModel.InitializeAsync();
+                this._viewModel = this.GetRequiredService<InternshipsViewModel>();
+                this.BindingContext = this._viewModel;
+                await this._viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Błąd", "Nie udało się załadować danych staży.", "OK");
+                await this.DisplayAlert("Błąd", "Nie udało się załadować danych staży.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in InternshipsPage: {ex}");
             }
         }
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.Internships.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (_viewModel != null)
+            if (this._viewModel != null)
             {
-                _viewModel.LoadDataAsync().ConfigureAwait(false);
+                this._viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
     }
