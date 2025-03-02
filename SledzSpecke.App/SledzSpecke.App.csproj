@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Original main PropertyGroup -->
   <PropertyGroup>
     <TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net9.0-android35.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
@@ -11,11 +12,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <!-- Display name -->
     <ApplicationTitle>SledzSpecke.App</ApplicationTitle>
+
+    <!-- App Identifier -->
     <ApplicationId>com.companyname.sledzspecke.app</ApplicationId>
+
+    <!-- Versions -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 
+    <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
     <WindowsPackageType>None</WindowsPackageType>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
@@ -26,30 +33,63 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
   </PropertyGroup>
 
-  <!-- Ustawienie domyślnego zachowania trimmingu -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-ios' OR '$(TargetFramework)' == 'net9.0-maccatalyst'">
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimmerDefaultAction>link</TrimmerDefaultAction>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <MtouchLink>Framework</MtouchLink>
-    <!-- Ograniczenie linkowania do frameworków systemowych -->
-  </PropertyGroup>
-
+  <!-- 
+       ADDED: Explicitly setting the Android ABIs for net9.0-android35.0 
+       so you can run on an x86_64 emulator (and optionally arm64, x86, etc.).
+  -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android35.0'">
-    <RuntimeIdentifiers>android-arm64;android-x64</RuntimeIdentifiers>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-maccatalyst'">
-    <UseXcode>16.2</UseXcode>
+    <!-- Include whichever ABIs you actually need -->
+    <AndroidSupportedAbis>arm64-v8a;armeabi-v7a;x86_64;x86</AndroidSupportedAbis>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- App Icon -->
     <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="559,559" />
+
+    <!-- Splash Screen -->
     <MauiSplashScreen Include="Resources\AppIcon\appicon.png" Color="#0d759c" BaseSize="559,559" />
+
+    <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
     <MauiImage Update="Resources\Images\appicon.png" Resize="True" BaseSize="559,559" />
+
+    <!-- Custom Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
+
+    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Converters\**" />
+    <Compile Remove="Resources\Icons\**" />
+    <Compile Remove="Resources\Splash\**" />
+    <Compile Remove="Services\Dialog\**" />
+    <Compile Remove="Services\Navigation\**" />
+    <EmbeddedResource Remove="Converters\**" />
+    <EmbeddedResource Remove="Resources\Icons\**" />
+    <EmbeddedResource Remove="Resources\Splash\**" />
+    <EmbeddedResource Remove="Services\Dialog\**" />
+    <EmbeddedResource Remove="Services\Navigation\**" />
+    <MauiCss Remove="Converters\**" />
+    <MauiCss Remove="Resources\Icons\**" />
+    <MauiCss Remove="Resources\Splash\**" />
+    <MauiCss Remove="Services\Dialog\**" />
+    <MauiCss Remove="Services\Navigation\**" />
+    <MauiXaml Remove="Converters\**" />
+    <MauiXaml Remove="Resources\Icons\**" />
+    <MauiXaml Remove="Resources\Splash\**" />
+    <MauiXaml Remove="Services\Dialog\**" />
+    <MauiXaml Remove="Services\Navigation\**" />
+    <None Remove="Converters\**" />
+    <None Remove="Resources\Icons\**" />
+    <None Remove="Resources\Splash\**" />
+    <None Remove="Services\Dialog\**" />
+    <None Remove="Services\Navigation\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiImage Remove="Resources\Images\appicon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -68,9 +108,71 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Features\Absences\Views\AbsenceDetailsPage.xaml.cs">
+      <DependentUpon>AbsenceDetailsPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiAsset Update="Resources\Raw\specialization.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </MauiAsset>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="Features\Absences\Views\AbsenceDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Absences\Views\AbsenceManagementPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Courses\Views\CourseDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Courses\Views\CoursesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Dashboard\Views\DashboardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Duties\Views\DutyShiftDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Duties\Views\DutyShiftsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Internships\Views\InternshipDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Internships\Views\InternshipsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Procedures\Views\ProcedureDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Procedures\Views\ProcedureEntryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Procedures\Views\ProceduresPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\SelfEducations\Views\SelfEducationDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\SelfEducations\Views\SelfEducationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\Settings\Views\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Features\SMKExport\Views\SMKExportPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Controls\" />
+    <Folder Include="Common\Behaviors\" />
   </ItemGroup>
 
 </Project>
