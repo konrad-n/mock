@@ -1,4 +1,13 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DataSeeder.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Seeder do bazy danych. Absolutne źródło wiedzy i prawdy dla całej aplikacji
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using SledzSpecke.Core.Models;
@@ -6,10 +15,18 @@ using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.Infrastructure.Database.Initialization
 {
+    /// <summary>
+    /// Klasa do zasilenia bazy danych specjalizacjami.
+    /// Dane pochodzą z oficjalnej dokumentacji.
+    /// </summary>
     [SuppressMessage("SonarCloud", "S1192", Justification = "DataSeeder")]
     public static class DataSeeder
-    { 
-        public static Specialization SeedHematologySpecialization() // na pewno będzie trzeba zrobić Seed innych specjalizacji potem
+    {
+        /// <summary>
+        /// Zasila bazę danych specjalizacją z zakresu hematologii.
+        /// </summary>
+        /// <returns>Obiekt Specialization reprezentujący specjalizację z zakresu hematologii.</returns>
+        public static Specialization SeedHematologySpecialization()
         {
             var specialization = new Specialization
             {
@@ -797,6 +814,321 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Basic,
                     InternshipId = 9,
                 },
+            });
+
+            return specialization;
+        }
+
+        /// <summary>
+        /// Zasila bazę danych specjalizacją z zakresu alergologii.
+        /// </summary>
+        /// <returns>/Obiekt Specialization reprezentujący specjalizację z zakresu alergologii.</returns>
+        public static Specialization SeedAllergologySpecialization()
+        {
+            var specialization = new Specialization
+            {
+                Id = 2,
+                Name = "Alergologia",
+                StartDate = DateTime.Now,
+                ExpectedEndDate = DateTime.Now.AddYears(3),
+                BaseDurationWeeks = 156, // 3 lata (156 tygodni i 3 dni = 783 dni robocze)
+                BasicModuleDurationWeeks = 104, // 2 lata (wcześniej zrealizowany moduł podstawowy chorób wewnętrznych)
+                SpecialisticModuleDurationWeeks = 156, // 3 lata
+                VacationDaysPerYear = 26,
+                SelfEducationDaysPerYear = 6,
+                StatutoryHolidaysPerYear = 13,
+                RequiredDutyHoursPerWeek = (int)(10 + (double)(5 / 60)),  // 10 godzin 5 minut
+                RequiresPublication = true,
+                RequiredConferences = 0, // Brak konkretnej informacji o wymaganej liczbie konferencji
+            };
+
+            // Dodanie kursów specjalizacyjnych
+            specialization.RequiredCourses.AddRange(new List<Course>
+            {
+                new Course
+                {
+                    Id = 1,
+                    Name = "Wprowadzenie do specjalizacji w dziedzinie alergologii",
+                    DurationDays = 1,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 2,
+                    Name = "Diagnostyka chorób alergicznych",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 3,
+                    Name = "Profilaktyka i leczenie chorób alergicznych",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 4,
+                    Name = "Immunoterapia alergenowa chorób alergicznych",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 5,
+                    Name = "Alergia zawodowa",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 6,
+                    Name = "Terapia inhalacyjna w alergologii",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 7,
+                    Name = "Podstawy immunologii klinicznej i alergologii",
+                    DurationDays = 3,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 8,
+                    Name = "Choroby alergiczne górnych dróg oddechowych i oczu",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 9,
+                    Name = "Alergologia w chorobach wewnętrznych. Choroby alergiczne układu oddechowego, POChP i anafilaksja",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 10,
+                    Name = "Choroby alergiczne skóry, obrzęki naczynioruchowe, mastocytoza",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 11,
+                    Name = "Odrębności chorób alergicznych u dzieci",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 12,
+                    Name = "Nadwrażliwość na leki",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 13,
+                    Name = "Nadwrażliwość na pokarmy oraz dodatki do żywności",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 14,
+                    Name = "Leczenie biologiczne w alergologii",
+                    DurationDays = 2,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Course
+                {
+                    Id = 15,
+                    Name = "Kurs atestacyjny (podsumowujący): Alergologia",
+                    DurationDays = 5,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+            });
+
+            // Dodanie staży specjalizacyjnych
+            specialization.RequiredInternships.AddRange(new List<Internship>
+            {
+                new Internship
+                {
+                    Id = 1,
+                    Name = "Staż podstawowy w zakresie alergologii",
+                    DurationWeeks = 94,
+                    WorkingDays = 470,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Internship
+                {
+                    Id = 2,
+                    Name = "Staż kierunkowy w zakresie diagnostyki laboratoryjnej",
+                    DurationWeeks = 1,
+                    WorkingDays = 5,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Internship
+                {
+                    Id = 3,
+                    Name = "Staż kierunkowy w zakresie dermatologii i wenerologii",
+                    DurationWeeks = 10,
+                    WorkingDays = 50,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Internship
+                {
+                    Id = 4,
+                    Name = "Staż kierunkowy w zakresie otorynolaryngologii",
+                    DurationWeeks = 10,
+                    WorkingDays = 50,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+                new Internship
+                {
+                    Id = 5,
+                    Name = "Staż kierunkowy w zakresie pediatrii",
+                    DurationWeeks = 10,
+                    WorkingDays = 50,
+                    IsRequired = true,
+                    Module = ModuleType.Specialistic,
+                },
+            });
+
+            // Dodanie procedur medycznych
+            specialization.RequiredProcedures.AddRange(new List<MedicalProcedure>
+            {
+                new MedicalProcedure
+                {
+                    Id = 1,
+                    Name = "wykonanie i interpretacja punktowych testów skórnych",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 2,
+                    Name = "wykonanie i interpretacja punktowych testów skórnych",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 80,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 3,
+                    Name = "wykonanie i interpretacja testów śródskórnych",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 4,
+                    Name = "wykonanie i interpretacja testów śródskórnych",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 5,
+                    Name = "wykonanie i interpretacja testów kontaktowych",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 6,
+                    Name = "wykonanie i interpretacja testów kontaktowych",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 7,
+                    Name = "wykonanie i interpretacja spirometrii",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 30,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 8,
+                    Name = "wykonanie i interpretacja spirometrii",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 50,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 9,
+                    Name = "wykonanie iniekcji podskórnych preparatów odczulających",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 10,
+                    Name = "wykonanie iniekcji podskórnych preparatów odczulających",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 200,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 11,
+                    Name = "wykonanie pomiaru PEF z edukacją pacjenta",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 12,
+                    Name = "wykonanie pomiaru PEF z edukacją pacjenta",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                // Dodaj pozostałe procedury w podobny sposób
             });
 
             return specialization;
