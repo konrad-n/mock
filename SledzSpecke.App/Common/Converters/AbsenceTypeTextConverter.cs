@@ -1,9 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AbsenceCardColorConverter.cs" company="SledzSpecke">
+// <copyright file="AbsenceTypeTextConverter.cs" company="SledzSpecke">
 //   Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 // <summary>
-//   Konwerter określający kolor karty nieobecności w zależności od jej typu.
+//   Konwerter typu nieobecności na tekst.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,34 +14,37 @@ using SledzSpecke.Core.Models;
 namespace SledzSpecke.App.Common.Converters
 {
     /// <summary>
-    /// Konwerter określający kolor karty nieobecności w zależności od jej typu.
+    /// Konwerter typu nieobecności na tekst.
     /// </summary>
-    public class AbsenceCardColorConverter : BaseConverter
+    public class AbsenceTypeTextConverter : BaseConverter
     {
         /// <summary>
-        /// Konwertuje typ nieobecności na kolor tła.
+        /// Konwertuje typ nieobecności na odpowiadający mu tekst.
         /// </summary>
         /// <param name="value">Wartość reprezentująca typ nieobecności.</param>
         /// <param name="targetType">Typ docelowy.</param>
         /// <param name="parameter">Parametr konwersji.</param>
         /// <param name="culture">Kultura używana w konwersji.</param>
-        /// <returns>Kolor tła dla karty nieobecności.</returns>
+        /// <returns>Tekst opisujący typ nieobecności.</returns>
         public override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is AbsenceType type)
             {
                 return type switch
                 {
-                    AbsenceType.SickLeave => Color.FromArgb("#FFE0E0"),
-                    AbsenceType.VacationLeave => Color.FromArgb("#E0F7FA"),
-                    AbsenceType.SelfEducationLeave => Color.FromArgb("#E8F5E9"),
-                    AbsenceType.MaternityLeave => Color.FromArgb("#FFF8E1"),
-                    AbsenceType.ParentalLeave => Color.FromArgb("#FFF8E1"),
-                    _ => Color.FromArgb("#F5F5F5")
+                    AbsenceType.SickLeave => "Zwolnienie lekarskie (L4)",
+                    AbsenceType.VacationLeave => "Urlop wypoczynkowy",
+                    AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samokształcenie)",
+                    AbsenceType.MaternityLeave => "Urlop macierzyński",
+                    AbsenceType.ParentalLeave => "Urlop rodzicielski",
+                    AbsenceType.SpecialLeave => "Urlop okolicznościowy",
+                    AbsenceType.UnpaidLeave => "Urlop bezpłatny",
+                    AbsenceType.Other => "Inna nieobecność",
+                    _ => "Nieobecność"
                 };
             }
 
-            return Color.FromArgb("#F5F5F5");
+            return "Nieobecność";
         }
     }
 }

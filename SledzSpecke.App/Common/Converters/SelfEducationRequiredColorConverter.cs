@@ -2,22 +2,15 @@
 
 namespace SledzSpecke.App.Common.Converters
 {
-    public class SelfEducationRequiredColorConverter : IValueConverter
+    public class SelfEducationRequiredColorConverter : BaseConverter
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is bool isRequired)
             {
                 return isRequired ? new Color(8, 32, 68) : Colors.DarkGreen;
             }
             return new Color(84, 126, 158);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

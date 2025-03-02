@@ -3,10 +3,9 @@ using System.Globalization;
 
 namespace SledzSpecke.App.Common.Converters
 {
-    public class InternshipStatusStyleConverter : IValueConverter
+    public class InternshipStatusStyleConverter : BaseConverter
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is Internship internship)
             {
@@ -24,12 +23,6 @@ namespace SledzSpecke.App.Common.Converters
                 return "PendingInternshipStyle";
             }
             return "PendingInternshipStyle";
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

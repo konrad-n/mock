@@ -1,23 +1,38 @@
-﻿using System.Globalization;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AbsenceSpecializationAffectionConverter.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Konwerter wpływu nieobecności na specjalizację na tekst.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
+using System.Globalization;
 
 namespace SledzSpecke.App.Common.Converters
 {
-    public class AbsenceSpecializationAffectionConverter : IValueConverter
+    /// <summary>
+    /// Konwerter wpływu nieobecności na specjalizację na tekst.
+    /// </summary>
+    public class AbsenceSpecializationAffectionConverter : BaseConverter
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        /// <summary>
+        /// Konwertuje informację o wpływie nieobecności na specjalizację na odpowiedni tekst.
+        /// </summary>
+        /// <param name="value">Wartość reprezentująca wpływ na specjalizację.</param>
+        /// <param name="targetType">Typ docelowy.</param>
+        /// <param name="parameter">Parametr konwersji.</param>
+        /// <param name="culture">Kultura używana w konwersji.</param>
+        /// <returns>Tekst informujący o wpływie na specjalizację.</returns>
+        public override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is bool affectsSpecialization)
             {
-                return affectsSpecialization ? "Wydłuża specjalizację" : "";
+                return affectsSpecialization ? "Wydłuża specjalizację" : string.Empty;
             }
-            return "";
-        }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            return string.Empty;
         }
     }
 }
