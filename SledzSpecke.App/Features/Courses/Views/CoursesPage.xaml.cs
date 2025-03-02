@@ -24,8 +24,6 @@ namespace SledzSpecke.App.Features.Courses.Views
                 this.viewModel = this.GetRequiredService<CoursesViewModel>();
                 this.BindingContext = this.viewModel;
                 await this.viewModel.InitializeAsync();
-
-                // Po inicjalizacji wyświetl kursy dla domyślnego modułu
                 this.DisplayCourses(this.viewModel.CurrentModule);
             }
             catch (Exception ex)
@@ -38,8 +36,6 @@ namespace SledzSpecke.App.Features.Courses.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
-            // Odśwież dane kursów przy każdym pokazaniu strony
             if (this.viewModel != null)
             {
                 this.viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
@@ -56,8 +52,6 @@ namespace SledzSpecke.App.Features.Courses.Views
         {
             this.CoursesLayout.Children.Clear();
             this.NoModuleSelectedLabel.IsVisible = false;
-
-            // Ustawienie aktywnego przycisku
             if (moduleType == ModuleType.Basic)
             {
                 this.BasicModuleButton.BackgroundColor = new Color(8, 32, 68);
@@ -98,7 +92,6 @@ namespace SledzSpecke.App.Features.Courses.Views
                             course.ScheduledDate.HasValue ? (Style)this.Resources["PlannedCourseStyle"] :
                             (Style)this.Resources["PendingCourseStyle"],
                 };
-
                 var statusIndicator = new BoxView
                 {
                     Color = course.IsCompleted ? Colors.Green :
@@ -109,20 +102,17 @@ namespace SledzSpecke.App.Features.Courses.Views
                     CornerRadius = 8,
                     VerticalOptions = LayoutOptions.Center,
                 };
-
                 var titleLabel = new Label
                 {
                     Text = course.Name,
                     FontAttributes = FontAttributes.Bold,
                     FontSize = 16,
                 };
-
                 var descriptionLabel = new Label
                 {
                     Text = $"Czas trwania: {course.DurationDays} dni",
                     FontSize = 14,
                 };
-
                 var statusLabel = new Label
                 {
                     Text = course.IsCompleted ? "Ukończony" :
@@ -134,7 +124,6 @@ namespace SledzSpecke.App.Features.Courses.Views
                                 course.ScheduledDate.HasValue ? Colors.Orange :
                                 new Color(84, 126, 158),
                 };
-
                 var detailsButton = new Button
                 {
                     Text = "Szczegóły",
@@ -146,7 +135,6 @@ namespace SledzSpecke.App.Features.Courses.Views
                     CommandParameter = course.Id,
                 };
                 detailsButton.Clicked += this.OnCourseDetailsClicked;
-
                 var headerLayout = new Grid
                 {
                     ColumnDefinitions = new ColumnDefinitionCollection
@@ -157,12 +145,10 @@ namespace SledzSpecke.App.Features.Courses.Views
                 };
                 headerLayout.Add(statusIndicator, 0, 0);
                 headerLayout.Add(titleLabel, 1, 0);
-
                 var contentLayout = new VerticalStackLayout
                 {
                     Children = { headerLayout, descriptionLabel, statusLabel, detailsButton },
                 };
-
                 frame.Content = contentLayout;
                 this.CoursesLayout.Children.Add(frame);
             }

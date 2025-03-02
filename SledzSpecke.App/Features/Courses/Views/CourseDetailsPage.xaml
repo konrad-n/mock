@@ -9,17 +9,13 @@
           Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="0">
-            <!-- Page Header -->
             <Label Text="Dane kursu" FontSize="22" FontAttributes="Bold" 
                    HorizontalOptions="Center" Margin="0,0,0,20" 
                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-
-            <!-- Main Form Content -->
             <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
                    Padding="20" CornerRadius="10" Margin="0,0,0,20">
                 <VerticalStackLayout Spacing="15">
-                    <!-- Course Name Section -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Nazwa kursu" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -30,8 +26,6 @@
                                    Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Course Description Section -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Opis" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -44,8 +38,6 @@
                                     Margin="10,5" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Course Duration Section -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Czas trwania (dni)" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -58,8 +50,6 @@
                                    Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Module Selection Section -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Moduł" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -76,8 +66,6 @@
                             </Picker>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Status Selection Section -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Status" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>

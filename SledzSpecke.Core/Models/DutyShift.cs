@@ -17,7 +17,6 @@ namespace SledzSpecke.Core.Models
 
         public double DurationHours { get; set; }
 
-        // New fields for SMK export format requirements
         [Ignore]
         public int DurationHoursInt => (int)Math.Floor(this.DurationHours);
 
@@ -26,7 +25,7 @@ namespace SledzSpecke.Core.Models
 
         public DutyType Type { get; set; }
 
-        public string Location { get; set; } // In SMK "Nazwa komórki organizacyjnej"
+        public string Location { get; set; }
 
         public string SupervisorName { get; set; }
 
@@ -36,8 +35,6 @@ namespace SledzSpecke.Core.Models
         public int? InternshipId { get; set; }
 
         public int SpecializationId { get; set; }
-
-        // Department name for SMK export
         public string DepartmentName { get; set; }
     }
 }

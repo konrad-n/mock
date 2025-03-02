@@ -20,13 +20,13 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         private DateTime startDate = DateTime.Now;
 
         [ObservableProperty]
-        private TimeSpan startTime = new TimeSpan(8, 0, 0); // 8:00 AM
+        private TimeSpan startTime = new TimeSpan(8, 0, 0);
 
         [ObservableProperty]
         private DateTime endDate = DateTime.Now.AddDays(1);
 
         [ObservableProperty]
-        private TimeSpan endTime = new TimeSpan(8, 0, 0); // 8:00 AM next day
+        private TimeSpan endTime = new TimeSpan(8, 0, 0);
 
         [ObservableProperty]
         private string durationText = "24 godziny";
@@ -35,7 +35,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         private string location = string.Empty;
 
         [ObservableProperty]
-        private string departmentName = string.Empty; // For SMK
+        private string departmentName = string.Empty;
 
         [ObservableProperty]
         private string supervisorName = string.Empty;
@@ -60,7 +60,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
             if (dutyShift == null)
             {
-                // New duty shift
                 this.isNewDutyShift = true;
                 this.dutyShift = new DutyShift
                 {
@@ -70,12 +69,11 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     Type = DutyType.Independent,
                 };
                 this.PageTitle = "Dodaj dyżur";
-                this.DutyTypeSelectedIndex = 0; // Independent
+                this.DutyTypeSelectedIndex = 0;
                 this.IsSupervisorVisible = false;
             }
             else
             {
-                // Edit existing duty shift
                 this.isNewDutyShift = false;
                 this.dutyShift = dutyShift;
                 this.PageTitle = "Edytuj dyżur";
@@ -101,7 +99,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             try
             {
-                // Sprawdź czy dutyShift nie jest null
                 if (this.dutyShift == null)
                 {
                     this.DurationText = "Wczytywanie...";
@@ -119,7 +116,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
                 var duration = endDateTime - startDateTime;
 
-                // Warn about long duty shifts
                 if (duration.TotalHours > 24)
                 {
                     MainThread.BeginInvokeOnMainThread(async () =>
@@ -132,7 +128,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
                         if (!continueAnyway)
                         {
-                            // Reset to 24 hours duty
                             this.EndDate = this.StartDate.Date.AddDays(1);
                             this.EndTime = this.StartTime;
                             this.OnPropertyChanged(nameof(this.EndDate));
@@ -144,8 +139,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 }
 
                 this.dutyShift.DurationHours = duration.TotalHours;
-
-                // Format according to SMK requirements - split into hours and minutes
                 int hours = (int)Math.Floor(duration.TotalHours);
                 int minutes = (int)Math.Round((duration.TotalHours - hours) * 60);
 
@@ -172,7 +165,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         [RelayCommand]
         private void UpdateDutyType(int index)
         {
-            // Sprawdź czy dutyShift nie jest null
             if (this.dutyShift == null)
             {
                 this.logger?.LogWarning("Próba aktualizacji typu dyżuru gdy dutyShift jest null");
@@ -194,7 +186,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             try
             {
-                // Validation
                 if (string.IsNullOrWhiteSpace(this.Location))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce dyżuru jest wymagane.", "OK");
@@ -210,14 +201,12 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     return;
                 }
 
-                // For accompanied type, supervisor is required
                 if (this.dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla dyżuru towarzyszącego.", "OK");
                     return;
                 }
 
-                // Always create a new duty shift object to avoid reference issues
                 var dutyShiftToSave = new DutyShift
                 {
                     StartDate = startDateTime,
@@ -230,7 +219,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     Type = this.dutyShift.Type,
                 };
 
-                // Only set the ID if we're editing an existing duty shift
                 if (!this.isNewDutyShift)
                 {
                     dutyShiftToSave.Id = this.dutyShift.Id;

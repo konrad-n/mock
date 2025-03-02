@@ -27,8 +27,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
             {
                 this.viewModel = this.GetRequiredService<ProcedureEntryViewModel>();
                 this.BindingContext = this.viewModel;
-
-                // Initialize ViewModel with procedure and callback
                 this.viewModel.Initialize(this.procedure, this.onSaveCallback);
             }
             catch (Exception ex)

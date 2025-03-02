@@ -115,12 +115,12 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 var specialization = await this.databaseService.GetCurrentSpecializationAsync();
-                return specialization?.SelfEducationDaysPerYear ?? 6; // Default to 6 days if not specified
+                return specialization?.SelfEducationDaysPerYear ?? 6;
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error getting yearly self-education allowance");
-                return 6; // Default to 6 days in case of error
+                return 6;
             }
         }
     }

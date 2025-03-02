@@ -25,11 +25,7 @@ namespace SledzSpecke.App.Features.Internships.Views
             try
             {
                 this.viewModel = this.GetRequiredService<InternshipDetailsViewModel>();
-
-                // Najpierw inicjalizujemy ViewModel
                 this.viewModel.Initialize(this.internship, this.currentModule, this.onSaveCallback);
-
-                // Dopiero potem BindingContext
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

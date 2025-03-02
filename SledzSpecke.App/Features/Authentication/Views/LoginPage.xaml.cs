@@ -16,10 +16,7 @@ namespace SledzSpecke.App.Features.Authentication.Views
             try
             {
                 this.viewModel = this.GetRequiredService<LoginViewModel>();
-
-                // Dodaj debug log
                 System.Diagnostics.Debug.WriteLine($"Debug mode: Email = {this.viewModel.Email}, Password = {this.viewModel.Password}");
-
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

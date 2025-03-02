@@ -27,8 +27,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 this.viewModel = this.GetRequiredService<ProceduresViewModel>();
                 this.BindingContext = this.viewModel;
                 await this.viewModel.InitializeAsync();
-
-                // Po inicjalizacji wyświetl procedury
                 this.DisplayProcedures();
             }
             catch (Exception ex)
@@ -42,7 +40,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
         {
             base.OnAppearing();
 
-            // Odśwież dane procedur przy każdym pokazaniu strony
             if (this.viewModel != null)
             {
                 this.viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
@@ -65,7 +62,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 return;
             }
 
-            // Filter procedures by module and type
             var procedures = this.viewModel.Specialization.RequiredProcedures
                 .Where(p => p.Module == this.viewModel.CurrentModule && p.ProcedureType == this.viewModel.CurrentProcedureType)
                 .OrderBy(p => p.Name)
@@ -85,7 +81,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 return;
             }
 
-            // Grupowanie procedur według stażu
             var proceduresByInternship = procedures.GroupBy(p => p.InternshipId);
 
             foreach (var group in proceduresByInternship)
@@ -93,8 +88,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 var internshipId = group.Key;
                 var internshipName = this.viewModel.Specialization.RequiredInternships
                     .FirstOrDefault(i => i.Id == internshipId)?.Name ?? "Nieokreślony staż";
-
-                // Nagłówek stażu
                 this.ProceduresLayout.Children.Add(new Label
                 {
                     Text = internshipName,
@@ -185,7 +178,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
             }
         }
 
-        // Obsługa przycisków filtrów
         private void OnBasicModuleButtonClicked(object sender, EventArgs e)
         {
             if (this.viewModel.CurrentModule != ModuleType.Basic)
@@ -255,7 +247,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
             }
         }
 
-        // Callback methods
         private async Task OnProcedureAdded(MedicalProcedure procedure)
         {
             await this.viewModel.SaveProcedureAsync(procedure);

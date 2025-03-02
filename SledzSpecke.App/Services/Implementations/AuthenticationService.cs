@@ -29,7 +29,6 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Check if user already exists
                 var existingUser = await this.databaseService.QueryAsync<User>("SELECT * FROM Users WHERE Email = ?", email);
                 if (existingUser.Count > 0)
                 {
@@ -37,10 +36,8 @@ namespace SledzSpecke.App.Services.Implementations
                     return false;
                 }
 
-                // Hash password
                 string passwordHash = this.HashPassword(password);
 
-                // Create new user
                 var user = new User
                 {
                     Username = username,
@@ -50,10 +47,8 @@ namespace SledzSpecke.App.Services.Implementations
                     CreatedAt = DateTime.UtcNow,
                 };
 
-                // Save user to database
                 await this.databaseService.SaveAsync(user);
 
-                // Create user settings
                 var settings = new UserSettings
                 {
                     Username = username,
@@ -91,7 +86,6 @@ namespace SledzSpecke.App.Services.Implementations
                 var user = users[0];
                 this.logger.LogDebug("Found user: {Username} with ID: {Id}", user.Username, user.Id);
 
-                // Verify password
                 bool isPasswordValid = this.VerifyPassword(password, user.PasswordHash);
                 this.logger.LogDebug("Password verification result for user {Email}: {Result}", email, isPasswordValid ? "Valid" : "Invalid");
 
@@ -101,10 +95,8 @@ namespace SledzSpecke.App.Services.Implementations
                     return false;
                 }
 
-                // Set current user
                 this.currentUser = user;
 
-                // Update last login
                 user.LastLoginAt = DateTime.UtcNow;
                 await this.databaseService.SaveAsync(user);
 
@@ -134,7 +126,6 @@ namespace SledzSpecke.App.Services.Implementations
 
             try
             {
-                // Verify current password
                 bool isCurrentPasswordValid = this.VerifyPassword(currentPassword, this.currentUser.PasswordHash);
                 if (!isCurrentPasswordValid)
                 {
@@ -142,10 +133,7 @@ namespace SledzSpecke.App.Services.Implementations
                     return false;
                 }
 
-                // Hash new password
                 string newPasswordHash = this.HashPassword(newPassword);
-
-                // Update password
                 this.currentUser.PasswordHash = newPasswordHash;
                 await this.databaseService.SaveAsync(this.currentUser);
 
@@ -164,17 +152,12 @@ namespace SledzSpecke.App.Services.Implementations
             try
             {
                 this.logger.LogInformation("Seeding test user");
-
-                // Check if test user already exists
                 var existingUsers = await this.databaseService.QueryAsync<User>("SELECT * FROM Users WHERE Email = ?", "olo@pozakontrololo.com");
                 if (existingUsers.Count > 0)
                 {
-                    // User already exists, no need to create it again
                     this.logger.LogInformation("Test user already exists");
                     return true;
                 }
-
-                // Ensure specialization types are available
                 this.logger.LogDebug("Getting specialization types");
                 var types = await this.databaseService.GetAllAsync<SpecializationType>();
                 if (types.Count == 0)
@@ -187,10 +170,9 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                 }
 
-                // Get hematology specialization type
                 this.logger.LogDebug("Getting hematology specialization type");
                 var specializationTypes = await this.databaseService.QueryAsync<SpecializationType>("SELECT * FROM SpecializationTypes WHERE Name = ?", "Hematologia");
-                int specializationTypeId = 28; // Default ID for hematology
+                int specializationTypeId = 28;
 
                 if (specializationTypes.Count > 0)
                 {
@@ -202,7 +184,6 @@ namespace SledzSpecke.App.Services.Implementations
                     this.logger.LogWarning("Hematology specialization type not found, using default ID: {Id}", specializationTypeId);
                 }
 
-                // Create the test user
                 this.logger.LogInformation("Creating test user");
                 var testUser = new User
                 {
@@ -213,11 +194,9 @@ namespace SledzSpecke.App.Services.Implementations
                     CreatedAt = DateTime.UtcNow,
                 };
 
-                // Save the user
                 await this.databaseService.SaveAsync(testUser);
                 this.logger.LogDebug("Test user saved with ID: {Id}", testUser.Id);
 
-                // Create user settings
                 this.logger.LogInformation("Creating user settings for test user");
                 var settings = new UserSettings
                 {
@@ -225,14 +204,11 @@ namespace SledzSpecke.App.Services.Implementations
                     EnableNotifications = true,
                     EnableAutoSync = true,
                     UseDarkTheme = false,
-                    CurrentSpecializationId = 0, // Will be updated when specialization is created
+                    CurrentSpecializationId = 0,
                 };
                 await this.databaseService.SaveUserSettingsAsync(settings);
-
-                // Zainicjuj dane szablonowe dla hematologii
                 await this.databaseService.InitializeSpecializationTemplateDataAsync(specializationTypeId);
 
-                // Create specialization
                 this.logger.LogInformation("Creating specialization for test user");
                 var specialization = new Specialization
                 {
@@ -253,8 +229,6 @@ namespace SledzSpecke.App.Services.Implementations
 
                 await this.databaseService.SaveAsync(specialization);
                 this.logger.LogDebug("Specialization saved with ID: {Id}", specialization.Id);
-
-                // Update user settings with specialization ID
                 this.logger.LogInformation("Updating user settings with specialization ID");
                 settings.CurrentSpecializationId = specialization.Id;
                 await this.databaseService.SaveUserSettingsAsync(settings);

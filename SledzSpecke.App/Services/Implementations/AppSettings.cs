@@ -31,7 +31,7 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error loading settings");
-                this.settings = new UserSettings(); // Use default settings in case of error
+                this.settings = new UserSettings();
             }
         }
 
@@ -51,7 +51,6 @@ namespace SledzSpecke.App.Services.Implementations
 
         public T GetSetting<T>(string key, T defaultValue = default)
         {
-            // Use pattern matching and null coalescing to handle potential nulls
             return key switch
             {
                 "Username" => this.settings.Username is not null && typeof(T) == typeof(string)
@@ -91,7 +90,6 @@ namespace SledzSpecke.App.Services.Implementations
             switch (key)
             {
                 case "Username":
-                    // Use null-conditional operator to avoid null assignments
                     if (value is string username)
                     {
                         this.settings.Username = username;
@@ -151,7 +149,6 @@ namespace SledzSpecke.App.Services.Implementations
 
         public void RemoveSetting(string key)
         {
-            // Handle string properties separately from bool properties
             switch (key)
             {
                 case "Username":

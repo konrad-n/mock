@@ -75,26 +75,17 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         {
             try
             {
-                // Get all self-education events
                 var events = await this.selfEducationService.GetAllSelfEducationAsync();
                 this.SelfEducationList = new ObservableCollection<SelfEducation>(events);
-
-                // Update used days label
                 var totalUsedDays = await this.selfEducationService.GetTotalUsedDaysAsync();
                 var yearlyAllowance = await this.selfEducationService.GetYearlyAllowanceAsync();
-                var totalAllowedDays = yearlyAllowance * 3; // 3 years typical
+                var totalAllowedDays = yearlyAllowance * 3;
                 this.UsedDaysLabel = $"{totalUsedDays}/{totalAllowedDays}";
-
-                // Get yearly used days and update label
                 var currentYear = DateTime.Now.Year;
                 var yearlyUsedDays = await this.selfEducationService.GetYearlyUsedDaysAsync();
                 var usedDaysThisYear = yearlyUsedDays.ContainsKey(currentYear) ? yearlyUsedDays[currentYear] : 0;
                 this.YearlyDaysLabel = $"{usedDaysThisYear} dni";
-
-                // Group education events by year
                 this.GroupEducationEventsByYear();
-
-                // Show/hide "no events" message
                 this.NoEventsVisible = this.SelfEducationList.Count == 0;
             }
             catch (Exception ex)
@@ -149,14 +140,9 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         {
             try
             {
-                // Generowanie nowego ID
                 selfEducation.Id = this.SelfEducationList.Count > 0 ? this.SelfEducationList.Max(s => s.Id) + 1 : 1;
                 this.SelfEducationList.Add(selfEducation);
-
-                // Save to database
                 this.selfEducationService.SaveSelfEducationAsync(selfEducation);
-
-                // Refresh view
                 this.LoadDataAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -176,10 +162,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                     this.SelfEducationList[index] = selfEducation;
                 }
 
-                // Save to database
                 this.selfEducationService.SaveSelfEducationAsync(selfEducation);
-
-                // Refresh view
                 this.LoadDataAsync().ConfigureAwait(false);
             }
             catch (Exception ex)

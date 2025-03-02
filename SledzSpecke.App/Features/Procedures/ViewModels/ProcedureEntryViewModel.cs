@@ -44,7 +44,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         private string patientId;
 
         [ObservableProperty]
-        private string patientGender = "Mężczyzna"; // Default value
+        private string patientGender = "Mężczyzna";
 
         [ObservableProperty]
         private string location;
@@ -89,14 +89,12 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         {
             this.procedure = procedure;
             this.onSaveCallback = onSaveCallback;
-
             this.ProcedureName = procedure.Name;
 
-            // Set type-specific properties based on procedure type
             if (procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeA)
             {
                 this.ProcedureType = "Kod A - wykonywanie samodzielne";
-                this.ProcedureTypeColor = Color.FromArgb("#2196F3"); // Blue for Type A
+                this.ProcedureTypeColor = Color.FromArgb("#2196F3");
                 this.ProcedureTypeBorderColor = Color.FromArgb("#1976D2");
                 this.SupervisorLabel = "Nadzorujący (opcjonalnie)";
                 this.SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego (jeśli dotyczy)";
@@ -106,7 +104,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             else
             {
                 this.ProcedureType = "Kod B - pierwsza asysta";
-                this.ProcedureTypeColor = Color.FromArgb("#4CAF50"); // Green for Type B
+                this.ProcedureTypeColor = Color.FromArgb("#4CAF50");
                 this.ProcedureTypeBorderColor = Color.FromArgb("#388E3C");
                 this.SupervisorLabel = "Nadzorujący (wymagane)";
                 this.SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego";
@@ -114,27 +112,24 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 this.FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej procedurę";
             }
 
-            // Calculate and set completion information
             this.CompletionStatus = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount}";
             int remaining = procedure.RequiredCount - procedure.CompletedCount;
             this.RemainingText = $"Pozostało: {remaining}";
             this.CompletionProgress = (double)procedure.CompletedCount / procedure.RequiredCount;
 
-            // Set progress color based on completion
             if (this.CompletionProgress >= 1.0)
             {
-                this.ProgressColor = Color.FromArgb("#4CAF50"); // Green when complete
+                this.ProgressColor = Color.FromArgb("#4CAF50");
             }
             else if (this.CompletionProgress >= 0.7)
             {
-                this.ProgressColor = Color.FromArgb("#FFB74D"); // Orange when nearly complete
+                this.ProgressColor = Color.FromArgb("#FFB74D");
             }
             else
             {
-                this.ProgressColor = Color.FromArgb("#2196F3"); // Blue for in progress
+                this.ProgressColor = Color.FromArgb("#2196F3");
             }
 
-            // Get internship name if available
             if (procedure.InternshipId.HasValue)
             {
                 Task.Run(async () =>
@@ -177,7 +172,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         {
             try
             {
-                // Validation
                 if (string.IsNullOrWhiteSpace(this.PatientId))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Identyfikator pacjenta jest wymagany.", "OK");
@@ -196,14 +190,12 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                     return;
                 }
 
-                // For type B (assistance) supervisor is required
                 if (this.procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla procedury typu B.", "OK");
                     return;
                 }
 
-                // Create new entry
                 var procedureEntry = new ProcedureEntry
                 {
                     Date = this.EntryDate,

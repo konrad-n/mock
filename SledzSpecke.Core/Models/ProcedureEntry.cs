@@ -12,7 +12,7 @@ namespace SledzSpecke.Core.Models
 
         public DateTime Date { get; set; }
 
-        public string PatientId { get; set; } // Patient initials for SMK
+        public string PatientId { get; set; }
 
         public string Location { get; set; }
 
@@ -23,15 +23,14 @@ namespace SledzSpecke.Core.Models
         [Indexed]
         public int ProcedureId { get; set; }
 
-        // New fields according to SMK manual requirements
-        public string PatientGender { get; set; } // Patient gender
+        public string PatientGender { get; set; }
 
-        public string FirstAssistantData { get; set; } // First assistant data
+        public string FirstAssistantData { get; set; }
 
-        public string SecondAssistantData { get; set; } // Second assistant data
+        public string SecondAssistantData { get; set; }
 
-        public string ProcedureGroup { get; set; } // "Procedura z grupy"
+        public string ProcedureGroup { get; set; }
 
-        public string InternshipName { get; set; } // Internship name
+        public string InternshipName { get; set; }
     }
 }

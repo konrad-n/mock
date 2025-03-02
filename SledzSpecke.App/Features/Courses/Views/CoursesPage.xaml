@@ -21,8 +21,6 @@
                 <Setter Property="BackgroundColor" Value="#F5F5F5" />
                 <Setter Property="BorderColor" Value="#9E9E9E" />
             </Style>
-
-            <!-- Style dla przycisków modułów -->
             <Style x:Key="ModuleButtonActive" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="#082044" />
                 <Setter Property="TextColor" Value="White" />
@@ -32,8 +30,6 @@
                 <Setter Property="BackgroundColor" Value="#E4E4E4" />
                 <Setter Property="TextColor" Value="#333333" />
             </Style>
-
-            <!-- Style dla przycisków szczegółów -->
             <Style x:Key="DetailsButton" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="#24C1DE" />
                 <Setter Property="TextColor" Value="White" />
@@ -44,7 +40,6 @@
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
-
     <Grid RowDefinitions="Auto,*">
         <Grid ColumnDefinitions="*,*" Padding="10">
             <Button Text="Moduł podstawowy" 
@@ -54,7 +49,6 @@
                 x:Name="BasicModuleButton"
                 BackgroundColor="#082044"
                 TextColor="White"/>
-
             <Button Text="Moduł specjalistyczny" 
                 Clicked="OnSpecialisticModuleButtonClicked" 
                 Grid.Column="1" 
@@ -63,19 +57,15 @@
                 BackgroundColor="#E4E4E4"
                 TextColor="#333333"/>
         </Grid>
-
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="15" Spacing="10" x:Name="CoursesLayout">
                 <Label Text="Wybierz moduł powyżej, aby zobaczyć kursy" 
                    HorizontalOptions="Center" 
                    VerticalOptions="Center"
                    x:Name="NoModuleSelectedLabel"/>
-
-                <!-- Tutaj będą dynamicznie dodawane elementy kursów -->
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
-
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Dodaj" Clicked="OnAddCourseClicked" IconImageSource="addicon.png" />
     </ContentPage.ToolbarItems>

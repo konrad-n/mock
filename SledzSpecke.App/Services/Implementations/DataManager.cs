@@ -33,7 +33,6 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // First try to get from database
                 var currentSpecialization = await this.databaseService.GetCurrentSpecializationAsync();
                 if (currentSpecialization != null)
                 {
@@ -42,7 +41,6 @@ namespace SledzSpecke.App.Services.Implementations
                     return currentSpecialization;
                 }
 
-                // If nothing found, seed default data
                 this.specialization = DataSeeder.SeedHematologySpecialization();
                 await this.SaveSpecializationAsync(this.specialization);
             }
@@ -50,7 +48,6 @@ namespace SledzSpecke.App.Services.Implementations
             {
                 this.logger.LogError(ex, "Error loading specialization data");
 
-                // W przypadku błędu, zwracamy nową instancję specjalizacji
                 this.specialization = DataSeeder.SeedHematologySpecialization();
                 await this.SaveSpecializationAsync(this.specialization);
             }
@@ -64,21 +61,15 @@ namespace SledzSpecke.App.Services.Implementations
             {
                 this.specialization = specialization;
 
-                // Inicjalizacja danych szablonowych jeśli potrzebne
                 if (!await this.databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
                 {
                     await this.databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
                 }
 
-                // Save to database
                 await this.databaseService.SaveAsync(specialization);
-
-                // Save user settings
                 var settings = await this.databaseService.GetUserSettingsAsync();
                 settings.CurrentSpecializationId = specialization.Id;
                 await this.databaseService.SaveUserSettingsAsync(settings);
-
-                // Save to file as backup
                 string json = JsonSerializer.Serialize(specialization, new JsonSerializerOptions
                 {
                     WriteIndented = true,
@@ -98,10 +89,7 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Delete from database
                 await this.databaseService.DeleteAllDataAsync();
-
-                // Delete file backup
                 if (File.Exists(specializationFile))
                 {
                     File.Delete(specializationFile);
@@ -126,7 +114,6 @@ namespace SledzSpecke.App.Services.Implementations
 
                 if (types.Count == 0)
                 {
-                    // Seed specialization types if none exist
                     types = SpecializationTypeSeeder.SeedSpecializationTypes();
                     foreach (var type in types)
                     {
@@ -147,14 +134,11 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Sprawdź, czy dane szablonowe już istnieją
                 if (!await this.databaseService.HasSpecializationTemplateDataAsync(specializationTypeId))
                 {
-                    // Zainicjuj dane szablonowe
                     await this.databaseService.InitializeSpecializationTemplateDataAsync(specializationTypeId);
                 }
 
-                // Get specialization type
                 var specializationType = await this.databaseService.GetByIdAsync<SpecializationType>(specializationTypeId);
                 if (specializationType == null)
                 {
@@ -162,7 +146,6 @@ namespace SledzSpecke.App.Services.Implementations
                     return null;
                 }
 
-                // Create new specialization based on type
                 var newSpecialization = new Specialization
                 {
                     Name = specializationType.Name,
@@ -180,10 +163,7 @@ namespace SledzSpecke.App.Services.Implementations
                     SpecializationTypeId = specializationType.Id,
                 };
 
-                // Save specialization to database
                 await this.databaseService.SaveAsync(newSpecialization);
-
-                // Update user settings
                 var settings = await this.databaseService.GetUserSettingsAsync();
                 settings.Username = username;
                 settings.CurrentSpecializationId = newSpecialization.Id;

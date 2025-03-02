@@ -1,8 +1,4 @@
-﻿// <copyright file="DatabaseService.cs" company="SledzSpecke">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -16,9 +12,7 @@ using SQLite;
 
 namespace SledzSpecke.Infrastructure.Database
 {
-    /// <summary>
-    /// Implementation of the database service providing access to application data.
-    /// </summary>
+
     public class DatabaseService : IDatabaseService
     {
         private const string DatabaseNotInitializedText = "Database is not initialized";
@@ -28,21 +22,14 @@ namespace SledzSpecke.Infrastructure.Database
         private SQLiteAsyncConnection? database;
         private bool isInitialized = false;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseService"/> class.
-        /// </summary>
-        /// <param name="fileSystemService">File system service used to get database path.</param>
-        /// <param name="logger">Logger for recording database operation events.</param>
         public DatabaseService(IFileSystemService fileSystemService, ILogger<DatabaseService> logger)
         {
             this.fileSystemService = fileSystemService;
             this.logger = logger;
         }
 
-        /// <inheritdoc/>
         public async Task InitAsync()
         {
-            // Use a semaphore to prevent concurrent initialization from multiple threads
             await this.initLock.WaitAsync();
 
             try
@@ -55,7 +42,6 @@ namespace SledzSpecke.Infrastructure.Database
                 var databasePath = Path.Combine(this.fileSystemService.GetAppDataDirectory(), "SledzSpecke.db3");
                 this.logger.LogInformation("Initializing database at {Path}", databasePath);
 
-                // Check if directory exists
                 var directory = Path.GetDirectoryName(databasePath);
                 if (!Directory.Exists(directory))
                 {
@@ -63,11 +49,9 @@ namespace SledzSpecke.Infrastructure.Database
                     this.logger.LogInformation("Created database directory at {Path}", directory);
                 }
 
-                // Create database connection with additional options
                 var flags = SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache;
                 this.database = new SQLiteAsyncConnection(databasePath, flags);
 
-                // Create tables for all models
                 await this.database.CreateTableAsync<User>().ConfigureAwait(false);
                 await this.database.CreateTableAsync<SpecializationType>().ConfigureAwait(false);
                 await this.database.CreateTableAsync<Specialization>().ConfigureAwait(false);
@@ -89,7 +73,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<List<T>> GetAllAsync<T>()
             where T : new()
         {
@@ -110,7 +93,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<T?> GetByIdAsync<T>(int id)
             where T : class, new()
         {
@@ -131,7 +113,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<int> SaveAsync<T>(T item)
             where T : new()
         {
@@ -145,7 +126,6 @@ namespace SledzSpecke.Infrastructure.Database
             return await this.database.InsertOrReplaceAsync(item).ConfigureAwait(false);
         }
 
-        /// <inheritdoc/>
         public async Task<int> DeleteAsync<T>(T item)
             where T : new()
         {
@@ -159,7 +139,6 @@ namespace SledzSpecke.Infrastructure.Database
             return await this.database.DeleteAsync(item).ConfigureAwait(false);
         }
 
-        /// <inheritdoc/>
         public async Task<List<T>> QueryAsync<T>(string query, params object[] args)
             where T : new()
         {
@@ -180,7 +159,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<int> ExecuteAsync(string query, params object[] args)
         {
             await this.EnsureInitializedAsync();
@@ -193,7 +171,6 @@ namespace SledzSpecke.Infrastructure.Database
             return await this.database.ExecuteAsync(query, args).ConfigureAwait(false);
         }
 
-        /// <inheritdoc/>
         public async Task<List<MedicalProcedure>> GetProceduresForInternshipAsync(int internshipId)
         {
             await this.EnsureInitializedAsync();
@@ -215,7 +192,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<List<ProcedureEntry>> GetEntriesForProcedureAsync(int procedureId)
         {
             await this.EnsureInitializedAsync();
@@ -237,7 +213,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<List<Course>> GetCoursesForModuleAsync(ModuleType moduleType)
         {
             await this.EnsureInitializedAsync();
@@ -259,7 +234,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<List<Internship>> GetInternshipsForModuleAsync(ModuleType moduleType)
         {
             await this.EnsureInitializedAsync();
@@ -281,7 +255,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<UserSettings> GetUserSettingsAsync()
         {
             await this.EnsureInitializedAsync();
@@ -304,7 +277,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task SaveUserSettingsAsync(UserSettings settings)
         {
             await this.EnsureInitializedAsync();
@@ -318,7 +290,6 @@ namespace SledzSpecke.Infrastructure.Database
             this.logger.LogInformation("User settings saved successfully");
         }
 
-        /// <inheritdoc/>
         public async Task<Specialization?> GetCurrentSpecializationAsync()
         {
             await this.EnsureInitializedAsync();
@@ -348,7 +319,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task<bool> DeleteAllDataAsync()
         {
             await this.EnsureInitializedAsync();
@@ -372,7 +342,6 @@ namespace SledzSpecke.Infrastructure.Database
             return true;
         }
 
-        /// <inheritdoc/>
         public async Task<bool> HasSpecializationTemplateDataAsync(int specializationTypeId)
         {
             await this.EnsureInitializedAsync();
@@ -383,7 +352,6 @@ namespace SledzSpecke.Infrastructure.Database
                     throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
-                // Check if specialization of given type exists
                 var specialization = await this.database.Table<Specialization>()
                     .Where(s => s.SpecializationTypeId == specializationTypeId)
                     .FirstOrDefaultAsync();
@@ -393,7 +361,6 @@ namespace SledzSpecke.Infrastructure.Database
                     return false;
                 }
 
-                // Check if courses exist for this specialization
                 var courses = await this.database.Table<Course>()
                     .Where(c => c.SpecializationId == specialization.Id)
                     .CountAsync();
@@ -407,7 +374,6 @@ namespace SledzSpecke.Infrastructure.Database
             }
         }
 
-        /// <inheritdoc/>
         public async Task InitializeSpecializationTemplateDataAsync(int specializationTypeId)
         {
             await this.EnsureInitializedAsync();
@@ -417,7 +383,6 @@ namespace SledzSpecke.Infrastructure.Database
                 throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
-            // Check if template data already exists
             if (await this.HasSpecializationTemplateDataAsync(specializationTypeId))
             {
                 this.logger.LogInformation("Template data already exists for specialization type {SpecializationTypeId}", specializationTypeId);
@@ -426,28 +391,23 @@ namespace SledzSpecke.Infrastructure.Database
 
             this.logger.LogInformation("Initializing template data for specialization type {SpecializationTypeId}", specializationTypeId);
 
-            // For now, we'll use hematology data - add support for other specializations in the future
             var templateData = DataSeeder.SeedHematologySpecialization();
             templateData.SpecializationTypeId = specializationTypeId;
 
-            // Save specialization
             await this.SaveAsync(templateData);
 
-            // Save courses
             foreach (var course in templateData.RequiredCourses)
             {
                 course.SpecializationId = templateData.Id;
                 await this.SaveAsync(course);
             }
 
-            // Save internships
             foreach (var internship in templateData.RequiredInternships)
             {
                 internship.SpecializationId = templateData.Id;
                 await this.SaveAsync(internship);
             }
 
-            // Save procedures
             foreach (var procedure in templateData.RequiredProcedures)
             {
                 procedure.SpecializationId = templateData.Id;
@@ -457,7 +417,6 @@ namespace SledzSpecke.Infrastructure.Database
             this.logger.LogInformation("Template data initialized successfully for specialization type {SpecializationTypeId}", specializationTypeId);
         }
 
-        /// <inheritdoc/>
         public async Task<int> InsertAsync<T>(T item)
             where T : new()
         {
@@ -472,7 +431,6 @@ namespace SledzSpecke.Infrastructure.Database
             return await this.database.InsertAsync(item).ConfigureAwait(false);
         }
 
-        /// <inheritdoc/>
         public async Task<int> UpdateAsync<T>(T item)
             where T : new()
         {
@@ -487,10 +445,6 @@ namespace SledzSpecke.Infrastructure.Database
             return await this.database.UpdateAsync(item).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Ensures the database is initialized before performing operations.
-        /// </summary>
-        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task EnsureInitializedAsync()
         {
             if (!this.isInitialized)

@@ -25,11 +25,7 @@ namespace SledzSpecke.App.Features.Courses.Views
             try
             {
                 this.viewModel = this.GetRequiredService<CourseDetailsViewModel>();
-
-                // Najpierw inicjalizujemy ViewModel
                 this.viewModel.Initialize(this.course, this.currentModule, this.onSaveCallback);
-
-                // Dopiero potem BindingContext
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

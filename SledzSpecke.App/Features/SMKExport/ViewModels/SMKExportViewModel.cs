@@ -154,14 +154,12 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
         {
             try
             {
-                // Validate selections
                 if (this.IsCustomDatesSelected && this.StartDate > this.EndDate)
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd zakresu dat", "Data początkowa nie może być późniejsza niż data końcowa.", "OK");
                     return;
                 }
 
-                // If general export selected, ensure at least one category is selected
                 if (this.IsGeneralExportSelected &&
                     !this.IncludeCoursesChecked && !this.IncludeInternshipsChecked && !this.IncludeProceduresChecked)
                 {
@@ -169,7 +167,6 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
                     return;
                 }
 
-                // Set export options
                 this.exportOptions = new SmkExportOptions
                 {
                     ExportType = this.IsGeneralExportSelected ? SmkExportType.General :
@@ -191,16 +188,11 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
                     EndDate = this.IsCustomDatesSelected ? this.EndDate : null,
 
                     UseSmkExactFormat = this.UseSmkExactFormat,
-                    SplitDutyHoursAndMinutes = true // Always true for SMK format
+                    SplitDutyHoursAndMinutes = true,
                 };
 
-                // Show loading indicator
                 this.IsLoading = true;
-
-                // Generate report
                 this.FilePath = await this.exportService.ExportToSMKAsync(this.exportOptions);
-
-                // Show result
                 this.IsResultVisible = true;
 
                 await Application.Current.MainPage.DisplayAlert(
@@ -215,7 +207,6 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             }
             finally
             {
-                // Hide loading indicator
                 this.IsLoading = false;
             }
         }
@@ -227,14 +218,12 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             {
                 string filePath = this.FilePath;
 
-                // Check if file exists
                 if (!File.Exists(filePath))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Plik nie istnieje lub został usunięty.", "OK");
                     return;
                 }
 
-                // Try to open the file in the default application
                 await Launcher.OpenAsync(new OpenFileRequest
                 {
                     File = new ReadOnlyFile(filePath)
@@ -252,7 +241,6 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
         {
             try
             {
-                // Try to open the folder containing the file
                 string folderPath = Path.GetDirectoryName(this.FilePath);
 
                 if (!Directory.Exists(folderPath))

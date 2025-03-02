@@ -22,11 +22,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             try
             {
                 this.viewModel = this.GetRequiredService<SelfEducationDetailsViewModel>();
-
-                // Najpierw ViewModel
                 this.viewModel.Initialize(this.selfEducation, this.onSaveCallback);
-
-                // Dopiero potem BindingContext
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

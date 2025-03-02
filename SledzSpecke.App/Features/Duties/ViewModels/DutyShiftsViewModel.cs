@@ -83,25 +83,14 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             try
             {
-                // Get all duty shifts from the database
                 var allDutyShifts = await this.dutyShiftService.GetAllDutyShiftsAsync();
                 this.DutyShifts = new ObservableCollection<DutyShift>(allDutyShifts);
-
-                // Get specialization for required hours
                 this.specialization = await this.specializationService.GetSpecializationAsync();
                 this.totalRequiredHours = this.specialization.RequiredDutyHoursPerWeek * (this.specialization.BaseDurationWeeks / 52.0) * 52;
-
-                // Get weekly average
                 double weeklyAverage = this.CalculateWeeklyAverage();
-
-                // Update UI
                 this.UpdateTotalHours();
                 this.GroupAndDisplayDutyShifts();
-
-                // Update weekly hours label
                 this.WeeklyHoursLabel = $"{weeklyAverage:F1}h";
-
-                // Show/hide no duty shifts message
                 this.IsNoDutyShiftsVisible = this.DutyShifts.Count == 0;
             }
             catch (Exception ex)
@@ -120,7 +109,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     return 0;
                 }
 
-                // Count actual weeks with duties
                 var dates = this.DutyShifts.Select(d => d.StartDate.Date).Distinct().OrderBy(d => d).ToList();
                 if (dates.Count == 0)
                 {
@@ -129,14 +117,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
                 DateTime firstDate = dates.First();
                 DateTime lastDate = dates.Last();
-
-                // Calculate number of weeks between first and last duty
                 double weeks = Math.Max(1, (lastDate - firstDate).TotalDays / 7);
-
-                // Calculate total hours
                 double totalHours = this.DutyShifts.Sum(d => d.DurationHours);
-
-                // Return weekly average
                 return totalHours / weeks;
             }
             catch (Exception ex)
@@ -164,14 +146,11 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             try
             {
-                // Group duty shifts by month and year
                 var dutyShiftsByMonth = this.DutyShifts
                     .OrderByDescending(d => d.StartDate)
                     .GroupBy(d => new { Year = d.StartDate.Year, Month = d.StartDate.Month })
                     .ToList();
-
                 this.GroupedDutyShifts.Clear();
-
                 foreach (var monthGroup in dutyShiftsByMonth)
                 {
                     var monthName = this.GetMonthName(monthGroup.Key.Month);
@@ -220,10 +199,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             try
             {
-                // Save to database
                 await this.dutyShiftService.SaveDutyShiftAsync(dutyShift);
-
-                // Refresh data
                 await this.LoadDataAsync();
             }
             catch (Exception ex)

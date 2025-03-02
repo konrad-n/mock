@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
-using SledzSpecke.App.Services;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 
@@ -60,7 +59,6 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         [RelayCommand]
         public async Task RegisterAsync()
         {
-            // Validation
             if (string.IsNullOrWhiteSpace(this.Username) ||
                 string.IsNullOrWhiteSpace(this.Email) ||
                 string.IsNullOrWhiteSpace(this.Password) ||

@@ -52,32 +52,25 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 
             if (course == null)
             {
-                // Nowy kurs
                 this.course = new Course
                 {
-                    Id = new Random().Next(1000, 9999), // Tymczasowe ID
+                    Id = new Random().Next(1000, 9999),
                     Module = currentModule,
                     IsRequired = true,
                 };
-
                 this.PageTitle = "Dodaj kurs";
                 this.ModulePickerSelectedIndex = currentModule == ModuleType.Basic ? 0 : 1;
-                this.StatusPickerSelectedIndex = 0; // Domyślnie "Oczekujący"
+                this.StatusPickerSelectedIndex = 0;
             }
             else
             {
-                // Edycja istniejącego kursu
                 this.course = course;
                 this.PageTitle = "Szczegóły kursu";
                 this.DurationDays = course.DurationDays.ToString();
-
-                // Ustawienie pickerów
                 this.ModulePickerSelectedIndex = course.Module == ModuleType.Basic ? 0 : 1;
-
-                // Ustawienie statusu
                 if (course.IsCompleted)
                 {
-                    this.StatusPickerSelectedIndex = 3; // Ukończony
+                    this.StatusPickerSelectedIndex = 3;
                     this.IsCompletionDateVisible = true;
                     this.IsCompletionVisible = true;
                     if (course.CompletionDate.HasValue)
@@ -87,7 +80,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                 }
                 else if (course.IsAttended)
                 {
-                    this.StatusPickerSelectedIndex = 2; // Zarejestrowany
+                    this.StatusPickerSelectedIndex = 2; 
                     this.IsDateVisible = true;
                     if (course.ScheduledDate.HasValue)
                     {
@@ -96,13 +89,13 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                 }
                 else if (course.ScheduledDate.HasValue)
                 {
-                    this.StatusPickerSelectedIndex = 1; // Zaplanowany
+                    this.StatusPickerSelectedIndex = 1;
                     this.IsDateVisible = true;
                     this.CourseDate = course.ScheduledDate.Value;
                 }
                 else
                 {
-                    this.StatusPickerSelectedIndex = 0; // Oczekujący
+                    this.StatusPickerSelectedIndex = 0;
                 }
             }
         }
@@ -196,7 +189,6 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
         [RelayCommand]
         private async Task SaveAsync()
         {
-            // Walidacja
             if (string.IsNullOrWhiteSpace(this.course.Name))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa kursu jest wymagana.", "OK");
@@ -210,8 +202,6 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             }
 
             this.course.DurationDays = duration;
-
-            // Dodatkowe ustawienia w zależności od statusu
             if (this.IsDateVisible && this.course.ScheduledDate == null)
             {
                 this.course.ScheduledDate = this.CourseDate;
@@ -226,7 +216,6 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             {
                 await this.onSaveCallback(this.course);
             }
-
             await Shell.Current.Navigation.PopAsync();
         }
     }

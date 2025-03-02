@@ -31,7 +31,6 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
         {
             base.OnAppearing();
 
-            // Refresh data when page appears
             if (this.viewModel != null)
             {
                 this.viewModel.LoadDataAsync().ConfigureAwait(false);

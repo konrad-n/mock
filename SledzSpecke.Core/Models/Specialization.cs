@@ -77,19 +77,16 @@ namespace SledzSpecke.Core.Models
         {
             var dates = new List<DateTime>();
 
-            // Add course dates
             foreach (var course in this.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
             {
                 dates.Add(course.ScheduledDate!.Value);
             }
 
-            // Add internship dates
             foreach (var internship in this.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
             {
                 dates.Add(internship.StartDate!.Value);
             }
 
-            // Add end of basic module
             var endOfBasicModule = this.StartDate.AddDays(this.BasicModuleDurationWeeks * 7);
             if (endOfBasicModule > DateTime.Now)
             {

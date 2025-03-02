@@ -55,24 +55,21 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
 
             if (selfEducation == null)
             {
-                // Nowe wydarzenie
                 this.selfEducation = new SelfEducation
                 {
-                    Id = new Random().Next(1000, 9999), // Tymczasowe ID
+                    Id = new Random().Next(1000, 9999),
                     StartDate = this.StartDate,
                     EndDate = this.EndDate,
                     DurationDays = 1,
                     Type = SelfEducationType.Conference,
                 };
                 this.PageTitle = "Dodaj wydarzenie";
-                this.TypePickerSelectedIndex = 0; // Konferencja
+                this.TypePickerSelectedIndex = 0;
             }
             else
             {
-                // Edycja istniejącego wydarzenia
                 this.selfEducation = selfEducation;
                 this.PageTitle = "Edytuj wydarzenie";
-
                 this.SelfEducationTitle = selfEducation.Title;
                 this.StartDate = selfEducation.StartDate;
                 this.EndDate = selfEducation.EndDate;
@@ -81,7 +78,6 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 this.Organizer = selfEducation.Organizer;
                 this.IsRequired = selfEducation.IsRequired;
                 this.Notes = selfEducation.Notes;
-
                 this.TypePickerSelectedIndex = (int)selfEducation.Type;
             }
 
@@ -144,7 +140,6 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         [RelayCommand]
         private async Task SaveAsync()
         {
-            // Walidacja
             if (string.IsNullOrWhiteSpace(this.SelfEducationTitle))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Tytuł wydarzenia jest wymagany.", "OK");
@@ -175,7 +170,6 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 return;
             }
 
-            // Aktualizacja wydarzenia
             this.selfEducation.Title = this.SelfEducationTitle;
             this.selfEducation.StartDate = this.StartDate;
             this.selfEducation.EndDate = this.EndDate;
@@ -184,7 +178,6 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             this.selfEducation.Organizer = this.Organizer;
             this.selfEducation.IsRequired = this.IsRequired;
             this.selfEducation.Notes = this.Notes;
-
             this.onSaveCallback?.Invoke(this.selfEducation);
             await Shell.Current.Navigation.PopAsync();
         }

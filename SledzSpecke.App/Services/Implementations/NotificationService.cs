@@ -23,7 +23,6 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Check if notifications are enabled
                 var settings = await this.databaseService.GetUserSettingsAsync();
                 if (!settings.EnableNotifications)
                 {
@@ -31,7 +30,6 @@ namespace SledzSpecke.App.Services.Implementations
                     return;
                 }
 
-                // Get current specialization
                 var specialization = await this.databaseService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
@@ -39,7 +37,6 @@ namespace SledzSpecke.App.Services.Implementations
                     return;
                 }
 
-                // Load related data
                 var courses = await this.databaseService.QueryAsync<Course>(
                     "SELECT * FROM Courses WHERE SpecializationId = ? AND IsCompleted = 0",
                     specialization.Id);
@@ -50,12 +47,11 @@ namespace SledzSpecke.App.Services.Implementations
 
                 var today = DateTime.Now.Date;
 
-                // Check courses
                 foreach (var course in courses.Where(c => c.ScheduledDate.HasValue))
                 {
                     int daysUntil = (course.ScheduledDate!.Value.Date - today).Days;
 
-                    if (daysUntil == 7) // 1 week before
+                    if (daysUntil == 7)
                     {
                         await this.ScheduleNotificationAsync(
                             $"Zbliża się kurs: {course.Name}",
@@ -63,7 +59,7 @@ namespace SledzSpecke.App.Services.Implementations
                             course.Id,
                             NotificationType.Course);
                     }
-                    else if (daysUntil == 1) // 1 day before
+                    else if (daysUntil == 1)
                     {
                         await this.ScheduleNotificationAsync(
                             $"Jutro rozpoczyna się kurs: {course.Name}",
@@ -73,12 +69,11 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                 }
 
-                // Check internships
                 foreach (var internship in internships.Where(i => i.StartDate.HasValue))
                 {
                     int daysUntil = (internship.StartDate!.Value.Date - today).Days;
 
-                    if (daysUntil == 7) // 1 week before
+                    if (daysUntil == 7)
                     {
                         await this.ScheduleNotificationAsync(
                             $"Zbliża się staż: {internship.Name}",
@@ -86,7 +81,7 @@ namespace SledzSpecke.App.Services.Implementations
                             internship.Id,
                             NotificationType.Internship);
                     }
-                    else if (daysUntil == 1) // 1 day before
+                    else if (daysUntil == 1)
                     {
                         await this.ScheduleNotificationAsync(
                             $"Jutro rozpoczyna się staż: {internship.Name}",
@@ -96,13 +91,12 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                 }
 
-                // Check end of basic module
                 var endOfBasicModule = specialization.StartDate.AddDays(specialization.BasicModuleDurationWeeks * 7);
                 if (endOfBasicModule > today)
                 {
                     int daysUntilEnd = (endOfBasicModule - today).Days;
 
-                    if (daysUntilEnd == 30) // 1 month before
+                    if (daysUntilEnd == 30)
                     {
                         await this.ScheduleNotificationAsync(
                             "Zbliża się koniec modułu podstawowego",
@@ -110,7 +104,7 @@ namespace SledzSpecke.App.Services.Implementations
                             0,
                             NotificationType.ModuleEnd);
                     }
-                    else if (daysUntilEnd == 7) // 1 week before
+                    else if (daysUntilEnd == 7)
                     {
                         await this.ScheduleNotificationAsync(
                             "Zbliża się koniec modułu podstawowego",
@@ -132,10 +126,6 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // In a real implementation, this would use a platform-specific notification API
-                // For MAUI, you could use Plugin.LocalNotification or similar
-
-                // For now, just log the notification
                 this.logger.LogInformation(
                     "Notification scheduled: {Title} - {Message} (Type: {Type}, ItemId: {ItemId})",
                     title,
@@ -143,9 +133,7 @@ namespace SledzSpecke.App.Services.Implementations
                     type,
                     itemId);
 
-                // Example implementation for Android/iOS would go here
-                // This is where you would use the notification plugin to schedule the actual notification
-                await Task.CompletedTask; // Placeholder for async implementation
+                await Task.CompletedTask;
             }
             catch (Exception ex)
             {

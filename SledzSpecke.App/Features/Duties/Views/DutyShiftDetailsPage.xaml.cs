@@ -22,11 +22,7 @@ namespace SledzSpecke.App.Features.Duties.Views
             try
             {
                 this.viewModel = this.GetRequiredService<DutyShiftDetailsViewModel>();
-
-                // Najpierw inicjalizujemy ViewModel
                 this.viewModel.Initialize(this.dutyShift, this.onSaveCallback);
-
-                // Dopiero potem ustawiamy BindingContext
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

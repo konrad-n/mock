@@ -22,11 +22,9 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
-        <!-- Dashboard for absence information -->
         <Border Margin="15" Padding="15" StrokeShape="RoundRectangle 10" Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
               BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}">
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                <!-- End date info -->
                 <VerticalStackLayout Grid.Row="0" Grid.Column="0">
                     <Label Text="Planowany koniec specjalizacji" FontSize="14" 
                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
@@ -34,7 +32,6 @@
                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                 </VerticalStackLayout>
 
-                <!-- End date with absences -->
                 <VerticalStackLayout Grid.Row="0" Grid.Column="1">
                     <Label Text="Koniec z nieobecnościami" FontSize="14" 
                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
@@ -42,7 +39,6 @@
                           TextColor="{AppThemeBinding Light=#FF9800, Dark=#FFAB40}"/>
                 </VerticalStackLayout>
 
-                <!-- Self-education days -->
                 <Border Grid.Row="1" Grid.Column="0" Padding="10" StrokeShape="RoundRectangle 8" Stroke="#e4f0f5"
                       BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
                     <VerticalStackLayout>
@@ -57,7 +53,6 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Other leaves -->
                 <Border Grid.Row="1" Grid.Column="1" Padding="10" StrokeShape="RoundRectangle 8" Stroke="#e4f0f5"
                       BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
                     <VerticalStackLayout>
@@ -72,17 +67,14 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Add absence button -->
                 <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Dodaj nieobecność" 
                        Command="{Binding AddAbsenceCommand}" HeightRequest="45" 
                        BackgroundColor="#0D759C" TextColor="White"/>
             </Grid>
         </Border>
 
-        <!-- Absences list -->
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="15" Spacing="15">
-                <!-- Filter controls -->
                 <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                       BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
                       Padding="15" StrokeShape="RoundRectangle 10">
@@ -114,12 +106,10 @@
                     </Grid>
                 </Border>
 
-                <!-- Komunikat o braku nieobecności -->
                 <Label Text="Brak nieobecności do wyświetlenia"
                       HorizontalOptions="Center" IsVisible="{Binding IsNoAbsencesVisible}" Margin="0,20,0,0"
                       TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
 
-                <!-- Lista nieobecności -->
                 <CollectionView ItemsSource="{Binding FilteredAbsences}" 
                                IsVisible="{Binding IsNoAbsencesVisible, Converter={StaticResource InverseBoolConverter}}">
                     <CollectionView.ItemTemplate>
@@ -130,41 +120,30 @@
                                   Margin="0,0,0,10"
                                   Padding="15">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <!-- Icon -->
                                     <Label Text="{Binding Type, Converter={StaticResource AbsenceIconTextConverter}}"
                                           FontSize="24"
                                           HorizontalOptions="Center"
                                           VerticalOptions="Center"
                                           Grid.Column="0"/>
 
-                                    <!-- Content -->
                                     <VerticalStackLayout Grid.Column="1" Spacing="5">
-                                        <!-- Title with date range -->
                                         <Label Text="{Binding Type, Converter={StaticResource AbsenceTypeTextConverter}}"
                                               FontSize="16"
                                               FontAttributes="Bold"
                                               TextColor="{AppThemeBinding Light=#212121, Dark=White}"/>
-
-                                        <!-- Date range -->
                                         <Label Text="{Binding ., Converter={StaticResource AbsenceDateRangeConverter}}"
                                               FontSize="14"
                                               TextColor="{AppThemeBinding Light=#757575, Dark=#95B8CE}"/>
-
-                                        <!-- Description if available -->
                                         <Label Text="{Binding Description}"
                                               FontSize="14"
                                               TextColor="{AppThemeBinding Light=#757575, Dark=#95B8CE}"
                                               IsVisible="{Binding Description, Converter={StaticResource StringToBoolConverter}}"/>
-
-                                        <!-- Affect specialization indicator -->
                                         <Label Text="{Binding AffectsSpecializationLength, Converter={StaticResource AbsenceSpecializationAffectionConverter}}"
                                               FontSize="12"
                                               TextColor="{AppThemeBinding Light=#F44336, Dark=#FF5252}"
                                               FontAttributes="Italic"
                                               IsVisible="{Binding AffectsSpecializationLength}"/>
                                     </VerticalStackLayout>
-
-                                    <!-- Edit button -->
                                     <Button Text="✏️"
                                             FontSize="18"
                                             BackgroundColor="Transparent"

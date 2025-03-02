@@ -56,13 +56,11 @@ namespace SledzSpecke.App.Services.Implementations
 
                 if (dutyShift.Id == 0)
                 {
-                    // Insert new record approach
                     await this.databaseService.InsertAsync(dutyShift);
                     this.logger.LogInformation("New duty shift inserted with ID: {Id}", dutyShift.Id);
                 }
                 else
                 {
-                    // Update existing record
                     await this.databaseService.UpdateAsync(dutyShift);
                     this.logger.LogInformation("Existing duty shift updated with ID: {Id}", dutyShift.Id);
                 }
@@ -133,21 +131,11 @@ namespace SledzSpecke.App.Services.Implementations
                 {
                     return 0;
                 }
-
-                // Find the first and last duty dates
                 DateTime firstDate = dutyShifts.Min(d => d.StartDate.Date);
                 DateTime lastDate = dutyShifts.Max(d => d.StartDate.Date);
-
-                // Calculate number of weeks between first and last duty
                 double totalWeeks = Math.Max(1, (lastDate - firstDate).TotalDays / 7);
-
-                // If less than requested weeks, use actual number
                 totalWeeks = Math.Min(totalWeeks, weeks);
-
-                // Calculate total hours
                 double totalHours = dutyShifts.Sum(d => d.DurationHours);
-
-                // Return weekly average
                 return totalHours / totalWeeks;
             }
             catch (Exception ex)

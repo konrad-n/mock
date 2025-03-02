@@ -8,17 +8,13 @@
             Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
-            <!-- Header -->
             <Label Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" 
                    HorizontalOptions="Center" Margin="0,0,0,10" 
                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
-
-            <!-- Main form -->
             <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
                    Padding="20" StrokeShape="RoundRectangle 10">
                 <VerticalStackLayout Spacing="15">
-                    <!-- Absence type -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Typ nieobecności" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -41,10 +37,7 @@
                             </Picker>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Date range -->
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
-                        <!-- Start date -->
                         <VerticalStackLayout Grid.Column="0" Spacing="5">
                             <Label Text="Data rozpoczęcia" FontAttributes="Bold" 
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -55,8 +48,6 @@
                                             Margin="10,0" BackgroundColor="Transparent"/>
                             </Border>
                         </VerticalStackLayout>
-
-                        <!-- End date -->
                         <VerticalStackLayout Grid.Column="1" Spacing="5">
                             <Label Text="Data zakończenia" FontAttributes="Bold" 
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -68,8 +59,6 @@
                             </Border>
                         </VerticalStackLayout>
                     </Grid>
-
-                    <!-- Duration -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Liczba dni" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -80,8 +69,6 @@
                                    Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Description -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Opis" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -92,8 +79,6 @@
                                     Margin="10,5" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Affects specialization length -->
                     <Grid ColumnDefinitions="Auto,*" Margin="0,5,0,5">
                         <CheckBox x:Name="AffectsSpecializationCheckBox" 
                                   IsChecked="{Binding AffectsSpecializationLength}" 
@@ -102,8 +87,6 @@
                                VerticalOptions="Center" Grid.Column="1"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                     </Grid>
-
-                    <!-- Document reference -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Sygnatura dokumentu" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -114,8 +97,6 @@
                                    Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Year -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Rok" FontAttributes="Bold" 
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -126,8 +107,6 @@
                                    Margin="10,0" BackgroundColor="Transparent"/>
                         </Border>
                     </VerticalStackLayout>
-
-                    <!-- Is approved -->
                     <Grid ColumnDefinitions="Auto,*" Margin="0,5,0,5">
                         <CheckBox x:Name="IsApprovedCheckBox" 
                                   IsChecked="{Binding IsApproved}" 
@@ -138,8 +117,6 @@
                     </Grid>
                 </VerticalStackLayout>
             </Border>
-
-            <!-- Action Buttons -->
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,10,0,20">
                 <Button Grid.Column="0" Text="Usuń" Command="{Binding DeleteCommand}" 
                         BackgroundColor="#F44336" TextColor="White"

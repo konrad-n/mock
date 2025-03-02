@@ -115,8 +115,6 @@ namespace SledzSpecke.App
             }
         }
 
-        // Tymczasowa metoda pomocnicza do uzyskania serwisu
-        // Docelowo należy usunąć tę metodę, gdy wszystkie strony będą używać DI
         public static TService GetService<TService>(IElement element) where TService : class
         {
             if (element.Handler?.MauiContext == null)

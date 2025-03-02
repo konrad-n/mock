@@ -81,7 +81,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
         public void UpdateButtonStyles()
         {
-            // Module buttons
             if (this.CurrentModule == ModuleType.Basic)
             {
                 this.BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
@@ -97,7 +96,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 this.SpecialisticModuleButtonTextColor = Colors.White;
             }
 
-            // Type buttons
             if (this.CurrentProcedureType == ProcedureType.TypeA)
             {
                 this.TypeAButtonBackgroundColor = new Color(13, 117, 156);

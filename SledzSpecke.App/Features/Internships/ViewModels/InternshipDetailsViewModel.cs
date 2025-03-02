@@ -55,32 +55,27 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
 
             if (internship == null)
             {
-                // Nowy staż
                 this.internship = new Internship
                 {
-                    Id = new Random().Next(1000, 9999), // Tymczasowe ID
+                    Id = new Random().Next(1000, 9999),
                     Module = currentModule,
                     IsRequired = true,
                 };
                 this.PageTitle = "Dodaj staż";
                 this.ModulePickerSelectedIndex = currentModule == ModuleType.Basic ? 0 : 1;
-                this.StatusPickerSelectedIndex = 0; // Domyślnie "Oczekujący"
+                this.StatusPickerSelectedIndex = 0;
             }
             else
             {
-                // Edycja istniejącego stażu
                 this.internship = internship;
                 this.PageTitle = "Szczegóły stażu";
                 this.DurationWeeks = internship.DurationWeeks.ToString();
                 this.WorkingDays = internship.WorkingDays.ToString();
-
-                // Ustawienie pickerów
                 this.ModulePickerSelectedIndex = internship.Module == ModuleType.Basic ? 0 : 1;
 
-                // Ustawienie statusu
                 if (internship.IsCompleted)
                 {
-                    this.StatusPickerSelectedIndex = 3; // Ukończony
+                    this.StatusPickerSelectedIndex = 3;
                     this.IsStartDateVisible = true;
                     this.IsEndDateVisible = true;
                     this.IsCompletionVisible = true;
@@ -96,7 +91,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
                 }
                 else if (internship.StartDate.HasValue && !internship.EndDate.HasValue)
                 {
-                    this.StatusPickerSelectedIndex = 2; // W trakcie
+                    this.StatusPickerSelectedIndex = 2;
                     this.IsStartDateVisible = true;
                     this.IsEndDateVisible = false;
                     this.IsCompletionVisible = false;
@@ -104,7 +99,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
                 }
                 else if (internship.StartDate.HasValue)
                 {
-                    this.StatusPickerSelectedIndex = 1; // Zaplanowany
+                    this.StatusPickerSelectedIndex = 1;
                     this.IsStartDateVisible = true;
                     this.IsEndDateVisible = false;
                     this.IsCompletionVisible = false;
@@ -112,7 +107,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
                 }
                 else
                 {
-                    this.StatusPickerSelectedIndex = 0; // Oczekujący
+                    this.StatusPickerSelectedIndex = 0;
                     this.IsStartDateVisible = false;
                     this.IsEndDateVisible = false;
                     this.IsCompletionVisible = false;
@@ -176,7 +171,6 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         [RelayCommand]
         private async Task SaveAsync()
         {
-            // Walidacja
             if (string.IsNullOrWhiteSpace(this.internship.Name))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa stażu jest wymagana.", "OK");
@@ -198,7 +192,6 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             this.internship.DurationWeeks = durationWeeks;
             this.internship.WorkingDays = workingDays;
 
-            // Dodatkowe ustawienia w zależności od statusu
             if (this.IsStartDateVisible && this.internship.StartDate == null)
             {
                 this.internship.StartDate = this.StartDate;

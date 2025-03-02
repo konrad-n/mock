@@ -24,18 +24,13 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Get current specialization from database
                 var specialization = await this.databaseService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
                     this.logger.LogInformation("No current specialization found. Creating default specialization.");
-
-                    // Create default specialization if none exists
                     specialization = DataSeeder.SeedHematologySpecialization();
                     await this.SaveSpecializationAsync(specialization);
                 }
-
-                // Load related data
                 await this.LoadRelatedDataAsync(specialization);
 
                 return specialization;
@@ -43,8 +38,6 @@ namespace SledzSpecke.App.Services.Implementations
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error getting specialization");
-
-                // Nie zwracaj tutaj seedera - to zmniejszy spójność danych
                 throw;
             }
         }
@@ -53,12 +46,9 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Sprawdź czy dane szablonowe istnieją, jeśli nie - zainicjuj je
                 if (!await this.databaseService.HasSpecializationTemplateDataAsync(specialization.SpecializationTypeId))
                 {
                     await this.databaseService.InitializeSpecializationTemplateDataAsync(specialization.SpecializationTypeId);
-
-                    // Po inicjalizacji ponownie pobierz specjalizację
                     specialization = await this.databaseService.GetCurrentSpecializationAsync();
                     if (specialization == null)
                     {
@@ -66,10 +56,7 @@ namespace SledzSpecke.App.Services.Implementations
                     }
                 }
 
-                // Save specialization
                 await this.databaseService.SaveAsync(specialization);
-
-                // Update user settings
                 var settings = await this.databaseService.GetUserSettingsAsync();
                 settings.CurrentSpecializationId = specialization.Id;
                 await this.databaseService.SaveUserSettingsAsync(settings);
@@ -148,13 +135,11 @@ namespace SledzSpecke.App.Services.Implementations
                 var existingCourse = specialization.RequiredCourses.FirstOrDefault(c => c.Id == course.Id);
                 if (existingCourse != null)
                 {
-                    // Update existing course in memory
                     var index = specialization.RequiredCourses.IndexOf(existingCourse);
                     specialization.RequiredCourses[index] = course;
                 }
                 else
                 {
-                    // Add new course
                     specialization.RequiredCourses.Add(course);
                 }
 
@@ -179,13 +164,11 @@ namespace SledzSpecke.App.Services.Implementations
                 var existingInternship = specialization.RequiredInternships.FirstOrDefault(i => i.Id == internship.Id);
                 if (existingInternship != null)
                 {
-                    // Update existing internship in memory
                     var index = specialization.RequiredInternships.IndexOf(existingInternship);
                     specialization.RequiredInternships[index] = internship;
                 }
                 else
                 {
-                    // Add new internship
                     specialization.RequiredInternships.Add(internship);
                 }
 
@@ -207,7 +190,6 @@ namespace SledzSpecke.App.Services.Implementations
 
                 await this.databaseService.SaveAsync(procedure);
 
-                // Save procedure entries
                 foreach (var entry in procedure.Entries)
                 {
                     entry.ProcedureId = procedure.Id;
@@ -217,13 +199,11 @@ namespace SledzSpecke.App.Services.Implementations
                 var existingProcedure = specialization.RequiredProcedures.FirstOrDefault(p => p.Id == procedure.Id);
                 if (existingProcedure != null)
                 {
-                    // Update existing procedure in memory
                     var index = specialization.RequiredProcedures.IndexOf(existingProcedure);
                     specialization.RequiredProcedures[index] = procedure;
                 }
                 else
                 {
-                    // Add new procedure
                     specialization.RequiredProcedures.Add(procedure);
                 }
 
@@ -242,8 +222,6 @@ namespace SledzSpecke.App.Services.Implementations
             {
                 entry.ProcedureId = procedure.Id;
                 await this.databaseService.SaveAsync(entry);
-
-                // Update procedure
                 procedure.Entries.Add(entry);
                 procedure.CompletedCount = procedure.Entries.Count;
                 await this.databaseService.SaveAsync(procedure);
@@ -261,19 +239,12 @@ namespace SledzSpecke.App.Services.Implementations
         {
             try
             {
-                // Load courses
                 var courses = await this.databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
                 specialization.RequiredCourses = courses;
-
-                // Load internships
                 var internships = await this.databaseService.QueryAsync<Internship>("SELECT * FROM Internships WHERE SpecializationId = ?", specialization.Id);
                 specialization.RequiredInternships = internships;
-
-                // Load procedures
                 var procedures = await this.databaseService.QueryAsync<MedicalProcedure>("SELECT * FROM MedicalProcedures WHERE SpecializationId = ?", specialization.Id);
                 specialization.RequiredProcedures = procedures;
-
-                // Load procedure entries
                 foreach (var procedure in specialization.RequiredProcedures)
                 {
                     var entries = await this.databaseService.QueryAsync<ProcedureEntry>("SELECT * FROM ProcedureEntries WHERE ProcedureId = ?", procedure.Id);

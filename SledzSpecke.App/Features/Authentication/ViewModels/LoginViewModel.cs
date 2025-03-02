@@ -31,14 +31,14 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             ILogger<LoginViewModel> logger,
             ISpecializationService specializationService,
             IServiceProvider serviceProvider,
-            INavigationService navigationService) : base(logger)
+            INavigationService navigationService)
+            : base(logger)
         {
             this.authenticationService = authenticationService;
             this.specializationService = specializationService;
             this.serviceProvider = serviceProvider;
             this.navigationService = navigationService;
 
-            // Dodaj debug log
             System.Diagnostics.Debug.WriteLine("LoginViewModel constructor called");
 
 #if DEBUG

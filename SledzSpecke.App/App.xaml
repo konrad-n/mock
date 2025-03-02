@@ -11,7 +11,6 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Custom Colors -->
             <Color x:Key="PrimaryColor">#24C1DE</Color>
             <Color x:Key="SecondaryColor">#0D759C</Color>
             <Color x:Key="AccentColor">#30DDE8</Color>
@@ -22,7 +21,6 @@
             <Color x:Key="TextColor">#082044</Color>
             <Color x:Key="TextMutedColor">#547E9E</Color>
 
-            <!-- Custom Styles -->
             <Style TargetType="Button" x:Key="PrimaryButton">
                 <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
                 <Setter Property="TextColor" Value="White" />
@@ -76,8 +74,7 @@
                 <Setter Property="HeightRequest" Value="10" />
                 <Setter Property="VerticalOptions" Value="Center" />
             </Style>
-            
-            <!-- Style dla przycisku SMK (ciemny granat) -->
+
             <Style TargetType="Button" x:Key="SMKReportButton">
                 <Setter Property="BackgroundColor" Value="#082044" />
                 <Setter Property="TextColor" Value="White" />
@@ -86,7 +83,6 @@
                 <Setter Property="Padding" Value="16,10" />
             </Style>
 
-            <!-- Style dla przycisku Ustawienia (niebieskoszary) -->
             <Style TargetType="Button" x:Key="SettingsButton">
                 <Setter Property="BackgroundColor" Value="#547E9E" />
                 <Setter Property="TextColor" Value="White" />

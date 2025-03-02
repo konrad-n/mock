@@ -61,10 +61,9 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
             if (procedure == null)
             {
-                // Nowa procedura
                 this.procedure = new MedicalProcedure
                 {
-                    Id = new Random().Next(1000, 9999), // Tymczasowe ID
+                    Id = new Random().Next(1000, 9999),
                     Module = currentModule,
                     ProcedureType = currentProcedureType,
                     CompletedCount = 0,
@@ -75,18 +74,14 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             }
             else
             {
-                // Edycja istniejącej procedury
                 this.PageTitle = "Szczegóły procedury";
                 this.RequiredCount = procedure.RequiredCount.ToString();
                 this.CompletedCount = procedure.CompletedCount.ToString();
                 this.Notes = procedure.Description;
             }
 
-            // Ustawienie pickerów
             this.ProcedureTypePickerSelectedIndex = this.procedure.ProcedureType == ProcedureType.TypeA ? 0 : 1;
             this.ModulePickerSelectedIndex = this.procedure.Module == ModuleType.Basic ? 0 : 1;
-
-            // Wypełnienie pickera stażów
             this.LoadInternships(this.procedure.Module);
         }
 
@@ -105,14 +100,9 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             if (this.procedure != null)
             {
                 this.procedure.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
-
-                // Przy zmianie modułu zapamiętujemy aktualny identyfikator stażu
                 int? currentInternshipId = this.procedure.InternshipId;
-
-                // Ładujemy nową listę stażów
                 this.LoadInternships(this.procedure.Module);
 
-                // Jeśli staż należy do nowego modułu, ustawiamy go ponownie
                 if (currentInternshipId.HasValue)
                 {
                     int index = this.FilteredInternships.FindIndex(i => i.Id == currentInternshipId.Value);
@@ -134,7 +124,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             }
             else if (this.procedure != null)
             {
-                // Brak wyboru stażu
                 this.procedure.InternshipId = null;
             }
         }
@@ -148,7 +137,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         [RelayCommand]
         private async Task SaveAsync()
         {
-            // Walidacja
             if (string.IsNullOrWhiteSpace(this.procedure.Name))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa procedury jest wymagana.", "OK");
@@ -170,8 +158,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
             this.procedure.RequiredCount = requiredCount;
             this.procedure.Description = this.Notes;
-
-            // Upewniamy się, że przypisany jest poprawny staż
             this.procedure.InternshipId = this.FilteredInternships[this.InternshipPickerSelectedIndex].Id;
 
             if (this.onSaveCallback != null)
@@ -192,7 +178,6 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 this.InternshipItems.Add(internship.Name);
             }
 
-            // Jeśli edytujemy procedurę, ustawiamy wybrany staż
             if (this.procedure.InternshipId.HasValue)
             {
                 int index = this.FilteredInternships.FindIndex(i => i.Id == this.procedure.InternshipId);
@@ -202,10 +187,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 }
                 else
                 {
-                    // Staż nie należy do wybranego modułu, więc ustawiamy pusty
                     this.InternshipPickerSelectedIndex = -1;
-
-                    // Czyścimy przypisanie stażu
                     this.procedure.InternshipId = null;
                 }
             }

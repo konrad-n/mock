@@ -42,7 +42,6 @@ namespace SledzSpecke.App.Features.SMKExport.Views
                 }
                 else
                 {
-                    // Fallback for binding issues
                     if (rb.Parent is Grid grid && grid.Children.IndexOf(rb) == 0)
                     {
                         VerticalStackLayout vsl = grid.Children.FirstOrDefault(c => c is VerticalStackLayout) as VerticalStackLayout;

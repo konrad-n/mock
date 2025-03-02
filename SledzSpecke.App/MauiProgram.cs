@@ -1,13 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MauiProgram.cs" company="SledzSpecke">
-//   Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-// <summary>
-//   Punkt wejścia dla aplikacji MAUI. Konfiguruje usługi i zależności.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Features.Absences.ViewModels;
 using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Features.Authentication.ViewModels;
@@ -35,15 +26,8 @@ using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.App
 {
-    /// <summary>
-    /// Klasa konfigurująca aplikację MAUI.
-    /// </summary>
     public static class MauiProgram
     {
-        /// <summary>
-        /// Tworzy i konfiguruje aplikację MAUI.
-        /// </summary>
-        /// <returns>Skonfigurowana instancja aplikacji MAUI.</returns>
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -55,7 +39,6 @@ namespace SledzSpecke.App
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // Register services
             RegisterServices(builder.Services);
 
 #if DEBUG
@@ -65,15 +48,10 @@ namespace SledzSpecke.App
             return builder.Build();
         }
 
-        /// <summary>
-        /// Rejestruje usługi w kontenerze DI.
-        /// </summary>
-        /// <param name="services">Kolekcja usług DI.</param>
         private static void RegisterServices(IServiceCollection services)
         {
             services.AddSingleton<App>();
 
-            // Register services
             services.AddSingleton<IFileSystemService, MauiFileSystemService>();
             services.AddSingleton<IDatabaseService, DatabaseService>();
             services.AddSingleton<IDataManager, DataManager>();
@@ -87,7 +65,6 @@ namespace SledzSpecke.App
             services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
             services.AddSingleton<INavigationService, NavigationService>();
 
-            // Register ViewModels
             services.AddTransient<LoginViewModel>();
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<DashboardViewModel>();
@@ -107,7 +84,6 @@ namespace SledzSpecke.App
             services.AddTransient<ProcedureDetailsViewModel>();
             services.AddTransient<SelfEducationDetailsViewModel>();
 
-            // Register pages
             services.AddSingleton<NavigationPage>();
             services.AddTransient<LoginPage>();
             services.AddTransient<RegistrationPage>();
@@ -128,7 +104,6 @@ namespace SledzSpecke.App
             services.AddTransient<AbsenceManagementPage>();
             services.AddTransient<AbsenceDetailsPage>();
 
-            // Register shell last
             services.AddSingleton<AppShell>();
         }
     }

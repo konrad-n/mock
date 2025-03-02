@@ -64,18 +64,13 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
                     throw new InvalidOperationException("Nie udało się załadować danych specjalizacji.");
                 }
 
-                // Dane specjalizacji
                 this.SpecializationName = this.specialization.Name;
                 this.StartDate = this.specialization.StartDate;
                 this.DurationYears = ((this.specialization.ExpectedEndDate - this.specialization.StartDate).Days / 365).ToString();
-
-                // Dane użytkownika
                 this.Username = this.appSettings.GetSetting<string>("Username", string.Empty);
                 this.MedicalLicenseNumber = this.appSettings.GetSetting<string>("MedicalLicenseNumber", string.Empty);
                 this.TrainingUnit = this.appSettings.GetSetting<string>("TrainingUnit", string.Empty);
                 this.Supervisor = this.appSettings.GetSetting<string>("Supervisor", string.Empty);
-
-                // Ustawienia aplikacji
                 this.EnableNotifications = this.appSettings.GetSetting<bool>("EnableNotifications", true);
                 this.EnableAutoSync = this.appSettings.GetSetting<bool>("EnableAutoSync", true);
                 this.UseDarkTheme = this.appSettings.GetSetting<bool>("UseDarkTheme", false);
@@ -102,28 +97,17 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
 
             try
             {
-                // Aktualizacja danych specjalizacji
                 this.specialization.StartDate = this.StartDate;
                 this.specialization.ExpectedEndDate = this.StartDate.AddYears(5);
-
-                // Zapisanie specialization
                 await this.dataManager.SaveSpecializationAsync(this.specialization);
-
-                // Aktualizacja ustawień użytkownika
                 this.appSettings.SetSetting("Username", this.Username);
                 this.appSettings.SetSetting("MedicalLicenseNumber", this.MedicalLicenseNumber);
                 this.appSettings.SetSetting("TrainingUnit", this.TrainingUnit);
                 this.appSettings.SetSetting("Supervisor", this.Supervisor);
-
-                // Aktualizacja ustawień aplikacji
                 this.appSettings.SetSetting("EnableNotifications", this.EnableNotifications);
                 this.appSettings.SetSetting("EnableAutoSync", this.EnableAutoSync);
                 this.appSettings.SetSetting("UseDarkTheme", this.UseDarkTheme);
-
-                // Zapisanie ustawień
                 await this.appSettings.SaveAsync();
-
-                // Zastosowanie ustawień motywu
                 Application.Current.UserAppTheme = this.UseDarkTheme ? AppTheme.Dark : AppTheme.Light;
             }
             catch (Exception ex)
