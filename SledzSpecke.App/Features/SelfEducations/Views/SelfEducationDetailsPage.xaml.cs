@@ -7,8 +7,8 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
     public partial class SelfEducationDetailsPage : BaseContentPage
     {
         private SelfEducationDetailsViewModel _viewModel;
-        private SelfEducation _selfEducation;
-        private Action<SelfEducation> _onSaveCallback;
+        private readonly SelfEducation _selfEducation;
+        private readonly Action<SelfEducation> _onSaveCallback;
 
         public SelfEducationDetailsPage(SelfEducation selfEducation, Action<SelfEducation> onSaveCallback)
         {

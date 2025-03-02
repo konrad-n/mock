@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.App.Features.Authentication.Views;
-using SledzSpecke.App.Services;
 using SledzSpecke.App.Services.Interfaces;
 
 namespace SledzSpecke.App.Features.Authentication.ViewModels
@@ -12,6 +11,8 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
     {
         private readonly IAuthenticationService _authenticationService;
         private readonly INavigationService _navigationService;
+        private readonly ISpecializationService _specializationService;
+        private readonly IServiceProvider _serviceProvider;
 
         [ObservableProperty]
         private string _email;
@@ -24,8 +25,6 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
 
         [ObservableProperty]
         private string _errorMessage;
-        private ISpecializationService _specializationService;
-        private IServiceProvider _serviceProvider;
 
         public LoginViewModel(
             IAuthenticationService authenticationService,

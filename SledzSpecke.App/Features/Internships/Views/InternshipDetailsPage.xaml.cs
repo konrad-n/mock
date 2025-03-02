@@ -8,9 +8,9 @@ namespace SledzSpecke.App.Features.Internships.Views
     public partial class InternshipDetailsPage : BaseContentPage
     {
         private InternshipDetailsViewModel _viewModel;
-        private Internship _internship;
-        private ModuleType _currentModule;
-        private Func<Internship, Task> _onSaveCallback;
+        private readonly Internship _internship;
+        private readonly ModuleType _currentModule;
+        private readonly Func<Internship, Task> _onSaveCallback;
 
         public InternshipDetailsPage(Internship internship, ModuleType currentModule, Func<Internship, Task> onSaveCallback)
         {

@@ -7,10 +7,10 @@ namespace SledzSpecke.App.Features.Courses.Views
 {
     public partial class CourseDetailsPage : BaseContentPage
     {
+        private readonly Course _course;
+        private readonly ModuleType _currentModule;
+        private readonly Func<Course, Task> _onSaveCallback;
         private CourseDetailsViewModel _viewModel;
-        private Course _course;
-        private ModuleType _currentModule;
-        private Func<Course, Task> _onSaveCallback;
 
         public CourseDetailsPage(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {

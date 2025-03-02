@@ -1,24 +1,20 @@
 ﻿using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Absences.ViewModels;
 using SledzSpecke.Core.Models;
-using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Absences.Views
 {
     public partial class AbsenceDetailsPage : BaseContentPage
     {
         private AbsenceDetailsViewModel _viewModel;
-        private Absence _absence;
-        private IDatabaseService _databaseService;
-        private Action<Absence> _onSaveCallback;
+        private readonly Absence _absence;
+        private readonly Action<Absence> _onSaveCallback;
 
         public AbsenceDetailsPage(
-            IDatabaseService databaseService,
             Absence absence,
             Action<Absence> onSaveCallback)
         {
             this.InitializeComponent();
-            this._databaseService = databaseService;
             this._absence = absence;
             this._onSaveCallback = onSaveCallback;
         }

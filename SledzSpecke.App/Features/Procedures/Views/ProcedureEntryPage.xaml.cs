@@ -8,9 +8,8 @@ namespace SledzSpecke.App.Features.Procedures.Views
     public partial class ProcedureEntryPage : BaseContentPage
     {
         private ProcedureEntryViewModel _viewModel;
-        private MedicalProcedure _procedure;
-        private Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
-        private IDatabaseService _databaseService;
+        private readonly MedicalProcedure _procedure;
+        private readonly Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
 
         public ProcedureEntryPage(
             IDatabaseService databaseService,
@@ -18,7 +17,6 @@ namespace SledzSpecke.App.Features.Procedures.Views
             Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
             this.InitializeComponent();
-            this._databaseService = databaseService;
             this._procedure = procedure;
             this._onSaveCallback = onSaveCallback;
         }

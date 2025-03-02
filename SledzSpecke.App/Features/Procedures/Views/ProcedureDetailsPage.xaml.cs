@@ -9,11 +9,11 @@ namespace SledzSpecke.App.Features.Procedures.Views
     public partial class ProcedureDetailsPage : BaseContentPage
     {
         private ProcedureDetailsViewModel _viewModel;
-        private MedicalProcedure _procedure;
-        private ModuleType _currentModule;
-        private ProcedureType _currentProcedureType;
-        private Func<MedicalProcedure, Task> _onSaveCallback;
-        private List<Internship> _internships;
+        private readonly MedicalProcedure _procedure;
+        private readonly ModuleType _currentModule;
+        private readonly ProcedureType _currentProcedureType;
+        private readonly Func<MedicalProcedure, Task> _onSaveCallback;
+        private readonly List<Internship> _internships;
 
         public ProcedureDetailsPage(MedicalProcedure procedure, ModuleType currentModule, ProcedureType currentProcedureType, Func<MedicalProcedure, Task> onSaveCallback)
         {

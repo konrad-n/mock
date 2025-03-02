@@ -177,7 +177,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         [RelayCommand]
         private async Task AddAbsenceAsync()
         {
-            await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(this._databaseService, null, this.OnAbsenceAdded));
+            await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(null, this.OnAbsenceAdded));
         }
 
         [RelayCommand]
@@ -186,7 +186,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             var absence = this.AllAbsences.FirstOrDefault(a => a.Id == absenceId);
             if (absence != null)
             {
-                await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(this._databaseService, absence, this.OnAbsenceUpdated));
+                await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(absence, this.OnAbsenceUpdated));
             }
         }
 

@@ -7,8 +7,8 @@ namespace SledzSpecke.App.Features.Duties.Views
     public partial class DutyShiftDetailsPage : BaseContentPage
     {
         private DutyShiftDetailsViewModel _viewModel;
-        private DutyShift _dutyShift;
-        private Func<DutyShift, Task> _onSaveCallback;
+        private readonly DutyShift _dutyShift;
+        private readonly Func<DutyShift, Task> _onSaveCallback;
 
         public DutyShiftDetailsPage(DutyShift dutyShift, Func<DutyShift, Task> onSaveCallback)
         {
