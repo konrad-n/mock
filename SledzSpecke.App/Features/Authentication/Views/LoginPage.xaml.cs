@@ -4,7 +4,7 @@ namespace SledzSpecke.App.Features.Authentication.Views
 {
     public partial class LoginPage
     {
-        private LoginViewModel _viewModel;
+        private LoginViewModel viewModel;
 
         public LoginPage()
         {
@@ -15,12 +15,12 @@ namespace SledzSpecke.App.Features.Authentication.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<LoginViewModel>();
+                this.viewModel = this.GetRequiredService<LoginViewModel>();
 
                 // Dodaj debug log
-                System.Diagnostics.Debug.WriteLine($"Debug mode: Email = {this._viewModel.Email}, Password = {this._viewModel.Password}");
+                System.Diagnostics.Debug.WriteLine($"Debug mode: Email = {this.viewModel.Email}, Password = {this.viewModel.Password}");
 
-                this.BindingContext = this._viewModel;
+                this.BindingContext = this.viewModel;
             }
             catch (Exception ex)
             {

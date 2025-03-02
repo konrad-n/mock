@@ -21,10 +21,10 @@ namespace SledzSpecke.Infrastructure.Database
     /// </summary>
     public class DatabaseService : IDatabaseService
     {
+        private const string DatabaseNotInitializedText = "Database is not initialized";
         private readonly ILogger<DatabaseService> logger;
         private readonly IFileSystemService fileSystemService;
         private readonly SemaphoreSlim initLock = new SemaphoreSlim(1, 1);
-
         private SQLiteAsyncConnection? database;
         private bool isInitialized = false;
 
@@ -83,12 +83,6 @@ namespace SledzSpecke.Infrastructure.Database
                 this.isInitialized = true;
                 this.logger.LogInformation("Database initialized successfully at {Path}", databasePath);
             }
-            catch (Exception)
-            {
-                // Simply rethrow the exception without logging it here
-                // to avoid duplicate logging in the call stack
-                throw;
-            }
             finally
             {
                 this.initLock.Release();
@@ -104,7 +98,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.Table<T>().ToListAsync().ConfigureAwait(false);
@@ -125,7 +119,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.FindAsync<T>(id).ConfigureAwait(false);
@@ -145,7 +139,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             return await this.database.InsertOrReplaceAsync(item).ConfigureAwait(false);
@@ -159,7 +153,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             return await this.database.DeleteAsync(item).ConfigureAwait(false);
@@ -174,7 +168,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.QueryAsync<T>(query, args).ConfigureAwait(false);
@@ -193,7 +187,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             return await this.database.ExecuteAsync(query, args).ConfigureAwait(false);
@@ -207,7 +201,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.Table<MedicalProcedure>()
@@ -229,7 +223,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.Table<ProcedureEntry>()
@@ -251,7 +245,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.Table<Course>()
@@ -273,7 +267,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 return await this.database.Table<Internship>()
@@ -295,7 +289,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 this.logger.LogDebug("Getting user settings");
@@ -317,7 +311,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             await this.database.InsertOrReplaceAsync(settings).ConfigureAwait(false);
@@ -340,7 +334,7 @@ namespace SledzSpecke.Infrastructure.Database
 
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 var specialization = await this.database.FindAsync<Specialization>(userSettings.CurrentSpecializationId).ConfigureAwait(false);
@@ -361,7 +355,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             await this.database.DeleteAllAsync<Course>().ConfigureAwait(false);
@@ -386,7 +380,7 @@ namespace SledzSpecke.Infrastructure.Database
             {
                 if (this.database == null)
                 {
-                    throw new InvalidOperationException("Database is not initialized");
+                    throw new InvalidOperationException(DatabaseNotInitializedText);
                 }
 
                 // Check if specialization of given type exists
@@ -420,7 +414,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             // Check if template data already exists
@@ -471,7 +465,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             this.logger.LogDebug("Inserting new item of type {Type}", typeof(T).Name);
@@ -486,7 +480,7 @@ namespace SledzSpecke.Infrastructure.Database
 
             if (this.database == null)
             {
-                throw new InvalidOperationException("Database is not initialized");
+                throw new InvalidOperationException(DatabaseNotInitializedText);
             }
 
             this.logger.LogDebug("Updating item of type {Type}", typeof(T).Name);

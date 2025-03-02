@@ -8,7 +8,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProcedureDetailsPage : BaseContentPage
     {
-        private ProcedureDetailsViewModel _viewModel;
+        private ProcedureDetailsViewModel viewModel;
         private readonly MedicalProcedure _procedure;
         private readonly ModuleType _currentModule;
         private readonly ProcedureType _currentProcedureType;
@@ -29,11 +29,11 @@ namespace SledzSpecke.App.Features.Procedures.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<ProcedureDetailsViewModel>();
-                this.BindingContext = this._viewModel;
+                this.viewModel = this.GetRequiredService<ProcedureDetailsViewModel>();
+                this.BindingContext = this.viewModel;
 
                 // Initialize ViewModel with procedure and callback
-                this._viewModel.Initialize(this._procedure, this._currentModule, this._currentProcedureType, this._onSaveCallback, this._internships);
+                this.viewModel.Initialize(this._procedure, this._currentModule, this._currentProcedureType, this._onSaveCallback, this._internships);
             }
             catch (Exception ex)
             {
@@ -44,25 +44,25 @@ namespace SledzSpecke.App.Features.Procedures.Views
 
         private void OnProcedureTypePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Procedure != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Procedure != null)
             {
-                this._viewModel.UpdateProcedureTypeCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateProcedureTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnModulePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Procedure != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Procedure != null)
             {
-                this._viewModel.UpdateModuleCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateModuleCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnInternshipPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Procedure != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Procedure != null)
             {
-                this._viewModel.UpdateInternshipCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateInternshipCommand.Execute(picker.SelectedIndex);
             }
         }
     }

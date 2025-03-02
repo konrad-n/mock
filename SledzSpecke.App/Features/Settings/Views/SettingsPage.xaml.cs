@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.Settings.Views
 {
     public partial class SettingsPage : BaseContentPage
     {
-        private SettingsViewModel _viewModel;
+        private SettingsViewModel viewModel;
 
         public SettingsPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.Settings.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<SettingsViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<SettingsViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -38,7 +38,7 @@ namespace SledzSpecke.App.Features.Settings.Views
         {
             try
             {
-                await this._viewModel.SaveChangesAsync();
+                await this.viewModel.SaveChangesAsync();
                 await this.DisplayAlert("Sukces", "Ustawienia zostały zapisane pomyślnie.", "OK");
             }
             catch (InvalidOperationException ex)
@@ -63,7 +63,7 @@ namespace SledzSpecke.App.Features.Settings.Views
             {
                 try
                 {
-                    await this._viewModel.ClearDataAsync();
+                    await this.viewModel.ClearDataAsync();
                     await this.DisplayAlert("Sukces", "Wszystkie dane zostały wyczyszczone pomyślnie.", "OK");
                     await this.Navigation.PopToRootAsync();
                 }

@@ -7,7 +7,7 @@ namespace SledzSpecke.App.Features.Internships.Views
 {
     public partial class InternshipDetailsPage : BaseContentPage
     {
-        private InternshipDetailsViewModel _viewModel;
+        private InternshipDetailsViewModel viewModel;
         private readonly Internship _internship;
         private readonly ModuleType _currentModule;
         private readonly Func<Internship, Task> _onSaveCallback;
@@ -24,11 +24,11 @@ namespace SledzSpecke.App.Features.Internships.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<InternshipDetailsViewModel>();
+                this.viewModel = this.GetRequiredService<InternshipDetailsViewModel>();
                 // Najpierw inicjalizujemy ViewModel
-                this._viewModel.Initialize(this._internship, this._currentModule, this._onSaveCallback);
+                this.viewModel.Initialize(this._internship, this._currentModule, this._onSaveCallback);
                 // Dopiero potem ustawiamy BindingContext
-                this.BindingContext = this._viewModel;
+                this.BindingContext = this.viewModel;
             }
             catch (Exception ex)
             {
@@ -39,17 +39,17 @@ namespace SledzSpecke.App.Features.Internships.Views
 
         private void OnModulePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Internship != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Internship != null)
             {
-                this._viewModel.UpdateModuleTypeCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateModuleTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnStatusPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Internship != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Internship != null)
             {
-                this._viewModel.UpdateStatusCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateStatusCommand.Execute(picker.SelectedIndex);
             }
         }
     }

@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace SledzSpecke.App.Services.Implementations
 {
@@ -14,6 +14,7 @@ namespace SledzSpecke.App.Services.Implementations
         private User _currentUser;
 
         public bool IsAuthenticated => this._currentUser != null;
+
         public User CurrentUser => this._currentUser;
 
         public AuthenticationService(

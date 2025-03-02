@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
 {
     public partial class SMKExportPage : BaseContentPage
     {
-        private SMKExportViewModel _viewModel;
+        private SMKExportViewModel viewModel;
 
         public SMKExportPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.SMKExport.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<SMKExportViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<SMKExportViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
                     }
                 }
 
-                this._viewModel.ChangeExportTypeCommand.Execute(exportTypeIndex);
+                this.viewModel.ChangeExportTypeCommand.Execute(exportTypeIndex);
             }
         }
 
@@ -69,7 +69,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
         {
             if (sender is RadioButton rb)
             {
-                this._viewModel.ToggleCustomDatesCommand.Execute(rb.IsChecked);
+                this.viewModel.ToggleCustomDatesCommand.Execute(rb.IsChecked);
             }
         }
     }

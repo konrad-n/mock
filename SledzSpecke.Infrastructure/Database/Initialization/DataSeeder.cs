@@ -1128,7 +1128,332 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                // Dodaj pozostałe procedury w podobny sposób
+                new MedicalProcedure
+                {
+                    Id = 13,
+                    Name = "wykonanie i interpretacja próby rozkurczowej lub próby prowokacji oskrzeli",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 14,
+                    Name = "wykonanie i interpretacja próby rozkurczowej lub próby prowokacji oskrzeli",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 15,
+                    Name = "podanie leku biologicznego",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 16,
+                    Name = "podanie leku biologicznego",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 17,
+                    Name = "przeprowadzenie edukacji chorego dotyczącej właściwego sposobu przyjmowania leków wziewnych – wybór inhalatora/nebulizatora",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 18,
+                    Name = "przeprowadzenie edukacji chorego dotyczącej właściwego sposobu przyjmowania leków wziewnych – wybór inhalatora/nebulizatora",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 19,
+                    Name = "wykonanie i interpretacja testów śródskórnych w diagnostyce na jady owadów lub na leki",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 20,
+                    Name = "wykonanie i interpretacja testów śródskórnych w diagnostyce na jady owadów lub na leki",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 21,
+                    Name = "wykonanie i interpretacja wyniku próby prowokacji oskrzeli",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 2,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 22,
+                    Name = "wykonanie i interpretacja wyniku próby prowokacji oskrzeli",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 2,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 23,
+                    Name = "wykonanie iniekcji podskórnych w okresie wstępnym odczulania na jady owadów",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 24,
+                    Name = "wykonanie iniekcji podskórnych w okresie wstępnym odczulania na jady owadów",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 25,
+                    Name = "interpretacja wyniku gazometrii krwi tętniczej",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 26,
+                    Name = "interpretacja wyniku gazometrii krwi tętniczej",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 27,
+                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 0,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 28,
+                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 2,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 29,
+                    Name = "przeprowadzenie edukacji chorego dotyczącej rozpoznawania i leczenia wstrząsu anafilaktycznego wraz ze szkoleniem dotyczącym podawania adrenaliny",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 30,
+                    Name = "przeprowadzenie edukacji chorego dotyczącej rozpoznawania i leczenia wstrząsu anafilaktycznego wraz ze szkoleniem dotyczącym podawania adrenaliny",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 31,
+                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego z obrzękiem naczynioruchowym",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 32,
+                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego z obrzękiem naczynioruchowym",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 33,
+                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego diagnozowanego w kierunku mastocytozy",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+                new MedicalProcedure
+                {
+                    Id = 34,
+                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego diagnozowanego w kierunku mastocytozy",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 1,
+                },
+
+                // Procedury dla staży kierunkowych (w dokumentacji zaznaczono, że nie podlegają rozliczeniu w EKS)
+                new MedicalProcedure
+                {
+                    Id = 35,
+                    Name = "interpretacja wyników badań diagnostyki molekularnej, w tym typu multipleks",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 2, // Staż w zakresie diagnostyki laboratoryjnej
+                },
+                new MedicalProcedure
+                {
+                    Id = 36,
+                    Name = "interpretacja wyników badań diagnostyki molekularnej, w tym typu multipleks",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 2,
+                },
+                new MedicalProcedure
+                {
+                    Id = 37,
+                    Name = "ustalenie planu żywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergią na pokarmy",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 5, // Staż w zakresie pediatrii
+                },
+                new MedicalProcedure
+                {
+                    Id = 38,
+                    Name = "ustalenie planu żywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergią na pokarmy",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 5,
+                },
+                new MedicalProcedure
+                {
+                    Id = 39,
+                    Name = "zagadnienia dotyczące pielęgnacji skóry w atopowym zapaleniu skóry",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 3, // Staż w zakresie dermatologii
+                },
+                new MedicalProcedure
+                {
+                    Id = 40,
+                    Name = "zagadnienia dotyczące pielęgnacji skóry w atopowym zapaleniu skóry",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 3,
+                },
+                new MedicalProcedure
+                {
+                    Id = 41,
+                    Name = "wziernikowanie nosa",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4, // Staż w zakresie otorynolaryngologii
+                },
+                new MedicalProcedure
+                {
+                    Id = 42,
+                    Name = "wziernikowanie nosa",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
+                new MedicalProcedure
+                {
+                    Id = 43,
+                    Name = "ocena tomografii komputerowej zatok",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
+                new MedicalProcedure
+                {
+                    Id = 44,
+                    Name = "ocena tomografii komputerowej zatok",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 20,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
+                new MedicalProcedure
+                {
+                    Id = 45,
+                    Name = "badanie węchu",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
+                new MedicalProcedure
+                {
+                    Id = 46,
+                    Name = "badanie węchu",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 10,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
+                new MedicalProcedure
+                {
+                    Id = 47,
+                    Name = "rynomanometria",
+                    ProcedureType = ProcedureType.TypeA,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
+                new MedicalProcedure
+                {
+                    Id = 48,
+                    Name = "rynomanometria",
+                    ProcedureType = ProcedureType.TypeB,
+                    RequiredCount = 5,
+                    Module = ModuleType.Specialistic,
+                    InternshipId = 4,
+                },
             });
 
             return specialization;

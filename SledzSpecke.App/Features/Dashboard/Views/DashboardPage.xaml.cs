@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.Dashboard.Views
 {
     public partial class DashboardPage : BaseContentPage
     {
-        private DashboardViewModel _viewModel;
+        private DashboardViewModel viewModel;
 
         public DashboardPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.Dashboard.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<DashboardViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<DashboardViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {

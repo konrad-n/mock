@@ -10,7 +10,7 @@ namespace SledzSpecke.App.Features.Courses.Views
         private readonly Course _course;
         private readonly ModuleType _currentModule;
         private readonly Func<Course, Task> _onSaveCallback;
-        private CourseDetailsViewModel _viewModel;
+        private CourseDetailsViewModel viewModel;
 
         public CourseDetailsPage(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {
@@ -24,11 +24,11 @@ namespace SledzSpecke.App.Features.Courses.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<CourseDetailsViewModel>();
+                this.viewModel = this.GetRequiredService<CourseDetailsViewModel>();
                 // Najpierw inicjalizujemy ViewModel
-                this._viewModel.Initialize(this._course, this._currentModule, this._onSaveCallback);
+                this.viewModel.Initialize(this._course, this._currentModule, this._onSaveCallback);
                 // Dopiero potem ustawiamy BindingContext
-                this.BindingContext = this._viewModel;
+                this.BindingContext = this.viewModel;
             }
             catch (Exception ex)
             {
@@ -39,17 +39,17 @@ namespace SledzSpecke.App.Features.Courses.Views
 
         private void OnModulePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Course != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Course != null)
             {
-                this._viewModel.UpdateModuleTypeCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateModuleTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnStatusPickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.Course != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.Course != null)
             {
-                this._viewModel.UpdateStatusCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateStatusCommand.Execute(picker.SelectedIndex);
             }
         }
     }

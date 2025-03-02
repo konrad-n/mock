@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.Authentication.Views
 {
     public partial class RegistrationPage : BaseContentPage
     {
-        private RegistrationViewModel _viewModel;
+        private RegistrationViewModel viewModel;
 
         public RegistrationPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.Authentication.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<RegistrationViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<RegistrationViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -29,9 +29,9 @@ namespace SledzSpecke.App.Features.Authentication.Views
 
         private async void OnRegisterClicked(object sender, EventArgs e)
         {
-            if (this._viewModel != null)
+            if (this.viewModel != null)
             {
-                await this._viewModel.RegisterAsync();
+                await this.viewModel.RegisterAsync();
             }
         }
     }

@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
 {
     public partial class SelfEducationPage : BaseContentPage
     {
-        private SelfEducationViewModel _viewModel;
+        private SelfEducationViewModel viewModel;
 
         public SelfEducationPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<SelfEducationViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<SelfEducationViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (this._viewModel != null)
+            if (this.viewModel != null)
             {
-                this._viewModel.LoadDataAsync().ConfigureAwait(false);
+                this.viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
     }

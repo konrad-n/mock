@@ -8,8 +8,8 @@ namespace SledzSpecke.App.Features.Courses.Views
 {
     public partial class CoursesPage : BaseContentPage
     {
-        private CoursesViewModel _viewModel;
         private readonly ISpecializationService specializationService;
+        private CoursesViewModel viewModel;
 
         public CoursesPage(ISpecializationService specializationService)
         {
@@ -21,12 +21,12 @@ namespace SledzSpecke.App.Features.Courses.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<CoursesViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<CoursesViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
 
                 // Po inicjalizacji wyświetl kursy dla domyślnego modułu
-                this.DisplayCourses(this._viewModel.CurrentModule);
+                this.DisplayCourses(this.viewModel.CurrentModule);
             }
             catch (Exception ex)
             {
@@ -40,13 +40,13 @@ namespace SledzSpecke.App.Features.Courses.Views
             base.OnAppearing();
 
             // Odśwież dane kursów przy każdym pokazaniu strony
-            if (this._viewModel != null)
+            if (this.viewModel != null)
             {
-                this._viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
+                this.viewModel.LoadSpecializationDataAsync().ContinueWith(_ =>
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        this.DisplayCourses(this._viewModel.CurrentModule);
+                        this.DisplayCourses(this.viewModel.CurrentModule);
                     });
                 });
             }
@@ -73,7 +73,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                 this.SpecialisticModuleButton.TextColor = Colors.White;
             }
 
-            var courses = this._viewModel.GetFilteredCourses();
+            var courses = this.viewModel.GetFilteredCourses();
 
             if (courses.Count == 0)
             {
@@ -82,7 +82,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                     Text = "Brak kursów do wyświetlenia",
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 20, 0, 0)
+                    Margin = new Thickness(0, 20, 0, 0),
                 });
                 return;
             }
@@ -96,7 +96,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                     CornerRadius = 5,
                     Style = course.IsCompleted ? (Style)this.Resources["CompletedCourseStyle"] :
                             course.ScheduledDate.HasValue ? (Style)this.Resources["PlannedCourseStyle"] :
-                            (Style)this.Resources["PendingCourseStyle"]
+                            (Style)this.Resources["PendingCourseStyle"],
                 };
 
                 var statusIndicator = new BoxView
@@ -107,20 +107,20 @@ namespace SledzSpecke.App.Features.Courses.Views
                     WidthRequest = 16,
                     HeightRequest = 16,
                     CornerRadius = 8,
-                    VerticalOptions = LayoutOptions.Center
+                    VerticalOptions = LayoutOptions.Center,
                 };
 
                 var titleLabel = new Label
                 {
                     Text = course.Name,
                     FontAttributes = FontAttributes.Bold,
-                    FontSize = 16
+                    FontSize = 16,
                 };
 
                 var descriptionLabel = new Label
                 {
                     Text = $"Czas trwania: {course.DurationDays} dni",
-                    FontSize = 14
+                    FontSize = 14,
                 };
 
                 var statusLabel = new Label
@@ -132,7 +132,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                     FontSize = 14,
                     TextColor = course.IsCompleted ? Colors.Green :
                                 course.ScheduledDate.HasValue ? Colors.Orange :
-                                new Color(84, 126, 158)
+                                new Color(84, 126, 158),
                 };
 
                 var detailsButton = new Button
@@ -143,7 +143,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                     Margin = new Thickness(0, 5, 0, 0),
                     BackgroundColor = new Color(36, 193, 222),
                     TextColor = Colors.White,
-                    CommandParameter = course.Id
+                    CommandParameter = course.Id,
                 };
                 detailsButton.Clicked += this.OnCourseDetailsClicked;
 
@@ -152,8 +152,8 @@ namespace SledzSpecke.App.Features.Courses.Views
                     ColumnDefinitions = new ColumnDefinitionCollection
                     {
                         new ColumnDefinition { Width = new GridLength(30) },
-                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
-                    }
+                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    },
                 };
                 headerLayout.Add(statusIndicator, 0, 0);
                 headerLayout.Add(titleLabel, 1, 0);
@@ -172,43 +172,43 @@ namespace SledzSpecke.App.Features.Courses.Views
         {
             if (sender is Button button && button.CommandParameter is int courseId)
             {
-                var course = this._viewModel.Specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
+                var course = this.viewModel.Specialization.RequiredCourses.FirstOrDefault(c => c.Id == courseId);
                 if (course != null)
                 {
-                    await this.Navigation.PushAsync(new CourseDetailsPage(course, this._viewModel.CurrentModule, this.OnCourseUpdated));
+                    await this.Navigation.PushAsync(new CourseDetailsPage(course, this.viewModel.CurrentModule, this.OnCourseUpdated));
                 }
             }
         }
 
         private async void OnBasicModuleButtonClicked(object sender, EventArgs e)
         {
-            this._viewModel.SelectBasicModule();
-            this.DisplayCourses(this._viewModel.CurrentModule);
+            this.viewModel.SelectBasicModule();
+            this.DisplayCourses(this.viewModel.CurrentModule);
         }
 
         private async void OnSpecialisticModuleButtonClicked(object sender, EventArgs e)
         {
-            this._viewModel.SelectSpecialisticModule();
-            this.DisplayCourses(this._viewModel.CurrentModule);
+            this.viewModel.SelectSpecialisticModule();
+            this.DisplayCourses(this.viewModel.CurrentModule);
         }
 
         private async void OnAddCourseClicked(object sender, EventArgs e)
         {
-            await this.Navigation.PushAsync(new CourseDetailsPage(null, this._viewModel.CurrentModule, this.OnCourseAdded));
+            await this.Navigation.PushAsync(new CourseDetailsPage(null, this.viewModel.CurrentModule, this.OnCourseAdded));
         }
 
         private async Task OnCourseAdded(Course course)
         {
             await this.specializationService.SaveCourseAsync(course);
-            await this._viewModel.LoadSpecializationDataAsync();
-            this.DisplayCourses(this._viewModel.CurrentModule);
+            await this.viewModel.LoadSpecializationDataAsync();
+            this.DisplayCourses(this.viewModel.CurrentModule);
         }
 
         private async Task OnCourseUpdated(Course course)
         {
             await this.specializationService.SaveCourseAsync(course);
-            await this._viewModel.LoadSpecializationDataAsync();
-            this.DisplayCourses(this._viewModel.CurrentModule);
+            await this.viewModel.LoadSpecializationDataAsync();
+            this.DisplayCourses(this.viewModel.CurrentModule);
         }
     }
 }

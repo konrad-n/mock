@@ -6,7 +6,7 @@ namespace SledzSpecke.App.Features.Duties.Views
 {
     public partial class DutyShiftDetailsPage : BaseContentPage
     {
-        private DutyShiftDetailsViewModel _viewModel;
+        private DutyShiftDetailsViewModel viewModel;
         private readonly DutyShift _dutyShift;
         private readonly Func<DutyShift, Task> _onSaveCallback;
 
@@ -21,13 +21,13 @@ namespace SledzSpecke.App.Features.Duties.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<DutyShiftDetailsViewModel>();
+                this.viewModel = this.GetRequiredService<DutyShiftDetailsViewModel>();
 
                 // Najpierw inicjalizujemy ViewModel
-                this._viewModel.Initialize(this._dutyShift, this._onSaveCallback);
+                this.viewModel.Initialize(this._dutyShift, this._onSaveCallback);
 
                 // Dopiero potem ustawiamy BindingContext
-                this.BindingContext = this._viewModel;
+                this.BindingContext = this.viewModel;
             }
             catch (Exception ex)
             {
@@ -38,17 +38,17 @@ namespace SledzSpecke.App.Features.Duties.Views
 
         private void OnDutyTypePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null)
+            if (sender is Picker picker && this.viewModel != null)
             {
-                this._viewModel.UpdateDutyTypeCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateDutyTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnDateTimeChanged(object sender, EventArgs e)
         {
-            if (this._viewModel != null)
+            if (this.viewModel != null)
             {
-                this._viewModel.UpdateDurationText();
+                this.viewModel.UpdateDurationText();
             }
         }
     }

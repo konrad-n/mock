@@ -10,7 +10,7 @@ dotnet_diagnostic.SA1101.severity = error
 dotnet_diagnostic.SA1200.severity = none
 
 # Disable SA1600 (Elements must be documented)
-dotnet_diagnostic.SA1200.severity = none
+dotnet_diagnostic.SA1600.severity = none
 
 # Disable SA1633 (The file header is missing or not located at the top of the file)
-dotnet_diagnostic.SA1200.severity = none
+dotnet_diagnostic.SA1633.severity = none

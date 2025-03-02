@@ -6,7 +6,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
 {
     public partial class SelfEducationDetailsPage : BaseContentPage
     {
-        private SelfEducationDetailsViewModel _viewModel;
+        private SelfEducationDetailsViewModel viewModel;
         private readonly SelfEducation _selfEducation;
         private readonly Action<SelfEducation> _onSaveCallback;
 
@@ -21,11 +21,11 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<SelfEducationDetailsViewModel>();
+                this.viewModel = this.GetRequiredService<SelfEducationDetailsViewModel>();
                 // Najpierw inicjalizujemy ViewModel
-                this._viewModel.Initialize(this._selfEducation, this._onSaveCallback);
+                this.viewModel.Initialize(this._selfEducation, this._onSaveCallback);
                 // Dopiero potem ustawiamy BindingContext
-                this.BindingContext = this._viewModel;
+                this.BindingContext = this.viewModel;
             }
             catch (Exception ex)
             {
@@ -36,17 +36,17 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
 
         private void OnTypePickerSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is Picker picker && this._viewModel != null && this._viewModel.SelfEducation != null)
+            if (sender is Picker picker && this.viewModel != null && this.viewModel.SelfEducation != null)
             {
-                this._viewModel.UpdateTypeCommand.Execute(picker.SelectedIndex);
+                this.viewModel.UpdateTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
         private void OnDateSelected(object sender, DateChangedEventArgs e)
         {
-            if (this._viewModel != null && this._viewModel.SelfEducation != null)
+            if (this.viewModel != null && this.viewModel.SelfEducation != null)
             {
-                this._viewModel.UpdateDateCommand.Execute(null);
+                this.viewModel.UpdateDateCommand.Execute(null);
             }
         }
     }

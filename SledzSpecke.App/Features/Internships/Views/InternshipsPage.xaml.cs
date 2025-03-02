@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.Internships.Views
 {
     public partial class InternshipsPage : BaseContentPage
     {
-        private InternshipsViewModel _viewModel;
+        private InternshipsViewModel viewModel;
 
         public InternshipsPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.Internships.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<InternshipsViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<InternshipsViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.Internships.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (this._viewModel != null)
+            if (this.viewModel != null)
             {
-                this._viewModel.LoadDataAsync().ConfigureAwait(false);
+                this.viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
     }

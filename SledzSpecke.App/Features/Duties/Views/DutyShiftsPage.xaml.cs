@@ -5,7 +5,7 @@ namespace SledzSpecke.App.Features.Duties.Views
 {
     public partial class DutyShiftsPage : BaseContentPage
     {
-        private DutyShiftsViewModel _viewModel;
+        private DutyShiftsViewModel viewModel;
 
         public DutyShiftsPage()
         {
@@ -16,9 +16,9 @@ namespace SledzSpecke.App.Features.Duties.Views
         {
             try
             {
-                this._viewModel = this.GetRequiredService<DutyShiftsViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<DutyShiftsViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -32,9 +32,9 @@ namespace SledzSpecke.App.Features.Duties.Views
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (this._viewModel != null)
+            if (this.viewModel != null)
             {
-                this._viewModel.LoadDataAsync().ConfigureAwait(false);
+                this.viewModel.LoadDataAsync().ConfigureAwait(false);
             }
         }
     }
