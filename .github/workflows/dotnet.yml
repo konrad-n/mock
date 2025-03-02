@@ -1,14 +1,15 @@
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,8 +17,13 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.2'
+          xcode-version: latest
           
+      - name: Install iOS Simulator Runtime
+        run: |
+          sudo xcode-select --switch /Applications/Xcode.app
+          sudo xcodebuild -downloadAllPlatforms
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
@@ -25,12 +31,14 @@ jobs:
           
       - name: Install .NET MAUI Workloads
         run: dotnet workload install maui --ignore-failed-sources
-        
-      - name: Restore dependencies
-        run: dotnet restore SledzSpecke.sln
+
+      - name: Clean and Restore
+        run: |
+          dotnet clean SledzSpecke.sln
+          dotnet restore SledzSpecke.sln
         
       - name: Build
-        run: dotnet build SledzSpecke.sln --no-restore
+        run: dotnet build SledzSpecke.sln --no-restore --configuration Release
         
       - name: Test
         run: dotnet test SledzSpecke.sln --no-build --verbosity normal
