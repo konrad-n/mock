@@ -21,7 +21,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <!-- Dashboard for absence information -->
-        <Frame Margin="15" Padding="15" CornerRadius="10" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+        <Border Margin="15" Padding="15" StrokeShape="RoundRectangle 10" Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}">
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                 <!-- End date info -->
@@ -41,7 +41,7 @@
                 </VerticalStackLayout>
 
                 <!-- Self-education days -->
-                <Frame Grid.Row="1" Grid.Column="0" Padding="10" CornerRadius="8" BorderColor="#e4f0f5"
+                <Border Grid.Row="1" Grid.Column="0" Padding="10" StrokeShape="RoundRectangle 8" Stroke="#e4f0f5"
                        BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
                     <VerticalStackLayout>
                         <Label Text="Dni samokształcenia w roku" FontSize="14" 
@@ -53,10 +53,10 @@
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         </StackLayout>
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
                 <!-- Other leaves -->
-                <Frame Grid.Row="1" Grid.Column="1" Padding="10" CornerRadius="8" BorderColor="#e4f0f5"
+                <Border Grid.Row="1" Grid.Column="1" Padding="10" StrokeShape="RoundRectangle 8" Stroke="#e4f0f5"
                        BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
                     <VerticalStackLayout>
                         <Label Text="Suma nieobecności" FontSize="14" 
@@ -68,22 +68,22 @@
                                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         </StackLayout>
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
                 <!-- Add absence button -->
                 <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Dodaj nieobecność" 
                         Command="{Binding AddAbsenceCommand}" HeightRequest="45" 
                         BackgroundColor="#0D759C" TextColor="White"/>
             </Grid>
-        </Frame>
+        </Border>
 
         <!-- Absences list -->
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="15" Spacing="15">
                 <!-- Filter controls -->
-                <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
+                <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
-                       Padding="15" CornerRadius="10">
+                       Padding="15" StrokeShape="RoundRectangle 10">
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                         <Label Text="Pokaż:" Grid.Row="0" Grid.Column="0" VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
@@ -110,7 +110,7 @@
                             </Picker.ItemsSource>
                         </Picker>
                     </Grid>
-                </Frame>
+                </Border>
 
                 <!-- Komunikat o braku nieobecności -->
                 <Label Text="Brak nieobecności do wyświetlenia"
@@ -122,9 +122,9 @@
                                 IsVisible="{Binding IsNoAbsencesVisible, Converter={StaticResource InverseBoolConverter}}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:Absence">
-                            <Frame BackgroundColor="{Binding Type, Converter={StaticResource AbsenceCardColorConverter}}"
-                                   BorderColor="{AppThemeBinding Light=#E0E0E0, Dark=#547E9E}"
-                                   CornerRadius="10"
+                            <Border BackgroundColor="{Binding Type, Converter={StaticResource AbsenceCardColorConverter}}"
+                                   Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#547E9E}"
+                                   StrokeShape="RoundRectangle 10"
                                    Margin="0,0,0,10"
                                    Padding="15">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
@@ -177,7 +177,7 @@
                                             CommandParameter="{Binding Id}"
                                             Grid.Column="2"/>
                                 </Grid>
-                            </Frame>
+                            </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>

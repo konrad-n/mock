@@ -1,4 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AbsenceManagementViewModel.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   ViewModel zarządzania nieobecnościami.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -10,62 +19,163 @@ using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Absences.ViewModels
 {
+    /// <summary>
+    /// ViewModel zarządzania nieobecnościami.
+    /// </summary>
     public partial class AbsenceManagementViewModel : ViewModelBase
     {
-        private readonly ISpecializationService _specializationService;
-        private readonly ISpecializationDateCalculator _specializationDateCalculator;
-        private readonly IDatabaseService _databaseService;
+        private readonly ISpecializationService specializationService;
+        private readonly ISpecializationDateCalculator specializationDateCalculator;
+        private readonly IDatabaseService databaseService;
 
+        /// <summary>
+        /// Specjalizacja.
+        /// </summary>
         [ObservableProperty]
-        private Specialization _specialization;
+        private Specialization specialization = null!;
 
+        /// <summary>
+        /// Wszystkie nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private ObservableCollection<Absence> _allAbsences;
+        private ObservableCollection<Absence> allAbsences = new ();
 
+        /// <summary>
+        /// Przefiltrowane nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private ObservableCollection<Absence> _filteredAbsences;
+        private ObservableCollection<Absence> filteredAbsences = new ();
 
+        /// <summary>
+        /// Wybrany typ nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private AbsenceType? _selectedAbsenceType;
+        private AbsenceType? selectedAbsenceType;
 
+        /// <summary>
+        /// Wybrany rok.
+        /// </summary>
         [ObservableProperty]
-        private int? _selectedYear;
+        private int? selectedYear;
 
+        /// <summary>
+        /// Etykieta planowanej daty zakończenia specjalizacji.
+        /// </summary>
         [ObservableProperty]
-        private string _plannedEndDateLabel;
+        private string plannedEndDateLabel = string.Empty;
 
+        /// <summary>
+        /// Etykieta faktycznej daty zakończenia specjalizacji.
+        /// </summary>
         [ObservableProperty]
-        private string _actualEndDateLabel;
+        private string actualEndDateLabel = string.Empty;
 
+        /// <summary>
+        /// Etykieta dni samokształcenia.
+        /// </summary>
         [ObservableProperty]
-        private string _selfEducationDaysLabel;
+        private string selfEducationDaysLabel = string.Empty;
 
+        /// <summary>
+        /// Etykieta sumy dni nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private string _totalAbsenceDaysLabel;
+        private string totalAbsenceDaysLabel = string.Empty;
 
+        /// <summary>
+        /// Określa, czy komunikat o braku nieobecności jest widoczny.
+        /// </summary>
         [ObservableProperty]
-        private bool _isNoAbsencesVisible;
+        private bool isNoAbsencesVisible;
 
+        /// <summary>
+        /// Dostępne lata.
+        /// </summary>
         [ObservableProperty]
-        private ObservableCollection<int> _availableYears;
+        private ObservableCollection<int> availableYears = new ();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbsenceManagementViewModel"/> class.
+        /// </summary>
+        /// <param name="specializationService">Serwis specjalizacji.</param>
+        /// <param name="specializationDateCalculator">Kalkulator dat specjalizacji.</param>
+        /// <param name="databaseService">Serwis bazy danych.</param>
+        /// <param name="logger">Logger.</param>
         public AbsenceManagementViewModel(
             ISpecializationService specializationService,
             ISpecializationDateCalculator specializationDateCalculator,
             IDatabaseService databaseService,
-            ILogger<AbsenceManagementViewModel> logger) : base(logger)
+            ILogger<AbsenceManagementViewModel> logger)
+            : base(logger)
         {
-            this._specializationService = specializationService;
-            this._specializationDateCalculator = specializationDateCalculator;
-            this._databaseService = databaseService;
-
-            this.AllAbsences = new ObservableCollection<Absence>();
-            this.FilteredAbsences = new ObservableCollection<Absence>();
-            this.AvailableYears = new ObservableCollection<int>();
+            this.specializationService = specializationService;
+            this.specializationDateCalculator = specializationDateCalculator;
+            this.databaseService = databaseService;
 
             this.Title = "Nieobecności i urlopy";
         }
 
+        /// <summary>
+        /// Zwraca opis typu nieobecności.
+        /// </summary>
+        /// <param name="type">Typ nieobecności.</param>
+        /// <returns>Opis typu nieobecności.</returns>
+        public static string GetAbsenceTypeText(AbsenceType type)
+        {
+            return type switch
+            {
+                AbsenceType.SickLeave => "Zwolnienie lekarskie (L4)",
+                AbsenceType.VacationLeave => "Urlop wypoczynkowy",
+                AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samokształcenie)",
+                AbsenceType.MaternityLeave => "Urlop macierzyński",
+                AbsenceType.ParentalLeave => "Urlop rodzicielski",
+                AbsenceType.SpecialLeave => "Urlop okolicznościowy",
+                AbsenceType.UnpaidLeave => "Urlop bezpłatny",
+                AbsenceType.Other => "Inna nieobecność",
+                _ => "Nieobecność",
+            };
+        }
+
+        /// <summary>
+        /// Zwraca kolor karty dla typu nieobecności.
+        /// </summary>
+        /// <param name="type">Typ nieobecności.</param>
+        /// <returns>Kolor karty.</returns>
+        public static Color GetAbsenceCardColor(AbsenceType type)
+        {
+            return type switch
+            {
+                AbsenceType.SickLeave => Color.FromArgb("#FFE0E0"),
+                AbsenceType.VacationLeave => Color.FromArgb("#E0F7FA"),
+                AbsenceType.SelfEducationLeave => Color.FromArgb("#E8F5E9"),
+                AbsenceType.MaternityLeave => Color.FromArgb("#FFF8E1"),
+                AbsenceType.ParentalLeave => Color.FromArgb("#FFF8E1"),
+                _ => Color.FromArgb("#F5F5F5")
+            };
+        }
+
+        /// <summary>
+        /// Zwraca ikonę tekstową dla typu nieobecności.
+        /// </summary>
+        /// <param name="type">Typ nieobecności.</param>
+        /// <returns>Ikona tekstowa (emoji).</returns>
+        public static string GetAbsenceIconText(AbsenceType type)
+        {
+            return type switch
+            {
+                AbsenceType.SickLeave => "🤒",
+                AbsenceType.VacationLeave => "🏖️",
+                AbsenceType.SelfEducationLeave => "📚",
+                AbsenceType.MaternityLeave => "👶",
+                AbsenceType.ParentalLeave => "👶",
+                _ => "📅"
+            };
+        }
+
+        /// <summary>
+        /// Inicjalizuje ViewModel.
+        /// </summary>
+        /// <returns>Task reprezentujący operację asynchroniczną.</returns>
         public override async Task InitializeAsync()
         {
             try
@@ -83,16 +193,20 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
+        /// <summary>
+        /// Ładuje dane nieobecności.
+        /// </summary>
+        /// <returns>Task reprezentujący operację asynchroniczną.</returns>
         public async Task LoadDataAsync()
         {
             try
             {
                 // Load specialization data
-                this.Specialization = await this._specializationService.GetSpecializationAsync();
+                this.Specialization = await this.specializationService.GetSpecializationAsync();
 
                 // Calculate dates
                 DateTime plannedEndDate = this.Specialization.StartDate.AddDays(this.Specialization.BaseDurationWeeks * 7);
-                DateTime actualEndDate = await this._specializationDateCalculator.CalculateExpectedEndDateAsync(this.Specialization.Id);
+                DateTime actualEndDate = await this.specializationDateCalculator.CalculateExpectedEndDateAsync(this.Specialization.Id);
 
                 // Update UI with dates
                 this.PlannedEndDateLabel = plannedEndDate.ToString("dd.MM.yyyy");
@@ -100,13 +214,13 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
 
                 // Calculate self-education days
                 int currentYear = DateTime.Now.Year;
-                int remainingSelfEducationDays = await this._specializationDateCalculator.GetRemainingEducationDaysForYearAsync(this.Specialization.Id, currentYear);
+                int remainingSelfEducationDays = await this.specializationDateCalculator.GetRemainingEducationDaysForYearAsync(this.Specialization.Id, currentYear);
                 int usedSelfEducationDays = this.Specialization.SelfEducationDaysPerYear - remainingSelfEducationDays;
 
                 this.SelfEducationDaysLabel = $"{usedSelfEducationDays}/{this.Specialization.SelfEducationDaysPerYear}";
 
                 // Load absences
-                var absences = await this._databaseService.QueryAsync<Absence>(
+                var absences = await this.databaseService.QueryAsync<Absence>(
                     "SELECT * FROM Absences WHERE SpecializationId = ? ORDER BY StartDate DESC",
                     this.Specialization.Id);
 
@@ -124,32 +238,13 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error loading absence data");
-                throw;
+                this._logger.LogError(ex, "Error loading absence data"); // Nie rzucaj wyjątku ponownie, tylko zaloguj błąd
             }
         }
 
-        private void SetupYearFilter()
-        {
-            // Get unique years from absences
-            var years = this.AllAbsences
-                .Select(a => a.Year)
-                .Distinct()
-                .OrderBy(y => y)
-                .ToList();
-
-            this.AvailableYears.Clear();
-
-            // All years
-            this.AvailableYears.Add(0); // 0 represents "All years"
-
-            // Add individual years
-            foreach (var year in years)
-            {
-                this.AvailableYears.Add(year);
-            }
-        }
-
+        /// <summary>
+        /// Stosuje filtry i wyświetla nieobecności.
+        /// </summary>
         public void ApplyFiltersAndDisplayAbsences()
         {
             // Filter absences
@@ -174,12 +269,43 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             this.IsNoAbsencesVisible = this.FilteredAbsences.Count == 0;
         }
 
+        /// <summary>
+        /// Konfiguruje filtr roku.
+        /// </summary>
+        private void SetupYearFilter()
+        {
+            // Get unique years from absences
+            var years = this.AllAbsences
+                .Select(a => a.Year)
+                .Distinct()
+                .OrderBy(y => y)
+                .ToList();
+
+            this.AvailableYears.Clear();
+
+            // All years
+            this.AvailableYears.Add(0); // 0 represents "All years"
+
+            // Add individual years
+            foreach (var year in years)
+            {
+                this.AvailableYears.Add(year);
+            }
+        }
+
+        /// <summary>
+        /// Dodaje nową nieobecność.
+        /// </summary>
         [RelayCommand]
         private async Task AddAbsenceAsync()
         {
             await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(null, this.OnAbsenceAdded));
         }
 
+        /// <summary>
+        /// Edytuje nieobecność.
+        /// </summary>
+        /// <param name="absenceId">Identyfikator nieobecności.</param>
         [RelayCommand]
         private async Task EditAbsenceAsync(int absenceId)
         {
@@ -190,6 +316,10 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
+        /// <summary>
+        /// Filtruje nieobecności według typu.
+        /// </summary>
+        /// <param name="typeIndex">Indeks typu nieobecności.</param>
         [RelayCommand]
         private void FilterByAbsenceType(int typeIndex)
         {
@@ -207,6 +337,10 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             this.ApplyFiltersAndDisplayAbsences();
         }
 
+        /// <summary>
+        /// Filtruje nieobecności według roku.
+        /// </summary>
+        /// <param name="yearIndex">Indeks roku.</param>
         [RelayCommand]
         private void FilterByYear(int yearIndex)
         {
@@ -215,6 +349,10 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             this.ApplyFiltersAndDisplayAbsences();
         }
 
+        /// <summary>
+        /// Obsługuje dodanie nieobecności.
+        /// </summary>
+        /// <param name="absence">Dodana nieobecność.</param>
         private async void OnAbsenceAdded(Absence absence)
         {
             try
@@ -227,10 +365,10 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
 
                 // Użyj metody specyficznej do wstawiania (insert) nowego rekordu
                 // zamiast metody SaveAsync, która może używać ID do decydowania czy wykonać update
-                await this._databaseService.InsertAsync(absence);
+                await this.databaseService.InsertAsync(absence);
 
                 // Dla pewności, dodaj log który pokazuje nowe ID
-                this._logger.LogInformation($"Added new absence with ID: {absence.Id}");
+                this._logger.LogInformation("Added new absence with ID: {AbsenceId}", absence.Id);
 
                 // Reload data
                 await this.LoadDataAsync();
@@ -238,60 +376,28 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             catch (Exception ex)
             {
                 this._logger.LogError(ex, "Error adding absence");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas dodawania nieobecności: {ex.Message}", "OK");
+                var window = Application.Current?.Windows[0];
+                var page = window?.Page;
+
+                if (page != null)
+                {
+                    await page.DisplayAlert("Błąd", $"Wystąpił problem podczas dodawania nieobecności: {ex.Message}", "OK");
+                }
             }
         }
 
+        /// <summary>
+        /// Obsługuje aktualizację nieobecności.
+        /// </summary>
+        /// <param name="absence">Zaktualizowana nieobecność.</param>
         private async void OnAbsenceUpdated(Absence absence)
         {
             // Update absence
             absence.SpecializationId = this.Specialization.Id;
-            await this._databaseService.SaveAsync(absence);
+            await this.databaseService.SaveAsync(absence);
 
             // Reload data
             await this.LoadDataAsync();
-        }
-
-        public static string GetAbsenceTypeText(AbsenceType type)
-        {
-            return type switch
-            {
-                AbsenceType.SickLeave => "Zwolnienie lekarskie (L4)",
-                AbsenceType.VacationLeave => "Urlop wypoczynkowy",
-                AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samokształcenie)",
-                AbsenceType.MaternityLeave => "Urlop macierzyński",
-                AbsenceType.ParentalLeave => "Urlop rodzicielski",
-                AbsenceType.SpecialLeave => "Urlop okolicznościowy",
-                AbsenceType.UnpaidLeave => "Urlop bezpłatny",
-                AbsenceType.Other => "Inna nieobecność",
-                _ => "Nieobecność",
-            };
-        }
-
-        public static Color GetAbsenceCardColor(AbsenceType type)
-        {
-            return type switch
-            {
-                AbsenceType.SickLeave => Color.FromArgb("#FFE0E0"),
-                AbsenceType.VacationLeave => Color.FromArgb("#E0F7FA"),
-                AbsenceType.SelfEducationLeave => Color.FromArgb("#E8F5E9"),
-                AbsenceType.MaternityLeave => Color.FromArgb("#FFF8E1"),
-                AbsenceType.ParentalLeave => Color.FromArgb("#FFF8E1"),
-                _ => Color.FromArgb("#F5F5F5")
-            };
-        }
-
-        public static string GetAbsenceIconText(AbsenceType type)
-        {
-            return type switch
-            {
-                AbsenceType.SickLeave => "🤒",
-                AbsenceType.VacationLeave => "🏖️",
-                AbsenceType.SelfEducationLeave => "📚",
-                AbsenceType.MaternityLeave => "👶",
-                AbsenceType.ParentalLeave => "👶",
-                _ => "📅"
-            };
         }
     }
 }

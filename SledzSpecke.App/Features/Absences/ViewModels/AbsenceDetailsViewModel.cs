@@ -1,4 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AbsenceDetailsViewModel.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   ViewModel szczegółów nieobecności.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -7,67 +16,114 @@ using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Absences.ViewModels
 {
+    /// <summary>
+    /// ViewModel szczegółów nieobecności.
+    /// </summary>
     public partial class AbsenceDetailsViewModel : ViewModelBase
     {
-        private readonly IDatabaseService _databaseService;
-        private Action<Absence> _onSaveCallback;
-        private Absence _absence;
+        private readonly IDatabaseService databaseService;
+        private Action<Absence>? onSaveCallback;
+        private Absence? absence;
 
+        /// <summary>
+        /// Tytuł strony.
+        /// </summary>
         [ObservableProperty]
-        private string _pageTitle;
+        private string pageTitle = string.Empty;
 
+        /// <summary>
+        /// Określa, czy nieobecność już istnieje.
+        /// </summary>
         [ObservableProperty]
-        private bool _isExistingAbsence;
+        private bool isExistingAbsence;
 
+        /// <summary>
+        /// Data rozpoczęcia nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private DateTime _startDate = DateTime.Now;
+        private DateTime startDate = DateTime.Now;
 
+        /// <summary>
+        /// Data zakończenia nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private DateTime _endDate = DateTime.Now;
+        private DateTime endDate = DateTime.Now;
 
+        /// <summary>
+        /// Liczba dni nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private string _durationDays;
+        private string durationDays = string.Empty;
 
+        /// <summary>
+        /// Opis nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private string _description;
+        private string description = string.Empty;
 
+        /// <summary>
+        /// Określa, czy nieobecność wydłuża czas trwania specjalizacji.
+        /// </summary>
         [ObservableProperty]
-        private bool _affectsSpecializationLength;
+        private bool affectsSpecializationLength;
 
+        /// <summary>
+        /// Sygnatura dokumentu.
+        /// </summary>
         [ObservableProperty]
-        private string _documentReference;
+        private string documentReference = string.Empty;
 
+        /// <summary>
+        /// Rok nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private string _year;
+        private string year = string.Empty;
 
+        /// <summary>
+        /// Określa, czy nieobecność jest zatwierdzona.
+        /// </summary>
         [ObservableProperty]
-        private bool _isApproved;
+        private bool isApproved;
 
+        /// <summary>
+        /// Indeks wybranego typu nieobecności.
+        /// </summary>
         [ObservableProperty]
-        private int _absenceTypeSelectedIndex;
+        private int absenceTypeSelectedIndex;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbsenceDetailsViewModel"/> class.
+        /// </summary>
+        /// <param name="databaseService">Serwis bazy danych.</param>
+        /// <param name="logger">Logger.</param>
         public AbsenceDetailsViewModel(
             IDatabaseService databaseService,
-            ILogger<AbsenceDetailsViewModel> logger) : base(logger)
+            ILogger<AbsenceDetailsViewModel> logger)
+            : base(logger)
         {
-            this._databaseService = databaseService;
+            this.databaseService = databaseService;
             this.Title = "Nieobecność";
         }
 
-        public void Initialize(Absence absence, Action<Absence> onSaveCallback)
+        /// <summary>
+        /// Inicjalizuje ViewModel.
+        /// </summary>
+        /// <param name="absenceParam">Nieobecność do edycji lub null dla nowej nieobecności.</param>
+        /// <param name="saveCallback">Wywołanie zwrotne po zapisaniu nieobecności.</param>
+        public void Initialize(Absence? absenceParam, Action<Absence> saveCallback)
         {
-            this._onSaveCallback = onSaveCallback;
+            this.onSaveCallback = saveCallback;
 
-            if (absence == null)
+            if (absenceParam == null)
             {
                 // Nowa nieobecność
-                this._absence = new Absence
+                this.absence = new Absence
                 {
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now,
                     Type = AbsenceType.SickLeave,
                     Year = DateTime.Now.Year,
-                    AffectsSpecializationLength = true
+                    AffectsSpecializationLength = true,
                 };
                 this.PageTitle = "Dodaj nieobecność";
                 this.IsExistingAbsence = false;
@@ -78,24 +134,27 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             else
             {
                 // Edycja istniejącej nieobecności
-                this._absence = absence;
+                this.absence = absenceParam;
                 this.PageTitle = "Edytuj nieobecność";
                 this.IsExistingAbsence = true;
 
-                this.StartDate = absence.StartDate;
-                this.EndDate = absence.EndDate;
-                this.DurationDays = absence.DurationDays.ToString();
-                this.Description = absence.Description;
-                this.AffectsSpecializationLength = absence.AffectsSpecializationLength;
-                this.DocumentReference = absence.DocumentReference;
-                this.Year = absence.Year.ToString();
-                this.IsApproved = absence.IsApproved;
+                this.StartDate = absenceParam.StartDate;
+                this.EndDate = absenceParam.EndDate;
+                this.DurationDays = absenceParam.DurationDays.ToString();
+                this.Description = absenceParam.Description ?? string.Empty;
+                this.AffectsSpecializationLength = absenceParam.AffectsSpecializationLength;
+                this.DocumentReference = absenceParam.DocumentReference ?? string.Empty;
+                this.Year = absenceParam.Year.ToString();
+                this.IsApproved = absenceParam.IsApproved;
 
                 // Set absence type picker
-                this.AbsenceTypeSelectedIndex = (int)absence.Type;
+                this.AbsenceTypeSelectedIndex = (int)absenceParam.Type;
             }
         }
 
+        /// <summary>
+        /// Oblicza liczbę dni nieobecności.
+        /// </summary>
         public void CalculateDuration()
         {
             if (this.EndDate >= this.StartDate)
@@ -109,14 +168,31 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
+        /// <summary>
+        /// Anuluje edycję nieobecności.
+        /// </summary>
+        [RelayCommand]
+        private static async Task CancelAsync()
+        {
+            await Shell.Current.Navigation.PopAsync();
+        }
 
+        /// <summary>
+        /// Aktualizuje typ nieobecności.
+        /// </summary>
+        /// <param name="index">Indeks wybranego typu nieobecności.</param>
         [RelayCommand]
         private void UpdateAbsenceType(int index)
         {
-            this._absence.Type = (AbsenceType)index;
+            if (this.absence == null)
+            {
+                return;
+            }
+
+            this.absence.Type = (AbsenceType)index;
 
             // Set default values based on type
-            switch (this._absence.Type)
+            switch (this.absence.Type)
             {
                 case AbsenceType.SelfEducationLeave:
                     // Self-education leave typically affects specialization length
@@ -135,15 +211,26 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
+        /// <summary>
+        /// Usuwa nieobecność.
+        /// </summary>
         [RelayCommand]
         private async Task DeleteAsync()
         {
-            if (!this.IsExistingAbsence)
+            if (!this.IsExistingAbsence || this.absence == null)
             {
                 return;
             }
 
-            bool confirm = await Application.Current.MainPage.DisplayAlert(
+            var window = Application.Current?.Windows[0];
+            var page = window?.Page;
+
+            if (page == null)
+            {
+                return;
+            }
+
+            bool confirm = await page.DisplayAlert(
                 "Potwierdzenie",
                 "Czy na pewno chcesz usunąć tę nieobecność?",
                 "Tak",
@@ -153,13 +240,13 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             {
                 try
                 {
-                    await this._databaseService.DeleteAsync(this._absence);
+                    await this.databaseService.DeleteAsync(this.absence);
                     await Shell.Current.Navigation.PopAsync();
                 }
                 catch (Exception ex)
                 {
                     this._logger.LogError(ex, "Error deleting absence");
-                    await Application.Current.MainPage.DisplayAlert(
+                    await page.DisplayAlert(
                         "Błąd",
                         $"Nie udało się usunąć nieobecności: {ex.Message}",
                         "OK");
@@ -167,28 +254,33 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task CancelAsync()
-        {
-            await Shell.Current.Navigation.PopAsync();
-        }
-
+        /// <summary>
+        /// Zapisuje nieobecność.
+        /// </summary>
         [RelayCommand]
         private async Task SaveAsync()
         {
+            var window = Application.Current?.Windows[0];
+            var page = window?.Page;
+
+            if (page == null)
+            {
+                return;
+            }
+
             // Validation
             if (this.StartDate > this.EndDate)
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await page.DisplayAlert(
                     "Błąd",
                     "Data zakończenia musi być późniejsza lub równa dacie rozpoczęcia.",
                     "OK");
                 return;
             }
 
-            if (!int.TryParse(this.Year, out int year))
+            if (!int.TryParse(this.Year, out int yearValue))
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await page.DisplayAlert(
                     "Błąd",
                     "Wprowadź poprawny rok.",
                     "OK");
@@ -196,7 +288,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
 
             // Upewnij się, że zawsze tworzysz NOWY obiekt Absence, nigdy nie modyfikuj istniejącego
-            var absence = new Absence
+            var newAbsence = new Absence
             {
                 StartDate = this.StartDate,
                 EndDate = this.EndDate,
@@ -204,15 +296,12 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 Description = this.Description,
                 AffectsSpecializationLength = this.AffectsSpecializationLength,
                 DocumentReference = this.DocumentReference,
-                Year = year,
+                Year = yearValue,
                 IsApproved = this.IsApproved,
                 Type = (AbsenceType)this.AbsenceTypeSelectedIndex,
             };
 
-            if (this._onSaveCallback != null)
-            {
-                this._onSaveCallback(absence);
-            }
+            this.onSaveCallback?.Invoke(newAbsence);
 
             await Shell.Current.Navigation.PopAsync();
         }

@@ -1,24 +1,43 @@
-﻿using SledzSpecke.App.Common.Views;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AbsenceManagementPage.xaml.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Strona zarządzania nieobecnościami.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Absences.ViewModels;
 
 namespace SledzSpecke.App.Features.Absences.Views
 {
+    /// <summary>
+    /// Strona zarządzania nieobecnościami.
+    /// </summary>
     public partial class AbsenceManagementPage : BaseContentPage
     {
-        private AbsenceManagementViewModel _viewModel;
+        private AbsenceManagementViewModel viewModel = null!;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbsenceManagementPage"/> class.
+        /// </summary>
         public AbsenceManagementPage()
         {
             this.InitializeComponent();
         }
 
+        /// <summary>
+        /// Inicjalizuje stronę asynchronicznie.
+        /// </summary>
+        /// <returns>Task reprezentujący operację asynchroniczną.</returns>
         protected override async Task InitializePageAsync()
         {
             try
             {
-                this._viewModel = this.GetRequiredService<AbsenceManagementViewModel>();
-                this.BindingContext = this._viewModel;
-                await this._viewModel.InitializeAsync();
+                this.viewModel = this.GetRequiredService<AbsenceManagementViewModel>();
+                this.BindingContext = this.viewModel;
+                await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -27,30 +46,40 @@ namespace SledzSpecke.App.Features.Absences.Views
             }
         }
 
+        /// <summary>
+        /// Wywoływane przy pojawieniu się strony.
+        /// </summary>
         protected override void OnAppearing()
         {
             base.OnAppearing();
 
             // Refresh data when page appears
-            if (this._viewModel != null)
-            {
-                this._viewModel.LoadDataAsync().ConfigureAwait(false);
-            }
+            this.viewModel?.LoadDataAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Obsługuje zmianę filtra typu nieobecności.
+        /// </summary>
+        /// <param name="sender">Obiekt źródłowy zdarzenia.</param>
+        /// <param name="e">Argumenty zdarzenia.</param>
         private void OnFilterTypeChanged(object sender, EventArgs e)
         {
             if (sender is Picker picker)
             {
-                this._viewModel.FilterByAbsenceTypeCommand.Execute(picker.SelectedIndex);
+                this.viewModel.FilterByAbsenceTypeCommand.Execute(picker.SelectedIndex);
             }
         }
 
+        /// <summary>
+        /// Obsługuje zmianę filtra roku.
+        /// </summary>
+        /// <param name="sender">Obiekt źródłowy zdarzenia.</param>
+        /// <param name="e">Argumenty zdarzenia.</param>
         private void OnFilterYearChanged(object sender, EventArgs e)
         {
             if (sender is Picker picker)
             {
-                this._viewModel.FilterByYearCommand.Execute(picker.SelectedIndex);
+                this.viewModel.FilterByYearCommand.Execute(picker.SelectedIndex);
             }
         }
     }
