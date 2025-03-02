@@ -252,7 +252,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             await this.LoadDataAsync();
         }
 
-        public string GetAbsenceTypeText(AbsenceType type)
+        public static string GetAbsenceTypeText(AbsenceType type)
         {
             return type switch
             {
@@ -268,7 +268,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             };
         }
 
-        public Color GetAbsenceCardColor(AbsenceType type)
+        public static Color GetAbsenceCardColor(AbsenceType type)
         {
             return type switch
             {
@@ -281,7 +281,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             };
         }
 
-        public string GetAbsenceIconText(AbsenceType type)
+        public static string GetAbsenceIconText(AbsenceType type)
         {
             return type switch
             {

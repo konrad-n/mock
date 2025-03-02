@@ -11,17 +11,14 @@ namespace SledzSpecke.App.Common.Converters
             {
                 return !boolValue;
             }
+
             return value;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue)
-            {
-                return !boolValue;
-            }
-            return value;
+            return this.Convert(value, targetType, parameter, culture);
         }
     }
 }
