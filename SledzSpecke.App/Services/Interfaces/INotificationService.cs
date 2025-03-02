@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.App.Services
+﻿namespace SledzSpecke.App.Services.Interfaces
 {
     public interface INotificationService
     {

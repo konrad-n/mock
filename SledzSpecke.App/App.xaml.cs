@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Features.Authentication.Views;
-using SledzSpecke.App.Services;
+using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App
@@ -34,7 +34,7 @@ namespace SledzSpecke.App
             try
             {
                 MainPage = new NavigationPage(_serviceProvider.GetRequiredService<LoginPage>());
-                InitializeAsync();
+                _ = InitializeAsync();
             }
             catch (Exception ex)
             {
@@ -43,7 +43,7 @@ namespace SledzSpecke.App
             }
         }
 
-        private async void InitializeAsync()
+        private async Task InitializeAsync()
         {
             try
             {

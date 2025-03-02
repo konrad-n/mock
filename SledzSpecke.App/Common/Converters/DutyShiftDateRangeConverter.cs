@@ -1,27 +1,15 @@
-﻿using SledzSpecke.Core.Models;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace SledzSpecke.App.Common.Converters
 {
-    public class InternshipStatusTextConverter : IValueConverter
+    public class DutyShiftDateRangeConverter : IValueConverter
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Internship internship)
+            if (value is DateTime startDate && parameter is DateTime endDate)
             {
-                if (internship.IsCompleted)
-                    return "Ukończony";
-
-                bool isCurrentInternship = internship.StartDate.HasValue && !internship.EndDate.HasValue;
-
-                if (isCurrentInternship)
-                    return $"W trakcie od: {internship.StartDate?.ToString("dd.MM.yyyy")}";
-
-                if (internship.StartDate.HasValue)
-                    return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";
-
-                return "Oczekujący";
+                return $"{startDate:dd.MM.yyyy HH:mm} - {endDate:dd.MM.yyyy HH:mm}";
             }
             return string.Empty;
         }

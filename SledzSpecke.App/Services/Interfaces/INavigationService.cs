@@ -1,8 +1,11 @@
-﻿public interface INavigationService
+﻿namespace SledzSpecke.App.Services.Interfaces
 {
-    Task NavigateToAsync(Type pageType);
-    Task NavigateToAsync<T>() where T : Page;
-    Task PopAsync();
-    Task DisplayAlertAsync(string title, string message, string cancel);
-    Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel);
+    public interface INavigationService
+    {
+        Task NavigateToAsync(Type pageType);
+        Task NavigateToAsync<T>() where T : Page;
+        Task PopAsync();
+        Task DisplayAlertAsync(string title, string message, string cancel);
+        Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel);
+    }
 }

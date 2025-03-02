@@ -21,6 +21,7 @@ using SledzSpecke.App.Features.SMKExport.ViewModels;
 using SledzSpecke.App.Features.SMKExport.Views;
 using SledzSpecke.App.Services;
 using SledzSpecke.App.Services.Implementations;
+using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Infrastructure.Database;
 using SledzSpecke.Infrastructure.Services;
 

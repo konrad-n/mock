@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.App.Features.SelfEducations.Views;
-using SledzSpecke.App.Services;
+using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 using System.Collections.ObjectModel;

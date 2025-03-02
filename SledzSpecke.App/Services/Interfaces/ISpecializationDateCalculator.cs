@@ -1,6 +1,6 @@
 ﻿using SledzSpecke.App.Services.Implementations;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Interfaces
 {
     public interface ISpecializationDateCalculator
     {

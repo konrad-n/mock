@@ -7,6 +7,7 @@ using SledzSpecke.App.Features.SelfEducations.Views;
 using SledzSpecke.App.Features.Settings.Views;
 using SledzSpecke.App.Features.SMKExport.Views;
 using SledzSpecke.App.Services;
+using SledzSpecke.App.Services.Interfaces;
 
 namespace SledzSpecke.App
 {

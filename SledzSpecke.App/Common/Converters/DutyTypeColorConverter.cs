@@ -1,29 +1,20 @@
-﻿using SledzSpecke.Core.Models;
+﻿using SledzSpecke.Core.Models.Enums;
 using System.Globalization;
 
 namespace SledzSpecke.App.Common.Converters
 {
-    public class InternshipStatusTextConverter : IValueConverter
+    public class DutyTypeColorConverter : IValueConverter
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Internship internship)
+            if (value is DutyType dutyType)
             {
-                if (internship.IsCompleted)
-                    return "Ukończony";
-
-                bool isCurrentInternship = internship.StartDate.HasValue && !internship.EndDate.HasValue;
-
-                if (isCurrentInternship)
-                    return $"W trakcie od: {internship.StartDate?.ToString("dd.MM.yyyy")}";
-
-                if (internship.StartDate.HasValue)
-                    return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";
-
-                return "Oczekujący";
+                return dutyType == DutyType.Independent ?
+                    new Color(8, 32, 68) : // Ciemny niebieski
+                    new Color(0, 100, 0);  // Ciemny zielony
             }
-            return string.Empty;
+            return Colors.Black;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2325", Justification = "Required for IValueConverter interface")]

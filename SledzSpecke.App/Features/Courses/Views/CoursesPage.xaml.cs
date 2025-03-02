@@ -1,6 +1,6 @@
 ﻿using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Courses.ViewModels;
-using SledzSpecke.App.Services;
+using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
 

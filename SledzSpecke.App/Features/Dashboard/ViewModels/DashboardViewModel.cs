@@ -2,18 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
-using SledzSpecke.App.Features.Absences.Views;
-using SledzSpecke.App.Features.Courses.Views;
-using SledzSpecke.App.Features.Duties.Views;
-using SledzSpecke.App.Features.Internships.Views;
-using SledzSpecke.App.Features.Procedures.Views;
-using SledzSpecke.App.Features.SelfEducations.Views;
-using SledzSpecke.App.Features.Settings.Views;
-using SledzSpecke.App.Features.SMKExport.Views;
-using SledzSpecke.App.Services;
+using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using System.Linq;
 
 namespace SledzSpecke.App.Features.Dashboard.ViewModels
 {

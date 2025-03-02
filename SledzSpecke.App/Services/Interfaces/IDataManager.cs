@@ -1,8 +1,6 @@
 ﻿using SledzSpecke.Core.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace SledzSpecke.App.Services
+namespace SledzSpecke.App.Services.Interfaces
 {
     public interface IDataManager
     {

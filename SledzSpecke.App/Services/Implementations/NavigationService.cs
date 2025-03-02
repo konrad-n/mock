@@ -1,84 +1,88 @@
 ﻿using Microsoft.Extensions.Logging;
+using SledzSpecke.App.Services.Interfaces;
 
-public class NavigationService : INavigationService
+namespace SledzSpecke.App.Services.Implementations
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<NavigationService> _logger;
-
-    public NavigationService(IServiceProvider serviceProvider, ILogger<NavigationService> logger)
+    public class NavigationService : INavigationService
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<NavigationService> _logger;
 
-    public async Task NavigateToAsync(Type pageType)
-    {
-        try
+        public NavigationService(IServiceProvider serviceProvider, ILogger<NavigationService> logger)
         {
-            var page = _serviceProvider.GetService(pageType) as Page;
-            if (page == null)
-            {
-                _logger.LogWarning("Could not resolve page of type {PageType}", pageType.Name);
-                return;
-            }
-
-            if (Shell.Current != null)
-            {
-                await Shell.Current.Navigation.PushAsync(page);
-            }
-            else if (Application.Current.MainPage is NavigationPage navPage)
-            {
-                await navPage.PushAsync(page);
-            }
-            else
-            {
-                Application.Current.MainPage = new NavigationPage(page);
-            }
+            _serviceProvider = serviceProvider;
+            _logger = logger;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Navigation failed");
-        }
-    }
 
-    public async Task NavigateToAsync<T>() where T : Page
-    {
-        await NavigateToAsync(typeof(T));
-    }
-
-    public async Task PopAsync()
-    {
-        try
+        public async Task NavigateToAsync(Type pageType)
         {
-            if (Shell.Current != null)
+            try
             {
-                await Shell.Current.Navigation.PopAsync();
+                var page = _serviceProvider.GetService(pageType) as Page;
+                if (page == null)
+                {
+                    _logger.LogWarning("Could not resolve page of type {PageType}", pageType.Name);
+                    return;
+                }
+
+                if (Shell.Current != null)
+                {
+                    await Shell.Current.Navigation.PushAsync(page);
+                }
+                else if (Application.Current.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(page);
+                }
+                else
+                {
+                    Application.Current.MainPage = new NavigationPage(page);
+                }
             }
-            else if (Application.Current.MainPage is NavigationPage navPage)
+            catch (Exception ex)
             {
-                await navPage.PopAsync();
+                _logger.LogError(ex, "Navigation failed");
             }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Navigation pop failed");
-        }
-    }
 
-    public async Task DisplayAlertAsync(string title, string message, string cancel)
-    {
-        if (Application.Current.MainPage != null)
+        public async Task NavigateToAsync<T>() where T : Page
         {
-            await Application.Current.MainPage.DisplayAlert(title, message, cancel);
+            await NavigateToAsync(typeof(T));
         }
-    }
 
-    public async Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel)
-    {
-        if (Application.Current.MainPage != null)
+        public async Task PopAsync()
         {
-            return await Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
+            try
+            {
+                if (Shell.Current != null)
+                {
+                    await Shell.Current.Navigation.PopAsync();
+                }
+                else if (Application.Current.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PopAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Navigation pop failed");
+            }
         }
-        return false;
+
+        public async Task DisplayAlertAsync(string title, string message, string cancel)
+        {
+            if (Application.Current.MainPage != null)
+            {
+                await Application.Current.MainPage.DisplayAlert(title, message, cancel);
+            }
+        }
+
+        public async Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel)
+        {
+            if (Application.Current.MainPage != null)
+            {
+                return await Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
+            }
+            return false;
+        }
     }
 }
