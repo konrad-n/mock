@@ -84,6 +84,8 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
 
                 TypePickerSelectedIndex = (int)selfEducation.Type;
             }
+
+            UpdateDurationDays();
         }
 
         [RelayCommand]
@@ -107,6 +109,10 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             {
                 TimeSpan duration = EndDate - StartDate;
                 DurationDays = (duration.Days + 1).ToString();
+            }
+            else
+            {
+                DurationDays = "1";
             }
         }
 
