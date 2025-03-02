@@ -9,8 +9,8 @@ namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProceduresPage : BaseContentPage
     {
-        private ProceduresViewModel viewModel;
         private readonly IDatabaseService databaseService;
+        private ProceduresViewModel viewModel;
 
         public ProceduresPage(
             ISpecializationService specializationService,
@@ -61,7 +61,9 @@ namespace SledzSpecke.App.Features.Procedures.Views
             this.NoSelectionLabel.IsVisible = false;
 
             if (this.viewModel.Specialization == null)
+            {
                 return;
+            }
 
             // Filter procedures by module and type
             var procedures = this.viewModel.Specialization.RequiredProcedures
@@ -78,7 +80,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                     Text = "Brak procedur do wyświetlenia",
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 20, 0, 0)
+                    Margin = new Thickness(0, 20, 0, 0),
                 });
                 return;
             }
@@ -98,7 +100,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                     Text = internshipName,
                     FontSize = 18,
                     FontAttributes = FontAttributes.Bold,
-                    Margin = new Thickness(0, 10, 0, 5)
+                    Margin = new Thickness(0, 10, 0, 5),
                 });
 
                 foreach (var procedure in group)
@@ -108,27 +110,30 @@ namespace SledzSpecke.App.Features.Procedures.Views
                         Padding = new Thickness(10),
                         Margin = new Thickness(0, 0, 0, 10),
                         CornerRadius = 5,
-                        BorderColor = procedure.CompletedCount >= procedure.RequiredCount ? Colors.Green : new Color(228, 240, 245)
+                        BorderColor =
+                            procedure.CompletedCount >= procedure.RequiredCount
+                                ? Colors.Green
+                                : new Color(228, 240, 245),
                     };
 
                     var progressBar = new ProgressBar
                     {
                         Progress = procedure.CompletionPercentage / 100,
                         HeightRequest = 10,
-                        Margin = new Thickness(0, 5, 0, 5)
+                        Margin = new Thickness(0, 5, 0, 5),
                     };
 
                     var titleLabel = new Label
                     {
                         Text = procedure.Name,
                         FontAttributes = FontAttributes.Bold,
-                        FontSize = 16
+                        FontSize = 16,
                     };
 
                     var countLabel = new Label
                     {
                         Text = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount} ({procedure.CompletionPercentage:F0}%)",
-                        FontSize = 14
+                        FontSize = 14,
                     };
 
                     var addEntryButton = new Button
@@ -137,7 +142,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                         HeightRequest = 35,
                         FontSize = 14,
                         Margin = new Thickness(0, 5, 0, 0),
-                        CommandParameter = procedure.Id
+                        CommandParameter = procedure.Id,
                     };
                     addEntryButton.Clicked += this.OnAddProcedureEntryClicked;
 
@@ -147,7 +152,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                         HeightRequest = 35,
                         FontSize = 14,
                         Margin = new Thickness(0, 5, 0, 0),
-                        CommandParameter = procedure.Id
+                        CommandParameter = procedure.Id,
                     };
                     detailsButton.Clicked += this.OnProcedureDetailsClicked;
 
@@ -155,10 +160,17 @@ namespace SledzSpecke.App.Features.Procedures.Views
                     {
                         ColumnDefinitions = new ColumnDefinitionCollection
                         {
-                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
-                        }
+                            new ColumnDefinition
+                            {
+                                Width = new GridLength(1, GridUnitType.Star),
+                            },
+                            new ColumnDefinition
+                            {
+                                Width = new GridLength(1, GridUnitType.Star),
+                            },
+                        },
                     };
+
                     buttonsLayout.Add(addEntryButton, 0, 0);
                     buttonsLayout.Add(detailsButton, 1, 0);
 

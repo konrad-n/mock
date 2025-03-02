@@ -166,7 +166,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
 
             // Create a unique filename
-            string fileName = $"SMK_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            string fileName = $"SMKexport_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Ensure all rows have the same columns by finding all unique column names
@@ -174,7 +174,7 @@ namespace SledzSpecke.App.Services.Implementations
 
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("SMK_Export");
+                var worksheet = workbook.Worksheets.Add("SMKexport");
 
                 // Add header row
                 for (int i = 0; i < columns.Count; i++)
@@ -209,7 +209,7 @@ namespace SledzSpecke.App.Services.Implementations
         private async Task<string> ExportProceduresToExcelAsync(Specialization specialization, SmkExportOptions options)
         {
             // Create a unique filename
-            string fileName = $"SMK_Procedury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            string fileName = $"SMKprocedury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Load procedures and entries
@@ -344,7 +344,7 @@ namespace SledzSpecke.App.Services.Implementations
         private async Task<string> ExportDutyShiftsToExcelAsync(Specialization specialization, SmkExportOptions options)
         {
             // Create a unique filename
-            string fileName = $"SMK_Dyzury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            string fileName = $"SMKdyzury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
             // Load duty shifts

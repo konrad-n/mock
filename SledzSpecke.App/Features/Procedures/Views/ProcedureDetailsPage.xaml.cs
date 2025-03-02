@@ -8,21 +8,21 @@ namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProcedureDetailsPage : BaseContentPage
     {
+        private readonly MedicalProcedure procedure;
+        private readonly ModuleType currentModule;
+        private readonly ProcedureType currentProcedureType;
+        private readonly Func<MedicalProcedure, Task> onSaveCallback;
+        private readonly List<Internship> internships;
         private ProcedureDetailsViewModel viewModel;
-        private readonly MedicalProcedure _procedure;
-        private readonly ModuleType _currentModule;
-        private readonly ProcedureType _currentProcedureType;
-        private readonly Func<MedicalProcedure, Task> _onSaveCallback;
-        private readonly List<Internship> _internships;
 
         public ProcedureDetailsPage(MedicalProcedure procedure, ModuleType currentModule, ProcedureType currentProcedureType, Func<MedicalProcedure, Task> onSaveCallback)
         {
             this.InitializeComponent();
-            this._procedure = procedure;
-            this._currentModule = currentModule;
-            this._currentProcedureType = currentProcedureType;
-            this._onSaveCallback = onSaveCallback;
-            this._internships = DataSeeder.SeedHematologySpecialization().RequiredInternships.ToList();
+            this.procedure = procedure;
+            this.currentModule = currentModule;
+            this.currentProcedureType = currentProcedureType;
+            this.onSaveCallback = onSaveCallback;
+            this.internships = DataSeeder.SeedHematologySpecialization().RequiredInternships.ToList();
         }
 
         protected override async Task InitializePageAsync()
@@ -33,7 +33,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 this.BindingContext = this.viewModel;
 
                 // Initialize ViewModel with procedure and callback
-                this.viewModel.Initialize(this._procedure, this._currentModule, this._currentProcedureType, this._onSaveCallback, this._internships);
+                this.viewModel.Initialize(this.procedure, this.currentModule, this.currentProcedureType, this.onSaveCallback, this.internships);
             }
             catch (Exception ex)
             {

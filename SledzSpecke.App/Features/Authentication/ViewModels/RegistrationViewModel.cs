@@ -18,31 +18,32 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         private List<SpecializationType> specializationTypes;
 
         [ObservableProperty]
-        private string _username;
+        private string username;
 
         [ObservableProperty]
-        private string _email;
+        private string email;
 
         [ObservableProperty]
-        private string _password;
+        private string password;
 
         [ObservableProperty]
-        private string _confirmPassword;
+        private string confirmPassword;
 
         [ObservableProperty]
         private int specializationSelectedIndex = -1;
 
         [ObservableProperty]
-        private bool _isLoading;
+        private bool isLoading;
 
         [ObservableProperty]
-        private string _errorMessage;
+        private string errorMessage;
 
         public RegistrationViewModel(
             IDataManager dataManager,
             IAuthenticationService authenticationService,
             ILogger<RegistrationViewModel> logger,
-            INavigationService navigationService) : base(logger)
+            INavigationService navigationService)
+            : base(logger)
         {
             this.dataManager = dataManager;
             this.authenticationService = authenticationService;
@@ -54,19 +55,6 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         public override async Task InitializeAsync()
         {
             await this.LoadSpecializationTypesAsync();
-        }
-
-        private async Task LoadSpecializationTypesAsync()
-        {
-            try
-            {
-                this.SpecializationTypes = await this.dataManager.GetAllSpecializationTypesAsync();
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Error loading specialization types");
-                this.ErrorMessage = $"Nie udało się załadować listy specjalizacji: {ex.Message}";
-            }
         }
 
         [RelayCommand]
@@ -124,6 +112,19 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             finally
             {
                 this.IsLoading = false;
+            }
+        }
+
+        private async Task LoadSpecializationTypesAsync()
+        {
+            try
+            {
+                this.SpecializationTypes = await this.dataManager.GetAllSpecializationTypesAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error loading specialization types");
+                this.ErrorMessage = $"Nie udało się załadować listy specjalizacji: {ex.Message}";
             }
         }
     }

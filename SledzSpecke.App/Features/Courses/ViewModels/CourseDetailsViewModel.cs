@@ -9,51 +9,51 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 {
     public partial class CourseDetailsViewModel : ViewModelBase
     {
-        private Course _course;
-        private Func<Course, Task> _onSaveCallback;
+        private Course course;
+        private Func<Course, Task> onSaveCallback;
 
         [ObservableProperty]
-        private string _pageTitle;
+        private string pageTitle;
 
         [ObservableProperty]
-        private string _durationDays;
+        private string durationDays;
 
         [ObservableProperty]
-        private DateTime _courseDate = DateTime.Now.AddDays(30);
+        private DateTime courseDate = DateTime.Now.AddDays(30);
 
         [ObservableProperty]
-        private DateTime _completionDate = DateTime.Now;
+        private DateTime completionDate = DateTime.Now;
 
         [ObservableProperty]
-        private bool _isDateVisible;
+        private bool isDateVisible;
 
         [ObservableProperty]
-        private bool _isCompletionDateVisible;
+        private bool isCompletionDateVisible;
 
         [ObservableProperty]
-        private bool _isCompletionVisible;
+        private bool isCompletionVisible;
 
         [ObservableProperty]
-        private int _modulePickerSelectedIndex;
+        private int modulePickerSelectedIndex;
 
         [ObservableProperty]
-        private int _statusPickerSelectedIndex;
-
-        public Course Course => this._course;
+        private int statusPickerSelectedIndex;
 
         public CourseDetailsViewModel(ILogger<CourseDetailsViewModel> logger) : base(logger)
         {
             this.Title = "Szczegóły kursu";
         }
 
+        public Course Course => this.course;
+
         public void Initialize(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {
-            this._onSaveCallback = onSaveCallback;
+            this.onSaveCallback = onSaveCallback;
 
             if (course == null)
             {
                 // Nowy kurs
-                this._course = new Course
+                this.course = new Course
                 {
                     Id = new Random().Next(1000, 9999), // Tymczasowe ID
                     Module = currentModule,
@@ -67,7 +67,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             else
             {
                 // Edycja istniejącego kursu
-                this._course = course;
+                this.course = course;
                 this.PageTitle = "Szczegóły kursu";
                 this.DurationDays = course.DurationDays.ToString();
 
@@ -110,16 +110,19 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
         [RelayCommand]
         public void UpdateModuleType(int selectedIndex)
         {
-            if (this._course != null)
+            if (this.course != null)
             {
-                this._course.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
+                this.course.Module = selectedIndex == 0 ? ModuleType.Basic : ModuleType.Specialistic;
             }
         }
 
         [RelayCommand]
         public void UpdateStatus(int selectedIndex)
         {
-            if (this._course == null) return;
+            if (this.course == null)
+            {
+                return;
+            }
 
             switch (selectedIndex)
             {
@@ -127,40 +130,40 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                     this.IsDateVisible = false;
                     this.IsCompletionDateVisible = false;
                     this.IsCompletionVisible = false;
-                    this._course.ScheduledDate = null;
-                    this._course.IsRegistered = false;
-                    this._course.IsAttended = false;
-                    this._course.IsCompleted = false;
-                    this._course.CompletionDate = null;
+                    this.course.ScheduledDate = null;
+                    this.course.IsRegistered = false;
+                    this.course.IsAttended = false;
+                    this.course.IsCompleted = false;
+                    this.course.CompletionDate = null;
                     break;
                 case 1: // Zaplanowany
                     this.IsDateVisible = true;
                     this.IsCompletionDateVisible = false;
                     this.IsCompletionVisible = false;
-                    this._course.ScheduledDate = this.CourseDate;
-                    this._course.IsRegistered = false;
-                    this._course.IsAttended = false;
-                    this._course.IsCompleted = false;
-                    this._course.CompletionDate = null;
+                    this.course.ScheduledDate = this.CourseDate;
+                    this.course.IsRegistered = false;
+                    this.course.IsAttended = false;
+                    this.course.IsCompleted = false;
+                    this.course.CompletionDate = null;
                     break;
                 case 2: // Zarejestrowany
                     this.IsDateVisible = true;
                     this.IsCompletionDateVisible = false;
                     this.IsCompletionVisible = false;
-                    this._course.ScheduledDate = this.CourseDate;
-                    this._course.IsRegistered = true;
-                    this._course.IsAttended = true;
-                    this._course.IsCompleted = false;
-                    this._course.CompletionDate = null;
+                    this.course.ScheduledDate = this.CourseDate;
+                    this.course.IsRegistered = true;
+                    this.course.IsAttended = true;
+                    this.course.IsCompleted = false;
+                    this.course.CompletionDate = null;
                     break;
                 case 3: // Ukończony
                     this.IsDateVisible = false;
                     this.IsCompletionDateVisible = true;
                     this.IsCompletionVisible = true;
-                    this._course.IsRegistered = true;
-                    this._course.IsAttended = true;
-                    this._course.IsCompleted = true;
-                    this._course.CompletionDate = this.CompletionDate;
+                    this.course.IsRegistered = true;
+                    this.course.IsAttended = true;
+                    this.course.IsCompleted = true;
+                    this.course.CompletionDate = this.CompletionDate;
                     break;
             }
         }
@@ -173,7 +176,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                 var fileResult = await FilePicker.PickAsync();
                 if (fileResult != null)
                 {
-                    this._course.CertificateFilePath = fileResult.FullPath;
+                    this.course.CertificateFilePath = fileResult.FullPath;
                     await Application.Current.MainPage.DisplayAlert("Sukces", "Plik został dodany pomyślnie.", "OK");
                 }
             }
@@ -194,7 +197,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
         private async Task SaveAsync()
         {
             // Walidacja
-            if (string.IsNullOrWhiteSpace(this._course.Name))
+            if (string.IsNullOrWhiteSpace(this.course.Name))
             {
                 await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa kursu jest wymagana.", "OK");
                 return;
@@ -206,22 +209,22 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                 return;
             }
 
-            this._course.DurationDays = duration;
+            this.course.DurationDays = duration;
 
             // Dodatkowe ustawienia w zależności od statusu
-            if (this.IsDateVisible && this._course.ScheduledDate == null)
+            if (this.IsDateVisible && this.course.ScheduledDate == null)
             {
-                this._course.ScheduledDate = this.CourseDate;
+                this.course.ScheduledDate = this.CourseDate;
             }
 
-            if (this.IsCompletionDateVisible && this._course.CompletionDate == null)
+            if (this.IsCompletionDateVisible && this.course.CompletionDate == null)
             {
-                this._course.CompletionDate = this.CompletionDate;
+                this.course.CompletionDate = this.CompletionDate;
             }
 
-            if (this._onSaveCallback != null)
+            if (this.onSaveCallback != null)
             {
-                await this._onSaveCallback(this._course);
+                await this.onSaveCallback(this.course);
             }
 
             await Shell.Current.Navigation.PopAsync();

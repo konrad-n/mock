@@ -4,7 +4,6 @@ using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Procedures.ViewModels
 {
@@ -13,44 +12,45 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         private readonly ISpecializationService specializationService;
 
         [ObservableProperty]
-        private ModuleType _currentModule = ModuleType.Basic;
+        private ModuleType currentModule = ModuleType.Basic;
 
         [ObservableProperty]
-        private ProcedureType _currentProcedureType = ProcedureType.TypeA;
+        private ProcedureType currentProcedureType = ProcedureType.TypeA;
 
         [ObservableProperty]
         private Specialization specialization;
 
         [ObservableProperty]
-        private bool _isProceduresEmpty = false;
+        private bool isProceduresEmpty = false;
 
         [ObservableProperty]
-        private Color _basicModuleButtonBackgroundColor = new Color(8, 32, 68);
+        private Color basicModuleButtonBackgroundColor = new Color(8, 32, 68);
 
         [ObservableProperty]
-        private Color _basicModuleButtonTextColor = Colors.White;
+        private Color basicModuleButtonTextColor = Colors.White;
 
         [ObservableProperty]
-        private Color _specialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
+        private Color specialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
 
         [ObservableProperty]
-        private Color _specialisticModuleButtonTextColor = Colors.Black;
+        private Color specialisticModuleButtonTextColor = Colors.Black;
 
         [ObservableProperty]
-        private Color _typeAButtonBackgroundColor = new Color(13, 117, 156);
+        private Color typeAButtonBackgroundColor = new Color(13, 117, 156);
 
         [ObservableProperty]
-        private Color _typeAButtonTextColor = Colors.White;
+        private Color typeAButtonTextColor = Colors.White;
 
         [ObservableProperty]
-        private Color _typeBButtonBackgroundColor = new Color(228, 240, 245);
+        private Color typeBButtonBackgroundColor = new Color(228, 240, 245);
 
         [ObservableProperty]
-        private Color _typeBButtonTextColor = Colors.Black;
+        private Color typeBButtonTextColor = Colors.Black;
 
         public ProceduresViewModel(
             ISpecializationService specializationService,
-            ILogger<ProceduresViewModel> logger) : base(logger)
+            ILogger<ProceduresViewModel> logger)
+            : base(logger)
         {
             this.specializationService = specializationService;
             this.Title = "Procedury";

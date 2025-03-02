@@ -7,17 +7,17 @@ namespace SledzSpecke.App.Features.Courses.Views
 {
     public partial class CourseDetailsPage : BaseContentPage
     {
-        private readonly Course _course;
-        private readonly ModuleType _currentModule;
-        private readonly Func<Course, Task> _onSaveCallback;
+        private readonly Course course;
+        private readonly ModuleType currentModule;
+        private readonly Func<Course, Task> onSaveCallback;
         private CourseDetailsViewModel viewModel;
 
         public CourseDetailsPage(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {
             this.InitializeComponent();
-            this._course = course;
-            this._currentModule = currentModule;
-            this._onSaveCallback = onSaveCallback;
+            this.course = course;
+            this.currentModule = currentModule;
+            this.onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
@@ -25,9 +25,11 @@ namespace SledzSpecke.App.Features.Courses.Views
             try
             {
                 this.viewModel = this.GetRequiredService<CourseDetailsViewModel>();
+
                 // Najpierw inicjalizujemy ViewModel
-                this.viewModel.Initialize(this._course, this._currentModule, this._onSaveCallback);
-                // Dopiero potem ustawiamy BindingContext
+                this.viewModel.Initialize(this.course, this.currentModule, this.onSaveCallback);
+
+                // Dopiero potem BindingContext
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

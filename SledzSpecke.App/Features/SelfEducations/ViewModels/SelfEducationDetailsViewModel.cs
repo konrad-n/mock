@@ -9,60 +9,60 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
 {
     public partial class SelfEducationDetailsViewModel : ViewModelBase
     {
-        private SelfEducation _selfEducation;
-        private Action<SelfEducation> _onSaveCallback;
+        private SelfEducation selfEducation;
+        private Action<SelfEducation> onSaveCallback;
 
         [ObservableProperty]
-        private string _pageTitle;
+        private string pageTitle;
 
         [ObservableProperty]
-        private string _selfEducationTitle;
+        private string selfEducationTitle;
 
         [ObservableProperty]
-        private DateTime _startDate = DateTime.Now;
+        private DateTime startDate = DateTime.Now;
 
         [ObservableProperty]
-        private DateTime _endDate = DateTime.Now.AddDays(1);
+        private DateTime endDate = DateTime.Now.AddDays(1);
 
         [ObservableProperty]
-        private string _durationDays = "1";
+        private string durationDays = "1";
 
         [ObservableProperty]
-        private string _location;
+        private string location;
 
         [ObservableProperty]
-        private string _organizer;
+        private string organizer;
 
         [ObservableProperty]
-        private bool _isRequired;
+        private bool isRequired;
 
         [ObservableProperty]
-        private string _notes;
+        private string notes;
 
         [ObservableProperty]
-        private int _typePickerSelectedIndex;
-
-        public SelfEducation SelfEducation => this._selfEducation;
+        private int typePickerSelectedIndex;
 
         public SelfEducationDetailsViewModel(ILogger<SelfEducationDetailsViewModel> logger) : base(logger)
         {
             this.Title = "Szczegóły wydarzenia";
         }
 
+        public SelfEducation SelfEducation => this.selfEducation;
+
         public void Initialize(SelfEducation selfEducation, Action<SelfEducation> onSaveCallback)
         {
-            this._onSaveCallback = onSaveCallback;
+            this.onSaveCallback = onSaveCallback;
 
             if (selfEducation == null)
             {
                 // Nowe wydarzenie
-                this._selfEducation = new SelfEducation
+                this.selfEducation = new SelfEducation
                 {
                     Id = new Random().Next(1000, 9999), // Tymczasowe ID
                     StartDate = this.StartDate,
                     EndDate = this.EndDate,
                     DurationDays = 1,
-                    Type = SelfEducationType.Conference
+                    Type = SelfEducationType.Conference,
                 };
                 this.PageTitle = "Dodaj wydarzenie";
                 this.TypePickerSelectedIndex = 0; // Konferencja
@@ -70,7 +70,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             else
             {
                 // Edycja istniejącego wydarzenia
-                this._selfEducation = selfEducation;
+                this.selfEducation = selfEducation;
                 this.PageTitle = "Edytuj wydarzenie";
 
                 this.SelfEducationTitle = selfEducation.Title;
@@ -91,9 +91,9 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         [RelayCommand]
         public void UpdateType(int selectedIndex)
         {
-            if (this._selfEducation != null)
+            if (this.selfEducation != null)
             {
-                this._selfEducation.Type = (SelfEducationType)selectedIndex;
+                this.selfEducation.Type = (SelfEducationType)selectedIndex;
             }
         }
 
@@ -124,7 +124,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 var fileResult = await FilePicker.PickAsync();
                 if (fileResult != null)
                 {
-                    this._selfEducation.CertificateFilePath = fileResult.FullPath;
+                    this.selfEducation.CertificateFilePath = fileResult.FullPath;
                     await Application.Current.MainPage.DisplayAlert("Sukces", "Plik został dodany pomyślnie.", "OK");
                 }
             }
@@ -176,16 +176,16 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             }
 
             // Aktualizacja wydarzenia
-            this._selfEducation.Title = this.SelfEducationTitle;
-            this._selfEducation.StartDate = this.StartDate;
-            this._selfEducation.EndDate = this.EndDate;
-            this._selfEducation.DurationDays = durationDays;
-            this._selfEducation.Location = this.Location;
-            this._selfEducation.Organizer = this.Organizer;
-            this._selfEducation.IsRequired = this.IsRequired;
-            this._selfEducation.Notes = this.Notes;
+            this.selfEducation.Title = this.SelfEducationTitle;
+            this.selfEducation.StartDate = this.StartDate;
+            this.selfEducation.EndDate = this.EndDate;
+            this.selfEducation.DurationDays = durationDays;
+            this.selfEducation.Location = this.Location;
+            this.selfEducation.Organizer = this.Organizer;
+            this.selfEducation.IsRequired = this.IsRequired;
+            this.selfEducation.Notes = this.Notes;
 
-            this._onSaveCallback?.Invoke(this._selfEducation);
+            this.onSaveCallback?.Invoke(this.selfEducation);
             await Shell.Current.Navigation.PopAsync();
         }
     }

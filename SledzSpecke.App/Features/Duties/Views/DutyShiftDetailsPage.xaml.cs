@@ -7,14 +7,14 @@ namespace SledzSpecke.App.Features.Duties.Views
     public partial class DutyShiftDetailsPage : BaseContentPage
     {
         private DutyShiftDetailsViewModel viewModel;
-        private readonly DutyShift _dutyShift;
-        private readonly Func<DutyShift, Task> _onSaveCallback;
+        private readonly DutyShift dutyShift;
+        private readonly Func<DutyShift, Task> onSaveCallback;
 
         public DutyShiftDetailsPage(DutyShift dutyShift, Func<DutyShift, Task> onSaveCallback)
         {
             this.InitializeComponent();
-            this._dutyShift = dutyShift;
-            this._onSaveCallback = onSaveCallback;
+            this.dutyShift = dutyShift;
+            this.onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
@@ -24,7 +24,7 @@ namespace SledzSpecke.App.Features.Duties.Views
                 this.viewModel = this.GetRequiredService<DutyShiftDetailsViewModel>();
 
                 // Najpierw inicjalizujemy ViewModel
-                this.viewModel.Initialize(this._dutyShift, this._onSaveCallback);
+                this.viewModel.Initialize(this.dutyShift, this.onSaveCallback);
 
                 // Dopiero potem ustawiamy BindingContext
                 this.BindingContext = this.viewModel;

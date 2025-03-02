@@ -8,7 +8,7 @@
              Title="{Binding Title}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
-            <Image Source="app_logo.png" 
+            <Image Source="applogo.png" 
                    HeightRequest="100" 
                    WidthRequest="100" 
                    HorizontalOptions="Center" />

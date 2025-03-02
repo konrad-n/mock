@@ -160,7 +160,7 @@ namespace SledzSpecke.App.Features.Courses.Views
 
                 var contentLayout = new VerticalStackLayout
                 {
-                    Children = { headerLayout, descriptionLabel, statusLabel, detailsButton }
+                    Children = { headerLayout, descriptionLabel, statusLabel, detailsButton },
                 };
 
                 frame.Content = contentLayout;

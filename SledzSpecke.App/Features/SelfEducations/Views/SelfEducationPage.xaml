@@ -107,6 +107,6 @@
     </Grid>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Dodaj" Command="{Binding AddSelfEducationCommand}" IconImageSource="add_icon.png" />
+        <ToolbarItem Text="Dodaj" Command="{Binding AddSelfEducationCommand}" IconImageSource="addicon.png" />
     </ContentPage.ToolbarItems>
 </common:BaseContentPage>

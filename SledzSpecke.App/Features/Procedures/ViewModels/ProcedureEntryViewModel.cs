@@ -10,75 +10,76 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
     public partial class ProcedureEntryViewModel : ViewModelBase
     {
         private readonly IDatabaseService databaseService;
-        private Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
-        private MedicalProcedure _procedure;
+        private Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback;
+        private MedicalProcedure procedure;
 
         [ObservableProperty]
-        private string _procedureName;
+        private string procedureName;
 
         [ObservableProperty]
-        private string _procedureType;
+        private string procedureType;
 
         [ObservableProperty]
-        private string _completionStatus;
+        private string completionStatus;
 
         [ObservableProperty]
-        private string _remainingText;
+        private string remainingText;
 
         [ObservableProperty]
-        private double _completionProgress;
+        private double completionProgress;
 
         [ObservableProperty]
-        private Color _procedureTypeColor;
+        private Color procedureTypeColor;
 
         [ObservableProperty]
-        private Color _procedureTypeBorderColor;
+        private Color procedureTypeBorderColor;
 
         [ObservableProperty]
-        private Color _progressColor;
+        private Color progressColor;
 
         [ObservableProperty]
-        private DateTime _entryDate = DateTime.Now;
+        private DateTime entryDate = DateTime.Now;
 
         [ObservableProperty]
-        private string _patientId;
+        private string patientId;
 
         [ObservableProperty]
-        private string _patientGender = "Mężczyzna"; // Default value
+        private string patientGender = "Mężczyzna"; // Default value
 
         [ObservableProperty]
-        private string _location;
+        private string location;
 
         [ObservableProperty]
-        private string _supervisorName;
+        private string supervisorName;
 
         [ObservableProperty]
-        private string _supervisorLabel;
+        private string supervisorLabel;
 
         [ObservableProperty]
-        private string _supervisorPlaceholder;
+        private string supervisorPlaceholder;
 
         [ObservableProperty]
-        private string _firstAssistantLabel;
+        private string firstAssistantLabel;
 
         [ObservableProperty]
-        private string _firstAssistantPlaceholder;
+        private string firstAssistantPlaceholder;
 
         [ObservableProperty]
-        private string _firstAssistantData;
+        private string firstAssistantData;
 
         [ObservableProperty]
-        private string _secondAssistantData;
+        private string secondAssistantData;
 
         [ObservableProperty]
-        private string _procedureGroup;
+        private string procedureGroup;
 
         [ObservableProperty]
-        private string _notes;
+        private string notes;
 
         public ProcedureEntryViewModel(
             IDatabaseService databaseService,
-            ILogger<ProcedureEntryViewModel> logger) : base(logger)
+            ILogger<ProcedureEntryViewModel> logger)
+            : base(logger)
         {
             this.databaseService = databaseService;
             this.Title = "Dodaj wykonanie procedury";
@@ -86,8 +87,8 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
         public void Initialize(MedicalProcedure procedure, Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
-            this._procedure = procedure;
-            this._onSaveCallback = onSaveCallback;
+            this.procedure = procedure;
+            this.onSaveCallback = onSaveCallback;
 
             this.ProcedureName = procedure.Name;
 
@@ -196,7 +197,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 }
 
                 // For type B (assistance) supervisor is required
-                if (this._procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(this.SupervisorName))
+                if (this.procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla procedury typu B.", "OK");
                     return;
@@ -213,14 +214,14 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                     FirstAssistantData = this.FirstAssistantData,
                     SecondAssistantData = this.SecondAssistantData,
                     ProcedureGroup = this.ProcedureGroup,
-                    InternshipName = this._procedure.InternshipId.HasValue ?
-                        (await this.databaseService.GetByIdAsync<Internship>(this._procedure.InternshipId.Value))?.Name : string.Empty,
+                    InternshipName = this.procedure.InternshipId.HasValue ?
+                        (await this.databaseService.GetByIdAsync<Internship>(this.procedure.InternshipId.Value))?.Name : string.Empty,
                     Notes = this.Notes
                 };
 
-                if (this._onSaveCallback != null)
+                if (this.onSaveCallback != null)
                 {
-                    await this._onSaveCallback(this._procedure, procedureEntry);
+                    await this.onSaveCallback(this.procedure, procedureEntry);
                 }
 
                 await Shell.Current.Navigation.PopAsync();

@@ -80,7 +80,7 @@
     </Grid>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Dodaj" Clicked="OnAddProcedureClicked" IconImageSource="add_icon.png" />
+        <ToolbarItem Text="Dodaj" Clicked="OnAddProcedureClicked" IconImageSource="addicon.png" />
     </ContentPage.ToolbarItems>
 
     <!-- Add a custom visual for empty state -->

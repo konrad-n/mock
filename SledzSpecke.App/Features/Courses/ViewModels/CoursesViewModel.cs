@@ -12,23 +12,24 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
         private readonly ISpecializationService specializationService;
 
         [ObservableProperty]
-        private ModuleType _currentModule = ModuleType.Basic;
+        private ModuleType currentModule = ModuleType.Basic;
 
         [ObservableProperty]
         private Specialization specialization;
 
         [ObservableProperty]
-        private bool _isModuleBasicSelected = true;
+        private bool isModuleBasicSelected = true;
 
         [ObservableProperty]
-        private bool _isModuleSpecialisticSelected = false;
+        private bool isModuleSpecialisticSelected = false;
 
         [ObservableProperty]
-        private bool _noCoursesVisible = false;
+        private bool noCoursesVisible = false;
 
         public CoursesViewModel(
             ISpecializationService specializationService,
-            ILogger<CoursesViewModel> logger) : base(logger)
+            ILogger<CoursesViewModel> logger)
+            : base(logger)
         {
             this.specializationService = specializationService;
             this.Title = "Kursy";
@@ -72,7 +73,10 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 
         public List<Course> GetFilteredCourses()
         {
-            if (this.Specialization == null) return new List<Course>();
+            if (this.Specialization == null)
+            {
+                return new List<Course>();
+            }
 
             return this.Specialization.RequiredCourses
                 .Where(c => c.Module == this.CurrentModule)

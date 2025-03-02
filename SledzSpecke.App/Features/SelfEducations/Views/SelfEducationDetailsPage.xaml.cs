@@ -6,15 +6,15 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
 {
     public partial class SelfEducationDetailsPage : BaseContentPage
     {
+        private readonly SelfEducation selfEducation;
+        private readonly Action<SelfEducation> onSaveCallback;
         private SelfEducationDetailsViewModel viewModel;
-        private readonly SelfEducation _selfEducation;
-        private readonly Action<SelfEducation> _onSaveCallback;
 
         public SelfEducationDetailsPage(SelfEducation selfEducation, Action<SelfEducation> onSaveCallback)
         {
             this.InitializeComponent();
-            this._selfEducation = selfEducation;
-            this._onSaveCallback = onSaveCallback;
+            this.selfEducation = selfEducation;
+            this.onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
@@ -22,9 +22,11 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             try
             {
                 this.viewModel = this.GetRequiredService<SelfEducationDetailsViewModel>();
-                // Najpierw inicjalizujemy ViewModel
-                this.viewModel.Initialize(this._selfEducation, this._onSaveCallback);
-                // Dopiero potem ustawiamy BindingContext
+
+                // Najpierw ViewModel
+                this.viewModel.Initialize(this.selfEducation, this.onSaveCallback);
+
+                // Dopiero potem BindingContext
                 this.BindingContext = this.viewModel;
             }
             catch (Exception ex)

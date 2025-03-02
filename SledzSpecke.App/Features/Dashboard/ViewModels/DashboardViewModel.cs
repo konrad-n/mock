@@ -13,95 +13,96 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
         private readonly ISpecializationService specializationService;
         private readonly ISpecializationDateCalculator specializationDateCalculator;
         private readonly IDutyShiftService dutyShiftService;
-        private readonly ISelfEducationService _selfEducationService;
+        private readonly ISelfEducationService selfEducationService;
         private Specialization specialization;
 
         [ObservableProperty]
-        private string _startDateLabel;
+        private string startDateLabel;
 
         [ObservableProperty]
-        private string _plannedEndDateLabel;
+        private string plannedEndDateLabel;
 
         [ObservableProperty]
-        private string _actualEndDateLabel;
+        private string actualEndDateLabel;
 
         [ObservableProperty]
-        private string _daysLeftLabel;
+        private string daysLeftLabel;
 
         [ObservableProperty]
-        private string _currentStageLabel;
+        private string currentStageLabel;
 
         [ObservableProperty]
-        private double _totalProgressBarValue;
+        private double totalProgressBarValue;
 
         [ObservableProperty]
-        private string _totalProgressLabel;
+        private string totalProgressLabel;
 
         [ObservableProperty]
-        private double _basicModuleProgressBarValue;
+        private double basicModuleProgressBarValue;
 
         [ObservableProperty]
-        private string _basicModuleProgressLabel;
+        private string basicModuleProgressLabel;
 
         [ObservableProperty]
-        private double _specialisticModuleProgressBarValue;
+        private double specialisticModuleProgressBarValue;
 
         [ObservableProperty]
-        private string _specialisticModuleProgressLabel;
+        private string specialisticModuleProgressLabel;
 
         [ObservableProperty]
-        private string _coursesLabel;
+        private string coursesLabel;
 
         [ObservableProperty]
-        private string _internshipsLabel;
+        private string internshipsLabel;
 
         [ObservableProperty]
-        private string _proceduresALabel;
+        private string proceduresALabel;
 
         [ObservableProperty]
-        private string _proceduresBLabel;
+        private string proceduresBLabel;
 
         [ObservableProperty]
-        private string _dutyShiftsLabel;
+        private string dutyShiftsLabel;
 
         [ObservableProperty]
-        private string _selfEducationLabel;
+        private string selfEducationLabel;
 
         [ObservableProperty]
-        private string _upcomingEvent1;
+        private string upcomingEvent1;
 
         [ObservableProperty]
-        private string _upcomingEvent2;
+        private string upcomingEvent2;
 
         [ObservableProperty]
-        private string _upcomingEvent3;
+        private string upcomingEvent3;
 
         [ObservableProperty]
-        private bool _upcomingEvent2Visible;
+        private bool upcomingEvent2Visible;
 
         [ObservableProperty]
-        private bool _upcomingEvent3Visible;
+        private bool upcomingEvent3Visible;
 
         [ObservableProperty]
-        private Color _upcomingEvent1Color;
+        private Color upcomingEvent1Color;
 
         [ObservableProperty]
-        private Color _upcomingEvent2Color;
+        private Color upcomingEvent2Color;
 
         [ObservableProperty]
-        private Color _upcomingEvent3Color;
+        private Color upcomingEvent3Color;
 
         public DashboardViewModel(
             ISpecializationService specializationService,
             ISpecializationDateCalculator specializationDateCalculator,
             IDutyShiftService dutyShiftService,
             ISelfEducationService selfEducationService,
-            ILogger<DashboardViewModel> logger) : base(logger)
+            ILogger<DashboardViewModel> logger)
+            : base(logger)
         {
             this.specializationService = specializationService;
             this.specializationDateCalculator = specializationDateCalculator;
             this.dutyShiftService = dutyShiftService;
-            this._selfEducationService = selfEducationService;
+            this.selfEducationService = selfEducationService;
 
             this.Title = "Dashboard";
         }
@@ -171,16 +172,16 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             // Ogólny postęp
             var totalProgress = this.specialization.GetCompletionPercentage() / 100;
             this.TotalProgressBarValue = totalProgress;
-            this.TotalProgressLabel = $"{(totalProgress * 100):F0}% ukończono";
+            this.TotalProgressLabel = $"{totalProgress * 100:F0}% ukończono";
 
             // Postęp modułów
             var basicModuleProgress = this.GetBasicModuleProgress();
             this.BasicModuleProgressBarValue = basicModuleProgress;
-            this.BasicModuleProgressLabel = $"{(basicModuleProgress * 100):F0}%";
+            this.BasicModuleProgressLabel = $"{basicModuleProgress * 100:F0}%";
 
             var specialisticModuleProgress = this.GetSpecialisticModuleProgress();
             this.SpecialisticModuleProgressBarValue = specialisticModuleProgress;
-            this.SpecialisticModuleProgressLabel = $"{(specialisticModuleProgress * 100):F0}%";
+            this.SpecialisticModuleProgressLabel = $"{specialisticModuleProgress * 100:F0}%";
 
             // Statystyki kategorii
             var completedCourses = this.specialization.RequiredCourses.Count(c => c.IsCompleted);
@@ -204,7 +205,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             var requiredDutyHours = this.specialization.RequiredDutyHoursPerWeek * (this.specialization.BaseDurationWeeks / 52.0) * 52;
             this.DutyShiftsLabel = $"{totalDutyHours:F1}/{requiredDutyHours:F0} godzin";
 
-            var totalSelfEducationDays = await this._selfEducationService.GetTotalUsedDaysAsync();
+            var totalSelfEducationDays = await this.selfEducationService.GetTotalUsedDaysAsync();
             var totalAllowedDays = this.specialization.SelfEducationDaysPerYear * 3; // 3 years typical
             this.SelfEducationLabel = $"{totalSelfEducationDays}/{totalAllowedDays} dni";
 
@@ -288,7 +289,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             // Add courses
             foreach (var course in this.specialization.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
             {
-                if (course.ScheduledDate.Value >= today)
+                if (course.ScheduledDate!.Value >= today)
                 {
                     upcomingEvents.Add((
                         course.ScheduledDate.Value,
@@ -301,7 +302,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             // Add internships
             foreach (var internship in this.specialization.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
             {
-                if (internship.StartDate.Value >= today)
+                if (internship.StartDate!.Value >= today)
                 {
                     upcomingEvents.Add((
                         internship.StartDate.Value,

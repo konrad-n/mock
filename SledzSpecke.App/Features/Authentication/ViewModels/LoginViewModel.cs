@@ -15,16 +15,16 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         private readonly IServiceProvider serviceProvider;
 
         [ObservableProperty]
-        private string _email;
+        private string email;
 
         [ObservableProperty]
-        private string _password;
+        private string password;
 
         [ObservableProperty]
-        private bool _isLoading;
+        private bool isLoading;
 
         [ObservableProperty]
-        private string _errorMessage;
+        private string errorMessage;
 
         public LoginViewModel(
             IAuthenticationService authenticationService,

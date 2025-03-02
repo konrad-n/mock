@@ -34,7 +34,7 @@ namespace SledzSpecke.Core.Models
 
         public bool SplitDutyHoursAndMinutes { get; set; } = true;
 
-        public string ExportFileName => $"SMK_Export_{DateTime.Now:yyyyMMdd}";
+        public string ExportFileName => $"SMKexport_{DateTime.Now:yyyyMMdd}";
 
         public string FullExportFileName => this.ExportFileName + (this.Format == ExportFormat.Excel ? ".xlsx" : ".csv");
     }

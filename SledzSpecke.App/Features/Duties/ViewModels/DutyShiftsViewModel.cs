@@ -14,33 +14,52 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         private readonly IDutyShiftService dutyShiftService;
         private readonly ISpecializationService specializationService;
         private Specialization specialization;
-        private double _totalRequiredHours;
+        private double totalRequiredHours;
 
         [ObservableProperty]
-        private ObservableCollection<DutyShift> _dutyShifts;
+        private ObservableCollection<DutyShift> dutyShifts;
 
         [ObservableProperty]
-        private string _totalHoursLabel;
+        private string totalHoursLabel;
 
         [ObservableProperty]
-        private string _weeklyHoursLabel;
+        private string weeklyHoursLabel;
 
         [ObservableProperty]
-        private bool _isNoDutyShiftsVisible;
+        private bool isNoDutyShiftsVisible;
 
         [ObservableProperty]
-        private ObservableCollection<GroupedDutyShifts> _groupedDutyShifts;
+        private ObservableCollection<GroupedDutyShifts> groupedDutyShifts;
 
         public DutyShiftsViewModel(
             IDutyShiftService dutyShiftService,
             ISpecializationService specializationService,
-            ILogger<DutyShiftsViewModel> logger) : base(logger)
+            ILogger<DutyShiftsViewModel> logger)
+            : base(logger)
         {
             this.dutyShiftService = dutyShiftService;
             this.specializationService = specializationService;
             this.DutyShifts = new ObservableCollection<DutyShift>();
             this.GroupedDutyShifts = new ObservableCollection<GroupedDutyShifts>();
             this.Title = "Dyżury";
+        }
+
+        [RelayCommand]
+        public async Task EditDutyShiftAsync(int dutyShiftId)
+        {
+            try
+            {
+                var dutyShift = await this.dutyShiftService.GetDutyShiftAsync(dutyShiftId);
+                if (dutyShift != null)
+                {
+                    await Shell.Current.Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, this.OnDutyShiftSaved));
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error navigating to edit duty shift page");
+                throw;
+            }
         }
 
         public override async Task InitializeAsync()
@@ -65,12 +84,12 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 // Get all duty shifts from the database
-                var dutyShifts = await this.dutyShiftService.GetAllDutyShiftsAsync();
-                this.DutyShifts = new ObservableCollection<DutyShift>(dutyShifts);
+                var allDutyShifts = await this.dutyShiftService.GetAllDutyShiftsAsync();
+                this.DutyShifts = new ObservableCollection<DutyShift>(allDutyShifts);
 
                 // Get specialization for required hours
                 this.specialization = await this.specializationService.GetSpecializationAsync();
-                this._totalRequiredHours = this.specialization.RequiredDutyHoursPerWeek * (this.specialization.BaseDurationWeeks / 52.0) * 52;
+                this.totalRequiredHours = this.specialization.RequiredDutyHoursPerWeek * (this.specialization.BaseDurationWeeks / 52.0) * 52;
 
                 // Get weekly average
                 double weeklyAverage = this.CalculateWeeklyAverage();
@@ -97,12 +116,16 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 if (this.DutyShifts == null || this.DutyShifts.Count == 0)
+                {
                     return 0;
+                }
 
                 // Count actual weeks with duties
                 var dates = this.DutyShifts.Select(d => d.StartDate.Date).Distinct().OrderBy(d => d).ToList();
                 if (dates.Count == 0)
+                {
                     return 0;
+                }
 
                 DateTime firstDate = dates.First();
                 DateTime lastDate = dates.Last();
@@ -128,12 +151,12 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             try
             {
                 double totalHours = this.DutyShifts?.Sum(d => d.DurationHours) ?? 0;
-                this.TotalHoursLabel = $"{totalHours:F1}/{this._totalRequiredHours:F0} godzin";
+                this.TotalHoursLabel = $"{totalHours:F1}/{this.totalRequiredHours:F0} godzin";
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error updating total hours");
-                this.TotalHoursLabel = $"0.0/{this._totalRequiredHours:F0} godzin";
+                this.TotalHoursLabel = $"0.0/{this.totalRequiredHours:F0} godzin";
             }
         }
 
@@ -157,8 +180,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     var totalHours = monthGroup.Sum(d => d.DurationHours);
                     var subtitle = $"Łącznie: {totalHours:F1} godzin";
 
-                    var groupedDutyShifts = new GroupedDutyShifts(title, subtitle, new ObservableCollection<DutyShift>(monthGroup));
-                    this.GroupedDutyShifts.Add(groupedDutyShifts);
+                    var groupedDutyShiftsWithMonthGroup = new GroupedDutyShifts(title, subtitle, new ObservableCollection<DutyShift>(monthGroup));
+                    this.GroupedDutyShifts.Add(groupedDutyShiftsWithMonthGroup);
                 }
             }
             catch (Exception ex)
@@ -208,36 +231,6 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 this.logger.LogError(ex, "Error saving duty shift");
                 throw;
             }
-        }
-
-        [RelayCommand]
-        public async Task EditDutyShiftAsync(int dutyShiftId)
-        {
-            try
-            {
-                var dutyShift = await this.dutyShiftService.GetDutyShiftAsync(dutyShiftId);
-                if (dutyShift != null)
-                {
-                    await Shell.Current.Navigation.PushAsync(new DutyShiftDetailsPage(dutyShift, this.OnDutyShiftSaved));
-                }
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Error navigating to edit duty shift page");
-                throw;
-            }
-        }
-    }
-
-    public class GroupedDutyShifts : ObservableCollection<DutyShift>
-    {
-        public string Title { get; private set; }
-        public string Subtitle { get; private set; }
-
-        public GroupedDutyShifts(string title, string subtitle, ObservableCollection<DutyShift> items) : base(items)
-        {
-            this.Title = title;
-            this.Subtitle = subtitle;
         }
     }
 }

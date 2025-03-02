@@ -9,45 +9,45 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 {
     public partial class DutyShiftDetailsViewModel : ViewModelBase
     {
-        private Func<DutyShift, Task> _onSaveCallback;
-        private DutyShift _dutyShift;
-        private bool _isNewDutyShift = false;
+        private Func<DutyShift, Task> onSaveCallback;
+        private DutyShift dutyShift;
+        private bool isNewDutyShift = false;
 
         [ObservableProperty]
-        private string _pageTitle;
+        private string pageTitle;
 
         [ObservableProperty]
-        private DateTime _startDate = DateTime.Now;
+        private DateTime startDate = DateTime.Now;
 
         [ObservableProperty]
-        private TimeSpan _startTime = new TimeSpan(8, 0, 0); // 8:00 AM
+        private TimeSpan startTime = new TimeSpan(8, 0, 0); // 8:00 AM
 
         [ObservableProperty]
-        private DateTime _endDate = DateTime.Now.AddDays(1);
+        private DateTime endDate = DateTime.Now.AddDays(1);
 
         [ObservableProperty]
-        private TimeSpan _endTime = new TimeSpan(8, 0, 0); // 8:00 AM next day
+        private TimeSpan endTime = new TimeSpan(8, 0, 0); // 8:00 AM next day
 
         [ObservableProperty]
-        private string _durationText = "24 godziny";
+        private string durationText = "24 godziny";
 
         [ObservableProperty]
-        private string _location = string.Empty;
+        private string location = string.Empty;
 
         [ObservableProperty]
-        private string _departmentName = string.Empty; // For SMK
+        private string departmentName = string.Empty; // For SMK
 
         [ObservableProperty]
-        private string _supervisorName = string.Empty;
+        private string supervisorName = string.Empty;
 
         [ObservableProperty]
-        private string _notes = string.Empty;
+        private string notes = string.Empty;
 
         [ObservableProperty]
-        private bool _isSupervisorVisible;
+        private bool isSupervisorVisible;
 
         [ObservableProperty]
-        private int _dutyTypeSelectedIndex;
+        private int dutyTypeSelectedIndex;
 
         public DutyShiftDetailsViewModel(ILogger<DutyShiftDetailsViewModel> logger) : base(logger)
         {
@@ -56,18 +56,18 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
         public void Initialize(DutyShift dutyShift, Func<DutyShift, Task> onSaveCallback)
         {
-            this._onSaveCallback = onSaveCallback;
+            this.onSaveCallback = onSaveCallback;
 
             if (dutyShift == null)
             {
                 // New duty shift
-                this._isNewDutyShift = true;
-                this._dutyShift = new DutyShift
+                this.isNewDutyShift = true;
+                this.dutyShift = new DutyShift
                 {
                     StartDate = DateTime.Now.Date.Add(this.StartTime),
                     EndDate = DateTime.Now.Date.AddDays(1).Add(this.EndTime),
                     DurationHours = 24,
-                    Type = DutyType.Independent
+                    Type = DutyType.Independent,
                 };
                 this.PageTitle = "Dodaj dyżur";
                 this.DutyTypeSelectedIndex = 0; // Independent
@@ -76,8 +76,8 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             else
             {
                 // Edit existing duty shift
-                this._isNewDutyShift = false;
-                this._dutyShift = dutyShift;
+                this.isNewDutyShift = false;
+                this.dutyShift = dutyShift;
                 this.PageTitle = "Edytuj dyżur";
 
                 this.StartDate = dutyShift.StartDate.Date;
@@ -97,26 +97,12 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             }
         }
 
-        [RelayCommand]
-        private void UpdateDutyType(int index)
-        {
-            // Sprawdź czy _dutyShift nie jest null
-            if (this._dutyShift == null)
-            {
-                this.logger?.LogWarning("Próba aktualizacji typu dyżuru gdy _dutyShift jest null");
-                return;
-            }
-
-            this._dutyShift.Type = index == 0 ? DutyType.Independent : DutyType.Accompanied;
-            this.IsSupervisorVisible = this._dutyShift.Type == DutyType.Accompanied;
-        }
-
         public void UpdateDurationText()
         {
             try
             {
-                // Sprawdź czy _dutyShift nie jest null
-                if (this._dutyShift == null)
+                // Sprawdź czy dutyShift nie jest null
+                if (this.dutyShift == null)
                 {
                     this.DurationText = "Wczytywanie...";
                     return;
@@ -157,7 +143,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     });
                 }
 
-                this._dutyShift.DurationHours = duration.TotalHours;
+                this.dutyShift.DurationHours = duration.TotalHours;
 
                 // Format according to SMK requirements - split into hours and minutes
                 int hours = (int)Math.Floor(duration.TotalHours);
@@ -181,6 +167,20 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 this.logger.LogError(ex, "Error updating duration text");
                 this.DurationText = "Błąd obliczania czasu";
             }
+        }
+
+        [RelayCommand]
+        private void UpdateDutyType(int index)
+        {
+            // Sprawdź czy dutyShift nie jest null
+            if (this.dutyShift == null)
+            {
+                this.logger?.LogWarning("Próba aktualizacji typu dyżuru gdy dutyShift jest null");
+                return;
+            }
+
+            this.dutyShift.Type = index == 0 ? DutyType.Independent : DutyType.Accompanied;
+            this.IsSupervisorVisible = this.dutyShift.Type == DutyType.Accompanied;
         }
 
         [RelayCommand]
@@ -211,7 +211,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                 }
 
                 // For accompanied type, supervisor is required
-                if (this._dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(this.SupervisorName))
+                if (this.dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
                     await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla dyżuru towarzyszącego.", "OK");
                     return;
@@ -227,18 +227,18 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     DepartmentName = this.DepartmentName,
                     SupervisorName = this.SupervisorName,
                     Notes = this.Notes,
-                    Type = this._dutyShift.Type
+                    Type = this.dutyShift.Type,
                 };
 
                 // Only set the ID if we're editing an existing duty shift
-                if (!this._isNewDutyShift)
+                if (!this.isNewDutyShift)
                 {
-                    dutyShiftToSave.Id = this._dutyShift.Id;
+                    dutyShiftToSave.Id = this.dutyShift.Id;
                 }
 
-                if (this._onSaveCallback != null)
+                if (this.onSaveCallback != null)
                 {
-                    await this._onSaveCallback(dutyShiftToSave);
+                    await this.onSaveCallback(dutyShiftToSave);
                 }
                 await Shell.Current.Navigation.PopAsync();
             }

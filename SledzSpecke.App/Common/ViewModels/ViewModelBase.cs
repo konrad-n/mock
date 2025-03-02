@@ -8,10 +8,10 @@ namespace SledzSpecke.App.Common.ViewModels
         protected readonly ILogger logger;
 
         [ObservableProperty]
-        private bool _isBusy;
+        private bool isBusy;
 
         [ObservableProperty]
-        private string _title;
+        private string title;
 
         protected ViewModelBase(ILogger logger)
         {

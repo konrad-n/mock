@@ -77,6 +77,6 @@
     </Grid>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Dodaj" Clicked="OnAddCourseClicked" IconImageSource="add_icon.png" />
+        <ToolbarItem Text="Dodaj" Clicked="OnAddCourseClicked" IconImageSource="addicon.png" />
     </ContentPage.ToolbarItems>
 </common:BaseContentPage>

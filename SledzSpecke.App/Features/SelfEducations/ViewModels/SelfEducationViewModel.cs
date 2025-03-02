@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -6,37 +7,51 @@ using SledzSpecke.App.Features.SelfEducations.Views;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
-using System.Collections.ObjectModel;
 
 namespace SledzSpecke.App.Features.SelfEducations.ViewModels
 {
     public partial class SelfEducationViewModel : ViewModelBase
     {
-        private readonly ISelfEducationService _selfEducationService;
+        private readonly ISelfEducationService selfEducationService;
 
         [ObservableProperty]
-        private ObservableCollection<SelfEducation> _selfEducationList;
+        private ObservableCollection<SelfEducation> selfEducationList;
 
         [ObservableProperty]
-        private ObservableCollection<YearlyEducationGroup> _educationByYear;
+        private ObservableCollection<YearlyEducationGroup> educationByYear;
 
         [ObservableProperty]
-        private string _usedDaysLabel;
+        private string usedDaysLabel;
 
         [ObservableProperty]
-        private string _yearlyDaysLabel;
+        private string yearlyDaysLabel;
 
         [ObservableProperty]
-        private bool _noEventsVisible;
+        private bool noEventsVisible;
 
         public SelfEducationViewModel(
             ISelfEducationService selfEducationService,
-            ILogger<SelfEducationViewModel> logger) : base(logger)
+            ILogger<SelfEducationViewModel> logger)
+            : base(logger)
         {
-            this._selfEducationService = selfEducationService;
+            this.selfEducationService = selfEducationService;
             this.SelfEducationList = new ObservableCollection<SelfEducation>();
             this.EducationByYear = new ObservableCollection<YearlyEducationGroup>();
             this.Title = "Samokształcenie";
+        }
+
+        public static string GetSelfEducationTypeName(SelfEducationType type)
+        {
+            return type switch
+            {
+                SelfEducationType.Conference => "Konferencja",
+                SelfEducationType.Workshop => "Warsztaty",
+                SelfEducationType.Course => "Kurs",
+                SelfEducationType.ScientificMeeting => "Spotkanie naukowe",
+                SelfEducationType.Publication => "Publikacja",
+                SelfEducationType.Other => "Inne",
+                _ => "Nieznany"
+            };
         }
 
         public override async Task InitializeAsync()
@@ -44,7 +59,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             try
             {
                 this.IsBusy = true;
-                await  this.LoadDataAsync();
+                await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
@@ -61,18 +76,18 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             try
             {
                 // Get all self-education events
-                var events = await this._selfEducationService.GetAllSelfEducationAsync();
+                var events = await this.selfEducationService.GetAllSelfEducationAsync();
                 this.SelfEducationList = new ObservableCollection<SelfEducation>(events);
 
                 // Update used days label
-                var totalUsedDays = await this._selfEducationService.GetTotalUsedDaysAsync();
-                var yearlyAllowance = await this._selfEducationService.GetYearlyAllowanceAsync();
+                var totalUsedDays = await this.selfEducationService.GetTotalUsedDaysAsync();
+                var yearlyAllowance = await this.selfEducationService.GetYearlyAllowanceAsync();
                 var totalAllowedDays = yearlyAllowance * 3; // 3 years typical
                 this.UsedDaysLabel = $"{totalUsedDays}/{totalAllowedDays}";
 
                 // Get yearly used days and update label
                 var currentYear = DateTime.Now.Year;
-                var yearlyUsedDays = await this._selfEducationService.GetYearlyUsedDaysAsync();
+                var yearlyUsedDays = await this.selfEducationService.GetYearlyUsedDaysAsync();
                 var usedDaysThisYear = yearlyUsedDays.ContainsKey(currentYear) ? yearlyUsedDays[currentYear] : 0;
                 this.YearlyDaysLabel = $"{usedDaysThisYear} dni";
 
@@ -139,7 +154,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 this.SelfEducationList.Add(selfEducation);
 
                 // Save to database
-                this._selfEducationService.SaveSelfEducationAsync(selfEducation);
+                this.selfEducationService.SaveSelfEducationAsync(selfEducation);
 
                 // Refresh view
                 this.LoadDataAsync().ConfigureAwait(false);
@@ -162,7 +177,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 }
 
                 // Save to database
-                this._selfEducationService.SaveSelfEducationAsync(selfEducation);
+                this.selfEducationService.SaveSelfEducationAsync(selfEducation);
 
                 // Refresh view
                 this.LoadDataAsync().ConfigureAwait(false);
@@ -171,36 +186,6 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             {
                 this.logger.LogError(ex, "Error updating self-education event");
             }
-        }
-
-        public string GetSelfEducationTypeName(SelfEducationType type)
-        {
-            return type switch
-            {
-                SelfEducationType.Conference => "Konferencja",
-                SelfEducationType.Workshop => "Warsztaty",
-                SelfEducationType.Course => "Kurs",
-                SelfEducationType.ScientificMeeting => "Spotkanie naukowe",
-                SelfEducationType.Publication => "Publikacja",
-                SelfEducationType.Other => "Inne",
-                _ => "Nieznany"
-            };
-        }
-    }
-
-    public class YearlyEducationGroup : ObservableCollection<SelfEducation>
-    {
-        public int Year { get; private set; }
-        public int TotalDays { get; private set; }
-        public string Header { get; private set; }
-        public string Summary { get; private set; }
-
-        public YearlyEducationGroup(int year, int totalDays, ObservableCollection<SelfEducation> items) : base(items)
-        {
-            this.Year = year;
-            this.TotalDays = totalDays;
-            this.Header = $"Rok {year}";
-            this.Summary = $"Wykorzystano: {totalDays}/6 dni";
         }
     }
 }

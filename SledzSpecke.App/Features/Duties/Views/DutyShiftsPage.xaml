@@ -92,6 +92,6 @@
     </Grid>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Dodaj" Command="{Binding AddDutyShiftCommand}" IconImageSource="add_icon.png" />
+        <ToolbarItem Text="Dodaj" Command="{Binding AddDutyShiftCommand}" IconImageSource="addicon.png" />
     </ContentPage.ToolbarItems>
 </common:BaseContentPage>

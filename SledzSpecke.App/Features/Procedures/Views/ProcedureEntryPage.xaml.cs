@@ -7,9 +7,9 @@ namespace SledzSpecke.App.Features.Procedures.Views
 {
     public partial class ProcedureEntryPage : BaseContentPage
     {
+        private readonly MedicalProcedure procedure;
+        private readonly Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback;
         private ProcedureEntryViewModel viewModel;
-        private readonly MedicalProcedure _procedure;
-        private readonly Func<MedicalProcedure, ProcedureEntry, Task> _onSaveCallback;
 
         public ProcedureEntryPage(
             IDatabaseService databaseService,
@@ -17,8 +17,8 @@ namespace SledzSpecke.App.Features.Procedures.Views
             Func<MedicalProcedure, ProcedureEntry, Task> onSaveCallback)
         {
             this.InitializeComponent();
-            this._procedure = procedure;
-            this._onSaveCallback = onSaveCallback;
+            this.procedure = procedure;
+            this.onSaveCallback = onSaveCallback;
         }
 
         protected override async Task InitializePageAsync()
@@ -29,7 +29,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
                 this.BindingContext = this.viewModel;
 
                 // Initialize ViewModel with procedure and callback
-                this.viewModel.Initialize(this._procedure, this._onSaveCallback);
+                this.viewModel.Initialize(this.procedure, this.onSaveCallback);
             }
             catch (Exception ex)
             {

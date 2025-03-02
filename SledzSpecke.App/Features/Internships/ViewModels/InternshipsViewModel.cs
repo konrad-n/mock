@@ -18,33 +18,39 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         private Specialization specialization;
 
         [ObservableProperty]
-        private ModuleType _currentModule = ModuleType.Basic;
+        private ModuleType currentModule = ModuleType.Basic;
 
         [ObservableProperty]
-        private ObservableCollection<Internship> _internships;
+        private ObservableCollection<Internship> internships;
 
         [ObservableProperty]
-        private bool _isNoInternshipsVisible;
+        private bool isNoInternshipsVisible;
 
         [ObservableProperty]
-        private Color _basicModuleButtonBackgroundColor = new Color(8, 32, 68);
+        private Color basicModuleButtonBackgroundColor = new Color(8, 32, 68);
 
         [ObservableProperty]
-        private Color _basicModuleButtonTextColor = Colors.White;
+        private Color basicModuleButtonTextColor = Colors.White;
 
         [ObservableProperty]
-        private Color _specialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
+        private Color specialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
 
         [ObservableProperty]
-        private Color _specialisticModuleButtonTextColor = Colors.Black;
+        private Color specialisticModuleButtonTextColor = Colors.Black;
 
         public InternshipsViewModel(
             ISpecializationService specializationService,
-            ILogger<InternshipsViewModel> logger) : base(logger)
+            ILogger<InternshipsViewModel> logger)
+            : base(logger)
         {
             this.specializationService = specializationService;
             this.Internships = new ObservableCollection<Internship>();
             this.Title = "Staże";
+        }
+
+        public static bool IsCurrentInternship(Internship internship)
+        {
+            return internship.StartDate.HasValue && !internship.EndDate.HasValue;
         }
 
         public override async Task InitializeAsync()
@@ -92,21 +98,57 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             this.IsNoInternshipsVisible = this.Internships.Count == 0;
         }
 
-        private void UpdateModuleButtons()
+        public Color GetInternshipStatusColor(Internship internship)
         {
-            if (this.CurrentModule == ModuleType.Basic)
+            if (internship.IsCompleted)
             {
-                this.BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
-                this.BasicModuleButtonTextColor = Colors.White;
-                this.SpecialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
-                this.SpecialisticModuleButtonTextColor = Colors.Black;
+                return Colors.Green;
             }
-            else
+
+            if (IsCurrentInternship(internship))
             {
-                this.BasicModuleButtonBackgroundColor = new Color(228, 240, 245);
-                this.BasicModuleButtonTextColor = Colors.Black;
-                this.SpecialisticModuleButtonBackgroundColor = new Color(8, 32, 68);
-                this.SpecialisticModuleButtonTextColor = Colors.White;
+                return Colors.Blue;
+            }
+
+            if (internship.StartDate.HasValue)
+            {
+                return Colors.Orange;
+            }
+
+            return new Color(84, 126, 158);
+        }
+
+        public string GetInternshipStatusText(Internship internship)
+        {
+            if (internship.IsCompleted)
+            {
+                return "Ukończony";
+            }
+
+            if (IsCurrentInternship(internship))
+            {
+                return $"W trakcie od: {internship.StartDate?.ToString("dd.MM.yyyy")}";
+            }
+
+            if (internship.StartDate.HasValue)
+            {
+                return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";
+            }
+
+            return "Oczekujący";
+        }
+
+        private async Task OnInternshipAdded(Internship internship)
+        {
+            try
+            {
+                await this.specializationService.SaveInternshipAsync(internship);
+                await this.LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error adding internship");
+                throw;
             }
         }
 
@@ -138,20 +180,6 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             }
         }
 
-        private async Task OnInternshipAdded(Internship internship)
-        {
-            try
-            {
-                await this.specializationService.SaveInternshipAsync(internship);
-                await this.LoadDataAsync();
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Error adding internship");
-                throw;
-            }
-        }
-
         private async Task OnInternshipUpdated(Internship internship)
         {
             try
@@ -166,31 +194,22 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
             }
         }
 
-        public bool IsCurrentInternship(Internship internship)
+        private void UpdateModuleButtons()
         {
-            return internship.StartDate.HasValue && !internship.EndDate.HasValue;
-        }
-
-        public Color GetInternshipStatusColor(Internship internship)
-        {
-            if (internship.IsCompleted)
-                return Colors.Green;
-            if (this.IsCurrentInternship(internship))
-                return Colors.Blue;
-            if (internship.StartDate.HasValue)
-                return Colors.Orange;
-            return new Color(84, 126, 158);
-        }
-
-        public string GetInternshipStatusText(Internship internship)
-        {
-            if (internship.IsCompleted)
-                return "Ukończony";
-            if (this.IsCurrentInternship(internship))
-                return $"W trakcie od: {internship.StartDate?.ToString("dd.MM.yyyy")}";
-            if (internship.StartDate.HasValue)
-                return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";
-            return "Oczekujący";
+            if (this.CurrentModule == ModuleType.Basic)
+            {
+                this.BasicModuleButtonBackgroundColor = new Color(8, 32, 68);
+                this.BasicModuleButtonTextColor = Colors.White;
+                this.SpecialisticModuleButtonBackgroundColor = new Color(228, 240, 245);
+                this.SpecialisticModuleButtonTextColor = Colors.Black;
+            }
+            else
+            {
+                this.BasicModuleButtonBackgroundColor = new Color(228, 240, 245);
+                this.BasicModuleButtonTextColor = Colors.Black;
+                this.SpecialisticModuleButtonBackgroundColor = new Color(8, 32, 68);
+                this.SpecialisticModuleButtonTextColor = Colors.White;
+            }
         }
     }
 }
