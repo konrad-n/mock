@@ -8,7 +8,7 @@
           Title="{Binding Title}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Header Section with Shadow -->
+            
             <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10" 
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                    Margin="0,0,0,10">
@@ -30,7 +30,7 @@
                             </VerticalStackLayout>
                         </Frame>
 
-                        <!-- Zmodyfikowany kafel z terminami zakończenia -->
+                        
                         <Frame BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                                BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#0D365B}"
                                Padding="15" Grid.Column="1" Grid.Row="0" CornerRadius="8">
@@ -74,7 +74,7 @@
                 </Grid>
             </Frame>
 
-            <!-- Progress Section with Enhanced Visuals -->
+            
             <Frame BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                 <VerticalStackLayout Spacing="15">
@@ -117,12 +117,12 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Categories Grid with Enhanced Visual Appeal -->
+            
             <Label Text="Kategorie" FontSize="20" FontAttributes="Bold" Margin="10,0,0,0"
                    TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="15" RowSpacing="15">
-                <!-- Courses -->
+                
                 <Frame Grid.Column="0" Grid.Row="0" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                     <VerticalStackLayout Spacing="8">
@@ -140,7 +140,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <!-- Internships -->
+                
                 <Frame Grid.Column="1" Grid.Row="0" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                     <VerticalStackLayout Spacing="8">
@@ -158,7 +158,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <!-- Procedures A -->
+                
                 <Frame Grid.Column="0" Grid.Row="1" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                     <VerticalStackLayout Spacing="8">
@@ -176,7 +176,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <!-- Procedures B -->
+                
                 <Frame Grid.Column="1" Grid.Row="1" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                     <VerticalStackLayout Spacing="8">
@@ -194,7 +194,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <!-- Duty Shifts -->
+                
                 <Frame Grid.Column="0" Grid.Row="2" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                     <VerticalStackLayout Spacing="8">
@@ -212,7 +212,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <!-- Self Education -->
+                
                 <Frame Grid.Column="1" Grid.Row="2" BorderColor="#e4f0f5" Padding="15" CornerRadius="10"
                        BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                     <VerticalStackLayout Spacing="8">
@@ -231,7 +231,7 @@
                 </Frame>
             </Grid>
 
-            <!-- Upcoming Events with Visual Enhancement -->
+            
             <Frame BorderColor="#e4f0f5" Padding="20" CornerRadius="10" Margin="0,5,0,15"
                    BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}">
                 <VerticalStackLayout Spacing="12">
@@ -239,20 +239,20 @@
                            TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
 
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
-                        <!-- Event 1 -->
+                        
                         <BoxView Grid.Row="0" Grid.Column="0" Color="#24C1DE" WidthRequest="4" HeightRequest="20" 
                                  CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,10,0"/>
                         <Label Text="{Binding UpcomingEvent1}" Grid.Row="0" Grid.Column="1"
                                TextColor="{Binding UpcomingEvent1Color}"/>
 
-                        <!-- Event 2 -->
+                        
                         <BoxView Grid.Row="1" Grid.Column="0" IsVisible="{Binding UpcomingEvent2Visible}"
                                  Color="#0D759C" WidthRequest="4" HeightRequest="20" 
                                  CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,10,0"/>
                         <Label Text="{Binding UpcomingEvent2}" Grid.Row="1" Grid.Column="1" IsVisible="{Binding UpcomingEvent2Visible}"
                                TextColor="{Binding UpcomingEvent2Color}"/>
 
-                        <!-- Event 3 -->
+                        
                         <BoxView Grid.Row="2" Grid.Column="0" IsVisible="{Binding UpcomingEvent3Visible}"
                                  Color="#FF9800" WidthRequest="4" HeightRequest="20" 
                                  CornerRadius="2" VerticalOptions="Center" HorizontalOptions="Start" Margin="0,0,10,0"/>
@@ -268,7 +268,7 @@
                 HeightRequest="45" CornerRadius="8" 
                 Margin="0,10,0,0"/>
 
-            <!-- Action Buttons with Improved Layout -->
+            
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,5,0,20">
                 <Button Grid.Column="0" Text="Raport do SMK" 
                         Command="{Binding GenerateReportCommand}" 

@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Features.Authentication.ViewModels;
+using SledzSpecke.App.Features.Authentication.ViewModels;
 
 namespace SledzSpecke.App.Features.Authentication.Views
 {
@@ -21,7 +21,7 @@ namespace SledzSpecke.App.Features.Authentication.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony logowania.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony logowania.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in LoginPage: {ex}");
             }
         }

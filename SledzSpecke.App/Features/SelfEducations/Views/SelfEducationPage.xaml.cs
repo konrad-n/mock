@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.SelfEducations.ViewModels;
 
 namespace SledzSpecke.App.Features.SelfEducations.Views
@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się załadować danych samokształcenia.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zaladowac danych samoksztalcenia.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in SelfEducationPage: {ex}");
             }
         }

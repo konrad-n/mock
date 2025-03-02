@@ -1,4 +1,4 @@
-﻿using SledzSpecke.Infrastructure.Services;
+using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.App.Services.Implementations
 {
@@ -10,3 +10,4 @@ namespace SledzSpecke.App.Services.Implementations
         }
     }
 }
+

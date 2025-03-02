@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace SledzSpecke.App.Common.Converters
 {
@@ -8,7 +8,7 @@ namespace SledzSpecke.App.Common.Converters
         {
             if (value is bool affectsSpecialization)
             {
-                return affectsSpecialization ? "Wydłuża specjalizację" : string.Empty;
+                return affectsSpecialization ? "Wydluza specjalizacje" : string.Empty;
             }
 
             return string.Empty;

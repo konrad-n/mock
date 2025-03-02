@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -65,13 +65,13 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
                 string.IsNullOrWhiteSpace(this.ConfirmPassword) ||
                 this.SpecializationSelectedIndex == -1)
             {
-                this.ErrorMessage = "Proszę wypełnić wszystkie pola formularza.";
+                this.ErrorMessage = "Prosze wypelnic wszystkie pola formularza.";
                 return;
             }
 
             if (this.Password != this.ConfirmPassword)
             {
-                this.ErrorMessage = "Hasła nie są identyczne.";
+                this.ErrorMessage = "Hasla nie sa identyczne.";
                 return;
             }
 
@@ -92,20 +92,20 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
                 {
                     await this.navigationService.DisplayAlertAsync(
                         "Sukces",
-                        "Rejestracja zakończona pomyślnie. Możesz się teraz zalogować.",
+                        "Rejestracja zakonczona pomyslnie. Mozesz sie teraz zalogowac.",
                         "OK");
 
                     await this.navigationService.PopAsync();
                 }
                 else
                 {
-                    this.ErrorMessage = "Użytkownik o podanym adresie email już istnieje.";
+                    this.ErrorMessage = "Uzytkownik o podanym adresie email juz istnieje.";
                 }
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error during registration");
-                this.ErrorMessage = $"Wystąpił problem podczas rejestracji: {ex.Message}";
+                this.ErrorMessage = $"Wystapil problem podczas rejestracji: {ex.Message}";
             }
             finally
             {
@@ -122,7 +122,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error loading specialization types");
-                this.ErrorMessage = $"Nie udało się załadować listy specjalizacji: {ex.Message}";
+                this.ErrorMessage = $"Nie udalo sie zaladowac listy specjalizacji: {ex.Message}";
             }
         }
     }

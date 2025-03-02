@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.SelfEducations.ViewModels;
 using SledzSpecke.Core.Models;
 
@@ -27,7 +27,7 @@ namespace SledzSpecke.App.Features.SelfEducations.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów wydarzenia.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony szczeg�l�w wydarzenia.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in SelfEducationDetailsPage: {ex}");
             }
         }

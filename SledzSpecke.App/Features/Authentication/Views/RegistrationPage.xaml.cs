@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Authentication.ViewModels;
 
 namespace SledzSpecke.App.Features.Authentication.Views
@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Features.Authentication.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony rejestracji.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony rejestracji.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in RegistrationPage: {ex}");
             }
         }

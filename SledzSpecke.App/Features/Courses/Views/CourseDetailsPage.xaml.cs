@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Courses.ViewModels;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
@@ -30,7 +30,7 @@ namespace SledzSpecke.App.Features.Courses.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów kursu.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony szczeg�l�w kursu.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in CourseDetailsPage: {ex}");
             }
         }

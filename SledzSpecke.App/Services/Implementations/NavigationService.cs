@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Interfaces;
 
 namespace SledzSpecke.App.Services.Implementations

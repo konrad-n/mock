@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -41,7 +41,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             this.specializationService = specializationService;
             this.DutyShifts = new ObservableCollection<DutyShift>();
             this.GroupedDutyShifts = new ObservableCollection<GroupedDutyShifts>();
-            this.Title = "Dyżury";
+            this.Title = "Dyzury";
         }
 
         [RelayCommand]
@@ -157,7 +157,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     var year = monthGroup.Key.Year;
                     var title = $"{monthName} {year}";
                     var totalHours = monthGroup.Sum(d => d.DurationHours);
-                    var subtitle = $"Łącznie: {totalHours:F1} godzin";
+                    var subtitle = $"Lacznie: {totalHours:F1} godzin";
 
                     var groupedDutyShiftsWithMonthGroup = new GroupedDutyShifts(title, subtitle, new ObservableCollection<DutyShift>(monthGroup));
                     this.GroupedDutyShifts.Add(groupedDutyShiftsWithMonthGroup);
@@ -173,18 +173,18 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             return month switch
             {
-                1 => "Styczeń",
+                1 => "Styczen",
                 2 => "Luty",
                 3 => "Marzec",
-                4 => "Kwiecień",
+                4 => "Kwiecien",
                 5 => "Maj",
                 6 => "Czerwiec",
                 7 => "Lipiec",
-                8 => "Sierpień",
-                9 => "Wrzesień",
-                10 => "Październik",
+                8 => "Sierpien",
+                9 => "Wrzesien",
+                10 => "Pazdziernik",
                 11 => "Listopad",
-                12 => "Grudzień",
+                12 => "Grudzien",
                 _ => "Nieznany"
             };
         }

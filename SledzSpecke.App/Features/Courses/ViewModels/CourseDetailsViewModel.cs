@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -41,7 +41,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 
         public CourseDetailsViewModel(ILogger<CourseDetailsViewModel> logger) : base(logger)
         {
-            this.Title = "Szczegóły kursu";
+            this.Title = "Szczeg�ly kursu";
         }
 
         public Course Course => this.course;
@@ -65,7 +65,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
             else
             {
                 this.course = course;
-                this.PageTitle = "Szczegóły kursu";
+                this.PageTitle = "Szczeg�ly kursu";
                 this.DurationDays = course.DurationDays.ToString();
                 this.ModulePickerSelectedIndex = course.Module == ModuleType.Basic ? 0 : 1;
                 if (course.IsCompleted)
@@ -119,7 +119,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 
             switch (selectedIndex)
             {
-                case 0: // Oczekujący
+                case 0: // Oczekujacy
                     this.IsDateVisible = false;
                     this.IsCompletionDateVisible = false;
                     this.IsCompletionVisible = false;
@@ -149,7 +149,7 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                     this.course.IsCompleted = false;
                     this.course.CompletionDate = null;
                     break;
-                case 3: // Ukończony
+                case 3: // Ukonczony
                     this.IsDateVisible = false;
                     this.IsCompletionDateVisible = true;
                     this.IsCompletionVisible = true;
@@ -170,13 +170,13 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                 if (fileResult != null)
                 {
                     this.course.CertificateFilePath = fileResult.FullPath;
-                    await Application.Current.MainPage.DisplayAlert("Sukces", "Plik został dodany pomyślnie.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Sukces", "Plik zostal dodany pomyslnie.", "OK");
                 }
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error adding attachment");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem z wyborem pliku: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Wystapil problem z wyborem pliku: {ex.Message}", "OK");
             }
         }
 
@@ -191,13 +191,13 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
         {
             if (string.IsNullOrWhiteSpace(this.course.Name))
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa kursu jest wymagana.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Nazwa kursu jest wymagana.", "OK");
                 return;
             }
 
             if (!int.TryParse(this.DurationDays, out int duration) || duration <= 0)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawny czas trwania kursu.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Wprowadz poprawny czas trwania kursu.", "OK");
                 return;
             }
 

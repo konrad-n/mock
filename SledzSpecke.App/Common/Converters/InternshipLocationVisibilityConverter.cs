@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Common.Converters

@@ -1,9 +1,9 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DataSeeder.cs" company="SledzSpecke">
 //   Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 // <summary>
-//   Seeder do bazy danych. Absolutne źródło wiedzy i prawdy dla całej aplikacji
+//   Seeder do bazy danych. Absolutne zr�dlo wiedzy i prawdy dla calej aplikacji
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -17,15 +17,15 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
 {
     /// <summary>
     /// Klasa do zasilenia bazy danych specjalizacjami.
-    /// Dane pochodzą z oficjalnej dokumentacji.
+    /// Dane pochodza z oficjalnej dokumentacji.
     /// </summary>
     [SuppressMessage("SonarCloud", "S1192", Justification = "DataSeeder")]
     public static class DataSeeder
     {
         /// <summary>
-        /// Zasila bazę danych specjalizacją z zakresu hematologii.
+        /// Zasila baze danych specjalizacja z zakresu hematologii.
         /// </summary>
-        /// <returns>Obiekt Specialization reprezentujący specjalizację z zakresu hematologii.</returns>
+        /// <returns>Obiekt Specialization reprezentujacy specjalizacje z zakresu hematologii.</returns>
         public static Specialization SeedHematologySpecialization()
         {
             var specialization = new Specialization
@@ -45,7 +45,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 RequiredConferences = 3,
             };
 
-            // Dodanie kursów specjalizacyjnych (moduł specjalistyczny)
+            // Dodanie kurs�w specjalizacyjnych (modul specjalistyczny)
             specialization.RequiredCourses.AddRange(new List<Course>
             {
                 new Course
@@ -59,7 +59,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 2,
-                    Name = "Badanie cytologiczne szpiku oraz histologiczne szpiku i węzłów chłonnych",
+                    Name = "Badanie cytologiczne szpiku oraz histologiczne szpiku i wezl�w chlonnych",
                     DurationDays = 5,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -75,7 +75,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 4,
-                    Name = "Diagnostyka cytogenetyczna i molekularna nowotworów krwi",
+                    Name = "Diagnostyka cytogenetyczna i molekularna nowotwor�w krwi",
                     DurationDays = 1,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -99,7 +99,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 7,
-                    Name = "Przeszczepianie komórek krwiotwórczych",
+                    Name = "Przeszczepianie kom�rek krwiotw�rczych",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -107,7 +107,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 8,
-                    Name = "Psychologiczne problemy pacjentów z chorobami krwi i układu chłonnego",
+                    Name = "Psychologiczne problemy pacjent�w z chorobami krwi i ukladu chlonnego",
                     DurationDays = 1,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -115,7 +115,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 9,
-                    Name = "Onkologia guzów litych dla hematologów",
+                    Name = "Onkologia guz�w litych dla hematolog�w",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -131,14 +131,14 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 11,
-                    Name = "Kurs atestacyjny (podsumowujący): Hematologia",
+                    Name = "Kurs atestacyjny (podsumowujacy): Hematologia",
                     DurationDays = 5,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
                 },
             });
 
-            // Dodanie kursów specjalizacyjnych (moduł podstawowy z chorób wewnętrznych)
+            // Dodanie kurs�w specjalizacyjnych (modul podstawowy z chor�b wewnetrznych)
             specialization.RequiredCourses.AddRange(new List<Course>
             {
                 new Course
@@ -200,7 +200,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 19,
-                    Name = "Przetaczanie krwi i jej składników",
+                    Name = "Przetaczanie krwi i jej skladnik�w",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Basic,
@@ -223,13 +223,13 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Dodanie staży (moduł specjalistyczny)
+            // Dodanie stazy (modul specjalistyczny)
             specialization.RequiredInternships.AddRange(new List<Internship>
             {
                 new Internship
                 {
                     Id = 1,
-                    Name = "Staż podstawowy w zakresie hematologii",
+                    Name = "Staz podstawowy w zakresie hematologii",
                     DurationWeeks = 101,
                     WorkingDays = 505,
                     IsRequired = true,
@@ -238,7 +238,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 2,
-                    Name = "Staż kierunkowy w laboratorium hematologicznym",
+                    Name = "Staz kierunkowy w laboratorium hematologicznym",
                     DurationWeeks = 4,
                     WorkingDays = 20,
                     IsRequired = true,
@@ -247,7 +247,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 3,
-                    Name = "Staż kierunkowy w ośrodku przeszczepiania szpiku akredytowanym do wykonywania przeszczepień allogenicznych",
+                    Name = "Staz kierunkowy w osrodku przeszczepiania szpiku akredytowanym do wykonywania przeszczepien allogenicznych",
                     DurationWeeks = 4,
                     WorkingDays = 20,
                     IsRequired = true,
@@ -256,7 +256,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 4,
-                    Name = "Staż kierunkowy w hematologicznym oddziale dziennego leczenia",
+                    Name = "Staz kierunkowy w hematologicznym oddziale dziennego leczenia",
                     DurationWeeks = 5,
                     WorkingDays = 25,
                     IsRequired = true,
@@ -265,7 +265,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 5,
-                    Name = "Staż kierunkowy w poradni hematologicznej",
+                    Name = "Staz kierunkowy w poradni hematologicznej",
                     DurationWeeks = 8,
                     WorkingDays = 40,
                     IsRequired = true,
@@ -274,7 +274,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 6,
-                    Name = "Staż kierunkowy w Regionalnym Centrum Krwiodawstwa i Krwiolecznictwa",
+                    Name = "Staz kierunkowy w Regionalnym Centrum Krwiodawstwa i Krwiolecznictwa",
                     DurationWeeks = 1,
                     WorkingDays = 5,
                     IsRequired = true,
@@ -283,7 +283,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 7,
-                    Name = "Staż kierunkowy w ośrodku leczenia hemofilii i pokrewnych skaz krwotocznych",
+                    Name = "Staz kierunkowy w osrodku leczenia hemofilii i pokrewnych skaz krwotocznych",
                     DurationWeeks = 3,
                     WorkingDays = 15,
                     IsRequired = true,
@@ -291,13 +291,13 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Dodanie staży (moduł podstawowy)
+            // Dodanie stazy (modul podstawowy)
             specialization.RequiredInternships.AddRange(new List<Internship>
             {
                 new Internship
                 {
                     Id = 8,
-                    Name = "Staż podstawowy w zakresie chorób wewnętrznych",
+                    Name = "Staz podstawowy w zakresie chor�b wewnetrznych",
                     DurationWeeks = 67,
                     WorkingDays = 335,
                     IsRequired = true,
@@ -306,7 +306,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 9,
-                    Name = "Staż kierunkowy w zakresie intensywnej opieki medycznej",
+                    Name = "Staz kierunkowy w zakresie intensywnej opieki medycznej",
                     DurationWeeks = 4,
                     WorkingDays = 20,
                     IsRequired = true,
@@ -315,7 +315,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 10,
-                    Name = "Staż kierunkowy w szpitalnym oddziale ratunkowym",
+                    Name = "Staz kierunkowy w szpitalnym oddziale ratunkowym",
                     DurationWeeks = 12,
                     WorkingDays = 60,
                     IsRequired = true,
@@ -323,7 +323,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Dodanie procedur medycznych (moduł specjalistyczny) - staż podstawowy
+            // Dodanie procedur medycznych (modul specjalistyczny) - staz podstawowy
             specialization.RequiredProcedures.AddRange(new List<MedicalProcedure>
             {
                 new MedicalProcedure
@@ -401,7 +401,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 9,
-                    Name = "prowadzenie intensywnego leczenia chorych na ostre białaczki szpikowe lub ostre białaczki limfoblastyczne",
+                    Name = "prowadzenie intensywnego leczenia chorych na ostre bialaczki szpikowe lub ostre bialaczki limfoblastyczne",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 7,
                     Module = ModuleType.Specialistic,
@@ -410,7 +410,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 10,
-                    Name = "prowadzenie leczenia indukującego chorych na chłoniaki agresywne",
+                    Name = "prowadzenie leczenia indukujacego chorych na chloniaki agresywne",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 4,
                     Module = ModuleType.Specialistic,
@@ -428,7 +428,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 12,
-                    Name = "zakładanie centralnego cewnika żylnego",
+                    Name = "zakladanie centralnego cewnika zylnego",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 3,
                     Module = ModuleType.Specialistic,
@@ -437,7 +437,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 13,
-                    Name = "punkcja lędźwiowa i dokanałowe podanie cytostatyków",
+                    Name = "punkcja ledzwiowa i dokanalowe podanie cytostatyk�w",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -446,7 +446,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 14,
-                    Name = "biopsja cienkoigłowa węzła lub biopsja węzła pod kontrolą USG/TK",
+                    Name = "biopsja cienkoiglowa wezla lub biopsja wezla pod kontrola USG/TK",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 3,
                     Module = ModuleType.Specialistic,
@@ -454,7 +454,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Dodanie procedur medycznych (moduł specjalistyczny) - staże kierunkowe
+            // Dodanie procedur medycznych (modul specjalistyczny) - staze kierunkowe
             specialization.RequiredProcedures.AddRange(new List<MedicalProcedure>
             {
                 new MedicalProcedure
@@ -496,7 +496,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 19,
-                    Name = "przeszczepienie autologicznych komórek krwiotwórczych",
+                    Name = "przeszczepienie autologicznych kom�rek krwiotw�rczych",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Specialistic,
@@ -505,7 +505,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 20,
-                    Name = "przeszczepienie allogenicznych komórek krwiotwórczych",
+                    Name = "przeszczepienie allogenicznych kom�rek krwiotw�rczych",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 1,
                     Module = ModuleType.Specialistic,
@@ -513,13 +513,13 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Dodanie procedur medycznych (moduł podstawowy) - staż podstawowy
+            // Dodanie procedur medycznych (modul podstawowy) - staz podstawowy
             specialization.RequiredProcedures.AddRange(new List<MedicalProcedure>
             {
                 new MedicalProcedure
                 {
                     Id = 21,
-                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    Name = "prowadzenie resuscytacji krazeniowo-oddechowej BLS / ALS",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 3,
                     Module = ModuleType.Basic,
@@ -528,7 +528,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 22,
-                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    Name = "prowadzenie resuscytacji krazeniowo-oddechowej BLS / ALS",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 3,
                     Module = ModuleType.Basic,
@@ -537,7 +537,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 23,
-                    Name = "nakłucie jamy opłucnej w przypadku płynu",
+                    Name = "naklucie jamy oplucnej w przypadku plynu",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 10,
                     Module = ModuleType.Basic,
@@ -546,7 +546,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 24,
-                    Name = "nakłucie jamy opłucnej w przypadku płynu",
+                    Name = "naklucie jamy oplucnej w przypadku plynu",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 3,
                     Module = ModuleType.Basic,
@@ -555,7 +555,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 25,
-                    Name = "nakłucie jamy otrzewnej w przypadku wodobrzusza",
+                    Name = "naklucie jamy otrzewnej w przypadku wodobrzusza",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 10,
                     Module = ModuleType.Basic,
@@ -564,7 +564,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 26,
-                    Name = "nakłucie jamy otrzewnej w przypadku wodobrzusza",
+                    Name = "naklucie jamy otrzewnej w przypadku wodobrzusza",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 3,
                     Module = ModuleType.Basic,
@@ -573,7 +573,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 27,
-                    Name = "nakłucia żył obwodowych – iniekcje dożylne, pobrania krwi obwodowej",
+                    Name = "naklucia zyl obwodowych � iniekcje dozylne, pobrania krwi obwodowej",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 30,
                     Module = ModuleType.Basic,
@@ -582,7 +582,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 28,
-                    Name = "nakłucia żył obwodowych – iniekcje dożylne, pobrania krwi obwodowej",
+                    Name = "naklucia zyl obwodowych � iniekcje dozylne, pobrania krwi obwodowej",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 5,
                     Module = ModuleType.Basic,
@@ -591,7 +591,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 29,
-                    Name = "nakłucie tętnicy obwodowej w celu pobrania krwi do badania gazometrycznego",
+                    Name = "naklucie tetnicy obwodowej w celu pobrania krwi do badania gazometrycznego",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 30,
                     Module = ModuleType.Basic,
@@ -600,7 +600,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 30,
-                    Name = "nakłucie tętnicy obwodowej w celu pobrania krwi do badania gazometrycznego",
+                    Name = "naklucie tetnicy obwodowej w celu pobrania krwi do badania gazometrycznego",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 5,
                     Module = ModuleType.Basic,
@@ -608,13 +608,13 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Dodanie pozostałych procedur medycznych (moduł podstawowy)
+            // Dodanie pozostalych procedur medycznych (modul podstawowy)
             specialization.RequiredProcedures.AddRange(new List<MedicalProcedure>
             {
                 new MedicalProcedure
                 {
                     Id = 31,
-                    Name = "pomiar ośrodkowego ciśnienia żylnego",
+                    Name = "pomiar osrodkowego cisnienia zylnego",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 6,
                     Module = ModuleType.Basic,
@@ -623,7 +623,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 32,
-                    Name = "pomiar ośrodkowego ciśnienia żylnego",
+                    Name = "pomiar osrodkowego cisnienia zylnego",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Basic,
@@ -632,7 +632,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 33,
-                    Name = "cewnikowanie pęcherza moczowego",
+                    Name = "cewnikowanie pecherza moczowego",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 20,
                     Module = ModuleType.Basic,
@@ -641,7 +641,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 34,
-                    Name = "cewnikowanie pęcherza moczowego",
+                    Name = "cewnikowanie pecherza moczowego",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 4,
                     Module = ModuleType.Basic,
@@ -686,7 +686,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 39,
-                    Name = "wprowadzenie zgłębnika do żołądka",
+                    Name = "wprowadzenie zglebnika do zoladka",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Basic,
@@ -695,7 +695,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 40,
-                    Name = "wprowadzenie zgłębnika do żołądka",
+                    Name = "wprowadzenie zglebnika do zoladka",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Basic,
@@ -722,7 +722,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 43,
-                    Name = "badanie palpacyjne gruczołu piersiowego",
+                    Name = "badanie palpacyjne gruczolu piersiowego",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 10,
                     Module = ModuleType.Basic,
@@ -731,7 +731,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 44,
-                    Name = "badanie palpacyjne gruczołu piersiowego",
+                    Name = "badanie palpacyjne gruczolu piersiowego",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Basic,
@@ -739,13 +739,13 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 },
             });
 
-            // Procedury w stażach kierunkowych (moduł podstawowy)
+            // Procedury w stazach kierunkowych (modul podstawowy)
             specialization.RequiredProcedures.AddRange(new List<MedicalProcedure>
             {
                 new MedicalProcedure
                 {
                     Id = 45,
-                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    Name = "prowadzenie resuscytacji krazeniowo-oddechowej BLS / ALS",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Basic,
@@ -754,7 +754,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 46,
-                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    Name = "prowadzenie resuscytacji krazeniowo-oddechowej BLS / ALS",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 1,
                     Module = ModuleType.Basic,
@@ -799,7 +799,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 51,
-                    Name = "pomiar szczytowego przepływu wydechowego",
+                    Name = "pomiar szczytowego przeplywu wydechowego",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 3,
                     Module = ModuleType.Basic,
@@ -808,7 +808,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 52,
-                    Name = "pomiar szczytowego przepływu wydechowego",
+                    Name = "pomiar szczytowego przeplywu wydechowego",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 3,
                     Module = ModuleType.Basic,
@@ -820,9 +820,9 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
         }
 
         /// <summary>
-        /// Zasila bazę danych specjalizacją z zakresu alergologii.
+        /// Zasila baze danych specjalizacja z zakresu alergologii.
         /// </summary>
-        /// <returns>/Obiekt Specialization reprezentujący specjalizację z zakresu alergologii.</returns>
+        /// <returns>/Obiekt Specialization reprezentujacy specjalizacje z zakresu alergologii.</returns>
         public static Specialization SeedAllergologySpecialization()
         {
             var specialization = new Specialization
@@ -832,7 +832,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 StartDate = DateTime.Now,
                 ExpectedEndDate = DateTime.Now.AddYears(3),
                 BaseDurationWeeks = 156, // 3 lata (156 tygodni i 3 dni = 783 dni robocze)
-                BasicModuleDurationWeeks = 104, // 2 lata (wcześniej zrealizowany moduł podstawowy chorób wewnętrznych)
+                BasicModuleDurationWeeks = 104, // 2 lata (wczesniej zrealizowany modul podstawowy chor�b wewnetrznych)
                 SpecialisticModuleDurationWeeks = 156, // 3 lata
                 VacationDaysPerYear = 26,
                 SelfEducationDaysPerYear = 6,
@@ -842,7 +842,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 RequiredConferences = 0, // Brak konkretnej informacji o wymaganej liczbie konferencji
             };
 
-            // Dodanie kursów specjalizacyjnych
+            // Dodanie kurs�w specjalizacyjnych
             specialization.RequiredCourses.AddRange(new List<Course>
             {
                 new Course
@@ -856,7 +856,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 2,
-                    Name = "Diagnostyka chorób alergicznych",
+                    Name = "Diagnostyka chor�b alergicznych",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -864,7 +864,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 3,
-                    Name = "Profilaktyka i leczenie chorób alergicznych",
+                    Name = "Profilaktyka i leczenie chor�b alergicznych",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -872,7 +872,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 4,
-                    Name = "Immunoterapia alergenowa chorób alergicznych",
+                    Name = "Immunoterapia alergenowa chor�b alergicznych",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -904,7 +904,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 8,
-                    Name = "Choroby alergiczne górnych dróg oddechowych i oczu",
+                    Name = "Choroby alergiczne g�rnych dr�g oddechowych i oczu",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -912,7 +912,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 9,
-                    Name = "Alergologia w chorobach wewnętrznych. Choroby alergiczne układu oddechowego, POChP i anafilaksja",
+                    Name = "Alergologia w chorobach wewnetrznych. Choroby alergiczne ukladu oddechowego, POChP i anafilaksja",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -920,7 +920,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 10,
-                    Name = "Choroby alergiczne skóry, obrzęki naczynioruchowe, mastocytoza",
+                    Name = "Choroby alergiczne sk�ry, obrzeki naczynioruchowe, mastocytoza",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -928,7 +928,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 11,
-                    Name = "Odrębności chorób alergicznych u dzieci",
+                    Name = "Odrebnosci chor�b alergicznych u dzieci",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -936,7 +936,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 12,
-                    Name = "Nadwrażliwość na leki",
+                    Name = "Nadwrazliwosc na leki",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -944,7 +944,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 13,
-                    Name = "Nadwrażliwość na pokarmy oraz dodatki do żywności",
+                    Name = "Nadwrazliwosc na pokarmy oraz dodatki do zywnosci",
                     DurationDays = 2,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
@@ -960,20 +960,20 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Course
                 {
                     Id = 15,
-                    Name = "Kurs atestacyjny (podsumowujący): Alergologia",
+                    Name = "Kurs atestacyjny (podsumowujacy): Alergologia",
                     DurationDays = 5,
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
                 },
             });
 
-            // Dodanie staży specjalizacyjnych
+            // Dodanie stazy specjalizacyjnych
             specialization.RequiredInternships.AddRange(new List<Internship>
             {
                 new Internship
                 {
                     Id = 1,
-                    Name = "Staż podstawowy w zakresie alergologii",
+                    Name = "Staz podstawowy w zakresie alergologii",
                     DurationWeeks = 94,
                     WorkingDays = 470,
                     IsRequired = true,
@@ -982,7 +982,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 2,
-                    Name = "Staż kierunkowy w zakresie diagnostyki laboratoryjnej",
+                    Name = "Staz kierunkowy w zakresie diagnostyki laboratoryjnej",
                     DurationWeeks = 1,
                     WorkingDays = 5,
                     IsRequired = true,
@@ -991,7 +991,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 3,
-                    Name = "Staż kierunkowy w zakresie dermatologii i wenerologii",
+                    Name = "Staz kierunkowy w zakresie dermatologii i wenerologii",
                     DurationWeeks = 10,
                     WorkingDays = 50,
                     IsRequired = true,
@@ -1000,7 +1000,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 4,
-                    Name = "Staż kierunkowy w zakresie otorynolaryngologii",
+                    Name = "Staz kierunkowy w zakresie otorynolaryngologii",
                     DurationWeeks = 10,
                     WorkingDays = 50,
                     IsRequired = true,
@@ -1009,7 +1009,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new Internship
                 {
                     Id = 5,
-                    Name = "Staż kierunkowy w zakresie pediatrii",
+                    Name = "Staz kierunkowy w zakresie pediatrii",
                     DurationWeeks = 10,
                     WorkingDays = 50,
                     IsRequired = true,
@@ -1023,7 +1023,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 1,
-                    Name = "wykonanie i interpretacja punktowych testów skórnych",
+                    Name = "wykonanie i interpretacja punktowych test�w sk�rnych",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1032,7 +1032,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 2,
-                    Name = "wykonanie i interpretacja punktowych testów skórnych",
+                    Name = "wykonanie i interpretacja punktowych test�w sk�rnych",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 80,
                     Module = ModuleType.Specialistic,
@@ -1041,7 +1041,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 3,
-                    Name = "wykonanie i interpretacja testów śródskórnych",
+                    Name = "wykonanie i interpretacja test�w sr�dsk�rnych",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1050,7 +1050,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 4,
-                    Name = "wykonanie i interpretacja testów śródskórnych",
+                    Name = "wykonanie i interpretacja test�w sr�dsk�rnych",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1059,7 +1059,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 5,
-                    Name = "wykonanie i interpretacja testów kontaktowych",
+                    Name = "wykonanie i interpretacja test�w kontaktowych",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1068,7 +1068,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 6,
-                    Name = "wykonanie i interpretacja testów kontaktowych",
+                    Name = "wykonanie i interpretacja test�w kontaktowych",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1095,7 +1095,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 9,
-                    Name = "wykonanie iniekcji podskórnych preparatów odczulających",
+                    Name = "wykonanie iniekcji podsk�rnych preparat�w odczulajacych",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1104,7 +1104,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 10,
-                    Name = "wykonanie iniekcji podskórnych preparatów odczulających",
+                    Name = "wykonanie iniekcji podsk�rnych preparat�w odczulajacych",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 200,
                     Module = ModuleType.Specialistic,
@@ -1113,7 +1113,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 11,
-                    Name = "wykonanie pomiaru PEF z edukacją pacjenta",
+                    Name = "wykonanie pomiaru PEF z edukacja pacjenta",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1122,7 +1122,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 12,
-                    Name = "wykonanie pomiaru PEF z edukacją pacjenta",
+                    Name = "wykonanie pomiaru PEF z edukacja pacjenta",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1131,7 +1131,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 13,
-                    Name = "wykonanie i interpretacja próby rozkurczowej lub próby prowokacji oskrzeli",
+                    Name = "wykonanie i interpretacja pr�by rozkurczowej lub pr�by prowokacji oskrzeli",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1140,7 +1140,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 14,
-                    Name = "wykonanie i interpretacja próby rozkurczowej lub próby prowokacji oskrzeli",
+                    Name = "wykonanie i interpretacja pr�by rozkurczowej lub pr�by prowokacji oskrzeli",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1167,7 +1167,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 17,
-                    Name = "przeprowadzenie edukacji chorego dotyczącej właściwego sposobu przyjmowania leków wziewnych – wybór inhalatora/nebulizatora",
+                    Name = "przeprowadzenie edukacji chorego dotyczacej wlasciwego sposobu przyjmowania lek�w wziewnych � wyb�r inhalatora/nebulizatora",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1176,7 +1176,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 18,
-                    Name = "przeprowadzenie edukacji chorego dotyczącej właściwego sposobu przyjmowania leków wziewnych – wybór inhalatora/nebulizatora",
+                    Name = "przeprowadzenie edukacji chorego dotyczacej wlasciwego sposobu przyjmowania lek�w wziewnych � wyb�r inhalatora/nebulizatora",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 20,
                     Module = ModuleType.Specialistic,
@@ -1185,7 +1185,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 19,
-                    Name = "wykonanie i interpretacja testów śródskórnych w diagnostyce na jady owadów lub na leki",
+                    Name = "wykonanie i interpretacja test�w sr�dsk�rnych w diagnostyce na jady owad�w lub na leki",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1194,7 +1194,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 20,
-                    Name = "wykonanie i interpretacja testów śródskórnych w diagnostyce na jady owadów lub na leki",
+                    Name = "wykonanie i interpretacja test�w sr�dsk�rnych w diagnostyce na jady owad�w lub na leki",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1203,7 +1203,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 21,
-                    Name = "wykonanie i interpretacja wyniku próby prowokacji oskrzeli",
+                    Name = "wykonanie i interpretacja wyniku pr�by prowokacji oskrzeli",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 2,
                     Module = ModuleType.Specialistic,
@@ -1212,7 +1212,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 22,
-                    Name = "wykonanie i interpretacja wyniku próby prowokacji oskrzeli",
+                    Name = "wykonanie i interpretacja wyniku pr�by prowokacji oskrzeli",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Specialistic,
@@ -1221,7 +1221,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 23,
-                    Name = "wykonanie iniekcji podskórnych w okresie wstępnym odczulania na jady owadów",
+                    Name = "wykonanie iniekcji podsk�rnych w okresie wstepnym odczulania na jady owad�w",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1230,7 +1230,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 24,
-                    Name = "wykonanie iniekcji podskórnych w okresie wstępnym odczulania na jady owadów",
+                    Name = "wykonanie iniekcji podsk�rnych w okresie wstepnym odczulania na jady owad�w",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1239,7 +1239,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 25,
-                    Name = "interpretacja wyniku gazometrii krwi tętniczej",
+                    Name = "interpretacja wyniku gazometrii krwi tetniczej",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1248,7 +1248,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 26,
-                    Name = "interpretacja wyniku gazometrii krwi tętniczej",
+                    Name = "interpretacja wyniku gazometrii krwi tetniczej",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1257,7 +1257,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 27,
-                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    Name = "prowadzenie resuscytacji krazeniowo-oddechowej BLS / ALS",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 0,
                     Module = ModuleType.Specialistic,
@@ -1266,7 +1266,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 28,
-                    Name = "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+                    Name = "prowadzenie resuscytacji krazeniowo-oddechowej BLS / ALS",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Specialistic,
@@ -1275,7 +1275,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 29,
-                    Name = "przeprowadzenie edukacji chorego dotyczącej rozpoznawania i leczenia wstrząsu anafilaktycznego wraz ze szkoleniem dotyczącym podawania adrenaliny",
+                    Name = "przeprowadzenie edukacji chorego dotyczacej rozpoznawania i leczenia wstrzasu anafilaktycznego wraz ze szkoleniem dotyczacym podawania adrenaliny",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1284,7 +1284,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 30,
-                    Name = "przeprowadzenie edukacji chorego dotyczącej rozpoznawania i leczenia wstrząsu anafilaktycznego wraz ze szkoleniem dotyczącym podawania adrenaliny",
+                    Name = "przeprowadzenie edukacji chorego dotyczacej rozpoznawania i leczenia wstrzasu anafilaktycznego wraz ze szkoleniem dotyczacym podawania adrenaliny",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1293,7 +1293,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 31,
-                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego z obrzękiem naczynioruchowym",
+                    Name = "zaplanowanie diagnostyki i interpretacja wynik�w u chorego z obrzekiem naczynioruchowym",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1302,7 +1302,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 32,
-                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego z obrzękiem naczynioruchowym",
+                    Name = "zaplanowanie diagnostyki i interpretacja wynik�w u chorego z obrzekiem naczynioruchowym",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1311,7 +1311,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 33,
-                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego diagnozowanego w kierunku mastocytozy",
+                    Name = "zaplanowanie diagnostyki i interpretacja wynik�w u chorego diagnozowanego w kierunku mastocytozy",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1320,27 +1320,27 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 34,
-                    Name = "zaplanowanie diagnostyki i interpretacja wyników u chorego diagnozowanego w kierunku mastocytozy",
+                    Name = "zaplanowanie diagnostyki i interpretacja wynik�w u chorego diagnozowanego w kierunku mastocytozy",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
 
-                // Procedury dla staży kierunkowych (w dokumentacji zaznaczono, że nie podlegają rozliczeniu w EKS)
+                // Procedury dla stazy kierunkowych (w dokumentacji zaznaczono, ze nie podlegaja rozliczeniu w EKS)
                 new MedicalProcedure
                 {
                     Id = 35,
-                    Name = "interpretacja wyników badań diagnostyki molekularnej, w tym typu multipleks",
+                    Name = "interpretacja wynik�w badan diagnostyki molekularnej, w tym typu multipleks",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
-                    InternshipId = 2, // Staż w zakresie diagnostyki laboratoryjnej
+                    InternshipId = 2, // Staz w zakresie diagnostyki laboratoryjnej
                 },
                 new MedicalProcedure
                 {
                     Id = 36,
-                    Name = "interpretacja wyników badań diagnostyki molekularnej, w tym typu multipleks",
+                    Name = "interpretacja wynik�w badan diagnostyki molekularnej, w tym typu multipleks",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1349,16 +1349,16 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 37,
-                    Name = "ustalenie planu żywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergią na pokarmy",
+                    Name = "ustalenie planu zywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergia na pokarmy",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
-                    InternshipId = 5, // Staż w zakresie pediatrii
+                    InternshipId = 5, // Staz w zakresie pediatrii
                 },
                 new MedicalProcedure
                 {
                     Id = 38,
-                    Name = "ustalenie planu żywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergią na pokarmy",
+                    Name = "ustalenie planu zywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergia na pokarmy",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1367,16 +1367,16 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 39,
-                    Name = "zagadnienia dotyczące pielęgnacji skóry w atopowym zapaleniu skóry",
+                    Name = "zagadnienia dotyczace pielegnacji sk�ry w atopowym zapaleniu sk�ry",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
-                    InternshipId = 3, // Staż w zakresie dermatologii
+                    InternshipId = 3, // Staz w zakresie dermatologii
                 },
                 new MedicalProcedure
                 {
                     Id = 40,
-                    Name = "zagadnienia dotyczące pielęgnacji skóry w atopowym zapaleniu skóry",
+                    Name = "zagadnienia dotyczace pielegnacji sk�ry w atopowym zapaleniu sk�ry",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
@@ -1389,7 +1389,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,
-                    InternshipId = 4, // Staż w zakresie otorynolaryngologii
+                    InternshipId = 4, // Staz w zakresie otorynolaryngologii
                 },
                 new MedicalProcedure
                 {
@@ -1421,7 +1421,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 45,
-                    Name = "badanie węchu",
+                    Name = "badanie wechu",
                     ProcedureType = ProcedureType.TypeA,
                     RequiredCount = 5,
                     Module = ModuleType.Specialistic,
@@ -1430,7 +1430,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 new MedicalProcedure
                 {
                     Id = 46,
-                    Name = "badanie węchu",
+                    Name = "badanie wechu",
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 10,
                     Module = ModuleType.Specialistic,

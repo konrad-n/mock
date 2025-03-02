@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.App.Services.Interfaces;

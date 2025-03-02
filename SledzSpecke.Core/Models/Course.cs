@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SledzSpecke.Core.Models.Enums;
 using SQLite;
 

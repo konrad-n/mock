@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -44,7 +44,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
 
         public InternshipDetailsViewModel(ILogger<InternshipDetailsViewModel> logger) : base(logger)
         {
-            this.Title = "Szczegóły stażu";
+            this.Title = "Szczeg�ly stazu";
         }
 
         public Internship Internship => this.internship;
@@ -61,14 +61,14 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
                     Module = currentModule,
                     IsRequired = true,
                 };
-                this.PageTitle = "Dodaj staż";
+                this.PageTitle = "Dodaj staz";
                 this.ModulePickerSelectedIndex = currentModule == ModuleType.Basic ? 0 : 1;
                 this.StatusPickerSelectedIndex = 0;
             }
             else
             {
                 this.internship = internship;
-                this.PageTitle = "Szczegóły stażu";
+                this.PageTitle = "Szczeg�ly stazu";
                 this.DurationWeeks = internship.DurationWeeks.ToString();
                 this.WorkingDays = internship.WorkingDays.ToString();
                 this.ModulePickerSelectedIndex = internship.Module == ModuleType.Basic ? 0 : 1;
@@ -134,7 +134,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
 
             switch (selectedIndex)
             {
-                case 0: // Oczekujący
+                case 0: // Oczekujacy
                     this.IsStartDateVisible = false;
                     this.IsEndDateVisible = false;
                     this.IsCompletionVisible = false;
@@ -151,7 +151,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
                     this.internship.EndDate = null;
                     this.internship.IsCompleted = false;
                     break;
-                case 3: // Ukończony
+                case 3: // Ukonczony
                     this.IsStartDateVisible = true;
                     this.IsEndDateVisible = true;
                     this.IsCompletionVisible = true;
@@ -173,19 +173,19 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             if (string.IsNullOrWhiteSpace(this.internship.Name))
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa stażu jest wymagana.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Nazwa stazu jest wymagana.", "OK");
                 return;
             }
 
             if (!int.TryParse(this.DurationWeeks, out int durationWeeks) || durationWeeks <= 0)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawny czas trwania stażu (tygodnie).", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Wprowadz poprawny czas trwania stazu (tygodnie).", "OK");
                 return;
             }
 
             if (!int.TryParse(this.WorkingDays, out int workingDays) || workingDays <= 0)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawną liczbę dni roboczych.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Wprowadz poprawna liczbe dni roboczych.", "OK");
                 return;
             }
 

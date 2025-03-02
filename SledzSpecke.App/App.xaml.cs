@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Features.Authentication.Views;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Infrastructure.Database;

@@ -1,4 +1,4 @@
-锘縰sing ClosedXML.Excel;
+using ClosedXML.Excel;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
@@ -84,12 +84,12 @@ namespace SledzSpecke.App.Services.Implementations
                     {
                         ["Typ"] = "Kurs",
                         ["Nazwa"] = course.Name,
-                        ["Data rozpocz臋cia"] = course.ScheduledDate?.ToString("dd.MM.yyyy")
+                        ["Data rozpoczecia"] = course.ScheduledDate?.ToString("dd.MM.yyyy")
                             ?? string.Empty,
-                        ["Data zako艅czenia"] = course.CompletionDate?.ToString("dd.MM.yyyy")
+                        ["Data zakonczenia"] = course.CompletionDate?.ToString("dd.MM.yyyy")
                             ?? string.Empty,
                         ["Status"] = this.GetStatusText(course.IsCompleted),
-                        ["Modu艂"] = this.GetModuleText(course.Module),
+                        ["Modul"] = this.GetModuleText(course.Module),
                     };
 
                     data.Add(courseData);
@@ -107,12 +107,12 @@ namespace SledzSpecke.App.Services.Implementations
 
                     Dictionary<string, string> internshipData = new Dictionary<string, string>
                     {
-                        ["Typ"] = "Sta偶",
+                        ["Typ"] = "Staz",
                         ["Nazwa"] = internship.Name,
-                        ["Data rozpocz臋cia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? string.Empty,
-                        ["Data zako艅czenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? string.Empty,
+                        ["Data rozpoczecia"] = internship.StartDate?.ToString("dd.MM.yyyy") ?? string.Empty,
+                        ["Data zakonczenia"] = internship.EndDate?.ToString("dd.MM.yyyy") ?? string.Empty,
                         ["Status"] = this.GetStatusText(internship.IsCompleted),
-                        ["Modu艂"] = this.GetModuleText(internship.Module),
+                        ["Modul"] = this.GetModuleText(internship.Module),
                         ["Miejsce"] = internship.Location
                             ?? string.Empty,
                         ["Opiekun"] = internship.SupervisorName
@@ -151,9 +151,9 @@ namespace SledzSpecke.App.Services.Implementations
                         ["Wymagane"] = group.Sum(p => p.RequiredCount).ToString(),
                         ["Wykonane"] = group.Sum(p => p.CompletedCount).ToString(),
                         ["Status"] = group.Sum(p => p.CompletedCount) >= group.Sum(p => p.RequiredCount)
-                            ? "Uko艅czono"
+                            ? "Ukonczono"
                             : "W trakcie",
-                        ["Modu艂"] = this.GetModuleText(group.Key.Module),
+                        ["Modul"] = this.GetModuleText(group.Key.Module),
                     };
                     data.Add(procedureData);
                 }
@@ -218,7 +218,7 @@ namespace SledzSpecke.App.Services.Implementations
                     continue;
                 }
 
-                string internshipName = "Nieokre艣lony";
+                string internshipName = "Nieokreslony";
                 if (procedure.InternshipId.HasValue)
                 {
                     var internship = await this.databaseService.GetByIdAsync<Internship>(procedure.InternshipId.Value);
@@ -264,10 +264,10 @@ namespace SledzSpecke.App.Services.Implementations
             {
                 var worksheet = workbook.Worksheets.Add("Procedury");
 
-                worksheet.Cell(1, 1).Value = "Imi臋 i nazwisko";
+                worksheet.Cell(1, 1).Value = "Imie i nazwisko";
                 worksheet.Cell(1, 2).Value = "Data";
-                worksheet.Cell(1, 3).Value = "Osoba Wykonuj膮ca";
-                worksheet.Cell(1, 4).Value = "Dane Asystent贸w";
+                worksheet.Cell(1, 3).Value = "Osoba Wykonujaca";
+                worksheet.Cell(1, 4).Value = "Dane Asystent體";
                 worksheet.Cell(1, 5).Value = "Procedura z grupy";
 
                 var headerRange = worksheet.Range("A1:E1");
@@ -293,10 +293,10 @@ namespace SledzSpecke.App.Services.Implementations
                 infoSheet.Cell(3, 1).Value = "Format danych:";
                 infoSheet.Cell(3, 1).Style.Font.Bold = true;
 
-                infoSheet.Cell(4, 1).Value = "1. Imi臋 i nazwisko - identyfikator pacjenta";
+                infoSheet.Cell(4, 1).Value = "1. Imie i nazwisko - identyfikator pacjenta";
                 infoSheet.Cell(5, 1).Value = "2. Data - data w formacie RRRR-MM-DD";
-                infoSheet.Cell(6, 1).Value = "3. Osoba Wykonuj膮ca - lekarz wykonuj膮cy procedur臋";
-                infoSheet.Cell(7, 1).Value = "4. Dane Asystent贸w - osoby asystuj膮ce przy procedurze";
+                infoSheet.Cell(6, 1).Value = "3. Osoba Wykonujaca - lekarz wykonujacy procedure";
+                infoSheet.Cell(7, 1).Value = "4. Dane Asystent體 - osoby asystujace przy procedurze";
                 infoSheet.Cell(8, 1).Value = "5. Procedura z grupy - nazwa procedury i grupa";
 
                 worksheet.Columns().AdjustToContents();
@@ -325,12 +325,12 @@ namespace SledzSpecke.App.Services.Implementations
 
             using (var workbook = new XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("Dy偶ury");
+                var worksheet = workbook.Worksheets.Add("Dyzury");
 
                 worksheet.Cell(1, 1).Value = "Liczba godzin";
                 worksheet.Cell(1, 2).Value = "Liczba minut";
-                worksheet.Cell(1, 3).Value = "Data rozpocz臋cia";
-                worksheet.Cell(1, 4).Value = "Nazwa kom贸rki organizacyjnej";
+                worksheet.Cell(1, 3).Value = "Data rozpoczecia";
+                worksheet.Cell(1, 4).Value = "Nazwa kom髍ki organizacyjnej";
 
                 var headerRange = worksheet.Range("A1:D1");
                 headerRange.Style.Font.Bold = true;
@@ -367,10 +367,10 @@ namespace SledzSpecke.App.Services.Implementations
                 infoSheet.Cell(3, 1).Value = "Format danych:";
                 infoSheet.Cell(3, 1).Style.Font.Bold = true;
 
-                infoSheet.Cell(4, 1).Value = "1. Liczba godzin - ca艂kowita liczba godzin dy偶uru";
-                infoSheet.Cell(5, 1).Value = "2. Liczba minut - dodatkowe minuty (ponad pe艂ne godziny)";
-                infoSheet.Cell(6, 1).Value = "3. Data rozpocz臋cia - data w formacie RRRR-MM-DD";
-                infoSheet.Cell(7, 1).Value = "4. Nazwa kom贸rki organizacyjnej - miejsce dy偶uru";
+                infoSheet.Cell(4, 1).Value = "1. Liczba godzin - calkowita liczba godzin dyzuru";
+                infoSheet.Cell(5, 1).Value = "2. Liczba minut - dodatkowe minuty (ponad pelne godziny)";
+                infoSheet.Cell(6, 1).Value = "3. Data rozpoczecia - data w formacie RRRR-MM-DD";
+                infoSheet.Cell(7, 1).Value = "4. Nazwa kom髍ki organizacyjnej - miejsce dyzuru";
 
                 worksheet.Columns().AdjustToContents();
                 infoSheet.Columns().AdjustToContents();
@@ -414,7 +414,7 @@ namespace SledzSpecke.App.Services.Implementations
         private string GetStatusText(bool isCompleted)
         {
             return isCompleted ?
-                "Uko艅czono" :
+                "Ukonczono" :
                 "W trakcie";
         }
 

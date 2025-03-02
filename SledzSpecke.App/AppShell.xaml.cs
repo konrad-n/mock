@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Features.Authentication.Views;
+using SledzSpecke.App.Features.Authentication.Views;
 using SledzSpecke.App.Features.Courses.Views;
 using SledzSpecke.App.Features.Duties.Views;
 using SledzSpecke.App.Features.Internships.Views;
@@ -45,7 +45,7 @@ namespace SledzSpecke.App
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error updating user info: {ex.Message}");
-                this.UserNameLabel.Text = "Użytkownik";
+                this.UserNameLabel.Text = "Uzytkownik";
                 this.SpecializationLabel.Text = "Specjalizacja";
             }
         }
@@ -88,7 +88,7 @@ namespace SledzSpecke.App
 
         private async void OnLogoutClicked(object sender, EventArgs e)
         {
-            bool confirm = await this.DisplayAlert("Wylogowanie", "Czy na pewno chcesz się wylogować?", "Tak", "Nie");
+            bool confirm = await this.DisplayAlert("Wylogowanie", "Czy na pewno chcesz sie wylogowac?", "Tak", "Nie");
             if (confirm)
             {
                 this.authenticationService.Logout();

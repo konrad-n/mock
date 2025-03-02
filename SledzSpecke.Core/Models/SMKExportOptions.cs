@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.Core.Models
@@ -27,7 +27,6 @@ namespace SledzSpecke.Core.Models
 
         public DateTime? EndDate { get; set; } = DateTime.Now;
 
-        // New fields for SMK format according to manual
         public bool UseSmkExactFormat { get; set; } = true;
 
         public bool IncludePatientIds { get; set; } = true;
@@ -39,3 +38,4 @@ namespace SledzSpecke.Core.Models
         public string FullExportFileName => this.ExportFileName + (this.Format == ExportFormat.Excel ? ".xlsx" : ".csv");
     }
 }
+

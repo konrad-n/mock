@@ -7,7 +7,7 @@
           x:DataType="viewmodels:ProceduresViewModel"
           Title="{Binding Title}">
     <Grid RowDefinitions="Auto,Auto,*">
-        <!-- Filter section with visual improvements -->
+        
         <Frame Grid.Row="0" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                Margin="15,15,15,0" Padding="10" CornerRadius="10">
@@ -35,7 +35,7 @@
             </VerticalStackLayout>
         </Frame>
 
-        <!-- Type filters with visual improvements -->
+        
         <Frame Grid.Row="1" BorderColor="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
                BackgroundColor="{AppThemeBinding Light=White, Dark=#082044}"
                Margin="15,10,15,10" Padding="10" CornerRadius="10">
@@ -63,10 +63,10 @@
             </VerticalStackLayout>
         </Frame>
 
-        <!-- Procedures list with enhanced visuals -->
+        
         <ScrollView Grid.Row="2">
             <VerticalStackLayout Padding="15" Spacing="15" x:Name="ProceduresLayout">
-                <!-- Placeholder message when no selection -->
+                
                 <Label Text="Wybierz moduł i typ procedury powyżej" 
                    HorizontalOptions="Center" 
                    VerticalOptions="Center"
@@ -74,7 +74,7 @@
                    IsVisible="{Binding IsProceduresEmpty}"
                    FontSize="16" TextColor="{AppThemeBinding Light=#082044, Dark=#95B8CE}"/>
 
-                <!-- Dynamic procedure content will be added here -->
+                
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
@@ -83,7 +83,7 @@
         <ToolbarItem Text="Dodaj" Clicked="OnAddProcedureClicked" IconImageSource="addicon.png" />
     </ContentPage.ToolbarItems>
 
-    <!-- Add a custom visual for empty state -->
+    
     <ContentPage.Resources>
         <ResourceDictionary>
             <ControlTemplate x:Key="EmptyStateTemplate">

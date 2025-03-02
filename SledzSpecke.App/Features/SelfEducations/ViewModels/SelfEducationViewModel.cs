@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -37,7 +37,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
             this.selfEducationService = selfEducationService;
             this.SelfEducationList = new ObservableCollection<SelfEducation>();
             this.EducationByYear = new ObservableCollection<YearlyEducationGroup>();
-            this.Title = "Samokształcenie";
+            this.Title = "Samoksztalcenie";
         }
 
         public static string GetSelfEducationTypeName(SelfEducationType type)

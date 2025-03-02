@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -53,7 +53,7 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
         {
             if (string.IsNullOrWhiteSpace(this.Email) || string.IsNullOrWhiteSpace(this.Password))
             {
-                this.ErrorMessage = "Proszę wprowadzić adres email i hasło.";
+                this.ErrorMessage = "Prosze wprowadzic adres email i haslo.";
                 return;
             }
 
@@ -79,19 +79,19 @@ namespace SledzSpecke.App.Features.Authentication.ViewModels
                     catch (Exception ex)
                     {
                         this.logger.LogError(ex, "Error setting AppShell as MainPage");
-                        this.ErrorMessage = "Logowanie powiodło się, ale wystąpił problem z uruchomieniem głównego ekranu aplikacji.";
+                        this.ErrorMessage = "Logowanie powiodlo sie, ale wystapil problem z uruchomieniem gl�wnego ekranu aplikacji.";
                     }
                 }
                 else
                 {
                     this.logger.LogWarning("Login failed for {Email}", this.Email);
-                    this.ErrorMessage = "Nieprawidłowy adres email lub hasło.";
+                    this.ErrorMessage = "Nieprawidlowy adres email lub haslo.";
                 }
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error during login for {Email}", this.Email);
-                this.ErrorMessage = $"Wystąpił problem podczas próby logowania. Szczegóły błędu: {ex.Message}";
+                this.ErrorMessage = $"Wystapil problem podczas pr�by logowania. Szczeg�ly bledu: {ex.Message}";
             }
             finally
             {

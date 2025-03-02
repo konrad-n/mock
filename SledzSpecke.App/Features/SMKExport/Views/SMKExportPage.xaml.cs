@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.SMKExport.ViewModels;
 
 namespace SledzSpecke.App.Features.SMKExport.Views
@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony eksportu SMK.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony eksportu SMK.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in SMKExportPage: {ex}");
             }
         }
@@ -53,7 +53,7 @@ namespace SledzSpecke.App.Features.SMKExport.Views
                                 string text = label.Text?.ToLowerInvariant() ?? string.Empty;
                                 if (text.Contains("procedur"))
                                     exportTypeIndex = 1;
-                                else if (text.Contains("dyżur"))
+                                else if (text.Contains("dyzur"))
                                     exportTypeIndex = 2;
                             }
                         }

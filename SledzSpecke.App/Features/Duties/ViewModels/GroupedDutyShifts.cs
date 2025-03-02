@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Features.Duties.ViewModels

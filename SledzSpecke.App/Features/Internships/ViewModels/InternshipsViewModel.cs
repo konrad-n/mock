@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -45,7 +45,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             this.specializationService = specializationService;
             this.Internships = new ObservableCollection<Internship>();
-            this.Title = "Staże";
+            this.Title = "Staze";
         }
 
         public static bool IsCurrentInternship(Internship internship)
@@ -122,7 +122,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
         {
             if (internship.IsCompleted)
             {
-                return "Ukończony";
+                return "Ukonczony";
             }
 
             if (IsCurrentInternship(internship))
@@ -135,7 +135,7 @@ namespace SledzSpecke.App.Features.Internships.ViewModels
                 return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";
             }
 
-            return "Oczekujący";
+            return "Oczekujacy";
         }
 
         private async Task OnInternshipAdded(Internship internship)

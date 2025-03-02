@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.Core.Models;
@@ -30,7 +30,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             : base(logger)
         {
             this.databaseService = databaseService;
-            this.Title = "Nieobecność";
+            this.Title = "Nieobecnosc";
         }
 
         public string PageTitle
@@ -113,7 +113,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                     Year = DateTime.Now.Year,
                     AffectsSpecializationLength = true,
                 };
-                this.PageTitle = "Dodaj nieobecność";
+                this.PageTitle = "Dodaj nieobecnosc";
                 this.IsExistingAbsence = false;
                 this.AbsenceTypeSelectedIndex = 0;
                 this.Year = DateTime.Now.Year.ToString();
@@ -122,7 +122,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             else
             {
                 this.absence = absenceParam;
-                this.PageTitle = "Edytuj nieobecność";
+                this.PageTitle = "Edytuj nieobecnosc";
                 this.IsExistingAbsence = true;
                 this.StartDate = absenceParam.StartDate;
                 this.EndDate = absenceParam.EndDate;
@@ -199,7 +199,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
 
             bool confirm = await page.DisplayAlert(
                 "Potwierdzenie",
-                "Czy na pewno chcesz usunąć tę nieobecność?",
+                "Czy na pewno chcesz usunac te nieobecnosc?",
                 "Tak",
                 "Nie");
 
@@ -214,8 +214,8 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 {
                     this.logger.LogError(ex, "Error deleting absence");
                     await page.DisplayAlert(
-                        "Błąd",
-                        $"Nie udało się usunąć nieobecności: {ex.Message}",
+                        "Blad",
+                        $"Nie udalo sie usunac nieobecnosci: {ex.Message}",
                         "OK");
                 }
             }
@@ -235,8 +235,8 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             if (this.StartDate > this.EndDate)
             {
                 await page.DisplayAlert(
-                    "Błąd",
-                    "Data zakończenia musi być późniejsza lub równa dacie rozpoczęcia.",
+                    "Blad",
+                    "Data zakonczenia musi byc p�zniejsza lub r�wna dacie rozpoczecia.",
                     "OK");
                 return;
             }
@@ -244,8 +244,8 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             if (!int.TryParse(this.Year, out int yearValue))
             {
                 await page.DisplayAlert(
-                    "Błąd",
-                    "Wprowadź poprawny rok.",
+                    "Blad",
+                    "Wprowadz poprawny rok.",
                     "OK");
                 return;
             }

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
@@ -9,7 +9,7 @@ namespace SledzSpecke.App.Common.Converters
         {
             if (value is DutyType dutyType)
             {
-                return dutyType == DutyType.Independent ? "Samodzielny" : "Towarzyszący";
+                return dutyType == DutyType.Independent ? "Samodzielny" : "Towarzyszacy";
             }
 
             return "Nieznany";

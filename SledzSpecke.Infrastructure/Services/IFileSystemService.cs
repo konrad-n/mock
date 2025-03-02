@@ -1,4 +1,4 @@
-﻿// <copyright file="IFileSystemService.cs" company="SledzSpecke">
+// <copyright file="IFileSystemService.cs" company="SledzSpecke">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 

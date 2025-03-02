@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Absences.ViewModels;
 
 namespace SledzSpecke.App.Features.Absences.Views
@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Features.Absences.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się załadować danych nieobecności.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zaladowac danych nieobecnosci.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in AbsenceManagementPage: {ex}");
             }
         }

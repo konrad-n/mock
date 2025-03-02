@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Absences.ViewModels;
 using SledzSpecke.Core.Models;
 
@@ -29,7 +29,7 @@ namespace SledzSpecke.App.Features.Absences.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów nieobecności.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony szczeg�l�w nieobecnosci.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in AbsenceDetailsPage: {ex}");
             }
         }

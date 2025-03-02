@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
@@ -11,16 +11,16 @@ namespace SledzSpecke.App.Common.Converters
             {
                 return type switch
                 {
-                    AbsenceType.SickLeave => "🤒",
-                    AbsenceType.VacationLeave => "🏖️",
-                    AbsenceType.SelfEducationLeave => "📚",
-                    AbsenceType.MaternityLeave => "👶",
-                    AbsenceType.ParentalLeave => "👶",
-                    _ => "📅"
+                    AbsenceType.SickLeave => "??",
+                    AbsenceType.VacationLeave => "???",
+                    AbsenceType.SelfEducationLeave => "??",
+                    AbsenceType.MaternityLeave => "??",
+                    AbsenceType.ParentalLeave => "??",
+                    _ => "??"
                 };
             }
 
-            return "📅";
+            return "??";
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SQLite;
 
 namespace SledzSpecke.Core.Models
@@ -27,3 +27,4 @@ namespace SledzSpecke.Core.Models
         public DateTime? LastLoginAt { get; set; }
     }
 }
+

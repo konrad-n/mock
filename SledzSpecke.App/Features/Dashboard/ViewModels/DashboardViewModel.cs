@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -153,16 +153,16 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             var daysSinceStart = (DateTime.Now - this.specialization.StartDate).Days;
             if (daysSinceStart < (this.specialization.BasicModuleDurationWeeks * 7))
             {
-                this.CurrentStageLabel = "Moduł podstawowy";
+                this.CurrentStageLabel = "Modul podstawowy";
             }
             else
             {
-                this.CurrentStageLabel = "Moduł specjalistyczny";
+                this.CurrentStageLabel = "Modul specjalistyczny";
             }
 
             var totalProgress = this.specialization.GetCompletionPercentage() / 100;
             this.TotalProgressBarValue = totalProgress;
-            this.TotalProgressLabel = $"{totalProgress * 100:F0}% ukończono";
+            this.TotalProgressLabel = $"{totalProgress * 100:F0}% ukonczono";
             var basicModuleProgress = this.GetBasicModuleProgress();
             this.BasicModuleProgressBarValue = basicModuleProgress;
             this.BasicModuleProgressLabel = $"{basicModuleProgress * 100:F0}%";
@@ -170,9 +170,9 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             this.SpecialisticModuleProgressBarValue = specialisticModuleProgress;
             this.SpecialisticModuleProgressLabel = $"{specialisticModuleProgress * 100:F0}%";
             var completedCourses = this.specialization.RequiredCourses.Count(c => c.IsCompleted);
-            this.CoursesLabel = $"{completedCourses}/{this.specialization.RequiredCourses.Count} ukończonych";
+            this.CoursesLabel = $"{completedCourses}/{this.specialization.RequiredCourses.Count} ukonczonych";
             var completedInternships = this.specialization.RequiredInternships.Count(i => i.IsCompleted);
-            this.InternshipsLabel = $"{completedInternships}/{this.specialization.RequiredInternships.Count} ukończonych";
+            this.InternshipsLabel = $"{completedInternships}/{this.specialization.RequiredInternships.Count} ukonczonych";
             var proceduresTypeA = this.specialization.RequiredProcedures.Where(p => p.ProcedureType == ProcedureType.TypeA).ToList();
             var totalProceduresTypeA = proceduresTypeA.Sum(p => p.RequiredCount);
             var completedProceduresTypeA = proceduresTypeA.Sum(p => p.CompletedCount);
@@ -272,7 +272,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
                 {
                     upcomingEvents.Add((
                         internship.StartDate.Value,
-                        $"Staż: {internship.Name}",
+                        $"Staz: {internship.Name}",
                         false
                     ));
                 }
@@ -283,7 +283,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             {
                 upcomingEvents.Add((
                     endOfBasicModule,
-                    "Koniec modułu podstawowego",
+                    "Koniec modulu podstawowego",
                     true
                 ));
             }
@@ -297,7 +297,7 @@ namespace SledzSpecke.App.Features.Dashboard.ViewModels
             }
             else
             {
-                this.UpcomingEvent1 = "Brak nadchodzących wydarzeń";
+                this.UpcomingEvent1 = "Brak nadchodzacych wydarzen";
                 this.UpcomingEvent1Color = new Color(8, 32, 68);
             }
 

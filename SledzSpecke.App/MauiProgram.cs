@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Features.Absences.ViewModels;
 using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Features.Authentication.ViewModels;

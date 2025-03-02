@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -44,7 +44,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         private string patientId;
 
         [ObservableProperty]
-        private string patientGender = "Mężczyzna";
+        private string patientGender = "Mezczyzna";
 
         [ObservableProperty]
         private string location;
@@ -96,25 +96,25 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                 this.ProcedureType = "Kod A - wykonywanie samodzielne";
                 this.ProcedureTypeColor = Color.FromArgb("#2196F3");
                 this.ProcedureTypeBorderColor = Color.FromArgb("#1976D2");
-                this.SupervisorLabel = "Nadzorujący (opcjonalnie)";
-                this.SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego (jeśli dotyczy)";
-                this.FirstAssistantLabel = "Dane osoby wykonującej I asystę";
-                this.FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej I asystę";
+                this.SupervisorLabel = "Nadzorujacy (opcjonalnie)";
+                this.SupervisorPlaceholder = "Wprowadz imie i nazwisko nadzorujacego (jesli dotyczy)";
+                this.FirstAssistantLabel = "Dane osoby wykonujacej I asyste";
+                this.FirstAssistantPlaceholder = "Wprowadz dane osoby wykonujacej I asyste";
             }
             else
             {
                 this.ProcedureType = "Kod B - pierwsza asysta";
                 this.ProcedureTypeColor = Color.FromArgb("#4CAF50");
                 this.ProcedureTypeBorderColor = Color.FromArgb("#388E3C");
-                this.SupervisorLabel = "Nadzorujący (wymagane)";
-                this.SupervisorPlaceholder = "Wprowadź imię i nazwisko nadzorującego";
-                this.FirstAssistantLabel = "Dane osoby wykonującej procedurę";
-                this.FirstAssistantPlaceholder = "Wprowadź dane osoby wykonującej procedurę";
+                this.SupervisorLabel = "Nadzorujacy (wymagane)";
+                this.SupervisorPlaceholder = "Wprowadz imie i nazwisko nadzorujacego";
+                this.FirstAssistantLabel = "Dane osoby wykonujacej procedure";
+                this.FirstAssistantPlaceholder = "Wprowadz dane osoby wykonujacej procedure";
             }
 
             this.CompletionStatus = $"Wykonane: {procedure.CompletedCount}/{procedure.RequiredCount}";
             int remaining = procedure.RequiredCount - procedure.CompletedCount;
-            this.RemainingText = $"Pozostało: {remaining}";
+            this.RemainingText = $"Pozostalo: {remaining}";
             this.CompletionProgress = (double)procedure.CompletedCount / procedure.RequiredCount;
 
             if (this.CompletionProgress >= 1.0)
@@ -156,8 +156,8 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         {
             await Application.Current.MainPage.DisplayAlert(
                 "Informacja o polu 'Procedura z grupy'",
-                "Pole to jest wymagane do eksportu SMK i jest wykorzystywane, gdy procedura jest częścią grupy procedur, np. \"Operacje brzucha: procedura A, procedura B\".\n\n" +
-                "Jeśli w nazwie procedury wymienione są procedury po przecinku, należy uzupełnić to pole, wpisując konkretną procedurę, którą wykonano.",
+                "Pole to jest wymagane do eksportu SMK i jest wykorzystywane, gdy procedura jest czescia grupy procedur, np. \"Operacje brzucha: procedura A, procedura B\".\n\n" +
+                "Jesli w nazwie procedury wymienione sa procedury po przecinku, nalezy uzupelnic to pole, wpisujac konkretna procedure, kt�ra wykonano.",
                 "Zamknij");
         }
 
@@ -174,25 +174,25 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             {
                 if (string.IsNullOrWhiteSpace(this.PatientId))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Identyfikator pacjenta jest wymagany.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Identyfikator pacjenta jest wymagany.", "OK");
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(this.PatientGender))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Płeć pacjenta jest wymagana.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Plec pacjenta jest wymagana.", "OK");
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(this.Location))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce wykonania jest wymagane.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Miejsce wykonania jest wymagane.", "OK");
                     return;
                 }
 
                 if (this.procedure.ProcedureType == Core.Models.Enums.ProcedureType.TypeB && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla procedury typu B.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Imie i nazwisko nadzorujacego jest wymagane dla procedury typu B.", "OK");
                     return;
                 }
 
@@ -221,7 +221,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error saving procedure entry");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił błąd podczas zapisywania: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Wystapil blad podczas zapisywania: {ex.Message}", "OK");
             }
         }
     }

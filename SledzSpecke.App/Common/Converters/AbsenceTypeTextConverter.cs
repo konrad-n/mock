@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
@@ -13,17 +13,17 @@ namespace SledzSpecke.App.Common.Converters
                 {
                     AbsenceType.SickLeave => "Zwolnienie lekarskie (L4)",
                     AbsenceType.VacationLeave => "Urlop wypoczynkowy",
-                    AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samokształcenie)",
-                    AbsenceType.MaternityLeave => "Urlop macierzyński",
+                    AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samoksztalcenie)",
+                    AbsenceType.MaternityLeave => "Urlop macierzynski",
                     AbsenceType.ParentalLeave => "Urlop rodzicielski",
-                    AbsenceType.SpecialLeave => "Urlop okolicznościowy",
-                    AbsenceType.UnpaidLeave => "Urlop bezpłatny",
-                    AbsenceType.Other => "Inna nieobecność",
-                    _ => "Nieobecność"
+                    AbsenceType.SpecialLeave => "Urlop okolicznosciowy",
+                    AbsenceType.UnpaidLeave => "Urlop bezplatny",
+                    AbsenceType.Other => "Inna nieobecnosc",
+                    _ => "Nieobecnosc"
                 };
             }
 
-            return "Nieobecność";
+            return "Nieobecnosc";
         }
     }
 }

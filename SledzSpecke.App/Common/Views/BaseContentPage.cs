@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.App.Common.Views
+namespace SledzSpecke.App.Common.Views
 {
     public abstract class BaseContentPage : ContentPage
     {
@@ -44,3 +44,4 @@
         }
     }
 }
+

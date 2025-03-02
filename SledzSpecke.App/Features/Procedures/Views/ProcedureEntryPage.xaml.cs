@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Procedures.ViewModels;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
@@ -31,7 +31,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować formularza procedury.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac formularza procedury.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in ProcedureEntryPage: {ex}");
             }
         }

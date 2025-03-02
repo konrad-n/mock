@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -44,7 +44,7 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
 
         public SelfEducationDetailsViewModel(ILogger<SelfEducationDetailsViewModel> logger) : base(logger)
         {
-            this.Title = "Szczegóły wydarzenia";
+            this.Title = "Szczeg�ly wydarzenia";
         }
 
         public SelfEducation SelfEducation => this.selfEducation;
@@ -121,13 +121,13 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
                 if (fileResult != null)
                 {
                     this.selfEducation.CertificateFilePath = fileResult.FullPath;
-                    await Application.Current.MainPage.DisplayAlert("Sukces", "Plik został dodany pomyślnie.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Sukces", "Plik zostal dodany pomyslnie.", "OK");
                 }
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error adding attachment");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem z wyborem pliku: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Wystapil problem z wyborem pliku: {ex.Message}", "OK");
             }
         }
 
@@ -142,31 +142,31 @@ namespace SledzSpecke.App.Features.SelfEducations.ViewModels
         {
             if (string.IsNullOrWhiteSpace(this.SelfEducationTitle))
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Tytuł wydarzenia jest wymagany.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Tytul wydarzenia jest wymagany.", "OK");
                 return;
             }
 
             if (this.EndDate < this.StartDate)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Data zakończenia musi być późniejsza lub równa dacie rozpoczęcia.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Data zakonczenia musi byc p�zniejsza lub r�wna dacie rozpoczecia.", "OK");
                 return;
             }
 
             if (!int.TryParse(this.DurationDays, out int durationDays) || durationDays <= 0)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawną liczbę dni.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Wprowadz poprawna liczbe dni.", "OK");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(this.Location))
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce wydarzenia jest wymagane.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Miejsce wydarzenia jest wymagane.", "OK");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(this.Organizer))
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa organizatora jest wymagana.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Nazwa organizatora jest wymagana.", "OK");
                 return;
             }
 

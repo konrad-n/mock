@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -156,14 +156,14 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             {
                 if (this.IsCustomDatesSelected && this.StartDate > this.EndDate)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd zakresu dat", "Data początkowa nie może być późniejsza niż data końcowa.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad zakresu dat", "Data poczatkowa nie moze byc p�zniejsza niz data koncowa.", "OK");
                     return;
                 }
 
                 if (this.IsGeneralExportSelected &&
                     !this.IncludeCoursesChecked && !this.IncludeInternshipsChecked && !this.IncludeProceduresChecked)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd wyboru zakresu", "Wybierz przynajmniej jedną kategorię danych do eksportu.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad wyboru zakresu", "Wybierz przynajmniej jedna kategorie danych do eksportu.", "OK");
                     return;
                 }
 
@@ -197,13 +197,13 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 
                 await Application.Current.MainPage.DisplayAlert(
                     "Sukces",
-                    $"Raport został wygenerowany pomyślnie w formacie zgodnym z SMK.\n\nFormat: {(this.exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}",
+                    $"Raport zostal wygenerowany pomyslnie w formacie zgodnym z SMK.\n\nFormat: {(this.exportOptions.Format == ExportFormat.Excel ? "Excel" : "CSV")}",
                     "OK");
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error generating SMK export");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas generowania raportu: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Wystapil problem podczas generowania raportu: {ex.Message}", "OK");
             }
             finally
             {
@@ -220,7 +220,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 
                 if (!File.Exists(filePath))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Plik nie istnieje lub został usunięty.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Plik nie istnieje lub zostal usuniety.", "OK");
                     return;
                 }
 
@@ -232,7 +232,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error opening file");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Nie udało się otworzyć pliku: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Nie udalo sie otworzyc pliku: {ex.Message}", "OK");
             }
         }
 
@@ -245,7 +245,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 
                 if (!Directory.Exists(folderPath))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Folder nie istnieje lub został usunięty.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Folder nie istnieje lub zostal usuniety.", "OK");
                     return;
                 }
 
@@ -254,7 +254,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error opening folder");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Nie udało się otworzyć folderu: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Nie udalo sie otworzyc folderu: {ex.Message}", "OK");
             }
         }
     }

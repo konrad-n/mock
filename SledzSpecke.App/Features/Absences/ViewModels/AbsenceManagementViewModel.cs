@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -38,7 +38,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             this.specializationDateCalculator = specializationDateCalculator;
             this.databaseService = databaseService;
 
-            this.Title = "Nieobecności i urlopy";
+            this.Title = "Nieobecnosci i urlopy";
         }
 
         public Specialization Specialization
@@ -112,13 +112,13 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             {
                 AbsenceType.SickLeave => "Zwolnienie lekarskie (L4)",
                 AbsenceType.VacationLeave => "Urlop wypoczynkowy",
-                AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samokształcenie)",
-                AbsenceType.MaternityLeave => "Urlop macierzyński",
+                AbsenceType.SelfEducationLeave => "Urlop szkoleniowy (samoksztalcenie)",
+                AbsenceType.MaternityLeave => "Urlop macierzynski",
                 AbsenceType.ParentalLeave => "Urlop rodzicielski",
-                AbsenceType.SpecialLeave => "Urlop okolicznościowy",
-                AbsenceType.UnpaidLeave => "Urlop bezpłatny",
-                AbsenceType.Other => "Inna nieobecność",
-                _ => "Nieobecność",
+                AbsenceType.SpecialLeave => "Urlop okolicznosciowy",
+                AbsenceType.UnpaidLeave => "Urlop bezplatny",
+                AbsenceType.Other => "Inna nieobecnosc",
+                _ => "Nieobecnosc",
             };
         }
 
@@ -139,12 +139,12 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         {
             return type switch
             {
-                AbsenceType.SickLeave => "🤒",
-                AbsenceType.VacationLeave => "🏖️",
-                AbsenceType.SelfEducationLeave => "📚",
-                AbsenceType.MaternityLeave => "👶",
-                AbsenceType.ParentalLeave => "👶",
-                _ => "📅"
+                AbsenceType.SickLeave => "??",
+                AbsenceType.VacationLeave => "???",
+                AbsenceType.SelfEducationLeave => "??",
+                AbsenceType.MaternityLeave => "??",
+                AbsenceType.ParentalLeave => "??",
+                _ => "??"
             };
         }
 
@@ -284,7 +284,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
 
                 if (page != null)
                 {
-                    await page.DisplayAlert("Błąd", $"Wystąpił problem podczas dodawania nieobecności: {ex.Message}", "OK");
+                    await page.DisplayAlert("Blad", $"Wystapil problem podczas dodawania nieobecnosci: {ex.Message}", "OK");
                 }
             }
         }

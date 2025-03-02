@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.App.Common.Helpers
+namespace SledzSpecke.App.Common.Helpers
 {
     public static class ServiceHelper
     {
@@ -20,3 +20,4 @@
         }
     }
 }
+

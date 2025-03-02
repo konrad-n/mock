@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -61,7 +61,7 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
                 this.specialization = await this.dataManager.LoadSpecializationAsync();
                 if (this.specialization == null)
                 {
-                    throw new InvalidOperationException("Nie udało się załadować danych specjalizacji.");
+                    throw new InvalidOperationException("Nie udalo sie zaladowac danych specjalizacji.");
                 }
 
                 this.SpecializationName = this.specialization.Name;
@@ -87,7 +87,7 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
         {
             if (string.IsNullOrWhiteSpace(this.Username))
             {
-                throw new InvalidOperationException("Imię i nazwisko jest wymagane.");
+                throw new InvalidOperationException("Imie i nazwisko jest wymagane.");
             }
 
             if (string.IsNullOrWhiteSpace(this.MedicalLicenseNumber))
@@ -136,3 +136,4 @@ namespace SledzSpecke.App.Features.Settings.ViewModels
         }
     }
 }
+

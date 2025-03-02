@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Procedures.ViewModels;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
@@ -31,7 +31,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony procedur.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony procedur.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in ProceduresPage: {ex}");
             }
         }
@@ -73,7 +73,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
             {
                 this.ProceduresLayout.Children.Add(new Label
                 {
-                    Text = "Brak procedur do wyświetlenia",
+                    Text = "Brak procedur do wyswietlenia",
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center,
                     Margin = new Thickness(0, 20, 0, 0),
@@ -87,7 +87,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
             {
                 var internshipId = group.Key;
                 var internshipName = this.viewModel.Specialization.RequiredInternships
-                    .FirstOrDefault(i => i.Id == internshipId)?.Name ?? "Nieokreślony staż";
+                    .FirstOrDefault(i => i.Id == internshipId)?.Name ?? "Nieokreslony staz";
                 this.ProceduresLayout.Children.Add(new Label
                 {
                     Text = internshipName,
@@ -141,7 +141,7 @@ namespace SledzSpecke.App.Features.Procedures.Views
 
                     var detailsButton = new Button
                     {
-                        Text = "Szczegóły",
+                        Text = "Szczeg�ly",
                         HeightRequest = 35,
                         FontSize = 14,
                         Margin = new Thickness(0, 5, 0, 0),

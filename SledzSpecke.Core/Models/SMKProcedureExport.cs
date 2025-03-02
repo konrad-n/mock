@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace SledzSpecke.Core.Models
 {
@@ -15,3 +15,4 @@ namespace SledzSpecke.Core.Models
         public string ProcedureGroup { get; set; }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.Core.Models.Enums
+namespace SledzSpecke.Core.Models.Enums
 {
     public enum SmkExportType
     {

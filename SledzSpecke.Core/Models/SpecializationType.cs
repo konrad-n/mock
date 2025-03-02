@@ -1,4 +1,4 @@
-﻿using SQLite;
+using SQLite;
 
 namespace SledzSpecke.Core.Models
 {
@@ -34,3 +34,4 @@ namespace SledzSpecke.Core.Models
         public int RequiredConferences { get; set; }
     }
 }
+

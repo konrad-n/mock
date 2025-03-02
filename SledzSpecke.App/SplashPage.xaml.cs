@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.App;
+namespace SledzSpecke.App;
 
 public partial class SplashPage : ContentPage
 {
@@ -18,7 +18,8 @@ public partial class SplashPage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Initialization error: {ex.Message}");
-            await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować aplikacji", "OK");
+            await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac aplikacji", "OK");
         }
     }
 }
+

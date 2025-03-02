@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Courses.ViewModels;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
@@ -28,7 +28,7 @@ namespace SledzSpecke.App.Features.Courses.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się załadować danych kursów.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zaladowac danych kurs�w.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in CoursesPage: {ex}");
             }
         }
@@ -73,7 +73,7 @@ namespace SledzSpecke.App.Features.Courses.Views
             {
                 this.CoursesLayout.Children.Add(new Label
                 {
-                    Text = "Brak kursów do wyświetlenia",
+                    Text = "Brak kurs�w do wyswietlenia",
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center,
                     Margin = new Thickness(0, 20, 0, 0),
@@ -115,10 +115,10 @@ namespace SledzSpecke.App.Features.Courses.Views
                 };
                 var statusLabel = new Label
                 {
-                    Text = course.IsCompleted ? "Ukończony" :
+                    Text = course.IsCompleted ? "Ukonczony" :
                            course.IsAttended ? "Zarejestrowany" :
                            course.ScheduledDate.HasValue ? $"Zaplanowany na: {course.ScheduledDate.Value.ToString("dd.MM.yyyy")}" :
-                           "Oczekujący",
+                           "Oczekujacy",
                     FontSize = 14,
                     TextColor = course.IsCompleted ? Colors.Green :
                                 course.ScheduledDate.HasValue ? Colors.Orange :
@@ -126,7 +126,7 @@ namespace SledzSpecke.App.Features.Courses.Views
                 };
                 var detailsButton = new Button
                 {
-                    Text = "Szczegóły",
+                    Text = "Szczeg�ly",
                     HeightRequest = 35,
                     FontSize = 14,
                     Margin = new Thickness(0, 5, 0, 0),

@@ -1,4 +1,4 @@
-﻿// <copyright file="IDatabaseService.cs" company="SledzSpecke">
+// <copyright file="IDatabaseService.cs" company="SledzSpecke">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 

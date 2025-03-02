@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -45,7 +45,7 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
 
         public ProcedureDetailsViewModel(ILogger<ProcedureDetailsViewModel> logger) : base(logger)
         {
-            this.Title = "Szczegóły procedury";
+            this.Title = "Szczeg�ly procedury";
         }
 
         public void Initialize(
@@ -68,13 +68,13 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
                     ProcedureType = currentProcedureType,
                     CompletedCount = 0,
                 };
-                this.PageTitle = "Dodaj procedurę";
+                this.PageTitle = "Dodaj procedure";
                 this.RequiredCount = "1";
                 this.CompletedCount = "0";
             }
             else
             {
-                this.PageTitle = "Szczegóły procedury";
+                this.PageTitle = "Szczeg�ly procedury";
                 this.RequiredCount = procedure.RequiredCount.ToString();
                 this.CompletedCount = procedure.CompletedCount.ToString();
                 this.Notes = procedure.Description;
@@ -139,20 +139,20 @@ namespace SledzSpecke.App.Features.Procedures.ViewModels
         {
             if (string.IsNullOrWhiteSpace(this.procedure.Name))
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Nazwa procedury jest wymagana.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Nazwa procedury jest wymagana.", "OK");
                 return;
             }
 
             if (!int.TryParse(this.RequiredCount, out int requiredCount) || requiredCount <= 0)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Wprowadź poprawną wymaganą liczbę procedur.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Wprowadz poprawna wymagana liczbe procedur.", "OK");
                 return;
             }
 
             if (this.InternshipPickerSelectedIndex < 0 ||
                 this.InternshipPickerSelectedIndex >= this.FilteredInternships.Count)
             {
-                await Application.Current.MainPage.DisplayAlert("Błąd", "Wybierz staż, w ramach którego wykonywana jest procedura.", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", "Wybierz staz, w ramach kt�rego wykonywana jest procedura.", "OK");
                 return;
             }
 

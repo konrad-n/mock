@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Common.Converters
@@ -11,7 +11,7 @@ namespace SledzSpecke.App.Common.Converters
             {
                 if (internship.IsCompleted)
                 {
-                    return "Ukończony";
+                    return "Ukonczony";
                 }
 
                 bool isCurrentInternship = internship.StartDate.HasValue && !internship.EndDate.HasValue;
@@ -26,7 +26,7 @@ namespace SledzSpecke.App.Common.Converters
                     return $"Zaplanowany na: {internship.StartDate?.ToString("dd.MM.yyyy")}";
                 }
 
-                return "Oczekujący";
+                return "Oczekujacy";
             }
 
             return string.Empty;

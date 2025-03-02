@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -51,7 +51,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
         public DutyShiftDetailsViewModel(ILogger<DutyShiftDetailsViewModel> logger) : base(logger)
         {
-            this.Title = "Szczegóły dyżuru";
+            this.Title = "Szczeg�ly dyzuru";
         }
 
         public void Initialize(DutyShift dutyShift, Func<DutyShift, Task> onSaveCallback)
@@ -68,7 +68,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     DurationHours = 24,
                     Type = DutyType.Independent,
                 };
-                this.PageTitle = "Dodaj dyżur";
+                this.PageTitle = "Dodaj dyzur";
                 this.DutyTypeSelectedIndex = 0;
                 this.IsSupervisorVisible = false;
             }
@@ -76,7 +76,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             {
                 this.isNewDutyShift = false;
                 this.dutyShift = dutyShift;
-                this.PageTitle = "Edytuj dyżur";
+                this.PageTitle = "Edytuj dyzur";
 
                 this.StartDate = dutyShift.StartDate.Date;
                 this.StartTime = dutyShift.StartDate.TimeOfDay;
@@ -110,7 +110,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
                 if (endDateTime <= startDateTime)
                 {
-                    this.DurationText = "Nieprawidłowy zakres czasu";
+                    this.DurationText = "Nieprawidlowy zakres czasu";
                     return;
                 }
 
@@ -122,7 +122,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
                     {
                         bool continueAnyway = await Application.Current.MainPage.DisplayAlert(
                             "Uwaga",
-                            "Dyżur przekracza 24 godziny. Dyżury powinny zazwyczaj trwać maksymalnie 24 godziny. Czy na pewno chcesz kontynuować?",
+                            "Dyzur przekracza 24 godziny. Dyzury powinny zazwyczaj trwac maksymalnie 24 godziny. Czy na pewno chcesz kontynuowac?",
                             "Tak",
                             "Nie");
 
@@ -158,7 +158,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error updating duration text");
-                this.DurationText = "Błąd obliczania czasu";
+                this.DurationText = "Blad obliczania czasu";
             }
         }
 
@@ -167,7 +167,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
         {
             if (this.dutyShift == null)
             {
-                this.logger?.LogWarning("Próba aktualizacji typu dyżuru gdy dutyShift jest null");
+                this.logger?.LogWarning("Pr�ba aktualizacji typu dyzuru gdy dutyShift jest null");
                 return;
             }
 
@@ -188,7 +188,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             {
                 if (string.IsNullOrWhiteSpace(this.Location))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Miejsce dyżuru jest wymagane.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Miejsce dyzuru jest wymagane.", "OK");
                     return;
                 }
 
@@ -197,13 +197,13 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
 
                 if (endDateTime <= startDateTime)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Data i godzina zakończenia musi być późniejsza niż data i godzina rozpoczęcia.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Data i godzina zakonczenia musi byc p�zniejsza niz data i godzina rozpoczecia.", "OK");
                     return;
                 }
 
                 if (this.dutyShift.Type == DutyType.Accompanied && string.IsNullOrWhiteSpace(this.SupervisorName))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Błąd", "Imię i nazwisko nadzorującego jest wymagane dla dyżuru towarzyszącego.", "OK");
+                    await Application.Current.MainPage.DisplayAlert("Blad", "Imie i nazwisko nadzorujacego jest wymagane dla dyzuru towarzyszacego.", "OK");
                     return;
                 }
 
@@ -233,7 +233,7 @@ namespace SledzSpecke.App.Features.Duties.ViewModels
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error saving duty shift");
-                await Application.Current.MainPage.DisplayAlert("Błąd", $"Wystąpił problem podczas zapisywania dyżuru: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Blad", $"Wystapil problem podczas zapisywania dyzuru: {ex.Message}", "OK");
             }
         }
     }

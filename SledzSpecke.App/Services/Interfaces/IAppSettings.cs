@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.App.Services.Interfaces
+namespace SledzSpecke.App.Services.Interfaces
 {
     public interface IAppSettings
     {

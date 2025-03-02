@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
@@ -54,16 +54,16 @@ namespace SledzSpecke.App.Services.Implementations
                     if (daysUntil == 7)
                     {
                         await this.ScheduleNotificationAsync(
-                            $"Zbliża się kurs: {course.Name}",
-                            $"Kurs rozpoczyna się za tydzień ({course.ScheduledDate.Value:dd.MM.yyyy})",
+                            $"Zbliza sie kurs: {course.Name}",
+                            $"Kurs rozpoczyna sie za tydzien ({course.ScheduledDate.Value:dd.MM.yyyy})",
                             course.Id,
                             NotificationType.Course);
                     }
                     else if (daysUntil == 1)
                     {
                         await this.ScheduleNotificationAsync(
-                            $"Jutro rozpoczyna się kurs: {course.Name}",
-                            $"Kurs rozpoczyna się jutro ({course.ScheduledDate.Value:dd.MM.yyyy})",
+                            $"Jutro rozpoczyna sie kurs: {course.Name}",
+                            $"Kurs rozpoczyna sie jutro ({course.ScheduledDate.Value:dd.MM.yyyy})",
                             course.Id,
                             NotificationType.Course);
                     }
@@ -76,16 +76,16 @@ namespace SledzSpecke.App.Services.Implementations
                     if (daysUntil == 7)
                     {
                         await this.ScheduleNotificationAsync(
-                            $"Zbliża się staż: {internship.Name}",
-                            $"Staż rozpoczyna się za tydzień ({internship.StartDate.Value:dd.MM.yyyy})",
+                            $"Zbliza sie staz: {internship.Name}",
+                            $"Staz rozpoczyna sie za tydzien ({internship.StartDate.Value:dd.MM.yyyy})",
                             internship.Id,
                             NotificationType.Internship);
                     }
                     else if (daysUntil == 1)
                     {
                         await this.ScheduleNotificationAsync(
-                            $"Jutro rozpoczyna się staż: {internship.Name}",
-                            $"Staż rozpoczyna się jutro ({internship.StartDate.Value:dd.MM.yyyy})",
+                            $"Jutro rozpoczyna sie staz: {internship.Name}",
+                            $"Staz rozpoczyna sie jutro ({internship.StartDate.Value:dd.MM.yyyy})",
                             internship.Id,
                             NotificationType.Internship);
                     }
@@ -99,16 +99,16 @@ namespace SledzSpecke.App.Services.Implementations
                     if (daysUntilEnd == 30)
                     {
                         await this.ScheduleNotificationAsync(
-                            "Zbliża się koniec modułu podstawowego",
-                            $"Moduł podstawowy kończy się za miesiąc ({endOfBasicModule:dd.MM.yyyy})",
+                            "Zbliza sie koniec modulu podstawowego",
+                            $"Modul podstawowy konczy sie za miesiac ({endOfBasicModule:dd.MM.yyyy})",
                             0,
                             NotificationType.ModuleEnd);
                     }
                     else if (daysUntilEnd == 7)
                     {
                         await this.ScheduleNotificationAsync(
-                            "Zbliża się koniec modułu podstawowego",
-                            $"Moduł podstawowy kończy się za tydzień ({endOfBasicModule:dd.MM.yyyy})",
+                            "Zbliza sie koniec modulu podstawowego",
+                            $"Modul podstawowy konczy sie za tydzien ({endOfBasicModule:dd.MM.yyyy})",
                             0,
                             NotificationType.ModuleEnd);
                     }

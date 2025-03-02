@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Duties.ViewModels;
 
 namespace SledzSpecke.App.Features.Duties.Views
@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Features.Duties.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się załadować dyżurów.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zaladowac dyzur�w.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in DutyShiftsPage: {ex}");
             }
         }

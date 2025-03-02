@@ -1,4 +1,4 @@
-﻿using SledzSpecke.App.Common.Views;
+using SledzSpecke.App.Common.Views;
 using SledzSpecke.App.Features.Duties.ViewModels;
 using SledzSpecke.Core.Models;
 
@@ -27,7 +27,7 @@ namespace SledzSpecke.App.Features.Duties.Views
             }
             catch (Exception ex)
             {
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować strony szczegółów dyżuru.", "OK");
+                await this.DisplayAlert("Blad", "Nie udalo sie zainicjalizowac strony szczeg�l�w dyzuru.", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error in DutyShiftDetailsPage: {ex}");
             }
         }

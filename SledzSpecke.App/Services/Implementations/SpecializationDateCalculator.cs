@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Core.Models.Enums;
@@ -40,7 +40,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Błąd podczas obliczania oczekiwanej daty zakończenia specjalizacji");
+                this.logger.LogError(ex, "Blad podczas obliczania oczekiwanej daty zakonczenia specjalizacji");
                 throw;
             }
         }
@@ -68,7 +68,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Błąd podczas obliczania dostępnych dni samokształcenia");
+                this.logger.LogError(ex, "Blad podczas obliczania dostepnych dni samoksztalcenia");
                 throw;
             }
         }
@@ -89,8 +89,8 @@ namespace SledzSpecke.App.Services.Implementations
                 dates.Add(new SpecializationDateInfo
                 {
                     Date = specialization.StartDate,
-                    Title = "Rozpoczęcie specjalizacji",
-                    Description = "Data rozpoczęcia szkolenia specjalizacyjnego",
+                    Title = "Rozpoczecie specjalizacji",
+                    Description = "Data rozpoczecia szkolenia specjalizacyjnego",
                     Type = DateType.Start,
                     IsPast = specialization.StartDate < now,
                 });
@@ -99,8 +99,8 @@ namespace SledzSpecke.App.Services.Implementations
                 dates.Add(new SpecializationDateInfo
                 {
                     Date = basicModuleEndDate,
-                    Title = "Zakończenie modułu podstawowego",
-                    Description = "Planowana data zakończenia modułu podstawowego",
+                    Title = "Zakonczenie modulu podstawowego",
+                    Description = "Planowana data zakonczenia modulu podstawowego",
                     Type = DateType.ModuleEnd,
                     IsPast = basicModuleEndDate < now,
                     DaysRemaining = (int)Math.Max(0, (basicModuleEndDate - now).TotalDays),
@@ -110,8 +110,8 @@ namespace SledzSpecke.App.Services.Implementations
                 dates.Add(new SpecializationDateInfo
                 {
                     Date = expectedEndDate,
-                    Title = "Zakończenie specjalizacji",
-                    Description = "Oczekiwana data zakończenia specjalizacji z uwzględnieniem nieobecności",
+                    Title = "Zakonczenie specjalizacji",
+                    Description = "Oczekiwana data zakonczenia specjalizacji z uwzglednieniem nieobecnosci",
                     Type = DateType.End,
                     IsPast = expectedEndDate < now,
                     DaysRemaining = (int)Math.Max(0, (expectedEndDate - now).TotalDays),
@@ -149,8 +149,8 @@ namespace SledzSpecke.App.Services.Implementations
                         dates.Add(new SpecializationDateInfo
                         {
                             Date = internship.StartDate.Value,
-                            Title = $"Staż: {internship.Name}",
-                            Description = $"Rozpoczęcie stażu kierunkowego",
+                            Title = $"Staz: {internship.Name}",
+                            Description = $"Rozpoczecie stazu kierunkowego",
                             Type = DateType.Internship,
                             IsPast = internship.StartDate.Value < now,
                             DaysRemaining = (int)Math.Max(0, (internship.StartDate.Value - now).TotalDays),
@@ -172,8 +172,8 @@ namespace SledzSpecke.App.Services.Implementations
                     dates.Add(new SpecializationDateInfo
                     {
                         Date = yearEndWarningDate,
-                        Title = "Dni samokształcenia",
-                        Description = $"Pozostało {remainingEducationDays} dni samokształcenia w {currentYear} roku",
+                        Title = "Dni samoksztalcenia",
+                        Description = $"Pozostalo {remainingEducationDays} dni samoksztalcenia w {currentYear} roku",
                         Type = DateType.Warning,
                         IsPast = false,
                         DaysRemaining = (int)(new DateTime(currentYear, 12, 31, 0, 0, 0, DateTimeKind.Local) - now).TotalDays,
@@ -184,7 +184,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Błąd podczas generowania ważnych dat specjalizacji");
+                this.logger.LogError(ex, "Blad podczas generowania waznych dat specjalizacji");
                 throw;
             }
         }

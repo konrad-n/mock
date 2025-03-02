@@ -1,14 +1,14 @@
-﻿namespace SledzSpecke.Core.Models.Enums
+namespace SledzSpecke.Core.Models.Enums
 {
     public enum AbsenceType
     {
         SickLeave, // L4
         VacationLeave,  // Urlop wypoczynkowy
         SelfEducationLeave,  // Urlop szkoleniowy (6 dni rocznie)
-        MaternityLeave,  // Urlop macierzyński
+        MaternityLeave,  // Urlop macierzynski
         ParentalLeave,  // Urlop rodzicielski
-        SpecialLeave,  // Urlop okolicznościowy
-        UnpaidLeave, // Urlop bezpłatny
+        SpecialLeave,  // Urlop okolicznosciowy
+        UnpaidLeave, // Urlop bezplatny
         Other, // Inne
     }
 }
