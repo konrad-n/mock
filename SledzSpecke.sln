@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Core", "SledzSp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Infrastructure", "SledzSpecke.Infrastructure\SledzSpecke.Infrastructure.csproj", "{2C5D475A-5B4D-4899-B90F-52320EF9CB14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Tests", "SledzSpecke.Tests\SledzSpecke.Tests.csproj", "{B59FD826-8611-4D2B-947B-FE33C8F7A9CC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,10 +28,6 @@ Global
 		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B59FD826-8611-4D2B-947B-FE33C8F7A9CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B59FD826-8611-4D2B-947B-FE33C8F7A9CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B59FD826-8611-4D2B-947B-FE33C8F7A9CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B59FD826-8611-4D2B-947B-FE33C8F7A9CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
