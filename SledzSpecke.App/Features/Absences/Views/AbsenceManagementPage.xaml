@@ -164,20 +164,20 @@
                                               IsVisible="{Binding AffectsSpecializationLength}"/>
                                     </VerticalStackLayout>
 
-                                    <!-- Edit button - poprawione wiązanie -->
+                                    <!-- Edit button -->
                                     <Button Text="✏️"
-                                       FontSize="18"
-                                       BackgroundColor="Transparent"
-                                       BorderColor="Transparent"
-                                       TextColor="{AppThemeBinding Light=#0D759C, Dark=#4FC3F7}"
-                                       Padding="0"
-                                       HeightRequest="40"
-                                       WidthRequest="40"
-                                       HorizontalOptions="End"
-                                       VerticalOptions="Start"
-                                       Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:AbsenceManagementViewModel}}, Path=EditAbsenceCommand}"
-                                       CommandParameter="{Binding Id}"
-                                       Grid.Column="2"/>
+                                            FontSize="18"
+                                            BackgroundColor="Transparent"
+                                            BorderColor="Transparent"
+                                            TextColor="{AppThemeBinding Light=#0D759C, Dark=#4FC3F7}"
+                                            Padding="0"
+                                            HeightRequest="40"
+                                            WidthRequest="40"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Start"
+                                            Clicked="OnEditButtonClicked"
+                                            ClassId="{Binding Id}"
+                                            Grid.Column="2"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

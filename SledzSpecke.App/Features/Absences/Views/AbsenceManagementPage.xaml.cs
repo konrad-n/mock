@@ -82,5 +82,13 @@ namespace SledzSpecke.App.Features.Absences.Views
                 this.viewModel.FilterByYearCommand.Execute(picker.SelectedIndex);
             }
         }
+
+        private void OnEditButtonClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && int.TryParse(button.ClassId, out int absenceId))
+            {
+                this.viewModel.EditAbsenceCommand.Execute(absenceId);
+            }
+        }
     }
 }
