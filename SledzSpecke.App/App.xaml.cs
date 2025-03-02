@@ -43,42 +43,6 @@ namespace SledzSpecke.App
             }
         }
 
-        private async Task InitializeAsync()
-        {
-            try
-            {
-                this.logger.LogInformation("Starting app initialization");
-
-                await this.databaseService.InitAsync();
-                this.logger.LogDebug("Database initialized");
-
-                var userSeeded = await this.authenticationService.SeedTestUserAsync();
-                this.logger.LogDebug("Test user seeded: {Result}", userSeeded);
-
-                await this.appSettings.LoadAsync();
-                this.logger.LogDebug("Settings loaded");
-
-                bool useDarkTheme = this.appSettings.GetSetting<bool>("UseDarkTheme");
-                Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
-                this.logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
-
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
-                });
-
-                this.logger.LogInformation("Application initialized successfully");
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Error initializing application");
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
-                });
-            }
-        }
-
         protected override void OnStart()
         {
             try
@@ -115,20 +79,40 @@ namespace SledzSpecke.App
             }
         }
 
-        // Tymczasowa metoda pomocnicza do uzyskania serwisu
-        // Docelowo należy usunąć tę metodę, gdy wszystkie strony będą używać DI
-        public static TService GetService<TService>(IElement element) where TService : class
+        private async Task InitializeAsync()
         {
-            if (element.Handler?.MauiContext == null)
-                throw new InvalidOperationException("Element handler is not initialized");
+            try
+            {
+                this.logger.LogInformation("Starting app initialization");
 
-            var services = element.Handler.MauiContext.Services;
-            var service = services.GetService<TService>();
+                await this.databaseService.InitAsync();
+                this.logger.LogDebug("Database initialized");
 
-            if (service == null)
-                throw new InvalidOperationException($"Service {typeof(TService).Name} not found");
+                var userSeeded = await this.authenticationService.SeedTestUserAsync();
+                this.logger.LogDebug("Test user seeded: {Result}", userSeeded);
 
-            return service;
+                await this.appSettings.LoadAsync();
+                this.logger.LogDebug("Settings loaded");
+
+                bool useDarkTheme = this.appSettings.GetSetting<bool>("UseDarkTheme");
+                Application.Current.UserAppTheme = useDarkTheme ? AppTheme.Dark : AppTheme.Light;
+                this.logger.LogDebug("Theme applied: {Theme}", useDarkTheme ? "Dark" : "Light");
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                });
+
+                this.logger.LogInformation("Application initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error initializing application");
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                });
+            }
         }
     }
 }

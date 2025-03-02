@@ -55,7 +55,7 @@ namespace SledzSpecke.App
         {
             if (this.authenticationService.IsAuthenticated)
             {
-                this.UserNameLabel.Text = this. authenticationService.CurrentUser.Username;
+                this.UserNameLabel.Text = this.authenticationService.CurrentUser.Username;
 
                 try
                 {
