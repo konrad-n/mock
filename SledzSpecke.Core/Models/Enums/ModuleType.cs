@@ -3,6 +3,6 @@
     public enum ModuleType
     {
         Basic,
-        Specialistic
+        Specialistic,
     }
 }

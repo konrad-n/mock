@@ -14,3 +14,9 @@ dotnet_diagnostic.SA1600.severity = none
 
 # Disable SA1633 (The file header is missing or not located at the top of the file)
 dotnet_diagnostic.SA1633.severity = none
+
+# Disable SA1602 (Document enums)
+dotnet_diagnostic.SA1602.severity = none
+
+# Disable CS8618
+dotnet_diagnostic.CS8618.severity = none

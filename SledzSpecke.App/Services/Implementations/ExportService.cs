@@ -21,7 +21,7 @@ namespace SledzSpecke.App.Services.Implementations
             this.logger = logger;
         }
 
-        public async Task<string> ExportToSMKAsync(SMKExportOptions options)
+        public async Task<string> ExportToSMKAsync(SmkExportOptions options)
         {
             try
             {
@@ -36,15 +36,15 @@ namespace SledzSpecke.App.Services.Implementations
                 string filePath = string.Empty;
 
                 // Export based on selected type
-                if (options.ExportType == SMKExportType.General)
+                if (options.ExportType == SmkExportType.General)
                 {
                     filePath = await this.ExportGeneralToExcelAsync(specialization, options);
                 }
-                else if (options.ExportType == SMKExportType.Procedures)
+                else if (options.ExportType == SmkExportType.Procedures)
                 {
                     filePath = await this.ExportProceduresToExcelAsync(specialization, options);
                 }
-                else if (options.ExportType == SMKExportType.DutyShifts)
+                else if (options.ExportType == SmkExportType.DutyShifts)
                 {
                     filePath = await this.ExportDutyShiftsToExcelAsync(specialization, options);
                 }
@@ -59,7 +59,7 @@ namespace SledzSpecke.App.Services.Implementations
             }
         }
 
-        private async Task<string> ExportGeneralToExcelAsync(Specialization specialization, SMKExportOptions options)
+        private async Task<string> ExportGeneralToExcelAsync(Specialization specialization, SmkExportOptions options)
         {
             // Load related data
             var courses = await this.databaseService.QueryAsync<Course>("SELECT * FROM Courses WHERE SpecializationId = ?", specialization.Id);
@@ -188,7 +188,7 @@ namespace SledzSpecke.App.Services.Implementations
             return filePath;
         }
 
-        private async Task<string> ExportProceduresToExcelAsync(Specialization specialization, SMKExportOptions options)
+        private async Task<string> ExportProceduresToExcelAsync(Specialization specialization, SmkExportOptions options)
         {
             // Create a unique filename
             string fileName = $"SMK_Procedury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
@@ -317,7 +317,7 @@ namespace SledzSpecke.App.Services.Implementations
             return filePath;
         }
 
-        private async Task<string> ExportDutyShiftsToExcelAsync(Specialization specialization, SMKExportOptions options)
+        private async Task<string> ExportDutyShiftsToExcelAsync(Specialization specialization, SmkExportOptions options)
         {
             // Create a unique filename
             string fileName = $"SMK_Dyzury_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
@@ -400,7 +400,7 @@ namespace SledzSpecke.App.Services.Implementations
             return filePath;
         }
 
-        private async Task<string> ExportToCsvAsync(List<Dictionary<string, string>> data, SMKExportOptions options)
+        private async Task<string> ExportToCsvAsync(List<Dictionary<string, string>> data, SmkExportOptions options)
         {
             // Create a unique filename
             string fileName = $"SMK_Export_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
@@ -438,13 +438,13 @@ namespace SledzSpecke.App.Services.Implementations
             return value;
         }
 
-        private bool FilterByModule(ModuleType module, SMKExportModuleFilter filter)
+        private bool FilterByModule(ModuleType module, SmkExportModuleFilter filter)
         {
             return filter switch
             {
-                SMKExportModuleFilter.All => true,
-                SMKExportModuleFilter.BasicOnly => module == ModuleType.Basic,
-                SMKExportModuleFilter.SpecialisticOnly => module == ModuleType.Specialistic,
+                SmkExportModuleFilter.All => true,
+                SmkExportModuleFilter.BasicOnly => module == ModuleType.Basic,
+                SmkExportModuleFilter.SpecialisticOnly => module == ModuleType.Specialistic,
                 _ => true
             };
         }

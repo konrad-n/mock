@@ -1,12 +1,13 @@
-﻿using SQLite;
-using System;
+﻿using System;
+using SQLite;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("UserSettings")]
     public class UserSettings
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string Username { get; set; }

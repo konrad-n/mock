@@ -15,6 +15,7 @@ using SledzSpecke.App.Common.ViewModels;
 using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
+using SledzSpecke.Core.Models.Enums;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App.Features.Absences.ViewModels

@@ -1,9 +1,9 @@
 ﻿namespace SledzSpecke.Core.Models.Enums
 {
-    public enum SMKExportType
+    public enum SmkExportType
     {
         General,
         Procedures,
-        DutyShifts
+        DutyShifts,
     }
 }

@@ -3,6 +3,6 @@
     public enum ProcedureType
     {
         TypeA,
-        TypeB
+        TypeB,
     }
 }

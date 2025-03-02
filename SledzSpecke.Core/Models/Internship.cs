@@ -1,17 +1,19 @@
-﻿using SledzSpecke.Core.Models.Enums;
-using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SledzSpecke.Core.Models.Enums;
+using SQLite;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("Internships")]
     public class Internship
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
-        [MaxLength(255), Indexed]
+        [MaxLength(255)]
+        [Indexed]
         public string Name { get; set; }
 
         public string Description { get; set; }

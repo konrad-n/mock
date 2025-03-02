@@ -1,12 +1,14 @@
-﻿using SQLite;
-using System;
+﻿using System;
+using SledzSpecke.Core.Models.Enums;
+using SQLite;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("Absences")]
     public class Absence
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -28,17 +30,5 @@ namespace SledzSpecke.Core.Models
         public int SpecializationId { get; set; }
 
         public int Year { get; set; }
-    }
-
-    public enum AbsenceType
-    {
-        SickLeave,            // L4
-        VacationLeave,        // Urlop wypoczynkowy
-        SelfEducationLeave,   // Urlop szkoleniowy (6 dni rocznie)
-        MaternityLeave,       // Urlop macierzyński
-        ParentalLeave,        // Urlop rodzicielski
-        SpecialLeave,         // Urlop okolicznościowy
-        UnpaidLeave,          // Urlop bezpłatny
-        Other                 // Inne
     }
 }

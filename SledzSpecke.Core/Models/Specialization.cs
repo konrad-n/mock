@@ -1,18 +1,20 @@
-﻿using SledzSpecke.Core.Models.Enums;
-using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SledzSpecke.Core.Models.Enums;
+using SQLite;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("Specializations")]
     public class Specialization
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
-        [MaxLength(100), Indexed]
+        [MaxLength(100)]
+        [Indexed]
         public string Name { get; set; }
 
         public DateTime StartDate { get; set; }
@@ -77,16 +79,22 @@ namespace SledzSpecke.Core.Models
 
             // Add course dates
             foreach (var course in this.RequiredCourses.Where(c => !c.IsCompleted && c.ScheduledDate.HasValue))
-                dates.Add(course.ScheduledDate.Value);
+            {
+                dates.Add(course.ScheduledDate!.Value);
+            }
 
             // Add internship dates
             foreach (var internship in this.RequiredInternships.Where(i => !i.IsCompleted && i.StartDate.HasValue))
-                dates.Add(internship.StartDate.Value);
+            {
+                dates.Add(internship.StartDate!.Value);
+            }
 
             // Add end of basic module
             var endOfBasicModule = this.StartDate.AddDays(this.BasicModuleDurationWeeks * 7);
             if (endOfBasicModule > DateTime.Now)
+            {
                 dates.Add(endOfBasicModule);
+            }
 
             return dates.OrderBy(d => d).ToList();
         }

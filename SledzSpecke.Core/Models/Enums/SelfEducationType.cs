@@ -7,6 +7,6 @@
         Course,
         ScientificMeeting,
         Publication,
-        Other
+        Other,
     }
 }

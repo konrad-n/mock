@@ -1,16 +1,18 @@
-﻿using SledzSpecke.Core.Models.Enums;
+﻿using System;
+using SledzSpecke.Core.Models.Enums;
 using SQLite;
-using System;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("SelfEducation")]
     public class SelfEducation
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
-        [MaxLength(255), Indexed]
+        [MaxLength(255)]
+        [Indexed]
         public string Title { get; set; }
 
         public SelfEducationType Type { get; set; }

@@ -1,15 +1,16 @@
 ﻿using SQLite;
-using System;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("SpecializationTypes")]
     public class SpecializationType
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
-        [MaxLength(100), Indexed]
+        [MaxLength(100)]
+        [Indexed]
         public string Name { get; set; }
 
         public string Description { get; set; }

@@ -11,7 +11,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
     public partial class SMKExportViewModel : ViewModelBase
     {
         private readonly IExportService exportService;
-        private SMKExportOptions _exportOptions;
+        private SmkExportOptions _exportOptions;
 
         [ObservableProperty]
         private bool _isGeneralExportSelected = true;
@@ -75,7 +75,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
             ILogger<SMKExportViewModel> logger) : base(logger)
         {
             this.exportService = exportService;
-            this._exportOptions = new SMKExportOptions();
+            this._exportOptions = new SmkExportOptions();
             this.Title = "Eksport do SMK";
         }
 
@@ -87,7 +87,7 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 
         private void SetupInitialState()
         {
-            this._exportOptions = new SMKExportOptions();
+            this._exportOptions = new SmkExportOptions();
             this.IsGeneralExportSelected = true;
             this.IsProcedureExportSelected = false;
             this.IsDutyShiftExportSelected = false;
@@ -170,11 +170,11 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
                 }
 
                 // Set export options
-                this._exportOptions = new SMKExportOptions
+                this._exportOptions = new SmkExportOptions
                 {
-                    ExportType = this.IsGeneralExportSelected ? SMKExportType.General :
-                                  this.IsProcedureExportSelected ? SMKExportType.Procedures :
-                                  SMKExportType.DutyShifts,
+                    ExportType = this.IsGeneralExportSelected ? SmkExportType.General :
+                                  this.IsProcedureExportSelected ? SmkExportType.Procedures :
+                                  SmkExportType.DutyShifts,
 
                     IncludeCourses = this.IncludeCoursesChecked,
                     IncludeInternships = this.IncludeInternshipsChecked,
@@ -182,9 +182,9 @@ namespace SledzSpecke.App.Features.SMKExport.ViewModels
 
                     Format = this.FormatSelectedIndex == 0 ? ExportFormat.Excel : ExportFormat.CSV,
 
-                    ModuleFilter = this.IsAllModulesSelected ? SMKExportModuleFilter.All :
-                                   this.IsBasicModuleSelected ? SMKExportModuleFilter.BasicOnly :
-                                   SMKExportModuleFilter.SpecialisticOnly,
+                    ModuleFilter = this.IsAllModulesSelected ? SmkExportModuleFilter.All :
+                                   this.IsBasicModuleSelected ? SmkExportModuleFilter.BasicOnly :
+                                   SmkExportModuleFilter.SpecialisticOnly,
 
                     UseCustomDateRange = this.IsCustomDatesSelected,
                     StartDate = this.IsCustomDatesSelected ? this.StartDate : null,

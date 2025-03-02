@@ -1,12 +1,13 @@
-﻿using SQLite;
-using System;
+﻿using System;
+using SQLite;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("ProcedureEntries")]
     public class ProcedureEntry
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public DateTime Date { get; set; }
@@ -24,9 +25,13 @@ namespace SledzSpecke.Core.Models
 
         // New fields according to SMK manual requirements
         public string PatientGender { get; set; } // Patient gender
+
         public string FirstAssistantData { get; set; } // First assistant data
+
         public string SecondAssistantData { get; set; } // Second assistant data
+
         public string ProcedureGroup { get; set; } // "Procedura z grupy"
+
         public string InternshipName { get; set; } // Internship name
     }
 }

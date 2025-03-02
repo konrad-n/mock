@@ -3,6 +3,6 @@
     public enum DutyType
     {
         Accompanied,
-        Independent
+        Independent,
     }
 }

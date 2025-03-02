@@ -1,13 +1,14 @@
-﻿using SledzSpecke.Core.Models.Enums;
+﻿using System;
+using SledzSpecke.Core.Models.Enums;
 using SQLite;
-using System;
 
 namespace SledzSpecke.Core.Models
 {
     [Table("DutyShifts")]
     public class DutyShift
     {
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public DateTime StartDate { get; set; }
