@@ -32,67 +32,67 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         /// Specjalizacja.
         /// </summary>
         [ObservableProperty]
-        private Specialization specialization = null!;
+        private Specialization _specialization = null!;
 
         /// <summary>
         /// Wszystkie nieobecności.
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<Absence> allAbsences = new ();
+        private ObservableCollection<Absence> _allAbsences = new();
 
         /// <summary>
         /// Przefiltrowane nieobecności.
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<Absence> filteredAbsences = new ();
+        private ObservableCollection<Absence> _filteredAbsences = new();
 
         /// <summary>
         /// Wybrany typ nieobecności.
         /// </summary>
         [ObservableProperty]
-        private AbsenceType? selectedAbsenceType;
+        private AbsenceType? _selectedAbsenceType;
 
         /// <summary>
         /// Wybrany rok.
         /// </summary>
         [ObservableProperty]
-        private int? selectedYear;
+        private int? _selectedYear;
 
         /// <summary>
         /// Etykieta planowanej daty zakończenia specjalizacji.
         /// </summary>
         [ObservableProperty]
-        private string plannedEndDateLabel = string.Empty;
+        private string _plannedEndDateLabel = string.Empty;
 
         /// <summary>
         /// Etykieta faktycznej daty zakończenia specjalizacji.
         /// </summary>
         [ObservableProperty]
-        private string actualEndDateLabel = string.Empty;
+        private string _actualEndDateLabel = string.Empty;
 
         /// <summary>
         /// Etykieta dni samokształcenia.
         /// </summary>
         [ObservableProperty]
-        private string selfEducationDaysLabel = string.Empty;
+        private string _selfEducationDaysLabel = string.Empty;
 
         /// <summary>
         /// Etykieta sumy dni nieobecności.
         /// </summary>
         [ObservableProperty]
-        private string totalAbsenceDaysLabel = string.Empty;
+        private string _totalAbsenceDaysLabel = string.Empty;
 
         /// <summary>
         /// Określa, czy komunikat o braku nieobecności jest widoczny.
         /// </summary>
         [ObservableProperty]
-        private bool isNoAbsencesVisible;
+        private bool _isNoAbsencesVisible;
 
         /// <summary>
         /// Dostępne lata.
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<int> availableYears = new ();
+        private ObservableCollection<int> _availableYears = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsenceManagementViewModel"/> class.

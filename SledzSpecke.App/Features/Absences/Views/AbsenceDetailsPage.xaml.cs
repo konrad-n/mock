@@ -75,10 +75,7 @@ namespace SledzSpecke.App.Features.Absences.Views
         /// <param name="e">Argumenty zdarzenia.</param>
         private void OnDateSelected(object sender, DateChangedEventArgs e)
         {
-            if (this.viewModel is not null)
-            {
-                this.viewModel.CalculateDuration();
-            }
+            this.viewModel?.CalculateDuration();
         }
     }
 }

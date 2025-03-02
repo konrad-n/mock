@@ -16,6 +16,8 @@
             <converters:AbsenceIconTextConverter x:Key="AbsenceIconTextConverter" />
             <converters:AbsenceDateRangeConverter x:Key="AbsenceDateRangeConverter" />
             <converters:AbsenceSpecializationAffectionConverter x:Key="AbsenceSpecializationAffectionConverter" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -173,7 +175,7 @@
                                             WidthRequest="40"
                                             HorizontalOptions="End"
                                             VerticalOptions="Start"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:AbsenceManagementViewModel}}, Path=EditAbsenceCommand}"
+                                            Command="{Binding Path=EditAbsenceCommand, Source={RelativeSource AncestorType={x:Type viewmodels:AbsenceManagementViewModel}}}"
                                             CommandParameter="{Binding Id}"
                                             Grid.Column="2"/>
                                 </Grid>
