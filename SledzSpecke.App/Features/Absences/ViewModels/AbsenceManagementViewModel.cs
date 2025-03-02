@@ -345,7 +345,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         [RelayCommand]
         private async Task AddAbsenceAsync()
         {
-            await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(null, this.OnAbsenceAdded));
+            await Shell.Current.Navigation.PushAsync(new AbsenceDetailsPage(absence: null, this.OnAbsenceAdded));
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace SledzSpecke.App.Features.Absences.Views
     /// </summary>
     public partial class AbsenceDetailsPage : BaseContentPage
     {
-        private readonly Absence absence;
+        private readonly Absence? absence;
         private readonly Action<Absence> onSaveCallback;
         private AbsenceDetailsViewModel viewModel = null!;
 
@@ -28,7 +28,7 @@ namespace SledzSpecke.App.Features.Absences.Views
         /// <param name="absence">Nieobecność do edycji lub null dla nowej nieobecności.</param>
         /// <param name="onSaveCallback">Wywołanie zwrotne po zapisaniu nieobecności.</param>
         public AbsenceDetailsPage(
-            Absence absence,
+            Absence? absence,
             Action<Absence> onSaveCallback)
         {
             this.InitializeComponent();
