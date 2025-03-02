@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+          xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+          xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.SelfEducations.ViewModels"
+          xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
           x:Class="SledzSpecke.App.Features.SelfEducations.Views.SelfEducationDetailsPage"
+          x:DataType="viewmodels:SelfEducationDetailsViewModel"
           Title="{Binding PageTitle}">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <Label Text="Dane wydarzenia" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
             <Label Text="Tytuł" FontAttributes="Bold"/>
-            <Entry x:Name="TitleEntry" Placeholder="Wprowadź tytuł wydarzenia" Text="{Binding Title}"/>
+            <Entry x:Name="TitleEntry" Placeholder="Wprowadź tytuł wydarzenia" Text="{Binding SelfEducationTitle}"/>
 
             <Label Text="Typ wydarzenia" FontAttributes="Bold"/>
-            <Picker x:Name="TypePicker" Title="Wybierz typ wydarzenia" SelectedIndexChanged="OnTypePickerSelectedIndexChanged">
+            <Picker x:Name="TypePicker" Title="Wybierz typ wydarzenia" 
+                    SelectedIndex="{Binding TypePickerSelectedIndex}"
+                    SelectedIndexChanged="OnTypePickerSelectedIndexChanged">
                 <Picker.Items>
                     <x:String>Konferencja</x:String>
                     <x:String>Warsztaty</x:String>
@@ -43,15 +49,15 @@
             </StackLayout>
 
             <Label Text="Załączniki" FontAttributes="Bold" Margin="0,10,0,0"/>
-            <Button Text="Dodaj certyfikat/zaświadczenie" Clicked="OnAddAttachmentClicked"/>
+            <Button Text="Dodaj certyfikat/zaświadczenie" Command="{Binding AddAttachmentCommand}"/>
 
             <Label Text="Notatki" FontAttributes="Bold"/>
             <Editor x:Name="NotesEditor" Placeholder="Wprowadź dodatkowe informacje" HeightRequest="100" Text="{Binding Notes}"/>
 
             <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" Margin="0,20,0,0">
-                <Button Text="Anuluj" Clicked="OnCancelClicked" WidthRequest="120" BackgroundColor="#547E9E"/>
-                <Button Text="Zapisz" Clicked="OnSaveClicked" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
+                <Button Text="Anuluj" Command="{Binding CancelCommand}" WidthRequest="120" BackgroundColor="#547E9E"/>
+                <Button Text="Zapisz" Command="{Binding SaveCommand}" WidthRequest="120" BackgroundColor="#082044" TextColor="White"/>
             </StackLayout>
         </VerticalStackLayout>
     </ScrollView>
-</ContentPage>
+</common:BaseContentPage>
