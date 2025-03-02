@@ -1,10 +1,30 @@
-﻿using System.Globalization;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SelfEducationTypeColorConverter.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Konwerter typu samokształcenia na kolor.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System.Globalization;
 using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
 {
+    /// <summary>
+    /// Konwerter typu samokształcenia na kolor.
+    /// </summary>
     public class SelfEducationTypeColorConverter : BaseConverter
     {
+        /// <summary>
+        /// Konwertuje typ samokształcenia na odpowiedni kolor.
+        /// </summary>
+        /// <param name="value">Wartość reprezentująca typ samokształcenia.</param>
+        /// <param name="targetType">Typ docelowy.</param>
+        /// <param name="parameter">Parametr konwersji.</param>
+        /// <param name="culture">Kultura używana w konwersji.</param>
+        /// <returns>Kolor odpowiadający typowi samokształcenia.</returns>
         public override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is SelfEducationType type)
