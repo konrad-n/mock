@@ -126,7 +126,7 @@ namespace SledzSpecke.App.Services.Implementations
                 });
 
                 // Oblicz i dodaj oczekiwaną datę zakończenia specjalizacji
-                DateTime expectedEndDate = await CalculateExpectedEndDateAsync(specializationId);
+                DateTime expectedEndDate = await this.CalculateExpectedEndDateAsync(specializationId);
                 dates.Add(new SpecializationDateInfo
                 {
                     Date = expectedEndDate,
