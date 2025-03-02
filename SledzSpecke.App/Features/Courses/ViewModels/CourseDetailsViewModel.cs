@@ -10,7 +10,6 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
     public partial class CourseDetailsViewModel : ViewModelBase
     {
         private Course _course;
-        private ModuleType _currentModule;
         private Func<Course, Task> _onSaveCallback;
 
         [ObservableProperty]
@@ -49,7 +48,6 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
 
         public void Initialize(Course course, ModuleType currentModule, Func<Course, Task> onSaveCallback)
         {
-            this._currentModule = currentModule;
             this._onSaveCallback = onSaveCallback;
 
             if (course == null)
@@ -59,8 +57,9 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                 {
                     Id = new Random().Next(1000, 9999), // Tymczasowe ID
                     Module = currentModule,
-                    IsRequired = true
+                    IsRequired = true,
                 };
+
                 this.PageTitle = "Dodaj kurs";
                 this.ModulePickerSelectedIndex = currentModule == ModuleType.Basic ? 0 : 1;
                 this.StatusPickerSelectedIndex = 0; // Domyślnie "Oczekujący"
@@ -82,14 +81,18 @@ namespace SledzSpecke.App.Features.Courses.ViewModels
                     this.IsCompletionDateVisible = true;
                     this.IsCompletionVisible = true;
                     if (course.CompletionDate.HasValue)
+                    {
                         this.CompletionDate = course.CompletionDate.Value;
+                    }
                 }
                 else if (course.IsAttended)
                 {
                     this.StatusPickerSelectedIndex = 2; // Zarejestrowany
                     this.IsDateVisible = true;
                     if (course.ScheduledDate.HasValue)
+                    {
                         this.CourseDate = course.ScheduledDate.Value;
+                    }
                 }
                 else if (course.ScheduledDate.HasValue)
                 {
