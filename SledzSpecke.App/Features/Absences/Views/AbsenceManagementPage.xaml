@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <common:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-            xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
-            xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Absences.ViewModels"
-            xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
-            xmlns:models="clr-namespace:SledzSpecke.Core.Models;assembly=SledzSpecke.Core"
-            x:Class="SledzSpecke.App.Features.Absences.Views.AbsenceManagementPage"
-            x:DataType="viewmodels:AbsenceManagementViewModel"
-            Title="{Binding Title}">
+           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+           xmlns:common="clr-namespace:SledzSpecke.App.Common.Views"
+           xmlns:viewmodels="clr-namespace:SledzSpecke.App.Features.Absences.ViewModels"
+           xmlns:converters="clr-namespace:SledzSpecke.App.Common.Converters"
+           xmlns:models="clr-namespace:SledzSpecke.Core.Models;assembly=SledzSpecke.Core"
+           x:Class="SledzSpecke.App.Features.Absences.Views.AbsenceManagementPage"
+           x:DataType="viewmodels:AbsenceManagementViewModel"
+           Title="{Binding Title}">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -24,58 +24,58 @@
     <Grid RowDefinitions="Auto,*">
         <!-- Dashboard for absence information -->
         <Border Margin="15" Padding="15" StrokeShape="RoundRectangle 10" Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
-               BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}">
+              BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}">
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                 <!-- End date info -->
                 <VerticalStackLayout Grid.Row="0" Grid.Column="0">
                     <Label Text="Planowany koniec specjalizacji" FontSize="14" 
-                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                          TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
                     <Label Text="{Binding PlannedEndDateLabel}" FontSize="18" FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                          TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                 </VerticalStackLayout>
 
                 <!-- End date with absences -->
                 <VerticalStackLayout Grid.Row="0" Grid.Column="1">
                     <Label Text="Koniec z nieobecnościami" FontSize="14" 
-                           TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                          TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
                     <Label Text="{Binding ActualEndDateLabel}" FontSize="18" FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light=#FF9800, Dark=#FFAB40}"/>
+                          TextColor="{AppThemeBinding Light=#FF9800, Dark=#FFAB40}"/>
                 </VerticalStackLayout>
 
                 <!-- Self-education days -->
                 <Border Grid.Row="1" Grid.Column="0" Padding="10" StrokeShape="RoundRectangle 8" Stroke="#e4f0f5"
-                       BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
+                      BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
                     <VerticalStackLayout>
                         <Label Text="Dni samokształcenia w roku" FontSize="14" 
-                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                              TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="{Binding SelfEducationDaysLabel}" FontSize="18" FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                                  TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                             <Label Text=" dni" FontSize="18" 
-                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                                  TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         </StackLayout>
                     </VerticalStackLayout>
                 </Border>
 
                 <!-- Other leaves -->
                 <Border Grid.Row="1" Grid.Column="1" Padding="10" StrokeShape="RoundRectangle 8" Stroke="#e4f0f5"
-                       BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
+                      BackgroundColor="{AppThemeBinding Light=#F9FBFD, Dark=#082044}">
                     <VerticalStackLayout>
                         <Label Text="Suma nieobecności" FontSize="14" 
-                               TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                              TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="{Binding TotalAbsenceDaysLabel}" FontSize="18" FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                                  TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                             <Label Text=" dni" FontSize="18" 
-                                   TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                                  TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         </StackLayout>
                     </VerticalStackLayout>
                 </Border>
 
                 <!-- Add absence button -->
                 <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Dodaj nieobecność" 
-                        Command="{Binding AddAbsenceCommand}" HeightRequest="45" 
-                        BackgroundColor="#0D759C" TextColor="White"/>
+                       Command="{Binding AddAbsenceCommand}" HeightRequest="45" 
+                       BackgroundColor="#0D759C" TextColor="White"/>
             </Grid>
         </Border>
 
@@ -84,13 +84,13 @@
             <VerticalStackLayout Padding="15" Spacing="15">
                 <!-- Filter controls -->
                 <Border Stroke="{AppThemeBinding Light=#e4f0f5, Dark=#547E9E}" 
-                       BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
-                       Padding="15" StrokeShape="RoundRectangle 10">
+                      BackgroundColor="{AppThemeBinding Light=White, Dark=#0D365B}"
+                      Padding="15" StrokeShape="RoundRectangle 10">
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                         <Label Text="Pokaż:" Grid.Row="0" Grid.Column="0" VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                              TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         <Picker Grid.Row="0" Grid.Column="1" Title="Wszystkie typy"
-                                SelectedIndexChanged="OnFilterTypeChanged">
+                               SelectedIndexChanged="OnFilterTypeChanged">
                             <Picker.Items>
                                 <x:String>Wszystkie typy</x:String>
                                 <x:String>L4</x:String>
@@ -102,9 +102,9 @@
                         </Picker>
 
                         <Label Text="Rok:" Grid.Row="1" Grid.Column="0" VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
+                              TextColor="{AppThemeBinding Light=#082044, Dark=White}"/>
                         <Picker Grid.Row="1" Grid.Column="1" Title="Wszystkie lata"
-                                SelectedIndexChanged="OnFilterYearChanged">
+                               SelectedIndexChanged="OnFilterYearChanged">
                             <Picker.ItemsSource>
                                 <x:Array Type="{x:Type x:String}">
                                     <x:String>Wszystkie lata</x:String>
@@ -116,68 +116,68 @@
 
                 <!-- Komunikat o braku nieobecności -->
                 <Label Text="Brak nieobecności do wyświetlenia"
-                       HorizontalOptions="Center" IsVisible="{Binding IsNoAbsencesVisible}" Margin="0,20,0,0"
-                       TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
+                      HorizontalOptions="Center" IsVisible="{Binding IsNoAbsencesVisible}" Margin="0,20,0,0"
+                      TextColor="{AppThemeBinding Light=#547E9E, Dark=#95B8CE}"/>
 
                 <!-- Lista nieobecności -->
                 <CollectionView ItemsSource="{Binding FilteredAbsences}" 
-                                IsVisible="{Binding IsNoAbsencesVisible, Converter={StaticResource InverseBoolConverter}}">
+                               IsVisible="{Binding IsNoAbsencesVisible, Converter={StaticResource InverseBoolConverter}}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:Absence">
                             <Border BackgroundColor="{Binding Type, Converter={StaticResource AbsenceCardColorConverter}}"
-                                   Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#547E9E}"
-                                   StrokeShape="RoundRectangle 10"
-                                   Margin="0,0,0,10"
-                                   Padding="15">
+                                  Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#547E9E}"
+                                  StrokeShape="RoundRectangle 10"
+                                  Margin="0,0,0,10"
+                                  Padding="15">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
                                     <!-- Icon -->
                                     <Label Text="{Binding Type, Converter={StaticResource AbsenceIconTextConverter}}"
-                                           FontSize="24"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center"
-                                           Grid.Column="0"/>
+                                          FontSize="24"
+                                          HorizontalOptions="Center"
+                                          VerticalOptions="Center"
+                                          Grid.Column="0"/>
 
                                     <!-- Content -->
                                     <VerticalStackLayout Grid.Column="1" Spacing="5">
                                         <!-- Title with date range -->
                                         <Label Text="{Binding Type, Converter={StaticResource AbsenceTypeTextConverter}}"
-                                               FontSize="16"
-                                               FontAttributes="Bold"
-                                               TextColor="{AppThemeBinding Light=#212121, Dark=White}"/>
+                                              FontSize="16"
+                                              FontAttributes="Bold"
+                                              TextColor="{AppThemeBinding Light=#212121, Dark=White}"/>
 
                                         <!-- Date range -->
                                         <Label Text="{Binding ., Converter={StaticResource AbsenceDateRangeConverter}}"
-                                               FontSize="14"
-                                               TextColor="{AppThemeBinding Light=#757575, Dark=#95B8CE}"/>
+                                              FontSize="14"
+                                              TextColor="{AppThemeBinding Light=#757575, Dark=#95B8CE}"/>
 
                                         <!-- Description if available -->
                                         <Label Text="{Binding Description}"
-                                               FontSize="14"
-                                               TextColor="{AppThemeBinding Light=#757575, Dark=#95B8CE}"
-                                               IsVisible="{Binding Description, Converter={StaticResource StringToBoolConverter}}"/>
+                                              FontSize="14"
+                                              TextColor="{AppThemeBinding Light=#757575, Dark=#95B8CE}"
+                                              IsVisible="{Binding Description, Converter={StaticResource StringToBoolConverter}}"/>
 
                                         <!-- Affect specialization indicator -->
                                         <Label Text="{Binding AffectsSpecializationLength, Converter={StaticResource AbsenceSpecializationAffectionConverter}}"
-                                               FontSize="12"
-                                               TextColor="{AppThemeBinding Light=#F44336, Dark=#FF5252}"
-                                               FontAttributes="Italic"
-                                               IsVisible="{Binding AffectsSpecializationLength}"/>
+                                              FontSize="12"
+                                              TextColor="{AppThemeBinding Light=#F44336, Dark=#FF5252}"
+                                              FontAttributes="Italic"
+                                              IsVisible="{Binding AffectsSpecializationLength}"/>
                                     </VerticalStackLayout>
 
-                                    <!-- Edit button -->
+                                    <!-- Edit button - naprawiono wiązanie -->
                                     <Button Text="✏️"
-                                            FontSize="18"
-                                            BackgroundColor="Transparent"
-                                            BorderColor="Transparent"
-                                            TextColor="{AppThemeBinding Light=#0D759C, Dark=#4FC3F7}"
-                                            Padding="0"
-                                            HeightRequest="40"
-                                            WidthRequest="40"
-                                            HorizontalOptions="End"
-                                            VerticalOptions="Start"
-                                            Command="{Binding Path=EditAbsenceCommand, Source={RelativeSource AncestorType={x:Type viewmodels:AbsenceManagementViewModel}}}"
-                                            CommandParameter="{Binding Id}"
-                                            Grid.Column="2"/>
+                                           FontSize="18"
+                                           BackgroundColor="Transparent"
+                                           BorderColor="Transparent"
+                                           TextColor="{AppThemeBinding Light=#0D759C, Dark=#4FC3F7}"
+                                           Padding="0"
+                                           HeightRequest="40"
+                                           WidthRequest="40"
+                                           HorizontalOptions="End"
+                                           VerticalOptions="Start"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:AbsenceManagementViewModel}}, Path=EditAbsenceCommand}"
+                                           CommandParameter="{Binding Id}"
+                                           Grid.Column="2"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

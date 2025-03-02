@@ -28,71 +28,18 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         private readonly ISpecializationDateCalculator specializationDateCalculator;
         private readonly IDatabaseService databaseService;
 
-        /// <summary>
-        /// Specjalizacja.
-        /// </summary>
-        [ObservableProperty]
-        private Specialization _specialization = null!;
-
-        /// <summary>
-        /// Wszystkie nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private ObservableCollection<Absence> _allAbsences = new();
-
-        /// <summary>
-        /// Przefiltrowane nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private ObservableCollection<Absence> _filteredAbsences = new();
-
-        /// <summary>
-        /// Wybrany typ nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private AbsenceType? _selectedAbsenceType;
-
-        /// <summary>
-        /// Wybrany rok.
-        /// </summary>
-        [ObservableProperty]
-        private int? _selectedYear;
-
-        /// <summary>
-        /// Etykieta planowanej daty zakończenia specjalizacji.
-        /// </summary>
-        [ObservableProperty]
-        private string _plannedEndDateLabel = string.Empty;
-
-        /// <summary>
-        /// Etykieta faktycznej daty zakończenia specjalizacji.
-        /// </summary>
-        [ObservableProperty]
-        private string _actualEndDateLabel = string.Empty;
-
-        /// <summary>
-        /// Etykieta dni samokształcenia.
-        /// </summary>
-        [ObservableProperty]
-        private string _selfEducationDaysLabel = string.Empty;
-
-        /// <summary>
-        /// Etykieta sumy dni nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string _totalAbsenceDaysLabel = string.Empty;
-
-        /// <summary>
-        /// Określa, czy komunikat o braku nieobecności jest widoczny.
-        /// </summary>
-        [ObservableProperty]
-        private bool _isNoAbsencesVisible;
-
-        /// <summary>
-        /// Dostępne lata.
-        /// </summary>
-        [ObservableProperty]
-        private ObservableCollection<int> _availableYears = new ();
+        // Używamy partial properties zamiast [ObservableProperty] dla zgodności z AOT
+        private Specialization specialization = null!;
+        private ObservableCollection<Absence> allAbsences = new ();
+        private ObservableCollection<Absence> filteredAbsences = new ();
+        private AbsenceType? selectedAbsenceType;
+        private int? selectedYear;
+        private string plannedEndDateLabel = string.Empty;
+        private string actualEndDateLabel = string.Empty;
+        private string selfEducationDaysLabel = string.Empty;
+        private string totalAbsenceDaysLabel = string.Empty;
+        private bool isNoAbsencesVisible;
+        private ObservableCollection<int> availableYears = new ();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsenceManagementViewModel"/> class.
@@ -113,6 +60,105 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             this.databaseService = databaseService;
 
             this.Title = "Nieobecności i urlopy";
+        }
+
+        /// <summary>
+        /// Gets or sets specjalizację.
+        /// </summary>
+        public Specialization Specialization
+        {
+            get => this.specialization;
+            set => this.SetProperty(ref this.specialization, value);
+        }
+
+        /// <summary>
+        /// Gets or sets wszystkie nieobecności.
+        /// </summary>
+        public ObservableCollection<Absence> AllAbsences
+        {
+            get => this.allAbsences;
+            set => this.SetProperty(ref this.allAbsences, value);
+        }
+
+        /// <summary>
+        /// Gets or sets przefiltrowane nieobecności.
+        /// </summary>
+        public ObservableCollection<Absence> FilteredAbsences
+        {
+            get => this.filteredAbsences;
+            set => this.SetProperty(ref this.filteredAbsences, value);
+        }
+
+        /// <summary>
+        /// Gets or sets wybrany typ nieobecności.
+        /// </summary>
+        public AbsenceType? SelectedAbsenceType
+        {
+            get => this.selectedAbsenceType;
+            set => this.SetProperty(ref this.selectedAbsenceType, value);
+        }
+
+        /// <summary>
+        /// Gets or sets wybrany rok.
+        /// </summary>
+        public int? SelectedYear
+        {
+            get => this.selectedYear;
+            set => this.SetProperty(ref this.selectedYear, value);
+        }
+
+        /// <summary>
+        /// Gets or sets etykietę planowanej daty zakończenia specjalizacji.
+        /// </summary>
+        public string PlannedEndDateLabel
+        {
+            get => this.plannedEndDateLabel;
+            set => this.SetProperty(ref this.plannedEndDateLabel, value);
+        }
+
+        /// <summary>
+        /// Gets or sets etykietę faktycznej daty zakończenia specjalizacji.
+        /// </summary>
+        public string ActualEndDateLabel
+        {
+            get => this.actualEndDateLabel;
+            set => this.SetProperty(ref this.actualEndDateLabel, value);
+        }
+
+        /// <summary>
+        /// Gets or sets etykietę dni samokształcenia.
+        /// </summary>
+        public string SelfEducationDaysLabel
+        {
+            get => this.selfEducationDaysLabel;
+            set => this.SetProperty(ref this.selfEducationDaysLabel, value);
+        }
+
+        /// <summary>
+        /// Gets or sets etykietę sumy dni nieobecności.
+        /// </summary>
+        public string TotalAbsenceDaysLabel
+        {
+            get => this.totalAbsenceDaysLabel;
+            set => this.SetProperty(ref this.totalAbsenceDaysLabel, value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether komunikat o braku nieobecności jest widoczny.
+        /// </summary>
+        public bool IsNoAbsencesVisible
+        {
+            get => this.isNoAbsencesVisible;
+            set => this.SetProperty(ref this.isNoAbsencesVisible, value);
+        }
+
+        /// <summary>
+        /// Gets or sets dostępne lata.
+        /// </summary>
+        public ObservableCollection<int> AvailableYears
+        {
+            get => this.availableYears;
+            set => this.SetProperty(ref this.availableYears, value);
         }
 
         /// <summary>

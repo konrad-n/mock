@@ -22,75 +22,21 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
     public partial class AbsenceDetailsViewModel : ViewModelBase
     {
         private readonly IDatabaseService databaseService;
-
-        /// <summary>
-        /// Tytuł strony.
-        /// </summary>
-        [ObservableProperty]
-        private readonly string pageTitle = string.Empty;
-
-        /// <summary>
-        /// Określa, czy nieobecność jest zatwierdzona.
-        /// </summary>
-        [ObservableProperty]
-        private readonly bool isApproved;
-
-        /// <summary>
-        /// Indeks wybranego typu nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private readonly int absenceTypeSelectedIndex;
-
-        /// <summary>
-        /// Określa, czy nieobecność już istnieje.
-        /// </summary>
-        [ObservableProperty]
-        private bool isExistingAbsence;
-
-        /// <summary>
-        /// Data rozpoczęcia nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private DateTime startDate = DateTime.Now;
-
-        /// <summary>
-        /// Data zakończenia nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private DateTime endDate = DateTime.Now;
-
-        /// <summary>
-        /// Liczba dni nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string durationDays = string.Empty;
-
-        /// <summary>
-        /// Opis nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string description = string.Empty;
-
-        /// <summary>
-        /// Określa, czy nieobecność wydłuża czas trwania specjalizacji.
-        /// </summary>
-        [ObservableProperty]
-        private bool affectsSpecializationLength;
-
-        /// <summary>
-        /// Sygnatura dokumentu.
-        /// </summary>
-        [ObservableProperty]
-        private string documentReference = string.Empty;
-
-        /// <summary>
-        /// Rok nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string year = string.Empty;
-
         private Action<Absence>? onSaveCallback;
         private Absence? absence;
+
+        // Używamy partial properties zamiast [ObservableProperty] dla zgodności z AOT
+        private string pageTitle = string.Empty;
+        private bool isApproved;
+        private int absenceTypeSelectedIndex;
+        private bool isExistingAbsence;
+        private DateTime startDate = DateTime.Now;
+        private DateTime endDate = DateTime.Now;
+        private string durationDays = string.Empty;
+        private string description = string.Empty;
+        private bool affectsSpecializationLength;
+        private string documentReference = string.Empty;
+        private string year = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsenceDetailsViewModel"/> class.
@@ -104,6 +50,105 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         {
             this.databaseService = databaseService;
             this.Title = "Nieobecność";
+        }
+
+        /// <summary>
+        /// Gets or sets tytuł strony.
+        /// </summary>
+        public string PageTitle
+        {
+            get => this.pageTitle;
+            set => this.SetProperty(ref this.pageTitle, value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether nieobecność jest zatwierdzona.
+        /// </summary>
+        public bool IsApproved
+        {
+            get => this.isApproved;
+            set => this.SetProperty(ref this.isApproved, value);
+        }
+
+        /// <summary>
+        /// Gets or sets indeks wybranego typu nieobecności.
+        /// </summary>
+        public int AbsenceTypeSelectedIndex
+        {
+            get => this.absenceTypeSelectedIndex;
+            set => this.SetProperty(ref this.absenceTypeSelectedIndex, value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether nieobecność już istnieje.
+        /// </summary>
+        public bool IsExistingAbsence
+        {
+            get => this.isExistingAbsence;
+            set => this.SetProperty(ref this.isExistingAbsence, value);
+        }
+
+        /// <summary>
+        /// Gets or sets datę rozpoczęcia nieobecności.
+        /// </summary>
+        public DateTime StartDate
+        {
+            get => this.startDate;
+            set => this.SetProperty(ref this.startDate, value);
+        }
+
+        /// <summary>
+        /// Gets or sets datę zakończenia nieobecności.
+        /// </summary>
+        public DateTime EndDate
+        {
+            get => this.endDate;
+            set => this.SetProperty(ref this.endDate, value);
+        }
+
+        /// <summary>
+        /// Gets or sets liczbę dni nieobecności.
+        /// </summary>
+        public string DurationDays
+        {
+            get => this.durationDays;
+            set => this.SetProperty(ref this.durationDays, value);
+        }
+
+        /// <summary>
+        /// Gets or sets opis nieobecności.
+        /// </summary>
+        public string Description
+        {
+            get => this.description;
+            set => this.SetProperty(ref this.description, value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether nieobecność wydłuża czas trwania specjalizacji.
+        /// </summary>
+        public bool AffectsSpecializationLength
+        {
+            get => this.affectsSpecializationLength;
+            set => this.SetProperty(ref this.affectsSpecializationLength, value);
+        }
+
+        /// <summary>
+        /// Gets or sets sygnaturę dokumentu.
+        /// </summary>
+        public string DocumentReference
+        {
+            get => this.documentReference;
+            set => this.SetProperty(ref this.documentReference, value);
+        }
+
+        /// <summary>
+        /// Gets or sets rok nieobecności.
+        /// </summary>
+        public string Year
+        {
+            get => this.year;
+            set => this.SetProperty(ref this.year, value);
         }
 
         /// <summary>
@@ -301,6 +346,13 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 IsApproved = this.IsApproved,
                 Type = (AbsenceType)this.AbsenceTypeSelectedIndex,
             };
+
+            // Przepisz ID jeśli edytujemy istniejący rekord
+            if (this.absence != null && this.IsExistingAbsence)
+            {
+                newAbsence.Id = this.absence.Id;
+                newAbsence.SpecializationId = this.absence.SpecializationId;
+            }
 
             this.onSaveCallback?.Invoke(newAbsence);
 
