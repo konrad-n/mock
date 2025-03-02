@@ -1,4 +1,13 @@
-﻿using SledzSpecke.App.Features.Authentication.Views;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AppShell.xaml.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Główny plik powłoki aplikacji.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using SledzSpecke.App.Features.Authentication.Views;
 using SledzSpecke.App.Features.Courses.Views;
 using SledzSpecke.App.Features.Duties.Views;
 using SledzSpecke.App.Features.Internships.Views;
@@ -10,12 +19,21 @@ using SledzSpecke.App.Services.Interfaces;
 
 namespace SledzSpecke.App
 {
+    /// <summary>
+    /// Główna powłoka aplikacji definiująca nawigację i menu.
+    /// </summary>
     public partial class AppShell : Shell
     {
         private readonly IAuthenticationService authenticationService;
         private readonly ISpecializationService specializationService;
         private readonly IServiceProvider serviceProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppShell"/> class.
+        /// </summary>
+        /// <param name="authenticationService">Serwis uwierzytelniania.</param>
+        /// <param name="specializationService">Serwis specjalizacji.</param>
+        /// <param name="serviceProvider">Dostawca usług DI.</param>
         public AppShell(
             IAuthenticationService authenticationService,
             ISpecializationService specializationService,
@@ -51,6 +69,9 @@ namespace SledzSpecke.App
             }
         }
 
+        /// <summary>
+        /// Aktualizuje informacje o użytkowniku w menu aplikacji.
+        /// </summary>
         private void UpdateUserInfo()
         {
             if (this.authenticationService.IsAuthenticated)
@@ -87,13 +108,22 @@ namespace SledzSpecke.App
             }
         }
 
+        /// <summary>
+        /// Obsługuje kliknięcie przycisku wylogowania.
+        /// </summary>
+        /// <param name="sender">Obiekt źródłowy zdarzenia.</param>
+        /// <param name="e">Argumenty zdarzenia.</param>
         private async void OnLogoutClicked(object sender, EventArgs e)
         {
             bool confirm = await this.DisplayAlert("Wylogowanie", "Czy na pewno chcesz się wylogować?", "Tak", "Nie");
             if (confirm)
             {
                 this.authenticationService.Logout();
-                Application.Current.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+
+                if (Application.Current?.Windows.Count > 0)
+                {
+                    Application.Current.Windows[0].Page = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                }
             }
         }
     }

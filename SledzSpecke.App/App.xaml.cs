@@ -1,10 +1,22 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="App.xaml.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Punkt wejścia aplikacji.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Features.Authentication.Views;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Infrastructure.Database;
 
 namespace SledzSpecke.App
 {
+    /// <summary>
+    /// Główna klasa aplikacji.
+    /// </summary>
     public partial class App : Application
     {
         private readonly ILogger<App> logger;
@@ -14,6 +26,15 @@ namespace SledzSpecke.App
         private readonly IDatabaseService databaseService;
         private readonly IAuthenticationService authenticationService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="App"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">Dostawca usług DI.</param>
+        /// <param name="logger">Logger aplikacji.</param>
+        /// <param name="notificationService">Serwis powiadomień.</param>
+        /// <param name="appSettings">Ustawienia aplikacji.</param>
+        /// <param name="databaseService">Serwis bazy danych.</param>
+        /// <param name="authenticationService">Serwis uwierzytelniania.</param>
         public App(
             IServiceProvider serviceProvider,
             ILogger<App> logger,
@@ -33,16 +54,19 @@ namespace SledzSpecke.App
 
             try
             {
-                this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                this.CreateStartupWindow();
                 _ = this.InitializeAsync();
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "Error in App constructor");
-                this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                this.CreateStartupWindow();
             }
         }
 
+        /// <summary>
+        /// Wywoływane przy rozpoczęciu pracy aplikacji.
+        /// </summary>
         protected override void OnStart()
         {
             try
@@ -55,6 +79,9 @@ namespace SledzSpecke.App
             }
         }
 
+        /// <summary>
+        /// Wywoływane gdy aplikacja przechodzi w stan uśpienia.
+        /// </summary>
         protected override void OnSleep()
         {
             try
@@ -67,6 +94,9 @@ namespace SledzSpecke.App
             }
         }
 
+        /// <summary>
+        /// Wywoływane gdy aplikacja wznawia działanie.
+        /// </summary>
         protected override void OnResume()
         {
             try
@@ -79,6 +109,26 @@ namespace SledzSpecke.App
             }
         }
 
+        /// <summary>
+        /// Tworzy okno startowe aplikacji.
+        /// </summary>
+        private void CreateStartupWindow()
+        {
+            if (Application.Current?.Windows.Count == 0)
+            {
+                Window window = new (new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>()));
+                this.Windows.Add(window);
+            }
+            else if (Application.Current?.Windows.Count > 0)
+            {
+                Application.Current.Windows[0].Page = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+            }
+        }
+
+        /// <summary>
+        /// Inicjalizuje aplikację asynchronicznie.
+        /// </summary>
+        /// <returns>Task reprezentujący operację asynchroniczną.</returns>
         private async Task InitializeAsync()
         {
             try
@@ -100,7 +150,10 @@ namespace SledzSpecke.App
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                    if (Application.Current?.Windows.Count > 0)
+                    {
+                        Application.Current.Windows[0].Page = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                    }
                 });
 
                 this.logger.LogInformation("Application initialized successfully");
@@ -110,7 +163,10 @@ namespace SledzSpecke.App
                 this.logger.LogError(ex, "Error initializing application");
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    this.MainPage = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                    if (Application.Current?.Windows.Count > 0)
+                    {
+                        Application.Current.Windows[0].Page = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                    }
                 });
             }
         }

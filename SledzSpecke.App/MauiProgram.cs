@@ -1,4 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MauiProgram.cs" company="SledzSpecke">
+//   Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+// <summary>
+//   Punkt wejścia dla aplikacji MAUI. Konfiguruje usługi i zależności.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Features.Absences.ViewModels;
 using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Features.Authentication.ViewModels;
@@ -26,8 +35,15 @@ using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.App
 {
+    /// <summary>
+    /// Klasa konfigurująca aplikację MAUI.
+    /// </summary>
     public static class MauiProgram
     {
+        /// <summary>
+        /// Tworzy i konfiguruje aplikację MAUI.
+        /// </summary>
+        /// <returns>Skonfigurowana instancja aplikacji MAUI.</returns>
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
@@ -46,18 +62,13 @@ namespace SledzSpecke.App
             builder.Logging.AddDebug();
 #endif
 
-            var app = builder.Build();
-
-            // Utwórz scope dla głównego okna aplikacji
-            using (var scope = app.Services.CreateScope())
-            {
-                // Inicjalizuj App z wszystkimi zależnościami
-                var mainPage = scope.ServiceProvider.GetRequiredService<App>();
-            }
-
-            return app;
+            return builder.Build();
         }
 
+        /// <summary>
+        /// Rejestruje usługi w kontenerze DI.
+        /// </summary>
+        /// <param name="services">Kolekcja usług DI.</param>
         private static void RegisterServices(IServiceCollection services)
         {
             services.AddSingleton<App>();
