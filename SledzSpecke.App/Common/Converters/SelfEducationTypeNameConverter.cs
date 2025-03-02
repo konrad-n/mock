@@ -1,5 +1,5 @@
-﻿using SledzSpecke.Core.Models.Enums;
-using System.Globalization;
+﻿using System.Globalization;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
 {
@@ -20,6 +20,7 @@ namespace SledzSpecke.App.Common.Converters
                     _ => "Nieznany"
                 };
             }
+
             return "Nieznany";
         }
     }

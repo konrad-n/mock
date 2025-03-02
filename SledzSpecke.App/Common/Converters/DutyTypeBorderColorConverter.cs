@@ -1,5 +1,5 @@
-﻿using SledzSpecke.Core.Models.Enums;
-using System.Globalization;
+﻿using System.Globalization;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
 {
@@ -13,6 +13,7 @@ namespace SledzSpecke.App.Common.Converters
                     new Color(8, 32, 68) : // Ciemny niebieski
                     Colors.DarkGreen;
             }
+
             return Colors.LightGray;
         }
     }

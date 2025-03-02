@@ -10,6 +10,7 @@ namespace SledzSpecke.App.Common.Converters
             {
                 return isRequired ? "Wymagane w programie specjalizacji" : "Dodatkowe";
             }
+
             return "Nieznane";
         }
     }

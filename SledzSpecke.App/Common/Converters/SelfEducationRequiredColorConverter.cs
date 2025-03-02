@@ -10,6 +10,7 @@ namespace SledzSpecke.App.Common.Converters
             {
                 return isRequired ? new Color(8, 32, 68) : Colors.DarkGreen;
             }
+
             return new Color(84, 126, 158);
         }
     }

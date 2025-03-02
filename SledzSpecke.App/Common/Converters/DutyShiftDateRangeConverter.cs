@@ -10,6 +10,7 @@ namespace SledzSpecke.App.Common.Converters
             {
                 return $"{startDate:dd.MM.yyyy HH:mm} - {endDate:dd.MM.yyyy HH:mm}";
             }
+
             return string.Empty;
         }
     }

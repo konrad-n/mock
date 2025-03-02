@@ -7,7 +7,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Globalization;
 
 namespace SledzSpecke.App.Common.Converters

@@ -1,5 +1,5 @@
-﻿using SledzSpecke.Core.Models;
-using System.Globalization;
+﻿using System.Globalization;
+using SledzSpecke.Core.Models;
 
 namespace SledzSpecke.App.Common.Converters
 {
@@ -14,6 +14,7 @@ namespace SledzSpecke.App.Common.Converters
 
                 return !string.IsNullOrEmpty(internship.Location) || isCurrentOrCompleted;
             }
+
             return false;
         }
     }

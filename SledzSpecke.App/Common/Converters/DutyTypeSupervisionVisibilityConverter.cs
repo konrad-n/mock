@@ -1,5 +1,5 @@
-﻿using SledzSpecke.Core.Models.Enums;
-using System.Globalization;
+﻿using System.Globalization;
+using SledzSpecke.Core.Models.Enums;
 
 namespace SledzSpecke.App.Common.Converters
 {
@@ -11,6 +11,7 @@ namespace SledzSpecke.App.Common.Converters
             {
                 return dutyType == DutyType.Accompanied && !string.IsNullOrEmpty(parameter as string);
             }
+
             return false;
         }
     }
