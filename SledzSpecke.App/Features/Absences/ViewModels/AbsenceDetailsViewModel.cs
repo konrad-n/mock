@@ -22,74 +22,75 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
     public partial class AbsenceDetailsViewModel : ViewModelBase
     {
         private readonly IDatabaseService databaseService;
-        private Action<Absence>? onSaveCallback;
-        private Absence? absence;
 
         /// <summary>
         /// Tytuł strony.
         /// </summary>
         [ObservableProperty]
-        private string _pageTitle = string.Empty;
-
-        /// <summary>
-        /// Określa, czy nieobecność już istnieje.
-        /// </summary>
-        [ObservableProperty]
-        private bool _isExistingAbsence;
-
-        /// <summary>
-        /// Data rozpoczęcia nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private DateTime _startDate = DateTime.Now;
-
-        /// <summary>
-        /// Data zakończenia nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private DateTime _endDate = DateTime.Now;
-
-        /// <summary>
-        /// Liczba dni nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string _durationDays = string.Empty;
-
-        /// <summary>
-        /// Opis nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string _description = string.Empty;
-
-        /// <summary>
-        /// Określa, czy nieobecność wydłuża czas trwania specjalizacji.
-        /// </summary>
-        [ObservableProperty]
-        private bool _affectsSpecializationLength;
-
-        /// <summary>
-        /// Sygnatura dokumentu.
-        /// </summary>
-        [ObservableProperty]
-        private string _documentReference = string.Empty;
-
-        /// <summary>
-        /// Rok nieobecności.
-        /// </summary>
-        [ObservableProperty]
-        private string _year = string.Empty;
+        private readonly string pageTitle = string.Empty;
 
         /// <summary>
         /// Określa, czy nieobecność jest zatwierdzona.
         /// </summary>
         [ObservableProperty]
-        private bool _isApproved;
+        private readonly bool isApproved;
 
         /// <summary>
         /// Indeks wybranego typu nieobecności.
         /// </summary>
         [ObservableProperty]
-        private int _absenceTypeSelectedIndex;
+        private readonly int absenceTypeSelectedIndex;
+
+        /// <summary>
+        /// Określa, czy nieobecność już istnieje.
+        /// </summary>
+        [ObservableProperty]
+        private bool isExistingAbsence;
+
+        /// <summary>
+        /// Data rozpoczęcia nieobecności.
+        /// </summary>
+        [ObservableProperty]
+        private DateTime startDate = DateTime.Now;
+
+        /// <summary>
+        /// Data zakończenia nieobecności.
+        /// </summary>
+        [ObservableProperty]
+        private DateTime endDate = DateTime.Now;
+
+        /// <summary>
+        /// Liczba dni nieobecności.
+        /// </summary>
+        [ObservableProperty]
+        private string durationDays = string.Empty;
+
+        /// <summary>
+        /// Opis nieobecności.
+        /// </summary>
+        [ObservableProperty]
+        private string description = string.Empty;
+
+        /// <summary>
+        /// Określa, czy nieobecność wydłuża czas trwania specjalizacji.
+        /// </summary>
+        [ObservableProperty]
+        private bool affectsSpecializationLength;
+
+        /// <summary>
+        /// Sygnatura dokumentu.
+        /// </summary>
+        [ObservableProperty]
+        private string documentReference = string.Empty;
+
+        /// <summary>
+        /// Rok nieobecności.
+        /// </summary>
+        [ObservableProperty]
+        private string year = string.Empty;
+
+        private Action<Absence>? onSaveCallback;
+        private Absence? absence;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsenceDetailsViewModel"/> class.

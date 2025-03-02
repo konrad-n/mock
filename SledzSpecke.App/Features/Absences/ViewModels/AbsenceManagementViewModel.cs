@@ -92,7 +92,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
         /// Dostępne lata.
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<int> _availableYears = new();
+        private ObservableCollection<int> _availableYears = new ();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsenceManagementViewModel"/> class.
