@@ -1,0 +1,32 @@
+name: .NET MAUI CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      
+      - name: Install .NET MAUI Workloads
+        run: dotnet workload install maui --ignore-failed-sources
+      
+      - name: Restore dependencies
+        run: dotnet restore SledzSpecke.sln
+      
+      - name: Build
+        run: dotnet build SledzSpecke.sln --no-restore
+      
+      - name: Test
+        run: dotnet test SledzSpecke.sln --no-build --verbosity normal
