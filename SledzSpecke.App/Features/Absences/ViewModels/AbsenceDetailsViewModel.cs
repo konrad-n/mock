@@ -96,6 +96,20 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
+        public void CalculateDuration()
+        {
+            if (this.EndDate >= this.StartDate)
+            {
+                int days = (this.EndDate - this.StartDate).Days + 1;
+                this.DurationDays = days.ToString();
+            }
+            else
+            {
+                this.DurationDays = "0";
+            }
+        }
+
+
         [RelayCommand]
         private void UpdateAbsenceType(int index)
         {
@@ -121,24 +135,13 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
             }
         }
 
-        public void CalculateDuration()
-        {
-            if (this.EndDate >= this.StartDate)
-            {
-                int days = (this.EndDate - this.StartDate).Days + 1;
-                this.DurationDays = days.ToString();
-            }
-            else
-            {
-                this.DurationDays = "0";
-            }
-        }
-
         [RelayCommand]
         private async Task DeleteAsync()
         {
             if (!this.IsExistingAbsence)
+            {
                 return;
+            }
 
             bool confirm = await Application.Current.MainPage.DisplayAlert(
                 "Potwierdzenie",
@@ -203,7 +206,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 DocumentReference = this.DocumentReference,
                 Year = year,
                 IsApproved = this.IsApproved,
-                Type = (AbsenceType)this.AbsenceTypeSelectedIndex
+                Type = (AbsenceType)this.AbsenceTypeSelectedIndex,
             };
 
             if (this._onSaveCallback != null)

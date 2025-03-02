@@ -67,26 +67,36 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\Behaviors\**" />
+    <Compile Remove="Common\Controls\**" />
     <Compile Remove="Converters\**" />
     <Compile Remove="Resources\Icons\**" />
     <Compile Remove="Resources\Splash\**" />
     <Compile Remove="Services\Dialog\**" />
     <Compile Remove="Services\Navigation\**" />
+    <EmbeddedResource Remove="Common\Behaviors\**" />
+    <EmbeddedResource Remove="Common\Controls\**" />
     <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
     <EmbeddedResource Remove="Resources\Splash\**" />
     <EmbeddedResource Remove="Services\Dialog\**" />
     <EmbeddedResource Remove="Services\Navigation\**" />
+    <MauiCss Remove="Common\Behaviors\**" />
+    <MauiCss Remove="Common\Controls\**" />
     <MauiCss Remove="Converters\**" />
     <MauiCss Remove="Resources\Icons\**" />
     <MauiCss Remove="Resources\Splash\**" />
     <MauiCss Remove="Services\Dialog\**" />
     <MauiCss Remove="Services\Navigation\**" />
+    <MauiXaml Remove="Common\Behaviors\**" />
+    <MauiXaml Remove="Common\Controls\**" />
     <MauiXaml Remove="Converters\**" />
     <MauiXaml Remove="Resources\Icons\**" />
     <MauiXaml Remove="Resources\Splash\**" />
     <MauiXaml Remove="Services\Dialog\**" />
     <MauiXaml Remove="Services\Navigation\**" />
+    <None Remove="Common\Behaviors\**" />
+    <None Remove="Common\Controls\**" />
     <None Remove="Converters\**" />
     <None Remove="Resources\Icons\**" />
     <None Remove="Resources\Splash\**" />
@@ -178,11 +188,6 @@
     <MauiXaml Update="Features\SMKExport\Views\SMKExportPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Common\Controls\" />
-    <Folder Include="Common\Behaviors\" />
   </ItemGroup>
 
 </Project>

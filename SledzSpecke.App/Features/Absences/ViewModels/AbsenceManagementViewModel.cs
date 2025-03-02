@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.App.Common.ViewModels;
@@ -6,7 +7,6 @@ using SledzSpecke.App.Features.Absences.Views;
 using SledzSpecke.App.Services.Interfaces;
 using SledzSpecke.Core.Models;
 using SledzSpecke.Infrastructure.Database;
-using System.Collections.ObjectModel;
 
 namespace SledzSpecke.App.Features.Absences.ViewModels
 {
@@ -201,7 +201,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 3 => AbsenceType.SelfEducationLeave,
                 4 => null, // Special handling for maternity/parental leaves
                 5 => null, // Special handling for other leave types
-                _ => null  // No filter (all types)
+                _ => null, // No filter (all types)
             };
 
             this.ApplyFiltersAndDisplayAbsences();
@@ -264,7 +264,7 @@ namespace SledzSpecke.App.Features.Absences.ViewModels
                 AbsenceType.SpecialLeave => "Urlop okolicznościowy",
                 AbsenceType.UnpaidLeave => "Urlop bezpłatny",
                 AbsenceType.Other => "Inna nieobecność",
-                _ => "Nieobecność"
+                _ => "Nieobecność",
             };
         }
 
