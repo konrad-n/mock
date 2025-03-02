@@ -1,4 +1,8 @@
-﻿using System;
+﻿// <copyright file="DatabaseService.cs" company="Konrad Niedźwiedzki">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -12,261 +16,316 @@ using SQLite;
 
 namespace SledzSpecke.Infrastructure.Database
 {
+    /// <summary>
+    /// Implementation of the database service providing access to application data.
+    /// </summary>
     public class DatabaseService : IDatabaseService
     {
-        private SQLiteAsyncConnection _database;
-        private readonly ILogger<DatabaseService> _logger;
-        private readonly IFileSystemService _fileSystemService;
-        private bool _isInitialized = false;
-        private readonly SemaphoreSlim _initLock = new SemaphoreSlim(1, 1);
+        private readonly ILogger<DatabaseService> logger;
+        private readonly IFileSystemService fileSystemService;
+        private readonly SemaphoreSlim initLock = new SemaphoreSlim(1, 1);
 
+        private SQLiteAsyncConnection? database;
+        private bool isInitialized = false;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseService"/> class.
+        /// </summary>
+        /// <param name="fileSystemService">File system service used to get database path.</param>
+        /// <param name="logger">Logger for recording database operation events.</param>
         public DatabaseService(IFileSystemService fileSystemService, ILogger<DatabaseService> logger)
         {
-            this._fileSystemService = fileSystemService;
-            this._logger = logger;
+            this.fileSystemService = fileSystemService;
+            this.logger = logger;
         }
 
+        /// <inheritdoc/>
         public async Task InitAsync()
         {
-            // Użyj semafora, aby zapobiec równoczesnej inicjalizacji z wielu wątków
-            await this._initLock.WaitAsync();
+            // Use a semaphore to prevent concurrent initialization from multiple threads
+            await this.initLock.WaitAsync();
 
             try
             {
-                if (this._isInitialized)
+                if (this.isInitialized)
+                {
                     return;
+                }
 
-                var databasePath = Path.Combine(this._fileSystemService.GetAppDataDirectory(), "SledzSpecke.db3");
-                this._logger.LogInformation("Initializing database at {Path}", databasePath);
+                var databasePath = Path.Combine(this.fileSystemService.GetAppDataDirectory(), "SledzSpecke.db3");
+                this.logger.LogInformation("Initializing database at {Path}", databasePath);
 
-                // Sprawdź, czy katalog istnieje
+                // Check if directory exists
                 var directory = Path.GetDirectoryName(databasePath);
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
-                    this._logger.LogInformation("Created database directory at {Path}", directory);
+                    this.logger.LogInformation("Created database directory at {Path}", directory);
                 }
 
-                // Utwórz połączenie z bazą danych z dodatkowymi opcjami
+                // Create database connection with additional options
                 var flags = SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache;
-                this._database = new SQLiteAsyncConnection(databasePath, flags);
+                this.database = new SQLiteAsyncConnection(databasePath, flags);
 
                 // Create tables for all models
-                await this._database.CreateTableAsync<User>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<SpecializationType>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<Specialization>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<Course>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<Internship>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<MedicalProcedure>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<ProcedureEntry>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<DutyShift>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<SelfEducation>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<UserSettings>().ConfigureAwait(false);
-                await this._database.CreateTableAsync<Absence>().ConfigureAwait(false);  // Dodana linia tworząca tabelę Absences
+                await this.database.CreateTableAsync<User>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<SpecializationType>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<Specialization>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<Course>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<Internship>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<MedicalProcedure>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<ProcedureEntry>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<DutyShift>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<SelfEducation>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<UserSettings>().ConfigureAwait(false);
+                await this.database.CreateTableAsync<Absence>().ConfigureAwait(false);
 
-                this._isInitialized = true;
-                this._logger.LogInformation("Database initialized successfully at {Path}", databasePath);
+                this.isInitialized = true;
+                this.logger.LogInformation("Database initialized successfully at {Path}", databasePath);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                this._logger.LogError(ex, "Error initializing database");
+                // Simply rethrow the exception without logging it here
+                // to avoid duplicate logging in the call stack
                 throw;
             }
             finally
             {
-                this._initLock.Release();
+                this.initLock.Release();
             }
         }
 
-        private async Task EnsureInitializedAsync()
-        {
-            if (!this._isInitialized)
-            {
-                await this.InitAsync();
-            }
-        }
-
-        public async Task<List<T>> GetAllAsync<T>() where T : new()
+        /// <inheritdoc/>
+        public async Task<List<T>> GetAllAsync<T>()
+            where T : new()
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.Table<T>().ToListAsync().ConfigureAwait(false);
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.Table<T>().ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting all items of type {Type}", typeof(T).Name);
+                this.logger.LogError(ex, "Error getting all items of type {Type}", typeof(T).Name);
                 return new List<T>();
             }
         }
 
-        public async Task<T> GetByIdAsync<T>(int id) where T : class, new()
+        /// <inheritdoc/>
+        public async Task<T?> GetByIdAsync<T>(int id)
+            where T : class, new()
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.FindAsync<T>(id).ConfigureAwait(false);
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.FindAsync<T>(id).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting item of type {Type} with ID {Id}", typeof(T).Name, id);
+                this.logger.LogError(ex, "Error getting item of type {Type} with ID {Id}", typeof(T).Name, id);
                 return null;
             }
         }
 
-        public async Task<int> SaveAsync<T>(T item) where T : new()
+        /// <inheritdoc/>
+        public async Task<int> SaveAsync<T>(T item)
+            where T : new()
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                return await this._database.InsertOrReplaceAsync(item).ConfigureAwait(false);
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Error saving item of type {Type}", typeof(T).Name);
-                throw;
-            }
+
+            return await this.database.InsertOrReplaceAsync(item).ConfigureAwait(false);
         }
 
-        public async Task<int> DeleteAsync<T>(T item) where T : new()
+        /// <inheritdoc/>
+        public async Task<int> DeleteAsync<T>(T item)
+            where T : new()
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                return await this._database.DeleteAsync(item).ConfigureAwait(false);
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Error deleting item of type {Type}", typeof(T).Name);
-                throw;
-            }
+
+            return await this.database.DeleteAsync(item).ConfigureAwait(false);
         }
 
-        public async Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : new()
+        /// <inheritdoc/>
+        public async Task<List<T>> QueryAsync<T>(string query, params object[] args)
+            where T : new()
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.QueryAsync<T>(query, args).ConfigureAwait(false);
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.QueryAsync<T>(query, args).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error executing query {Query} for type {Type}", query, typeof(T).Name);
+                this.logger.LogError(ex, "Error executing query {Query} for type {Type}", query, typeof(T).Name);
                 return new List<T>();
             }
         }
 
+        /// <inheritdoc/>
         public async Task<int> ExecuteAsync(string query, params object[] args)
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                return await this._database.ExecuteAsync(query, args).ConfigureAwait(false);
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Error executing non-query {Query}", query);
-                throw;
-            }
+
+            return await this.database.ExecuteAsync(query, args).ConfigureAwait(false);
         }
 
+        /// <inheritdoc/>
         public async Task<List<MedicalProcedure>> GetProceduresForInternshipAsync(int internshipId)
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.Table<MedicalProcedure>()
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.Table<MedicalProcedure>()
                     .Where(p => p.InternshipId == internshipId)
                     .ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting procedures for internship {InternshipId}", internshipId);
+                this.logger.LogError(ex, "Error getting procedures for internship {InternshipId}", internshipId);
                 return new List<MedicalProcedure>();
             }
         }
 
+        /// <inheritdoc/>
         public async Task<List<ProcedureEntry>> GetEntriesForProcedureAsync(int procedureId)
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.Table<ProcedureEntry>()
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.Table<ProcedureEntry>()
                     .Where(e => e.ProcedureId == procedureId)
                     .ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting entries for procedure {ProcedureId}", procedureId);
+                this.logger.LogError(ex, "Error getting entries for procedure {ProcedureId}", procedureId);
                 return new List<ProcedureEntry>();
             }
         }
 
+        /// <inheritdoc/>
         public async Task<List<Course>> GetCoursesForModuleAsync(ModuleType moduleType)
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.Table<Course>()
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.Table<Course>()
                     .Where(c => c.Module == moduleType)
                     .ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting courses for module {ModuleType}", moduleType);
+                this.logger.LogError(ex, "Error getting courses for module {ModuleType}", moduleType);
                 return new List<Course>();
             }
         }
 
+        /// <inheritdoc/>
         public async Task<List<Internship>> GetInternshipsForModuleAsync(ModuleType moduleType)
         {
             await this.EnsureInitializedAsync();
             try
             {
-                return await this._database.Table<Internship>()
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                return await this.database.Table<Internship>()
                     .Where(i => i.Module == moduleType)
                     .ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting internships for module {ModuleType}", moduleType);
+                this.logger.LogError(ex, "Error getting internships for module {ModuleType}", moduleType);
                 return new List<Internship>();
             }
         }
 
+        /// <inheritdoc/>
         public async Task<UserSettings> GetUserSettingsAsync()
         {
             await this.EnsureInitializedAsync();
             try
             {
-                this._logger.LogDebug("Getting user settings");
-                var settings = await this._database.Table<UserSettings>().FirstOrDefaultAsync().ConfigureAwait(false);
-                this._logger.LogDebug("User settings retrieved: {Settings}", settings != null ? "Found" : "Not found");
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                this.logger.LogDebug("Getting user settings");
+                var settings = await this.database.Table<UserSettings>().FirstOrDefaultAsync().ConfigureAwait(false);
+                this.logger.LogDebug("User settings retrieved: {Settings}", settings != null ? "Found" : "Not found");
                 return settings ?? new UserSettings();
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting user settings");
+                this.logger.LogError(ex, "Error getting user settings");
                 return new UserSettings();
             }
         }
 
+        /// <inheritdoc/>
         public async Task SaveUserSettingsAsync(UserSettings settings)
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                await this._database.InsertOrReplaceAsync(settings).ConfigureAwait(false);
-                this._logger.LogInformation("User settings saved successfully");
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Error saving user settings");
-                throw;
-            }
+
+            await this.database.InsertOrReplaceAsync(settings).ConfigureAwait(false);
+            this.logger.LogInformation("User settings saved successfully");
         }
 
-        public async Task<Specialization> GetCurrentSpecializationAsync()
+        /// <inheritdoc/>
+        public async Task<Specialization?> GetCurrentSpecializationAsync()
         {
             await this.EnsureInitializedAsync();
             try
@@ -275,62 +334,73 @@ namespace SledzSpecke.Infrastructure.Database
 
                 if (userSettings.CurrentSpecializationId == 0)
                 {
-                    this._logger.LogInformation("No current specialization ID found in settings");
+                    this.logger.LogInformation("No current specialization ID found in settings");
                     return null;
                 }
 
-                var specialization = await this._database.FindAsync<Specialization>(userSettings.CurrentSpecializationId).ConfigureAwait(false);
-                this._logger.LogDebug("Current specialization retrieved: {Specialization}", specialization != null ? specialization.Name : "Not found");
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                var specialization = await this.database.FindAsync<Specialization>(userSettings.CurrentSpecializationId).ConfigureAwait(false);
+                this.logger.LogDebug("Current specialization retrieved: {Specialization}", specialization != null ? specialization.Name : "Not found");
                 return specialization;
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error getting current specialization");
+                this.logger.LogError(ex, "Error getting current specialization");
                 return null;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> DeleteAllDataAsync()
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                await this._database.DeleteAllAsync<Course>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<Internship>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<MedicalProcedure>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<ProcedureEntry>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<DutyShift>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<SelfEducation>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<Specialization>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<User>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<UserSettings>().ConfigureAwait(false);
-                await this._database.DeleteAllAsync<Absence>().ConfigureAwait(false);  // Dodana linia usuwająca dane z tabeli Absences
-                this._logger.LogInformation("All data deleted from the database");
-                return true;
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Error deleting all data");
-                throw;
-            }
+
+            await this.database.DeleteAllAsync<Course>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<Internship>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<MedicalProcedure>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<ProcedureEntry>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<DutyShift>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<SelfEducation>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<Specialization>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<User>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<UserSettings>().ConfigureAwait(false);
+            await this.database.DeleteAllAsync<Absence>().ConfigureAwait(false);
+            this.logger.LogInformation("All data deleted from the database");
+            return true;
         }
 
-        // Nowa metoda do sprawdzania, czy specjalizacja ma już wczytane dane szablonowe
+        /// <inheritdoc/>
         public async Task<bool> HasSpecializationTemplateDataAsync(int specializationTypeId)
         {
             await this.EnsureInitializedAsync();
             try
             {
-                // Sprawdź czy istnieje specjalizacja o danym typie
-                var specialization = await this._database.Table<Specialization>()
+                if (this.database == null)
+                {
+                    throw new InvalidOperationException("Database is not initialized");
+                }
+
+                // Check if specialization of given type exists
+                var specialization = await this.database.Table<Specialization>()
                     .Where(s => s.SpecializationTypeId == specializationTypeId)
                     .FirstOrDefaultAsync();
 
                 if (specialization == null)
+                {
                     return false;
+                }
 
-                // Sprawdź czy istnieją kursy dla tej specjalizacji
-                var courses = await this._database.Table<Course>()
+                // Check if courses exist for this specialization
+                var courses = await this.database.Table<Course>()
                     .Where(c => c.SpecializationId == specialization.Id)
                     .CountAsync();
 
@@ -338,90 +408,100 @@ namespace SledzSpecke.Infrastructure.Database
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error checking specialization template data");
+                this.logger.LogError(ex, "Error checking specialization template data");
                 return false;
             }
         }
 
-        // Nowa metoda do inicjowania danych szablonowych dla specjalizacji
+        /// <inheritdoc/>
         public async Task InitializeSpecializationTemplateDataAsync(int specializationTypeId)
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                // Sprawdź, czy dane szablonowe już istnieją
-                if (await this.HasSpecializationTemplateDataAsync(specializationTypeId))
-                {
-                    this._logger.LogInformation("Template data already exists for specialization type {SpecializationTypeId}", specializationTypeId);
-                    return;
-                }
-
-                this._logger.LogInformation("Initializing template data for specialization type {SpecializationTypeId}", specializationTypeId);
-
-                // Tymczasowo użyjemy danych dla hematologii - w przyszłości dodać obsługę innych specjalizacji
-                var templateData = DataSeeder.SeedHematologySpecialization();
-                templateData.SpecializationTypeId = specializationTypeId;
-
-                // Zapisz specjalizację
-                await this.SaveAsync(templateData);
-
-                // Zapisz kursy
-                foreach (var course in templateData.RequiredCourses)
-                {
-                    course.SpecializationId = templateData.Id;
-                    await this.SaveAsync(course);
-                }
-
-                // Zapisz staże
-                foreach (var internship in templateData.RequiredInternships)
-                {
-                    internship.SpecializationId = templateData.Id;
-                    await this.SaveAsync(internship);
-                }
-
-                // Zapisz procedury
-                foreach (var procedure in templateData.RequiredProcedures)
-                {
-                    procedure.SpecializationId = templateData.Id;
-                    await this.SaveAsync(procedure);
-                }
-
-                this._logger.LogInformation("Template data initialized successfully for specialization type {SpecializationTypeId}", specializationTypeId);
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
+
+            // Check if template data already exists
+            if (await this.HasSpecializationTemplateDataAsync(specializationTypeId))
             {
-                this._logger.LogError(ex, "Error initializing specialization template data");
-                throw;
+                this.logger.LogInformation("Template data already exists for specialization type {SpecializationTypeId}", specializationTypeId);
+                return;
             }
+
+            this.logger.LogInformation("Initializing template data for specialization type {SpecializationTypeId}", specializationTypeId);
+
+            // For now, we'll use hematology data - add support for other specializations in the future
+            var templateData = DataSeeder.SeedHematologySpecialization();
+            templateData.SpecializationTypeId = specializationTypeId;
+
+            // Save specialization
+            await this.SaveAsync(templateData);
+
+            // Save courses
+            foreach (var course in templateData.RequiredCourses)
+            {
+                course.SpecializationId = templateData.Id;
+                await this.SaveAsync(course);
+            }
+
+            // Save internships
+            foreach (var internship in templateData.RequiredInternships)
+            {
+                internship.SpecializationId = templateData.Id;
+                await this.SaveAsync(internship);
+            }
+
+            // Save procedures
+            foreach (var procedure in templateData.RequiredProcedures)
+            {
+                procedure.SpecializationId = templateData.Id;
+                await this.SaveAsync(procedure);
+            }
+
+            this.logger.LogInformation("Template data initialized successfully for specialization type {SpecializationTypeId}", specializationTypeId);
         }
 
-        public async Task<int> InsertAsync<T>(T item) where T : new()
+        /// <inheritdoc/>
+        public async Task<int> InsertAsync<T>(T item)
+            where T : new()
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                this._logger.LogDebug("Inserting new item of type {Type}", typeof(T).Name);
-                return await this._database.InsertAsync(item).ConfigureAwait(false);
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Error inserting item of type {Type}", typeof(T).Name);
-                throw;
-            }
+
+            this.logger.LogDebug("Inserting new item of type {Type}", typeof(T).Name);
+            return await this.database.InsertAsync(item).ConfigureAwait(false);
         }
 
-        public async Task<int> UpdateAsync<T>(T item) where T : new()
+        /// <inheritdoc/>
+        public async Task<int> UpdateAsync<T>(T item)
+            where T : new()
         {
             await this.EnsureInitializedAsync();
-            try
+
+            if (this.database == null)
             {
-                this._logger.LogDebug("Updating item of type {Type}", typeof(T).Name);
-                return await this._database.UpdateAsync(item).ConfigureAwait(false);
+                throw new InvalidOperationException("Database is not initialized");
             }
-            catch (Exception ex)
+
+            this.logger.LogDebug("Updating item of type {Type}", typeof(T).Name);
+            return await this.database.UpdateAsync(item).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Ensures the database is initialized before performing operations.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        private async Task EnsureInitializedAsync()
+        {
+            if (!this.isInitialized)
             {
-                this._logger.LogError(ex, "Error updating item of type {Type}", typeof(T).Name);
-                throw;
+                await this.InitAsync();
             }
         }
     }

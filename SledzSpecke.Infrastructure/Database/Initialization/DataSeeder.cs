@@ -23,7 +23,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                 VacationDaysPerYear = 26,
                 SelfEducationDaysPerYear = 6,
                 StatutoryHolidaysPerYear = 13,
-                RequiredDutyHoursPerWeek = (int)(10 + 5 / 60.0),  // 10 godzin 5 minut
+                RequiredDutyHoursPerWeek = (int)(10 + (double)(5 / 60)),  // 10 godzin 5 minut
                 RequiresPublication = true,
                 RequiredConferences = 3,
             };
@@ -164,7 +164,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     IsRequired = true,
                     Module = ModuleType.Basic,
                 },
-                new Course 
+                new Course
                 {
                     Id = 17,
                     Name = "Geriatria",
@@ -209,7 +209,8 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             // Dodanie staży (moduł specjalistyczny)
             specialization.RequiredInternships.AddRange(new List<Internship>
             {
-                new Internship {
+                new Internship
+                {
                     Id = 1,
                     Name = "Staż podstawowy w zakresie hematologii",
                     DurationWeeks = 101,
@@ -217,7 +218,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     IsRequired = true,
                     Module = ModuleType.Specialistic,
                 },
-                new Internship 
+                new Internship
                 {
                     Id = 2,
                     Name = "Staż kierunkowy w laboratorium hematologicznym",
@@ -276,7 +277,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
             // Dodanie staży (moduł podstawowy)
             specialization.RequiredInternships.AddRange(new List<Internship>
             {
-                new Internship 
+                new Internship
                 {
                     Id = 8,
                     Name = "Staż podstawowy w zakresie chorób wewnętrznych",
@@ -294,7 +295,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     IsRequired = true,
                     Module = ModuleType.Basic,
                 },
-                new Internship 
+                new Internship
                 {
                     Id = 10,
                     Name = "Staż kierunkowy w szpitalnym oddziale ratunkowym",
@@ -326,7 +327,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 3,
                     Name = "biopsja szpiku z kolca tylnego talerza biodrowego",
@@ -353,7 +354,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 6,
                     Name = "biopsja szpiku z kolca przedniego talerza biodrowego",
@@ -362,7 +363,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 7,
                     Name = "trepanobiopsja szpiku",
@@ -371,7 +372,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 8,
                     Name = "trepanobiopsja szpiku",
@@ -389,7 +390,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 10,
                     Name = "prowadzenie leczenia indukującego chorych na chłoniaki agresywne",
@@ -398,7 +399,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 11,
                     Name = "afereza lecznicza",
@@ -407,7 +408,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 12,
                     Name = "zakładanie centralnego cewnika żylnego",
@@ -416,7 +417,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 1,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 13,
                     Name = "punkcja lędźwiowa i dokanałowe podanie cytostatyków",
@@ -448,7 +449,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Specialistic,
                     InternshipId = 2,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 16,
                     Name = "ocena rozmazu krwi obwodowej",
@@ -611,7 +612,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     Module = ModuleType.Basic,
                     InternshipId = 8,
                 },
-                new MedicalProcedure 
+                new MedicalProcedure
                 {
                     Id = 33,
                     Name = "cewnikowanie pęcherza moczowego",
@@ -663,7 +664,7 @@ namespace SledzSpecke.Infrastructure.Database.Initialization
                     ProcedureType = ProcedureType.TypeB,
                     RequiredCount = 2,
                     Module = ModuleType.Basic,
-                    InternshipId = 8
+                    InternshipId = 8,
                 },
                 new MedicalProcedure
                 {
