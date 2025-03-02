@@ -83,6 +83,11 @@ namespace SledzSpecke.App.Features.Absences.Views
             }
         }
 
+        /// <summary>
+        /// Obsługuje edycję nieobecności.
+        /// </summary>
+        /// <param name="sender">Obiekt źródłowy zdarzenia.</param>
+        /// <param name="e">Argumenty zdarzenia.</param>
         private void OnEditButtonClicked(object sender, EventArgs e)
         {
             if (sender is Button button && int.TryParse(button.ClassId, out int absenceId))
