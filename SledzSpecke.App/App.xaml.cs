@@ -114,14 +114,21 @@ namespace SledzSpecke.App
         /// </summary>
         private void CreateStartupWindow()
         {
-            if (Application.Current?.Windows.Count == 0)
+            if (Application.Current != null)
             {
-                Window window = new (new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>()));
-                this.Windows.Add(window);
-            }
-            else if (Application.Current?.Windows.Count > 0)
-            {
-                Application.Current.Windows[0].Page = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                if (Application.Current.Windows.Count == 0)
+                {
+                    Window window = new (new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>()));
+                    Application.Current.OpenWindow(window);
+                }
+                else if (Application.Current.Windows.Count > 0)
+                {
+                    var mainWindow = Application.Current.Windows[0];
+                    if (mainWindow != null)
+                    {
+                        mainWindow.Page = new NavigationPage(this.serviceProvider.GetRequiredService<LoginPage>());
+                    }
+                }
             }
         }
 
