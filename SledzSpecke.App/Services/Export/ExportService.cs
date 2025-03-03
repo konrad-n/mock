@@ -686,7 +686,7 @@ namespace SledzSpecke.App.Services.Export
                 col = 1;
 
                 var procedure = procedures[i];
-                string internshipName = "";
+                string internshipName = string.Empty;
 
                 // Pobierz dane o stażu z AdditionalFields
                 if (!string.IsNullOrEmpty(procedure.AdditionalFields))
@@ -696,7 +696,7 @@ namespace SledzSpecke.App.Services.Export
                         var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(procedure.AdditionalFields);
                         if (additionalFields.TryGetValue("InternshipName", out object name))
                         {
-                            internshipName = name?.ToString() ?? "";
+                            internshipName = name?.ToString() ?? string.Empty;
                         }
                     }
                     catch
@@ -762,7 +762,7 @@ namespace SledzSpecke.App.Services.Export
                 col = 1;
 
                 var shift = shifts[i];
-                string internshipName = "";
+                string internshipName = string.Empty;
 
                 // Pobierz dane o stażu z AdditionalFields
                 if (!string.IsNullOrEmpty(shift.AdditionalFields))
@@ -772,7 +772,7 @@ namespace SledzSpecke.App.Services.Export
                         var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(shift.AdditionalFields);
                         if (additionalFields.TryGetValue("InternshipName", out object name))
                         {
-                            internshipName = name?.ToString() ?? "";
+                            internshipName = name?.ToString() ?? string.Empty;
                         }
                     }
                     catch
@@ -870,7 +870,7 @@ namespace SledzSpecke.App.Services.Export
                     try
                     {
                         var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(item.AdditionalFields);
-                        string additionalInfo = "";
+                        string additionalInfo = string.Empty;
 
                         foreach (var field in additionalFields)
                         {
@@ -933,7 +933,7 @@ namespace SledzSpecke.App.Services.Export
                     try
                     {
                         var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(publication.AdditionalFields);
-                        string additionalInfo = "";
+                        string additionalInfo = string.Empty;
 
                         foreach (var field in additionalFields)
                         {

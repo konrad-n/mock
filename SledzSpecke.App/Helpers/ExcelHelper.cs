@@ -255,7 +255,7 @@ namespace SledzSpecke.App.Helpers
                         var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(procedure.AdditionalFields);
                         if (additionalFields != null && additionalFields.TryGetValue("InternshipName", out object name))
                         {
-                            internshipName = name?.ToString() ?? "";
+                            internshipName = name?.ToString() ?? string.Empty;
                         }
                     }
                     catch

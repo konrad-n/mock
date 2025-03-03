@@ -129,7 +129,7 @@ namespace SledzSpecke.Tests.Services.SmkStrategy
         public void ParseAdditionalFields_WithEmptyJson_ReturnsEmptyDictionary()
         {
             // Arrange
-            string json = "";
+            string json = string.Empty;
 
             // Act
             var fields = this.strategy.ParseAdditionalFields(json);
