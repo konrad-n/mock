@@ -2,5 +2,8 @@
 {
     public enum RecognitionType
     {
+        BasicInternship,
+        SpecializationInternship,
+        Courses,
     }
 }

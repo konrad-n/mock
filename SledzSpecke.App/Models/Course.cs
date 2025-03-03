@@ -1,12 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SledzSpecke.App.Models.Enums;
+using SQLite;
 
 namespace SledzSpecke.App.Models
 {
     public class Course
     {
+        [PrimaryKey]
+        [AutoIncrement]
+        public int CourseId { get; set; }
+
+        [Indexed]
+        public int SpecializationId { get; set; }
+
+        // Dodane pole dla modułu
+        [Indexed]
+        public int? ModuleId { get; set; }
+
+        [MaxLength(50)]
+        public string CourseType { get; set; }
+
+        [MaxLength(100)]
+        public string CourseName { get; set; }
+
+        [MaxLength(20)]
+        public string CourseNumber { get; set; }
+
+        [MaxLength(100)]
+        public string InstitutionName { get; set; }
+
+        public DateTime CompletionDate { get; set; }
+
+        public int Year { get; set; }
+
+        public int CourseSequenceNumber { get; set; }
+
+        // Pola dla certyfikatów
+        public bool HasCertificate { get; set; }
+
+        public string CertificateNumber { get; set; }
+
+        public DateTime? CertificateDate { get; set; }
+
+        public SyncStatus SyncStatus { get; set; }
+
+        public string AdditionalFields { get; set; } // JSON
     }
 }

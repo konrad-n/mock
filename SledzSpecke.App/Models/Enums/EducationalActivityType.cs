@@ -2,5 +2,9 @@
 {
     public enum EducationalActivityType
     {
+        Conference,
+        Teaching,
+        Workshop,
+        Other,
     }
 }

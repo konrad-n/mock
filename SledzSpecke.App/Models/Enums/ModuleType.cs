@@ -2,5 +2,7 @@
 {
     public enum ModuleType
     {
+        Basic,        // Podstawowy
+        Specialistic, // Specjalistyczny
     }
 }
