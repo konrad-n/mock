@@ -2,5 +2,7 @@
 {
     public enum SmkVersion
     {
+        New,
+        Old,
     }
 }
