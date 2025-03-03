@@ -48,7 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Mocks\" />
     <Folder Include="TestData\TestSpecializationPrograms\" />
+    <Folder Include="TestUtilities\" />
   </ItemGroup>
 
   <!-- Special treatment for MAUI project reference -->

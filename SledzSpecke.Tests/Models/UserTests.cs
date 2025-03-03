@@ -1,15 +1,33 @@
-﻿namespace SledzSpecke.Tests;
+﻿using SledzSpecke.App.Models;
+using SledzSpecke.App.Models.Enums;
 
-public class UserTests
+namespace SledzSpecke.Tests.Models
 {
-    [SetUp]
-    public void Setup()
+    public class UserTests
     {
-    }
+        [Test]
+        public void User_PropertiesSetCorrectly()
+        {
+            // Arrange
+            var user = new User
+            {
+                UserId = 1,
+                Username = "testuser",
+                Email = "test@example.com",
+                PasswordHash = "hashedpassword",
+                SmkVersion = SmkVersion.New,
+                SpecializationId = 2,
+                RegistrationDate = new DateTime(2023, 1, 15)
+            };
 
-    [Test]
-    public void Test1()
-    {
-        Assert.Pass();
+            // Assert
+            Assert.That(user.UserId, Is.EqualTo(1));
+            Assert.That(user.Username, Is.EqualTo("testuser"));
+            Assert.That(user.Email, Is.EqualTo("test@example.com"));
+            Assert.That(user.PasswordHash, Is.EqualTo("hashedpassword"));
+            Assert.That(user.SmkVersion, Is.EqualTo(SmkVersion.New));
+            Assert.That(user.SpecializationId, Is.EqualTo(2));
+            Assert.That(user.RegistrationDate, Is.EqualTo(new DateTime(2023, 1, 15)));
+        }
     }
 }

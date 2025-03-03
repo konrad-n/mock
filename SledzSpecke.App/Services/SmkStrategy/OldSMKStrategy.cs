@@ -2,7 +2,7 @@
 
 namespace SledzSpecke.App.Services.SmkStrategy
 {
-    public class OldSMKStrategy : ISmkVersionStrategy
+    public class OldSmkStrategy : ISmkVersionStrategy
     {
         public Dictionary<string, bool> GetVisibleFields(string viewName)
         {
