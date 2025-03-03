@@ -32,14 +32,12 @@ jobs:
         
       - name: Restore dependencies
         run: dotnet restore SledzSpecke.sln
+
+      - name: Build Main project
+        run: dotnet build SledzSpecke/SledzSpecke.csproj -f net9.0-android35.0 --no-restore
         
-      - name: Build Core and Infrastructure projects
-        run: |
-          dotnet build SledzSpecke.Core/SledzSpecke.Core.csproj --no-restore
-          dotnet build SledzSpecke.Infrastructure/SledzSpecke.Infrastructure.csproj --no-restore
-        
-      - name: Build Android App
-        run: dotnet build SledzSpecke.App/SledzSpecke.App.csproj -f net9.0-android35.0 --no-restore
+      - name: Build Test project
+        run: dotnet build SledzSpecke.Tests/SledzSpecke.Tests.csproj -f net9.0-android35.0 --no-restore
       
       - name: Test
         run: dotnet test SledzSpecke.sln --no-build --verbosity normal || true
@@ -87,10 +85,5 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore SledzSpecke.sln
         
-      - name: Build Core and Infrastructure projects
-        run: |
-          dotnet build SledzSpecke.Core/SledzSpecke.Core.csproj --no-restore
-          dotnet build SledzSpecke.Infrastructure/SledzSpecke.Infrastructure.csproj --no-restore
-        
       - name: Build iOS App (attempt)
-        run: dotnet build SledzSpecke.App/SledzSpecke.App.csproj -f net9.0-ios --no-restore || true
+        run: dotnet build SledzSpecke/SledzSpecke.csproj -f net9.0-ios --no-restore || true
