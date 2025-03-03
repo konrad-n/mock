@@ -51,16 +51,19 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool install dotnet-sonarscanner --tool-path .\.sonar\scanner
           
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
+        
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
         
       - name: Begin SonarCloud analysis
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"konrad-n_mock" /o:"konrad-n" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/coverage.opencover.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"konrad-n_mock" /o:"konrad-n" /d:sonar.login="$env:SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/coverage.opencover.xml"
       
       - name: Restore dependencies
         run: dotnet restore SledzSpecke.sln
@@ -69,7 +72,15 @@ jobs:
         run: dotnet build SledzSpecke.sln --no-restore
         
       - name: Run tests with coverage
-        run: dotnet test SledzSpecke.sln --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="./coverage/coverage.opencover.xml"
+        run: dotnet test SledzSpecke.Tests/SledzSpecke.Tests.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="./coverage/coverage.opencover.xml"
         
       - name: Generate coverage report
-        run: reportgenerator "-reports:./coverage/coverage.opencover.xml" "-targetdir:coverage/report" "-reporttype
+        run: reportgenerator "-reports:./coverage/coverage.opencover.xml" "-targetdir:coverage/report" "-reporttypes:HtmlInline_AzurePipelines;Cobertura"
+        
+      - name: End SonarCloud analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
