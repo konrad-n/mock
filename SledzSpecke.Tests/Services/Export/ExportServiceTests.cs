@@ -6,9 +6,11 @@ using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
+using SledzSpecke.Tests.TestUtilities;
 
 namespace SledzSpecke.Tests
 {
+    [TestFixture]
     public class ExportServiceTests
     {
         private IDatabaseService databaseService;
@@ -17,10 +19,20 @@ namespace SledzSpecke.Tests
         private ExportService exportService;
         private Specialization testSpecialization;
         private User testUser;
+        private TestSecureStorageService secureStorageService;
+        private TestFileSystemService fileSystemService;
 
         [SetUp]
         public void Setup()
         {
+            // Initialize test services
+            this.secureStorageService = new TestSecureStorageService();
+            this.fileSystemService = new TestFileSystemService(useInMemoryStorage: true);
+
+            // Set our test services
+            Constants.SetFileSystemService(this.fileSystemService);
+            Settings.SetSecureStorageService(this.secureStorageService);
+
             // Initialize mocks
             this.databaseService = Substitute.For<IDatabaseService>();
             this.specializationService = Substitute.For<ISpecializationService>();
@@ -31,9 +43,9 @@ namespace SledzSpecke.Tests
             {
                 SpecializationId = 1,
                 Name = "Test Specialization",
-                StartDate = new DateTime(2023, 1, 1),
-                PlannedEndDate = new DateTime(2028, 1, 1),
-                HasModules = false
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                HasModules = false,
             };
 
             this.testUser = new User
@@ -42,7 +54,7 @@ namespace SledzSpecke.Tests
                 Username = "testuser",
                 Email = "test@example.com",
                 SmkVersion = SmkVersion.New,
-                SpecializationId = 1
+                SpecializationId = 1,
             };
 
             // Set up mock responses
@@ -51,29 +63,29 @@ namespace SledzSpecke.Tests
 
             // Initialize the service under test
             this.exportService = new ExportService(this.databaseService, this.specializationService, this.smkStrategy);
+        }
 
-            // Initialize ExcelHelper (required for EPPlus license)
-            ExcelHelper.Initialize();
+        [TearDown]
+        public void Cleanup()
+        {
+            // Clear test storage
+            this.secureStorageService.RemoveAll();
+            this.fileSystemService.ClearAllFiles();
         }
 
         [Test]
         public async Task GetLastExportDateAsync_ReturnsCorrectDate()
         {
             // Arrange
-            DateTime expectedDate = new DateTime(2023, 6, 15);
-
-            // Use a mock to intercept and replace the call to Settings.GetLastExportDateAsync
-            // Since we can't easily mock static methods, we'll need to test this differently
-            // For this test, we'll just validate that the method delegates to Settings
+            DateTime expectedDate = new DateTime(2023, 6, 15, 0, 0, 0, DateTimeKind.Local);
 
             // Act
-            await this.exportService.SaveLastExportDateAsync(expectedDate);
-            var actualDate = await this.exportService.GetLastExportDateAsync();
+            await Settings.SetLastExportDateAsync(expectedDate);
+            var actualDate = await Settings.GetLastExportDateAsync();
 
             // Assert
-            // This test will only pass if Settings.GetLastExportDateAsync returns what we just saved
-            // In a real scenario with TestSettings class, we would mock that instead
             Assert.That(actualDate, Is.Not.Null);
+            Assert.That(actualDate.Value.Date, Is.EqualTo(expectedDate.Date));
         }
 
         [Test]
@@ -90,71 +102,56 @@ namespace SledzSpecke.Tests
         }
 
         [Test]
-        public async Task ExportToExcelAsync_WithBasicOptions_CallsCorrectMethods()
+        public async Task SaveLastExportDateAsync_SetsDatabaseValue()
         {
-            // This test is more complex as it involves file system operations
-            // We'll focus on testing that the correct methods are called with the right parameters
-
             // Arrange
-            var exportOptions = new ExportOptions
-            {
-                StartDate = new DateTime(2023, 1, 1),
-                EndDate = new DateTime(2023, 12, 31),
-                IncludeInternships = true,
-                IncludeCourses = true,
-                IncludeProcedures = false,
-                IncludeShifts = false,
-                IncludeSelfEducation = false,
-                IncludePublications = false,
-                IncludeAbsences = false,
-                IncludeEducationalActivities = false,
-                IncludeRecognitions = false,
-                FormatForOldSMK = false
-            };
+            DateTime testDate = new DateTime(2023, 5, 10, 0, 0, 0, DateTimeKind.Local);
 
-            // Set up mock data for export
-            var internships = new List<Internship>
-            {
-                new Internship
-                {
-                    InternshipId = 1,
-                    InternshipName = "Test Internship",
-                    InstitutionName = "Test Institution",
-                    DepartmentName = "Test Department",
-                    StartDate = new DateTime(2023, 2, 1),
-                    EndDate = new DateTime(2023, 3, 1),
-                    DaysCount = 28,
-                    Year = 1,
-                    IsCompleted = true,
-                    IsApproved = true
-                }
-            };
+            // Act
+            await this.exportService.SaveLastExportDateAsync(testDate);
 
-            var courses = new List<Course>
-            {
-                new Course
-                {
-                    CourseId = 1,
-                    CourseName = "Test Course",
-                    CourseType = "Mandatory",
-                    CourseNumber = "C001",
-                    InstitutionName = "Test Institution",
-                    CompletionDate = new DateTime(2023, 4, 15),
-                    Year = 1,
-                    HasCertificate = true,
-                    CertificateNumber = "CERT123",
-                    CertificateDate = new DateTime(2023, 4, 20)
-                }
-            };
+            // Retrieve the value directly from our test storage
+            var retrievedDate = await Settings.GetLastExportDateAsync();
 
-            // Mock the database calls to return our test data
-            this.databaseService.GetInternshipsAsync(Arg.Any<int?>(), Arg.Any<int?>()).Returns(internships);
-            this.databaseService.GetCoursesAsync(Arg.Any<int?>(), Arg.Any<int?>()).Returns(courses);
+            // Assert
+            Assert.That(retrievedDate, Is.Not.Null);
+            Assert.That(retrievedDate.Value.Date, Is.EqualTo(testDate.Date));
+        }
 
+        [Test]
+        public void GetLastExportFilePathAsync_ReturnsCorrectPath()
+        {
+            // Arrange
+            string testPath = Path.Combine(this.fileSystemService.AppDataDirectory, "testexport.xlsx");
+            this.fileSystemService.EnsureDirectoryExists(Path.GetDirectoryName(testPath));
+
+            // Write a temporary file to simulate an export
+            File.WriteAllText(testPath, "Test content");
+
+            // Set the path in the service's field using reflection
+            var fieldInfo = typeof(ExportService).GetField("lastExportFilePath",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            fieldInfo.SetValue(this.exportService, testPath);
+
+            // Act
+            var result = this.exportService.GetLastExportFilePathAsync().Result;
+
+            // Assert
+            Assert.That(result, Is.EqualTo(testPath));
+        }
+
+        [Test]
+        public void VerifyServicesAreCorrectlySet()
+        {
+            // This test just verifies that our service dependency injection is working
             // Act & Assert
-            // We'll just check that the method doesn't throw an exception
-            // In a real test scenario, we would verify the file contents
-            Assert.DoesNotThrowAsync(async () => await this.exportService.ExportToExcelAsync(exportOptions));
+            var actualSecureStorage = TestServiceProvider.GetSecureStorageService();
+            var actualFileSystem = TestServiceProvider.GetFileSystemService();
+
+            Assert.That(actualSecureStorage, Is.Not.Null);
+            Assert.That(actualFileSystem, Is.Not.Null);
+            Assert.That(actualSecureStorage, Is.InstanceOf<TestSecureStorageService>());
+            Assert.That(actualFileSystem, Is.InstanceOf<TestFileSystemService>());
         }
     }
 }

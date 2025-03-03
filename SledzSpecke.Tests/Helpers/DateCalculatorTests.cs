@@ -13,7 +13,7 @@ namespace SledzSpecke.Tests
         [SetUp]
         public void Setup()
         {
-            this.startDate = new DateTime(2023, 1, 1);
+            this.startDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local);
             this.durationDays = 365; // 1 year
             this.absences = new List<Absence>();
         }
@@ -60,7 +60,7 @@ namespace SledzSpecke.Tests
             {
                 Type = AbsenceType.Maternity,
                 StartDate = this.startDate.AddDays(100),
-                EndDate = this.startDate.AddDays(279) // 180 days
+                EndDate = this.startDate.AddDays(279), // 180 days
             };
             this.absences.Add(maternityLeave);
 

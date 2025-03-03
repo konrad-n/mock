@@ -66,6 +66,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="SledzSpecke.net9.0-android35.0.v3.ncrunchproject" />
+    <None Remove="SledzSpecke.net9.0-ios.v3.ncrunchproject" />
+    <None Remove="SledzSpecke.net9.0-maccatalyst.v3.ncrunchproject" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="EPPlus" Version="7.6.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />

@@ -5,6 +5,7 @@ using SQLite;
 
 namespace SledzSpecke.Tests.Services.Database
 {
+    [TestFixture]
     public class DatabaseServiceTests
     {
         private IDatabaseService databaseService;
