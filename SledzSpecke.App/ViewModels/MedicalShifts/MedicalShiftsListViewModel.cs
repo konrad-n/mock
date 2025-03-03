@@ -81,9 +81,13 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         // Commands
         public ICommand RefreshCommand { get; }
+
         public ICommand FilterShiftsCommand { get; }
+
         public ICommand FilterCommand { get; }
+
         public ICommand ShiftSelectedCommand { get; }
+
         public ICommand AddShiftCommand { get; }
 
         // Methods
