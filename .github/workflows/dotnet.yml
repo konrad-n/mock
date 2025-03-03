@@ -14,22 +14,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
+      - name: Fix Windows Targeting Issue
+        run: |
+          echo '
+          <Project>
+            <PropertyGroup>
+              <EnableWindowsTargeting>true</EnableWindowsTargeting>
+            </PropertyGroup>
+          </Project>
+          ' > Directory.Build.props
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-          
+
       - name: Install .NET MAUI Workloads
         run: dotnet workload install maui --ignore-failed-sources
-        
+
       - name: Cache NuGet packages
         uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: ${{ runner.os }}-nuget-
-        
+
       - name: Restore dependencies
         run: dotnet restore SledzSpecke.sln
 
