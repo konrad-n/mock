@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helpers\" />
     <Folder Include="TestData\TestSpecializationPrograms\" />
   </ItemGroup>
 

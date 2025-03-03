@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SledzSpecke.App.Models.Enums
+﻿namespace SledzSpecke.App.Models.Enums
 {
-    public class SyncStatus
+    public enum SyncStatus
     {
     }
 }

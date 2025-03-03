@@ -1,6 +1,6 @@
 ﻿namespace SledzSpecke.App.Models.Enums
 {
-    public enum CourseType
+    public enum RecognitionType
     {
     }
 }

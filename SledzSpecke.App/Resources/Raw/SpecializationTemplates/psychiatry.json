@@ -1,3 +1,317 @@
 {
-
+  "name": "Psychiatria",
+  "code": "psychiatry",
+  "smkVersion": "New",
+  "hasModules": false,
+  "totalDuration": {
+    "years": 5,
+    "months": 0,
+    "days": 0
+  },
+  "totalWorkingDays": 1104,
+  "basicInfo": {
+    "targetGroup": "Lekarze nieposiadający specjalizacji I lub II stopnia lub tytułu specjalisty w odpowiedniej dziedzinie medycyny",
+    "qualificationProcedure": "wiosna 2023"
+  },
+  "courses": [
+    {
+      "id": 1,
+      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie psychiatrii\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 2,
+      "name": "Kurs: \"Psychiatria sądowa i opiniowanie sądowo-psychiatryczne\"",
+      "weeks": 2,
+      "workingDays": 10,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 3,
+      "name": "Kurs: \"Psychiatria środowiskowa i rehabilitacja psychiatryczna\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 4,
+      "name": "Kurs: \"Wybrane zagadnienia z zakresu psychiatrii klinicznej\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 5,
+      "name": "Kurs: \"Wprowadzenie do psychoterapii\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 6,
+      "name": "Kurs: \"Orzecznictwo lekarskie\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 7,
+      "name": "Kurs: \"Profilaktyka i promocja zdrowia\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 8,
+      "name": "Kurs atestacyjny (podsumowujący): \"Psychiatria\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    }
+  ],
+  "internships": [
+    {
+      "id": 1,
+      "name": "Staż podstawowy w zakresie psychiatrii",
+      "weeks": 148,
+      "workingDays": 740,
+      "isBasic": true,
+      "location": "Katedra i Klinika Psychiatryczna - Samodzielny Wojewódzki Zespół Publicznych Zakładów Psychiatrycznej Opieki Zdrowotnej w Warszawie",
+      "moduleId": null
+    },
+    {
+      "id": 2,
+      "name": "Staż kierunkowy w zakresie chorób wewnętrznych",
+      "weeks": 6,
+      "workingDays": 30,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 3,
+      "name": "Staż kierunkowy w zakresie neurologii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 4,
+      "name": "Staż kierunkowy w zakresie psychiatrii dzieci i młodzieży",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 5,
+      "name": "Staż kierunkowy w zakresie zaburzeń nerwicowych i psychoterapii",
+      "weeks": 12,
+      "workingDays": 60,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 6,
+      "name": "Staż kierunkowy w centrum zdrowia psychicznego",
+      "weeks": 12,
+      "workingDays": 60,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 7,
+      "name": "Staż kierunkowy w zakresie leczenia uzależnień",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 8,
+      "name": "Staż kierunkowy z psychiatrii konsultacyjnej",
+      "weeks": 6,
+      "workingDays": 30,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 9,
+      "name": "Staż kierunkowy z psychiatrii sądowej",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false,
+      "moduleId": null
+    }
+  ],
+  "procedures": [
+    {
+      "id": 1,
+      "name": "ocena stanu psychicznego za pomocą standaryzowanych skal klinicznych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 20,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 2,
+      "name": "kwalifikacja i przygotowanie pacjentów oraz przeprowadzenie zabiegów elektrowstrząsowych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 3,
+      "name": "przygotowanie opinii w sprawie zasadności przyjęcia bez zgody do szpitala psychiatrycznego",
+      "type": "Staż podstawowy",
+      "requiredCountA": 20,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 4,
+      "name": "przygotowanie opinii sądowo-psychiatrycznych w sprawach karnych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 5,
+      "name": "przygotowanie opinii sądowo-psychiatrycznych w sprawach cywilnych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 3,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 6,
+      "name": "przeprowadzenie konsultacji psychiatrycznych dla innych lekarzy",
+      "type": "Staż podstawowy",
+      "requiredCountA": 20,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 7,
+      "name": "prowadzenie pacjentów leczonych klozapiną",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 8,
+      "name": "prowadzenie pacjentów leczonych litem",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 9,
+      "name": "zastosowanie środków przymusu bezpośredniego zgodnie z UoOZP",
+      "type": "Staż podstawowy",
+      "requiredCountA": 10,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 10,
+      "name": "prowadzenie pacjentów przyjętych bez zgody do szpitala psychiatrycznego",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 1
+    },
+    {
+      "id": 11,
+      "name": "udzielanie świadczeń za pomocą narzędzi teleinformatycznych",
+      "type": "Staż kierunkowy w zakresie psychiatrii dzieci i młodzieży",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 4
+    },
+    {
+      "id": 12,
+      "name": "ocena wskazań do farmakoterapii lub psychoterapii oraz dobór technik psychoterapeutycznych",
+      "type": "Staż kierunkowy w zakresie zaburzeń nerwicowych i psychoterapii",
+      "requiredCountA": 5,
+      "requiredCountB": 10,
+      "internshipId": 5
+    },
+    {
+      "id": 13,
+      "name": "współudział w konsultacjach psychiatrycznych dla lekarzy innych specjalności",
+      "type": "Staż kierunkowy z psychiatrii konsultacyjnej",
+      "requiredCountA": 0,
+      "requiredCountB": 20,
+      "internshipId": 8
+    },
+    {
+      "id": 14,
+      "name": "przeprowadzenie ogólnego badania internistycznego",
+      "type": "Staż kierunkowy w zakresie chorób wewnętrznych",
+      "requiredCountA": 5,
+      "requiredCountB": 10,
+      "internshipId": 2
+    },
+    {
+      "id": 15,
+      "name": "przeprowadzenie ogólnego badania neurologicznego",
+      "type": "Staż kierunkowy w zakresie neurologii",
+      "requiredCountA": 5,
+      "requiredCountB": 10,
+      "internshipId": 3
+    },
+    {
+      "id": 16,
+      "name": "badanie psychiatryczne osób poniżej 18 roku życia",
+      "type": "Staż kierunkowy w zakresie psychiatrii dzieci i młodzieży",
+      "requiredCountA": 5,
+      "requiredCountB": 10,
+      "internshipId": 4
+    },
+    {
+      "id": 17,
+      "name": "prowadzenie pacjentów z powikłanymi zespołami abstynencyjnymi",
+      "type": "Staż kierunkowy w zakresie leczenia uzależnień",
+      "requiredCountA": 5,
+      "requiredCountB": 5,
+      "internshipId": 7
+    },
+    {
+      "id": 18,
+      "name": "tworzenie planu terapii zdrowienia",
+      "type": "Staż kierunkowy w Centrum Zdrowia Psychicznego",
+      "requiredCountA": 5,
+      "requiredCountB": 10,
+      "internshipId": 6
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 30,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 130,
+    "nationalHolidays": 65,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08, // 10 godz 5 min
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  }
 }

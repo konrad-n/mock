@@ -1,0 +1,349 @@
+{
+  "name": "Anestezjologia i intensywna terapia",
+  "code": "anesthesiology",
+  "smkVersion": "New",
+  "hasModules": false,
+  "totalDuration": {
+    "years": 6,
+    "months": 0,
+    "days": 0
+  },
+  "totalWorkingDays": 1566,
+  "basicInfo": {
+    "targetGroup": "Lekarze nieposiadający specjalizacji I lub II stopnia lub tytułu specjalisty w odpowiedniej dziedzinie medycyny",
+    "qualificationProcedure": "wiosna 2023"
+  },
+  "courses": [
+    {
+      "id": 1,
+      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie anestezjologii i intensywnej terapii\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 2,
+      "name": "Kurs: \"Toksykologia\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 3,
+      "name": "Kurs: \"Diagnostyka i leczenie bólu\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 4,
+      "name": "Kurs: \"Postępy w intensywnej terapii\"",
+      "weeks": 1.6,
+      "workingDays": 8,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 5,
+      "name": "Kurs: \"Stwierdzanie trwałego nieodwracalnego ustania czynności mózgu, zatrzymania krążenia oraz opieka nad potencjalnym dawcą narządów\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 6,
+      "name": "Kurs: \"Metody udrażniania dróg oddechowych\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 7,
+      "name": "Kurs: \"Przetaczanie krwi i jej składników\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 8,
+      "name": "Kurs: \"Orzecznictwo lekarskie\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 9,
+      "name": "Kurs: \"Profilaktyka i promocja zdrowia\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 10,
+      "name": "Kurs atestacyjny (podsumowujący): \"Anestezjologia i intensywna terapia\"",
+      "weeks": 2,
+      "workingDays": 10,
+      "required": true,
+      "moduleId": null
+    }
+  ],
+  "internships": [
+    {
+      "id": 1,
+      "name": "Staż podstawowy w zakresie anestezjologii i intensywnej terapii",
+      "weeks": 222,
+      "workingDays": 1110,
+      "isBasic": true,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 2,
+      "name": "Staż kierunkowy w zakresie anestezji dziecięcej",
+      "weeks": 12,
+      "workingDays": 60,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 3,
+      "name": "Staż kierunkowy w zakresie intensywnej terapii dziecięcej",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 4,
+      "name": "Staż kierunkowy w zakresie kardioanestezji",
+      "weeks": 3,
+      "workingDays": 15,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 5,
+      "name": "Staż kierunkowy w zakresie torakoanestezji",
+      "weeks": 3,
+      "workingDays": 15,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 6,
+      "name": "Staż kierunkowy w zakresie neuroanestezji",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 7,
+      "name": "Staż kierunkowy w zakresie anestezji w położnictwie",
+      "weeks": 6,
+      "workingDays": 30,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 8,
+      "name": "Staż kierunkowy w zakresie diagnostyki i leczenia bólu",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false,
+      "moduleId": null
+    },
+    {
+      "id": 9,
+      "name": "Staż kierunkowy w szpitalnym oddziale ratunkowym",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false,
+      "moduleId": null
+    }
+  ],
+  "procedures": [
+    {
+      "id": 1,
+      "name": "całkowita liczba znieczuleń ogólnych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 1000,
+      "requiredCountB": 500,
+      "internshipId": 1
+    },
+    {
+      "id": 2,
+      "name": "znieczulenie ogólne",
+      "type": "Staż podstawowy",
+      "requiredCountA": 742,
+      "requiredCountB": 360,
+      "internshipId": 1
+    },
+    {
+      "id": 3,
+      "name": "znieczulenie zewnątrzoponowe (z wyłączeniem analgezji zewnątrzoponowej porodu)",
+      "type": "Staż podstawowy",
+      "requiredCountA": 27,
+      "requiredCountB": 18,
+      "internshipId": 1
+    },
+    {
+      "id": 4,
+      "name": "znieczulenie podpajęczynówkowe",
+      "type": "Staż podstawowy",
+      "requiredCountA": 68,
+      "requiredCountB": 23,
+      "internshipId": 1
+    },
+    {
+      "id": 5,
+      "name": "blokady nerwów i splotów nerwowych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 68,
+      "requiredCountB": 14,
+      "internshipId": 1
+    },
+    {
+      "id": 6,
+      "name": "monitorowany nadzór anestezjologiczny",
+      "type": "Staż podstawowy",
+      "requiredCountA": 80,
+      "requiredCountB": 20,
+      "internshipId": 1
+    },
+    {
+      "id": 7,
+      "name": "znieczulenie w chirurgii naczyń",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 10,
+      "requiredCountB": 10,
+      "internshipId": null
+    },
+    {
+      "id": 8,
+      "name": "znieczulenie w urologii",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 15,
+      "requiredCountB": 5,
+      "internshipId": null
+    },
+    {
+      "id": 9,
+      "name": "znieczulenie w laryngologii",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 15,
+      "requiredCountB": 5,
+      "internshipId": null
+    },
+    {
+      "id": 10,
+      "name": "znieczulenie w ortopedii, chirurgii urazowej",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 20,
+      "requiredCountB": 10,
+      "internshipId": null
+    },
+    {
+      "id": 11,
+      "name": "znieczulenie/MNA w okulistyce",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 15,
+      "requiredCountB": 5,
+      "internshipId": null
+    },
+    {
+      "id": 12,
+      "name": "znieczulenie w trybie \"chirurgii jednego dnia\"",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 30,
+      "requiredCountB": 10,
+      "internshipId": null
+    },
+    {
+      "id": 13,
+      "name": "znieczulenie poza salą operacyjną",
+      "type": "Znieczulenia w zależności od rodzaju zabiegów chirurgicznych",
+      "requiredCountA": 0,
+      "requiredCountB": 40,
+      "internshipId": null
+    },
+    {
+      "id": 14,
+      "name": "kaniulacja tętnicy",
+      "type": "Procedury cewnikowania naczyń",
+      "requiredCountA": 80,
+      "requiredCountB": 20,
+      "internshipId": null
+    },
+    {
+      "id": 15,
+      "name": "kaniulacja żyły centralnej",
+      "type": "Procedury cewnikowania naczyń",
+      "requiredCountA": 80,
+      "requiredCountB": 20,
+      "internshipId": null
+    },
+    {
+      "id": 16,
+      "name": "cewnikowanie tętnicy płucnej lub innych naczyń w celu oceny dynamiki układu krążenia",
+      "type": "Procedury cewnikowania naczyń",
+      "requiredCountA": 0,
+      "requiredCountB": 20,
+      "internshipId": null
+    },
+    {
+      "id": 17,
+      "name": "znieczulenie w chirurgii dziecięcej (u dzieci w wieku 2-5 lat)",
+      "type": "Staż kierunkowy w zakresie anestezji dziecięcej",
+      "requiredCountA": 15,
+      "requiredCountB": 15,
+      "internshipId": 2
+    },
+    {
+      "id": 18,
+      "name": "znieczulenie w chirurgii dziecięcej (w pierwszym roku życia)",
+      "type": "Staż kierunkowy w zakresie anestezji dziecięcej",
+      "requiredCountA": 0,
+      "requiredCountB": 20,
+      "internshipId": 2
+    },
+    {
+      "id": 19,
+      "name": "znieczulenie do cięcia cesarskiego",
+      "type": "Staż kierunkowy w zakresie anestezji w położnictwie",
+      "requiredCountA": 20,
+      "requiredCountB": 20,
+      "internshipId": 7
+    },
+    {
+      "id": 20,
+      "name": "analgezja zewnątrzoponowa porodu",
+      "type": "Staż kierunkowy w zakresie anestezji w położnictwie",
+      "requiredCountA": 10,
+      "requiredCountB": 10,
+      "internshipId": 7
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 36,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 156,
+    "nationalHolidays": 78,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  }
+}

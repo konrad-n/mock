@@ -1,0 +1,340 @@
+{
+  "name": "Moduł specjalistyczny w zakresie kardiologii",
+  "code": "cardiology_specialistic",
+  "moduleType": "Specialistic",
+  "smkVersion": "New",
+  "duration": {
+    "years": 3,
+    "months": 0,
+    "days": 0
+  },
+  "workingDays": 783,
+  "courses": [
+    {
+      "id": 1,
+      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie kardiologii\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 2,
+      "name": "Kurs: \"Patofizjologia chorób sercowo-naczyniowych\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 3,
+      "name": "Kurs: \"Farmakoterapia chorób sercowo-naczyniowych\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 4,
+      "name": "Kurs: \"Nieinwazyjna diagnostyka elektrokardiograficzna\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 5,
+      "name": "Kurs: \"Diagnostyka obrazowa – echokardiografia\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 6,
+      "name": "Kurs: \"Diagnostyka obrazowa – nowe techniki obrazowania\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 7,
+      "name": "Kurs: \"Intensywna terapia kardiologiczna\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 8,
+      "name": "Kurs: \"Elektrofizjologia i elektroterapia\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 9,
+      "name": "Kurs: \"Diagnostyka inwazyjna i leczenie interwencyjne\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 10,
+      "name": "Kurs: \"Wrodzone i nabyte wady serca\"",
+      "weeks": 0.8,
+      "workingDays": 4,
+      "required": true
+    },
+    {
+      "id": 11,
+      "name": "Kurs: \"Onkologia w kardiologii\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 12,
+      "name": "Kurs: \"Przewlekły zespół wieńcowy\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 13,
+      "name": "Kurs: \"Nadciśnienie tętnicze\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 14,
+      "name": "Kurs: \"Nadciśnienie płucne i niewydolność prawej komory serca\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 15,
+      "name": "Kurs: \"Niewydolność serca\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 16,
+      "name": "Kurs: \"Diagnostyka i leczenie chorób naczyń obwodowych\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 17,
+      "name": "Kurs: \"Choroby rzadkie w kardiologii\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 18,
+      "name": "Kurs atestacyjny (podsumowujący): \"Kardiologia\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true
+    }
+  ],
+  "internships": [
+    {
+      "id": 1,
+      "name": "Staż podstawowy w zakresie kardiologii",
+      "weeks": 64,
+      "workingDays": 320,
+      "isBasic": true
+    },
+    {
+      "id": 2,
+      "name": "Staż kierunkowy w zakresie intensywnej terapii kardiologicznej",
+      "weeks": 16,
+      "workingDays": 80,
+      "isBasic": false
+    },
+    {
+      "id": 3,
+      "name": "Staż kierunkowy w zakresie elektrofizjologii i elektroterapii",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false
+    },
+    {
+      "id": 4,
+      "name": "Staż kierunkowy w zakresie kardiologii interwencyjnej",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false
+    },
+    {
+      "id": 5,
+      "name": "Staż kierunkowy w zakresie echokardiografii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 6,
+      "name": "Staż kierunkowy w zakresie kardiologii dziecięcej",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 7,
+      "name": "Staż kierunkowy w zakresie nabytych wrodzonych wad serca u dorosłych",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 8,
+      "name": "Staż kierunkowy w zakresie kardiochirurgii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 9,
+      "name": "Staż kierunkowy w zakresie nieinwazyjnej diagnostyki elektrokardiograficznej",
+      "weeks": 6,
+      "workingDays": 30,
+      "isBasic": false
+    },
+    {
+      "id": 10,
+      "name": "Staż kierunkowy w zakresie radiologii i diagnostyki obrazowej",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 11,
+      "name": "Staż kierunkowy w zakresie angiologii",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false
+    }
+  ],
+  "procedures": [
+    {
+      "id": 1,
+      "name": "badanie elektrokardiograficzne",
+      "type": "Staż podstawowy",
+      "requiredCountA": 200,
+      "requiredCountB": 0
+    },
+    {
+      "id": 2,
+      "name": "24-godzinne, ambulatoryjne monitorowanie EKG",
+      "type": "Staż podstawowy",
+      "requiredCountA": 50,
+      "requiredCountB": 0
+    },
+    {
+      "id": 3,
+      "name": "24-godzinne, ambulatoryjne monitorowanie ciśnienia tętniczego",
+      "type": "Staż podstawowy",
+      "requiredCountA": 50,
+      "requiredCountB": 0
+    },
+    {
+      "id": 4,
+      "name": "próba wysiłkowa elektrokardiograficzna",
+      "type": "Staż podstawowy",
+      "requiredCountA": 50,
+      "requiredCountB": 0
+    },
+    {
+      "id": 5,
+      "name": "badanie echokardiograficzne przezklatkowe",
+      "type": "Staż podstawowy",
+      "requiredCountA": 200,
+      "requiredCountB": 0
+    },
+    {
+      "id": 6,
+      "name": "badanie echokardiograficzne przezprzełykowe",
+      "type": "Staż podstawowy",
+      "requiredCountA": 0,
+      "requiredCountB": 50
+    },
+    {
+      "id": 7,
+      "name": "badanie echokardiograficzne obciążeniowe",
+      "type": "Staż podstawowy",
+      "requiredCountA": 0,
+      "requiredCountB": 50
+    },
+    {
+      "id": 8,
+      "name": "nakłucie opłucnej, otrzewnej",
+      "type": "Staż podstawowy",
+      "requiredCountA": 25,
+      "requiredCountB": 0
+    },
+    {
+      "id": 9,
+      "name": "wszczepienie stymulatora",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 0,
+      "requiredCountB": 5
+    },
+    {
+      "id": 10,
+      "name": "wszczepienie kardiowertera-defibrylatora",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 0,
+      "requiredCountB": 5
+    },
+    {
+      "id": 11,
+      "name": "kontrola stymulatora",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 0
+    },
+    {
+      "id": 12,
+      "name": "kontrola kardiowertera-defibrylatora",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 0
+    },
+    {
+      "id": 13,
+      "name": "badanie elektrofizjologiczne",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 0,
+      "requiredCountB": 5
+    },
+    {
+      "id": 14,
+      "name": "ablacja podłoża zaburzeń rytmu",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 0,
+      "requiredCountB": 5
+    },
+    {
+      "id": 15,
+      "name": "koronarografia",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 0,
+      "requiredCountB": 50
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 18,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 78,
+    "nationalHolidays": 39,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  }
+}
