@@ -44,19 +44,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Converters\**" />
     <Compile Remove="Resources\Icons\**" />
     <Compile Remove="Resources\Splash\**" />
-    <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
     <EmbeddedResource Remove="Resources\Splash\**" />
-    <MauiCss Remove="Converters\**" />
     <MauiCss Remove="Resources\Icons\**" />
     <MauiCss Remove="Resources\Splash\**" />
-    <MauiXaml Remove="Converters\**" />
     <MauiXaml Remove="Resources\Icons\**" />
     <MauiXaml Remove="Resources\Splash\**" />
-    <None Remove="Converters\**" />
     <None Remove="Resources\Icons\**" />
     <None Remove="Resources\Splash\**" />
   </ItemGroup>

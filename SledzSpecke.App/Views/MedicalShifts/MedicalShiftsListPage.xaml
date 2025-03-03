@@ -55,8 +55,14 @@
                                 <VerticalStackLayout Grid.Column="0">
                                     <Label Text="{Binding Date, StringFormat='Data: {0:d}'}" FontAttributes="Bold" />
                                     <Label Text="{Binding Location, StringFormat='Miejsce: {0}'}" />
-                                    <Label Text="{Binding Hours, StringFormat='Czas: {0}h {1}min'}" 
-                                           CommandParameter="{Binding Minutes}" />
+                                    <Label>
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="Czas: {0}h {1}min">
+                                                <Binding Path="Hours" />
+                                                <Binding Path="Minutes" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
                                     <Label Text="{Binding InternshipName, StringFormat='Staż: {0}'}" 
                                            FontSize="13" TextColor="{StaticResource TextMutedColor}" />
                                 </VerticalStackLayout>
