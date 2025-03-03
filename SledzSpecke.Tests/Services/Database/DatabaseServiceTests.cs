@@ -1,7 +1,6 @@
 ﻿using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
-using SQLite;
 
 namespace SledzSpecke.Tests.Services.Database
 {
@@ -9,14 +8,13 @@ namespace SledzSpecke.Tests.Services.Database
     public class DatabaseServiceTests
     {
         private IDatabaseService databaseService;
-        private string databasePath;
 
         [SetUp]
         public void Setup()
         {
-            // Create a temporary in-memory database for testing
-            this.databasePath = ":memory:";
-            this.databaseService = new TestDatabaseService(this.databasePath);
+            // Create a new in-memory database for each test to avoid cross-test contamination
+            string databasePath = ":memory:";
+            this.databaseService = new TestDatabaseService(databasePath);
         }
 
         [Test]
@@ -117,9 +115,13 @@ namespace SledzSpecke.Tests.Services.Database
         [Test]
         public async Task SaveInternshipAsync_SavesInternshipCorrectly()
         {
+            // Create a completely isolated test database service
+            string databasePath = ":memory:";
+            var isolatedDatabaseService = new TestDatabaseService(databasePath);
+            await isolatedDatabaseService.InitializeAsync();
+
             // Arrange
-            await this.databaseService.InitializeAsync();
-            var internship = new Internship
+            var testInternship = new Internship
             {
                 SpecializationId = 1,
                 InstitutionName = "Test Institution",
@@ -134,11 +136,11 @@ namespace SledzSpecke.Tests.Services.Database
                 SyncStatus = SyncStatus.NotSynced,
             };
 
-            // Act
-            int internshipId = await this.databaseService.SaveInternshipAsync(internship);
-            var savedInternship = await this.databaseService.GetInternshipAsync(internshipId);
+            // Act - save and immediately retrieve the internship
+            int internshipId = await isolatedDatabaseService.SaveInternshipAsync(testInternship);
+            var savedInternship = await isolatedDatabaseService.GetInternshipAsync(internshipId);
 
-            // Assert
+            // Assert - check that we got back exactly what we saved
             Assert.That(savedInternship, Is.Not.Null);
             Assert.That(savedInternship.InternshipId, Is.EqualTo(internshipId));
             Assert.That(savedInternship.InternshipName, Is.EqualTo("Test Internship"));
@@ -187,9 +189,13 @@ namespace SledzSpecke.Tests.Services.Database
         [Test]
         public async Task SaveModuleAsync_SavesModuleCorrectly()
         {
-            // Arrange
-            await this.databaseService.InitializeAsync();
-            var module = new Module
+            // Create a completely isolated test database service
+            string databasePath = ":memory:";
+            var isolatedDatabaseService = new TestDatabaseService(databasePath);
+            await isolatedDatabaseService.InitializeAsync();
+
+            // Arrange - create a test module
+            var testModule = new Module
             {
                 SpecializationId = 1,
                 Type = ModuleType.Basic,
@@ -203,11 +209,11 @@ namespace SledzSpecke.Tests.Services.Database
                 TotalCourses = 3,
             };
 
-            // Act
-            int moduleId = await this.databaseService.SaveModuleAsync(module);
-            var savedModule = await this.databaseService.GetModuleAsync(moduleId);
+            // Act - save and retrieve the module
+            int moduleId = await isolatedDatabaseService.SaveModuleAsync(testModule);
+            var savedModule = await isolatedDatabaseService.GetModuleAsync(moduleId);
 
-            // Assert
+            // Assert - check that we got back exactly what we saved
             Assert.That(savedModule, Is.Not.Null);
             Assert.That(savedModule.ModuleId, Is.EqualTo(moduleId));
             Assert.That(savedModule.Name, Is.EqualTo("Test Module"));
@@ -290,177 +296,5 @@ namespace SledzSpecke.Tests.Services.Database
             // Assert
             Assert.That(deletedInternship, Is.Null, "Internship should be deleted");
         }
-    }
-
-    // Test implementation of DatabaseService that uses in-memory SQLite database
-    public class TestDatabaseService : DatabaseService
-    {
-        private readonly string databasePath;
-        private SQLiteAsyncConnection database;
-        private bool isInitialized = false;
-
-        public TestDatabaseService(string databasePath)
-        {
-            this.databasePath = databasePath;
-        }
-
-        public new async Task InitializeAsync()
-        {
-            if (this.isInitialized)
-            {
-                return;
-            }
-
-            this.database = new SQLiteAsyncConnection(this.databasePath);
-
-            // Create tables for all models
-            await this.database.CreateTableAsync<User>();
-            await this.database.CreateTableAsync<SledzSpecke.App.Models.Specialization>();
-            await this.database.CreateTableAsync<Module>();
-            await this.database.CreateTableAsync<Internship>();
-            await this.database.CreateTableAsync<MedicalShift>();
-            await this.database.CreateTableAsync<Procedure>();
-            await this.database.CreateTableAsync<Course>();
-            await this.database.CreateTableAsync<SelfEducation>();
-            await this.database.CreateTableAsync<Publication>();
-            await this.database.CreateTableAsync<EducationalActivity>();
-            await this.database.CreateTableAsync<Absence>();
-            await this.database.CreateTableAsync<SledzSpecke.App.Models.Recognition>();
-            await this.database.CreateTableAsync<SpecializationProgram>();
-
-            this.isInitialized = true;
-        }
-
-        public new async Task<User> GetUserAsync(int id)
-        {
-            await this.InitializeAsync();
-            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.UserId == id);
-        }
-
-        public new async Task<User> GetUserByUsernameAsync(string username)
-        {
-            await this.InitializeAsync();
-            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username);
-        }
-
-        public new async Task<int> SaveUserAsync(User user)
-        {
-            await this.InitializeAsync();
-            if (user.UserId != 0)
-            {
-                await this.database.UpdateAsync(user);
-                return user.UserId;
-            }
-            else
-            {
-                return await this.database.InsertAsync(user);
-            }
-        }
-
-        public new async Task<SledzSpecke.App.Models.Specialization> GetSpecializationAsync(int id)
-        {
-            await this.InitializeAsync();
-            var specialization = await this.database.Table<SledzSpecke.App.Models.Specialization>().FirstOrDefaultAsync(s => s.SpecializationId == id);
-
-            if (specialization != null && specialization.HasModules)
-            {
-                specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
-            }
-
-            return specialization;
-        }
-
-        public new async Task<int> SaveSpecializationAsync(SledzSpecke.App.Models.Specialization specialization)
-        {
-            await this.InitializeAsync();
-            if (specialization.SpecializationId != 0)
-            {
-                await this.database.UpdateAsync(specialization);
-                return specialization.SpecializationId;
-            }
-            else
-            {
-                return await this.database.InsertAsync(specialization);
-            }
-        }
-
-        public new async Task<List<SledzSpecke.App.Models.Specialization>> GetAllSpecializationsAsync()
-        {
-            await this.InitializeAsync();
-            return await this.database.Table<SledzSpecke.App.Models.Specialization>().ToListAsync();
-        }
-
-        public new async Task<Module> GetModuleAsync(int id)
-        {
-            await this.InitializeAsync();
-            return await this.database.Table<Module>().FirstOrDefaultAsync(m => m.ModuleId == id);
-        }
-
-        public new async Task<List<Module>> GetModulesAsync(int specializationId)
-        {
-            await this.InitializeAsync();
-            return await this.database.Table<Module>().Where(m => m.SpecializationId == specializationId).ToListAsync();
-        }
-
-        public new async Task<int> SaveModuleAsync(Module module)
-        {
-            await this.InitializeAsync();
-            if (module.ModuleId != 0)
-            {
-                await this.database.UpdateAsync(module);
-                return module.ModuleId;
-            }
-            else
-            {
-                return await this.database.InsertAsync(module);
-            }
-        }
-
-        public new async Task<Internship> GetInternshipAsync(int id)
-        {
-            await this.InitializeAsync();
-            return await this.database.Table<Internship>().FirstOrDefaultAsync(i => i.InternshipId == id);
-        }
-
-        public new async Task<List<Internship>> GetInternshipsAsync(int? specializationId = null, int? moduleId = null)
-        {
-            await this.InitializeAsync();
-            var query = this.database.Table<Internship>();
-
-            if (specializationId.HasValue)
-            {
-                query = query.Where(i => i.SpecializationId == specializationId);
-            }
-
-            if (moduleId.HasValue)
-            {
-                query = query.Where(i => i.ModuleId == moduleId);
-            }
-
-            return await query.ToListAsync();
-        }
-
-        public new async Task<int> SaveInternshipAsync(Internship internship)
-        {
-            await this.InitializeAsync();
-            if (internship.InternshipId != 0)
-            {
-                await this.database.UpdateAsync(internship);
-                return internship.InternshipId;
-            }
-            else
-            {
-                return await this.database.InsertAsync(internship);
-            }
-        }
-
-        public new async Task<int> DeleteInternshipAsync(Internship internship)
-        {
-            await this.InitializeAsync();
-            return await this.database.DeleteAsync(internship);
-        }
-
-        // Other database methods would be implemented similarly
-        // For brevity, I'm only implementing the ones we need for the tests
     }
 }

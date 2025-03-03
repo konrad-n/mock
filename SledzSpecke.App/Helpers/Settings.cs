@@ -1,11 +1,32 @@
-﻿namespace SledzSpecke.App.Helpers
+﻿using SledzSpecke.App.Services.Storage;
+
+namespace SledzSpecke.App.Helpers
 {
     public static class Settings
     {
+        private static ISecureStorageService secureStorageService;
+
+        // Initialize with a default implementation
+        static Settings()
+        {
+            // This will be replaced with a proper implementation during app startup
+            // or with a test implementation during testing
+            secureStorageService = new SecureStorageService();
+        }
+
+        /// <summary>
+        /// Sets the secure storage service to use.
+        /// </summary>
+        /// <param name="service">The secure storage service implementation.</param>
+        public static void SetSecureStorageService(ISecureStorageService service)
+        {
+            secureStorageService = service ?? throw new ArgumentNullException(nameof(service));
+        }
+
         // Current User
         public static async Task<int> GetCurrentUserIdAsync()
         {
-            return await SecureStorage.GetAsync(Constants.CurrentUserIdKey) is string idStr &&
+            return await secureStorageService.GetAsync(Constants.CurrentUserIdKey) is string idStr &&
                    int.TryParse(idStr, out int id) ? id : 0;
         }
 
@@ -13,30 +34,30 @@
         {
             if (userId > 0)
             {
-                await SecureStorage.SetAsync(Constants.CurrentUserIdKey, userId.ToString());
+                await secureStorageService.SetAsync(Constants.CurrentUserIdKey, userId.ToString());
             }
             else
             {
-                SecureStorage.Remove(Constants.CurrentUserIdKey);
+                secureStorageService.Remove(Constants.CurrentUserIdKey);
             }
         }
 
         // Notifications
         public static async Task<bool> GetNotificationsEnabledAsync()
         {
-            return await SecureStorage.GetAsync(Constants.NotificationsEnabledKey) is string enabled &&
+            return await secureStorageService.GetAsync(Constants.NotificationsEnabledKey) is string enabled &&
                    bool.TryParse(enabled, out bool result) && result;
         }
 
         public static async Task SetNotificationsEnabledAsync(bool enabled)
         {
-            await SecureStorage.SetAsync(Constants.NotificationsEnabledKey, enabled.ToString());
+            await secureStorageService.SetAsync(Constants.NotificationsEnabledKey, enabled.ToString());
         }
 
         // Backup
         public static async Task<DateTime?> GetLastBackupDateAsync()
         {
-            if (await SecureStorage.GetAsync(Constants.LastBackupDateKey) is string dateStr
+            if (await secureStorageService.GetAsync(Constants.LastBackupDateKey) is string dateStr
                 && DateTime.TryParse(dateStr, out DateTime date))
             {
                 return date;
@@ -47,13 +68,13 @@
 
         public static async Task SetLastBackupDateAsync(DateTime date)
         {
-            await SecureStorage.SetAsync(Constants.LastBackupDateKey, date.ToString("O"));
+            await secureStorageService.SetAsync(Constants.LastBackupDateKey, date.ToString("O"));
         }
 
         // Export
         public static async Task<DateTime?> GetLastExportDateAsync()
         {
-            if (await SecureStorage.GetAsync(Constants.LastExportDateKey) is string dateStr
+            if (await secureStorageService.GetAsync(Constants.LastExportDateKey) is string dateStr
                 && DateTime.TryParse(dateStr, out DateTime date))
             {
                 return date;
@@ -64,25 +85,25 @@
 
         public static async Task SetLastExportDateAsync(DateTime date)
         {
-            await SecureStorage.SetAsync(Constants.LastExportDateKey, date.ToString("O"));
+            await secureStorageService.SetAsync(Constants.LastExportDateKey, date.ToString("O"));
         }
 
         // Dark Mode
         public static async Task<bool> GetIsDarkModeAsync()
         {
-            return await SecureStorage.GetAsync(Constants.IsDarkModeKey) is string darkMode &&
+            return await secureStorageService.GetAsync(Constants.IsDarkModeKey) is string darkMode &&
                    bool.TryParse(darkMode, out bool result) && result;
         }
 
         public static async Task SetIsDarkModeAsync(bool isDarkMode)
         {
-            await SecureStorage.SetAsync(Constants.IsDarkModeKey, isDarkMode.ToString());
+            await secureStorageService.SetAsync(Constants.IsDarkModeKey, isDarkMode.ToString());
         }
 
         // Current Module
         public static async Task<int> GetCurrentModuleIdAsync()
         {
-            return await SecureStorage.GetAsync(Constants.CurrentModuleIdKey) is string idStr &&
+            return await secureStorageService.GetAsync(Constants.CurrentModuleIdKey) is string idStr &&
                    int.TryParse(idStr, out int id) ? id : 0;
         }
 
@@ -90,17 +111,17 @@
         {
             if (moduleId > 0)
             {
-                await SecureStorage.SetAsync(Constants.CurrentModuleIdKey, moduleId.ToString());
+                await secureStorageService.SetAsync(Constants.CurrentModuleIdKey, moduleId.ToString());
             }
             else
             {
-                SecureStorage.Remove(Constants.CurrentModuleIdKey);
+                secureStorageService.Remove(Constants.CurrentModuleIdKey);
             }
         }
 
         public static async Task<int?> GetReminderDaysInAdvanceAsync()
         {
-            if (await SecureStorage.GetAsync(Constants.ReminderDaysInAdvanceKey) is string reminderDays
+            if (await secureStorageService.GetAsync(Constants.ReminderDaysInAdvanceKey) is string reminderDays
                 && int.TryParse(reminderDays, out int days))
             {
                 return days;
@@ -111,13 +132,13 @@
 
         public static async Task SetReminderDaysInAdvanceAsync(int days)
         {
-            await SecureStorage.SetAsync(Constants.ReminderDaysInAdvanceKey, days.ToString());
+            await secureStorageService.SetAsync(Constants.ReminderDaysInAdvanceKey, days.ToString());
         }
 
         // Clear All
         public static void ClearAll()
         {
-            SecureStorage.RemoveAll();
+            secureStorageService.RemoveAll();
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using NUnit.Framework;
-using SledzSpecke.App.Helpers;
-using SledzSpecke.App.Services.FileSystem;
-using SledzSpecke.App.Services.Storage;
+﻿using SledzSpecke.App.Helpers;
 using SledzSpecke.Tests.TestUtilities;
 
 namespace SledzSpecke.Tests
@@ -19,6 +16,10 @@ namespace SledzSpecke.Tests
             // Set these implementations as the ones to use
             Constants.SetFileSystemService(fileSystemService);
             Settings.SetSecureStorageService(secureStorageService);
+
+            // Also register them with the TestServiceProvider
+            TestServiceProvider.SetFileSystemService(fileSystemService);
+            TestServiceProvider.SetSecureStorageService(secureStorageService);
         }
 
         [OneTimeTearDown]

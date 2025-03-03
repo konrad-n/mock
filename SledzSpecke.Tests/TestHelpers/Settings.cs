@@ -10,7 +10,7 @@ namespace SledzSpecke.Tests.TestHelpers
         private static ISecureStorageService secureStorageService;
 
         // Initialize with a default implementation
-        public Settings()
+        static Settings()
         {
             // This will be replaced with a proper implementation during app startup
             // or with a test implementation during testing

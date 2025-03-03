@@ -1,15 +1,27 @@
-﻿using System;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SledzSpecke.App.Services.FileSystem;
 
 namespace SledzSpecke.App.Helpers
 {
     public static class Constants
     {
+        private static IFileSystemService fileSystemService;
+
+        // Initialize with a default implementation
+        static Constants()
+        {
+            // This will be replaced with a proper implementation during app startup
+            // or with a test implementation during testing
+            fileSystemService = new FileSystemService();
+        }
+
+        /// <summary>
+        /// Sets the file system service to use.
+        /// </summary>
+        /// <param name="service">The file system service implementation.</param>
+        public static void SetFileSystemService(IFileSystemService service)
+        {
+            fileSystemService = service ?? throw new ArgumentNullException(nameof(service));
+        }
 
         // API
         public const string ApiUrl = "https://api.sledzspecke.app";
@@ -55,15 +67,14 @@ namespace SledzSpecke.App.Helpers
             SQLite.SQLiteOpenFlags.Create |
             SQLite.SQLiteOpenFlags.SharedCache;
 
-        public static string DatabasePath => Path.Combine(FileSystem.AppDataDirectory, DatabaseFilename);
+        public static string DatabasePath => Path.Combine(fileSystemService.AppDataDirectory, DatabaseFilename);
 
-        public static string SpecializationTemplatesPath => Path.Combine(FileSystem.AppDataDirectory, SpecializationTemplatesFolder);
+        public static string SpecializationTemplatesPath => fileSystemService.GetAppSubdirectory(SpecializationTemplatesFolder);
 
-        public static string ExportsPath => Path.Combine(FileSystem.AppDataDirectory, ExportsFolder);
+        public static string ExportsPath => fileSystemService.GetAppSubdirectory(ExportsFolder);
 
-        public static string BackupsPath => Path.Combine(FileSystem.AppDataDirectory, BackupsFolder);
+        public static string BackupsPath => fileSystemService.GetAppSubdirectory(BackupsFolder);
 
-        public static string PublicationsPath => Path.Combine(FileSystem.AppDataDirectory, PublicationsFolder);
-
+        public static string PublicationsPath => fileSystemService.GetAppSubdirectory(PublicationsFolder);
     }
 }
