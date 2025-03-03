@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.Tests;
+﻿namespace SledzSpecke.Tests.Services.Recognition;
 
 public class RecognitionTests
 {

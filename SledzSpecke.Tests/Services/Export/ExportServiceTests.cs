@@ -1,14 +1,15 @@
 ﻿using NSubstitute;
-using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Export;
+using SledzSpecke.App.Services.FileSystem;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
+using SledzSpecke.Tests.TestHelpers;
 using SledzSpecke.Tests.TestUtilities;
 
-namespace SledzSpecke.Tests
+namespace SledzSpecke.Tests.Services.Export
 {
     [TestFixture]
     public class ExportServiceTests
@@ -17,7 +18,7 @@ namespace SledzSpecke.Tests
         private ISpecializationService specializationService;
         private ISmkVersionStrategy smkStrategy;
         private ExportService exportService;
-        private Specialization testSpecialization;
+        private App.Models.Specialization testSpecialization;
         private User testUser;
         private TestSecureStorageService secureStorageService;
         private TestFileSystemService fileSystemService;
@@ -31,7 +32,7 @@ namespace SledzSpecke.Tests
 
             // Set our test services
             Constants.SetFileSystemService(this.fileSystemService);
-            Settings.SetSecureStorageService(this.secureStorageService);
+            TestHelpers.Settings.SetSecureStorageService(this.secureStorageService);
 
             // Initialize mocks
             this.databaseService = Substitute.For<IDatabaseService>();
@@ -39,7 +40,7 @@ namespace SledzSpecke.Tests
             this.smkStrategy = Substitute.For<ISmkVersionStrategy>();
 
             // Initialize test data
-            this.testSpecialization = new Specialization
+            this.testSpecialization = new App.Models.Specialization
             {
                 SpecializationId = 1,
                 Name = "Test Specialization",
@@ -80,8 +81,8 @@ namespace SledzSpecke.Tests
             DateTime expectedDate = new DateTime(2023, 6, 15, 0, 0, 0, DateTimeKind.Local);
 
             // Act
-            await Settings.SetLastExportDateAsync(expectedDate);
-            var actualDate = await Settings.GetLastExportDateAsync();
+            await TestHelpers.Settings.SetLastExportDateAsync(expectedDate);
+            var actualDate = await TestHelpers.Settings.GetLastExportDateAsync();
 
             // Assert
             Assert.That(actualDate, Is.Not.Null);
@@ -110,8 +111,9 @@ namespace SledzSpecke.Tests
             // Act
             await this.exportService.SaveLastExportDateAsync(testDate);
 
-            // Retrieve the value directly from our test storage
-            var retrievedDate = await Settings.GetLastExportDateAsync();
+            // Retrieve the value directly from the app's Settings helper, not the test helper
+            // This ensures we're checking the same storage location that the ExportService uses
+            var retrievedDate = await App.Helpers.Settings.GetLastExportDateAsync();
 
             // Assert
             Assert.That(retrievedDate, Is.Not.Null);
@@ -119,25 +121,47 @@ namespace SledzSpecke.Tests
         }
 
         [Test]
-        public void GetLastExportFilePathAsync_ReturnsCorrectPath()
+        public async Task GetLastExportFilePathAsync_ReturnsCorrectPath()
         {
             // Arrange
-            string testPath = Path.Combine(this.fileSystemService.AppDataDirectory, "testexport.xlsx");
-            this.fileSystemService.EnsureDirectoryExists(Path.GetDirectoryName(testPath));
+            var mockFileSystemService = Substitute.For<IFileSystemService>();
+            var mockDatabaseService = Substitute.For<IDatabaseService>();
+            var mockSmkStrategy = Substitute.For<ISmkVersionStrategy>();
 
-            // Write a temporary file to simulate an export
-            File.WriteAllText(testPath, "Test content");
+            // Set up a temp directory that will work in any environment, including CI
+            string tempPath = Path.GetTempPath();
+            string exportDir = Path.Combine(tempPath, "SledzSpeckeTests_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(exportDir);
 
-            // Set the path in the service's field using reflection
-            var fieldInfo = typeof(ExportService).GetField("lastExportFilePath",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            fieldInfo.SetValue(this.exportService, testPath);
+            try
+            {
+                // Create a test file in the temp directory
+                string fileName = "testexport.xlsx";
+                string filePath = Path.Combine(exportDir, fileName);
+                File.WriteAllText(filePath, "test content");
 
-            // Act
-            var result = this.exportService.GetLastExportFilePathAsync().Result;
+                // Configure mock to return our test path
+                mockFileSystemService.GetAppSubdirectory(Arg.Any<string>()).Returns(exportDir);
 
-            // Assert
-            Assert.That(result, Is.EqualTo(testPath));
+                // Create service with mocks
+                var exportService = new ExportService(mockDatabaseService, null, mockSmkStrategy);
+
+                // Set the last export file path via reflection (since it's private)
+                var fieldInfo = typeof(ExportService).GetField("lastExportFilePath",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                fieldInfo.SetValue(exportService, filePath);
+
+                // Act
+                var result = await exportService.GetLastExportFilePathAsync();
+
+                // Assert
+                Assert.That(result, Is.EqualTo(filePath));
+            }
+            finally
+            {
+                // Clean up
+                try { Directory.Delete(exportDir, true); } catch { /* Ignore cleanup errors */ }
+            }
         }
 
         [Test]

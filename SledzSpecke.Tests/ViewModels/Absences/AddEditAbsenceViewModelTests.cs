@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.Tests;
+﻿namespace SledzSpecke.Tests.ViewModels.Absences;
 
 public class AddEditAbsenceViewModelTests
 {

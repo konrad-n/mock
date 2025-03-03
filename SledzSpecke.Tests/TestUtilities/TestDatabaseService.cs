@@ -2,7 +2,7 @@
 using SledzSpecke.App.Services.Database;
 using SQLite;
 
-namespace SledzSpecke.Tests.Services.Database
+namespace SledzSpecke.Tests.TestUtilities
 {
     // Test implementation of DatabaseService that uses in-memory SQLite database
     public class TestDatabaseService : IDatabaseService

@@ -1,4 +1,4 @@
-﻿namespace SledzSpecke.Tests;
+﻿namespace SledzSpecke.Tests.Services.Settings;
 
 public class SettingsServiceTests
 {

@@ -1,11 +1,11 @@
-﻿using NSubstitute;
+﻿using System.Text.Json;
+using NSubstitute;
 using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
-using System.Text.Json;
 
-namespace SledzSpecke.Tests
+namespace SledzSpecke.Tests.TestHelpers
 {
     public class ProgressCalculatorTests
     {

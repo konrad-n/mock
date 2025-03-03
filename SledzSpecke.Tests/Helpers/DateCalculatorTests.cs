@@ -2,7 +2,7 @@
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 
-namespace SledzSpecke.Tests
+namespace SledzSpecke.Tests.TestHelpers
 {
     public class DateCalculatorTests
     {
