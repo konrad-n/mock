@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
 using Plugin.LocalNotification;
 using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Services.Database;
@@ -202,10 +201,13 @@ namespace SledzSpecke.App.Services.Notification
 
             try
             {
+                // Generate a secure random notification ID
+                int notificationId = this.GenerateSecureRandomId();
+
                 // Show immediate notification
                 var notification = new NotificationRequest
                 {
-                    NotificationId = new Random().Next(1000, 10000),
+                    NotificationId = notificationId,
                     Title = title,
                     Description = message,
                     Schedule = new NotificationRequestSchedule
@@ -220,6 +222,16 @@ namespace SledzSpecke.App.Services.Notification
             {
                 System.Diagnostics.Debug.WriteLine($"Error showing notification: {ex.Message}");
             }
+        }
+
+        private int GenerateSecureRandomId()
+        {
+            byte[] randomBytes = new byte[4];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return Math.Abs(BitConverter.ToInt32(randomBytes, 0));
         }
 
         // Helper method for scheduling local notifications
