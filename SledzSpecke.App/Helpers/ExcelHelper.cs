@@ -245,7 +245,26 @@ namespace SledzSpecke.App.Helpers
                 worksheet.Cells[row, col++].Value = procedure.Code;
                 worksheet.Cells[row, col++].Value = procedure.OperatorCode;
                 worksheet.Cells[row, col++].Value = procedure.Location;
-                worksheet.Cells[row, col++].Value = procedure.InternshipName;
+
+                // Zamiast bezpośredniego dostępu do procedury.InternshipName
+                string internshipName = string.Empty;
+                if (!string.IsNullOrEmpty(procedure.AdditionalFields))
+                {
+                    try
+                    {
+                        var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(procedure.AdditionalFields);
+                        if (additionalFields != null && additionalFields.TryGetValue("InternshipName", out object name))
+                        {
+                            internshipName = name?.ToString() ?? "";
+                        }
+                    }
+                    catch
+                    {
+                        // Ignoruj błędy deserializacji
+                    }
+                }
+
+                worksheet.Cells[row, col++].Value = internshipName;
                 worksheet.Cells[row, col++].Value = procedure.PatientInitials;
                 worksheet.Cells[row, col++].Value = procedure.PatientGender;
                 worksheet.Cells[row, col++].Value = procedure.AssistantData;
