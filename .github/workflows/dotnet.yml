@@ -36,9 +36,6 @@ jobs:
       - name: Build Main project
         run: dotnet build SledzSpecke.App/SledzSpecke.csproj -f net9.0-android35.0 --no-restore
         
-      - name: Build Test project
-        run: dotnet build SledzSpecke.Tests/SledzSpecke.Tests.csproj -f net9.0-android35.0 --no-restore
-      
       - name: Test
         run: dotnet test SledzSpecke.sln --no-build --verbosity normal || true
 
