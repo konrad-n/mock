@@ -8,7 +8,7 @@ namespace SledzSpecke.App.Converters
         {
             if (value is bool isSelected)
             {
-                return isSelected ? Colors.Parse("#24C1DE") : Colors.Transparent;
+                return isSelected ? Color.FromHex("#24C1DE") : Colors.Transparent;
             }
 
             return Colors.Transparent;

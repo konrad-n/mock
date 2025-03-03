@@ -8,10 +8,10 @@ namespace SledzSpecke.App.Converters
         {
             if (value is bool isSelected)
             {
-                return isSelected ? Colors.White : Colors.Parse("#082044");
+                return isSelected ? Colors.White : Color.FromHex("#082044");
             }
 
-            return Colors.Parse("#082044");
+            return Color.FromHex("#082044");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
