@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using SledzSpecke.App.ViewModels.MedicalShifts;
+using SledzSpecke.App.Views.MedicalShifts;
 
 namespace SledzSpecke.App
 {
@@ -31,6 +33,20 @@ namespace SledzSpecke.App
             services.AddSingleton<NavigationPage>();
 
             services.AddSingleton<AppShell>();
+        }
+
+        private static void RegisterViewModels(IServiceCollection services)
+        {
+            services.AddTransient<MedicalShiftsListViewModel>();
+            services.AddTransient<MedicalShiftDetailsViewModel>();
+            services.AddTransient<AddEditMedicalShiftViewModel>();
+        }
+
+        private static void RegisterViews(IServiceCollection services)
+        {
+            services.AddTransient<MedicalShiftsListPage>();
+            services.AddTransient<MedicalShiftDetailsPage>();
+            services.AddTransient<AddEditMedicalShiftPage>();
         }
     }
 }

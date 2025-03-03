@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Material Design Typography -->
+    <x:Double x:Key="MaterialHeadline1">96</x:Double>
+    <x:Double x:Key="MaterialHeadline2">60</x:Double>
+    <x:Double x:Key="MaterialHeadline3">48</x:Double>
+    <x:Double x:Key="MaterialHeadline4">34</x:Double>
+    <x:Double x:Key="MaterialHeadline5">24</x:Double>
+    <x:Double x:Key="MaterialHeadline6">20</x:Double>
+    <x:Double x:Key="MaterialSubtitle1">16</x:Double>
+    <x:Double x:Key="MaterialSubtitle2">14</x:Double>
+    <x:Double x:Key="MaterialBody1">16</x:Double>
+    <x:Double x:Key="MaterialBody2">14</x:Double>
+    <x:Double x:Key="MaterialCaption">12</x:Double>
+    <x:Double x:Key="MaterialButton">14</x:Double>
+    <x:Double x:Key="MaterialOverline">10</x:Double>
+
+    <!-- Material Design Fonts -->
+    <x:String x:Key="MaterialFontFamily">OpenSansRegular</x:String>
+    <x:String x:Key="MaterialFontFamilyMedium">OpenSansSemibold</x:String>
+
+    <!-- Material Design Margins and Paddings -->
+    <Thickness x:Key="MaterialMarginExtraSmall">4</Thickness>
+    <Thickness x:Key="MaterialMarginSmall">8</Thickness>
+    <Thickness x:Key="MaterialMarginMedium">16</Thickness>
+    <Thickness x:Key="MaterialMarginLarge">24</Thickness>
+    <Thickness x:Key="MaterialMarginExtraLarge">32</Thickness>
+
+    <Thickness x:Key="MaterialPaddingExtraSmall">4</Thickness>
+    <Thickness x:Key="MaterialPaddingSmall">8</Thickness>
+    <Thickness x:Key="MaterialPaddingMedium">16</Thickness>
+    <Thickness x:Key="MaterialPaddingLarge">24</Thickness>
+    <Thickness x:Key="MaterialPaddingExtraLarge">32</Thickness>
+
+    <!-- Material Design Common Elevations -->
+    <x:Double x:Key="MaterialElevation0">0</x:Double>
+    <x:Double x:Key="MaterialElevation1">1</x:Double>
+    <x:Double x:Key="MaterialElevation2">2</x:Double>
+    <x:Double x:Key="MaterialElevation3">3</x:Double>
+    <x:Double x:Key="MaterialElevation4">4</x:Double>
+    <x:Double x:Key="MaterialElevation6">6</x:Double>
+    <x:Double x:Key="MaterialElevation8">8</x:Double>
+    <x:Double x:Key="MaterialElevation12">12</x:Double>
+    <x:Double x:Key="MaterialElevation16">16</x:Double>
+    <x:Double x:Key="MaterialElevation24">24</x:Double>
+
+    <!-- Material Card Styles -->
+    <Style x:Key="MaterialCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark=#121212}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="{StaticResource MaterialPaddingMedium}" />
+        <Setter Property="Margin" Value="{StaticResource MaterialMarginSmall}" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light=#E0E0E0, Dark=#333333}" />
+    </Style>
+
+    <!-- Material Button Styles -->
+    <Style x:Key="MaterialButtonBase" TargetType="Button">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamilyMedium}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialButton}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinimumHeightRequest" Value="36" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+    </Style>
+
+    <Style x:Key="MaterialButtonPrimary" TargetType="Button" BasedOn="{StaticResource MaterialButtonBase}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+
+    <Style x:Key="MaterialButtonSecondary" TargetType="Button" BasedOn="{StaticResource MaterialButtonBase}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Secondary}" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+
+    <Style x:Key="MaterialButtonOutlined" TargetType="Button" BasedOn="{StaticResource MaterialButtonBase}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderWidth" Value="1" />
+    </Style>
+
+    <Style x:Key="MaterialButtonText" TargetType="Button" BasedOn="{StaticResource MaterialButtonBase}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderWidth" Value="0" />
+    </Style>
+
+    <Style x:Key="MaterialButtonDanger" TargetType="Button" BasedOn="{StaticResource MaterialButtonBase}">
+        <Setter Property="BackgroundColor" Value="#F44336" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+
+    <!-- Material Text Field Styles -->
+    <Style x:Key="MaterialEntryBase" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody1}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#9E9E9E, Dark=#757575}" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+    </Style>
+
+    <!-- Material Label Styles -->
+    <Style x:Key="MaterialLabelHeadline5" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialHeadline5}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="Margin" Value="0,8" />
+    </Style>
+
+    <Style x:Key="MaterialLabelHeadline6" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialHeadline6}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="Margin" Value="0,4" />
+    </Style>
+
+    <Style x:Key="MaterialLabelSubtitle1" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialSubtitle1}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+    </Style>
+
+    <Style x:Key="MaterialLabelSubtitle2" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialSubtitle2}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+    </Style>
+
+    <Style x:Key="MaterialLabelBody1" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody1}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+    </Style>
+
+    <Style x:Key="MaterialLabelBody2" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody2}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+    </Style>
+
+    <Style x:Key="MaterialLabelCaption" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialCaption}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#757575, Dark=#BDBDBD}" />
+    </Style>
+
+    <!-- Material List Item Styles -->
+    <Style x:Key="MaterialListItem" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=White, Dark=#121212}" />
+        <Setter Property="Padding" Value="{StaticResource MaterialPaddingMedium}" />
+        <Setter Property="Margin" Value="0,4" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="BorderColor" Value="Transparent" />
+    </Style>
+
+    <!-- Material Divider Style -->
+    <Style x:Key="MaterialDivider" TargetType="BoxView">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E0E0E0, Dark=#333333}" />
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="Margin" Value="0,8" />
+    </Style>
+
+    <!-- Material Search Bar Style -->
+    <Style x:Key="MaterialSearchBar" TargetType="SearchBar">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#F5F5F5, Dark=#333333}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#9E9E9E, Dark=#757575}" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody1}" />
+    </Style>
+
+    <!-- Material Picker Style -->
+    <Style x:Key="MaterialPicker" TargetType="Picker">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="TitleColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody1}" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+    </Style>
+
+    <!-- Material DatePicker Style -->
+    <Style x:Key="MaterialDatePicker" TargetType="DatePicker">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody1}" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+    </Style>
+
+    <!-- Material TimePicker Style -->
+    <Style x:Key="MaterialTimePicker" TargetType="TimePicker">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=#212121, Dark=#FAFAFA}" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialBody1}" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+    </Style>
+
+    <!-- Material Icon Button -->
+    <Style x:Key="MaterialIconButton" TargetType="ImageButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <!-- Material Floating Action Button (FAB) -->
+    <Style x:Key="MaterialFAB" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="CornerRadius" Value="28" />
+        <Setter Property="WidthRequest" Value="56" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0,0,16,16" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="End" />
+    </Style>
+
+    <!-- Material Error Text -->
+    <Style x:Key="MaterialErrorText" TargetType="Label">
+        <Setter Property="TextColor" Value="#F44336" />
+        <Setter Property="FontSize" Value="{StaticResource MaterialCaption}" />
+        <Setter Property="FontFamily" Value="{StaticResource MaterialFontFamily}" />
+    </Style>
+</ResourceDictionary>

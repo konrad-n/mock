@@ -1,4 +1,4 @@
-namespace SledzSpecke.App.Views.MedicalShifts
+﻿namespace SledzSpecke.App.Views.MedicalShifts
 {
     public partial class AddEditMedicalShiftPage : ContentPage
     {

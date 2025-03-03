@@ -89,6 +89,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\Absences\AbsenceDetailsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

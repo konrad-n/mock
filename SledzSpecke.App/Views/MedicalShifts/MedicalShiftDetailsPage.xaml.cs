@@ -1,9 +1,10 @@
-namespace SledzSpecke.App.Views.MedicalShifts;
-
-public partial class MedicalShiftDetailsPage : ContentView
+﻿namespace SledzSpecke.App.Views.MedicalShifts
 {
-    public MedicalShiftDetailsPage()
+    public partial class MedicalShiftDetailsPage : ContentPage
     {
-        this.InitializeComponent();
+        public MedicalShiftDetailsPage()
+        {
+            this.InitializeComponent();
+        }
     }
 }
