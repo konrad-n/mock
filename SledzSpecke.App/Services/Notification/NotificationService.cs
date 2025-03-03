@@ -23,25 +23,27 @@ namespace SledzSpecke.App.Services.Notification
                 return;
             }
 
-            // Sprawdzenie, czy mamy uprawnienia do wysyłania powiadomień
-            var permissionStatus = await this.RequestNotificationPermissionAsync();
+            // Check notification permissions
+            try
+            {
+                // Use the correct method name from the plugin
+                await LocalNotificationCenter.Current.RequestNotificationPermission();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error requesting notification permission: {ex.Message}");
+            }
 
-            // Inicjalizacja lokalna
             this.isInitialized = true;
         }
 
-        public async Task<bool> RequestNotificationPermissionAsync()
+        // Updated method name to match interface
+        public async Task<bool> RequestNotificationPermission(object permission = null)
         {
             try
             {
-                var status = await Permissions.CheckStatusAsync<Permissions.Notifications>();
-
-                if (status != PermissionStatus.Granted)
-                {
-                    status = await Permissions.RequestAsync<Permissions.Notifications>();
-                }
-
-                return status == PermissionStatus.Granted;
+                // Use the plugin's method
+                return await LocalNotificationCenter.Current.RequestNotificationPermission();
             }
             catch (Exception ex)
             {
@@ -50,17 +52,18 @@ namespace SledzSpecke.App.Services.Notification
             }
         }
 
-        public async Task<bool> AreNotificationsEnabledAsync()
+        // Updated method name to match interface
+        public async Task<bool> AreNotificationsEnabled(object permission = null)
         {
             try
             {
-                // Sprawdzenie ustawień aplikacji
+                // Check app settings
                 var notificationsEnabled = await Helpers.Settings.GetNotificationsEnabledAsync();
 
-                // Sprawdzenie uprawnień systemowych
-                var status = await Permissions.CheckStatusAsync<Permissions.Notifications>();
+                // Check system permissions
+                var status = await LocalNotificationCenter.Current.AreNotificationsEnabled();
 
-                return notificationsEnabled && status == PermissionStatus.Granted;
+                return notificationsEnabled && status;
             }
             catch (Exception ex)
             {
@@ -71,29 +74,29 @@ namespace SledzSpecke.App.Services.Notification
 
         public async Task ScheduleCourseReminderAsync(int courseId, DateTime date)
         {
-            if (!await this.AreNotificationsEnabledAsync())
+            if (!await this.AreNotificationsEnabled())
             {
                 return;
             }
 
             try
             {
-                // Pobierz dane kursu
+                // Get course data
                 var course = await this.databaseService.GetCourseAsync(courseId);
                 if (course == null)
                 {
                     return;
                 }
 
-                // Utwórz powiadomienie
+                // Create notification
                 string title = "Przypomnienie o kursie";
                 string message = $"Kurs \"{course.CourseName}\" rozpoczyna się jutro.";
 
-                // Utwórz identyfikator dla powiadomienia
+                // Create notification ID
                 string notificationId = $"course_{courseId}";
 
-                // Zaplanuj powiadomienie jeden dzień przed datą kursu
-                DateTime notificationTime = date.AddDays(-1).Date.AddHours(9); // 9:00 rano dzień przed kursem
+                // Schedule notification one day before course date
+                DateTime notificationTime = date.AddDays(-1).Date.AddHours(9); // 9:00 AM the day before
 
                 await this.ScheduleLocalNotificationAsync(notificationId, title, message, notificationTime);
             }
@@ -105,29 +108,29 @@ namespace SledzSpecke.App.Services.Notification
 
         public async Task ScheduleShiftReminderAsync(int shiftId, DateTime date)
         {
-            if (!await this.AreNotificationsEnabledAsync())
+            if (!await this.AreNotificationsEnabled())
             {
                 return;
             }
 
             try
             {
-                // Pobierz dane dyżuru
+                // Get shift data
                 var shift = await this.databaseService.GetMedicalShiftAsync(shiftId);
                 if (shift == null)
                 {
                     return;
                 }
 
-                // Utwórz powiadomienie
+                // Create notification
                 string title = "Przypomnienie o dyżurze";
                 string message = $"Masz zaplanowany dyżur jutro w {shift.Location}.";
 
-                // Utwórz identyfikator dla powiadomienia
+                // Create notification ID
                 string notificationId = $"shift_{shiftId}";
 
-                // Zaplanuj powiadomienie jeden dzień przed datą dyżuru
-                DateTime notificationTime = date.AddDays(-1).Date.AddHours(18); // 18:00 wieczorem dzień przed dyżurem
+                // Schedule notification one day before shift date
+                DateTime notificationTime = date.AddDays(-1).Date.AddHours(18); // 6:00 PM the day before
 
                 await this.ScheduleLocalNotificationAsync(notificationId, title, message, notificationTime);
             }
@@ -139,22 +142,22 @@ namespace SledzSpecke.App.Services.Notification
 
         public async Task ScheduleDeadlineReminderAsync(string title, string message, DateTime date)
         {
-            if (!await this.AreNotificationsEnabledAsync())
+            if (!await this.AreNotificationsEnabled())
             {
                 return;
             }
 
             try
             {
-                // Utwórz identyfikator dla powiadomienia
+                // Create notification ID
                 string notificationId = $"deadline_{Guid.NewGuid().ToString()}";
 
-                // Pobierz liczbę dni wyprzedzenia z ustawień
-                var settings = await Helpers.Settings.GetReminderDaysInAdvanceAsync();
-                int daysInAdvance = settings ?? Constants.DefaultReminderDaysInAdvance;
+                // Get days in advance from settings
+                var days = await Helpers.Settings.GetReminderDaysInAdvanceAsync();
+                int daysInAdvance = days ?? Constants.DefaultReminderDaysInAdvance;
 
-                // Zaplanuj powiadomienie określoną liczbę dni przed terminem
-                DateTime notificationTime = date.AddDays(-daysInAdvance).Date.AddHours(9); // 9:00 rano w odpowiednim dniu
+                // Schedule notification specific number of days before deadline
+                DateTime notificationTime = date.AddDays(-daysInAdvance).Date.AddHours(9); // 9:00 AM on appropriate day
 
                 await this.ScheduleLocalNotificationAsync(notificationId, title, message, notificationTime);
             }
@@ -168,7 +171,7 @@ namespace SledzSpecke.App.Services.Notification
         {
             try
             {
-                // Anulowanie powiadomienia na podstawie ID
+                // Cancel notification by ID
                 LocalNotificationCenter.Current.Cancel(reminderId);
             }
             catch (Exception ex)
@@ -181,7 +184,7 @@ namespace SledzSpecke.App.Services.Notification
         {
             try
             {
-                // Anulowanie wszystkich powiadomień
+                // Cancel all notifications
                 LocalNotificationCenter.Current.CancelAll();
             }
             catch (Exception ex)
@@ -192,14 +195,14 @@ namespace SledzSpecke.App.Services.Notification
 
         public async Task ShowNotificationAsync(string title, string message)
         {
-            if (!await this.AreNotificationsEnabledAsync())
+            if (!await this.AreNotificationsEnabled())
             {
                 return;
             }
 
             try
             {
-                // Pokaż natychmiastowe powiadomienie
+                // Show immediate notification
                 var notification = new NotificationRequest
                 {
                     NotificationId = new Random().Next(1000, 10000),
@@ -219,12 +222,12 @@ namespace SledzSpecke.App.Services.Notification
             }
         }
 
-        // Metoda pomocnicza do planowania lokalnych powiadomień
+        // Helper method for scheduling local notifications
         private async Task ScheduleLocalNotificationAsync(string notificationId, string title, string message, DateTime scheduleTime)
         {
             try
             {
-                // Konwersja notificationId na int (wymagane przez LocalNotificationCenter)
+                // Convert notificationId to int (required by LocalNotificationCenter)
                 int notificationIdInt = Math.Abs(notificationId.GetHashCode());
 
                 var notification = new NotificationRequest
@@ -238,7 +241,8 @@ namespace SledzSpecke.App.Services.Notification
                     },
                 };
 
-                await LocalNotificationCenter.Current.Schedule(notification);
+                // Use the correct method - Show instead of Schedule
+                await LocalNotificationCenter.Current.Show(notification);
             }
             catch (Exception ex)
             {

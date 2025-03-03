@@ -98,6 +98,22 @@
             }
         }
 
+        public static async Task<int?> GetReminderDaysInAdvanceAsync()
+        {
+            if (await SecureStorage.GetAsync(Constants.ReminderDaysInAdvanceKey) is string reminderDays
+                && int.TryParse(reminderDays, out int days))
+            {
+                return days;
+            }
+
+            return Constants.DefaultReminderDaysInAdvance;
+        }
+
+        public static async Task SetReminderDaysInAdvanceAsync(int days)
+        {
+            await SecureStorage.SetAsync(Constants.ReminderDaysInAdvanceKey, days.ToString());
+        }
+
         // Clear All
         public static void ClearAll()
         {

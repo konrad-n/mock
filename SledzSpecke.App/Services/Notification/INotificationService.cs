@@ -1,15 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace SledzSpecke.App.Services.Notification
+﻿namespace SledzSpecke.App.Services.Notification
 {
     public interface INotificationService
     {
         Task Initialize();
 
-        Task<bool> RequestNotificationPermissionAsync();
+        // Change to match plugin method name
+        Task<bool> RequestNotificationPermission(object permission = null);
 
-        Task<bool> AreNotificationsEnabledAsync();
+        // Change to match plugin method name
+        Task<bool> AreNotificationsEnabled(object permission = null);
 
         Task ScheduleCourseReminderAsync(int courseId, DateTime date);
 
