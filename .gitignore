@@ -392,3 +392,4 @@ FodyWeavers.xsd
 /SledzSpecke.App/Platforms/Windows/Package.appxmanifest
 /SledzSpecke.App/Properties/launchSettings.json
 
+/SledzSpecke.Core/Models/SmkExportOptions.cs

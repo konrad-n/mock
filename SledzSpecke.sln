@@ -1,13 +1,8 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35806.99
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.App", "SledzSpecke.App\SledzSpecke.App.csproj", "{78E33459-55B8-40B9-B2FA-D2A026A21CE1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Core", "SledzSpecke.Core\SledzSpecke.Core.csproj", "{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Infrastructure", "SledzSpecke.Infrastructure\SledzSpecke.Infrastructure.csproj", "{2C5D475A-5B4D-4899-B90F-52320EF9CB14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke", "SledzSpecke.App\SledzSpecke.csproj", "{78E33459-55B8-40B9-B2FA-D2A026A21CE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,14 +15,6 @@ Global
 		{78E33459-55B8-40B9-B2FA-D2A026A21CE1}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{78E33459-55B8-40B9-B2FA-D2A026A21CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78E33459-55B8-40B9-B2FA-D2A026A21CE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{408412E3-7C3E-4CAE-9B5E-BF62D7FD1E08}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C5D475A-5B4D-4899-B90F-52320EF9CB14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,4 +23,3 @@ Global
 		SolutionGuid = {099444CE-9935-4F77-9B16-263307207BC7}
 	EndGlobalSection
 EndGlobal
-

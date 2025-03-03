@@ -1,28 +1,4 @@
 using Microsoft.Extensions.Logging;
-using SledzSpecke.App.Features.Absences.ViewModels;
-using SledzSpecke.App.Features.Absences.Views;
-using SledzSpecke.App.Features.Authentication.ViewModels;
-using SledzSpecke.App.Features.Authentication.Views;
-using SledzSpecke.App.Features.Courses.ViewModels;
-using SledzSpecke.App.Features.Courses.Views;
-using SledzSpecke.App.Features.Dashboard.ViewModels;
-using SledzSpecke.App.Features.Dashboard.Views;
-using SledzSpecke.App.Features.Duties.ViewModels;
-using SledzSpecke.App.Features.Duties.Views;
-using SledzSpecke.App.Features.Internships.ViewModels;
-using SledzSpecke.App.Features.Internships.Views;
-using SledzSpecke.App.Features.Procedures.ViewModels;
-using SledzSpecke.App.Features.Procedures.Views;
-using SledzSpecke.App.Features.SelfEducations.ViewModels;
-using SledzSpecke.App.Features.SelfEducations.Views;
-using SledzSpecke.App.Features.Settings.ViewModels;
-using SledzSpecke.App.Features.Settings.Views;
-using SledzSpecke.App.Features.SMKExport.ViewModels;
-using SledzSpecke.App.Features.SMKExport.Views;
-using SledzSpecke.App.Services.Implementations;
-using SledzSpecke.App.Services.Interfaces;
-using SledzSpecke.Infrastructure.Database;
-using SledzSpecke.Infrastructure.Services;
 
 namespace SledzSpecke.App
 {
@@ -52,57 +28,7 @@ namespace SledzSpecke.App
         {
             services.AddSingleton<App>();
 
-            services.AddSingleton<IFileSystemService, MauiFileSystemService>();
-            services.AddSingleton<IDatabaseService, DatabaseService>();
-            services.AddSingleton<IDataManager, DataManager>();
-            services.AddSingleton<ISpecializationService, SpecializationService>();
-            services.AddSingleton<IDutyShiftService, DutyShiftService>();
-            services.AddSingleton<ISelfEducationService, SelfEducationService>();
-            services.AddSingleton<IExportService, ExportService>();
-            services.AddSingleton<INotificationService, NotificationService>();
-            services.AddSingleton<IAppSettings, AppSettings>();
-            services.AddSingleton<IAuthenticationService, AuthenticationService>();
-            services.AddSingleton<ISpecializationDateCalculator, SpecializationDateCalculator>();
-            services.AddSingleton<INavigationService, NavigationService>();
-
-            services.AddTransient<LoginViewModel>();
-            services.AddTransient<SettingsViewModel>();
-            services.AddTransient<DashboardViewModel>();
-            services.AddTransient<CoursesViewModel>();
-            services.AddTransient<ProceduresViewModel>();
-            services.AddTransient<DutyShiftsViewModel>();
-            services.AddTransient<SelfEducationViewModel>();
-            services.AddTransient<InternshipsViewModel>();
-            services.AddTransient<AbsenceManagementViewModel>();
-            services.AddTransient<ProcedureEntryViewModel>();
-            services.AddTransient<DutyShiftDetailsViewModel>();
-            services.AddTransient<SMKExportViewModel>();
-            services.AddTransient<AbsenceDetailsViewModel>();
-            services.AddTransient<RegistrationViewModel>();
-            services.AddTransient<CourseDetailsViewModel>();
-            services.AddTransient<InternshipDetailsViewModel>();
-            services.AddTransient<ProcedureDetailsViewModel>();
-            services.AddTransient<SelfEducationDetailsViewModel>();
-
             services.AddSingleton<NavigationPage>();
-            services.AddTransient<LoginPage>();
-            services.AddTransient<RegistrationPage>();
-            services.AddTransient<DashboardPage>();
-            services.AddTransient<SettingsPage>();
-            services.AddTransient<CoursesPage>();
-            services.AddTransient<CourseDetailsPage>();
-            services.AddTransient<InternshipsPage>();
-            services.AddTransient<InternshipDetailsPage>();
-            services.AddTransient<ProceduresPage>();
-            services.AddTransient<ProcedureDetailsPage>();
-            services.AddTransient<ProcedureEntryPage>();
-            services.AddTransient<DutyShiftsPage>();
-            services.AddTransient<DutyShiftDetailsPage>();
-            services.AddTransient<SelfEducationPage>();
-            services.AddTransient<SelfEducationDetailsPage>();
-            services.AddTransient<SMKExportPage>();
-            services.AddTransient<AbsenceManagementPage>();
-            services.AddTransient<AbsenceDetailsPage>();
 
             services.AddSingleton<AppShell>();
         }
