@@ -35,52 +35,23 @@ jobs:
 
       - name: Build Main project
         run: dotnet build SledzSpecke.App/SledzSpecke.csproj -f net9.0-android35.0 --no-restore
-        
-      - name: Test
-        run: dotnet test SledzSpecke.sln --no-build --verbosity normal || true
 
-  build-ios:
-    runs-on: macos-latest
-    needs: build-android  # Run after Android build succeeds
-    continue-on-error: true  # Allow workflow to continue even if iOS build fails
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Run Tests with Coverage
+        run: dotnet test SledzSpecke.sln --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory coverage
         
-      - name: Create iOS project modifications
+      - name: Convert Coverage to Cobertura Format
         run: |
-          echo '
-          <Project>
-            <PropertyGroup>
-              <MtouchLink>SdkOnly</MtouchLink>
-              <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier(&apos;$(TargetFramework)&apos;)) == &apos;ios&apos;">15.0</SupportedOSPlatformVersion>
-              <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier(&apos;$(TargetFramework)&apos;)) == &apos;maccatalyst&apos;">15.0</SupportedOSPlatformVersion>
-            </PropertyGroup>
-          </Project>
-          ' > Directory.Build.props
-      
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+          dotnet tool install -g coverlet.console
+          coverlet ./SledzSpecke.Tests/bin/Debug/net9.0/SledzSpecke.Tests.dll --target "dotnet" --targetargs "test SledzSpecke.sln --no-build" --output "coverage/coverage.xml" --format cobertura
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
         with:
-          xcode-version: '15.2'
-          
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
-          
-      - name: Install .NET MAUI Workloads
-        run: dotnet workload install maui --ignore-failed-sources
-        
-      - name: Cache NuGet packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: ${{ runner.os }}-nuget-
-        
-      - name: Restore dependencies
-        run: dotnet restore SledzSpecke.sln
-        
-      - name: Build iOS App (attempt)
-        run: dotnet build SledzSpecke.App/SledzSpecke.csproj -f net9.0-ios --no-restore || true
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=your-org
+            -Dsonar.projectKey=your-project-key
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.cs.opencover.reportsPaths=coverage/coverage.xml
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
