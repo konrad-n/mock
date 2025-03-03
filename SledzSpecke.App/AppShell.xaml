@@ -1,22 +1,72 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Shell  
-   x:Class="SledzSpecke.App.AppShell"  
-   xmlns="http://schemas.microsoft.com/dotnet/2021/maui"  
-   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"  
-   xmlns:local="clr-namespace:SledzSpecke.App"  
-    
-   Shell.FlyoutBehavior="Flyout"  
-   FlyoutHeaderBehavior="Fixed"  
-   FlyoutWidth="280"  
-   Title="ŚledzSpecke">  
-   <Shell.FlyoutHeader>  
-       <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">  
-           <VerticalStackLayout Padding="20" VerticalOptions="Center">  
-               <Image Source="app_logo.png" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" />  
-               <Label x:Name="UserNameLabel" Text="Imię i Nazwisko" FontSize="18" TextColor="White" HorizontalOptions="Center" Margin="0,10,0,0" />  
-               <Label x:Name="SpecializationLabel" Text="Specjalizacja" FontSize="14" TextColor="White" HorizontalOptions="Center" />  
-           </VerticalStackLayout>  
-       </Grid>  
-   </Shell.FlyoutHeader>  
- 
+<Shell
+    x:Class="SledzSpecke.App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:SledzSpecke.App"
+    xmlns:dashboard="clr-namespace:SledzSpecke.App.Views.Dashboard"
+    xmlns:procedures="clr-namespace:SledzSpecke.App.Views.Procedures"
+    xmlns:internships="clr-namespace:SledzSpecke.App.Views.Internships"
+    xmlns:courses="clr-namespace:SledzSpecke.App.Views.Courses"
+    xmlns:medicalShifts="clr-namespace:SledzSpecke.App.Views.MedicalShifts"
+    xmlns:selfEducation="clr-namespace:SledzSpecke.App.Views.SelfEducation"
+    xmlns:publications="clr-namespace:SledzSpecke.App.Views.Publications"
+    xmlns:absences="clr-namespace:SledzSpecke.App.Views.Absences"
+    xmlns:statistics="clr-namespace:SledzSpecke.App.Views.Statistics"
+    xmlns:export="clr-namespace:SledzSpecke.App.Views.Export"
+    Shell.FlyoutBehavior="Flyout"
+    FlyoutHeaderBehavior="Fixed"
+    FlyoutWidth="280"
+    Title="ŚledzSpecke">
+
+    <Shell.FlyoutHeader>
+        <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">
+            <VerticalStackLayout Padding="20" VerticalOptions="Center">
+                <Image Source="app_logo.png" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center" />
+                <Label x:Name="UserNameLabel" Text="Imię i Nazwisko" FontSize="18" TextColor="White" HorizontalOptions="Center" Margin="0,10,0,0" />
+                <Label x:Name="SpecializationLabel" Text="Specjalizacja" FontSize="14" TextColor="White" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Main application tabs/items -->
+    <FlyoutItem Title="Dashboard" Icon="dashboard.png">
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="Dashboard" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Staże" Icon="internship.png">
+        <ShellContent ContentTemplate="{DataTemplate internships:InternshipsListPage}" Route="Internships" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Dyżury" Icon="duty.png">
+        <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsListPage}" Route="MedicalShifts" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Procedury" Icon="procedure.png">
+        <ShellContent ContentTemplate="{DataTemplate procedures:ProceduresListPage}" Route="Procedures" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Kursy" Icon="course.png">
+        <ShellContent ContentTemplate="{DataTemplate courses:CoursesListPage}" Route="Courses" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Samokształcenie" Icon="education.png">
+        <ShellContent ContentTemplate="{DataTemplate selfEducation:SelfEducationListPage}" Route="SelfEducation" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Publikacje" Icon="publication.png">
+        <ShellContent ContentTemplate="{DataTemplate publications:PublicationsListPage}" Route="Publications" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Nieobecności" Icon="absence.png">
+        <ShellContent ContentTemplate="{DataTemplate absences:AbsencesListPage}" Route="Absences" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Statystyki" Icon="report.png">
+        <ShellContent ContentTemplate="{DataTemplate statistics:StatisticsPage}" Route="Statistics" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Eksport" Icon="export.png">
+        <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="Export" />
+    </FlyoutItem>
 </Shell>

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace SledzSpecke.App
 {
     public partial class App : Application
@@ -7,6 +5,15 @@ namespace SledzSpecke.App
         public App()
         {
             this.InitializeComponent();
+
+            this.MainPage = new SplashPage();
+        }
+
+        protected override Window CreateWindow(IActivationState activationState)
+        {
+            Window window = base.CreateWindow(activationState);
+
+            return window;
         }
     }
 }
