@@ -17,7 +17,7 @@ namespace SledzSpecke.App.Models
 
         public string PasswordHash { get; set; }
 
-        public SmkVersion SMKVersion { get; set; }
+        public SmkVersion SmkVersion { get; set; }
 
         public int SpecializationId { get; set; }
 

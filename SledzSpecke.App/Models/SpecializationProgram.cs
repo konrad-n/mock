@@ -17,7 +17,7 @@ namespace SledzSpecke.App.Models
 
         public string Structure { get; set; } // JSON zawierający całą strukturę programu
 
-        public SmkVersion SMKVersion { get; set; }
+        public SmkVersion SmkVersion { get; set; }
 
         public bool HasModules { get; set; }
 

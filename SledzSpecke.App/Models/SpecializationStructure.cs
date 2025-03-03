@@ -1,12 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SledzSpecke.App.Models.Enums;
 
 namespace SledzSpecke.App.Models
 {
-    class SpecializationStructure
+    public class SpecializationStructure
     {
+        public string Name { get; set; }
+
+        public string Code { get; set; }
+
+        public SmkVersion SmkVersion { get; set; }
+
+        public bool HasModules { get; set; }
+
+        public TotalDuration TotalDuration { get; set; }
+
+        public int TotalWorkingDays { get; set; }
+
+        public BasicInfo BasicInfo { get; set; }
+
+        public List<CourseRequirement> Courses { get; set; }
+
+        public List<InternshipRequirement> Internships { get; set; }
+
+        public List<ProcedureRequirement> Procedures { get; set; }
+
+        public SelfEducationInfo SelfEducation { get; set; }
+
+        public HolidaysInfo Holidays { get; set; }
+
+        public MedicalShiftsInfo MedicalShifts { get; set; }
     }
 }

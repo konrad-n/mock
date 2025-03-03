@@ -37,7 +37,7 @@
             <Picker ItemsSource="{Binding YearOptions}" SelectedItem="{Binding Year}" />
 
             <!-- Pola specyficzne dla starej wersji SMK -->
-            <StackLayout IsVisible="{Binding IsOldSMKVersion}">
+            <StackLayout IsVisible="{Binding IsOldSmkVersion}">
                 <BoxView HeightRequest="1" Color="LightGray" Margin="0,10" />
                 <Label Text="Pola dodatkowe (Stara wersja SMK):" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
 

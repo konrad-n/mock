@@ -34,7 +34,7 @@ namespace SledzSpecke.App.Helpers
 
             // Deserializacja JSON do modelu programu specjalizacji
             var program = JsonSerializer.Deserialize<SpecializationProgram>(json);
-            program!.SMKVersion = smkVersion;
+            program!.SmkVersion = smkVersion;
 
             return program;
         }

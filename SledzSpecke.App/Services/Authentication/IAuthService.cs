@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SledzSpecke.App.Models;
 
 namespace SledzSpecke.App.Services.Authentication
 {
     public interface IAuthService
     {
+        Task<bool> LoginAsync(string username, string password);
+
+        Task<bool> RegisterAsync(User user, string password, Models.Specialization specialization);
+
+        Task<bool> ChangePasswordAsync(string currentPassword, string newPassword);
+
+        Task LogoutAsync();
+
+        Task<User> GetCurrentUserAsync();
+
+        Task<bool> IsAuthenticatedAsync();
     }
 }
