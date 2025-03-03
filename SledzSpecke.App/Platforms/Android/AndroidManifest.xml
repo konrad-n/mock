@@ -9,7 +9,7 @@
         android:icon="@mipmap/appicon"
         android:roundIcon="@mipmap/appicon_round"
         android:supportsRtl="true"
-		android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true">
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />

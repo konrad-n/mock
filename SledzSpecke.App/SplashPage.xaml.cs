@@ -6,9 +6,4 @@ public partial class SplashPage : ContentPage
     {
         this.InitializeComponent();
     }
-
-    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
-    {
-        base.OnNavigatedTo(args);
-    }
 }

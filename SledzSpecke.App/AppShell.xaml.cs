@@ -1,16 +1,10 @@
-
 namespace SledzSpecke.App
 {
     public partial class AppShell : Shell
     {
-        private readonly IServiceProvider serviceProvider;
-
-        public AppShell(
-            IServiceProvider serviceProvider)
+        public AppShell()
         {
             this.InitializeComponent();
-
-            this.serviceProvider = serviceProvider;
         }
     }
 }

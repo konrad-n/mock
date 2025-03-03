@@ -47,28 +47,18 @@
     <Compile Remove="Converters\**" />
     <Compile Remove="Resources\Icons\**" />
     <Compile Remove="Resources\Splash\**" />
-    <Compile Remove="Services\Dialog\**" />
-    <Compile Remove="Services\Navigation\**" />
     <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Resources\Icons\**" />
     <EmbeddedResource Remove="Resources\Splash\**" />
-    <EmbeddedResource Remove="Services\Dialog\**" />
-    <EmbeddedResource Remove="Services\Navigation\**" />
     <MauiCss Remove="Converters\**" />
     <MauiCss Remove="Resources\Icons\**" />
     <MauiCss Remove="Resources\Splash\**" />
-    <MauiCss Remove="Services\Dialog\**" />
-    <MauiCss Remove="Services\Navigation\**" />
     <MauiXaml Remove="Converters\**" />
     <MauiXaml Remove="Resources\Icons\**" />
     <MauiXaml Remove="Resources\Splash\**" />
-    <MauiXaml Remove="Services\Dialog\**" />
-    <MauiXaml Remove="Services\Navigation\**" />
     <None Remove="Converters\**" />
     <None Remove="Resources\Icons\**" />
     <None Remove="Resources\Splash\**" />
-    <None Remove="Services\Dialog\**" />
-    <None Remove="Services\Navigation\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,12 +67,14 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="EPPlus" Version="7.6.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.40" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.2" />
     <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.40" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -90,13 +82,90 @@
   </ItemGroup>
 
   <ItemGroup>
-    <MauiAsset Update="Resources\Raw\specialization.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </MauiAsset>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\Implementations\" />
+    <MauiXaml Update="Views\Absences\AbsenceDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Absences\AbsencesListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Absences\AddEditAbsencePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Authentication\LoginPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Authentication\RegisterPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Courses\AddEditCoursePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Courses\CourseDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Courses\CoursesListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Dashboard\DashboardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Export\ExportPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Internships\AddEditInternshipPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Internships\InternshipDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Internships\InternshipsListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\MedicalShifts\AddEditMedicalShiftPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\MedicalShifts\MedicalShiftDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\MedicalShifts\MedicalShiftsListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Procedures\AddEditProcedurePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Procedures\ProcedureDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Procedures\ProceduresListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Publications\AddEditPublicationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Publications\PublicationDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Publications\PublicationsListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\SelfEducation\AddEditSelfEducationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\SelfEducation\SelfEducationDetailsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\SelfEducation\SelfEducationListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Settings\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Statistics\ActivityChartPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Statistics\StatisticsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
   </ItemGroup>
 
 </Project>

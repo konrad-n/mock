@@ -27,7 +27,7 @@ dotnet_diagnostic.SA1615.severity = none
 # Disable SA1611 (Document enums)
 dotnet_diagnostic.SA1611.severity = none
 
-
+dotnet_diagnostic.SA0001.severity = none
 
 # Disable CS8618
 dotnet_diagnostic.CS8618.severity = none

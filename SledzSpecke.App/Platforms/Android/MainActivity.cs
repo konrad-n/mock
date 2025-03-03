@@ -8,4 +8,3 @@ namespace SledzSpecke.App;
 public class MainActivity : MauiAppCompatActivity
 {
 }
-
