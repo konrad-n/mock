@@ -1,11 +1,74 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SledzSpecke.App.Views.Procedures.ProceduresListPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
-</ContentView>
+             x:Class="SledzSpecke.App.Views.Procedures.ProceduresListPage"
+             Title="{Binding Title}">
+    <Grid RowDefinitions="Auto, Auto, *, Auto">
+        <!-- Pasek z przełącznikami -->
+        <Frame Padding="5" Margin="10,10,10,0" BorderColor="{StaticResource Primary}" HasShadow="False" 
+               Grid.Row="0" CornerRadius="5" IsClippedToBounds="True">
+            <Grid ColumnDefinitions="*,*">
+                <Button Text="Operator (A)" 
+                        BackgroundColor="{Binding TypeASelected, Converter={StaticResource BoolToColorConverter}}"
+                        TextColor="{Binding TypeASelected, Converter={StaticResource BoolToTextColorConverter}}"
+                        Command="{Binding SelectTypeCommand}" 
+                        CommandParameter="A" />
+                <Button Grid.Column="1" Text="Asysta (B)" 
+                        BackgroundColor="{Binding TypeBSelected, Converter={StaticResource BoolToColorConverter}}"
+                        TextColor="{Binding TypeBSelected, Converter={StaticResource BoolToTextColorConverter}}"
+                        Command="{Binding SelectTypeCommand}" 
+                        CommandParameter="B" />
+            </Grid>
+        </Frame>
+
+        <!-- Pasek wyszukiwania i filtrowania -->
+        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" Padding="10">
+            <SearchBar Placeholder="Szukaj procedur" Text="{Binding SearchText}" />
+            <Button Grid.Column="1" Text="Filtruj" Command="{Binding FilterCommand}" />
+        </Grid>
+
+        <!-- Lista procedur -->
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Procedures}" 
+                           SelectionMode="Single" 
+                           SelectedItem="{Binding SelectedProcedure}" 
+                           SelectionChangedCommand="{Binding ProcedureSelectedCommand}">
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <StackLayout BackgroundColor="{StaticResource Primary}" Padding="10">
+                            <Label Text="{Binding GroupName}" TextColor="White" FontAttributes="Bold" />
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                        <Label Text="Brak procedur" FontSize="18" HorizontalOptions="Center" />
+                        <Label Text="Dodaj nową procedurę klikając przycisk poniżej" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="10,5" Padding="10" BorderColor="LightGray" HasShadow="True">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding ProcedureName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding Date, StringFormat='Data: {0:d}'}" />
+                                    <Label Text="{Binding Location}" />
+                                    <Label Text="{Binding PatientInfo}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" VerticalOptions="Center" 
+                                       Text="{Binding OperatorCode}" FontAttributes="Bold"
+                                       TextColor="{Binding OperatorCode, Converter={StaticResource CodeToColorConverter}}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Przycisk dodawania -->
+        <Button Grid.Row="3" Text="Dodaj nową procedurę" Command="{Binding AddProcedureCommand}"
+                Margin="20" HorizontalOptions="Center" />
+    </Grid>
+</ContentPage>

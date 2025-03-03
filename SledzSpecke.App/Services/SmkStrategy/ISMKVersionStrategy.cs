@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SledzSpecke.App.Services.SmkStrategy
+﻿namespace SledzSpecke.App.Services.SmkStrategy
 {
-    public interface ISMKVersionStrategy
+    public interface ISmkVersionStrategy
     {
+        Dictionary<string, bool> GetVisibleFields(string viewName);
+
+        Dictionary<string, string> GetFieldLabels(string viewName);
+
+        List<string> GetRequiredFields(string viewName);
+
+        Dictionary<string, object> GetDefaultValues(string viewName);
+
+        string FormatAdditionalFields(Dictionary<string, object> fields);
+
+        Dictionary<string, object> ParseAdditionalFields(string json);
     }
 }

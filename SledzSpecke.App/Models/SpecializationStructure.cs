@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SledzSpecke.App.Models
 {
-    public class SpecializationStructure
+    class SpecializationStructure
     {
     }
 }

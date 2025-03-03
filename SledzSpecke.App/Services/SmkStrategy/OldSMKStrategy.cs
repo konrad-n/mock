@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SledzSpecke.App.Services.SmkStrategy
+﻿namespace SledzSpecke.App.Services.SmkStrategy
 {
     public class OldSMKStrategy
     {
+        // Services/SMKStrategy/OldSMKStrategy.cs (nowy) - analogicznie do NewSMKStrategy
     }
 }
