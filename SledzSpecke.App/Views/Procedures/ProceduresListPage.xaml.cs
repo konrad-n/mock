@@ -1,9 +1,10 @@
-namespace SledzSpecke.App.Views.Procedures;
-
-public partial class ProceduresListPage : ContentView
+namespace SledzSpecke.App.Views.Procedures
 {
-    public ProceduresListPage()
+    public partial class ProceduresListPage : ContentPage
     {
-        this.InitializeComponent();
+        public ProceduresListPage()
+        {
+            this.InitializeComponent();
+        }
     }
 }

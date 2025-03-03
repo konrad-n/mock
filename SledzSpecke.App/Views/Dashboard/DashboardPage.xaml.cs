@@ -1,9 +1,10 @@
-namespace SledzSpecke.App.Views.Dashboard;
-
-public partial class DashboardPage : ContentView
+namespace SledzSpecke.App.Views.Dashboard
 {
-    public DashboardPage()
+    public partial class DashboardPage : ContentPage
     {
-        this.InitializeComponent();
+        public DashboardPage()
+        {
+            this.InitializeComponent();
+        }
     }
 }
