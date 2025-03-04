@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Models
         [MaxLength(20)]
         public string Code { get; set; }
 
-        public string Structure { get; set; } // JSON zawierający całą strukturę programu
+        public string Structure { get; set; } // JSON zawierający całą oryginalną strukturę programu
 
         public SmkVersion SmkVersion { get; set; }
 
