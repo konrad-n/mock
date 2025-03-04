@@ -18,8 +18,8 @@ namespace SledzSpecke.Tests.Models
                 DepartmentName = "Test Department",
                 InternshipName = "Test Internship",
                 Year = 1,
-                StartDate = new DateTime(2023, 3, 1),
-                EndDate = new DateTime(2023, 5, 31),
+                StartDate = new DateTime(2023, 3, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 5, 31, 0, 0, 0, DateTimeKind.Local),
                 DaysCount = 92,
                 IsCompleted = true,
                 IsApproved = true,
@@ -38,8 +38,8 @@ namespace SledzSpecke.Tests.Models
             Assert.That(internship.DepartmentName, Is.EqualTo("Test Department"));
             Assert.That(internship.InternshipName, Is.EqualTo("Test Internship"));
             Assert.That(internship.Year, Is.EqualTo(1));
-            Assert.That(internship.StartDate, Is.EqualTo(new DateTime(2023, 3, 1)));
-            Assert.That(internship.EndDate, Is.EqualTo(new DateTime(2023, 5, 31)));
+            Assert.That(internship.StartDate, Is.EqualTo(new DateTime(2023, 3, 1, 0, 0, 0, DateTimeKind.Local)));
+            Assert.That(internship.EndDate, Is.EqualTo(new DateTime(2023, 5, 31, 0, 0, 0, DateTimeKind.Local)));
             Assert.That(internship.DaysCount, Is.EqualTo(92));
             Assert.That(internship.IsCompleted, Is.True);
             Assert.That(internship.IsApproved, Is.True);

@@ -12,8 +12,8 @@ namespace SledzSpecke.Tests.Models
             var absence = new Absence
             {
                 AbsenceId = 1,
-                StartDate = new DateTime(2023, 5, 1),
-                EndDate = new DateTime(2023, 5, 10),
+                StartDate = new DateTime(2023, 5, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 5, 10, 0, 0, 0, DateTimeKind.Local),
             };
 
             // Act

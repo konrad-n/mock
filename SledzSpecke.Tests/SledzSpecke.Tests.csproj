@@ -63,7 +63,6 @@
     <Folder Include="ViewModels\EducationalActivities\" />
     <Folder Include="ViewModels\Export\" />
     <Folder Include="ViewModels\Internships\" />
-    <Folder Include="ViewModels\MedicalShifts\" />
     <Folder Include="ViewModels\Procedures\" />
     <Folder Include="ViewModels\Publications\" />
     <Folder Include="ViewModels\Recognitions\" />

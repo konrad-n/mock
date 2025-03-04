@@ -173,7 +173,7 @@ namespace SledzSpecke.Tests.Services.Database
                 // Create a test file in the temp directory
                 string fileName = "testexport.xlsx";
                 string filePath = Path.Combine(exportDir, fileName);
-                File.WriteAllText(filePath, "test content");
+                await File.WriteAllTextAsync(filePath, "test content");
 
                 // Configure mock to return our test path
                 mockFileSystemService.GetAppSubdirectory(Arg.Any<string>()).Returns(exportDir);
@@ -182,8 +182,10 @@ namespace SledzSpecke.Tests.Services.Database
                 var exportService = new ExportService(mockDatabaseService, null, mockSmkStrategy);
 
                 // Set the last export file path via reflection (since it's private)
-                var fieldInfo = typeof(ExportService).GetField("lastExportFilePath",
+                var fieldInfo = typeof(ExportService).GetField(
+                    "lastExportFilePath",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
                 fieldInfo.SetValue(exportService, filePath);
 
                 // Act
@@ -195,7 +197,14 @@ namespace SledzSpecke.Tests.Services.Database
             finally
             {
                 // Clean up
-                try { Directory.Delete(exportDir, true); } catch { /* Ignore cleanup errors */ }
+                try
+                {
+                    Directory.Delete(exportDir, true);
+                }
+                catch
+                {
+                    /* Ignore cleanup errors */
+                }
             }
         }
     }

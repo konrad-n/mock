@@ -5,14 +5,14 @@
     /// </summary>
     public static class TestSettings
     {
-        private static readonly Dictionary<string, string> settingsStorage = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> SettingsStorage = new Dictionary<string, string>();
 
         /// <summary>
         /// Clears all stored settings.
         /// </summary>
         public static void ClearSettings()
         {
-            settingsStorage.Clear();
+            SettingsStorage.Clear();
         }
 
         /// <summary>
@@ -22,7 +22,7 @@
         /// <returns>The value if found, or null if not found.</returns>
         public static Task<string> GetAsync(string key)
         {
-            if (settingsStorage.TryGetValue(key, out string value))
+            if (SettingsStorage.TryGetValue(key, out string value))
             {
                 return Task.FromResult(value);
             }
@@ -36,7 +36,7 @@
         /// <param name="value">The value to store.</param>
         public static Task SetAsync(string key, string value)
         {
-            settingsStorage[key] = value;
+            SettingsStorage[key] = value;
             return Task.CompletedTask;
         }
 
@@ -46,9 +46,9 @@
         /// <param name="key">The key to remove.</param>
         public static void Remove(string key)
         {
-            if (settingsStorage.ContainsKey(key))
+            if (SettingsStorage.ContainsKey(key))
             {
-                settingsStorage.Remove(key);
+                SettingsStorage.Remove(key);
             }
         }
 
@@ -57,7 +57,7 @@
         /// </summary>
         public static void RemoveAll()
         {
-            settingsStorage.Clear();
+            SettingsStorage.Clear();
         }
     }
 }

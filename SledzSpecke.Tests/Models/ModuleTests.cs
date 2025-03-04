@@ -15,8 +15,8 @@ namespace SledzSpecke.Tests.Models
                 SpecializationId = 2,
                 Type = ModuleType.Basic,
                 Name = "Test Module",
-                StartDate = new DateTime(2023, 1, 1),
-                EndDate = new DateTime(2025, 1, 1),
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 Structure = "{\"testKey\":\"testValue\"}",
                 CompletedInternships = 3,
                 TotalInternships = 5,
@@ -33,8 +33,8 @@ namespace SledzSpecke.Tests.Models
             Assert.That(module.SpecializationId, Is.EqualTo(2));
             Assert.That(module.Type, Is.EqualTo(ModuleType.Basic));
             Assert.That(module.Name, Is.EqualTo("Test Module"));
-            Assert.That(module.StartDate, Is.EqualTo(new DateTime(2023, 1, 1)));
-            Assert.That(module.EndDate, Is.EqualTo(new DateTime(2025, 1, 1)));
+            Assert.That(module.StartDate, Is.EqualTo(new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local)));
+            Assert.That(module.EndDate, Is.EqualTo(new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local)));
             Assert.That(module.Structure, Is.EqualTo("{\"testKey\":\"testValue\"}"));
             Assert.That(module.CompletedInternships, Is.EqualTo(3));
             Assert.That(module.TotalInternships, Is.EqualTo(5));

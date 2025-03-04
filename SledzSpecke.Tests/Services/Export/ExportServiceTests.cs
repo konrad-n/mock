@@ -144,15 +144,15 @@ namespace SledzSpecke.Tests.Services.Export
                 mockFileSystemService.GetAppSubdirectory(Arg.Any<string>()).Returns(exportDir);
 
                 // Create service with mocks
-                var exportService = new ExportService(mockDatabaseService, null, mockSmkStrategy);
+                var sut = new ExportService(mockDatabaseService, null, mockSmkStrategy);
 
                 // Set the last export file path via reflection (since it's private)
                 var fieldInfo = typeof(ExportService).GetField("lastExportFilePath",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                fieldInfo.SetValue(exportService, filePath);
+                fieldInfo.SetValue(sut, filePath);
 
                 // Act
-                var result = await exportService.GetLastExportFilePathAsync();
+                var result = await sut.GetLastExportFilePathAsync();
 
                 // Assert
                 Assert.That(result, Is.EqualTo(filePath));
@@ -160,7 +160,14 @@ namespace SledzSpecke.Tests.Services.Export
             finally
             {
                 // Clean up
-                try { Directory.Delete(exportDir, true); } catch { /* Ignore cleanup errors */ }
+                try
+                {
+                    Directory.Delete(exportDir, true);
+                }
+                catch
+                {
+                    /* Ignore cleanup errors */
+                }
             }
         }
 

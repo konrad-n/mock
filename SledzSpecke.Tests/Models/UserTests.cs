@@ -17,7 +17,7 @@ namespace SledzSpecke.Tests.Models
                 PasswordHash = "hashedpassword",
                 SmkVersion = SmkVersion.New,
                 SpecializationId = 2,
-                RegistrationDate = new DateTime(2023, 1, 15),
+                RegistrationDate = new DateTime(2023, 1, 15, 0, 0, 0, DateTimeKind.Local),
             };
 
             // Assert
@@ -27,7 +27,7 @@ namespace SledzSpecke.Tests.Models
             Assert.That(user.PasswordHash, Is.EqualTo("hashedpassword"));
             Assert.That(user.SmkVersion, Is.EqualTo(SmkVersion.New));
             Assert.That(user.SpecializationId, Is.EqualTo(2));
-            Assert.That(user.RegistrationDate, Is.EqualTo(new DateTime(2023, 1, 15)));
+            Assert.That(user.RegistrationDate, Is.EqualTo(new DateTime(2023, 1, 15, 0, 0, 0, DateTimeKind.Local)));
         }
     }
 }

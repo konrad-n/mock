@@ -108,6 +108,7 @@ namespace SledzSpecke.Tests.Models
             // Assert
             // Progress should be capped at 1.0 even if individual categories exceed requirements
             Assert.That(progress, Is.LessThanOrEqualTo(1.0));
+
             // But with the current algorithm it should be exactly 1.0
             Assert.That(progress, Is.EqualTo(1.0).Within(0.0001));
         }

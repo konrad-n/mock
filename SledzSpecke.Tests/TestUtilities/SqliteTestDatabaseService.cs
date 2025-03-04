@@ -68,7 +68,6 @@ namespace SledzSpecke.Tests.TestUtilities
 
         // The remaining interface methods implemented with NotImplementedException for brevity
         // Add implementation as needed for your tests
-
         public Task<int> DeleteAbsenceAsync(Absence absence) => throw new NotImplementedException();
 
         public Task<int> DeleteCourseAsync(Course course) => throw new NotImplementedException();

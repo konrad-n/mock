@@ -14,9 +14,9 @@ namespace SledzSpecke.Tests.Models
                 SpecializationId = 1,
                 Name = "Test Specialization",
                 ProgramCode = "TEST",
-                StartDate = new DateTime(2023, 1, 1),
-                PlannedEndDate = new DateTime(2028, 1, 1),
-                CalculatedEndDate = new DateTime(2028, 6, 1), // With extensions
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                CalculatedEndDate = new DateTime(2028, 6, 1, 0, 0, 0, DateTimeKind.Local), // With extensions
                 ProgramStructure = "{\"testKey\":\"testValue\"}",
                 HasModules = true,
                 CurrentModuleId = 2,
@@ -35,9 +35,9 @@ namespace SledzSpecke.Tests.Models
             Assert.That(specialization.SpecializationId, Is.EqualTo(1));
             Assert.That(specialization.Name, Is.EqualTo("Test Specialization"));
             Assert.That(specialization.ProgramCode, Is.EqualTo("TEST"));
-            Assert.That(specialization.StartDate, Is.EqualTo(new DateTime(2023, 1, 1)));
-            Assert.That(specialization.PlannedEndDate, Is.EqualTo(new DateTime(2028, 1, 1)));
-            Assert.That(specialization.CalculatedEndDate, Is.EqualTo(new DateTime(2028, 6, 1)));
+            Assert.That(specialization.StartDate, Is.EqualTo(new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local)));
+            Assert.That(specialization.PlannedEndDate, Is.EqualTo(new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local)));
+            Assert.That(specialization.CalculatedEndDate, Is.EqualTo(new DateTime(2028, 6, 1, 0, 0, 0, DateTimeKind.Local)));
             Assert.That(specialization.ProgramStructure, Is.EqualTo("{\"testKey\":\"testValue\"}"));
             Assert.That(specialization.HasModules, Is.True);
             Assert.That(specialization.CurrentModuleId, Is.EqualTo(2));

@@ -166,11 +166,11 @@ namespace SledzSpecke.Tests.TestHelpers
         {
             // Arrange
             // Monday to Friday (5 working days)
-            DateTime startDate = new DateTime(2023, 1, 2); // Monday
-            DateTime endDate = new DateTime(2023, 1, 6);   // Friday
+            DateTime startDateForCalculate = new DateTime(2023, 1, 2, 0, 0, 0, DateTimeKind.Local); // Monday
+            DateTime endDate = new DateTime(2023, 1, 6, 0, 0, 0, DateTimeKind.Local);   // Friday
 
             // Act
-            int workingDays = DateCalculator.CalculateWorkingDays(startDate, endDate);
+            int workingDays = DateCalculator.CalculateWorkingDays(startDateForCalculate, endDate);
 
             // Assert
             Assert.That(workingDays, Is.EqualTo(5));
@@ -181,8 +181,8 @@ namespace SledzSpecke.Tests.TestHelpers
         {
             // Arrange
             // Monday to Monday (6 working days, excluding weekend)
-            DateTime startDate = new DateTime(2023, 1, 2); // Monday
-            DateTime endDate = new DateTime(2023, 1, 9);   // Next Monday
+            DateTime startDate = new DateTime(2023, 1, 2, 0, 0, 0, DateTimeKind.Local); // Monday
+            DateTime endDate = new DateTime(2023, 1, 9, 0, 0, 0, DateTimeKind.Local);   // Next Monday
 
             // Act
             int workingDays = DateCalculator.CalculateWorkingDays(startDate, endDate);
@@ -195,11 +195,11 @@ namespace SledzSpecke.Tests.TestHelpers
         public void CalculateWorkingDays_SingleDay_ReturnsOne()
         {
             // Arrange
-            DateTime startDate = new DateTime(2023, 1, 2); // Monday
-            DateTime endDate = new DateTime(2023, 1, 2);   // Same day
+            DateTime startDateForCalculate = new DateTime(2023, 1, 2, 0, 0, 0, DateTimeKind.Local); // Monday
+            DateTime endDate = new DateTime(2023, 1, 2, 0, 0, 0, DateTimeKind.Local);   // Same day
 
             // Act
-            int workingDays = DateCalculator.CalculateWorkingDays(startDate, endDate);
+            int workingDays = DateCalculator.CalculateWorkingDays(startDateForCalculate, endDate);
 
             // Assert
             Assert.That(workingDays, Is.EqualTo(1));
@@ -209,8 +209,8 @@ namespace SledzSpecke.Tests.TestHelpers
         public void CalculateWorkingDays_Weekend_ReturnsZero()
         {
             // Arrange
-            DateTime startDate = new DateTime(2023, 1, 7); // Saturday
-            DateTime endDate = new DateTime(2023, 1, 8);   // Sunday
+            DateTime startDate = new DateTime(2023, 1, 7, 0, 0, 0, DateTimeKind.Local); // Saturday
+            DateTime endDate = new DateTime(2023, 1, 8, 0, 0, 0, DateTimeKind.Local);   // Sunday
 
             // Act
             int workingDays = DateCalculator.CalculateWorkingDays(startDate, endDate);

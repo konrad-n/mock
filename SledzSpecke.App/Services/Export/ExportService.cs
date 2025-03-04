@@ -333,7 +333,6 @@ namespace SledzSpecke.App.Services.Export
                 : await this.databaseService.GetPublicationsAsync(specializationId: specializationId);
 
             // Nie ma filtracji po datach, ponieważ model Publication nie zawiera pola daty
-
             return publications;
         }
 
@@ -963,7 +962,7 @@ namespace SledzSpecke.App.Services.Export
             worksheet.Columns[1, col - 1].AutoFit();
         }
 
-        private void AddEducationalActivitiesWorksheet(ExcelPackage package, List<EducationalActivity> activities, bool oldSmkFormat)
+        private void AddEducationalActivitiesWorksheet(ExcelPackage package, List<EducationalActivity> activities)
         {
             var worksheet = package.Workbook.Worksheets.Add("Działalność edukacyjna");
 
@@ -1001,7 +1000,7 @@ namespace SledzSpecke.App.Services.Export
             worksheet.Columns[1, col - 1].AutoFit();
         }
 
-        private void AddAbsencesWorksheet(ExcelPackage package, List<Absence> absences, bool oldSmkFormat)
+        private void AddAbsencesWorksheet(ExcelPackage package, List<Absence> absences)
         {
             var worksheet = package.Workbook.Worksheets.Add("Nieobecności");
 
@@ -1042,7 +1041,7 @@ namespace SledzSpecke.App.Services.Export
             worksheet.Columns[1, col - 1].AutoFit();
         }
 
-        private void AddRecognitionsWorksheet(ExcelPackage package, List<Models.Recognition> recognitions, bool oldSmkFormat)
+        private void AddRecognitionsWorksheet(ExcelPackage package, List<Models.Recognition> recognitions)
         {
             var worksheet = package.Workbook.Worksheets.Add("Uznania/skrócenia");
 

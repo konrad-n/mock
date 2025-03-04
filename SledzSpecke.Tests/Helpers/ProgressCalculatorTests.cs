@@ -22,8 +22,8 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 SpecializationId = 1,
                 Name = "Test Specialization",
-                StartDate = new DateTime(2023, 1, 1),
-                PlannedEndDate = new DateTime(2028, 1, 1),
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 HasModules = false,
                 CompletedInternships = 0,
                 TotalInternships = 10,
@@ -37,8 +37,8 @@ namespace SledzSpecke.Tests.TestHelpers
                 SpecializationId = 1,
                 Type = ModuleType.Basic,
                 Name = "Test Module",
-                StartDate = new DateTime(2023, 1, 1),
-                EndDate = new DateTime(2025, 1, 1),
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 CompletedInternships = 0,
                 TotalInternships = 5,
                 CompletedCourses = 0,
@@ -323,8 +323,20 @@ namespace SledzSpecke.Tests.TestHelpers
 
             var absences = new List<Absence>
             {
-                new Absence { AbsenceId = 1, StartDate = new DateTime(2023, 3, 1), EndDate = new DateTime(2023, 3, 10), Type = AbsenceType.Sick },
-                new Absence { AbsenceId = 2, StartDate = new DateTime(2023, 6, 1), EndDate = new DateTime(2023, 6, 5), Type = AbsenceType.Vacation },
+                new Absence
+                {
+                    AbsenceId = 1,
+                    StartDate = new DateTime(2023, 3, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2023, 3, 10, 0, 0, 0, DateTimeKind.Local),
+                    Type = AbsenceType.Sick,
+                },
+                new Absence
+                { 
+                    AbsenceId = 2,
+                    StartDate = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2023, 6, 5, 0, 0, 0, DateTimeKind.Local),
+                    Type = AbsenceType.Vacation,
+                },
             };
             this.databaseService.GetAbsencesAsync(1).Returns(absences);
 
