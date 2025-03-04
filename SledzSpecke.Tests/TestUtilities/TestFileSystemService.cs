@@ -7,7 +7,7 @@ namespace SledzSpecke.Tests.TestUtilities
     /// </summary>
     public class TestFileSystemService : IFileSystemService
     {
-        private readonly string testBasePath = Path.Combine(Path.GetTempPath(), "SledzSpeckeTests");
+        private string testBasePath = Path.Combine(Path.GetTempPath(), "SledzSpeckeTests");
         private readonly Dictionary<string, byte[]> inMemoryFiles = new Dictionary<string, byte[]>();
         private readonly bool useInMemoryStorage;
 
@@ -22,7 +22,18 @@ namespace SledzSpecke.Tests.TestUtilities
             }
         }
 
-        public string AppDataDirectory => this.testBasePath;
+        public string AppDataDirectory
+        {
+            get
+            {
+                return this.testBasePath;
+            }
+
+            set
+            {
+                this.testBasePath = value;
+            }
+        }
 
         public string GetAppSubdirectory(string subDirectory)
         {

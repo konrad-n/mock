@@ -18,7 +18,7 @@ namespace SledzSpecke.Tests.Services.Export
         private ISpecializationService specializationService;
         private ISmkVersionStrategy smkStrategy;
         private ExportService exportService;
-        private App.Models.Specialization testSpecialization;
+        private Specialization testSpecialization;
         private User testUser;
         private TestSecureStorageService secureStorageService;
         private TestFileSystemService fileSystemService;
@@ -40,7 +40,7 @@ namespace SledzSpecke.Tests.Services.Export
             this.smkStrategy = Substitute.For<ISmkVersionStrategy>();
 
             // Initialize test data
-            this.testSpecialization = new App.Models.Specialization
+            this.testSpecialization = new Specialization
             {
                 SpecializationId = 1,
                 Name = "Test Specialization",
@@ -59,11 +59,16 @@ namespace SledzSpecke.Tests.Services.Export
             };
 
             // Set up mock responses
-            this.specializationService.GetCurrentSpecializationAsync().Returns(this.testSpecialization);
-            this.specializationService.GetCurrentUserAsync().Returns(this.testUser);
+            this.specializationService.GetCurrentSpecializationAsync()
+                .Returns(this.testSpecialization);
+            this.specializationService.GetCurrentUserAsync()
+                .Returns(this.testUser);
 
             // Initialize the service under test
-            this.exportService = new ExportService(this.databaseService, this.specializationService, this.smkStrategy);
+            this.exportService = new ExportService(
+                this.databaseService,
+                this.specializationService,
+                this.smkStrategy);
         }
 
         [TearDown]
@@ -111,8 +116,7 @@ namespace SledzSpecke.Tests.Services.Export
             // Act
             await this.exportService.SaveLastExportDateAsync(testDate);
 
-            // Retrieve the value directly from the app's Settings helper, not the test helper
-            // This ensures we're checking the same storage location that the ExportService uses
+            // Retrieve the value directly from the app's Settings helper
             var retrievedDate = await App.Helpers.Settings.GetLastExportDateAsync();
 
             // Assert
@@ -128,7 +132,7 @@ namespace SledzSpecke.Tests.Services.Export
             var mockDatabaseService = Substitute.For<IDatabaseService>();
             var mockSmkStrategy = Substitute.For<ISmkVersionStrategy>();
 
-            // Set up a temp directory that will work in any environment, including CI
+            // Set up a temp directory that will work in any environment
             string tempPath = Path.GetTempPath();
             string exportDir = Path.Combine(tempPath, "SledzSpeckeTests_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(exportDir);
@@ -146,8 +150,9 @@ namespace SledzSpecke.Tests.Services.Export
                 // Create service with mocks
                 var sut = new ExportService(mockDatabaseService, null, mockSmkStrategy);
 
-                // Set the last export file path via reflection (since it's private)
-                var fieldInfo = typeof(ExportService).GetField("lastExportFilePath",
+                // Set the last export file path via reflection
+                var fieldInfo = typeof(ExportService).GetField(
+                    "lastExportFilePath",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 fieldInfo.SetValue(sut, filePath);
 
@@ -172,9 +177,154 @@ namespace SledzSpecke.Tests.Services.Export
         }
 
         [Test]
+        public async Task ExportToExcelAsync_WithValidData_CreatesExcelFile()
+        {
+            // Arrange
+            var options = new ExportOptions
+            {
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 12, 31, 0, 0, 0, DateTimeKind.Local),
+                IncludeShifts = true,
+                IncludeProcedures = true,
+                IncludeInternships = true,
+                FormatForOldSMK = false,
+            };
+
+            var testInternships = new List<Internship>
+            {
+                new Internship
+                {
+                    InternshipId = 1,
+                    InternshipName = "Test Internship",
+                    InstitutionName = "Test Hospital",
+                    StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                    EndDate = new DateTime(2023, 3, 31, 0, 0, 0, DateTimeKind.Local),
+                    IsCompleted = true,
+                },
+            };
+
+            var testProcedures = new List<Procedure>
+            {
+                new Procedure
+                {
+                    ProcedureId = 1,
+                    Code = "TEST001",
+                    Date = new DateTime(2023, 2, 15, 0, 0, 0, DateTimeKind.Local),
+                    Location = "Test Location",
+                    OperatorCode = "A",
+                },
+            };
+
+            var testShifts = new List<MedicalShift>
+            {
+                new MedicalShift
+                {
+                    ShiftId = 1,
+                    Date = new DateTime(2023, 2, 1, 0, 0, 0, DateTimeKind.Local),
+                    Hours = 10,
+                    Minutes = 30,
+                    Location = "Test Department",
+                },
+            };
+
+            this.databaseService.GetInternshipsAsync(
+                Arg.Any<int?>(),
+                Arg.Any<int?>())
+                .Returns(testInternships);
+
+            this.databaseService.GetProceduresAsync(
+                Arg.Any<int?>(),
+                Arg.Any<string>())
+                .Returns(testProcedures);
+
+            this.databaseService.GetMedicalShiftsAsync(Arg.Any<int?>())
+                .Returns(testShifts);
+
+            // Act
+            var filePath = await this.exportService.ExportToExcelAsync(options);
+
+            // Assert
+            Assert.That(filePath, Is.Not.Null);
+            Assert.That(File.Exists(filePath), Is.True);
+
+            // Verify that the file is a valid Excel file
+            using (var package = new OfficeOpenXml.ExcelPackage(new FileInfo(filePath)))
+            {
+                Assert.That(package.Workbook.Worksheets.Count, Is.GreaterThan(0));
+
+                // Verify Summary sheet exists
+                var summarySheet = package.Workbook.Worksheets["Podsumowanie"];
+                Assert.That(summarySheet, Is.Not.Null);
+
+                // Verify data sheets exist
+                if (options.IncludeInternships)
+                {
+                    var internshipsSheet = package.Workbook.Worksheets["Staże kierunkowe"];
+                    Assert.That(internshipsSheet, Is.Not.Null);
+                }
+
+                if (options.IncludeShifts)
+                {
+                    var shiftsSheet = package.Workbook.Worksheets["Dyżury medyczne"];
+                    Assert.That(shiftsSheet, Is.Not.Null);
+                }
+
+                if (options.IncludeProcedures)
+                {
+                    var proceduresSheet = package.Workbook.Worksheets["Procedury"];
+                    Assert.That(proceduresSheet, Is.Not.Null);
+                }
+            }
+
+            // Cleanup
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+
+        [Test]
+        public async Task ExportToExcelAsync_WithNoSpecialization_ThrowsException()
+        {
+            // Arrange
+            this.specializationService.GetCurrentSpecializationAsync()
+                .Returns((Specialization)null);
+
+            var options = new ExportOptions
+            {
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 12, 31, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<Exception>(
+                async () => await this.exportService.ExportToExcelAsync(options));
+            Assert.That(ex.Message, Is.EqualTo("Nie znaleziono aktywnej specjalizacji"));
+        }
+
+        [Test]
+        public async Task ExportToExcelAsync_WithNoUser_ThrowsException()
+        {
+            // Arrange
+            this.specializationService.GetCurrentUserAsync()
+                .Returns((User)null);
+
+            var options = new ExportOptions
+            {
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 12, 31, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<Exception>(
+                async () => await this.exportService.ExportToExcelAsync(options));
+            Assert.That(ex.Message, Is.EqualTo("Nie znaleziono aktywnego użytkownika"));
+        }
+
+        [Test]
         public void VerifyServicesAreCorrectlySet()
         {
-            // This test just verifies that our service dependency injection is working
+            // This test verifies that our service dependency injection is working
             // Act & Assert
             var actualSecureStorage = TestServiceProvider.GetSecureStorageService();
             var actualFileSystem = TestServiceProvider.GetFileSystemService();

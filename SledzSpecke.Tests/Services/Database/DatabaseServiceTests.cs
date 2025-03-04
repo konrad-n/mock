@@ -1,26 +1,40 @@
-﻿using NSubstitute;
+﻿using System.Reflection;
+using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
-using SledzSpecke.App.Services.Export;
-using SledzSpecke.App.Services.FileSystem;
-using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.Tests.TestUtilities;
+using Module = SledzSpecke.App.Models.Module;
 
 namespace SledzSpecke.Tests.Services.Database
 {
     [TestFixture]
     public class DatabaseServiceTests
     {
-        private IDatabaseService databaseService;
+        private DatabaseService databaseService;
         private string dbPath;
+        private TestFileSystemService fileSystemService;
 
         [SetUp]
         public void Setup()
         {
-            // Create a new database file for each test
-            this.dbPath = Path.Combine(Path.GetTempPath(), $"test_db_{Guid.NewGuid()}.db3");
-            this.databaseService = new TestDatabaseService(this.dbPath);
+            // Create a new database file for each test in a temp directory
+            string tempPath = Path.GetTempPath();
+            string testDir = Path.Combine(tempPath, $"SledzSpeckeTests_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(testDir);
+            this.dbPath = Path.Combine(testDir, "test.db3");
+
+            // Setup test file system service
+            this.fileSystemService = new TestFileSystemService(useInMemoryStorage: false)
+            {
+                AppDataDirectory = testDir,
+            };
+
+            // Configure the app to use our test file system service
+            Constants.SetFileSystemService(this.fileSystemService);
+
+            // Initialize real DatabaseService
+            this.databaseService = new DatabaseService();
         }
 
         [TearDown]
@@ -28,9 +42,10 @@ namespace SledzSpecke.Tests.Services.Database
         {
             try
             {
-                if (File.Exists(this.dbPath))
+                var directoryPath = Path.GetDirectoryName(this.dbPath);
+                if (Directory.Exists(directoryPath))
                 {
-                    File.Delete(this.dbPath);
+                    Directory.Delete(directoryPath, true);
                 }
             }
             catch
@@ -45,12 +60,36 @@ namespace SledzSpecke.Tests.Services.Database
             // Act
             await this.databaseService.InitializeAsync();
 
-            // Assert - Successfully initialized
-            Assert.Pass("Database initialization completed successfully");
+            // Assert - Successfully initialized and can save data
+            var user = new User
+            {
+                Username = "testuser",
+                Email = "test@example.com",
+                PasswordHash = "hashedpassword",
+                SmkVersion = SmkVersion.New,
+                SpecializationId = 1,
+                RegistrationDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            var userId = await this.databaseService.SaveUserAsync(user);
+            Assert.That(userId, Is.GreaterThan(0));
         }
 
         [Test]
-        public async Task SaveUserAsync_SavesUserCorrectly()
+        public async Task GetUserAsync_NonExistentId_ReturnsNull()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+
+            // Act
+            var user = await this.databaseService.GetUserAsync(999);
+
+            // Assert
+            Assert.That(user, Is.Null);
+        }
+
+        [Test]
+        public async Task SaveUserAsync_SavesNewUser()
         {
             // Arrange
             await this.databaseService.InitializeAsync();
@@ -61,151 +100,794 @@ namespace SledzSpecke.Tests.Services.Database
                 PasswordHash = "hashedpassword",
                 SmkVersion = SmkVersion.New,
                 SpecializationId = 1,
-                RegistrationDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0, DateTimeKind.Local),
+                RegistrationDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
             };
 
             // Act
             int userId = await this.databaseService.SaveUserAsync(user);
-            var savedUser = await this.databaseService.GetUserAsync(userId);
 
             // Assert
+            Assert.That(userId, Is.GreaterThan(0));
+            var savedUser = await this.databaseService.GetUserAsync(userId);
             Assert.That(savedUser, Is.Not.Null);
-            Assert.That(savedUser.UserId, Is.EqualTo(userId));
             Assert.That(savedUser.Username, Is.EqualTo("testuser"));
-            Assert.That(savedUser.Email, Is.EqualTo("test@example.com"));
-            Assert.That(savedUser.PasswordHash, Is.EqualTo("hashedpassword"));
-            Assert.That(savedUser.SmkVersion, Is.EqualTo(SmkVersion.New));
-            Assert.That(savedUser.SpecializationId, Is.EqualTo(1));
         }
 
         [Test]
-        public async Task SaveInternshipAsync_SavesInternshipCorrectly()
+        public async Task SaveUserAsync_UpdatesExistingUser()
         {
             // Arrange
             await this.databaseService.InitializeAsync();
-
-            // Create a very specific test internship
-            var internship = new Internship
+            var user = new User
             {
-                SpecializationId = 9999, // Use a unique ID to avoid conflicts
-                InstitutionName = "Test Institution XYZ", // Make name unique
-                DepartmentName = "Test Department XYZ",
-                InternshipName = "Test Internship XYZ",
+                Username = "testuser",
+                Email = "test@example.com",
+                PasswordHash = "hashedpassword",
+                SmkVersion = SmkVersion.New,
+                SpecializationId = 1,
+                RegistrationDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            int userId = await this.databaseService.SaveUserAsync(user);
+            user.UserId = userId;
+            user.Email = "updated@example.com";
+
+            // Act
+            await this.databaseService.SaveUserAsync(user);
+
+            // Assert
+            var updatedUser = await this.databaseService.GetUserAsync(userId);
+            Assert.That(updatedUser.Email, Is.EqualTo("updated@example.com"));
+        }
+
+        [Test]
+        public async Task SaveAndGetSpecialization_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var specialization = new Specialization
+            {
+                Name = "Test Specialization",
+                ProgramCode = "TEST",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                CalculatedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                HasModules = false,
+                CurrentModuleId = null,
+                CompletedInternships = 0,
+                TotalInternships = 10,
+            };
+
+            // Act
+            int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
+
+            // Assert
+            Assert.That(specializationId, Is.GreaterThan(0));
+            var savedSpecialization = await this.databaseService.GetSpecializationAsync(specializationId);
+            Assert.That(savedSpecialization, Is.Not.Null);
+            Assert.That(savedSpecialization.Name, Is.EqualTo("Test Specialization"));
+        }
+
+        [Test]
+        public async Task GetInternshipsAsync_WithFilters_ReturnsFilteredResults()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var internship1 = new Internship
+            {
+                SpecializationId = 1,
+                ModuleId = 1,
+                InternshipName = "Internship 1",
+                InstitutionName = "Hospital 1",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 3, 31, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            var internship2 = new Internship
+            {
+                SpecializationId = 1,
+                ModuleId = 2,
+                InternshipName = "Internship 2",
+                InstitutionName = "Hospital 2",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 3, 31, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            await this.databaseService.SaveInternshipAsync(internship1);
+            await this.databaseService.SaveInternshipAsync(internship2);
+
+            // Act - Get by moduleId
+            var moduleInternships = await this.databaseService.GetInternshipsAsync(moduleId: 1);
+            var specializationInternships = await this.databaseService.GetInternshipsAsync(specializationId: 1);
+
+            // Assert
+            Assert.That(moduleInternships, Has.Count.EqualTo(1));
+            Assert.That(specializationInternships, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public async Task SaveAndGetMedicalShift_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var shift = new MedicalShift
+            {
+                InternshipId = 1,
+                Date = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                Hours = 12,
+                Minutes = 30,
+                Location = "Test Hospital",
                 Year = 1,
-                StartDate = new DateTime(2023, 3, 1, 0, 0, 0, DateTimeKind.Local),
-                EndDate = new DateTime(2023, 5, 31, 0, 0, 0, DateTimeKind.Local),
-                DaysCount = 92,
-                IsCompleted = false,
-                IsApproved = false,
                 SyncStatus = SyncStatus.NotSynced,
             };
 
             // Act
-            int internshipId = await this.databaseService.SaveInternshipAsync(internship);
-
-            // Assert ID is valid
-            Assert.That(internshipId, Is.GreaterThan(0), "Internship should have a valid ID after saving");
-
-            // Retrieve the saved internship
-            var savedInternship = await this.databaseService.GetInternshipAsync(internshipId);
+            int shiftId = await this.databaseService.SaveMedicalShiftAsync(shift);
 
             // Assert
-            Assert.That(savedInternship, Is.Not.Null, "Retrieved internship should not be null");
-            Assert.That(savedInternship.InternshipId, Is.EqualTo(internshipId));
-            Assert.That(savedInternship.InternshipName, Is.EqualTo("Test Internship XYZ"));
-            Assert.That(savedInternship.InstitutionName, Is.EqualTo("Test Institution XYZ"));
-            Assert.That(savedInternship.DaysCount, Is.EqualTo(92));
+            var savedShift = await this.databaseService.GetMedicalShiftAsync(shiftId);
+            Assert.That(savedShift, Is.Not.Null);
+            Assert.That(savedShift.Hours, Is.EqualTo(12));
+            Assert.That(savedShift.Minutes, Is.EqualTo(30));
+            Assert.That(savedShift.Location, Is.EqualTo("Test Hospital"));
         }
 
         [Test]
-        public async Task SaveModuleAsync_SavesModuleCorrectly()
+        public async Task GetMedicalShiftsAsync_WithInternshipFilter_ReturnsFilteredResults()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var shift1 = new MedicalShift
+            {
+                InternshipId = 1,
+                Date = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                Hours = 12,
+                Location = "Hospital 1",
+            };
+
+            var shift2 = new MedicalShift
+            {
+                InternshipId = 2,
+                Date = new DateTime(2023, 6, 2, 0, 0, 0, DateTimeKind.Local),
+                Hours = 10,
+                Location = "Hospital 2",
+            };
+
+            await this.databaseService.SaveMedicalShiftAsync(shift1);
+            await this.databaseService.SaveMedicalShiftAsync(shift2);
+
+            // Act
+            var internshipShifts = await this.databaseService.GetMedicalShiftsAsync(internshipId: 1);
+            var allShifts = await this.databaseService.GetMedicalShiftsAsync();
+
+            // Assert
+            Assert.That(internshipShifts, Has.Count.EqualTo(1));
+            Assert.That(allShifts, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public async Task DeleteMedicalShift_RemovesShiftFromDatabase()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var shift = new MedicalShift
+            {
+                InternshipId = 1,
+                Date = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                Hours = 12,
+                Location = "Test Hospital",
+            };
+
+            int shiftId = await this.databaseService.SaveMedicalShiftAsync(shift);
+            shift.ShiftId = shiftId;
+
+            // Act
+            await this.databaseService.DeleteMedicalShiftAsync(shift);
+
+            // Assert
+            var deletedShift = await this.databaseService.GetMedicalShiftAsync(shiftId);
+            Assert.That(deletedShift, Is.Null);
+        }
+
+        [Test]
+        public async Task SaveAndGetProcedure_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var procedure = new Procedure
+            {
+                InternshipId = 1,
+                Date = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                Code = "TEST001",
+                Location = "Test Hospital",
+                PatientInitials = "JD",
+                PatientGender = "M",
+                OperatorCode = "A",
+                SyncStatus = SyncStatus.NotSynced,
+            };
+
+            // Act
+            int procedureId = await this.databaseService.SaveProcedureAsync(procedure);
+
+            // Assert
+            var savedProcedure = await this.databaseService.GetProcedureAsync(procedureId);
+            Assert.That(savedProcedure, Is.Not.Null);
+            Assert.That(savedProcedure.Code, Is.EqualTo("TEST001"));
+            Assert.That(savedProcedure.OperatorCode, Is.EqualTo("A"));
+        }
+
+        [Test]
+        public async Task GetProceduresAsync_WithFiltersAndSearch_ReturnsFilteredResults()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var procedure1 = new Procedure
+            {
+                InternshipId = 1,
+                Code = "TEST001",
+                Location = "Hospital A",
+                PatientInitials = "JD",
+            };
+
+            var procedure2 = new Procedure
+            {
+                InternshipId = 2,
+                Code = "CARD001",
+                Location = "Hospital B",
+                PatientInitials = "MS",
+            };
+
+            await this.databaseService.SaveProcedureAsync(procedure1);
+            await this.databaseService.SaveProcedureAsync(procedure2);
+
+            // Act - Test internship filter
+            var internshipProcedures = await this.databaseService.GetProceduresAsync(internshipId: 1);
+            Assert.That(internshipProcedures, Has.Count.EqualTo(1));
+
+            // Act - Test search
+            var searchResults = await this.databaseService.GetProceduresAsync(searchText: "TEST");
+            Assert.That(searchResults, Has.Count.EqualTo(1));
+            Assert.That(searchResults[0].Code, Is.EqualTo("TEST001"));
+        }
+
+        [Test]
+        public async Task SaveAndGetSelfEducation_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var selfEducation = new SelfEducation
+            {
+                SpecializationId = 1,
+                Year = 1,
+                Type = "Reading",
+                Title = "Test Article",
+                Publisher = "Test Publisher",
+                SyncStatus = SyncStatus.NotSynced,
+            };
+
+            // Act
+            int selfEducationId = await this.databaseService.SaveSelfEducationAsync(selfEducation);
+
+            // Assert
+            var savedSelfEducation = await this.databaseService.GetSelfEducationAsync(selfEducationId);
+            Assert.That(savedSelfEducation, Is.Not.Null);
+            Assert.That(savedSelfEducation.Title, Is.EqualTo("Test Article"));
+            Assert.That(savedSelfEducation.Type, Is.EqualTo("Reading"));
+        }
+
+        [Test]
+        public async Task SaveAndGetEducationalActivity_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var activity = new EducationalActivity
+            {
+                SpecializationId = 1,
+                Type = EducationalActivityType.Conference,
+                Title = "Test Conference",
+                Description = "Test Description",
+                StartDate = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 6, 3, 0, 0, 0, DateTimeKind.Local),
+                SyncStatus = SyncStatus.NotSynced,
+            };
+
+            // Act
+            int activityId = await this.databaseService.SaveEducationalActivityAsync(activity);
+
+            // Assert
+            var savedActivity = await this.databaseService.GetEducationalActivityAsync(activityId);
+            Assert.That(savedActivity, Is.Not.Null);
+            Assert.That(savedActivity.Title, Is.EqualTo("Test Conference"));
+            Assert.That(savedActivity.Type, Is.EqualTo(EducationalActivityType.Conference));
+        }
+
+        [Test]
+        public async Task SaveAndGetPublication_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var publication = new Publication
+            {
+                SpecializationId = 1,
+                Description = "Test Publication",
+                FilePath = "/test/path/publication.pdf",
+                SyncStatus = SyncStatus.NotSynced,
+            };
+
+            // Act
+            int publicationId = await this.databaseService.SavePublicationAsync(publication);
+
+            // Assert
+            var savedPublication = await this.databaseService.GetPublicationAsync(publicationId);
+            Assert.That(savedPublication, Is.Not.Null);
+            Assert.That(savedPublication.Description, Is.EqualTo("Test Publication"));
+            Assert.That(savedPublication.FilePath, Is.EqualTo("/test/path/publication.pdf"));
+        }
+
+        [Test]
+        public async Task GetPublicationsAsync_WithFilters_ReturnsFilteredResults()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var publication1 = new Publication
+            {
+                SpecializationId = 1,
+                ModuleId = 1,
+                Description = "Publication 1",
+            };
+
+            var publication2 = new Publication
+            {
+                SpecializationId = 1,
+                ModuleId = 2,
+                Description = "Publication 2",
+            };
+
+            await this.databaseService.SavePublicationAsync(publication1);
+            await this.databaseService.SavePublicationAsync(publication2);
+
+            // Act
+            var modulePublications = await this.databaseService.GetPublicationsAsync(moduleId: 1);
+            var allPublications = await this.databaseService.GetPublicationsAsync(specializationId: 1);
+
+            // Assert
+            Assert.That(modulePublications, Has.Count.EqualTo(1));
+            Assert.That(allPublications, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public async Task SaveAndGetAbsence_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var absence = new Absence
+            {
+                SpecializationId = 1,
+                Type = AbsenceType.Sick,
+                StartDate = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 6, 7, 0, 0, 0, DateTimeKind.Local),
+                Description = "Test Absence",
+                SyncStatus = SyncStatus.NotSynced,
+            };
+
+            // Act
+            int absenceId = await this.databaseService.SaveAbsenceAsync(absence);
+
+            // Assert
+            var savedAbsence = await this.databaseService.GetAbsenceAsync(absenceId);
+            Assert.That(savedAbsence, Is.Not.Null);
+            Assert.That(savedAbsence.Type, Is.EqualTo(AbsenceType.Sick));
+            Assert.That(savedAbsence.Description, Is.EqualTo("Test Absence"));
+        }
+
+        [Test]
+        public async Task GetAbsencesAsync_ForSpecialization_ReturnsCorrectResults()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var absence1 = new Absence
+            {
+                SpecializationId = 1,
+                Type = AbsenceType.Sick,
+                StartDate = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 6, 7, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            var absence2 = new Absence
+            {
+                SpecializationId = 2,
+                Type = AbsenceType.Vacation,
+                StartDate = new DateTime(2023, 7, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 7, 7, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            await this.databaseService.SaveAbsenceAsync(absence1);
+            await this.databaseService.SaveAbsenceAsync(absence2);
+
+            // Act
+            var absences = await this.databaseService.GetAbsencesAsync(1);
+
+            // Assert
+            Assert.That(absences, Has.Count.EqualTo(1));
+            Assert.That(absences[0].SpecializationId, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task SaveAndGetSpecializationProgram_WorksCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var program = new SpecializationProgram
+            {
+                Name = "Test Program",
+                Code = "TEST",
+                Structure = "{\"testKey\":\"testValue\"}",
+                SmkVersion = SmkVersion.New,
+                HasModules = true,
+                BasicModuleCode = "TEST_BASIC",
+                BasicModuleDurationMonths = 24,
+                TotalDurationMonths = 60,
+            };
+
+            // Act
+            int programId = await this.databaseService.SaveSpecializationProgramAsync(program);
+
+            // Assert
+            var savedProgram = await this.databaseService.GetSpecializationProgramAsync(programId);
+            Assert.That(savedProgram, Is.Not.Null);
+            Assert.That(savedProgram.Name, Is.EqualTo("Test Program"));
+            Assert.That(savedProgram.Code, Is.EqualTo("TEST"));
+        }
+
+        [Test]
+        public async Task GetSpecializationProgramByCodeAsync_ReturnsCorrectProgram()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var program = new SpecializationProgram
+            {
+                Name = "Test Program",
+                Code = "TEST",
+                SmkVersion = SmkVersion.New,
+            };
+
+            await this.databaseService.SaveSpecializationProgramAsync(program);
+
+            // Act
+            var foundProgram = await this.databaseService.GetSpecializationProgramByCodeAsync("TEST", SmkVersion.New);
+
+            // Assert
+            Assert.That(foundProgram, Is.Not.Null);
+            Assert.That(foundProgram.Code, Is.EqualTo("TEST"));
+            Assert.That(foundProgram.SmkVersion, Is.EqualTo(SmkVersion.New));
+        }
+
+        [Test]
+        public async Task GetProceduresAsync_WithNullSearch_ReturnsAllProcedures()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var procedure1 = new Procedure
+            {
+                InternshipId = 1,
+                Code = "TEST001",
+                Location = "Hospital A",
+            };
+
+            var procedure2 = new Procedure
+            {
+                InternshipId = 1,
+                Code = "TEST002",
+                Location = "Hospital B",
+            };
+
+            await this.databaseService.SaveProcedureAsync(procedure1);
+            await this.databaseService.SaveProcedureAsync(procedure2);
+
+            // Act
+            var procedures = await this.databaseService.GetProceduresAsync(internshipId: 1, searchText: null);
+
+            // Assert
+            Assert.That(procedures, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public async Task GetProceduresAsync_SearchWithNullFields_HandlesNullsGracefully()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var procedure = new Procedure
+            {
+                InternshipId = 1,
+                Code = "TEST001",
+                Location = "Hospital A",
+                PatientInitials = null,
+                ProcedureGroup = null,
+            };
+
+            await this.databaseService.SaveProcedureAsync(procedure);
+
+            // Act
+            var procedures = await this.databaseService.GetProceduresAsync(searchText: "TEST");
+
+            // Assert
+            Assert.That(procedures, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public async Task UpdateModule_WithExistingModule_UpdatesCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var module = new Module
+            {
+                SpecializationId = 1,
+                Type = ModuleType.Basic,
+                Name = "Test Module",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            int moduleId = await this.databaseService.SaveModuleAsync(module);
+            module.ModuleId = moduleId;
+            module.Name = "Updated Module";
+
+            // Act
+            await this.databaseService.UpdateModuleAsync(module);
+
+            // Assert
+            var updatedModule = await this.databaseService.GetModuleAsync(moduleId);
+            Assert.That(updatedModule.Name, Is.EqualTo("Updated Module"));
+        }
+
+        [Test]
+        public async Task GetCoursesAsync_WithBothFilters_ReturnsCorrectlyCombinedResults()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var course1 = new Course
+            {
+                SpecializationId = 1,
+                ModuleId = 1,
+                CourseName = "Course 1",
+            };
+
+            var course2 = new Course
+            {
+                SpecializationId = 1,
+                ModuleId = 2,
+                CourseName = "Course 2",
+            };
+
+            var course3 = new Course
+            {
+                SpecializationId = 2,
+                ModuleId = 1,
+                CourseName = "Course 3",
+            };
+
+            await this.databaseService.SaveCourseAsync(course1);
+            await this.databaseService.SaveCourseAsync(course2);
+            await this.databaseService.SaveCourseAsync(course3);
+
+            // Act
+            var filteredCourses = await this.databaseService.GetCoursesAsync(specializationId: 1, moduleId: 1);
+
+            // Assert
+            Assert.That(filteredCourses, Has.Count.EqualTo(1));
+            Assert.That(filteredCourses[0].CourseName, Is.EqualTo("Course 1"));
+        }
+
+        [Test]
+        public async Task GetEducationalActivitiesAsync_WithModuleFilter_ReturnsCorrectActivities()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var activity1 = new EducationalActivity
+            {
+                SpecializationId = 1,
+                ModuleId = 1,
+                Type = EducationalActivityType.Conference,
+                Title = "Activity 1",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 1, 2, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            var activity2 = new EducationalActivity
+            {
+                SpecializationId = 1,
+                ModuleId = 2,
+                Type = EducationalActivityType.Workshop,
+                Title = "Activity 2",
+                StartDate = new DateTime(2023, 2, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2023, 2, 2, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            await this.databaseService.SaveEducationalActivityAsync(activity1);
+            await this.databaseService.SaveEducationalActivityAsync(activity2);
+
+            // Act
+            var filteredActivities = await this.databaseService.GetEducationalActivitiesAsync(specializationId: 1, moduleId: 1);
+
+            // Assert
+            Assert.That(filteredActivities, Has.Count.EqualTo(1));
+            Assert.That(filteredActivities[0].Title, Is.EqualTo("Activity 1"));
+        }
+
+        [Test]
+        public async Task SaveUser_UpdateExistingUser_UpdatesAllFields()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var user = new User
+            {
+                Username = "testuser",
+                Email = "test@example.com",
+                PasswordHash = "hash1",
+                SmkVersion = SmkVersion.New,
+                SpecializationId = 1,
+                RegistrationDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+            };
+
+            int userId = await this.databaseService.SaveUserAsync(user);
+            user.UserId = userId;
+
+            // Update all fields
+            user.Username = "updateduser";
+            user.Email = "updated@example.com";
+            user.PasswordHash = "hash2";
+            user.SmkVersion = SmkVersion.Old;
+            user.SpecializationId = 2;
+
+            // Act
+            await this.databaseService.SaveUserAsync(user);
+
+            // Assert
+            var updatedUser = await this.databaseService.GetUserAsync(userId);
+            Assert.That(updatedUser.Username, Is.EqualTo("updateduser"));
+            Assert.That(updatedUser.Email, Is.EqualTo("updated@example.com"));
+            Assert.That(updatedUser.PasswordHash, Is.EqualTo("hash2"));
+            Assert.That(updatedUser.SmkVersion, Is.EqualTo(SmkVersion.Old));
+            Assert.That(updatedUser.SpecializationId, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task SaveSpecialization_UpdateExisting_WithModules_UpdatesCorrectly()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var specialization = new Specialization
+            {
+                Name = "Test Specialization",
+                ProgramCode = "TEST",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                HasModules = true,
+                Modules = new List<Module>
+        {
+            new Module
+            {
+                Type = ModuleType.Basic,
+                Name = "Basic Module",
+                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EndDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
+            },
+        },
+            };
+
+            int specId = await this.databaseService.SaveSpecializationAsync(specialization);
+            specialization.SpecializationId = specId;
+            specialization.Name = "Updated Specialization";
+            specialization.ProgramCode = "UPDATED";
+
+            // Act
+            await this.databaseService.UpdateSpecializationAsync(specialization);
+
+            // Assert
+            var updatedSpec = await this.databaseService.GetSpecializationAsync(specId);
+            Assert.That(updatedSpec.Name, Is.EqualTo("Updated Specialization"));
+            Assert.That(updatedSpec.ProgramCode, Is.EqualTo("UPDATED"));
+            Assert.That(updatedSpec.HasModules, Is.True);
+        }
+
+        [Test]
+        public async Task GetAllSpecializationProgramsAsync_WithMultiplePrograms_ReturnsAllPrograms()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var programs = new List<SpecializationProgram>
+    {
+        new SpecializationProgram
+        {
+            Name = "Program 1",
+            Code = "CODE1",
+            SmkVersion = SmkVersion.New,
+        },
+        new SpecializationProgram
+        {
+            Name = "Program 2",
+            Code = "CODE2",
+            SmkVersion = SmkVersion.Old,
+        },
+        new SpecializationProgram
+        {
+            Name = "Program 3",
+            Code = "CODE3",
+            SmkVersion = SmkVersion.New,
+        },
+    };
+
+            foreach (var program in programs)
+            {
+                await this.databaseService.SaveSpecializationProgramAsync(program);
+            }
+
+            // Act
+            var allPrograms = await this.databaseService.GetAllSpecializationProgramsAsync();
+
+            // Assert
+            Assert.That(allPrograms, Has.Count.EqualTo(3));
+            Assert.That(allPrograms.Select(p => p.Code), Does.Contain("CODE1"));
+            Assert.That(allPrograms.Select(p => p.Code), Does.Contain("CODE2"));
+            Assert.That(allPrograms.Select(p => p.Code), Does.Contain("CODE3"));
+        }
+
+        [Test]
+        public async Task GetSpecializationProgramByCodeAsync_WithNonexistentCode_ReturnsNull()
         {
             // Arrange
             await this.databaseService.InitializeAsync();
 
-            // Create a module with unique identifiers
-            var module = new Module
-            {
-                SpecializationId = 9999, // Use a unique ID to avoid conflicts
-                Type = ModuleType.Basic,
-                Name = "Test Module XYZ", // Make name unique
-                StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                EndDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                Structure = "{\"testKey\":\"testValue\"}",
-                CompletedInternships = 0,
-                TotalInternships = 5,
-                CompletedCourses = 0,
-                TotalCourses = 3,
-            };
-
             // Act
-            int moduleId = await this.databaseService.SaveModuleAsync(module);
-
-            // Assert ID is valid
-            Assert.That(moduleId, Is.GreaterThan(0), "Module should have a valid ID after saving");
-
-            // Retrieve the saved module
-            var savedModule = await this.databaseService.GetModuleAsync(moduleId);
+            var program = await this.databaseService.GetSpecializationProgramByCodeAsync(
+                "NONEXISTENT",
+                SmkVersion.New);
 
             // Assert
-            Assert.That(savedModule, Is.Not.Null);
-            Assert.That(savedModule.ModuleId, Is.EqualTo(moduleId));
-            Assert.That(savedModule.Name, Is.EqualTo("Test Module XYZ"));
-            Assert.That(savedModule.Type, Is.EqualTo(ModuleType.Basic));
-            Assert.That(savedModule.SpecializationId, Is.EqualTo(9999));
+            Assert.That(program, Is.Null);
         }
 
         [Test]
-        public async Task GetLastExportFilePathAsync_ReturnsCorrectPath()
+        public async Task SaveMedicalShift_UpdateExisting_UpdatesAllFields()
         {
             // Arrange
-            var mockFileSystemService = Substitute.For<IFileSystemService>();
-            var mockDatabaseService = Substitute.For<IDatabaseService>();
-            var mockSmkStrategy = Substitute.For<ISmkVersionStrategy>();
-
-            // Set up a temp directory that will work in any environment, including CI
-            string tempPath = Path.GetTempPath();
-            string exportDir = Path.Combine(tempPath, "SledzSpeckeTests_" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(exportDir);
-
-            try
+            await this.databaseService.InitializeAsync();
+            var shift = new MedicalShift
             {
-                // Create a test file in the temp directory
-                string fileName = "testexport.xlsx";
-                string filePath = Path.Combine(exportDir, fileName);
-                await File.WriteAllTextAsync(filePath, "test content");
+                InternshipId = 1,
+                Date = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                Hours = 10,
+                Minutes = 30,
+                Location = "Initial Location",
+                Year = 1,
+                SyncStatus = SyncStatus.NotSynced,
+            };
 
-                // Configure mock to return our test path
-                mockFileSystemService.GetAppSubdirectory(Arg.Any<string>()).Returns(exportDir);
+            int shiftId = await this.databaseService.SaveMedicalShiftAsync(shift);
+            shift.ShiftId = shiftId;
 
-                // Create service with mocks
-                var exportService = new ExportService(mockDatabaseService, null, mockSmkStrategy);
+            // Update all fields
+            shift.InternshipId = 2;
+            shift.Date = new DateTime(2023, 2, 1, 0, 0, 0, DateTimeKind.Local);
+            shift.Hours = 12;
+            shift.Minutes = 45;
+            shift.Location = "Updated Location";
+            shift.Year = 2;
+            shift.SyncStatus = SyncStatus.Modified;
 
-                // Set the last export file path via reflection (since it's private)
-                var fieldInfo = typeof(ExportService).GetField(
-                    "lastExportFilePath",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            // Act
+            await this.databaseService.SaveMedicalShiftAsync(shift);
 
-                fieldInfo.SetValue(exportService, filePath);
-
-                // Act
-                var result = await exportService.GetLastExportFilePathAsync();
-
-                // Assert
-                Assert.That(result, Is.EqualTo(filePath));
-            }
-            finally
-            {
-                // Clean up
-                try
-                {
-                    Directory.Delete(exportDir, true);
-                }
-                catch
-                {
-                    /* Ignore cleanup errors */
-                }
-            }
+            // Assert
+            var updatedShift = await this.databaseService.GetMedicalShiftAsync(shiftId);
+            Assert.That(updatedShift.InternshipId, Is.EqualTo(2));
+            Assert.That(updatedShift.Hours, Is.EqualTo(12));
+            Assert.That(updatedShift.Minutes, Is.EqualTo(45));
+            Assert.That(updatedShift.Location, Is.EqualTo("Updated Location"));
+            Assert.That(updatedShift.Year, Is.EqualTo(2));
+            Assert.That(updatedShift.SyncStatus, Is.EqualTo(SyncStatus.Modified));
         }
+
+
     }
 }
