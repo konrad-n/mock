@@ -147,7 +147,7 @@ namespace SledzSpecke.App.Services.Export
 
         public async Task<DateTime?> GetLastExportDateAsync()
         {
-            return await Helpers.Settings.GetLastExportDateAsync();
+            return await Helpers.SettingsHelper.GetLastExportDateAsync();
         }
 
         public Task<string> GetLastExportFilePathAsync()
@@ -157,7 +157,7 @@ namespace SledzSpecke.App.Services.Export
 
         public async Task SaveLastExportDateAsync(DateTime date)
         {
-            await Helpers.Settings.SetLastExportDateAsync(date);
+            await Helpers.SettingsHelper.SetLastExportDateAsync(date);
         }
 
         public async Task<bool> ShareExportFileAsync(string filePath)

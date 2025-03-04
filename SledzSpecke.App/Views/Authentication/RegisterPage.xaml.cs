@@ -1,9 +1,13 @@
-namespace SledzSpecke.App.Views.Authentication;
+using SledzSpecke.App.ViewModels.Authentication;
 
-public partial class RegisterPage : ContentView
+namespace SledzSpecke.App.Views.Authentication
 {
-    public RegisterPage()
+    public partial class RegisterPage : ContentPage
     {
-        this.InitializeComponent();
+        public RegisterPage(RegisterViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+        }
     }
 }

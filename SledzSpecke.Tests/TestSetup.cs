@@ -15,7 +15,7 @@ namespace SledzSpecke.Tests
 
             // Set these implementations as the ones to use
             Constants.SetFileSystemService(fileSystemService);
-            Settings.SetSecureStorageService(secureStorageService);
+            SettingsHelper.SetSecureStorageService(secureStorageService);
 
             // Also register them with the TestServiceProvider
             TestServiceProvider.SetFileSystemService(fileSystemService);

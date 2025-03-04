@@ -394,7 +394,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 }
 
                 // Save selected module to settings
-                await Helpers.Settings.SetCurrentModuleIdAsync(this.CurrentModuleId);
+                await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.CurrentModuleId);
 
                 // Reload data
                 await this.LoadDataAsync();

@@ -14,6 +14,7 @@
     xmlns:absences="clr-namespace:SledzSpecke.App.Views.Absences"
     xmlns:statistics="clr-namespace:SledzSpecke.App.Views.Statistics"
     xmlns:export="clr-namespace:SledzSpecke.App.Views.Export"
+    xmlns:settings="clr-namespace:SledzSpecke.App.Views.Settings"
     Shell.FlyoutBehavior="Flyout"
     FlyoutHeaderBehavior="Fixed"
     FlyoutWidth="280"
@@ -69,4 +70,20 @@
     <FlyoutItem Title="Eksport" Icon="export.png">
         <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="Export" />
     </FlyoutItem>
+
+    <FlyoutItem Title="Ustawienia" Icon="settings.png">
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" Route="Settings" />
+    </FlyoutItem>
+
+    <Shell.FlyoutFooter>
+        <Grid Padding="20" BackgroundColor="{StaticResource Primary}">
+            <Button Text="Wyloguj" 
+                    TextColor="White" 
+                    BackgroundColor="Transparent" 
+                    BorderColor="White" 
+                    BorderWidth="1" 
+                    CornerRadius="5"
+                    Clicked="OnLogoutClicked" />
+        </Grid>
+    </Shell.FlyoutFooter>
 </Shell>

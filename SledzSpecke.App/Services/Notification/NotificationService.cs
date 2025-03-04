@@ -57,7 +57,7 @@ namespace SledzSpecke.App.Services.Notification
             try
             {
                 // Check app settings
-                var notificationsEnabled = await Helpers.Settings.GetNotificationsEnabledAsync();
+                var notificationsEnabled = await Helpers.SettingsHelper.GetNotificationsEnabledAsync();
 
                 // Check system permissions
                 var status = await LocalNotificationCenter.Current.AreNotificationsEnabled();
@@ -152,7 +152,7 @@ namespace SledzSpecke.App.Services.Notification
                 string notificationId = $"deadline_{Guid.NewGuid().ToString()}";
 
                 // Get days in advance from settings
-                var days = await Helpers.Settings.GetReminderDaysInAdvanceAsync();
+                var days = await Helpers.SettingsHelper.GetReminderDaysInAdvanceAsync();
                 int daysInAdvance = days ?? Constants.DefaultReminderDaysInAdvance;
 
                 // Schedule notification specific number of days before deadline

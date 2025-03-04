@@ -1,9 +1,13 @@
-namespace SledzSpecke.App.Views.Authentication;
+using SledzSpecke.App.ViewModels.Authentication;
 
-public partial class LoginPage : ContentView
+namespace SledzSpecke.App.Views.Authentication
 {
-    public LoginPage()
+    public partial class LoginPage : ContentPage
     {
-        this.InitializeComponent();
+        public LoginPage(LoginViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+        }
     }
 }

@@ -34,7 +34,7 @@ namespace SledzSpecke.Tests.Services.Export
 
             // Set our test services
             TestHelpers.Constants.SetFileSystemService(this.fileSystemService);
-            TestHelpers.Settings.SetSecureStorageService(this.secureStorageService);
+            TestHelpers.SettingsHelper.SetSecureStorageService(this.secureStorageService);
 
             // Initialize mocks
             this.databaseService = Substitute.For<IDatabaseService>();
@@ -90,8 +90,8 @@ namespace SledzSpecke.Tests.Services.Export
             DateTime expectedDate = new DateTime(2023, 6, 15, 0, 0, 0, DateTimeKind.Local);
 
             // Act
-            await TestHelpers.Settings.SetLastExportDateAsync(expectedDate);
-            var actualDate = await TestHelpers.Settings.GetLastExportDateAsync();
+            await TestHelpers.SettingsHelper.SetLastExportDateAsync(expectedDate);
+            var actualDate = await TestHelpers.SettingsHelper.GetLastExportDateAsync();
 
             // Assert
             Assert.That(actualDate, Is.Not.Null);
@@ -121,7 +121,7 @@ namespace SledzSpecke.Tests.Services.Export
             await this.exportService.SaveLastExportDateAsync(testDate);
 
             // Retrieve the value directly from the app's Settings helper
-            var retrievedDate = await App.Helpers.Settings.GetLastExportDateAsync();
+            var retrievedDate = await App.Helpers.SettingsHelper.GetLastExportDateAsync();
 
             // Assert
             Assert.That(retrievedDate, Is.Not.Null);

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SledzSpecke.App.ViewModels.Base
 {
     public class BaseViewModel : ObservableObject
     {
-        private bool isBusy;
+        public bool isBusy;
         private string title;
 
         public bool IsBusy

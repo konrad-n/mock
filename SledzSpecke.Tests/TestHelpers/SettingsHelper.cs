@@ -1,13 +1,16 @@
 ﻿using SledzSpecke.App.Services.Storage;
 
-namespace SledzSpecke.App.Helpers
+namespace SledzSpecke.Tests.TestHelpers
 {
-    public static class Settings
+    /// <summary>
+    /// Helper for securely storing settings.
+    /// </summary>
+    public static class SettingsHelper
     {
         private static ISecureStorageService secureStorageService;
 
         // Initialize with a default implementation
-        static Settings()
+        static SettingsHelper()
         {
             // This will be replaced with a proper implementation during app startup
             // or with a test implementation during testing
