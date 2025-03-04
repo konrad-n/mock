@@ -49,7 +49,27 @@
 
   <ItemGroup>
     <Folder Include="Mocks\" />
+    <Folder Include="Services\Authentication\" />
+    <Folder Include="Services\Notification\" />
+    <Folder Include="Services\Recognition\" />
+    <Folder Include="Services\Settings\" />
+    <Folder Include="Services\Specialization\" />
     <Folder Include="TestData\TestSpecializationPrograms\" />
+    <Folder Include="ViewModels\Absences\" />
+    <Folder Include="ViewModels\Authentication\" />
+    <Folder Include="ViewModels\Base\" />
+    <Folder Include="ViewModels\Courses\" />
+    <Folder Include="ViewModels\Dashboard\" />
+    <Folder Include="ViewModels\EducationalActivities\" />
+    <Folder Include="ViewModels\Export\" />
+    <Folder Include="ViewModels\Internships\" />
+    <Folder Include="ViewModels\MedicalShifts\" />
+    <Folder Include="ViewModels\Procedures\" />
+    <Folder Include="ViewModels\Publications\" />
+    <Folder Include="ViewModels\Recognitions\" />
+    <Folder Include="ViewModels\SelfEducation\" />
+    <Folder Include="ViewModels\Settings\" />
+    <Folder Include="ViewModels\Statistics\" />
   </ItemGroup>
 
   <!-- Special treatment for MAUI project reference -->

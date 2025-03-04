@@ -97,7 +97,9 @@ namespace SledzSpecke.Tests.TestUtilities
         public Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null) => throw new NotImplementedException();
 
         public Task<List<Module>> GetModulesAsync(int specializationId) => throw new NotImplementedException();
+
         public Task<Procedure> GetProcedureAsync(int id) => throw new NotImplementedException();
+
         public Task<List<Procedure>> GetProceduresAsync(int? internshipId = null, string searchText = null) => throw new NotImplementedException();
 
         public Task<Publication> GetPublicationAsync(int id) => throw new NotImplementedException();
