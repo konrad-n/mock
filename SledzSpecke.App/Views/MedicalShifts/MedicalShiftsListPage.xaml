@@ -6,18 +6,18 @@
     <Grid RowDefinitions="Auto, Auto, *, Auto">
         <!-- Filter options -->
         <Frame Grid.Row="0" Margin="10,10,10,0" Padding="5" BorderColor="{StaticResource Primary}" HasShadow="False" 
-               CornerRadius="5" IsClippedToBounds="True">
+            CornerRadius="5" IsClippedToBounds="True">
             <Grid ColumnDefinitions="*, *">
                 <Button Text="Wszystkie dyżury" 
-                        BackgroundColor="{Binding AllShiftsSelected, Converter={StaticResource BoolToColorConverter}}"
-                        TextColor="{Binding AllShiftsSelected, Converter={StaticResource BoolToTextColorConverter}}"
-                        Command="{Binding FilterShiftsCommand}" 
-                        CommandParameter="All" />
+                BackgroundColor="{Binding AllShiftsSelected, Converter={StaticResource BoolToColorConverter}}"
+                TextColor="{Binding AllShiftsSelected, Converter={StaticResource BoolToTextColorConverter}}"
+                Command="{Binding FilterShiftsCommand}" 
+                CommandParameter="All" />
                 <Button Grid.Column="1" Text="Bieżący staż" 
-                        BackgroundColor="{Binding CurrentInternshipSelected, Converter={StaticResource BoolToColorConverter}}"
-                        TextColor="{Binding CurrentInternshipSelected, Converter={StaticResource BoolToTextColorConverter}}"
-                        Command="{Binding FilterShiftsCommand}" 
-                        CommandParameter="Current" />
+                BackgroundColor="{Binding CurrentInternshipSelected, Converter={StaticResource BoolToColorConverter}}"
+                TextColor="{Binding CurrentInternshipSelected, Converter={StaticResource BoolToTextColorConverter}}"
+                Command="{Binding FilterShiftsCommand}" 
+                CommandParameter="Current" />
             </Grid>
         </Frame>
 

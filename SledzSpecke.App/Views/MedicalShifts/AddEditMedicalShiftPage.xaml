@@ -10,9 +10,9 @@
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Staż:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                     <Picker ItemsSource="{Binding AvailableInternships}" 
-                            SelectedItem="{Binding SelectedInternship}"
-                            ItemDisplayBinding="{Binding DisplayName}" 
-                            BackgroundColor="Transparent"/>
+                        SelectedItem="{Binding SelectedInternship}"
+                        ItemDisplayBinding="{Binding DisplayName}" 
+                        BackgroundColor="Transparent"/>
                 </VerticalStackLayout>
             </Frame>
 
