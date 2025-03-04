@@ -1,0 +1,497 @@
+{
+  "name": "Medycyna ratunkowa",
+  "code": "emergency_medicine",
+  "smkVersion": "New",
+  "hasModules": false,
+  "totalDuration": {
+    "years": 5,
+    "months": 0,
+    "days": 0
+  },
+  "totalWorkingDays": 1305,
+  "basicInfo": {
+    "targetGroup": "Lekarze nieposiadający specjalizacji I lub II stopnia lub tytułu specjalisty w odpowiedniej dziedzinie medycyny",
+    "qualificationProcedure": "wiosna 2023"
+  },
+  "courses": [
+    {
+      "id": 1,
+      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie medycyny ratunkowej\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 2,
+      "name": "Kurs: \"Ratownictwo medyczne\"",
+      "weeks": 2.2,
+      "workingDays": 11,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 3,
+      "name": "Kurs: \"Wentylacja mechaniczna płuc w stanach zagrożenia życia\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 4,
+      "name": "Kurs: \"Leczenie ciężkich obrażeń ciała\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 5,
+      "name": "Kurs: \"Zaawansowane zabiegi resuscytacyjne u osób dorosłych\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 6,
+      "name": "Kurs: \"Zaawansowane zabiegi resuscytacyjne u dzieci\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 7,
+      "name": "Kurs: \"Stany zagrożenia życia u dzieci\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 8,
+      "name": "Kurs: \"Leczenie zatruć\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 9,
+      "name": "Kurs: \"Podstawy medycyny katastrof\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 10,
+      "name": "Kurs: \"Zarządzanie w medycynie ratunkowej\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 11,
+      "name": "Kurs: \"Ratunkowe procedury zabiegowe\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 12,
+      "name": "Kurs: \"Zdarzenia mnogie i masowe oraz katastrofy\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 13,
+      "name": "Kurs: \"Orzecznictwo lekarskie\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 14,
+      "name": "Kurs: \"Profilaktyka i promocja zdrowia\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true,
+      "moduleId": null
+    },
+    {
+      "id": 15,
+      "name": "Kurs atestacyjny (podsumowujący): \"Medycyna ratunkowa\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true,
+      "moduleId": null
+    }
+  ],
+  "internships": [
+    {
+      "id": 1,
+      "name": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "weeks": 120,
+      "workingDays": 600,
+      "isBasic": true,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 2,
+      "name": "Staż kierunkowy w zakresie chorób wewnętrznych",
+      "weeks": 20,
+      "workingDays": 100,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 3,
+      "name": "Staż kierunkowy w zakresie chirurgii",
+      "weeks": 12,
+      "workingDays": 60,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 4,
+      "name": "Staż kierunkowy w zakresie intensywnej terapii i medycyny ratunkowej",
+      "weeks": 14,
+      "workingDays": 70,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 5,
+      "name": "Staż kierunkowy w zakresie pediatrii",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 6,
+      "name": "Staż kierunkowy w zakresie neurologii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 7,
+      "name": "Staż kierunkowy w zakresie ortopedii i traumatologii",
+      "weeks": 6,
+      "workingDays": 30,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 8,
+      "name": "Staż kierunkowy w zakresie psychiatrii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 9,
+      "name": "Staż kierunkowy w zakresie położnictwa i ginekologii",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 10,
+      "name": "Staż kierunkowy w zespole ratownictwa medycznego",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 11,
+      "name": "Staż kierunkowy w zakresie radiologii",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 12,
+      "name": "Staż kierunkowy w zakresie toksykologii klinicznej",
+      "weeks": 2,
+      "workingDays": 10,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    },
+    {
+      "id": 13,
+      "name": "Staż kierunkowy w zakresie kardiologii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false,
+      "location": null,
+      "moduleId": null
+    }
+  ],
+  "procedures": [
+    {
+      "id": 1,
+      "name": "intubacja dotchawicza",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 30,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 2,
+      "name": "bezprzyrządowe udrażnianie dróg oddechowych",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 30,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 3,
+      "name": "prowadzenie wentylacji zastępczej",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 30,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 4,
+      "name": "wykonanie konikopunkcji",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 3,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 5,
+      "name": "odbarczenie odmy prężnej",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 3,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 6,
+      "name": "nabranie wywiadu medycznego i badanie fizykalne z ukierunkowaniem na medycynę ratunkową",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 100,
+      "requiredCountB": 30,
+      "internshipId": 1
+    },
+    {
+      "id": 7,
+      "name": "monitorowanie czynności układu krążenia metodami nieinwazyjnymi",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 50,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 8,
+      "name": "wykonanie elektrokardiogramu i interpretacja zapisu EKG w podstawowym zakresie",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 50,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 9,
+      "name": "wykonanie defibrylacji i elektrowersji",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 10,
+      "name": "wykonanie krwawego dostępu tętniczego",
+      "type": "Staż kierunkowy w zakresie intensywnej terapii i medycyny ratunkowej",
+      "requiredCountA": 5,
+      "requiredCountB": 5,
+      "internshipId": 4
+    },
+    {
+      "id": 11,
+      "name": "prowadzenie elektrostymulacji zewnętrznej",
+      "type": "Staż kierunkowy w zakresie kardiologii",
+      "requiredCountA": 5,
+      "requiredCountB": 5,
+      "internshipId": 13
+    },
+    {
+      "id": 12,
+      "name": "asysta przy zakładaniu elektrody do stymulacji przezżylnej",
+      "type": "Staż kierunkowy w zakresie kardiologii",
+      "requiredCountA": 0,
+      "requiredCountB": 5,
+      "internshipId": 13
+    },
+    {
+      "id": 13,
+      "name": "interpretacja wyników badań radiologicznych klatki piersiowej i podstawowych badań tomografii komputerowej",
+      "type": "Staż kierunkowy w zakresie radiologii",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 11
+    },
+    {
+      "id": 14,
+      "name": "wykonanie znieczulenia miejscowego, przewodowego i dożylnego",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 15,
+      "name": "zaopatrzenie rany",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 50,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 16,
+      "name": "założenie unieruchomienia w urazach kości i stawów",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 30,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 17,
+      "name": "założenie dojścia do żył obwodowych",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 50,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 18,
+      "name": "założenie zgłębnika żołądkowego",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 19,
+      "name": "założenie cewnika do pęcherza moczowego",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 20,
+      "name": "prowadzenie zaawansowanej resuscytacji krążeniowo-oddechowej",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 10,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 21,
+      "name": "założenie dojścia doszpikowego",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 5,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 22,
+      "name": "wykonanie paracentezy i drenażu jamy otrzewnej",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 3,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 23,
+      "name": "nakłucie jamy opłucnowej",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 3,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 24,
+      "name": "nacięcie i drenaż ropnia",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 5,
+      "requiredCountB": 5,
+      "internshipId": 1
+    },
+    {
+      "id": 25,
+      "name": "dokonanie oceny miejsca zdarzenia",
+      "type": "Staż kierunkowy w zespole ratownictwa medycznego",
+      "requiredCountA": 10,
+      "requiredCountB": 0,
+      "internshipId": 10
+    },
+    {
+      "id": 26,
+      "name": "podanie leków drogą dożylną, domięśniową, podskórną, doodbytniczą, wziewną i doustną",
+      "type": "Staż podstawowy w szpitalnym oddziale ratunkowym",
+      "requiredCountA": 50,
+      "requiredCountB": 10,
+      "internshipId": 1
+    },
+    {
+      "id": 27,
+      "name": "wykonanie perikardiocentezy",
+      "type": "Staż kierunkowy w zakresie intensywnej terapii i medycyny ratunkowej",
+      "requiredCountA": 1,
+      "requiredCountB": 5,
+      "internshipId": 4
+    },
+    {
+      "id": 28,
+      "name": "założenie sondy Sengstakena-Blakemore'a",
+      "type": "Staż kierunkowy w zakresie chorób wewnętrznych",
+      "requiredCountA": 1,
+      "requiredCountB": 5,
+      "internshipId": 2
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 30,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 130,
+    "nationalHolidays": 65,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  }
+}

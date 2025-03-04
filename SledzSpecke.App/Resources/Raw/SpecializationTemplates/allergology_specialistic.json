@@ -1,0 +1,340 @@
+{
+  "name": "Moduł specjalistyczny w zakresie alergologii",
+  "code": "allergology_specialistic",
+  "moduleType": "Specialistic",
+  "smkVersion": "New",
+  "duration": {
+    "years": 3,
+    "months": 0,
+    "days": 0
+  },
+  "workingDays": 660,
+  "courses": [
+    {
+      "id": 1,
+      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie alergologii\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 2,
+      "name": "Kurs: \"Diagnostyka chorób alergicznych\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 3,
+      "name": "Kurs: \"Profilaktyka i leczenie chorób alergicznych\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 4,
+      "name": "Kurs: \"Immunoterapia alergenowa chorób alergicznych\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 5,
+      "name": "Kurs: \"Alergia zawodowa\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 6,
+      "name": "Kurs: \"Terapia inhalacyjna w alergologii\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 7,
+      "name": "Kurs: \"Podstawy immunologii klinicznej i alergologii\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 8,
+      "name": "Kurs: \"Choroby alergiczne górnych dróg oddechowych i oczu\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 9,
+      "name": "Kurs: \"Alergologia w chorobach wewnętrznych. Choroby alergiczne układu oddechowego, POChP i anafilaksja\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 10,
+      "name": "Kurs: \"Choroby alergiczne skóry, obrzęki naczynioruchowe, mastocytoza\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 11,
+      "name": "Kurs: \"Odrębności chorób alergicznych u dzieci\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 12,
+      "name": "Kurs: \"Nadwrażliwość na leki\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 13,
+      "name": "Kurs: \"Nadwrażliwość na pokarmy oraz dodatki do żywności\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 14,
+      "name": "Kurs: \"Leczenie biologiczne w alergologii\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 15,
+      "name": "Kurs atestacyjny (podsumowujący): \"Alergologia\"",
+      "weeks": 1,
+      "workingDays": 5,
+      "required": true
+    }
+  ],
+  "internships": [
+    {
+      "id": 1,
+      "name": "Staż podstawowy w zakresie alergologii",
+      "weeks": 94,
+      "workingDays": 470,
+      "isBasic": true
+    },
+    {
+      "id": 2,
+      "name": "Staż kierunkowy w zakresie diagnostyki laboratoryjnej",
+      "weeks": 1,
+      "workingDays": 5,
+      "isBasic": false
+    },
+    {
+      "id": 3,
+      "name": "Staż kierunkowy w zakresie dermatologii i wenerologii",
+      "weeks": 10,
+      "workingDays": 50,
+      "isBasic": false
+    },
+    {
+      "id": 4,
+      "name": "Staż kierunkowy w zakresie otorynolaryngologii",
+      "weeks": 10,
+      "workingDays": 50,
+      "isBasic": false
+    },
+    {
+      "id": 5,
+      "name": "Staż kierunkowy w zakresie pediatrii",
+      "weeks": 10,
+      "workingDays": 50,
+      "isBasic": false
+    }
+  ],
+  "procedures": [
+    {
+      "id": 1,
+      "name": "wykonanie i interpretacja punktowych testów skórnych – zestaw alergenów powietrznopochodnych lub pokarmowych z wyciągami alergenów, lub pokarmowych natywnych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 20,
+      "requiredCountB": 80
+    },
+    {
+      "id": 2,
+      "name": "wykonanie i interpretacja testów śródskórnych",
+      "type": "Staż podstawowy",
+      "requiredCountA": 10,
+      "requiredCountB": 20
+    },
+    {
+      "id": 3,
+      "name": "wykonanie i interpretacja testów kontaktowych z podstawowym zestawem alergenów polskich lub europejskich",
+      "type": "Staż podstawowy",
+      "requiredCountA": 10,
+      "requiredCountB": 20
+    },
+    {
+      "id": 4,
+      "name": "wykonanie i interpretacja spirometrii",
+      "type": "Staż podstawowy",
+      "requiredCountA": 30,
+      "requiredCountB": 50
+    },
+    {
+      "id": 5,
+      "name": "wykonanie i interpretacja próby rozkurczowej lub próby prowokacji oskrzeli",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 20
+    },
+    {
+      "id": 6,
+      "name": "wykonanie pomiaru PEF z edukacją pacjenta",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 20
+    },
+    {
+      "id": 7,
+      "name": "wykonanie iniekcji podskórnych preparatów odczulających",
+      "type": "Staż podstawowy",
+      "requiredCountA": 20,
+      "requiredCountB": 200
+    },
+    {
+      "id": 8,
+      "name": "podanie leku biologicznego",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 9,
+      "name": "przeprowadzenie edukacji chorego dotyczącej właściwego sposobu przyjmowania leków wziewnych – wybór inhalatora/nebulizatora",
+      "type": "Staż podstawowy",
+      "requiredCountA": 20,
+      "requiredCountB": 20
+    },
+    {
+      "id": 10,
+      "name": "wykonanie i interpretacja testów śródskórnych w diagnostyce na jady owadów lub na leki",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 5
+    },
+    {
+      "id": 11,
+      "name": "wykonanie i interpretacja wyniku próby prowokacji oskrzeli",
+      "type": "Staż podstawowy",
+      "requiredCountA": 2,
+      "requiredCountB": 2
+    },
+    {
+      "id": 12,
+      "name": "wykonanie iniekcji podskórnych w okresie wstępnym odczulania na jady owadów",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 5
+    },
+    {
+      "id": 13,
+      "name": "interpretacja wyniku gazometrii krwi tętniczej",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 14,
+      "name": "prowadzenie resuscytacji krążeniowo-oddechowej BLS / ALS",
+      "type": "Staż podstawowy",
+      "requiredCountA": 0,
+      "requiredCountB": 2
+    },
+    {
+      "id": 15,
+      "name": "przeprowadzenie edukacji chorego dotyczącej rozpoznawania i leczenia wstrząsu anafilaktycznego wraz ze szkoleniem dotyczącym podawania adrenaliny",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 16,
+      "name": "zaplanowanie diagnostyki i interpretacja wyników u chorego z obrzękiem naczynioruchowym",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 5
+    },
+    {
+      "id": 17,
+      "name": "zaplanowanie diagnostyki i interpretacja wyników u chorego diagnozowanego w kierunku mastocytozy",
+      "type": "Staż podstawowy",
+      "requiredCountA": 5,
+      "requiredCountB": 5
+    },
+    {
+      "id": 18,
+      "name": "interpretacja wyników badań diagnostyki molekularnej, w tym typu multiplex",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 19,
+      "name": "ustalenie planu żywieniowego (zasady stosowania diety hipoalergicznej) u dziecka z alergią na pokarmy",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 20,
+      "name": "zagadnienia dotyczące pielęgnacji skóry w atopowym zapaleniu skóry",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 21,
+      "name": "wziernikowanie nosa",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 10,
+      "requiredCountB": 20
+    },
+    {
+      "id": 22,
+      "name": "ocena tomografii komputerowej zatok",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 10,
+      "requiredCountB": 20
+    },
+    {
+      "id": 23,
+      "name": "badanie węchu",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 10
+    },
+    {
+      "id": 24,
+      "name": "rynomanometria",
+      "type": "Staże kierunkowe",
+      "requiredCountA": 5,
+      "requiredCountB": 5
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 18,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 78,
+    "nationalHolidays": 39,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  }
+}

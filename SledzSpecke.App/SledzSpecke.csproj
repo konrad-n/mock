@@ -67,9 +67,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\allergology.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\allergology_specialistic.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\anesthesiology.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_specialistic.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\emergency_medicine.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\internal_medicine.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry.json" />
   </ItemGroup>
