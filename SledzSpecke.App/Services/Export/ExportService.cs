@@ -962,7 +962,7 @@ namespace SledzSpecke.App.Services.Export
             worksheet.Columns[1, col - 1].AutoFit();
         }
 
-        private void AddEducationalActivitiesWorksheet(ExcelPackage package, List<EducationalActivity> activities)
+        private void AddEducationalActivitiesWorksheet(ExcelPackage package, List<EducationalActivity> activities, bool oldSmkFormat)
         {
             var worksheet = package.Workbook.Worksheets.Add("Działalność edukacyjna");
 
@@ -1000,7 +1000,7 @@ namespace SledzSpecke.App.Services.Export
             worksheet.Columns[1, col - 1].AutoFit();
         }
 
-        private void AddAbsencesWorksheet(ExcelPackage package, List<Absence> absences)
+        private void AddAbsencesWorksheet(ExcelPackage package, List<Absence> absences, bool oldSmkFormat)
         {
             var worksheet = package.Workbook.Worksheets.Add("Nieobecności");
 
