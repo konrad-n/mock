@@ -59,7 +59,6 @@
     <Folder Include="ViewModels\Authentication\" />
     <Folder Include="ViewModels\Base\" />
     <Folder Include="ViewModels\Courses\" />
-    <Folder Include="ViewModels\Dashboard\" />
     <Folder Include="ViewModels\EducationalActivities\" />
     <Folder Include="ViewModels\Export\" />
     <Folder Include="ViewModels\Internships\" />
