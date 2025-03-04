@@ -51,16 +51,16 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool install dotnet-sonarscanner --tool-path .\.sonar\scanner
           
-      - name: Install Coverlet
-        run: dotnet tool install --global coverlet.console
-        
+      - name: Create coverage directory
+        run: mkdir -p coverage
+          
       - name: Begin SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"konrad-n_mock" /o:"konrad-n" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/coverage.opencover.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"konrad-n_mock" /o:"konrad-n" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs,**/*.Designer.cs" /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/coverage/coverage.opencover.xml"
       
       - name: Restore dependencies
         run: dotnet restore SledzSpecke.sln
@@ -69,7 +69,13 @@ jobs:
         run: dotnet build SledzSpecke.sln --no-restore
         
       - name: Run tests with coverage
-        run: dotnet test SledzSpecke.Tests/SledzSpecke.Tests.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="coverage/coverage.opencover.xml"
+        run: dotnet test SledzSpecke.Tests/SledzSpecke.Tests.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="${{ github.workspace }}/coverage/coverage.opencover.xml"
+        
+      - name: Debug coverage file
+        run: |
+          dir coverage
+          type coverage\coverage.opencover.xml
+        shell: cmd
         
       - name: End SonarCloud analysis
         env:
