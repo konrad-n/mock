@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.FileSystem;
@@ -37,6 +38,9 @@ namespace SledzSpecke.App
 
         private static void RegisterServices(IServiceCollection services)
         {
+            // Helpers
+            services.AddSingleton<IFileAccessHelper, FileAccessHelper>();
+
             // Core app services
             services.AddSingleton<App>();
             services.AddSingleton<NavigationPage>();

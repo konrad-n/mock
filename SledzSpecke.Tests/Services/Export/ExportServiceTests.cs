@@ -1,4 +1,6 @@
 ﻿using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
@@ -6,7 +8,6 @@ using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.Services.FileSystem;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
-using SledzSpecke.Tests.TestHelpers;
 using SledzSpecke.Tests.TestUtilities;
 
 namespace SledzSpecke.Tests.Services.Export
@@ -22,6 +23,7 @@ namespace SledzSpecke.Tests.Services.Export
         private User testUser;
         private TestSecureStorageService secureStorageService;
         private TestFileSystemService fileSystemService;
+        private IFileAccessHelper fileAccessHelper;
 
         [SetUp]
         public void Setup()
@@ -31,13 +33,14 @@ namespace SledzSpecke.Tests.Services.Export
             this.fileSystemService = new TestFileSystemService(useInMemoryStorage: true);
 
             // Set our test services
-            Constants.SetFileSystemService(this.fileSystemService);
+            TestHelpers.Constants.SetFileSystemService(this.fileSystemService);
             TestHelpers.Settings.SetSecureStorageService(this.secureStorageService);
 
             // Initialize mocks
             this.databaseService = Substitute.For<IDatabaseService>();
             this.specializationService = Substitute.For<ISpecializationService>();
             this.smkStrategy = Substitute.For<ISmkVersionStrategy>();
+            this.fileAccessHelper = Substitute.For<IFileAccessHelper>();
 
             // Initialize test data
             this.testSpecialization = new Specialization
@@ -68,7 +71,8 @@ namespace SledzSpecke.Tests.Services.Export
             this.exportService = new ExportService(
                 this.databaseService,
                 this.specializationService,
-                this.smkStrategy);
+                this.smkStrategy,
+                this.fileAccessHelper);
         }
 
         [TearDown]
@@ -131,6 +135,7 @@ namespace SledzSpecke.Tests.Services.Export
             var mockFileSystemService = Substitute.For<IFileSystemService>();
             var mockDatabaseService = Substitute.For<IDatabaseService>();
             var mockSmkStrategy = Substitute.For<ISmkVersionStrategy>();
+            var mockFileAccessHelper = Substitute.For<IFileAccessHelper>();
 
             // Set up a temp directory that will work in any environment
             string tempPath = Path.GetTempPath();
@@ -148,7 +153,7 @@ namespace SledzSpecke.Tests.Services.Export
                 mockFileSystemService.GetAppSubdirectory(Arg.Any<string>()).Returns(exportDir);
 
                 // Create service with mocks
-                var sut = new ExportService(mockDatabaseService, null, mockSmkStrategy);
+                var sut = new ExportService(mockDatabaseService, null, mockSmkStrategy, mockFileAccessHelper);
 
                 // Set the last export file path via reflection
                 var fieldInfo = typeof(ExportService).GetField(
@@ -333,6 +338,87 @@ namespace SledzSpecke.Tests.Services.Export
             Assert.That(actualFileSystem, Is.Not.Null);
             Assert.That(actualSecureStorage, Is.InstanceOf<TestSecureStorageService>());
             Assert.That(actualFileSystem, Is.InstanceOf<TestFileSystemService>());
+        }
+
+        [Test]
+        public async Task GetLastExportFilePathAsync_WhenNoFileExported_ReturnsNull()
+        {
+            // Act
+            var result = await this.exportService.GetLastExportFilePathAsync();
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task ShareExportFileAsync_WithNullPath_ReturnsFalse()
+        {
+            // Act
+            bool result = await this.exportService.ShareExportFileAsync(null);
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task ExportToExcelAsync_WhenAllOptionsDisabled_CreatesOnlySummarySheet()
+        {
+            // Arrange
+            var options = new ExportOptions
+            {
+                IncludeShifts = false,
+                IncludeProcedures = false,
+                IncludeInternships = false,
+                IncludeCourses = false,
+                IncludeSelfEducation = false,
+                IncludePublications = false,
+                IncludeEducationalActivities = false,
+                IncludeAbsences = false,
+                IncludeRecognitions = false,
+                FormatForOldSMK = false,
+            };
+
+            // Act
+            var filePath = await this.exportService.ExportToExcelAsync(options);
+
+            // Assert
+            Assert.That(filePath, Is.Not.Null);
+            Assert.That(File.Exists(filePath), Is.True);
+
+            using (var package = new OfficeOpenXml.ExcelPackage(new FileInfo(filePath)))
+            {
+                Assert.That(package.Workbook.Worksheets.Count, Is.EqualTo(1));
+                Assert.That(package.Workbook.Worksheets["Podsumowanie"], Is.Not.Null);
+            }
+
+            // Cleanup
+            File.Delete(filePath);
+        }
+
+        [Test]
+        public async Task ExportToExcelAsync_WithExceptionDuringWrite_ThrowsException()
+        {
+            // Arrange
+            var options = new ExportOptions
+            {
+                IncludeShifts = true
+            };
+
+            this.databaseService.GetInternshipsAsync(Arg.Any<int>(), Arg.Any<int?>()).Throws(new Exception("Database error"));
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<Exception>(async () => await this.exportService.ExportToExcelAsync(options));
+            Assert.That(ex.Message, Does.Contain("Database error"));
+        }
+
+        [Test]
+        public async Task SaveLastExportDateAsync_WhenExceptionOccurs_DoesNotThrow()
+        {
+            // Arrange
+            var invalidDate = DateTime.MinValue; // Potencjalny błąd
+
+            // Act & Assert (metoda powinna obsłużyć błąd bez wyjątku)
+            Assert.DoesNotThrowAsync(async () => await this.exportService.SaveLastExportDateAsync(invalidDate));
         }
     }
 }

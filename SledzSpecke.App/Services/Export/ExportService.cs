@@ -15,15 +15,18 @@ namespace SledzSpecke.App.Services.Export
         private readonly ISpecializationService specializationService;
         private readonly ISmkVersionStrategy smkStrategy;
         private string lastExportFilePath;
+        private readonly IFileAccessHelper fileAccessHelper;
 
         public ExportService(
             IDatabaseService databaseService,
             ISpecializationService specializationService,
-            ISmkVersionStrategy smkStrategy)
+            ISmkVersionStrategy smkStrategy,
+            IFileAccessHelper fileAccessHelper)
         {
             this.databaseService = databaseService;
             this.specializationService = specializationService;
             this.smkStrategy = smkStrategy;
+            this.fileAccessHelper = fileAccessHelper;
 
             // Inicjalizacja biblioteki EPPlus
             ExcelHelper.Initialize();
@@ -34,7 +37,7 @@ namespace SledzSpecke.App.Services.Export
             try
             {
                 // Upewnij się, że katalog eksportu istnieje
-                await FileAccessHelper.EnsureFolderExistsAsync(Constants.ExportsPath);
+                await this.fileAccessHelper.EnsureFolderExistsAsync(Constants.ExportsPath);
 
                 // Pobierz dane specjalizacji
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
@@ -166,7 +169,7 @@ namespace SledzSpecke.App.Services.Export
 
             try
             {
-                return await FileAccessHelper.ShareFileAsync(filePath, "Eksport danych specjalizacji");
+                return await this.fileAccessHelper.ShareFileAsync(filePath, "Eksport danych specjalizacji");
             }
             catch (Exception ex)
             {
@@ -237,9 +240,9 @@ namespace SledzSpecke.App.Services.Export
             var result = new List<Procedure>();
 
             // Pobierz procedury dla każdego stażu
-            foreach (var internship in internships)
+            foreach (var internship in internships ?? new List<Internship>())
             {
-                var procedures = await this.databaseService.GetProceduresAsync(internship.InternshipId);
+                var procedures = await this.databaseService.GetProceduresAsync(internship.InternshipId) ?? new List<Procedure>();
 
                 // Dodaj nazwę stażu do każdej procedury
                 foreach (var procedure in procedures)

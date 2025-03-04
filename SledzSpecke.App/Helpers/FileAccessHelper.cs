@@ -1,8 +1,8 @@
 ﻿namespace SledzSpecke.App.Helpers
 {
-    public static class FileAccessHelper
+    public class FileAccessHelper : IFileAccessHelper
     {
-        public static async Task<bool> EnsureFolderExistsAsync(string folderPath)
+        public async Task<bool> EnsureFolderExistsAsync(string folderPath)
         {
             try
             {
@@ -20,11 +20,11 @@
             }
         }
 
-        public static async Task<string> SaveTextFileAsync(string folderPath, string fileName, string content)
+        public async Task<string> SaveTextFileAsync(string folderPath, string fileName, string content)
         {
             try
             {
-                await EnsureFolderExistsAsync(folderPath);
+                await this.EnsureFolderExistsAsync(folderPath);
 
                 string filePath = Path.Combine(folderPath, fileName);
                 await File.WriteAllTextAsync(filePath, content);
@@ -38,7 +38,7 @@
             }
         }
 
-        public static async Task<string> ReadTextFileAsync(string filePath)
+        public async Task<string> ReadTextFileAsync(string filePath)
         {
             try
             {
@@ -56,11 +56,11 @@
             }
         }
 
-        public static async Task<bool> SaveBinaryFileAsync(string folderPath, string fileName, byte[] data)
+        public async Task<bool> SaveBinaryFileAsync(string folderPath, string fileName, byte[] data)
         {
             try
             {
-                await EnsureFolderExistsAsync(folderPath);
+                await this.EnsureFolderExistsAsync(folderPath);
 
                 string filePath = Path.Combine(folderPath, fileName);
                 await File.WriteAllBytesAsync(filePath, data);
@@ -74,7 +74,7 @@
             }
         }
 
-        public static async Task<byte[]> ReadBinaryFileAsync(string filePath)
+        public async Task<byte[]> ReadBinaryFileAsync(string filePath)
         {
             try
             {
@@ -92,7 +92,7 @@
             }
         }
 
-        public static bool DeleteFile(string filePath)
+        public bool DeleteFile(string filePath)
         {
             try
             {
@@ -111,7 +111,7 @@
             }
         }
 
-        public static string GetUniqueFileName(string folderPath, string baseFileName, string extension)
+        public string GetUniqueFileName(string folderPath, string baseFileName, string extension)
         {
             string fileName = $"{baseFileName}.{extension}";
             string filePath = Path.Combine(folderPath, fileName);
@@ -127,7 +127,7 @@
             return fileName;
         }
 
-        public static async Task<string> PickFileAsync(string[] allowedTypes)
+        public async Task<string> PickFileAsync(string[] allowedTypes)
         {
             try
             {
@@ -153,7 +153,7 @@
             }
         }
 
-        public static async Task<bool> ShareFileAsync(string filePath, string title)
+        public async Task<bool> ShareFileAsync(string filePath, string title)
         {
             try
             {
