@@ -43,6 +43,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private string moduleInfo = string.Empty;
         private bool hasModules;
         private int year = 1;
+        private bool showOnlyActiveInternships = true;
 
         private ObservableCollection<InternshipListItem> availableInternships;
         private InternshipListItem selectedInternship;
@@ -135,6 +136,19 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     // Wczytaj dostępne kody procedur dla tego stażu
                     this.LoadProcedureCodesAsync(value.Value).ConfigureAwait(false);
+                }
+            }
+        }
+
+        public bool ShowOnlyActiveInternships
+        {
+            get => this.showOnlyActiveInternships;
+            set
+            {
+                if (this.SetProperty(ref this.showOnlyActiveInternships, value))
+                {
+                    // Po zmianie wartości, przeładuj listę staży
+                    this.LoadInternshipsAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -421,13 +435,23 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 // Pobierz staże dla obecnego modułu (jeśli podano) lub wszystkie staże
                 var internships = await this.databaseService.GetInternshipsAsync(moduleId: this.moduleId);
 
+                // Filtruj tylko aktywne (nieukończone) staże, żeby lista była bardziej przejrzysta
+                // Użytkownik może chcieć jednak widzieć wszystkie, więc możemy dodać opcję filtrowania
+                var activeInternships = this.ShowOnlyActiveInternships
+                    ? internships.Where(i => !i.IsCompleted).ToList()
+                    : internships;
+
                 // Dodaj staże do listy
-                foreach (var internship in internships)
+                foreach (var internship in activeInternships)
                 {
+                    // Ważne: W starym SMK format wyświetlania musi być dokładnie taki jak w oryginalnym systemie
                     var item = new InternshipListItem
                     {
                         InternshipId = internship.InternshipId,
-                        DisplayName = $"{internship.InternshipName} - {internship.InstitutionName}",
+                        // Format: "Nazwa stażu - Oddział - Instytucja"
+                        DisplayName = this.IsOldSmkVersion
+                            ? $"{internship.InternshipName} - {internship.DepartmentName} - {internship.InstitutionName}"
+                            : $"{internship.InternshipName} ({internship.InstitutionName})",
                     };
                     this.AvailableInternships.Add(item);
                 }
@@ -442,6 +466,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     this.SelectedInternship = this.AvailableInternships
                         .FirstOrDefault(i => i.InternshipId == this.internshipId.Value);
+                }
+
+                // Jeśli nie mamy żadnych staży, pokaż komunikat
+                if (this.AvailableInternships.Count == 0)
+                {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Brak staży",
+                        "Nie znaleziono żadnych aktywnych staży dla bieżącego modułu. Dodaj przynajmniej jeden staż przed dodaniem procedury.",
+                        "OK");
                 }
             }
             catch (Exception ex)

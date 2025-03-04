@@ -24,7 +24,12 @@
 
                     <!-- Staż - dla obu wersji SMK -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Nazwa stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0" Text="Nazwa stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                            <CheckBox Grid.Column="1" IsChecked="{Binding ShowOnlyActiveInternships}" />
+                            <Label Grid.Column="1" Text="Tylko aktywne" VerticalOptions="Center" 
+                                   HorizontalOptions="End" Margin="25,0,0,0" />
+                        </Grid>
                         <Picker ItemsSource="{Binding AvailableInternships}" 
                                 SelectedItem="{Binding SelectedInternship}"
                                 ItemDisplayBinding="{Binding DisplayName}" 
