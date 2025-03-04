@@ -1041,7 +1041,7 @@ namespace SledzSpecke.App.Services.Export
             worksheet.Columns[1, col - 1].AutoFit();
         }
 
-        private void AddRecognitionsWorksheet(ExcelPackage package, List<Models.Recognition> recognitions)
+        private void AddRecognitionsWorksheet(ExcelPackage package, List<Models.Recognition> recognitions, bool oldSmkFormat)
         {
             var worksheet = package.Workbook.Worksheets.Add("Uznania/skrócenia");
 
