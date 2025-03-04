@@ -547,21 +547,36 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
         private void ValidatePasswords()
         {
-            this.PasswordsNotMatch = string.IsNullOrEmpty(this.Password) ||
-                                 string.IsNullOrEmpty(this.ConfirmPassword) ||
-                                 this.Password != this.ConfirmPassword;
+            bool passwordsMatch = !string.IsNullOrEmpty(this.Password) &&
+                                 !string.IsNullOrEmpty(this.ConfirmPassword) &&
+                                 this.Password == this.ConfirmPassword;
+
+            // Ustaw PasswordsNotMatch na przeciwieństwo passwordsMatch
+            this.PasswordsNotMatch = !passwordsMatch;
+
+            System.Diagnostics.Debug.WriteLine($"ValidatePasswords: PasswordsMatch={passwordsMatch}, PasswordsNotMatch={this.PasswordsNotMatch}");
+
+            // Powiadom, że warunek wykonania komendy mógł się zmienić
+            ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
         }
 
         private bool CanRegister()
         {
-            return !string.IsNullOrWhiteSpace(this.Username) &&
-                   !string.IsNullOrWhiteSpace(this.Password) &&
-                   !string.IsNullOrWhiteSpace(this.ConfirmPassword) &&
-                   !string.IsNullOrWhiteSpace(this.Email) &&
-                   this.IsPasswordValid(this.Password) &&
-                   this.PasswordsNotMatch &&
-                   this.SelectedSpecialization != null &&
-                   (this.IsOldSmkVersion || this.IsNewSmkVersion);
+            // Dodajmy logowanie, żeby widzieć, który warunek nie jest spełniony
+            var isUsernameValid = !string.IsNullOrWhiteSpace(this.Username);
+            var isPasswordValid = !string.IsNullOrWhiteSpace(this.Password);
+            var isConfirmPasswordValid = !string.IsNullOrWhiteSpace(this.ConfirmPassword);
+            var isEmailValid = !string.IsNullOrWhiteSpace(this.Email);
+            var isPasswordFormatValid = this.IsPasswordValid(this.Password);
+            var arePasswordsMatching = !this.PasswordsNotMatch; // Negacja - hasła muszą się zgadzać
+            var isSpecializationSelected = this.SelectedSpecialization != null;
+            var isSmkVersionSelected = this.IsOldSmkVersion || this.IsNewSmkVersion;
+
+            var canRegister = isUsernameValid && isPasswordValid && isConfirmPasswordValid &&
+                             isEmailValid && isPasswordFormatValid && arePasswordsMatching &&
+                             isSpecializationSelected && isSmkVersionSelected;
+
+            return canRegister;
         }
 
         private async Task OnRegisterAsync()
