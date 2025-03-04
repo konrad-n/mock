@@ -39,6 +39,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool isOldSmkVersion;
         private string moduleInfo = string.Empty;
         private bool hasModules;
+        private int year = 1;
 
         private ObservableCollection<InternshipListItem> availableInternships;
         private InternshipListItem selectedInternship;
@@ -46,6 +47,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private ObservableCollection<string> availableGenders;
         private ObservableCollection<string> availableStatuses;
         private ObservableCollection<string> availableOperatorCodes;
+        private ObservableCollection<int> availableYears;
 
         public AddEditProcedureViewModel(
             ISpecializationService specializationService,
@@ -74,6 +76,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.AvailableGenders = new ObservableCollection<string> { "M", "K" };
             this.AvailableStatuses = new ObservableCollection<string>();
             this.AvailableOperatorCodes = new ObservableCollection<string> { "A", "B" };
+            this.AvailableYears = new ObservableCollection<int> { 1, 2, 3, 4, 5, 6 };
 
             this.InitializePickerOptions();
         }
@@ -188,6 +191,22 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.SetProperty(ref this.patientGender, value);
                 this.ValidateInput();
             }
+        }
+
+        public int Year
+        {
+            get => this.year;
+            set
+            {
+                this.SetProperty(ref this.year, value);
+                this.ValidateInput();
+            }
+        }
+
+        public ObservableCollection<int> AvailableYears
+        {
+            get => this.availableYears;
+            set => this.SetProperty(ref this.availableYears, value);
         }
 
         public string AssistantData
@@ -481,6 +500,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.ProcedureGroup = procedure.ProcedureGroup;
                 this.Status = procedure.Status;
                 this.PerformingPerson = procedure.PerformingPerson;
+                this.Year = procedure.Year;
 
                 // Pobierz staż, aby uzyskać informacje o module
                 var internship = await this.databaseService.GetInternshipAsync(procedure.InternshipId);
@@ -537,6 +557,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
 
             if (requiredFields.Contains("Location") && string.IsNullOrWhiteSpace(this.Location))
+            {
+                isValid = false;
+            }
+
+            if (this.IsOldSmkVersion && requiredFields.Contains("Year") && this.Year <= 0)
             {
                 isValid = false;
             }
@@ -600,6 +625,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 procedure.ProcedureGroup = this.ProcedureGroup;
                 procedure.Status = this.Status;
                 procedure.PerformingPerson = this.PerformingPerson;
+                procedure.Year = this.Year;
 
                 // Zapisz do bazy danych
                 await this.databaseService.SaveProcedureAsync(procedure);

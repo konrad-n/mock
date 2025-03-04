@@ -22,18 +22,19 @@ namespace SledzSpecke.App.Services.SmkStrategy
 
                 case "AddEditProcedure":
                     return new Dictionary<string, bool>
-                    {
-                        { "Date", true },
-                        { "Code", true },
-                        { "OperatorCode", true },
-                        { "PatientInitials", true },
-                        { "PatientGender", true },
-                        { "Location", true },
-                        { "AssistantData", false },
-                        { "ProcedureGroup", true },
-                        { "Status", true },
-                        { "PerformingPerson", true },
-                    };
+                {
+                    { "Date", true },
+                    { "Code", true },
+                    { "OperatorCode", true },
+                    { "PatientInitials", true },
+                    { "PatientGender", true },
+                    { "Location", true },
+                    { "AssistantData", true }, // Zmienione na true - to pole musi być dostępne w starym SMK
+                    { "ProcedureGroup", true },
+                    { "Status", true },
+                    { "PerformingPerson", true },
+                    { "Year", true }, // Dodane pole Rok - obowiązkowe w starym SMK
+                };
 
                 case "AddEditInternship":
                     return new Dictionary<string, bool>
@@ -72,17 +73,19 @@ namespace SledzSpecke.App.Services.SmkStrategy
 
                 case "AddEditProcedure":
                     return new Dictionary<string, string>
-                    {
-                        { "Date", "Data wykonania" },
-                        { "Code", "Kod zabiegu" },
-                        { "OperatorCode", "Operator/Asysta" },
-                        { "PatientInitials", "Inicjały pacjenta" },
-                        { "PatientGender", "Płeć pacjenta" },
-                        { "Location", "Miejsce wykonania" },
-                        { "ProcedureGroup", "Grupa procedur" },
-                        { "Status", "Status" },
-                        { "PerformingPerson", "Osoba wykonująca" },
-                    };
+                {
+                    { "Date", "Data wykonania" },
+                    { "Code", "Kod zabiegu" },
+                    { "OperatorCode", "Operator/Asysta" },
+                    { "PatientInitials", "Inicjały pacjenta" },
+                    { "PatientGender", "Płeć pacjenta" },
+                    { "Location", "Miejsce wykonania" },
+                    { "ProcedureGroup", "Grupa procedur" },
+                    { "Status", "Status" },
+                    { "PerformingPerson", "Osoba wykonująca" },
+                    { "AssistantData", "Dane osoby wykonującej I i II asystę" }, // Zmieniona etykieta na dokładną jak w SMK
+                    { "Year", "Rok" }, // Dodana etykieta dla pola Rok
+                };
 
                 case "AddEditInternship":
                     return new Dictionary<string, string>
@@ -119,13 +122,14 @@ namespace SledzSpecke.App.Services.SmkStrategy
 
                 case "AddEditProcedure":
                     return new List<string>
-                    {
-                        "Date",
-                        "Code",
-                        "OperatorCode",
-                        "Location",
-                        "PerformingPerson", // Wymagane w starej wersji SMK
-                    };
+                {
+                    "Date",
+                    "Code",
+                    "OperatorCode",
+                    "Location",
+                    "PerformingPerson", // Wymagane w starej wersji SMK
+                    "Year", // Dodane jako pole wymagane
+                };
 
                 case "AddEditInternship":
                     return new List<string>
@@ -159,12 +163,13 @@ namespace SledzSpecke.App.Services.SmkStrategy
 
                 case "AddEditProcedure":
                     return new Dictionary<string, object>
-                    {
-                        { "Date", DateTime.Today },
-                        { "OperatorCode", "A" },
-                        { "Status", "Zatwierdzona" },
-                        { "PerformingPerson", string.Empty },
-                    };
+                {
+                    { "Date", DateTime.Today },
+                    { "OperatorCode", "A" },
+                    { "Status", "Zatwierdzona" },
+                    { "PerformingPerson", string.Empty },
+                    { "Year", 1 }, // Dodana domyślna wartość dla pola Rok
+                };
 
                 case "AddEditInternship":
                     return new Dictionary<string, object>

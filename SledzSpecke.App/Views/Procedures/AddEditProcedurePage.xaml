@@ -126,10 +126,24 @@
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Dodatkowe informacje (Stary SMK):" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" />
 
+                    <!-- Rok -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Rok:" TextColor="{StaticResource TextMutedColor}" />
+                        <Picker ItemsSource="{Binding AvailableYears}" 
+                    SelectedItem="{Binding Year}" 
+                    BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
                     <!-- Osoba wykonująca -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Osoba wykonująca:" TextColor="{StaticResource TextMutedColor}" />
                         <Entry Text="{Binding PerformingPerson}" Placeholder="Podaj osobę wykonującą" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Dane osoby wykonującej I i II asystę -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Dane osoby wykonującej I i II asystę:" TextColor="{StaticResource TextMutedColor}" />
+                        <Entry Text="{Binding AssistantData}" Placeholder="Podaj dane asysty" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>

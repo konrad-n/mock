@@ -84,16 +84,24 @@
                 <VerticalStackLayout Spacing="5">
                     <Label Text="Dodatkowe informacje (Stary SMK)" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}"/>
                     <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto" RowSpacing="10" ColumnSpacing="15">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="15">
+                        <!-- Rok -->
+                        <Label Grid.Row="0" Grid.Column="0" Text="Rok:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Year}" TextColor="{StaticResource TextColor}"/>
+
                         <!-- Osoba wykonująca -->
-                        <Label Grid.Row="0" Grid.Column="0" Text="Osoba wykonująca:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding PerformingPerson}" TextColor="{StaticResource TextColor}"/>
+                        <Label Grid.Row="1" Grid.Column="0" Text="Osoba wykonująca:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding PerformingPerson}" TextColor="{StaticResource TextColor}"/>
+
+                        <!-- Dane osoby wykonującej I i II asystę -->
+                        <Label Grid.Row="2" Grid.Column="0" Text="Dane osoby wykonującej I i II asystę:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding AssistantData}" TextColor="{StaticResource TextColor}"/>
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Dodatkowe informacje dla nowej wersji SMK -->
-            <Frame Style="{StaticResource CardFrame}" Padding="15" IsVisible="{Binding AssistantData, Converter={StaticResource StringToBoolConverter}}">
+            <Frame Style="{StaticResource CardFrame}" Padding="15" IsVisible="{Binding IsOldSmkVersion, Converter={StaticResource InvertedBoolConverter}}">
                 <VerticalStackLayout Spacing="5">
                     <Label Text="Informacje o asyście" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
                     <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>

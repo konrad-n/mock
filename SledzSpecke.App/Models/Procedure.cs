@@ -28,6 +28,8 @@ namespace SledzSpecke.App.Models
 
         public string AssistantData { get; set; }
 
+        public int Year { get; set; }
+
         public string ProcedureGroup { get; set; }
 
         [MaxLength(20)]

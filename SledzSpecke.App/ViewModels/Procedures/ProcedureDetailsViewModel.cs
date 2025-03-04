@@ -32,7 +32,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private string internshipName = string.Empty;
         private string internshipInstitution = string.Empty;
         private string moduleInfo = string.Empty;
-        private bool isOldSmkVersion;
+        private bool isOldSmkVersion; private int year;
 
         public ProcedureDetailsViewModel(
             IDatabaseService databaseService,
@@ -104,6 +104,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             get => this.patientGender;
             set => this.SetProperty(ref this.patientGender, value);
+        }
+
+        public int Year
+        {
+            get => this.year;
+            set => this.SetProperty(ref this.year, value);
         }
 
         public string AssistantData
@@ -203,7 +209,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         // Komendy
         public ICommand EditCommand { get; }
+
         public ICommand DeleteCommand { get; }
+
         public ICommand GoBackCommand { get; }
 
         // Metody
@@ -241,6 +249,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.ProcedureGroup = this.Procedure.ProcedureGroup;
                 this.Status = this.Procedure.Status;
                 this.PerformingPerson = this.Procedure.PerformingPerson;
+                this.Year = this.Procedure.Year;
 
                 // Ustawienie statusu synchronizacji
                 this.IsNotSynced = this.Procedure.SyncStatus != SyncStatus.Synced;

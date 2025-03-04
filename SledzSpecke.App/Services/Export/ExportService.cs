@@ -658,25 +658,36 @@ namespace SledzSpecke.App.Services.Export
             // Headers
             int col = 1;
             worksheet.Cells[1, col++].Value = "Data";
+
+            if (oldSmkFormat)
+            {
+                worksheet.Cells[1, col++].Value = "Rok"; // Dodane pole Rok dla starego SMK
+            }
+
             worksheet.Cells[1, col++].Value = "Kod zabiegu";
             worksheet.Cells[1, col++].Value = "Operator/Asysta";
+
+            if (oldSmkFormat)
+            {
+                worksheet.Cells[1, col++].Value = "Osoba wykonująca"; // W starym SMK to pole jest przed "Miejsce wykonania"
+            }
+
             worksheet.Cells[1, col++].Value = "Miejsce wykonania";
+            worksheet.Cells[1, col++].Value = "Nazwa stażu";
             worksheet.Cells[1, col++].Value = "Inicjały pacjenta";
             worksheet.Cells[1, col++].Value = "Płeć pacjenta";
 
-            if (!oldSmkFormat)
+            if (oldSmkFormat)
+            {
+                worksheet.Cells[1, col++].Value = "Dane osoby wykonującej I i II asystę"; // W starym SMK
+            }
+            else
             {
                 worksheet.Cells[1, col++].Value = "Dane asysty"; // Tylko w nowej wersji SMK
             }
 
             worksheet.Cells[1, col++].Value = "Grupa procedur";
             worksheet.Cells[1, col++].Value = "Status";
-            worksheet.Cells[1, col++].Value = "Nazwa stażu";
-
-            if (oldSmkFormat)
-            {
-                worksheet.Cells[1, col++].Value = "Osoba wykonująca"; // Specyficzne dla starej wersji SMK
-            }
 
             // Format nagłówków
             this.FormatHeaders(worksheet, col - 1);
@@ -710,25 +721,36 @@ namespace SledzSpecke.App.Services.Export
                 worksheet.Cells[row, col++].Value = procedure.Date;
                 worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
 
+                if (oldSmkFormat)
+                {
+                    worksheet.Cells[row, col++].Value = procedure.Year; // Dodane pole Rok dla starego SMK
+                }
+
                 worksheet.Cells[row, col++].Value = procedure.Code;
                 worksheet.Cells[row, col++].Value = procedure.OperatorCode;
+
+                if (oldSmkFormat)
+                {
+                    worksheet.Cells[row, col++].Value = procedure.PerformingPerson; // Osoba wykonująca w starym SMK
+                }
+
                 worksheet.Cells[row, col++].Value = procedure.Location;
+                worksheet.Cells[row, col++].Value = internshipName;
                 worksheet.Cells[row, col++].Value = procedure.PatientInitials;
                 worksheet.Cells[row, col++].Value = procedure.PatientGender;
 
-                if (!oldSmkFormat)
+                // Dane asysty/osób asystujących
+                if (oldSmkFormat)
                 {
-                    worksheet.Cells[row, col++].Value = procedure.AssistantData;
+                    worksheet.Cells[row, col++].Value = procedure.AssistantData; // W starym SMK: "Dane osoby wykonującej I i II asystę"
+                }
+                else
+                {
+                    worksheet.Cells[row, col++].Value = procedure.AssistantData; // W nowym SMK: "Dane asysty"
                 }
 
                 worksheet.Cells[row, col++].Value = procedure.ProcedureGroup;
                 worksheet.Cells[row, col++].Value = procedure.Status;
-                worksheet.Cells[row, col++].Value = internshipName;
-
-                if (oldSmkFormat)
-                {
-                    worksheet.Cells[row, col++].Value = procedure.PerformingPerson;
-                }
             }
 
             // Autofit columns
