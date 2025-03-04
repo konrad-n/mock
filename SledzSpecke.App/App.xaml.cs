@@ -5,15 +5,11 @@ namespace SledzSpecke.App
         public App()
         {
             this.InitializeComponent();
-
-            this.MainPage = new SplashPage();
         }
 
-        protected override Window CreateWindow(IActivationState activationState)
+        protected override Window CreateWindow(IActivationState? activationState)
         {
-            Window window = base.CreateWindow(activationState);
-
-            return window;
+            return new Window(new AppShell());
         }
     }
 }

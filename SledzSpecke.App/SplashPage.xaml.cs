@@ -16,7 +16,13 @@ namespace SledzSpecke.App
 
             try
             {
-                Application.Current.MainPage = new AppShell();
+                // Instead of setting MainPage, set the Window's Page property
+                var windows = Application.Current?.Windows;
+                if (windows != null && windows.Count > 0)
+                {
+                    var window = windows[0];
+                    window.Page = new AppShell();
+                }
             }
             catch (Exception ex)
             {
