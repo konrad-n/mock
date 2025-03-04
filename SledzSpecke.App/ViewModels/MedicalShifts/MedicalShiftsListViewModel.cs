@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Database;
+using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -15,6 +13,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
     {
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
+        private readonly IDialogService dialogService;
 
         // Filter state
         private bool allShiftsSelected = true;
@@ -28,10 +27,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         public MedicalShiftsListViewModel(
             ISpecializationService specializationService,
-            IDatabaseService databaseService)
+            IDatabaseService databaseService,
+            IDialogService dialogService)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
+            this.dialogService = dialogService;
 
             // Initialize commands
             this.RefreshCommand = new AsyncRelayCommand(this.LoadShiftsAsync);
@@ -141,7 +142,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             {
                 // Handle error
                 System.Diagnostics.Debug.WriteLine($"Error loading shifts: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert(
+                await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować dyżurów. Spróbuj ponownie.",
                     "OK");

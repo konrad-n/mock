@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
+using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -21,6 +17,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
         private readonly ISmkVersionStrategy smkStrategy;
+        private readonly IDialogService dialogService;
 
         private int shiftId;
         private DateTime date = DateTime.Today;
@@ -40,11 +37,13 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         public AddEditMedicalShiftViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
-            ISmkVersionStrategy smkStrategy)
+            ISmkVersionStrategy smkStrategy,
+            IDialogService dialogService)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
             this.smkStrategy = smkStrategy;
+            this.dialogService = dialogService;
 
             // Set title based on whether we're adding or editing
             this.Title = "Nowy dyżur";
@@ -196,7 +195,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    await Application.Current.MainPage.DisplayAlert(
+                    await this.dialogService.DisplayAlertAsync(
                         "Błąd",
                         "Nie znaleziono aktywnej specjalizacji.",
                         "OK");
@@ -238,7 +237,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert(
+                await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować danych. Spróbuj ponownie.",
                     "OK");
@@ -264,7 +263,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 var shift = await this.databaseService.GetMedicalShiftAsync(shiftId);
                 if (shift == null)
                 {
-                    await Application.Current.MainPage.DisplayAlert(
+                    await this.dialogService.DisplayAlertAsync(
                         "Błąd",
                         "Nie znaleziono dyżuru.",
                         "OK");
@@ -314,7 +313,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading shift: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert(
+                await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować danych dyżuru.",
                     "OK");
@@ -421,7 +420,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 // Save to database
                 await this.databaseService.SaveMedicalShiftAsync(shift);
 
-                await Application.Current.MainPage.DisplayAlert(
+                await this.dialogService.DisplayAlertAsync(
                     "Sukces",
                     this.ShiftId > 0 ? "Dyżur został pomyślnie zaktualizowany." : "Dyżur został pomyślnie dodany.",
                     "OK");
@@ -432,7 +431,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error saving shift: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert(
+                await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się zapisać dyżuru. Spróbuj ponownie.",
                     "OK");

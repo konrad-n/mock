@@ -1,11 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
+using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -16,6 +14,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
     {
         private readonly IDatabaseService databaseService;
         private readonly ISmkVersionStrategy smkStrategy;
+        private readonly IDialogService dialogService;
 
         private int shiftId;
         private MedicalShift shift;
@@ -30,10 +29,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         public MedicalShiftDetailsViewModel(
             IDatabaseService databaseService,
-            ISmkVersionStrategy smkStrategy)
+            ISmkVersionStrategy smkStrategy,
+            IDialogService dialogService)
         {
             this.databaseService = databaseService;
             this.smkStrategy = smkStrategy;
+            this.dialogService = dialogService;
 
             // Initialize commands
             this.EditCommand = new AsyncRelayCommand(this.OnEditAsync);
@@ -130,7 +131,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 this.Shift = await this.databaseService.GetMedicalShiftAsync(shiftId);
                 if (this.Shift == null)
                 {
-                    await Application.Current.MainPage.DisplayAlert(
+                    await this.dialogService.DisplayAlertAsync(
                         "Błąd",
                         "Nie znaleziono dyżuru.",
                         "OK");
@@ -183,7 +184,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading shift: {ex.Message}");
-                await Application.Current.MainPage.DisplayAlert(
+                await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować szczegółów dyżuru.",
                     "OK");
@@ -222,7 +223,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            bool confirm = await Application.Current.MainPage.DisplayAlert(
+            bool confirm = await this.dialogService.DisplayAlertAsync(
                 "Potwierdź usunięcie",
                 "Czy na pewno chcesz usunąć ten dyżur? Tej operacji nie można cofnąć.",
                 "Tak, usuń",
@@ -233,7 +234,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 try
                 {
                     await this.databaseService.DeleteMedicalShiftAsync(this.Shift);
-                    await Application.Current.MainPage.DisplayAlert(
+                    await this.dialogService.DisplayAlertAsync(
                         "Sukces",
                         "Dyżur został pomyślnie usunięty.",
                         "OK");
@@ -242,7 +243,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error deleting shift: {ex.Message}");
-                    await Application.Current.MainPage.DisplayAlert(
+                    await this.dialogService.DisplayAlertAsync(
                         "Błąd",
                         "Nie udało się usunąć dyżuru. Spróbuj ponownie.",
                         "OK");
