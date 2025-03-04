@@ -18,7 +18,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         // Current module selection
         private int currentModuleId;
-        private Specialization currentSpecialization;
+        private Models.Specialization currentSpecialization;
         private Module currentModule;
         private bool basicModuleSelected;
         private bool specialisticModuleSelected;
@@ -96,7 +96,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             set => this.SetProperty(ref this.hasModules, value);
         }
 
-        public Specialization CurrentSpecialization
+        public Models.Specialization CurrentSpecialization
         {
             get => this.currentSpecialization;
             set => this.SetProperty(ref this.currentSpecialization, value);

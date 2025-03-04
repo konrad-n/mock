@@ -1,9 +1,16 @@
-namespace SledzSpecke.App.Views.SelfEducation;
+using SledzSpecke.App.ViewModels.SelfEducation;
 
-public partial class SelfEducationDetailsPage : ContentView
+namespace SledzSpecke.App.Views.SelfEducation
 {
-    public SelfEducationDetailsPage()
+    public partial class SelfEducationDetailsPage : ContentPage
     {
-        this.InitializeComponent();
+        private readonly SelfEducationDetailsViewModel viewModel;
+
+        public SelfEducationDetailsPage(SelfEducationDetailsViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+            this.viewModel = viewModel;
+        }
     }
 }

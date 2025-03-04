@@ -10,6 +10,8 @@ using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
 using SledzSpecke.App.ViewModels.MedicalShifts;
+using SledzSpecke.App.ViewModels.SelfEducation;
+using SledzSpecke.App.ViewModels.Specialization;
 using SledzSpecke.App.Views.Authentication;
 using SledzSpecke.App.Views.MedicalShifts;
 
@@ -93,6 +95,13 @@ namespace SledzSpecke.App
             services.AddTransient<MedicalShiftsListViewModel>();
             services.AddTransient<MedicalShiftDetailsViewModel>();
             services.AddTransient<AddEditMedicalShiftViewModel>();
+            services.AddTransient<MedicalShiftsListViewModel>();
+            services.AddTransient<MedicalShiftDetailsViewModel>();
+            services.AddTransient<AddEditMedicalShiftViewModel>();
+            services.AddTransient<SelfEducationListViewModel>();
+            services.AddTransient<SelfEducationDetailsViewModel>();
+            services.AddTransient<AddEditSelfEducationViewModel>();
+            services.AddTransient<InitializeSpecializationViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)

@@ -47,6 +47,13 @@ namespace SledzSpecke.App
             // Rejestracja tras do stron uznań
             Routing.RegisterRoute("RecognitionDetails", typeof(Views.Recognitions.RecognitionDetailsPage));
             Routing.RegisterRoute("AddEditRecognition", typeof(Views.Recognitions.AddEditRecognitionPage));
+
+            // Rejestracja tras do stron samokształcenia
+            Routing.RegisterRoute("SelfEducationDetails", typeof(Views.SelfEducation.SelfEducationDetailsPage));
+            Routing.RegisterRoute("AddEditSelfEducation", typeof(Views.SelfEducation.AddEditSelfEducationPage));
+
+            // Rejestracja tras do stron specjalizacji
+            Routing.RegisterRoute("InitializeSpecialization", typeof(Views.Specialization.InitializeSpecializationPage));
         }
 
         private async void InitializeUserInfoAsync()
