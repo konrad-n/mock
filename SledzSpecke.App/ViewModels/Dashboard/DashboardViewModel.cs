@@ -1,7 +1,10 @@
-﻿using System.Windows.Input;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
+using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
+using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -11,6 +14,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
     {
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
+        private readonly IDialogService dialogService;
 
         // Current module selection
         private int currentModuleId;
@@ -18,6 +22,8 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private Module currentModule;
         private bool basicModuleSelected;
         private bool specialisticModuleSelected;
+        private bool hasModules;
+        private ObservableCollection<ModuleInfo> availableModules;
 
         // Progress statistics
         private double overallProgress;
@@ -40,35 +46,17 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private string dateRangeInfo;
         private string progressText;
 
-        // Commands
-        public ICommand RefreshCommand { get; }
-
-        public ICommand SelectModuleCommand { get; }
-
-        public ICommand NavigateToInternshipsCommand { get; }
-
-        public ICommand NavigateToProceduresCommand { get; }
-
-        public ICommand NavigateToShiftsCommand { get; }
-
-        public ICommand NavigateToCoursesCommand { get; }
-
-        public ICommand NavigateToSelfEducationCommand { get; }
-
-        public ICommand NavigateToPublicationsCommand { get; }
-
-        public ICommand NavigateToAbsencesCommand { get; }
-
-        public ICommand NavigateToStatisticsCommand { get; }
-
-        public ICommand NavigateToExportCommand { get; }
-
-        public ICommand NavigateToRecognitionsCommand { get; }
-
-        public DashboardViewModel(ISpecializationService specializationService, IDatabaseService databaseService)
+        public DashboardViewModel(
+            ISpecializationService specializationService,
+            IDatabaseService databaseService,
+            IDialogService dialogService)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
+            this.dialogService = dialogService;
+
+            // Initialize collections
+            this.AvailableModules = new ObservableCollection<ModuleInfo>();
 
             // Initialize commands
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
@@ -83,6 +71,9 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             this.NavigateToStatisticsCommand = new AsyncRelayCommand(this.NavigateToStatisticsAsync);
             this.NavigateToExportCommand = new AsyncRelayCommand(this.NavigateToExportAsync);
             this.NavigateToRecognitionsCommand = new AsyncRelayCommand(this.NavigateToRecognitionsAsync);
+
+            // Load data on initialization
+            this.LoadDataAsync().ConfigureAwait(false);
         }
 
         // Properties
@@ -91,14 +82,19 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             get => this.currentModuleId;
             set
             {
-                this.SetProperty(ref this.currentModuleId, value);
-
-                // Reload all data with new module filter
-                this.LoadDataAsync();
+                if (this.SetProperty(ref this.currentModuleId, value))
+                {
+                    // Reload all data with new module filter
+                    this.LoadDataAsync().ConfigureAwait(false);
+                }
             }
         }
 
-        public bool HasModules => this.CurrentSpecialization?.HasModules ?? false;
+        public bool HasModules
+        {
+            get => this.hasModules;
+            set => this.SetProperty(ref this.hasModules, value);
+        }
 
         public Specialization CurrentSpecialization
         {
@@ -112,7 +108,11 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             set => this.SetProperty(ref this.currentModule, value);
         }
 
-        public List<ModuleInfo> AvailableModules => this.CurrentSpecialization?.Modules?.Select(m => new ModuleInfo { Id = m.ModuleId, Name = m.Name }).ToList();
+        public ObservableCollection<ModuleInfo> AvailableModules
+        {
+            get => this.availableModules;
+            set => this.SetProperty(ref this.availableModules, value);
+        }
 
         public bool BasicModuleSelected
         {
@@ -216,6 +216,31 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             set => this.SetProperty(ref this.progressText, value);
         }
 
+        // Commands
+        public ICommand RefreshCommand { get; }
+
+        public ICommand SelectModuleCommand { get; }
+
+        public ICommand NavigateToInternshipsCommand { get; }
+
+        public ICommand NavigateToProceduresCommand { get; }
+
+        public ICommand NavigateToShiftsCommand { get; }
+
+        public ICommand NavigateToCoursesCommand { get; }
+
+        public ICommand NavigateToSelfEducationCommand { get; }
+
+        public ICommand NavigateToPublicationsCommand { get; }
+
+        public ICommand NavigateToAbsencesCommand { get; }
+
+        public ICommand NavigateToStatisticsCommand { get; }
+
+        public ICommand NavigateToExportCommand { get; }
+
+        public ICommand NavigateToRecognitionsCommand { get; }
+
         // Methods
         public async Task LoadDataAsync()
         {
@@ -233,46 +258,93 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
                 if (this.CurrentSpecialization == null)
                 {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Nie znaleziono aktywnej specjalizacji. Proszę skontaktować się z administratorem.",
+                        "OK");
                     return;
                 }
 
-                // If specialized has modules, get current module
+                // Ustawienie flagi HasModules
+                this.HasModules = this.CurrentSpecialization.HasModules;
+
+                // Jeśli specjalizacja ma moduły, załaduj i ustaw bieżący moduł
                 if (this.CurrentSpecialization.HasModules)
                 {
-                    if (this.CurrentModuleId == 0)
+                    // Załaduj wszystkie moduły
+                    var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+
+                    // Odśwież listę dostępnych modułów
+                    this.AvailableModules.Clear();
+                    foreach (var module in modules)
                     {
-                        // Default to current module from specialization if not set
-                        this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId ?? 0;
+                        this.AvailableModules.Add(new ModuleInfo
+                        {
+                            Id = module.ModuleId,
+                            Name = module.Name,
+                        });
                     }
 
+                    // Jeśli nie ustawiono bieżącego modułu, użyj zapisanego w specjalizacji lub pierwszego z listy
+                    if (this.CurrentModuleId == 0)
+                    {
+                        // Najpierw sprawdź, czy specjalizacja ma zdefiniowany bieżący moduł
+                        if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
+                        {
+                            this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
+                        }
+                        // Jeśli nie, sprawdź ustawienia aplikacji
+                        else
+                        {
+                            int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
+                            if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
+                            {
+                                this.CurrentModuleId = savedModuleId;
+                            }
+                            // Jeśli nadal nie mamy bieżącego modułu, użyj pierwszego z listy
+                            else if (modules.Count > 0)
+                            {
+                                this.CurrentModuleId = modules[0].ModuleId;
+                            }
+                        }
+                    }
+
+                    // Pobierz bieżący moduł
                     if (this.CurrentModuleId > 0)
                     {
-                        // Set the current module in the service and then retrieve it
+                        // Ustaw bieżący moduł w serwisie i pobierz go
                         await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
                         this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
 
-                        // Set module selection state
-                        this.BasicModuleSelected = this.CurrentModule?.Type == Models.Enums.ModuleType.Basic;
-                        this.SpecialisticModuleSelected = !this.BasicModuleSelected;
-                    }
-                    else
-                    {
-                        // Default to basic module
-                        this.BasicModuleSelected = true;
-                        this.SpecialisticModuleSelected = false;
+                        // Ustaw stan wyboru modułu
+                        if (this.CurrentModule != null)
+                        {
+                            this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
+                            this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
+                        }
                     }
                 }
+                else
+                {
+                    // Dla specjalizacji bez modułów, wyczyść stan modułów
+                    this.CurrentModule = null;
+                    this.CurrentModuleId = 0;
+                    this.BasicModuleSelected = false;
+                    this.SpecialisticModuleSelected = false;
+                    this.AvailableModules.Clear();
+                }
 
-                // Load statistics
+                // Załaduj statystyki i aktualizuj UI
                 await this.LoadStatisticsAsync();
-
-                // Update UI text
                 this.UpdateUIText();
             }
             catch (Exception ex)
             {
-                // Handle exception
-                System.Diagnostics.Debug.WriteLine($"Error loading dashboard data: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych dashboard: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas ładowania danych. Spróbuj ponownie później.",
+                    "OK");
             }
             finally
             {
@@ -284,16 +356,16 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         {
             try
             {
-                // Load statistics based on current module or for whole specialization
-                int? moduleId = this.CurrentSpecialization?.HasModules == true ? this.CurrentModuleId : null;
+                // Określ ID modułu do filtrowania (null jeśli specjalizacja nie ma modułów)
+                int? moduleId = this.HasModules ? this.CurrentModuleId : null;
 
-                // Get overall progress
+                // Pobierz ogólny postęp
                 this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
                     this.databaseService,
                     this.CurrentSpecialization.SpecializationId,
                     moduleId);
 
-                // Get counts
+                // Pobierz liczby staży
                 int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
                 int totalInternships = moduleId.HasValue && this.CurrentModule != null
                     ? this.CurrentModule.TotalInternships
@@ -302,12 +374,16 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.InternshipCount = $"{completedInternships}/{totalInternships}";
                 this.InternshipProgress = totalInternships > 0 ? (double)completedInternships / totalInternships : 0;
 
-                int completedProcedures = await this.specializationService.GetProcedureCountAsync(moduleId);
-                int totalProcedures = 0; // This would need to be calculated from requirements
+                // Pobierz liczby procedur
+                int completedProceduresA = await this.specializationService.GetProcedureCountAsync(moduleId);
+                int totalProcedures = moduleId.HasValue && this.CurrentModule != null
+                    ? this.CurrentModule.TotalProceduresA + this.CurrentModule.TotalProceduresB
+                    : 0;
 
-                this.ProcedureCount = $"{completedProcedures}/{totalProcedures}";
-                this.ProcedureProgress = totalProcedures > 0 ? (double)completedProcedures / totalProcedures : 0.5; // Default to 50% if no data
+                this.ProcedureCount = $"{completedProceduresA}/{totalProcedures}";
+                this.ProcedureProgress = totalProcedures > 0 ? (double)completedProceduresA / totalProcedures : 0.5;
 
+                // Pobierz liczby kursów
                 int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
                 int totalCourses = moduleId.HasValue && this.CurrentModule != null
                     ? this.CurrentModule.TotalCourses
@@ -316,18 +392,29 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.CourseCount = $"{completedCourses}/{totalCourses}";
                 this.CourseProgress = totalCourses > 0 ? (double)completedCourses / totalCourses : 0;
 
-                // Get shift statistics
+                // Pobierz statystyki dyżurów
                 int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
-                this.ShiftStats = $"{completedShiftHours}h"; // This would need more context for total required hours
-                this.ShiftProgress = 0.3; // Default to 30% if no data
+                this.ShiftStats = $"{completedShiftHours}h";
 
-                // Other counts
+                // Oszacowanie postępu dyżurów - wymaga dostępu do wymagań z programu specjalizacji
+                SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync();
+                if (stats != null && stats.RequiredShiftHours > 0)
+                {
+                    this.ShiftProgress = (double)completedShiftHours / stats.RequiredShiftHours;
+                }
+                else
+                {
+                    this.ShiftProgress = 0.3; // Wartość domyślna
+                }
+
+                // Pozostałe liczniki
                 this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
                 this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading statistics: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania statystyk: {ex.Message}");
+                // Nie wyświetlamy błędu użytkownikowi - statystyki są elementem pomocniczym
             }
         }
 
@@ -338,32 +425,32 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 return;
             }
 
-            // Set title based on current module
-            if (this.CurrentSpecialization.HasModules && this.CurrentModule != null)
+            // Ustaw tytuł na podstawie bieżącego modułu
+            if (this.HasModules && this.CurrentModule != null)
             {
                 this.ModuleTitle = this.CurrentModule.Name;
             }
             else
             {
-                this.ModuleTitle = "Specjalizacja";
+                this.ModuleTitle = this.CurrentSpecialization.Name;
             }
 
-            // Set specialization info
+            // Ustaw informacje o specjalizacji
             this.SpecializationInfo = $"{this.CurrentSpecialization.Name}";
 
-            // Set date range
+            // Ustaw zakres dat
             string startDate = this.CurrentSpecialization.StartDate.ToString("d");
             string endDate = this.CurrentSpecialization.CalculatedEndDate.ToString("d");
             this.DateRangeInfo = $"{startDate} - {endDate}";
 
-            // Set progress text
+            // Ustaw tekst postępu
             int progressPercent = (int)(this.OverallProgress * 100);
             this.ProgressText = $"Ukończono {progressPercent}%";
         }
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            if (this.CurrentSpecialization == null || !this.CurrentSpecialization.HasModules)
+            if (this.CurrentSpecialization == null || !this.HasModules)
             {
                 return;
             }
@@ -374,7 +461,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
                 if (moduleType == "Basic")
                 {
-                    var basicModule = modules.FirstOrDefault(m => m.Type == Models.Enums.ModuleType.Basic);
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
                     if (basicModule != null)
                     {
                         this.CurrentModuleId = basicModule.ModuleId;
@@ -384,7 +471,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 }
                 else if (moduleType == "Specialistic")
                 {
-                    var specialisticModule = modules.FirstOrDefault(m => m.Type == Models.Enums.ModuleType.Specialistic);
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
                     if (specialisticModule != null)
                     {
                         this.CurrentModuleId = specialisticModule.ModuleId;
@@ -393,67 +480,88 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     }
                 }
 
-                // Save selected module to settings
+                // Zapisz wybrany moduł w ustawieniach
                 await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.CurrentModuleId);
 
-                // Reload data
+                // Ustaw bieżący moduł w specjalizacji
+                if (this.CurrentSpecialization.CurrentModuleId != this.CurrentModuleId)
+                {
+                    this.CurrentSpecialization.CurrentModuleId = this.CurrentModuleId;
+                    await this.databaseService.UpdateSpecializationAsync(this.CurrentSpecialization);
+                }
+
+                // Odśwież dane
                 await this.LoadDataAsync();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error selecting module: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zmiany modułu: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas przełączania modułu. Spróbuj ponownie.",
+                    "OK");
             }
         }
 
-        // Navigation methods
+        // Metody nawigacji
         private async Task NavigateToInternshipsAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Internships");
         }
 
         private async Task NavigateToProceduresAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Procedures");
         }
 
         private async Task NavigateToShiftsAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("MedicalShifts");
         }
 
         private async Task NavigateToCoursesAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Courses");
         }
 
         private async Task NavigateToSelfEducationAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("SelfEducation");
         }
 
         private async Task NavigateToPublicationsAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Publications");
         }
 
         private async Task NavigateToAbsencesAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Absences");
         }
 
         private async Task NavigateToStatisticsAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Statistics");
         }
 
         private async Task NavigateToExportAsync()
         {
-            // Navigation would be implemented here
+            await Shell.Current.GoToAsync("Export");
         }
 
         private async Task NavigateToRecognitionsAsync()
         {
-            // Navigation would be implemented here
+            // Uznania są tylko dla modułu specjalistycznego
+            if (this.HasModules && !this.SpecialisticModuleSelected)
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Informacja",
+                    "Uznania i skrócenia są dostępne tylko dla modułu specjalistycznego. Przełącz się na moduł specjalistyczny, aby uzyskać dostęp do tej funkcji.",
+                    "OK");
+                return;
+            }
+
+            await Shell.Current.GoToAsync("Recognitions");
         }
     }
 }
