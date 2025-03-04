@@ -1,9 +1,23 @@
-namespace SledzSpecke.App.Views.Procedures;
+﻿using SledzSpecke.App.ViewModels.Procedures;
 
-public partial class ProcedureDetailsPage : ContentView
+namespace SledzSpecke.App.Views.Procedures
 {
-    public ProcedureDetailsPage()
+    public partial class ProcedureDetailsPage : ContentPage
     {
-        this.InitializeComponent();
+        private readonly ProcedureDetailsViewModel viewModel;
+
+        public ProcedureDetailsPage(ProcedureDetailsViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+            this.viewModel = viewModel;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // Można dodać dodatkową logikę inicjalizacyjną jeśli potrzeba
+        }
     }
 }

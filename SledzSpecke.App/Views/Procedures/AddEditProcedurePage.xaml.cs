@@ -1,9 +1,23 @@
-namespace SledzSpecke.App.Views.Procedures;
+﻿using SledzSpecke.App.ViewModels.Procedures;
 
-public partial class AddEditProcedurePage : ContentView
+namespace SledzSpecke.App.Views.Procedures
 {
-    public AddEditProcedurePage()
+    public partial class AddEditProcedurePage : ContentPage
     {
-        this.InitializeComponent();
+        private readonly AddEditProcedureViewModel viewModel;
+
+        public AddEditProcedurePage(AddEditProcedureViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+            this.viewModel = viewModel;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // Można dodać dodatkową logikę inicjalizacyjną jeśli potrzeba
+        }
     }
 }
