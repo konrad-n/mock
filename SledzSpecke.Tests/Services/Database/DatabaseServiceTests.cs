@@ -888,6 +888,164 @@ namespace SledzSpecke.Tests.Services.Database
             Assert.That(updatedShift.SyncStatus, Is.EqualTo(SyncStatus.Modified));
         }
 
+        [Test]
+        public async Task GetUserByUsernameAsync_UserExists_ReturnsUser()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var user = new User { Username = "testuser", Email = "test@example.com" };
+            await this.databaseService.SaveUserAsync(user);
 
+            // Act
+            var result = await this.databaseService.GetUserByUsernameAsync("testuser");
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Username, Is.EqualTo("testuser"));
+        }
+
+        [Test]
+        public async Task GetUserByUsernameAsync_UserDoesNotExist_ReturnsNull()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+
+            // Act
+            var result = await this.databaseService.GetUserByUsernameAsync("nonexistent");
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetAllSpecializationsAsync_ReturnsAllSpecializations()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            await this.databaseService.SaveSpecializationAsync(new Specialization { Name = "Spec1" });
+            await this.databaseService.SaveSpecializationAsync(new Specialization { Name = "Spec2" });
+
+            // Act
+            var result = await this.databaseService.GetAllSpecializationsAsync();
+
+            // Assert
+            Assert.That(result.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task GetInternshipAsync_NonExistingId_ReturnsNull()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+
+            // Act
+            var result = await this.databaseService.GetInternshipAsync(99);
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetSelfEducationItemsAsync_WithSpecializationFilter_ReturnsFilteredItems()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var item1 = new SelfEducation { SpecializationId = 1, Title = "Item1" };
+            var item2 = new SelfEducation { SpecializationId = 2, Title = "Item2" };
+            await this.databaseService.SaveSelfEducationAsync(item1);
+            await this.databaseService.SaveSelfEducationAsync(item2);
+
+            // Act
+            var result = await this.databaseService.GetSelfEducationItemsAsync(specializationId: 1);
+
+            // Assert
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].Title, Is.EqualTo("Item1"));
+        }
+
+        [Test]
+        public async Task DeleteSelfEducationAsync_ExistingItem_RemovesItem()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var item = new SelfEducation { SpecializationId = 1, Title = "Item1" };
+            await this.databaseService.SaveSelfEducationAsync(item);
+
+            // Act
+            var deleteResult = await this.databaseService.DeleteSelfEducationAsync(item);
+            var checkResult = await this.databaseService.GetSelfEducationItemsAsync(specializationId: 1);
+
+            // Assert
+            Assert.That(deleteResult, Is.EqualTo(1));
+            Assert.That(checkResult.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task DeleteProcedureAsync_ExistingProcedure_RemovesProcedure()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var procedure = new Procedure { InternshipId = 1, Code = "TEST001" };
+            await this.databaseService.SaveProcedureAsync(procedure);
+
+            // Act
+            var deleteResult = await this.databaseService.DeleteProcedureAsync(procedure);
+            var checkResult = await this.databaseService.GetProceduresAsync();
+
+            // Assert
+            Assert.That(deleteResult, Is.EqualTo(1));
+            Assert.That(checkResult, Is.Empty);
+        }
+
+        [Test]
+        public async Task DeleteEducationalActivityAsync_ExistingActivity_RemovesActivity()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var activity = new EducationalActivity { SpecializationId = 1, Title = "Test Activity" };
+            await this.databaseService.SaveEducationalActivityAsync(activity);
+
+            // Act
+            var deleteResult = await this.databaseService.DeleteEducationalActivityAsync(activity);
+            var checkResult = await this.databaseService.GetEducationalActivitiesAsync(specializationId: 1);
+
+            // Assert
+            Assert.That(deleteResult, Is.EqualTo(1));
+            Assert.That(checkResult, Is.Empty);
+        }
+
+        [Test]
+        public async Task DeletePublicationAsync_ExistingPublication_RemovesPublication()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var publication = new Publication { SpecializationId = 1, Description = "Test Publication" };
+            await this.databaseService.SavePublicationAsync(publication);
+
+            // Act
+            var deleteResult = await this.databaseService.DeletePublicationAsync(publication);
+            var checkResult = await this.databaseService.GetPublicationsAsync(specializationId: 1);
+
+            // Assert
+            Assert.That(deleteResult, Is.EqualTo(1));
+            Assert.That(checkResult, Is.Empty);
+        }
+
+        [Test]
+        public async Task DeleteAbsenceAsync_ExistingAbsence_RemovesAbsence()
+        {
+            // Arrange
+            await this.databaseService.InitializeAsync();
+            var absence = new Absence { SpecializationId = 1, Description = "Test Absence" };
+            await this.databaseService.SaveAbsenceAsync(absence);
+
+            // Act
+            var deleteResult = await this.databaseService.DeleteAbsenceAsync(absence);
+            var checkResult = await this.databaseService.GetAbsencesAsync(1);
+
+            // Assert
+            Assert.That(deleteResult, Is.EqualTo(1));
+            Assert.That(checkResult, Is.Empty);
+        }
     }
 }
