@@ -13,19 +13,109 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Wybór stażu -->
+            <!-- Sekcja wspólna dla obu wersji SMK -->
             <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Staż:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                    <Picker ItemsSource="{Binding AvailableInternships}" 
-                            SelectedItem="{Binding SelectedInternship}"
-                            ItemDisplayBinding="{Binding DisplayName}" 
-                            BackgroundColor="Transparent"/>
+                <VerticalStackLayout Spacing="15">
+                    <!-- Data wykonania -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Data wykonania:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <DatePicker Date="{Binding Date}" Format="D" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Staż - dla obu wersji SMK -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableInternships}" 
+                                SelectedItem="{Binding SelectedInternship}"
+                                ItemDisplayBinding="{Binding DisplayName}" 
+                                Title="Wybierz staż"
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Podstawowe informacje o procedurze -->
-            <Frame Style="{StaticResource CardFrame}">
+            <!-- Pola dla starej wersji SMK -->
+            <Frame Style="{StaticResource CardFrame}" IsVisible="{Binding IsOldSmkVersion}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Dane zabiegu (Stary SMK):" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" />
+
+                    <!-- Rok -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Rok:" TextColor="{StaticResource TextMutedColor}" />
+                        <Picker ItemsSource="{Binding AvailableYears}" 
+                                SelectedItem="{Binding Year}" 
+                                Title="Wybierz rok"
+                                BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Kod zabiegu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Kod zabiegu:" TextColor="{StaticResource TextMutedColor}" />
+                        <Picker ItemsSource="{Binding AvailableOperatorCodes}" 
+                                SelectedItem="{Binding OperatorCode}"
+                                Title="Wybierz kod zabiegu" 
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+
+                    <!-- Osoba wykonująca -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Osoba wykonująca:" TextColor="{StaticResource TextMutedColor}" />
+                        <Entry Text="{Binding PerformingPerson}" Placeholder="Podaj osobę wykonującą" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Miejsce wykonania -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Miejsce wykonania:" TextColor="{StaticResource TextMutedColor}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Picker Grid.Column="0" ItemsSource="{Binding AvailableLocations}" 
+                                    SelectedItem="{Binding Location}"
+                                    Title="Wybierz miejsce wykonania" 
+                                    BackgroundColor="Transparent"/>
+                            <Button Grid.Column="1" Text="+" Command="{Binding AddLocationCommand}" 
+                                    WidthRequest="40" Margin="5,0,0,0"/>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Inicjały pacjenta -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Inicjały pacjenta:" TextColor="{StaticResource TextMutedColor}" />
+                        <Entry Text="{Binding PatientInitials}" Placeholder="Podaj inicjały pacjenta" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Płeć pacjenta -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Płeć pacjenta:" TextColor="{StaticResource TextMutedColor}" />
+                        <Picker ItemsSource="{Binding AvailableGenders}" 
+                                SelectedItem="{Binding PatientGender}" 
+                                Title="Wybierz płeć"
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+
+                    <!-- Dane osoby wykonującej I i II asystę -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Dane osoby wykonującej I i II asystę:" TextColor="{StaticResource TextMutedColor}" />
+                        <Entry Text="{Binding AssistantData}" Placeholder="Podaj dane asysty" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Procedura z grupy -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Procedura z grupy:" TextColor="{StaticResource TextMutedColor}" />
+                        <Entry Text="{Binding ProcedureGroup}" Placeholder="Podaj grupę procedur" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Status -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Status:" TextColor="{StaticResource TextMutedColor}" />
+                        <Picker ItemsSource="{Binding AvailableStatuses}" 
+                                SelectedItem="{Binding Status}" 
+                                Title="Wybierz status"
+                                BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Pola dla nowej wersji SMK -->
+            <Frame Style="{StaticResource CardFrame}" IsVisible="{Binding IsOldSmkVersion, Converter={StaticResource InvertedBoolConverter}}">
                 <VerticalStackLayout Spacing="15">
                     <!-- Kod procedury -->
                     <VerticalStackLayout Spacing="5">
@@ -52,60 +142,20 @@
                         <Label Text="Miejsce wykonania:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                         <Entry Text="{Binding Location}" Placeholder="Podaj miejsce wykonania" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
 
-            <!-- Data i status -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15">
-                    <!-- Data wykonania -->
+                    <!-- Informacje o pacjencie -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Data wykonania:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <DatePicker Date="{Binding Date}" Format="D" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
+                        <Label Text="Informacje o pacjencie:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
 
-                    <!-- Status -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Status:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <Picker ItemsSource="{Binding AvailableStatuses}" 
-                                SelectedItem="{Binding Status}" 
-                                BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- Informacje o pacjencie -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Informacje o pacjencie:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-
-                    <!-- Inicjały pacjenta -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Inicjały pacjenta:" TextColor="{StaticResource TextMutedColor}" />
+                        <!-- Inicjały pacjenta -->
                         <Entry Text="{Binding PatientInitials}" Placeholder="Podaj inicjały pacjenta" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
 
-                    <!-- Płeć pacjenta -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Płeć pacjenta:" TextColor="{StaticResource TextMutedColor}" />
+                        <!-- Płeć pacjenta -->
                         <Picker ItemsSource="{Binding AvailableGenders}" 
                                 SelectedItem="{Binding PatientGender}" 
-                                BackgroundColor="Transparent">
-                            <Picker.ItemsSource>
-                                <x:Array Type="{x:Type x:String}">
-                                    <x:String>M</x:String>
-                                    <x:String>K</x:String>
-                                </x:Array>
-                            </Picker.ItemsSource>
-                        </Picker>
+                                Title="Wybierz płeć"
+                                BackgroundColor="Transparent"/>
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- Pola dla nowej wersji SMK -->
-            <Frame Style="{StaticResource CardFrame}" IsVisible="{Binding IsOldSmkVersion, Converter={StaticResource InvertedBoolConverter}}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Dodatkowe informacje (Nowy SMK):" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
 
                     <!-- Dane asysty -->
                     <VerticalStackLayout Spacing="5">
@@ -118,32 +168,13 @@
                         <Label Text="Grupa procedur:" TextColor="{StaticResource TextMutedColor}" />
                         <Entry Text="{Binding ProcedureGroup}" Placeholder="Podaj grupę procedur" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
 
-            <!-- Pola dla starej wersji SMK -->
-            <Frame Style="{StaticResource CardFrame}" IsVisible="{Binding IsOldSmkVersion}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Dodatkowe informacje (Stary SMK):" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" />
-
-                    <!-- Rok -->
+                    <!-- Status -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Rok:" TextColor="{StaticResource TextMutedColor}" />
-                        <Picker ItemsSource="{Binding AvailableYears}" 
-                    SelectedItem="{Binding Year}" 
-                    BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-
-                    <!-- Osoba wykonująca -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Osoba wykonująca:" TextColor="{StaticResource TextMutedColor}" />
-                        <Entry Text="{Binding PerformingPerson}" Placeholder="Podaj osobę wykonującą" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-
-                    <!-- Dane osoby wykonującej I i II asystę -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Dane osoby wykonującej I i II asystę:" TextColor="{StaticResource TextMutedColor}" />
-                        <Entry Text="{Binding AssistantData}" Placeholder="Podaj dane asysty" BackgroundColor="Transparent" />
+                        <Label Text="Status:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableStatuses}" 
+                                SelectedItem="{Binding Status}" 
+                                BackgroundColor="Transparent" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>

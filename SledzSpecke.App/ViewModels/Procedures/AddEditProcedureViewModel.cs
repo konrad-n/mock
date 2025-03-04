@@ -17,6 +17,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
     [QueryProperty(nameof(ModuleId), "moduleId")]
     public class AddEditProcedureViewModel : BaseViewModel
     {
+        private const string LocationListKey = "ProcedureLocationsList";
+
+        // Istniejące pola
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
         private readonly ISmkVersionStrategy smkStrategy;
@@ -49,6 +52,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private ObservableCollection<string> availableOperatorCodes;
         private ObservableCollection<int> availableYears;
 
+        // Nowe pola dla comboboxów
+        private ObservableCollection<string> availableLocations;
+
+        // Konstruktor i inicjalizacja
         public AddEditProcedureViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
@@ -66,6 +73,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync, () => this.CanSave);
             this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
+            this.AddLocationCommand = new AsyncRelayCommand(this.OnAddLocationAsync);
 
             // Określenie wersji SMK
             this.IsOldSmkVersion = this.smkStrategy.GetType().Name.Contains("Old");
@@ -75,10 +83,29 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.AvailableProcedureCodes = new ObservableCollection<string>();
             this.AvailableGenders = new ObservableCollection<string> { "M", "K" };
             this.AvailableStatuses = new ObservableCollection<string>();
-            this.AvailableOperatorCodes = new ObservableCollection<string> { "A", "B" };
+
+            // Stary SMK ma dokładnie te wartości dla kodu zabiegu
+            this.AvailableOperatorCodes = new ObservableCollection<string> { "A - operator", "B - asysta" };
+
+            // Domyślna wartość dla kodu zabiegu w starym SMK
+            if (this.IsOldSmkVersion)
+            {
+                this.OperatorCode = "A - operator";
+            }
+
             this.AvailableYears = new ObservableCollection<int> { 1, 2, 3, 4, 5, 6 };
 
+            // Ładowanie dostępnych miejsc wykonania
+            this.LoadLocationsAsync().ConfigureAwait(false);
+
             this.InitializePickerOptions();
+        }
+
+        // Nowe właściwości dla comboboxów
+        public ObservableCollection<string> AvailableLocations
+        {
+            get => this.availableLocations;
+            set => this.SetProperty(ref this.availableLocations, value);
         }
 
         #region Properties
@@ -320,7 +347,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
         #region Commands
 
         public ICommand SaveCommand { get; }
+
         public ICommand CancelCommand { get; }
+
+        public ICommand AddLocationCommand { get; }
 
         #endregion
 
@@ -527,6 +557,78 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
+        // Metoda ładująca miejsca wykonania
+        private async Task LoadLocationsAsync()
+        {
+            // Załaduj listę z ustawień aplikacji
+            if (Preferences.Default.ContainsKey(LocationListKey))
+            {
+                string locationsJson = Preferences.Default.Get(LocationListKey, string.Empty);
+                if (!string.IsNullOrEmpty(locationsJson))
+                {
+                    try
+                    {
+                        var locations = System.Text.Json.JsonSerializer.Deserialize<List<string>>(locationsJson);
+                        this.AvailableLocations = new ObservableCollection<string>(locations);
+                    }
+                    catch
+                    {
+                        this.AvailableLocations = new ObservableCollection<string>();
+                    }
+                }
+                else
+                {
+                    this.AvailableLocations = new ObservableCollection<string>();
+                }
+            }
+            else
+            {
+                this.AvailableLocations = new ObservableCollection<string>();
+            }
+
+            // Dodaj domyślne miejsca, jeśli lista jest pusta
+            if (this.AvailableLocations.Count == 0)
+            {
+                this.AvailableLocations.Add("Oddział Chorób Wewnętrznych - Szpital Powiatowy");
+                this.AvailableLocations.Add("Klinika Kardiologii - Szpital Uniwersytecki");
+                this.AvailableLocations.Add("Oddział Chirurgii Ogólnej - Szpital Miejski");
+                this.AvailableLocations.Add("Oddział Neurologii - Szpital Wojewódzki");
+            }
+        }
+
+
+        // Metoda do dodawania nowego miejsca wykonania
+        private async Task OnAddLocationAsync()
+        {
+            string newLocation = await this.dialogService.DisplayPromptAsync(
+                "Nowe miejsce wykonania",
+                "Podaj nazwę nowego miejsca wykonania:",
+                "Dodaj",
+                "Anuluj");
+
+            if (!string.IsNullOrWhiteSpace(newLocation))
+            {
+                // Sprawdź, czy już nie istnieje
+                if (!this.AvailableLocations.Contains(newLocation))
+                {
+                    this.AvailableLocations.Add(newLocation);
+                    this.Location = newLocation;
+
+                    // Zapisz zaktualizowaną listę
+                    await this.SaveLocationsAsync();
+                }
+            }
+        }
+
+        // Metoda do zapisywania listy miejsc wykonania
+        private async Task SaveLocationsAsync()
+        {
+            // Zapisz listę w ustawieniach aplikacji
+            var locationsJson = System.Text.Json.JsonSerializer.Serialize(this.AvailableLocations);
+            Preferences.Default.Set(LocationListKey, locationsJson);
+        }
+
+        // Aktualizacja metody walidacji, aby uwzględnić nowe wymogi
         private void ValidateInput()
         {
             // Sprawdź czy wszystkie wymagane pola są wypełnione
@@ -561,15 +663,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 isValid = false;
             }
 
-            if (this.IsOldSmkVersion && requiredFields.Contains("Year") && this.Year <= 0)
-            {
-                isValid = false;
-            }
-
             // Dla starej wersji SMK sprawdź dodatkowe pola
             if (this.IsOldSmkVersion)
             {
                 if (requiredFields.Contains("PerformingPerson") && string.IsNullOrWhiteSpace(this.PerformingPerson))
+                {
+                    isValid = false;
+                }
+
+                if (requiredFields.Contains("Year") && this.Year <= 0)
                 {
                     isValid = false;
                 }

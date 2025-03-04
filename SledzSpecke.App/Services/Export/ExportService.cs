@@ -665,7 +665,6 @@ namespace SledzSpecke.App.Services.Export
             }
 
             worksheet.Cells[1, col++].Value = "Kod zabiegu";
-            worksheet.Cells[1, col++].Value = "Operator/Asysta";
 
             if (oldSmkFormat)
             {
@@ -686,7 +685,7 @@ namespace SledzSpecke.App.Services.Export
                 worksheet.Cells[1, col++].Value = "Dane asysty"; // Tylko w nowej wersji SMK
             }
 
-            worksheet.Cells[1, col++].Value = "Grupa procedur";
+            worksheet.Cells[1, col++].Value = "Procedura z grupy";
             worksheet.Cells[1, col++].Value = "Status";
 
             // Format nagłówków
@@ -726,7 +725,6 @@ namespace SledzSpecke.App.Services.Export
                     worksheet.Cells[row, col++].Value = procedure.Year; // Dodane pole Rok dla starego SMK
                 }
 
-                worksheet.Cells[row, col++].Value = procedure.Code;
                 worksheet.Cells[row, col++].Value = procedure.OperatorCode;
 
                 if (oldSmkFormat)
