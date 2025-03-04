@@ -1,11 +1,100 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SledzSpecke.App.Views.Courses.AddEditCoursePage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
-</ContentView>
+             x:Class="SledzSpecke.App.Views.Courses.AddEditCoursePage"
+             Title="{Binding Title}">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Informacja o module (widoczna tylko gdy istnieje) -->
+            <Frame IsVisible="{Binding ModuleInfo, Converter={StaticResource StringToBoolConverter}}"
+                   Style="{StaticResource CardFrame}" Padding="15">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="{Binding ModuleInfo}" TextColor="{StaticResource PrimaryColor}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Podstawowe informacje o kursie -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="15">
+                    <!-- Typ kursu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Wybierz typ kursu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableCourseTypes}" 
+                                SelectedItem="{Binding SelectedCourseType}"
+                                Title="Wybierz typ kursu"
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+
+                    <!-- Nazwa kursu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa kursu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding CourseName}" Placeholder="Podaj nazwę kursu" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Numer kursu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Numer kursu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding CourseNumber}" Placeholder="Podaj numer kursu (opcjonalnie)" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Instytucja -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Instytucja prowadząca:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding InstitutionName}" Placeholder="Podaj nazwę instytucji" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Data ukończenia i rok szkolenia -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="15">
+                    <!-- Data ukończenia -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Data ukończenia:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <DatePicker Date="{Binding CompletionDate}" Format="D" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Rok szkolenia -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Rok szkolenia:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableYears}" 
+                                SelectedItem="{Binding Year}" 
+                                BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Numer kolejny kursu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Numer kolejny kursu w roku:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding CourseSequenceNumber}" Keyboard="Numeric" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Informacje o certyfikacie -->
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Certyfikat:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                    <CheckBox IsChecked="{Binding HasCertificate}" />
+                    <Label Text="Kurs posiada certyfikat" />
+
+                    <VerticalStackLayout Spacing="5" IsVisible="{Binding HasCertificate}">
+                        <Label Text="Numer certyfikatu:" TextColor="{StaticResource TextMutedColor}" />
+                        <Entry Text="{Binding CertificateNumber}" Placeholder="Podaj numer certyfikatu" BackgroundColor="Transparent" />
+
+                        <Label Text="Data certyfikatu:" TextColor="{StaticResource TextMutedColor}" />
+                        <DatePicker Date="{Binding CertificateDate}" Format="D" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Przyciski akcji -->
+            <VerticalStackLayout Spacing="10" Margin="0,10,0,20">
+                <Button Text="Zapisz" Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}" Style="{StaticResource PrimaryButton}" />
+                <Button Text="Anuluj" Command="{Binding CancelCommand}" Style="{StaticResource OutlineButton}" />
+            </VerticalStackLayout>
+
+            <!-- Wskaźnik aktywności -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

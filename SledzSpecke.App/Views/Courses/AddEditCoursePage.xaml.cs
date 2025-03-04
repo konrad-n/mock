@@ -1,9 +1,23 @@
-namespace SledzSpecke.App.Views.Courses;
+﻿using SledzSpecke.App.ViewModels.Courses;
 
-public partial class AddEditCoursePage : ContentView
+namespace SledzSpecke.App.Views.Courses
 {
-    public AddEditCoursePage()
+    public partial class AddEditCoursePage : ContentPage
     {
-        this.InitializeComponent();
+        private readonly AddEditCourseViewModel viewModel;
+
+        public AddEditCoursePage(AddEditCourseViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+            this.viewModel = viewModel;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // Można tu dodać dodatkową logikę inicjalizacyjną jeśli potrzeba
+        }
     }
 }
