@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:enums="clr-namespace:SledzSpecke.App.Models.Enums"
              x:Class="SledzSpecke.App.Views.Specialization.InitializeSpecializationPage"
              Title="{Binding Title}">
     <ScrollView>
@@ -36,13 +37,13 @@
                     <HorizontalStackLayout Spacing="20">
                         <HorizontalStackLayout Spacing="10">
                             <RadioButton IsChecked="True" GroupName="SmkVersion" 
-                                         Value="{x:Static local:SmkVersion.New}"
+                                         Value="{x:Static enums:SmkVersion.New}"
                                          CheckedChanged="OnSmkVersionChanged"/>
                             <Label Text="Nowy SMK" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Spacing="10">
                             <RadioButton GroupName="SmkVersion" 
-                                         Value="{x:Static local:SmkVersion.Old}"
+                                         Value="{x:Static enums:SmkVersion.Old}"
                                          CheckedChanged="OnSmkVersionChanged"/>
                             <Label Text="Stary SMK" VerticalOptions="Center" />
                         </HorizontalStackLayout>

@@ -9,11 +9,17 @@ using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
+using SledzSpecke.App.ViewModels.Internships;
 using SledzSpecke.App.ViewModels.MedicalShifts;
+using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.ViewModels.SelfEducation;
 using SledzSpecke.App.ViewModels.Specialization;
 using SledzSpecke.App.Views.Authentication;
+using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
+using SledzSpecke.App.Views.Procedures;
+using SledzSpecke.App.Views.SelfEducation;
+using SledzSpecke.App.Views.Specialization;
 
 namespace SledzSpecke.App
 {
@@ -95,13 +101,18 @@ namespace SledzSpecke.App
             services.AddTransient<MedicalShiftsListViewModel>();
             services.AddTransient<MedicalShiftDetailsViewModel>();
             services.AddTransient<AddEditMedicalShiftViewModel>();
-            services.AddTransient<MedicalShiftsListViewModel>();
-            services.AddTransient<MedicalShiftDetailsViewModel>();
-            services.AddTransient<AddEditMedicalShiftViewModel>();
+
             services.AddTransient<SelfEducationListViewModel>();
             services.AddTransient<SelfEducationDetailsViewModel>();
             services.AddTransient<AddEditSelfEducationViewModel>();
+
             services.AddTransient<InitializeSpecializationViewModel>();
+
+            services.AddTransient<InternshipsListViewModel>();
+            services.AddTransient<InternshipDetailsViewModel>();
+            services.AddTransient<AddEditInternshipViewModel>();
+
+            services.AddTransient<ProceduresListViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
@@ -114,6 +125,18 @@ namespace SledzSpecke.App
             services.AddTransient<MedicalShiftsListPage>();
             services.AddTransient<MedicalShiftDetailsPage>();
             services.AddTransient<AddEditMedicalShiftPage>();
+
+            services.AddTransient<SelfEducationListPage>();
+            services.AddTransient<SelfEducationDetailsPage>();
+            services.AddTransient<AddEditSelfEducationPage>();
+
+            services.AddTransient<InitializeSpecializationPage>();
+
+            services.AddTransient<InternshipsListPage>();
+            services.AddTransient<InternshipDetailsPage>();
+            services.AddTransient<AddEditInternshipPage>();
+
+            services.AddTransient<ProcedureDetailsPage>();
         }
     }
 }

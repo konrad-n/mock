@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
+using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
@@ -18,6 +19,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         // Filtry
         private string searchText = string.Empty;
         private bool showOnlyActive = true;
+        private bool showBasicModule = false;
+        private bool showSpecialisticModule = false;
         private Internship selectedInternship;
 
         // Dane
@@ -25,6 +28,7 @@ namespace SledzSpecke.App.ViewModels.Internships
         private int? currentModuleId;
         private bool hasModules;
         private string moduleInfo = string.Empty;
+        private Module currentModule;
 
         public InternshipsListViewModel(
             ISpecializationService specializationService,
@@ -41,6 +45,7 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.InternshipSelectedCommand = new AsyncRelayCommand(this.OnInternshipSelectedAsync);
             this.AddInternshipCommand = new AsyncRelayCommand(this.OnAddInternshipAsync);
             this.ToggleActiveCommand = new RelayCommand(this.OnToggleActive);
+            this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
 
             // Inicjalizacja właściwości
             this.Title = "Staże specjalizacyjne";
@@ -87,12 +92,25 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
+        public bool ShowBasicModule
+        {
+            get => this.showBasicModule;
+            set => this.SetProperty(ref this.showBasicModule, value);
+        }
+
+        public bool ShowSpecialisticModule
+        {
+            get => this.showSpecialisticModule;
+            set => this.SetProperty(ref this.showSpecialisticModule, value);
+        }
+
         // Komendy
         public ICommand RefreshCommand { get; }
         public ICommand FilterCommand { get; }
         public ICommand InternshipSelectedCommand { get; }
         public ICommand AddInternshipCommand { get; }
         public ICommand ToggleActiveCommand { get; }
+        public ICommand SelectModuleCommand { get; }
 
         // Metody
         private async Task LoadInternshipsAsync()
@@ -127,12 +145,21 @@ namespace SledzSpecke.App.ViewModels.Internships
                     var module = await this.databaseService.GetModuleAsync(this.currentModuleId.Value);
                     if (module != null)
                     {
+                        this.currentModule = module;
+
+                        // Ustaw stan przycisków wyboru modułu
+                        this.ShowBasicModule = module.Type == ModuleType.Basic;
+                        this.ShowSpecialisticModule = module.Type == ModuleType.Specialistic;
+
                         this.ModuleInfo = $"Staże dla modułu: {module.Name}";
                     }
                 }
                 else
                 {
                     this.currentModuleId = null;
+                    this.currentModule = null;
+                    this.ShowBasicModule = false;
+                    this.ShowSpecialisticModule = false;
                     this.ModuleInfo = string.Empty;
                 }
 
@@ -151,7 +178,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                     items = items.Where(i =>
                         i.InternshipName.ToLowerInvariant().Contains(searchLower) ||
                         i.InstitutionName.ToLowerInvariant().Contains(searchLower) ||
-                        i.DepartmentName.ToLowerInvariant().Contains(searchLower))
+                        (i.DepartmentName != null && i.DepartmentName.ToLowerInvariant().Contains(searchLower)))
                         .ToList();
                 }
 
@@ -161,8 +188,14 @@ namespace SledzSpecke.App.ViewModels.Internships
                     items = items.Where(i => !i.IsCompleted).ToList();
                 }
 
+                // Sortowanie staży - najpierw według roku, potem według daty rozpoczęcia (od najnowszych)
+                var sortedItems = items
+                    .OrderBy(i => i.Year)
+                    .ThenByDescending(i => i.StartDate)
+                    .ToList();
+
                 // Dodaj staże do kolekcji
-                foreach (var item in items.OrderByDescending(i => i.StartDate))
+                foreach (var item in sortedItems)
                 {
                     var viewModel = new InternshipViewModel
                     {
@@ -177,6 +210,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                         IsCompleted = item.IsCompleted,
                         IsApproved = item.IsApproved,
                         SyncStatus = item.SyncStatus,
+                        IsBasic = this.IsBasicInternship(item),
                     };
 
                     // Pobierz nazwę modułu, jeśli dostępna
@@ -186,6 +220,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                         if (module != null)
                         {
                             viewModel.ModuleName = module.Name;
+                            viewModel.ModuleType = module.Type;
                         }
                     }
 
@@ -206,6 +241,14 @@ namespace SledzSpecke.App.ViewModels.Internships
             }
         }
 
+        private bool IsBasicInternship(Internship internship)
+        {
+            // Sprawdzenie, czy to staż podstawowy na podstawie nazwy
+            // Można dostosować tę logikę do konkretnych wymagań aplikacji
+            return internship.InternshipName.Contains("podstawowy") ||
+                   (this.currentModule != null && this.currentModule.Type == ModuleType.Basic);
+        }
+
         private async Task ApplyFiltersAsync()
         {
             await this.LoadInternshipsAsync();
@@ -215,6 +258,74 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             this.ShowOnlyActive = !this.ShowOnlyActive;
             this.ApplyFiltersAsync().ConfigureAwait(false);
+        }
+
+        private async Task OnSelectModuleAsync(string moduleType)
+        {
+            if (!this.HasModules)
+            {
+                return;
+            }
+
+            try
+            {
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null || !specialization.HasModules)
+                {
+                    return;
+                }
+
+                var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
+
+                if (moduleType == "Basic")
+                {
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                    if (basicModule != null)
+                    {
+                        this.currentModuleId = basicModule.ModuleId;
+                        this.ShowBasicModule = true;
+                        this.ShowSpecialisticModule = false;
+
+                        // Ustaw bieżący moduł w specjalizacji
+                        if (specialization.CurrentModuleId != this.currentModuleId)
+                        {
+                            specialization.CurrentModuleId = this.currentModuleId;
+                            await this.databaseService.UpdateSpecializationAsync(specialization);
+                        }
+                    }
+                }
+                else if (moduleType == "Specialistic")
+                {
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                    if (specialisticModule != null)
+                    {
+                        this.currentModuleId = specialisticModule.ModuleId;
+                        this.ShowBasicModule = false;
+                        this.ShowSpecialisticModule = true;
+
+                        // Ustaw bieżący moduł w specjalizacji
+                        if (specialization.CurrentModuleId != this.currentModuleId)
+                        {
+                            specialization.CurrentModuleId = this.currentModuleId;
+                            await this.databaseService.UpdateSpecializationAsync(specialization);
+                        }
+                    }
+                }
+
+                // Zapisz wybrany moduł w ustawieniach
+                await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.currentModuleId.GetValueOrDefault());
+
+                // Odśwież dane
+                await this.LoadInternshipsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zmiany modułu: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas przełączania modułu. Spróbuj ponownie.",
+                    "OK");
+            }
         }
 
         private async Task OnInternshipSelectedAsync()

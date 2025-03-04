@@ -4,6 +4,7 @@ using NSubstitute;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
+using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Dashboard;
 
@@ -19,6 +20,7 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
         private Specialization testSpecialization;
         private Module testBasicModule;
         private Module testSpecialisticModule;
+        private IDialogService dialogService;
 
         [SetUp]
         public void Setup()
@@ -26,6 +28,7 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
             // Inicjalizacja mocków serwisów
             this.specializationService = Substitute.For<ISpecializationService>();
             this.databaseService = Substitute.For<IDatabaseService>();
+            this.dialogService = Substitute.For<IDialogService>();
 
             // Konfiguracja danych testowych
             this.SetupTestData();
@@ -36,7 +39,8 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
             // Inicjalizacja ViewModel-a
             this.viewModel = new DashboardViewModel(
                 this.specializationService,
-                this.databaseService);
+                this.databaseService,
+                this.dialogService);
         }
 
         private void SetupTestData()

@@ -1,9 +1,16 @@
-namespace SledzSpecke.App.Views.Internships;
+using SledzSpecke.App.ViewModels.Internships;
 
-public partial class AddEditInternshipPage : ContentView
+namespace SledzSpecke.App.Views.Internships
 {
-    public AddEditInternshipPage()
+    public partial class AddEditInternshipPage : ContentPage
     {
-        this.InitializeComponent();
+        private readonly AddEditInternshipViewModel viewModel;
+
+        public AddEditInternshipPage(AddEditInternshipViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+            this.viewModel = viewModel;
+        }
     }
 }
