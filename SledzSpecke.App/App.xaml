@@ -26,9 +26,6 @@
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BoolToTextColorConverter x:Key="BoolToTextColorConverter" />
             <converters:CodeToColorConverter x:Key="CodeToColorConverter" />
-            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
-            <converters:BoolToTextColorConverter x:Key="BoolToTextColorConverter" />
-            <converters:CodeToColorConverter x:Key="CodeToColorConverter" />
             <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
             <converters:NotNullConverter x:Key="NotNullConverter" />
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
