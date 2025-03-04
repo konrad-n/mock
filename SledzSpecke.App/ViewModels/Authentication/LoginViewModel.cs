@@ -116,28 +116,23 @@ namespace SledzSpecke.App.ViewModels.Authentication
         {
             try
             {
+                if (this.IsBusy)
+                    return;
+
+                this.IsBusy = true;
+
                 // Przejście do strony rejestracji
                 if (Application.Current.MainPage is NavigationPage navigationPage)
                 {
-                    // Tworzymy nową instancję RegisterViewModel bezpośrednio
-                    var registerViewModel = new RegisterViewModel(this.authService, this.dialogService);
+                    // Tworzenie ViewModel z DI zamiast bezpośrednio
+                    var registerViewModel = IPlatformApplication.Current.Services.GetRequiredService<RegisterViewModel>();
 
-                    // Alternatywnie, jeśli RegisterViewModel ma więcej zależności, lepszym podejściem byłoby:
-                    // var registerViewModel = IPlatformApplication.Current.Services.GetRequiredService<RegisterViewModel>()
+                    // Tworzymy stronę i przechodzimy do niej
+                    var registerPage = new Views.Authentication.RegisterPage(registerViewModel);
+                    await navigationPage.PushAsync(registerPage);
 
-                    // Upewniamy się, że viewModel nie jest null przed utworzeniem strony
-                    if (registerViewModel != null)
-                    {
-                        await navigationPage.PushAsync(new Views.Authentication.RegisterPage(registerViewModel));
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("Nie udało się utworzyć RegisterViewModel");
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Wystąpił problem z przejściem do strony rejestracji.",
-                            "OK");
-                    }
+                    // Inicjalizacja MUSI zostać wykonana po przejściu do strony, nie tutaj
+                    // (RegisterPage wywoła InitializeAsync w OnAppearing)
                 }
             }
             catch (Exception ex)
@@ -149,6 +144,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     "Błąd",
                     "Wystąpił problem z przejściem do strony rejestracji.",
                     "OK");
+            }
+            finally
+            {
+                this.IsBusy = false;
             }
         }
     }

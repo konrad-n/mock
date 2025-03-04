@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Helpers;
@@ -23,8 +24,8 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private ObservableCollection<SpecializationProgram> availableSpecializations;
         private SpecializationProgram selectedSpecialization;
         private bool isOldSmkVersion;
-        private bool isNewSmkVersion;
-        private bool passwordsNotMatch;
+        private bool isNewSmkVersion = true; // Ustawiam wartość początkową tutaj zamiast w konstruktorze
+        private bool passwordsNotMatch = true; // Również ustawiam wartość początkową tutaj
 
         public RegisterViewModel(IAuthService authService, IDialogService dialogService)
         {
@@ -33,14 +34,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.Title = "Rejestracja";
             this.AvailableSpecializations = new ObservableCollection<SpecializationProgram>();
-            this.IsNewSmkVersion = true; // Domyślnie nowa wersja SMK
-            this.PasswordsNotMatch = true;
 
             // Inicjalizacja komend
             this.RegisterCommand = new AsyncRelayCommand(this.OnRegisterAsync, this.CanRegister);
             this.GoToLoginCommand = new AsyncRelayCommand(this.OnGoToLoginAsync);
-
-            // Nie ładujemy specjalizacji w konstruktorze, zrobimy to w InitializeAsync
         }
 
         public bool IsInitialized { get; private set; }
@@ -150,19 +147,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
             }
         }
 
-        public bool IsOldSmkVersion
-        {
-            get => this.isOldSmkVersion;
-            set
-            {
-                if (this.SetProperty(ref this.isOldSmkVersion, value) && value)
-                {
-                    this.IsNewSmkVersion = false;
-                    ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
-                }
-            }
-        }
-
         public bool IsNewSmkVersion
         {
             get => this.isNewSmkVersion;
@@ -171,7 +155,20 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (this.SetProperty(ref this.isNewSmkVersion, value) && value)
                 {
                     this.IsOldSmkVersion = false;
-                    ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
+                    (this.RegisterCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set
+            {
+                if (this.SetProperty(ref this.isOldSmkVersion, value) && value)
+                {
+                    this.IsNewSmkVersion = false;
+                    (this.RegisterCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -256,19 +253,29 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 {
                     System.Diagnostics.Debug.WriteLine("Nie znaleziono zasobów w pakiecie, próbuję załadować z katalogu specjalizacji...");
                     await this.LoadSpecializationTemplatesFromDirectoryAsync();
+
+                    // Jeśli nadal nie ma specjalizacji, dodaj domyślne
+                    if (this.AvailableSpecializations.Count == 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Nie znaleziono specjalizacji w katalogu, dodaję domyślne...");
+                        this.AddDefaultSpecializations();
+                    }
+
                     return;
                 }
 
                 this.AvailableSpecializations.Clear();
 
-                // Dodaj domyślne specjalizacje, jeśli nie ma żadnych
-                if (matchingResources.Count == 0)
+                // Opcje deserializacji, które są bardziej elastyczne
+                var options = new JsonSerializerOptions
                 {
-                    System.Diagnostics.Debug.WriteLine("Dodaję domyślne specjalizacje...");
-                    this.AddDefaultSpecializations();
-                    return;
-                }
+                    PropertyNameCaseInsensitive = true, // Ignoruje wielkość liter w nazwach właściwości
+                    AllowTrailingCommas = true,         // Pozwala na przecinki na końcu obiektów/tablic
+                    ReadCommentHandling = JsonCommentHandling.Skip, // Pomija komentarze
+                    Converters = { new JsonStringEnumConverter() }, // Konwertuje stringi na enumy
+                };
 
+                // Przetwarzanie znalezionych zasobów
                 foreach (var resourceName in matchingResources)
                 {
                     try
@@ -290,20 +297,114 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
                                     try
                                     {
-                                        var program = JsonSerializer.Deserialize<SpecializationProgram>(json);
+                                        // Użyj opcji deserializacji
+                                        System.Diagnostics.Debug.WriteLine($"Deserializacja JSON o długości {json.Length} znaków.");
+
+                                        // Próba dostosowania pliku JSON do modelu SpecializationProgram
+                                        SpecializationProgram program = null;
+
+                                        try
+                                        {
+                                            // Najpierw próbujemy standardowej deserializacji
+                                            program = JsonSerializer.Deserialize<SpecializationProgram>(json, options);
+                                        }
+                                        catch (JsonException jsonEx)
+                                        {
+                                            System.Diagnostics.Debug.WriteLine($"Standardowa deserializacja nie powiodła się: {jsonEx.Message}");
+
+                                            // Jeśli standardowa deserializacja nie działa, próbujemy dostosowania formatu
+                                            try
+                                            {
+                                                // Deserializuj do słownika, aby zachować wszystkie pola
+                                                var jsonObj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, options);
+
+                                                // Utwórz nowy SpecializationProgram i przepisz pola
+                                                program = new SpecializationProgram();
+
+                                                if (jsonObj.TryGetValue("name", out var nameElement) ||
+                                                    jsonObj.TryGetValue("Name", out nameElement))
+                                                {
+                                                    program.Name = nameElement.GetString();
+                                                }
+
+                                                if (jsonObj.TryGetValue("code", out var codeElement) ||
+                                                    jsonObj.TryGetValue("Code", out codeElement))
+                                                {
+                                                    program.Code = codeElement.GetString();
+                                                }
+
+                                                if (jsonObj.TryGetValue("hasModules", out var hasModulesElement) ||
+                                                    jsonObj.TryGetValue("HasModules", out hasModulesElement))
+                                                {
+                                                    program.HasModules = hasModulesElement.GetBoolean();
+                                                }
+
+                                                // Spróbuj pobrać czas trwania z TotalDuration.years lub bezpośrednio z totalDurationMonths
+                                                if ((jsonObj.TryGetValue("totalDuration", out var durationElement) ||
+                                                     jsonObj.TryGetValue("TotalDuration", out durationElement)) &&
+                                                    durationElement.ValueKind == JsonValueKind.Object)
+                                                {
+                                                    var durationObj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(durationElement.GetRawText(), options);
+                                                    if (durationObj.TryGetValue("years", out var yearsElement))
+                                                    {
+                                                        program.TotalDurationMonths = yearsElement.GetInt32() * 12;
+                                                    }
+                                                }
+                                                else if (jsonObj.TryGetValue("totalDurationMonths", out var monthsElement) ||
+                                                         jsonObj.TryGetValue("TotalDurationMonths", out monthsElement))
+                                                {
+                                                    program.TotalDurationMonths = monthsElement.GetInt32();
+                                                }
+
+                                                // Zapisz oryginalny JSON jako Structure, aby nie utracić żadnych danych
+                                                program.Structure = json;
+
+                                                // Oznaczmy specjalizację korzystając z pól w strukturze
+                                                if (json.Contains("\"moduleType\"") || json.Contains("\"ModuleType\""))
+                                                {
+                                                    // To prawdopodobnie pojedynczy moduł, nie cała specjalizacja
+                                                    continue;
+                                                }
+
+                                                // Dodaj dodatkowe pola SMK
+                                                if (jsonObj.TryGetValue("smkVersion", out var smkVersionElement) ||
+                                                    jsonObj.TryGetValue("SmkVersion", out smkVersionElement))
+                                                {
+                                                    string smkVersionStr = smkVersionElement.GetString();
+                                                    if (smkVersionStr == "New" || smkVersionStr == "new")
+                                                    {
+                                                        program.SmkVersion = SmkVersion.New;
+                                                    }
+                                                    else
+                                                    {
+                                                        program.SmkVersion = SmkVersion.Old;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    // Domyślnie nowa wersja
+                                                    program.SmkVersion = SmkVersion.New;
+                                                }
+                                            }
+                                            catch (Exception adaptEx)
+                                            {
+                                                System.Diagnostics.Debug.WriteLine($"Błąd adaptacji JSON: {adaptEx.Message}");
+                                                continue;
+                                            }
+                                        }
 
                                         if (program != null)
                                         {
-                                            System.Diagnostics.Debug.WriteLine($"Pomyślnie zdeserializowano program: {program.Name}");
+                                            System.Diagnostics.Debug.WriteLine($"Pomyślnie zdeserializowano program: {program.Name}, Kod: {program.Code}, Moduły: {program.HasModules}, Czas trwania: {program.TotalDurationMonths} miesięcy");
 
                                             // Dodanie do kolekcji
                                             this.AvailableSpecializations.Add(program);
 
-                                            // Zapisanie do pliku w katalogu aplikacji
+                                            // Zapisanie do pliku w katalogu aplikacji dla przyszłego użytku
                                             string fileName = Path.GetFileName(resourceName);
                                             if (string.IsNullOrEmpty(fileName))
                                             {
-                                                fileName = $"{program.Code.ToLower()}.json";
+                                                fileName = $"{program.Code?.ToLower() ?? "unknown"}.json";
                                             }
 
                                             string filePath = Path.Combine(Constants.SpecializationTemplatesPath, fileName);
@@ -397,18 +498,25 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
         private void AddDefaultSpecializations()
         {
-            // Dodaj kilka podstawowych specjalizacji jako awaryjne rozwiązanie
-            this.AvailableSpecializations.Add(new SpecializationProgram
+            System.Diagnostics.Debug.WriteLine("Dodaję domyślne specjalizacje...");
+
+            // Wyczyść kolekcję na wszelki wypadek
+            this.AvailableSpecializations.Clear();
+
+            // Dodaj kilka podstawowych specjalizacji z pełnymi danymi
+            var internalMedicine = new SpecializationProgram
             {
                 ProgramId = 1,
                 Name = "Choroby wewnętrzne",
                 Code = "internal_medicine",
                 SmkVersion = SmkVersion.New,
                 HasModules = false,
-                TotalDurationMonths = 48
-            });
+                TotalDurationMonths = 48,
+            };
+            this.AvailableSpecializations.Add(internalMedicine);
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {internalMedicine.Name}");
 
-            this.AvailableSpecializations.Add(new SpecializationProgram
+            var cardiology = new SpecializationProgram
             {
                 ProgramId = 2,
                 Name = "Kardiologia",
@@ -417,20 +525,24 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 HasModules = true,
                 BasicModuleCode = "internal_medicine",
                 BasicModuleDurationMonths = 24,
-                TotalDurationMonths = 60
-            });
+                TotalDurationMonths = 60,
+            };
+            this.AvailableSpecializations.Add(cardiology);
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {cardiology.Name}");
 
-            this.AvailableSpecializations.Add(new SpecializationProgram
+            var psychiatry = new SpecializationProgram
             {
                 ProgramId = 3,
                 Name = "Psychiatria",
                 Code = "psychiatry",
                 SmkVersion = SmkVersion.New,
                 HasModules = false,
-                TotalDurationMonths = 48
-            });
+                TotalDurationMonths = 48,
+            };
+            this.AvailableSpecializations.Add(psychiatry);
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {psychiatry.Name}");
 
-            System.Diagnostics.Debug.WriteLine("Dodano domyślne specjalizacje.");
+            System.Diagnostics.Debug.WriteLine($"Łącznie dodano {this.AvailableSpecializations.Count} specjalizacji");
         }
 
         private void ValidatePasswords()

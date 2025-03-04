@@ -5,7 +5,7 @@
              Style="{StaticResource SplashScreenStyle}">
     <Grid RowDefinitions="*,Auto,*">
         <Image Grid.Row="1"
-               Source="splash.svg"
+               Source="app_logo.png"
                HeightRequest="200"
                WidthRequest="200"
                HorizontalOptions="Center"/>

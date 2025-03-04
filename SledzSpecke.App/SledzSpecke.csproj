@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net9.0-android35.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
@@ -64,6 +64,14 @@
     <None Remove="SledzSpecke.net9.0-android35.0.v3.ncrunchproject" />
     <None Remove="SledzSpecke.net9.0-ios.v3.ncrunchproject" />
     <None Remove="SledzSpecke.net9.0-maccatalyst.v3.ncrunchproject" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\anesthesiology.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_specialistic.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\internal_medicine.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry.json" />
   </ItemGroup>
 
   <ItemGroup>
