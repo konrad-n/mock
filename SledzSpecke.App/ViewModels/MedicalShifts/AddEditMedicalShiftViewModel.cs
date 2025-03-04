@@ -12,6 +12,7 @@ using SledzSpecke.App.ViewModels.Base;
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
     [QueryProperty(nameof(ShiftId), "shiftId")]
+    [QueryProperty(nameof(ModuleId), "moduleId")]
     public partial class AddEditMedicalShiftViewModel : BaseViewModel
     {
         private readonly ISpecializationService specializationService;
@@ -20,6 +21,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly IDialogService dialogService;
 
         private int shiftId;
+        private int? moduleId;
         private DateTime date = DateTime.Today;
         private int hours = 10;
         private int minutes;
@@ -57,9 +59,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             // Initialize collections
             this.AvailableInternships = new ObservableCollection<InternshipListItem>();
-
-            // Load data
-            this.LoadDataAsync();
         }
 
         // Properties
@@ -74,7 +73,20 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     this.Title = "Edytuj dyżur";
 
                     // Load shift data
-                    this.LoadShiftAsync(value);
+                    this.LoadShiftAsync(value).ConfigureAwait(false);
+                }
+            }
+        }
+
+        public int? ModuleId
+        {
+            get => this.moduleId;
+            set
+            {
+                if (this.SetProperty(ref this.moduleId, value))
+                {
+                    // Load data based on the module ID
+                    this.LoadDataAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -203,16 +215,25 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     return;
                 }
 
-                // Load internships for current specialization
-                int? moduleId = null;
-                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                // Jeśli nie przekazano moduleId, a specjalizacja ma moduły, użyj bieżącego modułu
+                if (!this.moduleId.HasValue && specialization.HasModules && specialization.CurrentModuleId.HasValue)
                 {
-                    moduleId = specialization.CurrentModuleId.Value;
+                    this.moduleId = specialization.CurrentModuleId.Value;
                 }
 
-                var internships = await this.databaseService.GetInternshipsAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
+                // Load internships for current specialization or module
+                var internships = new List<Internship>();
+                if (this.moduleId.HasValue)
+                {
+                    // Pobierz staże dla konkretnego modułu
+                    internships = await this.databaseService.GetInternshipsAsync(moduleId: this.moduleId.Value);
+                }
+                else
+                {
+                    // Pobierz wszystkie staże dla specjalizacji
+                    internships = await this.databaseService.GetInternshipsAsync(
+                        specializationId: specialization.SpecializationId);
+                }
 
                 // Populate internships collection
                 this.AvailableInternships.Clear();
@@ -236,7 +257,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować danych. Spróbuj ponownie.",
@@ -278,6 +299,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 this.Location = shift.Location;
                 this.Year = shift.Year;
 
+                // Pobierz internship, aby określić moduleId
+                var internship = await this.databaseService.GetInternshipAsync(shift.InternshipId);
+                if (internship != null && internship.ModuleId.HasValue)
+                {
+                    this.moduleId = internship.ModuleId.Value;
+                }
+
+                // Load data to populate AvailableInternships
+                await this.LoadDataAsync();
+
                 // Select the correct internship
                 if (shift.InternshipId > 0)
                 {
@@ -303,7 +334,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error parsing additional fields: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Błąd parsowania pól dodatkowych: {ex.Message}");
                     }
                 }
 
@@ -312,7 +343,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading shift: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd ładowania dyżuru: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować danych dyżuru.",
@@ -430,7 +461,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error saving shift: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd zapisywania dyżuru: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się zapisać dyżuru. Spróbuj ponownie.",

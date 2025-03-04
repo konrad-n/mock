@@ -24,6 +24,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         // Data
         private ObservableCollection<MedicalShift> shifts;
         private int currentInternshipId;
+        private int? currentModuleId;
 
         public MedicalShiftsListViewModel(
             ISpecializationService specializationService,
@@ -46,7 +47,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.Shifts = new ObservableCollection<MedicalShift>();
 
             // Load data
-            this.LoadShiftsAsync();
+            this.LoadShiftsAsync().ConfigureAwait(false);
         }
 
         // Properties
@@ -103,6 +104,27 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             try
             {
+                // Pobierz bieżącą specjalizację i moduł (jeśli specjalizacja ma moduły)
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Nie znaleziono aktywnej specjalizacji.",
+                        "OK");
+                    return;
+                }
+
+                // Ustaw bieżący moduł, jeśli specjalizacja ma moduły
+                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                {
+                    this.currentModuleId = specialization.CurrentModuleId.Value;
+                }
+                else
+                {
+                    this.currentModuleId = null;
+                }
+
                 // Get current internship if filtering is active
                 if (this.CurrentInternshipSelected)
                 {
@@ -117,31 +139,108 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 // Clear existing shifts
                 this.Shifts.Clear();
 
-                // Load shifts from database
-                var shifts = this.currentInternshipId > 0
-                    ? await this.databaseService.GetMedicalShiftsAsync(this.currentInternshipId)
-                    : await this.databaseService.GetMedicalShiftsAsync();
+                // Pobierz wszystkie staże dla bieżącego modułu (jeśli jest wybrany)
+                var internships = new List<Internship>();
+                if (this.currentModuleId.HasValue)
+                {
+                    internships = await this.databaseService.GetInternshipsAsync(moduleId: this.currentModuleId.Value);
+                }
+                else
+                {
+                    var specializationId = specialization.SpecializationId;
+                    internships = await this.databaseService.GetInternshipsAsync(specializationId: specializationId);
+                }
+
+                // Pobierz dyżury dla staży
+                var allShifts = new List<MedicalShift>();
+
+                if (this.currentInternshipId > 0)
+                {
+                    // Filtrowanie tylko dla bieżącego stażu
+                    var shifts = await this.databaseService.GetMedicalShiftsAsync(this.currentInternshipId);
+                    allShifts.AddRange(shifts);
+                }
+                else
+                {
+                    // Pobierz dyżury dla wszystkich staży w module lub całej specjalizacji
+                    foreach (var internship in internships)
+                    {
+                        var shifts = await this.databaseService.GetMedicalShiftsAsync(internship.InternshipId);
+
+                        // Dodaj informacje o stażu do każdego dyżuru (do wyświetlenia w UI)
+                        foreach (var shift in shifts)
+                        {
+                            // Używamy AdditionalFields do tymczasowego przechowywania danych o stażu
+                            var additionalFields = new Dictionary<string, object>();
+                            if (!string.IsNullOrEmpty(shift.AdditionalFields))
+                            {
+                                try
+                                {
+                                    additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(shift.AdditionalFields);
+                                }
+                                catch
+                                {
+                                    additionalFields = new Dictionary<string, object>();
+                                }
+                            }
+
+                            additionalFields["InternshipName"] = internship.InternshipName;
+                            shift.AdditionalFields = System.Text.Json.JsonSerializer.Serialize(additionalFields);
+                        }
+
+                        allShifts.AddRange(shifts);
+                    }
+                }
 
                 // Apply search filter if needed
                 if (!string.IsNullOrEmpty(this.SearchText))
                 {
                     var searchLower = this.SearchText.ToLowerInvariant();
-                    shifts = shifts.Where(s =>
+                    allShifts = allShifts.Where(s =>
                         s.Location.ToLowerInvariant().Contains(searchLower) ||
                         s.Date.ToString("d").Contains(searchLower)
                     ).ToList();
                 }
 
                 // Add shifts to collection
-                foreach (var shift in shifts.OrderByDescending(s => s.Date))
+                foreach (var shift in allShifts.OrderByDescending(s => s.Date))
                 {
+                    // Pobierz nazwę stażu z AdditionalFields (jeśli dostępne)
+                    string internshipName = string.Empty;
+                    if (!string.IsNullOrEmpty(shift.AdditionalFields))
+                    {
+                        try
+                        {
+                            var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(shift.AdditionalFields);
+                            if (additionalFields.TryGetValue("InternshipName", out object name))
+                            {
+                                internshipName = name?.ToString() ?? string.Empty;
+                            }
+                        }
+                        catch
+                        {
+                            // Ignorowanie błędów deserializacji
+                        }
+                    }
+
+                    // Ustaw właściwość InternshipName w VM dla każdego dyżuru
+                    var shiftVM = new MedicalShiftViewModel
+                    {
+                        ShiftId = shift.ShiftId,
+                        Date = shift.Date,
+                        Hours = shift.Hours,
+                        Minutes = shift.Minutes,
+                        Location = shift.Location,
+                        Year = shift.Year,
+                        InternshipName = internshipName,
+                    };
+
                     this.Shifts.Add(shift);
                 }
             }
             catch (Exception ex)
             {
-                // Handle error
-                System.Diagnostics.Debug.WriteLine($"Error loading shifts: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania dyżurów: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować dyżurów. Spróbuj ponownie.",
@@ -190,8 +289,24 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         private async Task OnAddShiftAsync()
         {
-            // Navigate to add shift page
-            await Shell.Current.GoToAsync("AddEditMedicalShift");
+            // Get current module ID to pass to the add page
+            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+            int? moduleId = null;
+
+            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            {
+                moduleId = specialization.CurrentModuleId.Value;
+            }
+
+            // Navigate to add shift page, passing current module ID if applicable
+            if (moduleId.HasValue)
+            {
+                await Shell.Current.GoToAsync($"AddEditMedicalShift?moduleId={moduleId.Value}");
+            }
+            else
+            {
+                await Shell.Current.GoToAsync("AddEditMedicalShift");
+            }
         }
     }
 }
