@@ -17,7 +17,7 @@ namespace SledzSpecke.Tests.Models
                 PasswordHash = "hashedpassword",
                 SmkVersion = SmkVersion.New,
                 SpecializationId = 2,
-                RegistrationDate = new DateTime(2023, 1, 15)
+                RegistrationDate = new DateTime(2023, 1, 15),
             };
 
             // Assert

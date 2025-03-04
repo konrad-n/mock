@@ -17,7 +17,7 @@ namespace SledzSpecke.Tests.Models
                 CompletedProceduresA = 40,
                 RequiredProceduresA = 50,
                 CompletedProceduresB = 20,
-                RequiredProceduresB = 25
+                RequiredProceduresB = 25,
             };
 
             // Act
@@ -46,7 +46,7 @@ namespace SledzSpecke.Tests.Models
                 CompletedProceduresA = 0,
                 RequiredProceduresA = 0,
                 CompletedProceduresB = 0,
-                RequiredProceduresB = 0
+                RequiredProceduresB = 0,
             };
 
             // Act
@@ -70,7 +70,7 @@ namespace SledzSpecke.Tests.Models
                 CompletedProceduresA = 30,
                 RequiredProceduresA = 50,
                 CompletedProceduresB = 15,
-                RequiredProceduresB = 25
+                RequiredProceduresB = 25,
             };
 
             // Act
@@ -99,7 +99,7 @@ namespace SledzSpecke.Tests.Models
                 CompletedProceduresA = 60, // More than required
                 RequiredProceduresA = 50,
                 CompletedProceduresB = 30, // More than required
-                RequiredProceduresB = 25
+                RequiredProceduresB = 25,
             };
 
             // Act

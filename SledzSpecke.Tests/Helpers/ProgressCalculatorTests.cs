@@ -28,7 +28,7 @@ namespace SledzSpecke.Tests.TestHelpers
                 CompletedInternships = 0,
                 TotalInternships = 10,
                 CompletedCourses = 0,
-                TotalCourses = 5
+                TotalCourses = 5,
             };
 
             this.testModule = new Module
@@ -46,7 +46,7 @@ namespace SledzSpecke.Tests.TestHelpers
                 CompletedProceduresA = 0,
                 TotalProceduresA = 20,
                 CompletedProceduresB = 0,
-                TotalProceduresB = 10
+                TotalProceduresB = 10,
             };
         }
 
@@ -60,14 +60,14 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 new Internship { InternshipId = 1, IsCompleted = true },
                 new Internship { InternshipId = 2, IsCompleted = true },
-                new Internship { InternshipId = 3, IsCompleted = false }
+                new Internship { InternshipId = 3, IsCompleted = false },
             };
             this.databaseService.GetInternshipsAsync(moduleId: 1).Returns(internships);
 
             var courses = new List<Course>
             {
                 new Course { CourseId = 1 },
-                new Course { CourseId = 2 }
+                new Course { CourseId = 2 },
             };
             this.databaseService.GetCoursesAsync(moduleId: 1).Returns(courses);
 
@@ -75,14 +75,14 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 new Procedure { ProcedureId = 1, OperatorCode = "A" },
                 new Procedure { ProcedureId = 2, OperatorCode = "A" },
-                new Procedure { ProcedureId = 3, OperatorCode = "B" }
+                new Procedure { ProcedureId = 3, OperatorCode = "B" },
             };
 
             var proceduresForInternship2 = new List<Procedure>
             {
                 new Procedure { ProcedureId = 4, OperatorCode = "A" },
                 new Procedure { ProcedureId = 5, OperatorCode = "B" },
-                new Procedure { ProcedureId = 6, OperatorCode = "B" }
+                new Procedure { ProcedureId = 6, OperatorCode = "B" },
             };
 
             this.databaseService.GetProceduresAsync(internshipId: 1).Returns(proceduresForInternship1);
@@ -101,19 +101,19 @@ namespace SledzSpecke.Tests.TestHelpers
                     new InternshipRequirement { InternshipCode = "2", InternshipName = "Internship 2" },
                     new InternshipRequirement { InternshipCode = "3", InternshipName = "Internship 3" },
                     new InternshipRequirement { InternshipCode = "4", InternshipName = "Internship 4" },
-                    new InternshipRequirement { InternshipCode = "5", InternshipName = "Internship 5" }
+                    new InternshipRequirement { InternshipCode = "5", InternshipName = "Internship 5" },
                 },
                 Courses = new List<CourseRequirement>
                 {
                     new CourseRequirement { CourseName = "Course 1" },
                     new CourseRequirement { CourseName = "Course 2" },
-                    new CourseRequirement { CourseName = "Course 3" }
+                    new CourseRequirement { CourseName = "Course 3" },
                 },
                 Procedures = new List<ProcedureRequirement>
                 {
                     new ProcedureRequirement { ProcedureName = "Procedure 1", RequiredCountA = 10, RequiredCountB = 5 },
-                    new ProcedureRequirement { ProcedureName = "Procedure 2", RequiredCountA = 10, RequiredCountB = 5 }
-                }
+                    new ProcedureRequirement { ProcedureName = "Procedure 2", RequiredCountA = 10, RequiredCountB = 5 },
+                },
             };
 
             this.testModule.Structure = JsonSerializer.Serialize(moduleStructure);
@@ -148,14 +148,14 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 new Internship { InternshipId = 1, IsCompleted = true },
                 new Internship { InternshipId = 2, IsCompleted = true },
-                new Internship { InternshipId = 3, IsCompleted = false }
+                new Internship { InternshipId = 3, IsCompleted = false },
             };
             this.databaseService.GetInternshipsAsync(specializationId: 1).Returns(internships);
 
             var courses = new List<Course>
             {
                 new Course { CourseId = 1 },
-                new Course { CourseId = 2 }
+                new Course { CourseId = 2 },
             };
             this.databaseService.GetCoursesAsync(specializationId: 1).Returns(courses);
 
@@ -175,7 +175,7 @@ namespace SledzSpecke.Tests.TestHelpers
                     new InternshipRequirement { InternshipCode = "7", InternshipName = "Internship 7" },
                     new InternshipRequirement { InternshipCode = "8", InternshipName = "Internship 8" },
                     new InternshipRequirement { InternshipCode = "9", InternshipName = "Internship 9" },
-                    new InternshipRequirement { InternshipCode = "10", InternshipName = "Internship 10" }
+                    new InternshipRequirement { InternshipCode = "10", InternshipName = "Internship 10" },
                 },
                 Courses = new List<CourseRequirement>
                 {
@@ -183,8 +183,8 @@ namespace SledzSpecke.Tests.TestHelpers
                     new CourseRequirement { CourseName = "Course 2" },
                     new CourseRequirement { CourseName = "Course 3" },
                     new CourseRequirement { CourseName = "Course 4" },
-                    new CourseRequirement { CourseName = "Course 5" }
-                }
+                    new CourseRequirement { CourseName = "Course 5" },
+                },
             };
 
             this.testSpecialization.ProgramStructure = JsonSerializer.Serialize(specializationStructure);
@@ -271,14 +271,14 @@ namespace SledzSpecke.Tests.TestHelpers
             var internships = new List<Internship>
             {
                 new Internship { InternshipId = 1, IsCompleted = true, DaysCount = 30 },
-                new Internship { InternshipId = 2, IsCompleted = true, DaysCount = 20 }
+                new Internship { InternshipId = 2, IsCompleted = true, DaysCount = 20 },
             };
             this.databaseService.GetInternshipsAsync(specializationId: 1).Returns(internships);
 
             var courses = new List<Course>
             {
                 new Course { CourseId = 1 },
-                new Course { CourseId = 2 }
+                new Course { CourseId = 2 },
             };
             this.databaseService.GetCoursesAsync(specializationId: 1).Returns(courses);
 
@@ -286,7 +286,7 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 new Procedure { ProcedureId = 1, OperatorCode = "A" },
                 new Procedure { ProcedureId = 2, OperatorCode = "A" },
-                new Procedure { ProcedureId = 3, OperatorCode = "B" }
+                new Procedure { ProcedureId = 3, OperatorCode = "B" },
             };
 
             this.databaseService.GetProceduresAsync(internshipId: 1).Returns(procedures);
@@ -295,7 +295,7 @@ namespace SledzSpecke.Tests.TestHelpers
             var shifts = new List<MedicalShift>
             {
                 new MedicalShift { ShiftId = 1, Hours = 10, Minutes = 30 },
-                new MedicalShift { ShiftId = 2, Hours = 8, Minutes = 45 }
+                new MedicalShift { ShiftId = 2, Hours = 8, Minutes = 45 },
             };
 
             this.databaseService.GetMedicalShiftsAsync(1).Returns(shifts);
@@ -304,27 +304,27 @@ namespace SledzSpecke.Tests.TestHelpers
             var selfEducation = new List<SelfEducation>
             {
                 new SelfEducation { SelfEducationId = 1 },
-                new SelfEducation { SelfEducationId = 2 }
+                new SelfEducation { SelfEducationId = 2 },
             };
             this.databaseService.GetSelfEducationItemsAsync(specializationId: 1).Returns(selfEducation);
 
             var educationalActivities = new List<EducationalActivity>
             {
                 new EducationalActivity { ActivityId = 1 },
-                new EducationalActivity { ActivityId = 2 }
+                new EducationalActivity { ActivityId = 2 },
             };
             this.databaseService.GetEducationalActivitiesAsync(specializationId: 1).Returns(educationalActivities);
 
             var publications = new List<Publication>
             {
-                new Publication { PublicationId = 1 }
+                new Publication { PublicationId = 1 },
             };
             this.databaseService.GetPublicationsAsync(specializationId: 1).Returns(publications);
 
             var absences = new List<Absence>
             {
                 new Absence { AbsenceId = 1, StartDate = new DateTime(2023, 3, 1), EndDate = new DateTime(2023, 3, 10), Type = AbsenceType.Sick },
-                new Absence { AbsenceId = 2, StartDate = new DateTime(2023, 6, 1), EndDate = new DateTime(2023, 6, 5), Type = AbsenceType.Vacation }
+                new Absence { AbsenceId = 2, StartDate = new DateTime(2023, 6, 1), EndDate = new DateTime(2023, 6, 5), Type = AbsenceType.Vacation },
             };
             this.databaseService.GetAbsencesAsync(1).Returns(absences);
 
@@ -340,8 +340,8 @@ namespace SledzSpecke.Tests.TestHelpers
                 Courses = new List<CourseRequirement>(),
                 Procedures = new List<ProcedureRequirement>
                 {
-                    new ProcedureRequirement { ProcedureName = "Procedure 1", RequiredCountA = 5, RequiredCountB = 3 }
-                }
+                    new ProcedureRequirement { ProcedureName = "Procedure 1", RequiredCountA = 5, RequiredCountB = 3 },
+                },
             };
 
             this.testSpecialization.ProgramStructure = JsonSerializer.Serialize(specializationStructure);

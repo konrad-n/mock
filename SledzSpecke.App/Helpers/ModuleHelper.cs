@@ -15,7 +15,7 @@ namespace SledzSpecke.App.Helpers
                     "nefrologia",
                     "gastroenterologia",
                     "endokrynologia", "diabetologia",
-                    "reumatologia"
+                    "reumatologia",
                 };
 
             return moduleSpecializations.Contains(specializationCode.ToLower());

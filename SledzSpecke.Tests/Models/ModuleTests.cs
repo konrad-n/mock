@@ -25,7 +25,7 @@ namespace SledzSpecke.Tests.Models
                 CompletedProceduresA = 20,
                 TotalProceduresA = 30,
                 CompletedProceduresB = 10,
-                TotalProceduresB = 15
+                TotalProceduresB = 15,
             };
 
             // Assert

@@ -23,12 +23,12 @@ namespace SledzSpecke.Tests.Models
                 Modules = new List<Module>
                 {
                     new Module { ModuleId = 1, Name = "Basic Module", Type = ModuleType.Basic },
-                    new Module { ModuleId = 2, Name = "Specialistic Module", Type = ModuleType.Specialistic }
+                    new Module { ModuleId = 2, Name = "Specialistic Module", Type = ModuleType.Specialistic },
                 },
                 CompletedInternships = 8,
                 TotalInternships = 15,
                 CompletedCourses = 4,
-                TotalCourses = 7
+                TotalCourses = 7,
             };
 
             // Assert

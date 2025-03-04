@@ -39,7 +39,7 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 Type = AbsenceType.Sick,
                 StartDate = this.startDate.AddDays(100),
-                EndDate = this.startDate.AddDays(109)
+                EndDate = this.startDate.AddDays(109),
             };
             this.absences.Add(sickLeave);
 
@@ -81,7 +81,7 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 Type = AbsenceType.Vacation,
                 StartDate = this.startDate.AddDays(100),
-                EndDate = this.startDate.AddDays(109)
+                EndDate = this.startDate.AddDays(109),
             };
             this.absences.Add(vacation);
 
@@ -102,7 +102,7 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 Type = AbsenceType.Recognition,
                 StartDate = this.startDate.AddDays(100),
-                EndDate = this.startDate.AddDays(109)
+                EndDate = this.startDate.AddDays(109),
             };
             this.absences.Add(recognition);
 
@@ -123,28 +123,28 @@ namespace SledzSpecke.Tests.TestHelpers
             {
                 Type = AbsenceType.Sick,
                 StartDate = this.startDate.AddDays(50),
-                EndDate = this.startDate.AddDays(59)
+                EndDate = this.startDate.AddDays(59),
             };
 
             var maternityLeave = new Absence
             {
                 Type = AbsenceType.Maternity,
                 StartDate = this.startDate.AddDays(150),
-                EndDate = this.startDate.AddDays(179)
+                EndDate = this.startDate.AddDays(179),
             };
 
             var recognition = new Absence
             {
                 Type = AbsenceType.Recognition,
                 StartDate = this.startDate.AddDays(250),
-                EndDate = this.startDate.AddDays(254)
+                EndDate = this.startDate.AddDays(254),
             };
 
             var vacation = new Absence
             {
                 Type = AbsenceType.Vacation,
                 StartDate = this.startDate.AddDays(300),
-                EndDate = this.startDate.AddDays(309)
+                EndDate = this.startDate.AddDays(309),
             };
 
             this.absences.Add(sickLeave);

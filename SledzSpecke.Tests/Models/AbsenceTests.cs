@@ -13,7 +13,7 @@ namespace SledzSpecke.Tests.Models
             {
                 AbsenceId = 1,
                 StartDate = new DateTime(2023, 5, 1),
-                EndDate = new DateTime(2023, 5, 10)
+                EndDate = new DateTime(2023, 5, 10),
             };
 
             // Act
@@ -30,7 +30,7 @@ namespace SledzSpecke.Tests.Models
             var absence = new Absence
             {
                 AbsenceId = 1,
-                Type = AbsenceType.Sick
+                Type = AbsenceType.Sick,
             };
 
             // Act
@@ -47,7 +47,7 @@ namespace SledzSpecke.Tests.Models
             var absence = new Absence
             {
                 AbsenceId = 1,
-                Type = AbsenceType.Maternity
+                Type = AbsenceType.Maternity,
             };
 
             // Act
@@ -64,7 +64,7 @@ namespace SledzSpecke.Tests.Models
             var absence = new Absence
             {
                 AbsenceId = 1,
-                Type = AbsenceType.Paternity
+                Type = AbsenceType.Paternity,
             };
 
             // Act
@@ -81,7 +81,7 @@ namespace SledzSpecke.Tests.Models
             var absence = new Absence
             {
                 AbsenceId = 1,
-                Type = AbsenceType.Vacation
+                Type = AbsenceType.Vacation,
             };
 
             // Act
@@ -98,7 +98,7 @@ namespace SledzSpecke.Tests.Models
             var absence = new Absence
             {
                 AbsenceId = 1,
-                Type = AbsenceType.Unpaid
+                Type = AbsenceType.Unpaid,
             };
 
             // Act

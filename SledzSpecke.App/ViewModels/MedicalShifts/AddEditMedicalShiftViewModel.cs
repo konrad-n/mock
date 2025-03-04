@@ -221,7 +221,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     this.AvailableInternships.Add(new InternshipListItem
                     {
                         InternshipId = internship.InternshipId,
-                        DisplayName = $"{internship.InternshipName} - {internship.InstitutionName}"
+                        DisplayName = $"{internship.InternshipName} - {internship.InstitutionName}",
                     });
                 }
 
@@ -393,7 +393,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 {
                     shift = new MedicalShift
                     {
-                        SyncStatus = SyncStatus.NotSynced
+                        SyncStatus = SyncStatus.NotSynced,
                     };
                 }
 
@@ -411,7 +411,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     var additionalFields = new Dictionary<string, object>
                     {
                         { "OldSMKField1", this.OldSMKField1 },
-                        { "OldSMKField2", this.OldSMKField2 }
+                        { "OldSMKField2", this.OldSMKField2 },
                     };
 
                     shift.AdditionalFields = this.smkStrategy.FormatAdditionalFields(additionalFields);

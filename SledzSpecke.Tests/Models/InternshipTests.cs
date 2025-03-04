@@ -27,7 +27,7 @@ namespace SledzSpecke.Tests.Models
                 RecognitionReason = null,
                 RecognitionDaysReduction = 0,
                 SyncStatus = SyncStatus.Synced,
-                AdditionalFields = "{\"field1\":\"value1\"}"
+                AdditionalFields = "{\"field1\":\"value1\"}",
             };
 
             // Assert
