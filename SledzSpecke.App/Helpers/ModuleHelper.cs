@@ -148,9 +148,9 @@ namespace SledzSpecke.App.Helpers
         /// <param name="modules">Lista modułów do inicjalizacji.</param>
         /// <returns>True, jeśli inicjalizacja się powiodła; w przeciwnym razie false.</returns>
         public static async Task<bool> InitializeModulesAsync(
-            IDatabaseService databaseService,
-            int specializationId,
-            List<Module> modules)
+    IDatabaseService databaseService,
+    int specializationId,
+    List<Module> modules)
         {
             try
             {
@@ -162,6 +162,13 @@ namespace SledzSpecke.App.Helpers
                 // Pobierz specjalizację
                 var specialization = await databaseService.GetSpecializationAsync(specializationId);
                 if (specialization == null)
+                {
+                    return false;
+                }
+
+                // Pobierz użytkownika, aby uzyskać wersję SMK
+                var user = await databaseService.GetUserAsync(0); // Tutaj potrzebujemy uzyskać ID użytkownika
+                if (user == null)
                 {
                     return false;
                 }
@@ -182,7 +189,7 @@ namespace SledzSpecke.App.Helpers
                     {
                         program = await databaseService.GetSpecializationProgramByCodeAsync(
                             moduleCode,
-                            specialization.SmkVersion);
+                            user.SmkVersion); // Pobierz wersję SMK z użytkownika, nie ze specjalizacji
 
                         if (program != null && !string.IsNullOrEmpty(program.Structure))
                         {
