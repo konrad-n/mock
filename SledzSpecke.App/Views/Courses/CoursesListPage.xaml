@@ -1,11 +1,81 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SledzSpecke.App.Views.Courses.CoursesListPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
-</ContentView>
+             x:Class="SledzSpecke.App.Views.Courses.CoursesListPage"
+             Title="{Binding Title}">
+    <Grid RowDefinitions="Auto, Auto, Auto, *, Auto">
+        <!-- Przełącznik modułów - widoczny tylko dla specjalizacji modułowych -->
+        <Frame IsVisible="{Binding HasModules}" Grid.Row="0" Padding="5" Margin="10,10,10,5" 
+               BorderColor="{StaticResource Primary}" HasShadow="False" 
+               CornerRadius="5" IsClippedToBounds="True">
+            <Grid ColumnDefinitions="*,*">
+                <Button Text="Moduł podstawowy" 
+                        BackgroundColor="{Binding ShowBasicModule, Converter={StaticResource BoolToColorConverter}}"
+                        TextColor="{Binding ShowBasicModule, Converter={StaticResource BoolToTextColorConverter}}"
+                        Command="{Binding SelectModuleCommand}" 
+                        CommandParameter="Basic" />
+                <Button Grid.Column="1" Text="Moduł specjalistyczny" 
+                        BackgroundColor="{Binding ShowSpecialisticModule, Converter={StaticResource BoolToColorConverter}}"
+                        TextColor="{Binding ShowSpecialisticModule, Converter={StaticResource BoolToTextColorConverter}}"
+                        Command="{Binding SelectModuleCommand}" 
+                        CommandParameter="Specialistic" />
+            </Grid>
+        </Frame>
+
+        <!-- Informacja o module - widoczna tylko dla specjalizacji modułowych -->
+        <Frame IsVisible="{Binding HasModules}" Grid.Row="1" BorderColor="{StaticResource Primary}" HasShadow="False" 
+               Margin="10,0,10,5" Padding="10" CornerRadius="5">
+            <Label Text="{Binding ModuleInfo}" TextColor="{StaticResource PrimaryColor}" FontSize="14" />
+        </Frame>
+
+        <!-- Pasek wyszukiwania i filtrowania -->
+        <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Padding="10">
+            <SearchBar Placeholder="Szukaj kursów" Text="{Binding SearchText}" />
+            <Button Grid.Column="1" Text="Filtruj" Command="{Binding FilterCommand}" />
+        </Grid>
+
+        <!-- Lista kursów -->
+        <RefreshView Grid.Row="3" IsRefreshing="{Binding IsBusy}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Courses}" 
+                           SelectionMode="Single" 
+                           SelectedItem="{Binding SelectedCourse}" 
+                           SelectionChangedCommand="{Binding CourseSelectedCommand}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                        <Label Text="Brak kursów" FontSize="18" HorizontalOptions="Center" />
+                        <Label Text="Dodaj nowy kurs klikając przycisk poniżej" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="10,5">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding CourseName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding CourseType, StringFormat='Typ: {0}'}" />
+                                    <Label Text="{Binding InstitutionName, StringFormat='Instytucja: {0}'}" />
+                                    <Label Text="{Binding FormattedCompletionDate, StringFormat='Data ukończenia: {0}'}" />
+                                    <Label Text="{Binding ModuleName}" 
+                                           IsVisible="{Binding ModuleName, Converter={StaticResource StringToBoolConverter}}"
+                                           FontSize="13" TextColor="{StaticResource TextMutedColor}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End">
+                                    <Label Text="{Binding Year, StringFormat='{0}'}" FontSize="24" FontAttributes="Bold" 
+                                           TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
+                                    <Label Text="rok" FontSize="12" TextColor="{StaticResource TextMutedColor}" 
+                                           HorizontalOptions="Center" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Przycisk dodawania -->
+        <Button Grid.Row="4" Text="Dodaj nowy kurs" Command="{Binding AddCourseCommand}"
+                Style="{StaticResource PrimaryButton}"
+                Margin="20" HorizontalOptions="Center" />
+    </Grid>
+</ContentPage>
