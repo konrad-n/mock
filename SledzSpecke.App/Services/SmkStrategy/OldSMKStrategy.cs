@@ -24,16 +24,15 @@ namespace SledzSpecke.App.Services.SmkStrategy
                     return new Dictionary<string, bool>
                 {
                     { "Date", true },
+                    { "Year", true }, // Pole rok jest wymagane w starym SMK
                     { "Code", true },
-                    { "OperatorCode", true },
+                    { "PerformingPerson", true }, // Osoba wykonująca jest wymagana w starym SMK
+                    { "Location", true },
                     { "PatientInitials", true },
                     { "PatientGender", true },
-                    { "Location", true },
-                    { "AssistantData", true }, // Zmienione na true - to pole musi być dostępne w starym SMK
+                    { "AssistantData", true },
                     { "ProcedureGroup", true },
                     { "Status", true },
-                    { "PerformingPerson", true },
-                    { "Year", true }, // Dodane pole Rok - obowiązkowe w starym SMK
                 };
 
                 case "AddEditInternship":
@@ -74,17 +73,16 @@ namespace SledzSpecke.App.Services.SmkStrategy
                 case "AddEditProcedure":
                     return new Dictionary<string, string>
                 {
-                    { "Date", "Data wykonania" },
+                    { "Date", "Data" },
+                    { "Year", "Rok" },
                     { "Code", "Kod zabiegu" },
-                    { "OperatorCode", "Operator/Asysta" },
+                    { "PerformingPerson", "Osoba wykonująca" },
+                    { "Location", "Miejsce wykonania" },
                     { "PatientInitials", "Inicjały pacjenta" },
                     { "PatientGender", "Płeć pacjenta" },
-                    { "Location", "Miejsce wykonania" },
-                    { "ProcedureGroup", "Grupa procedur" },
+                    { "AssistantData", "Dane osoby wykonującej I i II asystę" },
+                    { "ProcedureGroup", "Procedura z grupy" },
                     { "Status", "Status" },
-                    { "PerformingPerson", "Osoba wykonująca" },
-                    { "AssistantData", "Dane osoby wykonującej I i II asystę" }, // Zmieniona etykieta na dokładną jak w SMK
-                    { "Year", "Rok" }, // Dodana etykieta dla pola Rok
                 };
 
                 case "AddEditInternship":
@@ -299,30 +297,37 @@ namespace SledzSpecke.App.Services.SmkStrategy
                 case "AddEditProcedure":
                     switch (fieldName)
                     {
-                        case "OperatorCode":
+                        case "Code":
                             return new Dictionary<string, string>
-                            {
-                                { "A", "Operator (A)" },
-                                { "B", "Asysta (B)" },
-                            };
+                    {
+                        { "A - operator", "A - operator" },
+                        { "B - asysta", "B - asysta" },
+                    };
                         case "PatientGender":
                             return new Dictionary<string, string>
-                            {
-                                { "M", "Mężczyzna" },
-                                { "K", "Kobieta" },
-                            };
+                    {
+                        { "M", "mężczyzna" },
+                        { "K", "kobieta" },
+                    };
                         case "Status":
                             return new Dictionary<string, string>
-                            {
-                                { "Zatwierdzona", "Zatwierdzona" },
-                                { "Niezatwierdzona", "Niezatwierdzona" },
-                                { "W trakcie", "W trakcie" },
-                                { "Odrzucona", "Odrzucona" },
-                            };
+                    {
+                        { "Wykonana", "Wykonana" },
+                        { "Niezatwierdzona", "Niezatwierdzona" },
+                    };
+                        case "Year":
+                            return new Dictionary<string, string>
+                    {
+                        { "1", "Uzupełnienie po weryfikacji 1" },
+                        { "2", "Uzupełnienie po weryfikacji 2" },
+                        { "3", "Uzupełnienie po weryfikacji 3" },
+                        { "4", "Uzupełnienie po weryfikacji 4" },
+                        { "5", "Uzupełnienie po weryfikacji 5" },
+                        { "6", "Uzupełnienie po weryfikacji 6" },
+                    };
                         default:
                             return new Dictionary<string, string>();
                     }
-
                 default:
                     return new Dictionary<string, string>();
             }
