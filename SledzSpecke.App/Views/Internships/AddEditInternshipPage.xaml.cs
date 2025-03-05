@@ -1,4 +1,4 @@
-using SledzSpecke.App.ViewModels.Internships;
+﻿using SledzSpecke.App.ViewModels.Internships;
 
 namespace SledzSpecke.App.Views.Internships
 {
@@ -11,6 +11,13 @@ namespace SledzSpecke.App.Views.Internships
             this.InitializeComponent();
             this.BindingContext = viewModel;
             this.viewModel = viewModel;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            // Tutaj można dodać dodatkową logikę inicjalizacyjną, jeśli jest potrzebna
         }
     }
 }

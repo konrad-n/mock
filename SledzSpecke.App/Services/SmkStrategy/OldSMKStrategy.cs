@@ -44,9 +44,12 @@ namespace SledzSpecke.App.Services.SmkStrategy
                         { "StartDate", true },
                         { "EndDate", true },
                         { "Year", true },
+                        { "DaysCount", true },
                         { "IsCompleted", true },
                         { "IsApproved", true },
-                        { "OldSMKField1", true },
+                        { "RecognitionType", true },    // Pole specyficzne dla starego SMK
+                        { "OldSMKField1", true },       // Kierownik stażu
+                        { "IsPartialCompletion", true } // Realizacja częściowa
                     };
 
                 case "AddEditCourse":
@@ -105,15 +108,18 @@ namespace SledzSpecke.App.Services.SmkStrategy
                 case "AddEditInternship":
                     return new Dictionary<string, string>
                     {
-                        { "InstitutionName", "Nazwa instytucji" },
-                        { "DepartmentName", "Nazwa oddziału" },
+                        { "InstitutionName", "Nazwa podmiotu prowadzącego staż" },
+                        { "DepartmentName", "Nazwa komórki organizacyjnej (miejsce odbywania stażu)" },
                         { "InternshipName", "Nazwa stażu" },
                         { "StartDate", "Data rozpoczęcia" },
                         { "EndDate", "Data zakończenia" },
                         { "Year", "Rok szkolenia" },
+                        { "DaysCount", "Liczba dni stażu" },
                         { "IsCompleted", "Ukończony" },
                         { "IsApproved", "Zatwierdzony" },
+                        { "RecognitionType", "Zaliczenie na podstawie uznania" },
                         { "OldSMKField1", "Kierownik stażu" },
+                        { "IsPartialCompletion", "Realizacja częściowa" }
                     };
 
                 case "AddEditCourse":
@@ -167,9 +173,12 @@ namespace SledzSpecke.App.Services.SmkStrategy
                     return new List<string>
                     {
                         "InstitutionName",
+                        "DepartmentName",
                         "InternshipName",
                         "StartDate",
                         "EndDate",
+                        "Year",
+                        "DaysCount",
                         "OldSMKField1",    // Wymagane w starej wersji SMK
                     };
 
@@ -219,9 +228,12 @@ namespace SledzSpecke.App.Services.SmkStrategy
                         { "StartDate", DateTime.Today },
                         { "EndDate", DateTime.Today.AddMonths(3) },
                         { "Year", 1 },
+                        { "DaysCount", 90 },
                         { "IsCompleted", false },
                         { "IsApproved", false },
                         { "OldSMKField1", string.Empty },
+                        { "RecognitionType", string.Empty },
+                        { "IsPartialCompletion", false }
                     };
 
                 case "AddEditCourse":
@@ -301,6 +313,29 @@ namespace SledzSpecke.App.Services.SmkStrategy
                             return $"Pole {fieldName} jest nieprawidłowe";
                     }
 
+                case "AddEditInternship":
+                    switch (fieldName)
+                    {
+                        case "InstitutionName":
+                            return "Nazwa podmiotu prowadzącego staż jest wymagana";
+                        case "DepartmentName":
+                            return "Nazwa komórki organizacyjnej jest wymagana";
+                        case "InternshipName":
+                            return "Nazwa stażu jest wymagana";
+                        case "StartDate":
+                            return "Data rozpoczęcia jest wymagana";
+                        case "EndDate":
+                            return "Data zakończenia jest wymagana";
+                        case "Year":
+                            return "Rok szkolenia jest wymagany";
+                        case "DaysCount":
+                            return "Liczba dni stażu jest wymagana";
+                        case "OldSMKField1":
+                            return "Kierownik stażu jest wymagany";
+                        default:
+                            return $"Pole {fieldName} jest nieprawidłowe";
+                    }
+
                 default:
                     return $"Pole {fieldName} jest nieprawidłowe";
             }
@@ -344,6 +379,7 @@ namespace SledzSpecke.App.Services.SmkStrategy
                                 { "3", "Rok 3" },
                                 { "4", "Rok 4" },
                                 { "5", "Rok 5" },
+                                { "6", "Rok 6" },
                             };
                         default:
                             return new Dictionary<string, string>();
@@ -378,6 +414,35 @@ namespace SledzSpecke.App.Services.SmkStrategy
                                 { "4", "Uzupełnienie po weryfikacji 4" },
                                 { "5", "Uzupełnienie po weryfikacji 5" },
                                 { "6", "Uzupełnienie po weryfikacji 6" },
+                            };
+                        default:
+                            return new Dictionary<string, string>();
+                    }
+
+                case "AddEditInternship":
+                    switch (fieldName)
+                    {
+                        case "Year":
+                            return new Dictionary<string, string>
+                            {
+                                { "1", "Rok 1" },
+                                { "2", "Rok 2" },
+                                { "3", "Rok 3" },
+                                { "4", "Rok 4" },
+                                { "5", "Rok 5" },
+                                { "6", "Rok 6" },
+                            };
+                        case "RecognitionType":
+                            return new Dictionary<string, string>
+                            {
+                                { "", "Wybierz rodzaj uznania" },
+                                { "Uznanie na podstawie decyzji CMKP", "Uznanie na podstawie decyzji CMKP" },
+                                { "Uznanie na podstawie par. 13 ust.2 rozporządzenia z 29.03.2019 w sprawie specjalizacji lekarzy i lekarzy dentystów",
+                                  "Uznanie na podstawie par. 13 ust.2 rozporządzenia z 29.03.2019 w sprawie specjalizacji lekarzy i lekarzy dentystów" },
+                                { "Uznanie na podstawie decyzji CMKP – realizacja zadań wynikających z wprowadzenia stanu zagrożenia epidemicznego lub stanu epidemii",
+                                  "Uznanie na podstawie decyzji CMKP – realizacja zadań wynikających z wprowadzenia stanu zagrożenia epidemicznego lub stanu epidemii" },
+                                { "Uznanie na podstawie potwierdzenia realizacji w ramach programu specjalizacji",
+                                  "Uznanie na podstawie potwierdzenia realizacji w ramach programu specjalizacji" },
                             };
                         default:
                             return new Dictionary<string, string>();

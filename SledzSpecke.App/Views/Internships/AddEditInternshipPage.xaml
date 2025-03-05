@@ -13,7 +13,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Podstawowe informacje o stażu -->
+            <!-- Sekcja wspólna dla obu wersji SMK -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="15">
                     <!-- Typ stażu -->
@@ -24,7 +24,119 @@
                                 Title="Wybierz typ stażu"
                                 BackgroundColor="Transparent"/>
                     </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
 
+            <!-- Pola dla starej wersji SMK -->
+            <Frame IsVisible="{Binding IsOldSmkVersion}" Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Dane stażu kierunkowego" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
+
+                    <!-- Informacja o częściowej realizacji -->
+                    <VerticalStackLayout IsVisible="{Binding IsEditMode}" Spacing="5">
+                        <Label Text="Realizacja stażu" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <CheckBox IsChecked="{Binding IsPartialCompletion}" />
+                            <Label Text="Realizacja częściowa (staż realizowany w wielu latach)" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Zaliczenie na podstawie uznania -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Zaliczenie na podstawie uznania:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableRecognitionTypes}" 
+                                SelectedItem="{Binding SelectedRecognitionType}"
+                                Title="Wybierz rodzaj uznania"
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+
+                    <!-- Nazwa podmiotu prowadzącego staż -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa podmiotu prowadzącego staż:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Entry Grid.Column="0" Text="{Binding InstitutionName}" 
+                                   Placeholder="Wybierz placówkę ze słownika" 
+                                   BackgroundColor="Transparent" />
+                            <Button Grid.Column="1" Text="Wybierz" 
+                                    Command="{Binding SelectInstitutionCommand}" 
+                                    Style="{StaticResource OutlineButton}"
+                                    Margin="5,0,0,0"/>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Nazwa komórki organizacyjnej -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa komórki organizacyjnej (miejsce odbywania stażu):" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding DepartmentName}" 
+                               Placeholder="Wprowadź nazwę miejsca realizacji stażu" 
+                               BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Nazwa stażu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Entry Grid.Column="0" Text="{Binding InternshipName}" 
+                                   Placeholder="Wybierz staż ze słownika" 
+                                   BackgroundColor="Transparent" />
+                            <Button Grid.Column="1" Text="Wybierz" 
+                                    Command="{Binding SelectInternshipCommand}" 
+                                    Style="{StaticResource OutlineButton}"
+                                    Margin="5,0,0,0"/>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Rok szkolenia, daty, dni -->
+                    <Grid ColumnDefinitions="*, *, *" RowDefinitions="Auto, Auto" ColumnSpacing="10" RowSpacing="5">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Rok szkolenia:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Data rozpoczęcia:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Label Grid.Row="0" Grid.Column="2" Text="Data zakończenia:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+
+                        <Picker Grid.Row="1" Grid.Column="0" 
+                                ItemsSource="{Binding AvailableYears}" 
+                                SelectedItem="{Binding Year}" 
+                                BackgroundColor="Transparent" />
+                        <DatePicker Grid.Row="1" Grid.Column="1" 
+                                   Date="{Binding StartDate}" 
+                                   Format="D" 
+                                   BackgroundColor="Transparent" />
+                        <DatePicker Grid.Row="1" Grid.Column="2" 
+                                   Date="{Binding EndDate}" 
+                                   Format="D" 
+                                   BackgroundColor="Transparent" />
+                    </Grid>
+
+                    <!-- Liczba dni stażu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Liczba dni stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding DaysCount}" Keyboard="Numeric" Placeholder="Wprowadź liczbę dni" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Kierownik stażu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Kierownik stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Entry Text="{Binding SupervisorName}" Placeholder="Wprowadź dane kierownika stażu" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Akceptacja -->
+                    <Label Text="Akceptacja" FontAttributes="Bold" TextColor="{StaticResource TextColor}" Margin="0,10,0,0" />
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding IsCompleted}" />
+                        <Label Text="Staż ukończony" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding IsApproved}" />
+                        <Label Text="Staż zatwierdzony" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Pola dla nowej wersji SMK -->
+            <Frame IsVisible="{Binding IsOldSmkVersion, Converter={StaticResource InvertedBoolConverter}}" Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="15">
                     <!-- Nazwa stażu -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Nazwa stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
@@ -42,12 +154,7 @@
                         <Label Text="Oddział:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                         <Entry Text="{Binding DepartmentName}" Placeholder="Podaj nazwę oddziału (opcjonalnie)" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
 
-            <!-- Daty stażu -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15">
                     <!-- Data rozpoczęcia -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Data rozpoczęcia:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
@@ -67,20 +174,18 @@
                                 SelectedItem="{Binding Year}" 
                                 BackgroundColor="Transparent" />
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
 
-            <!-- Status stażu -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Status stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="10" ColumnSpacing="10">
-                        <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding IsCompleted}" />
-                        <Label Grid.Row="0" Grid.Column="1" Text="Staż ukończony" VerticalOptions="Center" />
+                    <!-- Status stażu -->
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Status stażu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="10" ColumnSpacing="10">
+                            <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding IsCompleted}" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="Staż ukończony" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsApproved}" />
-                        <Label Grid.Row="1" Grid.Column="1" Text="Staż zatwierdzony" VerticalOptions="Center" />
-                    </Grid>
+                            <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding IsApproved}" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="Staż zatwierdzony" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>
 
