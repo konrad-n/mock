@@ -8,19 +8,24 @@
     {
         public async Task<string> GetAsync(string key)
         {
+            ArgumentNullException.ThrowIfNull(key);
+
             try
             {
-                return await SecureStorage.GetAsync(key);
+                return await SecureStorage.GetAsync(key) ?? string.Empty;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error reading from secure storage: {ex.Message}");
-                return null;
+                return string.Empty;
             }
         }
 
         public async Task SetAsync(string key, string value)
         {
+            ArgumentNullException.ThrowIfNull(key);
+            value ??= string.Empty;
+
             try
             {
                 await SecureStorage.SetAsync(key, value);

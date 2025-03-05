@@ -11,8 +11,8 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private readonly IAuthService authService;
         private readonly IDialogService dialogService;
 
-        private string username;
-        private string password;
+        private string username = string.Empty;
+        private string password = string.Empty;
         private bool rememberMe;
 
         public LoginViewModel(IAuthService authService, IDialogService dialogService)

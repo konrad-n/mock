@@ -59,16 +59,20 @@ namespace SledzSpecke.App.Services.Authentication
                 int userId = await SettingsHelper.GetCurrentUserIdAsync();
                 if (userId <= 0)
                 {
-                    return null;
+                    throw new InvalidOperationException("No user is currently logged in.");
                 }
 
                 this.currentUser = await this.databaseService.GetUserAsync(userId);
+                if (this.currentUser == null)
+                {
+                    throw new KeyNotFoundException($"User with ID {userId} not found.");
+                }
                 return this.currentUser;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania bieżącego użytkownika: {ex.Message}");
-                return null;
+                System.Diagnostics.Debug.WriteLine($"Error retrieving current user: {ex.Message}");
+                throw;
             }
         }
 

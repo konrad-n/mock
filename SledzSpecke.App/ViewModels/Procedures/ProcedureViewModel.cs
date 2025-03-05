@@ -26,6 +26,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private string internshipName = string.Empty;
         private string moduleName = string.Empty;
         private ModuleType moduleType;
+        private string procedureName = string.Empty;
+        private string patientInfo = string.Empty;
+        private string groupName = string.Empty;
 
         /// <summary>
         /// Pobiera lub ustawia identyfikator procedury.
@@ -199,22 +202,26 @@ namespace SledzSpecke.App.ViewModels.Procedures
         /// </summary>
         public string PatientInfo
         {
-            get
-            {
-                if (!string.IsNullOrEmpty(this.patientInitials))
-                {
-                    string info = $"Pacjent: {this.patientInitials}";
+            get => this.patientInfo;
+            set => this.SetProperty(ref this.patientInfo, value);
+        }
 
-                    if (!string.IsNullOrEmpty(this.patientGender))
-                    {
-                        info += $" ({this.patientGender})";
-                    }
+        /// <summary>
+        /// Pobiera lub ustawia nazwę procedury.
+        /// </summary>
+        public string ProcedureName
+        {
+            get => this.procedureName;
+            set => this.SetProperty(ref this.procedureName, value);
+        }
 
-                    return info;
-                }
-
-                return string.Empty;
-            }
+        /// <summary>
+        /// Pobiera lub ustawia nazwę grupy procedur.
+        /// </summary>
+        public string GroupName
+        {
+            get => this.groupName;
+            set => this.SetProperty(ref this.groupName, value);
         }
 
         /// <summary>
@@ -226,10 +233,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         /// <returns>Obiekt ViewModel procedury.</returns>
         public static ProcedureViewModel FromModel(Procedure procedure, string internshipName = null, string moduleName = null, ModuleType moduleType = ModuleType.Basic)
         {
-            if (procedure == null)
-            {
-                return null;
-            }
+            ArgumentNullException.ThrowIfNull(procedure, nameof(procedure));
 
             return new ProcedureViewModel
             {
@@ -249,6 +253,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 InternshipName = internshipName ?? string.Empty,
                 ModuleName = moduleName ?? string.Empty,
                 ModuleType = moduleType,
+                ProcedureName = procedure.Code,
+                PatientInfo = $"{procedure.PatientInitials} ({procedure.PatientGender})",
+                GroupName = procedure.ProcedureGroup
             };
         }
 

@@ -204,10 +204,7 @@ namespace SledzSpecke.App.ViewModels.Courses
         /// <returns>Obiekt ViewModel kursu.</returns>
         public static CourseViewModel FromModel(Course course, string moduleName = null, ModuleType moduleType = ModuleType.Basic)
         {
-            if (course == null)
-            {
-                return null;
-            }
+            ArgumentNullException.ThrowIfNull(course, nameof(course));
 
             return new CourseViewModel
             {
@@ -241,17 +238,17 @@ namespace SledzSpecke.App.ViewModels.Courses
                 CourseId = this.CourseId,
                 SpecializationId = specializationId,
                 ModuleId = moduleId,
-                CourseType = this.CourseType,
-                CourseName = this.CourseName,
-                CourseNumber = this.CourseNumber,
-                InstitutionName = this.InstitutionName,
+                CourseType = this.CourseType ?? string.Empty,
+                CourseName = this.CourseName ?? string.Empty,
+                CourseNumber = this.CourseNumber ?? string.Empty,
+                InstitutionName = this.InstitutionName ?? string.Empty,
                 CompletionDate = this.CompletionDate,
                 Year = this.Year,
                 CourseSequenceNumber = this.CourseSequenceNumber,
                 HasCertificate = this.HasCertificate,
-                CertificateNumber = this.CertificateNumber,
+                CertificateNumber = this.CertificateNumber ?? string.Empty,
                 CertificateDate = this.CertificateDate,
-                SyncStatus = this.SyncStatus,
+                SyncStatus = this.SyncStatus
             };
         }
 

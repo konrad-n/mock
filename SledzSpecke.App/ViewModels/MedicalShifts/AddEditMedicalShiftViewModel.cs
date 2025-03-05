@@ -488,6 +488,10 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     shift = new MedicalShift
                     {
                         SyncStatus = SyncStatus.NotSynced,
+                        Location = this.Location,
+                        AdditionalFields = "{}",
+                        ApproverName = string.Empty,
+                        ApproverRole = string.Empty
                     };
                 }
 

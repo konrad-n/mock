@@ -8,7 +8,7 @@
             {
                 if (!Directory.Exists(folderPath))
                 {
-                    Directory.CreateDirectory(folderPath);
+                    await Task.Run(() => Directory.CreateDirectory(folderPath));
                 }
 
                 return true;
@@ -22,6 +22,10 @@
 
         public async Task<string> SaveTextFileAsync(string folderPath, string fileName, string content)
         {
+            ArgumentNullException.ThrowIfNull(folderPath);
+            ArgumentNullException.ThrowIfNull(fileName);
+            content ??= string.Empty;
+
             try
             {
                 await this.EnsureFolderExistsAsync(folderPath);
@@ -34,12 +38,14 @@
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error saving text file: {ex.Message}");
-                return null;
+                return string.Empty;
             }
         }
 
         public async Task<string> ReadTextFileAsync(string filePath)
         {
+            ArgumentNullException.ThrowIfNull(filePath);
+
             try
             {
                 if (File.Exists(filePath))
@@ -47,12 +53,12 @@
                     return await File.ReadAllTextAsync(filePath);
                 }
 
-                return null;
+                return string.Empty;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error reading text file: {ex.Message}");
-                return null;
+                return string.Empty;
             }
         }
 
@@ -76,6 +82,8 @@
 
         public async Task<byte[]> ReadBinaryFileAsync(string filePath)
         {
+            ArgumentNullException.ThrowIfNull(filePath);
+
             try
             {
                 if (File.Exists(filePath))
@@ -83,12 +91,12 @@
                     return await File.ReadAllBytesAsync(filePath);
                 }
 
-                return null;
+                return Array.Empty<byte>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error reading binary file: {ex.Message}");
-                return null;
+                return Array.Empty<byte>();
             }
         }
 
@@ -129,6 +137,8 @@
 
         public async Task<string> PickFileAsync(string[] allowedTypes)
         {
+            ArgumentNullException.ThrowIfNull(allowedTypes);
+
             try
             {
                 var options = new PickOptions
@@ -144,12 +154,12 @@
                 };
 
                 var result = await FilePicker.PickAsync(options);
-                return result?.FullPath;
+                return result?.FullPath ?? string.Empty;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error picking file: {ex.Message}");
-                return null;
+                return string.Empty;
             }
         }
 

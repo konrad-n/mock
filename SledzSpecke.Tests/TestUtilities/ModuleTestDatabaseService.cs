@@ -8,12 +8,13 @@ namespace SledzSpecke.Tests.TestUtilities
     public class ModuleTestDatabaseService : IDatabaseService
     {
         private readonly SQLiteConnection connection;
-        private SQLiteAsyncConnection database;
+        private readonly SQLiteAsyncConnection database;
         private bool isInitialized = false;
 
         public ModuleTestDatabaseService(SQLiteConnection connection)
         {
             this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            this.database = new SQLiteAsyncConnection(connection.DatabasePath);
         }
 
         public async Task InitializeAsync()
@@ -22,9 +23,6 @@ namespace SledzSpecke.Tests.TestUtilities
             {
                 return;
             }
-
-            // Create an async connection that uses our existing open connection
-            this.database = new SQLiteAsyncConnection(this.connection.DatabasePath);
 
             // Create just the tables we need for this test
             await this.database.CreateTableAsync<Module>();

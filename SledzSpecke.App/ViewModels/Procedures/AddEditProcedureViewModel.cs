@@ -47,7 +47,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool showOnlyActiveInternships = true;
 
         private ObservableCollection<InternshipListItem> availableInternships = new();
-        private required InternshipListItem selectedInternship;
+        private InternshipListItem selectedInternship;
         private ObservableCollection<string> availableProcedureCodes = new();
         private ObservableCollection<string> availableGenders = new();
         private ObservableCollection<string> availableStatuses = new();
@@ -765,6 +765,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     procedure = new Procedure
                     {
                         SyncStatus = SyncStatus.NotSynced,
+                        Code = this.Code,
+                        OperatorCode = this.IsOldSmkVersion ? (this.OldSmkOperatorCode.StartsWith("A") ? "A" : "B") : this.OperatorCode,
+                        PerformingPerson = this.PerformingPerson,
+                        Location = this.Location,
+                        ProcedureGroup = this.ProcedureGroup,
+                        Status = this.IsOldSmkVersion ? "Wykonana" : this.Status
                     };
                 }
 
@@ -772,27 +778,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 procedure.InternshipId = this.SelectedInternship.InternshipId;
                 procedure.Date = this.Date;
                 procedure.Year = this.Year;
-
-                if (this.IsOldSmkVersion)
-                {
-                    // W starym SMK kod zabiegu jest albo "A - operator" albo "B - asysta"
-                    procedure.OperatorCode = this.OldSmkOperatorCode.StartsWith("A") ? "A" : "B";
-                    procedure.Code = this.OldSmkOperatorCode;
-                    procedure.PerformingPerson = this.PerformingPerson;
-                    procedure.Status = "Wykonana"; // Status zawsze "Wykonana" w starym SMK
-                }
-                else
-                {
-                    procedure.OperatorCode = this.OperatorCode;
-                    procedure.Code = this.Code;
-                    procedure.Status = this.Status;
-                }
-
-                procedure.Location = this.Location;
-                procedure.PatientInitials = this.PatientInitials;
-                procedure.PatientGender = this.PatientGender;
-                procedure.AssistantData = this.AssistantData;
-                procedure.ProcedureGroup = this.ProcedureGroup;
 
                 await this.databaseService.SaveProcedureAsync(procedure);
 

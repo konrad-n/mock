@@ -19,16 +19,16 @@ namespace SledzSpecke.App.Models
         public int Year { get; set; }
 
         [MaxLength(50)]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [MaxLength(100)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [MaxLength(100)]
-        public string Publisher { get; set; }
+        public string? Publisher { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string? AdditionalFields { get; set; } // JSON
     }
 }

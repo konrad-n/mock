@@ -9,18 +9,19 @@ namespace SledzSpecke.Tests.TestUtilities
     {
         private readonly Dictionary<string, string> storageDict = new Dictionary<string, string>();
 
-        public async Task<string> GetAsync(string key)
+        public Task<string> GetAsync(string key)
         {
             if (this.storageDict.TryGetValue(key, out string value))
             {
-                return value;
+                return Task.FromResult(value);
             }
-            return null;
+            return Task.FromResult(string.Empty);
         }
 
-        public async Task SetAsync(string key, string value)
+        public Task SetAsync(string key, string value)
         {
             this.storageDict[key] = value;
+            return Task.CompletedTask;
         }
 
         public void Remove(string key)

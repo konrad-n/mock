@@ -18,9 +18,9 @@ namespace SledzSpecke.App.Models
         public EducationalActivityType Type { get; set; }
 
         [MaxLength(200)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public DateTime StartDate { get; set; }
 

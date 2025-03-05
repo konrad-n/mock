@@ -44,6 +44,8 @@ namespace SledzSpecke.Tests.TestUtilities
 
         public bool EnsureDirectoryExists(string path)
         {
+            ArgumentNullException.ThrowIfNull(path);
+
             if (this.useInMemoryStorage)
             {
                 return true; // Always succeed for in-memory
@@ -67,18 +69,20 @@ namespace SledzSpecke.Tests.TestUtilities
 
         public async Task<string> ReadAllTextAsync(string path)
         {
+            ArgumentNullException.ThrowIfNull(path);
+
             if (this.useInMemoryStorage)
             {
                 if (this.inMemoryFiles.TryGetValue(path, out byte[] data))
                 {
                     return System.Text.Encoding.UTF8.GetString(data);
                 }
-                return null;
+                return string.Empty;
             }
 
             if (!this.FileExists(path))
             {
-                return null;
+                return string.Empty;
             }
 
             return await File.ReadAllTextAsync(path);
@@ -86,30 +90,39 @@ namespace SledzSpecke.Tests.TestUtilities
 
         public async Task WriteAllTextAsync(string path, string contents)
         {
+            ArgumentNullException.ThrowIfNull(path);
+            contents ??= string.Empty;
+
             if (this.useInMemoryStorage)
             {
                 this.inMemoryFiles[path] = System.Text.Encoding.UTF8.GetBytes(contents);
                 return;
             }
 
-            this.EnsureDirectoryExists(Path.GetDirectoryName(path));
+            string? directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                this.EnsureDirectoryExists(directory);
+            }
             await File.WriteAllTextAsync(path, contents);
         }
 
         public async Task<byte[]> ReadAllBytesAsync(string path)
         {
+            ArgumentNullException.ThrowIfNull(path);
+
             if (this.useInMemoryStorage)
             {
                 if (this.inMemoryFiles.TryGetValue(path, out byte[] data))
                 {
                     return data;
                 }
-                return null;
+                return Array.Empty<byte>();
             }
 
             if (!this.FileExists(path))
             {
-                return null;
+                return Array.Empty<byte>();
             }
 
             return await File.ReadAllBytesAsync(path);
@@ -117,13 +130,20 @@ namespace SledzSpecke.Tests.TestUtilities
 
         public async Task WriteAllBytesAsync(string path, byte[] bytes)
         {
+            ArgumentNullException.ThrowIfNull(path);
+            bytes ??= Array.Empty<byte>();
+
             if (this.useInMemoryStorage)
             {
                 this.inMemoryFiles[path] = bytes;
                 return;
             }
 
-            this.EnsureDirectoryExists(Path.GetDirectoryName(path));
+            string? directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                this.EnsureDirectoryExists(directory);
+            }
             await File.WriteAllBytesAsync(path, bytes);
         }
 

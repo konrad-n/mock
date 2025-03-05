@@ -47,7 +47,7 @@ namespace SledzSpecke.App.Helpers
         {
             if (string.IsNullOrEmpty(specializationCode))
             {
-                return null;
+                return string.Empty;
             }
 
             // Dla kardiologii i pokrewnych specjalizacji wewnętrznych
@@ -70,8 +70,7 @@ namespace SledzSpecke.App.Helpers
             }
 
             // Dla innych specjalizacji można dodać podobne mapowania
-
-            return null;
+            return string.Empty;
         }
 
         /// <summary>

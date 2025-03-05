@@ -173,9 +173,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 Date = this.Date,
                 Hours = this.Hours,
                 Minutes = this.Minutes,
-                Location = this.Location,
+                Location = this.Location ?? string.Empty,
                 Year = this.Year,
                 SyncStatus = this.SyncStatus,
+                AdditionalFields = "{}",
+                ApproverName = string.Empty,
+                ApproverRole = string.Empty
             };
         }
 

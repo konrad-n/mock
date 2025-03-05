@@ -29,6 +29,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool isPartialRealization;
         private string supervisorName = string.Empty;
         private bool isOldSmkVersion;
+        private string status = string.Empty;
+        private string dateRange = string.Empty;
 
         /// <summary>
         /// Pobiera lub ustawia identyfikator stażu.
@@ -203,7 +205,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         /// </summary>
         public string DateRange
         {
-            get => $"{this.startDate:d} - {this.endDate:d}";
+            get => this.dateRange;
+            set => this.SetProperty(ref this.dateRange, value);
         }
 
         /// <summary>
@@ -211,31 +214,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         /// </summary>
         public string Status
         {
-            get
-            {
-                string status = string.Empty;
-
-                if (this.isApproved)
-                {
-                    status = "Zatwierdzony";
-                }
-                else if (this.isCompleted)
-                {
-                    status = "Ukończony";
-                }
-                else
-                {
-                    status = "W trakcie";
-                }
-
-                // Dodaj informację o realizacji częściowej w starym SMK
-                if (this.IsOldSmkVersion && this.IsPartialRealization)
-                {
-                    status += " (realizacja częściowa)";
-                }
-
-                return status;
-            }
+            get => this.status;
+            set => this.SetProperty(ref this.status, value);
         }
 
         /// <summary>
@@ -265,10 +245,7 @@ namespace SledzSpecke.App.ViewModels.Internships
         /// <returns>Obiekt ViewModel stażu.</returns>
         public static InternshipViewModel FromModel(Internship internship, string moduleName = null, ModuleType moduleType = ModuleType.Basic, bool isOldSmk = false)
         {
-            if (internship == null)
-            {
-                return null;
-            }
+            ArgumentNullException.ThrowIfNull(internship, nameof(internship));
 
             return new InternshipViewModel
             {
@@ -282,14 +259,13 @@ namespace SledzSpecke.App.ViewModels.Internships
                 Year = internship.Year,
                 IsCompleted = internship.IsCompleted,
                 IsApproved = internship.IsApproved,
-                IsBasic = internship.InternshipName.Contains("podstawowy"),
+                IsBasic = internship.IsBasic,
+                IsPartialRealization = internship.IsPartialRealization,
+                SupervisorName = internship.SupervisorName,
                 SyncStatus = internship.SyncStatus,
                 ModuleName = moduleName ?? string.Empty,
                 ModuleType = moduleType,
-                // Pola specyficzne dla starego SMK
-                IsPartialRealization = internship.IsPartialRealization,
-                SupervisorName = internship.SupervisorName ?? string.Empty,
-                IsOldSmkVersion = isOldSmk
+                IsOldSmkVersion = isOldSmk,
             };
         }
 

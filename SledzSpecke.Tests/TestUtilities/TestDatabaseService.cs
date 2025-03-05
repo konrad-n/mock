@@ -8,12 +8,13 @@ namespace SledzSpecke.Tests.TestUtilities
     public class TestDatabaseService : IDatabaseService
     {
         private readonly string databasePath;
-        private SQLiteAsyncConnection database;
+        private readonly SQLiteAsyncConnection database;
         private bool isInitialized = false;
 
         public TestDatabaseService(string databasePath)
         {
             this.databasePath = databasePath;
+            this.database = new SQLiteAsyncConnection(databasePath);
         }
 
         public async Task InitializeAsync()
@@ -22,8 +23,6 @@ namespace SledzSpecke.Tests.TestUtilities
             {
                 return;
             }
-
-            this.database = new SQLiteAsyncConnection(this.databasePath);
 
             // Create tables for all models
             await this.database.CreateTableAsync<User>();
@@ -46,13 +45,15 @@ namespace SledzSpecke.Tests.TestUtilities
         public async Task<User> GetUserAsync(int id)
         {
             await this.InitializeAsync();
-            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.UserId == id);
+            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.UserId == id)
+                ?? throw new KeyNotFoundException($"User with ID {id} not found");
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
             await this.InitializeAsync();
-            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username);
+            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username)
+                ?? throw new KeyNotFoundException($"User with username '{username}' not found");
         }
 
         public async Task<int> SaveUserAsync(User user)
@@ -72,9 +73,15 @@ namespace SledzSpecke.Tests.TestUtilities
         public async Task<SledzSpecke.App.Models.Specialization> GetSpecializationAsync(int id)
         {
             await this.InitializeAsync();
-            var specialization = await this.database.Table<SledzSpecke.App.Models.Specialization>().FirstOrDefaultAsync(s => s.SpecializationId == id);
+            var specialization = await this.database.Table<SledzSpecke.App.Models.Specialization>()
+                .FirstOrDefaultAsync(s => s.SpecializationId == id);
 
-            if (specialization != null && specialization.HasModules)
+            if (specialization == null)
+            {
+                throw new KeyNotFoundException($"Specialization with ID {id} not found");
+            }
+
+            if (specialization.HasModules)
             {
                 specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
             }

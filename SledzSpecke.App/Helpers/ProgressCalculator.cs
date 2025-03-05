@@ -114,7 +114,7 @@ namespace SledzSpecke.App.Helpers
             var specialization = await database.GetSpecializationAsync(specializationId);
             if (specialization == null)
             {
-                return null;
+                return new SpecializationStatistics();
             }
 
             var stats = new SpecializationStatistics();

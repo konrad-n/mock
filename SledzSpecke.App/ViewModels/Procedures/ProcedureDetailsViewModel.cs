@@ -16,7 +16,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private readonly IDialogService dialogService;
 
         private int procedureId;
-        private required Procedure procedure;
+        public required Procedure Procedure { get; set; }
         private string code = string.Empty;
         private string operatorCode = string.Empty;
         private DateTime date;
@@ -49,14 +49,14 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             // Initialize properties
             this.Title = "Szczegóły procedury";
-            this.procedure = new Procedure
+            this.Procedure = new Procedure
             {
                 Code = string.Empty,
                 OperatorCode = string.Empty,
                 PerformingPerson = string.Empty,
                 Location = string.Empty,
                 ProcedureGroup = string.Empty,
-                Status = string.Empty
+                Status = "Nowa"
             };
 
             // Check SMK version (can be loaded from settings or service)
@@ -72,12 +72,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.SetProperty(ref this.procedureId, value);
                 this.LoadProcedureAsync(value).ConfigureAwait(false);
             }
-        }
-
-        public Procedure Procedure
-        {
-            get => this.procedure;
-            set => this.SetProperty(ref this.procedure, value);
         }
 
         public string Code
@@ -244,7 +238,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         "Błąd",
                         "Nie znaleziono procedury.",
                         "OK");
-                    await this.OnGoBackAsync();
                     return;
                 }
 

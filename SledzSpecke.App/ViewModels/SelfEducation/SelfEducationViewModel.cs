@@ -114,10 +114,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         /// <returns>Obiekt ViewModel samokształcenia.</returns>
         public static SelfEducationViewModel FromModel(Models.SelfEducation selfEducation, string moduleName = null)
         {
-            if (selfEducation == null)
-            {
-                return null;
-            }
+            ArgumentNullException.ThrowIfNull(selfEducation, nameof(selfEducation));
 
             var viewModel = new SelfEducationViewModel
             {
@@ -143,7 +140,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas parsowania pól dodatkowych: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Error parsing additional fields: {ex.Message}");
                 }
             }
 

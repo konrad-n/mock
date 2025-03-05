@@ -7,109 +7,158 @@
              Title="{Binding Title}">
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, *, Auto">
         <!-- Przełącznik modułów - widoczny tylko dla specjalizacji modułowych -->
-        <Frame IsVisible="{Binding HasModules}" Grid.Row="0" Padding="5" Margin="10,10,10,5" 
-               BorderColor="{StaticResource Primary}" HasShadow="False" 
-               CornerRadius="5" IsClippedToBounds="True">
+        <Frame IsVisible="{Binding HasModules}"
+               Grid.Row="0"
+               Padding="5"
+               Margin="10,10,10,5"
+               BorderColor="{StaticResource Primary}"
+               HasShadow="False"
+               CornerRadius="5"
+               IsClippedToBounds="True">
             <Grid ColumnDefinitions="*,*">
-                <Button Text="Moduł podstawowy" 
+                <Button Text="Moduł podstawowy"
                         BackgroundColor="{Binding ShowBasicModule, Converter={StaticResource BoolToColorConverter}}"
                         TextColor="{Binding ShowBasicModule, Converter={StaticResource BoolToTextColorConverter}}"
-                        Command="{Binding SelectModuleCommand}" 
-                        CommandParameter="Basic" />
-                <Button Grid.Column="1" Text="Moduł specjalistyczny" 
+                        Command="{Binding SelectModuleCommand}"
+                        CommandParameter="Basic"/>
+                <Button Grid.Column="1"
+                        Text="Moduł specjalistyczny"
                         BackgroundColor="{Binding ShowSpecialisticModule, Converter={StaticResource BoolToColorConverter}}"
                         TextColor="{Binding ShowSpecialisticModule, Converter={StaticResource BoolToTextColorConverter}}"
-                        Command="{Binding SelectModuleCommand}" 
-                        CommandParameter="Specialistic" />
+                        Command="{Binding SelectModuleCommand}"
+                        CommandParameter="Specialistic"/>
             </Grid>
         </Frame>
 
         <!-- Informacja o module - widoczna tylko dla specjalizacji modułowych -->
-        <Frame IsVisible="{Binding HasModules}" Grid.Row="1" BorderColor="{StaticResource Primary}" HasShadow="False" 
-               Margin="10,0,10,5" Padding="10" CornerRadius="5">
-            <Label Text="{Binding ModuleInfo}" TextColor="{StaticResource PrimaryColor}" FontSize="14" />
+        <Frame IsVisible="{Binding HasModules}"
+               Grid.Row="1"
+               BorderColor="{StaticResource Primary}"
+               HasShadow="False"
+               Margin="10,0,10,5"
+               Padding="10"
+               CornerRadius="5">
+            <Label Text="{Binding ModuleInfo}"
+                   TextColor="{StaticResource PrimaryColor}"
+                   FontSize="14"/>
         </Frame>
 
         <!-- Filtr aktywne/wszystkie -->
-        <Frame Grid.Row="2" Padding="5" Margin="10,5,10,5" BorderColor="{StaticResource Gray300}" HasShadow="False" 
-               CornerRadius="5" IsClippedToBounds="True">
+        <Frame Grid.Row="2"
+               Padding="5"
+               Margin="10,5,10,5"
+               BorderColor="{StaticResource Gray300}"
+               HasShadow="False"
+               CornerRadius="5"
+               IsClippedToBounds="True">
             <Grid ColumnDefinitions="*, Auto, *">
-                <Button Text="Aktywne staże" 
+                <Button Text="Aktywne staże"
                         Command="{Binding ToggleActiveCommand}"
                         IsEnabled="{Binding ShowOnlyActive}"
                         BackgroundColor="{Binding ShowOnlyActive, Converter={StaticResource BoolToColorConverter}}"
-                        TextColor="{Binding ShowOnlyActive, Converter={StaticResource BoolToTextColorConverter}}" />
+                        TextColor="{Binding ShowOnlyActive, Converter={StaticResource BoolToTextColorConverter}}"/>
 
-                <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="30" 
-                         BackgroundColor="{StaticResource Gray300}" VerticalOptions="Center" />
+                <BoxView Grid.Column="1"
+                         WidthRequest="1"
+                         HeightRequest="30"
+                         BackgroundColor="{StaticResource Gray300}"
+                         VerticalOptions="Center"/>
 
-                <Button Grid.Column="2" Text="Wszystkie staże" 
+                <Button Grid.Column="2"
+                        Text="Wszystkie staże"
                         Command="{Binding ToggleActiveCommand}"
                         IsEnabled="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}}"
                         BackgroundColor="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=Color}"
-                        TextColor="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=TextColor}" />
+                        TextColor="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=TextColor}"/>
             </Grid>
         </Frame>
 
         <!-- Filtr realizacja częściowa - widoczny tylko dla Starego SMK -->
-        <Frame Grid.Row="3" Padding="5" Margin="10,0,10,10" BorderColor="{StaticResource Gray300}" HasShadow="False" 
-               CornerRadius="5" IsClippedToBounds="True" IsVisible="{Binding IsOldSmkVersion}">
+        <Frame Grid.Row="3"
+               Padding="5"
+               Margin="10,0,10,10"
+               BorderColor="{StaticResource Gray300}"
+               HasShadow="False"
+               CornerRadius="5"
+               IsClippedToBounds="True"
+               IsVisible="{Binding IsOldSmkVersion}">
             <Grid ColumnDefinitions="*, Auto, *">
-                <Button Text="Wszystkie typy" 
+                <Button Text="Wszystkie typy"
                         Command="{Binding TogglePartialCommand}"
                         IsEnabled="{Binding ShowPartialOnly, Converter={StaticResource InvertedBoolConverter}}"
                         BackgroundColor="{Binding ShowPartialOnly, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=Color}"
-                        TextColor="{Binding ShowPartialOnly, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=TextColor}" />
+                        TextColor="{Binding ShowPartialOnly, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=TextColor}"/>
 
-                <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="30" 
-                         BackgroundColor="{StaticResource Gray300}" VerticalOptions="Center" />
+                <BoxView Grid.Column="1"
+                         WidthRequest="1"
+                         HeightRequest="30"
+                         BackgroundColor="{StaticResource Gray300}"
+                         VerticalOptions="Center"/>
 
-                <Button Grid.Column="2" Text="Realizacja częściowa" 
+                <Button Grid.Column="2"
+                        Text="Realizacja częściowa"
                         Command="{Binding TogglePartialCommand}"
                         IsEnabled="{Binding ShowPartialOnly}"
                         BackgroundColor="{Binding ShowPartialOnly, Converter={StaticResource BoolToColorConverter}}"
-                        TextColor="{Binding ShowPartialOnly, Converter={StaticResource BoolToTextColorConverter}}" />
+                        TextColor="{Binding ShowPartialOnly, Converter={StaticResource BoolToTextColorConverter}}"/>
             </Grid>
         </Frame>
 
         <!-- Lista staży -->
-        <RefreshView Grid.Row="4" IsRefreshing="{Binding IsBusy}" Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding Internships}" 
-                           SelectionMode="Single" 
-                           SelectedItem="{Binding SelectedInternship}" 
-                           SelectionChangedCommand="{Binding InternshipSelectedCommand}">
+        <RefreshView Grid.Row="4"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Internships}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedInternship}"
+                            SelectionChangedCommand="{Binding InternshipSelectedCommand}">
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                        <Label Text="Brak staży" FontSize="18" HorizontalOptions="Center" />
-                        <Label Text="Dodaj nowy staż klikając przycisk poniżej" HorizontalOptions="Center" />
+                    <VerticalStackLayout VerticalOptions="Center"
+                                         HorizontalOptions="Center">
+                        <Label Text="Brak staży"
+                               FontSize="18"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Dodaj nowy staż klikając przycisk poniżej"
+                               HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:InternshipsListViewModel">
-                        <Frame Style="{StaticResource CardFrame}" Margin="10,5">
+                    <DataTemplate x:DataType="vm:InternshipViewModel">
+                        <Frame Style="{StaticResource CardFrame}"
+                               Margin="10,5">
                             <Grid ColumnDefinitions="*, Auto">
                                 <VerticalStackLayout Grid.Column="0">
-                                    <Label Text="{Binding InternshipName}" FontAttributes="Bold" />
-                                    <Label Text="{Binding InstitutionName, StringFormat='Instytucja: {0}'}" />
-                                    <Label Text="{Binding DepartmentName, StringFormat='Oddział: {0}'}" 
-                                           IsVisible="{Binding DepartmentName, Converter={StaticResource StringToBoolConverter}}" />
-                                    <Label Text="{Binding DateRange, StringFormat='Okres: {0}'}" />
-                                    <Label Text="{Binding Status}" TextColor="{StaticResource PrimaryColor}" />
+                                    <Label Text="{Binding InternshipName}"
+                                           FontAttributes="Bold"/>
+                                    <Label Text="{Binding InstitutionName, StringFormat='Instytucja: {0}'}"/>
+                                    <Label Text="{Binding DepartmentName, StringFormat='Oddział: {0}'}"
+                                           IsVisible="{Binding DepartmentName, Converter={StaticResource StringToBoolConverter}}"/>
+                                    <Label Text="{Binding DateRange, StringFormat='Okres: {0}'}"/>
+                                    <Label Text="{Binding Status}"
+                                           TextColor="{StaticResource PrimaryColor}"/>
                                     <!-- Pole kierownika stażu dla Starego SMK -->
-                                    <Label Text="{Binding SupervisorName, StringFormat='Kierownik stażu: {0}'}" 
-                                           IsVisible="{Binding IsOldSmkVersion}" 
-                                           TextColor="{StaticResource TextMutedColor}" 
-                                           FontSize="13" />
-                                    <Label Text="{Binding ModuleName}" 
+                                    <Label Text="{Binding SupervisorName, StringFormat='Kierownik stażu: {0}'}"
+                                           IsVisible="{Binding IsOldSmkVersion}"
+                                           TextColor="{StaticResource TextMutedColor}"
+                                           FontSize="13"/>
+                                    <Label Text="{Binding ModuleName}"
                                            IsVisible="{Binding ModuleName, Converter={StaticResource StringToBoolConverter}}"
-                                           FontSize="13" TextColor="{StaticResource TextMutedColor}" />
+                                           FontSize="13"
+                                           TextColor="{StaticResource TextMutedColor}"/>
                                 </VerticalStackLayout>
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End">
-                                    <Label Text="{Binding DaysCount, StringFormat='{0}'}" FontSize="24" FontAttributes="Bold" 
-                                           TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
-                                    <Label Text="dni" FontSize="12" TextColor="{StaticResource TextMutedColor}" 
-                                           HorizontalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1"
+                                                     VerticalOptions="Center"
+                                                     HorizontalOptions="End">
+                                    <Label Text="{Binding DaysCount, StringFormat='{0}'}"
+                                           FontSize="24"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource Primary}"
+                                           HorizontalOptions="Center"/>
+                                    <Label Text="dni"
+                                           FontSize="12"
+                                           TextColor="{StaticResource TextMutedColor}"
+                                           HorizontalOptions="Center"/>
                                 </VerticalStackLayout>
                             </Grid>
                         </Frame>
@@ -119,8 +168,11 @@
         </RefreshView>
 
         <!-- Przycisk dodawania -->
-        <Button Grid.Row="5" Text="Dodaj nowy staż" Command="{Binding AddInternshipCommand}"
+        <Button Grid.Row="5"
+                Text="Dodaj nowy staż"
+                Command="{Binding AddInternshipCommand}"
                 Style="{StaticResource PrimaryButton}"
-                Margin="20" HorizontalOptions="Center" />
+                Margin="20"
+                HorizontalOptions="Center"/>
     </Grid>
 </ContentPage>

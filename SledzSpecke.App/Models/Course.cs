@@ -17,16 +17,16 @@ namespace SledzSpecke.App.Models
         public int? ModuleId { get; set; }
 
         [MaxLength(50)]
-        public string CourseType { get; set; }
+        public string? CourseType { get; set; }
 
         [MaxLength(100)]
-        public string CourseName { get; set; }
+        public string? CourseName { get; set; }
 
         [MaxLength(20)]
-        public string CourseNumber { get; set; }
+        public string? CourseNumber { get; set; }
 
         [MaxLength(100)]
-        public string InstitutionName { get; set; }
+        public string? InstitutionName { get; set; }
 
         public DateTime CompletionDate { get; set; }
 
@@ -37,13 +37,13 @@ namespace SledzSpecke.App.Models
         // Pola dla certyfikatów
         public bool HasCertificate { get; set; }
 
-        public string CertificateNumber { get; set; }
+        public string? CertificateNumber { get; set; }
 
         public DateTime? CertificateDate { get; set; }
 
         // Nowe pole dla rodzaju uznania kursu (stary SMK)
         [MaxLength(100)]
-        public string RecognitionType { get; set; }
+        public string? RecognitionType { get; set; }
 
         // Czy kurs wymaga akceptacji kierownika (stary SMK)
         public bool RequiresApproval { get; set; }
@@ -53,6 +53,6 @@ namespace SledzSpecke.App.Models
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string? AdditionalFields { get; set; } // JSON
     }
 }
