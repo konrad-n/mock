@@ -2,8 +2,8 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="SledzSpecke.App.Views.Authentication.RegisterPage"
     xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Authentication"
+    x:Class="SledzSpecke.App.Views.Authentication.RegisterPage"
     x:DataType="vm:RegisterViewModel"
     Title="Rejestracja">
 
@@ -28,8 +28,7 @@
             <!-- Formularz rejestracji -->
             <VerticalStackLayout Grid.Row="1"
                                  Spacing="15"
-                                 VerticalOptions="Center"
-                                 x:DataType="vm:RegisterViewModel">
+                                 VerticalOptions="Center">
                 <!-- Informacje o użytkowniku -->
                 <Label Text="Informacje osobiste"
                        FontSize="18"
@@ -69,8 +68,7 @@
                        FontSize="18"
                        FontAttributes="Bold"
                        Margin="0,10,0,0"/>
-                <HorizontalStackLayout Spacing="20"
-                                       x:DataType="vm:RegisterViewModel">
+                <HorizontalStackLayout Spacing="20">
                     <HorizontalStackLayout Spacing="10">
                         <CheckBox IsChecked="{Binding IsNewSmkVersion}"/>
                         <Label Text="Nowy SMK"

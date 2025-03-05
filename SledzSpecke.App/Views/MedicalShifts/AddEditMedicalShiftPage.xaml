@@ -1,129 +1,127 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SledzSpecke.App.Views.MedicalShifts.AddEditMedicalShiftPage"
              xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.MedicalShifts"
+             x:Class="SledzSpecke.App.Views.MedicalShifts.AddEditMedicalShiftPage"
              x:DataType="vm:AddEditMedicalShiftViewModel"
              Title="{Binding Title}">
 
-       <ScrollView>
-              <StackLayout Padding="20"
-                           Spacing="15"
-                           x:DataType="vm:AddEditMedicalShiftViewModel">
-                     <!-- Indykator ładowania -->
-                     <ActivityIndicator IsRunning="{Binding IsBusy}"
+    <ScrollView>
+        <StackLayout Padding="20"
+                           Spacing="15">
+            <!-- Indykator ładowania -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
                                         IsVisible="{Binding IsBusy}"
                                         HorizontalOptions="Center"
                                         VerticalOptions="Center"/>
 
-                     <Grid ColumnDefinitions="Auto,*"
+            <Grid ColumnDefinitions="Auto,*"
                            RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
                            IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
                            ColumnSpacing="15"
-                           RowSpacing="15"
-                           x:DataType="vm:AddEditMedicalShiftViewModel">
+                           RowSpacing="15">
 
-                            <!-- Wybór stażu -->
-                            <Label Grid.Row="0"
+                <!-- Wybór stażu -->
+                <Label Grid.Row="0"
                                    Grid.Column="0"
                                    Text="Staż:"
                                    VerticalOptions="Center"/>
-                            <Picker Grid.Row="0"
+                <Picker Grid.Row="0"
                                     Grid.Column="1"
                                     ItemsSource="{Binding AvailableInternships}"
                                     SelectedItem="{Binding SelectedInternship}"
                                     ItemDisplayBinding="{Binding DisplayName}"
                                     Title="Wybierz staż"/>
 
-                            <!-- Data rozpoczęcia - zmieniono nazwę z "Data dyżuru" -->
-                            <Label Grid.Row="1"
+                <!-- Data rozpoczęcia - zmieniono nazwę z "Data dyżuru" -->
+                <Label Grid.Row="1"
                                    Grid.Column="0"
                                    Text="Data rozpoczęcia:"
                                    VerticalOptions="Center"/>
-                            <DatePicker Grid.Row="1"
+                <DatePicker Grid.Row="1"
                                         Grid.Column="1"
                                         Date="{Binding Date}"
                                         Format="yyyy-MM-dd"/>
 
-                            <!-- Liczba godzin - zmieniono nazwę z "Godziny" -->
-                            <Label Grid.Row="2"
+                <!-- Liczba godzin - zmieniono nazwę z "Godziny" -->
+                <Label Grid.Row="2"
                                    Grid.Column="0"
                                    Text="Liczba godzin:"
                                    VerticalOptions="Center"/>
-                            <Entry Grid.Row="2"
+                <Entry Grid.Row="2"
                                    Grid.Column="1"
                                    Text="{Binding Hours}"
                                    Keyboard="Numeric"/>
 
-                            <!-- Liczba minut - zmieniono nazwę z "Minuty" -->
-                            <Label Grid.Row="3"
+                <!-- Liczba minut - zmieniono nazwę z "Minuty" -->
+                <Label Grid.Row="3"
                                    Grid.Column="0"
                                    Text="Liczba minut:"
                                    VerticalOptions="Center"/>
-                            <Entry Grid.Row="3"
+                <Entry Grid.Row="3"
                                    Grid.Column="1"
                                    Text="{Binding Minutes}"
                                    Keyboard="Numeric"/>
 
-                            <!-- Nazwa komórki organizacyjnej - zmieniono nazwę z "Miejsce dyżuru" -->
-                            <Label Grid.Row="4"
+                <!-- Nazwa komórki organizacyjnej - zmieniono nazwę z "Miejsce dyżuru" -->
+                <Label Grid.Row="4"
                                    Grid.Column="0"
                                    Text="Nazwa komórki organizacyjnej:"
                                    VerticalOptions="Center"/>
-                            <Entry Grid.Row="4"
+                <Entry Grid.Row="4"
                                    Grid.Column="1"
                                    Text="{Binding Location}"
                                    Placeholder="Wpisz nazwę komórki organizacyjnej"/>
 
-                            <!-- Rok szkolenia -->
-                            <Label Grid.Row="5"
+                <!-- Rok szkolenia -->
+                <Label Grid.Row="5"
                                    Grid.Column="0"
                                    Text="Rok szkolenia:"
                                    VerticalOptions="Center"/>
-                            <Picker Grid.Row="5"
+                <Picker Grid.Row="5"
                                     Grid.Column="1"
                                     ItemsSource="{Binding YearOptions}"
                                     SelectedItem="{Binding Year}"
                                     Title="Wybierz rok szkolenia"/>
 
-                            <!-- Osoba nadzorująca - dla starego SMK -->
-                            <Label Grid.Row="6"
+                <!-- Osoba nadzorująca - dla starego SMK -->
+                <Label Grid.Row="6"
                                    Grid.Column="0"
                                    Text="Osoba nadzorująca:"
                                    VerticalOptions="Center"
                                    IsVisible="{Binding IsOldSmkVersion}"/>
-                            <Entry Grid.Row="6"
+                <Entry Grid.Row="6"
                                    Grid.Column="1"
                                    Text="{Binding OldSMKField1}"
                                    Placeholder="Wpisz osobę nadzorującą dyżur"
                                    IsVisible="{Binding IsOldSmkVersion}"/>
 
-                            <!-- Oddział - dla starego SMK -->
-                            <Label Grid.Row="7"
+                <!-- Oddział - dla starego SMK -->
+                <Label Grid.Row="7"
                                    Grid.Column="0"
                                    Text="Oddział:"
                                    VerticalOptions="Center"
                                    IsVisible="{Binding IsOldSmkVersion}"/>
-                            <Entry Grid.Row="7"
+                <Entry Grid.Row="7"
                                    Grid.Column="1"
                                    Text="{Binding OldSMKField2}"
                                    Placeholder="Wpisz oddział"
                                    IsVisible="{Binding IsOldSmkVersion}"/>
-                     </Grid>
+            </Grid>
 
-                     <!-- Przyciski akcji -->
-                     <StackLayout Orientation="Horizontal"
+            <!-- Przyciski akcji -->
+            <StackLayout Orientation="Horizontal"
                                   Spacing="15"
                                   HorizontalOptions="Center"
                                   IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}">
-                            <Button Text="Zapisz"
+                <Button Text="Zapisz"
                                     Command="{Binding SaveCommand}"
                                     IsEnabled="{Binding CanSave}"
                                     Style="{StaticResource PrimaryButton}"/>
-                            <Button Text="Anuluj"
+                <Button Text="Anuluj"
                                     Command="{Binding CancelCommand}"
                                     Style="{StaticResource OutlineButton}"/>
-                     </StackLayout>
-              </StackLayout>
-       </ScrollView>
+            </StackLayout>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

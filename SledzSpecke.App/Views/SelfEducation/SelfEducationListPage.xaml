@@ -62,7 +62,7 @@
                                     <Label Text="{Binding Publisher, StringFormat='Wydawca/Organizator: {0}'}"/>
                                     <!-- Informacja o wymaganiu akceptacji - widoczna tylko dla starej wersji SMK -->
                                     <Label Text="{Binding RequiresAcceptance, Converter={StaticResource BoolToYesNoConverter}, StringFormat='Wymaga akceptacji: {0}'}"
-                                           IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsOldSmkVersion}"
+                                           IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SelfEducationListViewModel}}, Path=SelfEducationListViewModel.IsOldSmkVersion}"
                                            FontSize="13"
                                            TextColor="{StaticResource WarningColor}"/>
                                     <Label Text="{Binding ModuleName}"
