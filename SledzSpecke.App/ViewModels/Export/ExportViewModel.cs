@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
@@ -358,26 +358,11 @@ namespace SledzSpecke.App.ViewModels.Export
                         : null,
                 };
 
-                this.ExportStatusMessage = "Generowanie pliku Excel...";
+                // Serializuj opcje do przekazania do strony podglądu
+                string serializedOptions = System.Text.Json.JsonSerializer.Serialize(options);
 
-                // Wykonaj eksport
-                string filePath = await this.exportService.ExportToExcelAsync(options);
-
-                // Aktualizacja daty ostatniego eksportu
-                this.LastExportDate = DateTime.Now;
-
-                this.ExportStatusMessage = "Eksport zakończony pomyślnie.";
-
-                bool shareNow = await this.dialogService.DisplayAlertAsync(
-                    "Eksport zakończony",
-                    $"Dane zostały pomyślnie wyeksportowane do pliku Excel. Ścieżka do pliku: {filePath}. Czy chcesz udostępnić plik?",
-                    "Tak",
-                    "Nie");
-
-                if (shareNow)
-                {
-                    await this.OnShareLastExportAsync();
-                }
+                // Nawiguj do strony podglądu z opcjami eksportu
+                await Shell.Current.GoToAsync($"ExportPreview?options={Uri.EscapeDataString(serializedOptions)}");
             }
             catch (Exception ex)
             {
