@@ -586,99 +586,111 @@ namespace SledzSpecke.App.Services.Export
         }
 
         private void AddCoursesWorksheet(ExcelPackage package, List<Course> courses, bool oldSmkFormat)
+{
+    var worksheet = package.Workbook.Worksheets.Add("Kursy");
+
+    // Headers
+    int col = 1;
+
+    if (oldSmkFormat)
+    {
+        // Nagłówki specyficzne dla starego SMK w odpowiedniej kolejności
+        worksheet.Cells[1, col++].Value = "Uznanie lub zwolnienie z realizacji";
+        worksheet.Cells[1, col++].Value = "Nazwa kursu";
+        worksheet.Cells[1, col++].Value = "Numer kursu";
+        worksheet.Cells[1, col++].Value = "Nazwa podmiotu prowadzącego kurs";
+        worksheet.Cells[1, col++].Value = "Rok szkolenia";
+        worksheet.Cells[1, col++].Value = "Numer kolejny kursu";
+        worksheet.Cells[1, col++].Value = "Data ukończenia";
+        worksheet.Cells[1, col++].Value = "Nie wymaga akceptacji kierownika";
+        worksheet.Cells[1, col++].Value = "Numer zaświadczenia o ukończeniu kursu";
+        worksheet.Cells[1, col++].Value = "Data wygenerowania zaświadczenia";
+    }
+    else
+    {
+        // Standardowe nagłówki dla nowej wersji SMK
+        worksheet.Cells[1, col++].Value = "Nazwa kursu";
+        worksheet.Cells[1, col++].Value = "Typ kursu";
+        worksheet.Cells[1, col++].Value = "Numer kursu";
+        worksheet.Cells[1, col++].Value = "Instytucja";
+        worksheet.Cells[1, col++].Value = "Data ukończenia";
+        worksheet.Cells[1, col++].Value = "Rok szkolenia";
+        worksheet.Cells[1, col++].Value = "Numer kolejny";
+        worksheet.Cells[1, col++].Value = "Posiada certyfikat";
+        worksheet.Cells[1, col++].Value = "Numer certyfikatu";
+        worksheet.Cells[1, col++].Value = "Data certyfikatu";
+    }
+
+    // Format nagłówków
+    this.FormatHeaders(worksheet, col - 1);
+
+    // Data
+    for (int i = 0; i < courses.Count; i++)
+    {
+        int row = i + 2;
+        col = 1;
+
+        var course = courses[i];
+
+        if (oldSmkFormat)
         {
-            var worksheet = package.Workbook.Worksheets.Add("Kursy");
-
-            // Headers
-            int col = 1;
-
-            // Standardowe nagłówki dla wszystkich wersji SMK
-            worksheet.Cells[1, col++].Value = "Nazwa kursu";
-            worksheet.Cells[1, col++].Value = "Typ kursu";
-            worksheet.Cells[1, col++].Value = "Numer kursu";
-            worksheet.Cells[1, col++].Value = "Instytucja";
-            worksheet.Cells[1, col++].Value = "Data ukończenia";
-            worksheet.Cells[1, col++].Value = "Rok szkolenia";
-            worksheet.Cells[1, col++].Value = "Numer kolejny";
-
-            // Pola specyficzne dla starego SMK
-            if (oldSmkFormat)
+            // Dane w kolejności dla starego SMK
+            worksheet.Cells[row, col++].Value = course.RecognitionType;
+            worksheet.Cells[row, col++].Value = course.CourseName;
+            worksheet.Cells[row, col++].Value = course.CourseNumber;
+            worksheet.Cells[row, col++].Value = course.InstitutionName;
+            worksheet.Cells[row, col++].Value = course.Year;
+            worksheet.Cells[row, col++].Value = course.CourseSequenceNumber;
+            
+            worksheet.Cells[row, col++].Value = course.CompletionDate;
+            worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
+            
+            // Odwrócona logika - w SMK pole to wskazuje na brak wymogu akceptacji
+            worksheet.Cells[row, col++].Value = !course.RequiresApproval ? "Tak" : "Nie";
+            
+            worksheet.Cells[row, col++].Value = course.CertificateNumber;
+            
+            if (course.CertificateIssueDate.HasValue)
             {
-                worksheet.Cells[1, col++].Value = "Uznanie lub zwolnienie z realizacji";
-                worksheet.Cells[1, col++].Value = "Wymaga akceptacji kierownika";
-            }
-
-            // Pola certyfikatu dla wszystkich wersji
-            worksheet.Cells[1, col++].Value = "Posiada certyfikat";
-            worksheet.Cells[1, col++].Value = "Numer certyfikatu";
-            worksheet.Cells[1, col++].Value = "Data certyfikatu";
-
-            // Dodatkowe pole dla starego SMK
-            if (oldSmkFormat)
-            {
-                worksheet.Cells[1, col++].Value = "Data wygenerowania zaświadczenia";
-            }
-
-            // Format nagłówków
-            this.FormatHeaders(worksheet, col - 1);
-
-            // Data
-            for (int i = 0; i < courses.Count; i++)
-            {
-                int row = i + 2;
-                col = 1;
-
-                var course = courses[i];
-
-                worksheet.Cells[row, col++].Value = course.CourseName;
-                worksheet.Cells[row, col++].Value = course.CourseType;
-                worksheet.Cells[row, col++].Value = course.CourseNumber;
-                worksheet.Cells[row, col++].Value = course.InstitutionName;
-
-                worksheet.Cells[row, col++].Value = course.CompletionDate;
+                worksheet.Cells[row, col++].Value = course.CertificateIssueDate;
                 worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
-
-                worksheet.Cells[row, col++].Value = course.Year;
-                worksheet.Cells[row, col++].Value = course.CourseSequenceNumber;
-
-                // Dane specyficzne dla starego SMK
-                if (oldSmkFormat)
-                {
-                    worksheet.Cells[row, col++].Value = course.RecognitionType;
-                    worksheet.Cells[row, col++].Value = !course.RequiresApproval ? "Tak" : "Nie"; // Odwrócona logika
-                }
-
-                worksheet.Cells[row, col++].Value = course.HasCertificate ? "Tak" : "Nie";
-                worksheet.Cells[row, col++].Value = course.CertificateNumber;
-
-                if (course.CertificateDate.HasValue)
-                {
-                    worksheet.Cells[row, col++].Value = course.CertificateDate;
-                    worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
-                }
-                else
-                {
-                    col++;
-                }
-
-                // Data wygenerowania zaświadczenia dla starego SMK
-                if (oldSmkFormat)
-                {
-                    if (course.CertificateIssueDate.HasValue)
-                    {
-                        worksheet.Cells[row, col++].Value = course.CertificateIssueDate;
-                        worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
-                    }
-                    else
-                    {
-                        col++;
-                    }
-                }
             }
-
-            // Autofit columns
-            worksheet.Columns[1, col - 1].AutoFit();
+            else
+            {
+                col++;
+            }
         }
+        else
+        {
+            // Dane dla nowej wersji SMK
+            worksheet.Cells[row, col++].Value = course.CourseName;
+            worksheet.Cells[row, col++].Value = course.CourseType;
+            worksheet.Cells[row, col++].Value = course.CourseNumber;
+            worksheet.Cells[row, col++].Value = course.InstitutionName;
+            
+            worksheet.Cells[row, col++].Value = course.CompletionDate;
+            worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
+            
+            worksheet.Cells[row, col++].Value = course.Year;
+            worksheet.Cells[row, col++].Value = course.CourseSequenceNumber;
+            worksheet.Cells[row, col++].Value = course.HasCertificate ? "Tak" : "Nie";
+            worksheet.Cells[row, col++].Value = course.CertificateNumber;
+            
+            if (course.CertificateDate.HasValue)
+            {
+                worksheet.Cells[row, col++].Value = course.CertificateDate;
+                worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
+            }
+            else
+            {
+                col++;
+            }
+        }
+    }
+
+    // Autofit columns
+    worksheet.Columns[1, col - 1].AutoFit();
+}
 
         private void AddProceduresWorksheet(ExcelPackage package, List<Procedure> procedures, bool oldSmkFormat)
         {
