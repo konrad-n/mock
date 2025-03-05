@@ -6,7 +6,7 @@
     public class ValidationResult
     {
         /// <summary>
-        /// Czy walidacja przebiegła pomyślnie
+        /// Czy walidacja przebiegła pomyślnie.
         /// </summary>
         public bool IsValid { get; set; }
 

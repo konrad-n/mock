@@ -287,8 +287,11 @@ namespace SledzSpecke.App.ViewModels.Courses
 
         // Komendy
         public ICommand SaveCommand { get; }
+
         public ICommand CancelCommand { get; }
+
         public ICommand SelectCourseNumberCommand { get; }
+
         public ICommand SelectInstitutionCommand { get; }
 
         // Metody

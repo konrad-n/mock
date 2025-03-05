@@ -110,8 +110,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.availableLocations, value);
         }
 
-        #region Properties
-
         public int ProcedureId
         {
             get => this.procedureId;
@@ -377,19 +375,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.availableOperatorCodes, value);
         }
 
-        #endregion
-
-        #region Commands
-
         public ICommand SaveCommand { get; }
 
         public ICommand CancelCommand { get; }
 
         public ICommand AddLocationCommand { get; }
-
-        #endregion
-
-        #region Private Methods
 
         private void InitializePickerOptions()
         {
@@ -835,7 +825,5 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             await Shell.Current.GoToAsync("..");
         }
-
-        #endregion
     }
 }

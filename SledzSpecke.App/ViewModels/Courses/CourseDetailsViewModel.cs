@@ -172,7 +172,9 @@ namespace SledzSpecke.App.ViewModels.Courses
 
         // Komendy
         public ICommand EditCommand { get; }
+
         public ICommand DeleteCommand { get; }
+
         public ICommand GoBackCommand { get; }
 
         // Metody

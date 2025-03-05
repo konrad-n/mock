@@ -3,32 +3,32 @@
 namespace SledzSpecke.App.Models
 {
     /// <summary>
-    /// Model podsumowania dyżurów medycznych
+    /// Model podsumowania dyżurów medycznych.
     /// </summary>
     public class MedicalShiftsSummary
     {
         /// <summary>
-        /// Łączna liczba godzin zrealizowanych dyżurów
+        /// Łączna liczba godzin zrealizowanych dyżurów.
         /// </summary>
         public int TotalHours { get; set; }
 
         /// <summary>
-        /// Łączna liczba minut zrealizowanych dyżurów
+        /// Łączna liczba minut zrealizowanych dyżurów.
         /// </summary>
         public int TotalMinutes { get; set; }
 
         /// <summary>
-        /// Łączna liczba godzin zatwierdzonych dyżurów
+        /// Łączna liczba godzin zatwierdzonych dyżurów.
         /// </summary>
         public int ApprovedHours { get; set; }
 
         /// <summary>
-        /// Łączna liczba minut zatwierdzonych dyżurów
+        /// Łączna liczba minut zatwierdzonych dyżurów.
         /// </summary>
         public int ApprovedMinutes { get; set; }
 
         /// <summary>
-        /// Przeprowadza normalizację minut (jeśli > 59, dodaje do godzin)
+        /// Przeprowadza normalizację minut (jeśli > 59, dodaje do godzin).
         /// </summary>
         public void NormalizeTime()
         {
@@ -48,9 +48,9 @@ namespace SledzSpecke.App.Models
         }
 
         /// <summary>
-        /// Oblicza podsumowanie na podstawie listy dyżurów
+        /// Oblicza podsumowanie na podstawie listy dyżurów.
         /// </summary>
-        /// <param name="shifts">Lista dyżurów</param>
+        /// <param name="shifts">Lista dyżurów.</param>
         public static MedicalShiftsSummary CalculateFromShifts(List<MedicalShift> shifts)
         {
             var summary = new MedicalShiftsSummary();
