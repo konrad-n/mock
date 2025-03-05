@@ -13,7 +13,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Podstawowe informacje o kursie -->
+            <!-- Sekcja wspólna dla obu wersji SMK -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="15">
                     <!-- Typ kursu -->
@@ -24,7 +24,116 @@
                                 Title="Wybierz typ kursu"
                                 BackgroundColor="Transparent"/>
                     </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
 
+            <!-- Pola dla starej wersji SMK -->
+            <Frame IsVisible="{Binding IsOldSmkVersion}" Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Kurs specjalizacyjny" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
+
+                    <!-- Uznanie lub zwolnienie z realizacji -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Uznanie lub zwolnienie z realizacji:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableRecognitionTypes}" 
+                                SelectedItem="{Binding SelectedRecognitionType}"
+                                Title="Wybierz rodzaj uznania lub zwolnienia"
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+
+                    <!-- Nazwa kursu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa kursu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableCourseTypes}" 
+                                SelectedItem="{Binding SelectedCourseType}"
+                                Title="Wybierz kurs"
+                                BackgroundColor="Transparent"/>
+                        <Entry Text="{Binding CourseName}" Placeholder="Podaj nazwę kursu" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Numer kursu -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Numer kursu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Entry Grid.Column="0" Text="{Binding CourseNumber}" Placeholder="Podaj numer kursu" BackgroundColor="Transparent" />
+                            <Button Grid.Column="1" Text="Wybierz" 
+                                    Command="{Binding SelectCourseNumberCommand}" 
+                                    Style="{StaticResource OutlineButton}"
+                                    Margin="5,0,0,0"/>
+                        </Grid>
+                        <Label Text="Dla kursów realizowanych po 01.01.2020 wybierz kurs z listy" 
+                               FontSize="12" TextColor="#FF0000"/>
+                    </VerticalStackLayout>
+
+                    <!-- Nazwa podmiotu prowadzącego kurs -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Nazwa podmiotu prowadzącego kurs:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Entry Grid.Column="0" Text="{Binding InstitutionName}" 
+                                   Placeholder="Wpisz nazwę podmiotu prowadzącego kurs" 
+                                   BackgroundColor="Transparent" />
+                            <Button Grid.Column="1" Text="Wybierz" 
+                                    Command="{Binding SelectInstitutionCommand}" 
+                                    Style="{StaticResource OutlineButton}"
+                                    Margin="5,0,0,0"/>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Rok szkolenia, numer kolejny, data ukończenia -->
+                    <Grid ColumnDefinitions="*, *, *" RowDefinitions="Auto, Auto" ColumnSpacing="10" RowSpacing="5">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Rok szkolenia:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Numer kolejny kursu:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Label Grid.Row="0" Grid.Column="2" Text="Data ukończenia:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+
+                        <Picker Grid.Row="1" Grid.Column="0" 
+                                ItemsSource="{Binding AvailableYears}" 
+                                SelectedItem="{Binding Year}" 
+                                BackgroundColor="Transparent" />
+                        <Entry Grid.Row="1" Grid.Column="1" 
+                               Text="{Binding CourseSequenceNumber}" 
+                               Keyboard="Numeric" 
+                               BackgroundColor="Transparent" />
+                        <DatePicker Grid.Row="1" Grid.Column="2" 
+                                   Date="{Binding CompletionDate}" 
+                                   Format="D" 
+                                   BackgroundColor="Transparent" />
+                    </Grid>
+
+                    <!-- Akceptacja -->
+                    <Label Text="Akceptacja" FontAttributes="Bold" TextColor="{StaticResource TextColor}" Margin="0,10,0,0" />
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding RequiresApproval, Converter={StaticResource InvertedBoolConverter}}" />
+                        <Label Text="Kurs zaliczony na podstawie elektronicznego zaświadczenia o ukończeniu kursu. Nie wymaga dodatkowej akceptacji"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <!-- Pola certyfikatu - widoczne tylko gdy kurs nie wymaga akceptacji -->
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding RequiresApproval, Converter={StaticResource InvertedBoolConverter}}">
+                        <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" ColumnSpacing="10" RowSpacing="5">
+                            <Label Grid.Row="0" Grid.Column="0" Text="Numer zaświadczenia o ukończeniu kursu:" 
+                                   FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="Data wygenerowania zaświadczenia:" 
+                                   FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+
+                            <Entry Grid.Row="1" Grid.Column="0" 
+                                   Text="{Binding CertificateNumber}" 
+                                   Placeholder="Podaj numer zaświadczenia" 
+                                   BackgroundColor="Transparent" />
+                            <DatePicker Grid.Row="1" Grid.Column="1" 
+                                       Date="{Binding CertificateIssueDate}" 
+                                       Format="D" 
+                                       BackgroundColor="Transparent" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Pola dla nowej wersji SMK -->
+            <Frame IsVisible="{Binding IsOldSmkVersion, Converter={StaticResource InvertedBoolConverter}}" Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="15">
                     <!-- Nazwa kursu -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Nazwa kursu:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
@@ -42,12 +151,7 @@
                         <Label Text="Instytucja prowadząca:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                         <Entry Text="{Binding InstitutionName}" Placeholder="Podaj nazwę instytucji" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
 
-            <!-- Data ukończenia i rok szkolenia -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15">
                     <!-- Data ukończenia -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Data ukończenia:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
@@ -67,15 +171,15 @@
                         <Label Text="Numer kolejny kursu w roku:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                         <Entry Text="{Binding CourseSequenceNumber}" Keyboard="Numeric" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
 
-            <!-- Informacje o certyfikacie -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Certyfikat:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                    <CheckBox IsChecked="{Binding HasCertificate}" />
-                    <Label Text="Kurs posiada certyfikat" />
+                    <!-- Informacje o certyfikacie -->
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Certyfikat:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <CheckBox IsChecked="{Binding HasCertificate}" />
+                            <Label Text="Kurs posiada certyfikat" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="5" IsVisible="{Binding HasCertificate}">
                         <Label Text="Numer certyfikatu:" TextColor="{StaticResource TextMutedColor}" />
@@ -83,41 +187,6 @@
 
                         <Label Text="Data certyfikatu:" TextColor="{StaticResource TextMutedColor}" />
                         <DatePicker Date="{Binding CertificateDate}" Format="D" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- Sekcja dla starego SMK - wyświetlana tylko gdy IsOldSmkVersion=true -->
-            <Frame IsVisible="{Binding IsOldSmkVersion}" Style="{StaticResource CardFrame}" Margin="0,0,0,20">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Informacje specyficzne dla starego SMK" 
-                          FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-
-                    <!-- Uznanie lub zwolnienie z realizacji -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Uznanie lub zwolnienie z realizacji:" 
-                              FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <Picker ItemsSource="{Binding AvailableRecognitionTypes}" 
-                                SelectedItem="{Binding SelectedRecognitionType}"
-                                Title="Wybierz rodzaj uznania lub zwolnienia"
-                                BackgroundColor="Transparent"/>
-                    </VerticalStackLayout>
-
-                    <!-- Akceptacja kierownika specjalizacji -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Akceptacja:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <HorizontalStackLayout Spacing="10">
-                            <CheckBox IsChecked="{Binding RequiresApproval, Converter={StaticResource InvertedBoolConverter}}" />
-                            <Label Text="Kurs zaliczony na podstawie elektronicznego zaświadczenia o ukończeniu kursu. Nie wymaga dodatkowej akceptacji"
-                                  VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-
-                    <!-- Data wystawienia zaświadczenia (widoczne tylko gdy kurs nie wymaga akceptacji) -->
-                    <VerticalStackLayout Spacing="5" IsVisible="{Binding RequiresApproval, Converter={StaticResource InvertedBoolConverter}}">
-                        <Label Text="Data wygenerowania zaświadczenia:" 
-                              FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <DatePicker Date="{Binding CertificateIssueDate}" Format="D" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>
