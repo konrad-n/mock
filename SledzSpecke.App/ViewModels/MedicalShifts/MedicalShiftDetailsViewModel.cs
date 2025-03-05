@@ -27,6 +27,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private string oldSMKField1;
         private string oldSMKField2;
 
+        // Nowe pola związane z zatwierdzaniem
+        private DateTime? approvalDate;
+        private string approverName;
+        private string approverRole;
+        private bool isApproved;
+
         public MedicalShiftDetailsViewModel(
             IDatabaseService databaseService,
             ISmkVersionStrategy smkStrategy,
@@ -110,6 +116,31 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.oldSMKField2, value);
         }
 
+        // Nowe właściwości związane z zatwierdzaniem
+        public DateTime? ApprovalDate
+        {
+            get => this.approvalDate;
+            set => this.SetProperty(ref this.approvalDate, value);
+        }
+
+        public string ApproverName
+        {
+            get => this.approverName;
+            set => this.SetProperty(ref this.approverName, value);
+        }
+
+        public string ApproverRole
+        {
+            get => this.approverRole;
+            set => this.SetProperty(ref this.approverRole, value);
+        }
+
+        public bool IsApproved
+        {
+            get => this.isApproved;
+            set => this.SetProperty(ref this.isApproved, value);
+        }
+
         // Commands
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -145,6 +176,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 // Set sync status
                 this.IsNotSynced = this.Shift.SyncStatus != SyncStatus.Synced;
                 this.SyncStatusText = this.GetSyncStatusText(this.Shift.SyncStatus);
+
+                // Ustawienie pól zatwierdzenia
+                this.ApprovalDate = this.Shift.ApprovalDate;
+                this.ApproverName = this.Shift.ApproverName;
+                this.ApproverRole = this.Shift.ApproverRole;
+                this.IsApproved = this.Shift.IsApproved;
 
                 // Load internship data
                 if (this.Shift.InternshipId > 0)
@@ -209,6 +246,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         private async Task OnEditAsync()
         {
+            // Sprawdzenie czy dyżur może być edytowany (tylko niezatwierdzone)
+            if (this.Shift.IsApproved)
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Informacja",
+                    "Nie można edytować zatwierdzonego dyżuru.",
+                    "OK");
+                return;
+            }
+
             // Navigate to edit page
             if (this.Shift != null)
             {
@@ -220,6 +267,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         {
             if (this.Shift == null)
             {
+                return;
+            }
+
+            // Sprawdzenie czy dyżur może być usunięty (tylko niezatwierdzone)
+            if (this.Shift.IsApproved)
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Informacja",
+                    "Nie można usunąć zatwierdzonego dyżuru.",
+                    "OK");
                 return;
             }
 

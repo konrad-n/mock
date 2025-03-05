@@ -495,5 +495,86 @@ namespace SledzSpecke.App.ViewModels.Export
                 }
             });
         }
+
+        private async Task OnContinueExportAsync()
+        {
+            if (this.IsBusy)
+            {
+                return;
+            }
+
+            this.IsBusy = true;
+            this.ExportStatusMessage = "Weryfikacja danych przed eksportem...";
+
+            try
+            {
+                // Najpierw próbujemy wykonać eksport - jeśli wystąpią błędy walidacji, 
+                // zostanie zgłoszony wyjątek ValidationException
+                try
+                {
+                    // Przygotuj opcje eksportu
+                    var options = new ExportOptions
+                    {
+                        StartDate = this.StartDate,
+                        EndDate = this.EndDate,
+                        IncludeShifts = this.IncludeShifts,
+                        IncludeProcedures = this.IncludeProcedures,
+                        IncludeInternships = this.IncludeInternships,
+                        IncludeCourses = this.IncludeCourses,
+                        IncludeSelfEducation = this.IncludeSelfEducation,
+                        IncludePublications = this.IncludePublications,
+                        IncludeAbsences = this.IncludeAbsences,
+                        IncludeEducationalActivities = this.IncludeEducationalActivities,
+                        IncludeRecognitions = this.IncludeRecognitions,
+                        FormatForOldSMK = this.FormatForOldSmk,
+                        ModuleId = this.HasModules && this.SelectedModule != null && this.SelectedModule.Id > 0
+                            ? this.SelectedModule.Id
+                            : null,
+                    };
+
+                    // Testowy eksport - tylko weryfikacja danych
+                    this.ExportStatusMessage = "Weryfikacja danych - sprawdzanie kompletności...";
+                    await this.exportService.ValidateExportDataAsync(options);
+
+                    // Jeśli dotarliśmy tutaj, oznacza to, że walidacja przebiegła pomyślnie
+                    // Nawiguj do strony podglądu z opcjami eksportu
+                    string serializedOptions = System.Text.Json.JsonSerializer.Serialize(options);
+                    await Shell.Current.GoToAsync($"ExportPreview?options={Uri.EscapeDataString(serializedOptions)}");
+                }
+                catch (ValidationException ex)
+                {
+                    // Pokazujemy komunikat z błędami walidacji
+                    this.ExportStatusMessage = "Znaleziono błędy w danych";
+
+                    bool showDetails = await this.dialogService.DisplayAlertAsync(
+                        "Błędy walidacji",
+                        "Znaleziono błędy w danych, które uniemożliwiają eksport. Czy chcesz zobaczyć szczegóły?",
+                        "Tak",
+                        "Nie");
+
+                    if (showDetails)
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Szczegóły błędów",
+                            ex.Message,
+                            "OK");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas eksportu: {ex.Message}");
+                this.ExportStatusMessage = "Wystąpił błąd podczas eksportu.";
+
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd eksportu",
+                    $"Wystąpił problem podczas eksportu danych: {ex.Message}",
+                    "OK");
+            }
+            finally
+            {
+                this.IsBusy = false;
+            }
+        }
     }
 }

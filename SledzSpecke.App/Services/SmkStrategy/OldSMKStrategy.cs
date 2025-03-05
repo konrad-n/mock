@@ -89,10 +89,10 @@ namespace SledzSpecke.App.Services.SmkStrategy
                 case "AddEditMedicalShift":
                     return new Dictionary<string, string>
                     {
-                        { "Date", "Data dyżuru" },
-                        { "Hours", "Godziny" },
-                        { "Minutes", "Minuty" },
-                        { "Location", "Miejsce dyżuru" },
+                        { "Date", "Data rozpoczęcia" }, // Zmieniono z "Data dyżuru"
+                        { "Hours", "Liczba godzin" }, // Zmieniono z "Godziny"
+                        { "Minutes", "Liczba minut" }, // Zmieniono z "Minuty"
+                        { "Location", "Nazwa komórki organizacyjnej" }, // Zmieniono z "Miejsce dyżuru"
                         { "Year", "Rok szkolenia" },
                         { "OldSMKField1", "Osoba nadzorująca" },
                         { "OldSMKField2", "Oddział" },
@@ -169,9 +169,10 @@ namespace SledzSpecke.App.Services.SmkStrategy
                     {
                         "Date",
                         "Hours",
+                        "Minutes", // Dodano jako wymagane
                         "Location",
-                        "OldSMKField1",  // Wymagane w starej wersji SMK
-                        "OldSMKField2",  // Wymagane w starej wersji SMK
+                        "OldSMKField1",
+                        "OldSMKField2",
                     };
 
                 case "AddEditProcedure":
@@ -314,11 +315,13 @@ namespace SledzSpecke.App.Services.SmkStrategy
                     switch (fieldName)
                     {
                         case "Date":
-                            return "Data dyżuru jest wymagana";
+                            return "Data rozpoczęcia jest wymagana"; // Zmieniono
                         case "Hours":
                             return "Liczba godzin musi być większa od 0";
+                        case "Minutes":
+                            return "Liczba minut jest wymagana"; // Dodano
                         case "Location":
-                            return "Miejsce dyżuru jest wymagane";
+                            return "Nazwa komórki organizacyjnej jest wymagana"; // Zmieniono
                         case "OldSMKField1":
                             return "Osoba nadzorująca jest wymagana";
                         case "OldSMKField2":

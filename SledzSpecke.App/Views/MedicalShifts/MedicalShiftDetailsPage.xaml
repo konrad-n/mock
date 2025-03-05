@@ -3,85 +3,142 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.MedicalShifts.MedicalShiftDetailsPage"
              Title="{Binding Title}">
+
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
-            <!-- Header -->
-            <Frame Style="{StaticResource CardFrame}" Padding="15">
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="Szczegóły dyżuru" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
-                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="15">
-                        <!-- Date -->
-                        <Label Grid.Row="0" Grid.Column="0" Text="Data:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Shift.Date, StringFormat='{0:dddd, dd MMMM yyyy}'}" 
-                               TextColor="{StaticResource TextColor}"/>
+        <StackLayout Padding="20" Spacing="15">
+            <!-- Indykator ładowania -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" 
+                               HorizontalOptions="Center" VerticalOptions="Center" />
 
-                        <!-- Location -->
-                        <Label Grid.Row="1" Grid.Column="0" Text="Miejsce:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Shift.Location}" TextColor="{StaticResource TextColor}"/>
+            <StackLayout IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}">
+                <!-- Informacja o zatwierdzeniu -->
+                <Frame IsVisible="{Binding IsApproved}" 
+                       BackgroundColor="#E6F7E6" 
+                       BorderColor="#28A745" 
+                       Padding="15" 
+                       Margin="0,0,0,15">
+                    <StackLayout>
+                        <Label Text="Dyżur zatwierdzony" 
+                               TextColor="#28A745" 
+                               FontAttributes="Bold" 
+                               FontSize="16" />
+                        <Label Text="{Binding ApprovalDate, StringFormat='Data zatwierdzenia: {0:yyyy-MM-dd}'}" 
+                               TextColor="#28A745" />
+                        <Label Text="{Binding ApproverName, StringFormat='Zatwierdzone przez: {0}'}" 
+                               TextColor="#28A745" />
+                        <Label Text="{Binding ApproverRole, StringFormat='Funkcja: {0}'}" 
+                               TextColor="#28A745" />
+                    </StackLayout>
+                </Frame>
 
-                        <!-- Duration -->
-                        <Label Grid.Row="2" Grid.Column="0" Text="Czas:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding DurationText}" TextColor="{StaticResource TextColor}"/>
+                <!-- Informacja o stażu -->
+                <Frame Style="{StaticResource CardFrame}">
+                    <StackLayout>
+                        <Label Text="Informacje o stażu" 
+                               Style="{StaticResource SubHeaderLabel}" />
+                        <BoxView HeightRequest="1" Color="#95B8CE" Margin="0,5,0,10" />
 
-                        <!-- Year -->
-                        <Label Grid.Row="3" Grid.Column="0" Text="Rok szkolenia:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding Shift.Year}" TextColor="{StaticResource TextColor}"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" 
+                              ColumnSpacing="10" RowSpacing="10">
+                            <Label Grid.Row="0" Grid.Column="0" 
+                                   Text="Nazwa stażu:" 
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="0" Grid.Column="1" 
+                                   Text="{Binding InternshipName}" />
 
-            <!-- Internship details -->
-            <Frame Style="{StaticResource CardFrame}" Padding="15">
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="Informacje o stażu" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
-                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="10" ColumnSpacing="15">
-                        <!-- Internship name -->
-                        <Label Grid.Row="0" Grid.Column="0" Text="Nazwa stażu:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding InternshipName}" TextColor="{StaticResource TextColor}"/>
+                            <Label Grid.Row="1" Grid.Column="0" 
+                                   Text="Instytucja:" 
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="1" Grid.Column="1" 
+                                   Text="{Binding InternshipInstitution}" />
+                        </Grid>
+                    </StackLayout>
+                </Frame>
 
-                        <!-- Institution -->
-                        <Label Grid.Row="1" Grid.Column="0" Text="Instytucja:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding InternshipInstitution}" TextColor="{StaticResource TextColor}"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                <!-- Informacje o dyżurze -->
+                <Frame Style="{StaticResource CardFrame}">
+                    <StackLayout>
+                        <Label Text="Informacje o dyżurze" 
+                               Style="{StaticResource SubHeaderLabel}" />
+                        <BoxView HeightRequest="1" Color="#95B8CE" Margin="0,5,0,10" />
 
-            <!-- Additional fields for old SMK version -->
-            <Frame IsVisible="{Binding IsOldSMKVersion}" Style="{StaticResource CardFrame}" Padding="15">
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="Dodatkowe pola (stary SMK)" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}"/>
-                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="10" ColumnSpacing="15">
-                        <Label Grid.Row="0" Grid.Column="0" Text="Osoba nadzorująca:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding OldSMKField1}" TextColor="{StaticResource TextColor}"/>
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
+                              ColumnSpacing="10" RowSpacing="10">
+                            <!-- Data rozpoczęcia - zmieniono nazwę z "Data dyżuru" -->
+                            <Label Grid.Row="0" Grid.Column="0" 
+                                   Text="Data rozpoczęcia:" 
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="0" Grid.Column="1" 
+                                   Text="{Binding Shift.Date, StringFormat='{0:yyyy-MM-dd}'}" />
 
-                        <Label Grid.Row="1" Grid.Column="0" Text="Oddział:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
-                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding OldSMKField2}" TextColor="{StaticResource TextColor}"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                            <!-- Czas trwania -->
+                            <Label Grid.Row="1" Grid.Column="0" 
+                                   Text="Czas trwania:" 
+                                   FontAttributes="Bold" />
+                            <StackLayout Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                                <Label Text="{Binding Shift.Hours, StringFormat='Liczba godzin: {0}'}" Margin="0,0,10,0" />
+                                <Label Text="{Binding Shift.Minutes, StringFormat='Liczba minut: {0}'}" />
+                            </StackLayout>
 
-            <!-- Status information -->
-            <Frame Style="{StaticResource CardFrame}" Padding="15">
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="Status synchronizacji" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
-                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
-                    <Label Text="{Binding SyncStatusText}" TextColor="{StaticResource TextColor}"/>
-                    <Label IsVisible="{Binding IsNotSynced}" 
-                           Text="Ten dyżur nie został jeszcze zsynchronizowany z systemem SMK."
-                           TextColor="{StaticResource WarningColor}"
-                           Margin="0,5,0,0"/>
-                </VerticalStackLayout>
-            </Frame>
+                            <!-- Nazwa komórki organizacyjnej - zmieniono nazwę z "Miejsce dyżuru" -->
+                            <Label Grid.Row="2" Grid.Column="0" 
+                                   Text="Nazwa komórki organizacyjnej:" 
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="2" Grid.Column="1" 
+                                   Text="{Binding Shift.Location}" />
 
-            <!-- Action buttons -->
-            <VerticalStackLayout Spacing="10" Margin="0,10,0,20">
-                <Button Text="Edytuj dyżur" Command="{Binding EditCommand}" Style="{StaticResource PrimaryButton}"/>
-                <Button Text="Usuń dyżur" Command="{Binding DeleteCommand}" Style="{StaticResource DangerButton}"/>
-                <Button Text="Powrót" Command="{Binding GoBackCommand}" Style="{StaticResource OutlineButton}"/>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
+                            <!-- Rok szkolenia -->
+                            <Label Grid.Row="3" Grid.Column="0" 
+                                   Text="Rok szkolenia:" 
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="3" Grid.Column="1" 
+                                   Text="{Binding Shift.Year}" />
+
+                            <!-- Status synchronizacji -->
+                            <Label Grid.Row="4" Grid.Column="0" 
+                                   Text="Status synchronizacji:" 
+                                   FontAttributes="Bold" />
+                            <Label Grid.Row="4" Grid.Column="1" 
+                                   Text="{Binding SyncStatusText}" 
+                                   TextColor="{Binding IsNotSynced, Converter={StaticResource BoolToTextColorConverter}}" />
+
+                            <!-- Osoba nadzorująca - dla starego SMK -->
+                            <Label Grid.Row="5" Grid.Column="0" 
+                                   Text="Osoba nadzorująca:" 
+                                   FontAttributes="Bold" 
+                                   IsVisible="{Binding IsOldSMKVersion}" />
+                            <Label Grid.Row="5" Grid.Column="1" 
+                                   Text="{Binding OldSMKField1}" 
+                                   IsVisible="{Binding IsOldSMKVersion}" />
+
+                            <!-- Oddział - dla starego SMK -->
+                            <Label Grid.Row="6" Grid.Column="0" 
+                                   Text="Oddział:" 
+                                   FontAttributes="Bold"
+                                   IsVisible="{Binding IsOldSMKVersion}" />
+                            <Label Grid.Row="6" Grid.Column="1" 
+                                   Text="{Binding OldSMKField2}" 
+                                   IsVisible="{Binding IsOldSMKVersion}" />
+                        </Grid>
+                    </StackLayout>
+                </Frame>
+
+                <!-- Przyciski akcji -->
+                <StackLayout Orientation="Horizontal" Spacing="15" HorizontalOptions="Center"
+                             Margin="0,15,0,0">
+                    <Button Text="Edytuj" 
+                            Command="{Binding EditCommand}" 
+                            Style="{StaticResource PrimaryButton}"
+                            IsEnabled="{Binding IsApproved, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Button Text="Usuń" 
+                            Command="{Binding DeleteCommand}" 
+                            Style="{StaticResource DangerButton}"
+                            IsEnabled="{Binding IsApproved, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Button Text="Powrót" 
+                            Command="{Binding GoBackCommand}" 
+                            Style="{StaticResource OutlineButton}" />
+                </StackLayout>
+            </StackLayout>
+        </StackLayout>
     </ScrollView>
 </ContentPage>

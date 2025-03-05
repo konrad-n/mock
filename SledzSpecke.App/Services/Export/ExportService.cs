@@ -6,6 +6,7 @@ using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
+using System.Text;
 
 namespace SledzSpecke.App.Services.Export
 {
@@ -51,6 +52,40 @@ namespace SledzSpecke.App.Services.Export
                 if (user == null)
                 {
                     throw new Exception("Nie znaleziono aktywnego użytkownika");
+                }
+
+                // Flaga określająca czy używamy starego formatu SMK
+                bool isOldSmk = options.FormatForOldSMK;
+
+                // Lista błędów walidacji
+                List<string> validationErrors = new List<string>();
+
+                // Pobierz i zwaliduj dane przed eksportem
+                if (options.IncludeShifts)
+                {
+                    // Pobierz dyżury
+                    var shifts = await this.GetShiftsForExportAsync(specialization.SpecializationId, options);
+
+                    // Zwaliduj dyżury
+                    var shiftValidation = ExportValidator.ValidateMedicalShifts(shifts, isOldSmk);
+                    if (!shiftValidation.IsValid)
+                    {
+                        validationErrors.Add(shiftValidation.ErrorMessage);
+                    }
+                }
+
+                // Tutaj można dodać walidację dla innych typów danych (procedury, staże, kursy...)
+
+                // Jeśli znaleziono błędy walidacji, zgłoś je
+                if (validationErrors.Count > 0)
+                {
+                    StringBuilder errorMessage = new StringBuilder("Znaleziono błędy w danych:\n\n");
+                    foreach (var error in validationErrors)
+                    {
+                        errorMessage.AppendLine(error);
+                    }
+
+                    throw new ValidationException(errorMessage.ToString());
                 }
 
                 // Utwórz nazwy pliku i pełną ścieżkę
@@ -138,6 +173,11 @@ namespace SledzSpecke.App.Services.Export
 
                 return filePath;
             }
+            catch (ValidationException ex)
+            {
+                // Propaguj błędy walidacji, aby wyświetlić je użytkownikowi
+                throw;
+            }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error during export: {ex.Message}");
@@ -175,6 +215,69 @@ namespace SledzSpecke.App.Services.Export
             {
                 System.Diagnostics.Debug.WriteLine($"Error sharing export file: {ex.Message}");
                 return false;
+            }
+        }
+
+        public async Task ValidateExportDataAsync(ExportOptions options)
+        {
+            try
+            {
+                // Pobierz dane specjalizacji
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    throw new Exception("Nie znaleziono aktywnej specjalizacji");
+                }
+
+                // Pobierz dane użytkownika
+                var user = await this.specializationService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    throw new Exception("Nie znaleziono aktywnego użytkownika");
+                }
+
+                // Flaga określająca czy używamy starego formatu SMK
+                bool isOldSmk = options.FormatForOldSMK;
+
+                // Lista błędów walidacji
+                List<string> validationErrors = new List<string>();
+
+                // Pobierz i zwaliduj dane przed eksportem
+                if (options.IncludeShifts)
+                {
+                    // Pobierz dyżury
+                    var shifts = await this.GetShiftsForExportAsync(specialization.SpecializationId, options);
+
+                    // Zwaliduj dyżury
+                    var shiftValidation = ExportValidator.ValidateMedicalShifts(shifts, isOldSmk);
+                    if (!shiftValidation.IsValid)
+                    {
+                        validationErrors.Add(shiftValidation.ErrorMessage);
+                    }
+                }
+
+                // Tutaj można dodać walidację dla innych typów danych (procedury, staże, kursy...)
+
+                // Jeśli znaleziono błędy walidacji, zgłoś je
+                if (validationErrors.Count > 0)
+                {
+                    StringBuilder errorMessage = new StringBuilder("Znaleziono błędy w danych:\n\n");
+                    foreach (var error in validationErrors)
+                    {
+                        errorMessage.AppendLine(error);
+                    }
+                    throw new ValidationException(errorMessage.ToString());
+                }
+            }
+            catch (ValidationException)
+            {
+                // Propaguj błędy walidacji, aby wyświetlić je użytkownikowi
+                throw;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error during validation: {ex.Message}");
+                throw;
             }
         }
 
@@ -852,25 +955,39 @@ namespace SledzSpecke.App.Services.Export
         {
             var worksheet = package.Workbook.Worksheets.Add("Dyżury medyczne");
 
-            // Headers
+            // Nagłówki
             int col = 1;
-            worksheet.Cells[1, col++].Value = "Data";
-            worksheet.Cells[1, col++].Value = "Godziny";
-            worksheet.Cells[1, col++].Value = "Minuty";
-            worksheet.Cells[1, col++].Value = "Miejsce";
-            worksheet.Cells[1, col++].Value = "Rok szkolenia";
-            worksheet.Cells[1, col++].Value = "Nazwa stażu";
 
             if (oldSmkFormat)
             {
+                // Nagłówki specyficzne dla starego SMK w odpowiedniej kolejności
+                worksheet.Cells[1, col++].Value = "Lp";
+                worksheet.Cells[1, col++].Value = "Rok szkolenia";
+                worksheet.Cells[1, col++].Value = "Liczba godzin";
+                worksheet.Cells[1, col++].Value = "Liczba minut";
+                worksheet.Cells[1, col++].Value = "Data rozpoczęcia";
+                worksheet.Cells[1, col++].Value = "Nazwa komórki organizacyjnej";
+                worksheet.Cells[1, col++].Value = "Data akceptacji";
+                worksheet.Cells[1, col++].Value = "Imię i nazwisko";
+                worksheet.Cells[1, col++].Value = "Pełniona Funkcja";
                 worksheet.Cells[1, col++].Value = "Osoba nadzorująca";
                 worksheet.Cells[1, col++].Value = "Oddział";
+            }
+            else
+            {
+                // Nagłówki dla nowej wersji SMK
+                worksheet.Cells[1, col++].Value = "Data";
+                worksheet.Cells[1, col++].Value = "Godziny";
+                worksheet.Cells[1, col++].Value = "Minuty";
+                worksheet.Cells[1, col++].Value = "Miejsce";
+                worksheet.Cells[1, col++].Value = "Rok szkolenia";
+                worksheet.Cells[1, col++].Value = "Nazwa stażu";
             }
 
             // Format nagłówków
             this.FormatHeaders(worksheet, col - 1);
 
-            // Data
+            // Dane
             for (int i = 0; i < shifts.Count; i++)
             {
                 int row = i + 2;
@@ -896,17 +1013,30 @@ namespace SledzSpecke.App.Services.Export
                     }
                 }
 
-                worksheet.Cells[row, col++].Value = shift.Date;
-                worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
-
-                worksheet.Cells[row, col++].Value = shift.Hours;
-                worksheet.Cells[row, col++].Value = shift.Minutes;
-                worksheet.Cells[row, col++].Value = shift.Location;
-                worksheet.Cells[row, col++].Value = shift.Year;
-                worksheet.Cells[row, col++].Value = internshipName;
-
                 if (oldSmkFormat)
                 {
+                    // Lp - numer porządkowy
+                    worksheet.Cells[row, col++].Value = i + 1;
+
+                    // Rok szkolenia
+                    worksheet.Cells[row, col++].Value = shift.Year;
+
+                    // Liczba godzin
+                    worksheet.Cells[row, col++].Value = shift.Hours;
+
+                    // Liczba minut
+                    worksheet.Cells[row, col++].Value = shift.Minutes;
+
+                    // Data rozpoczęcia
+                    worksheet.Cells[row, col++].Value = shift.Date;
+                    worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
+
+                    // Nazwa komórki organizacyjnej
+                    worksheet.Cells[row, col++].Value = shift.Location;
+
+                    // Data akceptacji, Imię i nazwisko, Pełniona Funkcja - puste kolumny
+                    col += 3;
+
                     // Dodatkowe pola dla starej wersji SMK
                     if (!string.IsNullOrEmpty(shift.AdditionalFields))
                     {
@@ -941,6 +1071,18 @@ namespace SledzSpecke.App.Services.Export
                     {
                         col += 2;
                     }
+                }
+                else
+                {
+                    // Format dla nowej wersji SMK
+                    worksheet.Cells[row, col++].Value = shift.Date;
+                    worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
+
+                    worksheet.Cells[row, col++].Value = shift.Hours;
+                    worksheet.Cells[row, col++].Value = shift.Minutes;
+                    worksheet.Cells[row, col++].Value = shift.Location;
+                    worksheet.Cells[row, col++].Value = shift.Year;
+                    worksheet.Cells[row, col++].Value = internshipName;
                 }
             }
 

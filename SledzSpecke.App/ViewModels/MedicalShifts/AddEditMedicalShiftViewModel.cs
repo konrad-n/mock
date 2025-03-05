@@ -189,6 +189,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         // Commands
         public ICommand SaveCommand { get; }
+
         public ICommand CancelCommand { get; }
 
         // Methods
@@ -252,6 +253,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     this.SelectedInternship = this.AvailableInternships[0];
                 }
 
+                // Automatyczne obliczanie roku szkolenia na podstawie daty rozpoczęcia specjalizacji
+                if (this.ShiftId == 0) // Tylko dla nowego dyżuru
+                {
+                    this.Year = this.CalculateTrainingYear(specialization.StartDate, this.Date);
+                }
+
                 // Validate input
                 this.ValidateInput();
             }
@@ -267,6 +274,56 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             {
                 this.IsBusy = false;
             }
+        }
+
+        // Rozszerzenie dla OnDateSelected w AddEditMedicalShiftViewModel
+        // Dodaj to jako metodę wywoływaną przy zmianie daty
+        public void OnDateChanged()
+        {
+            if (this.ShiftId == 0) // Tylko dla nowego dyżuru
+            {
+                // Pobierz specjalizację asynchronicznie i zaktualizuj rok szkolenia
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                        if (specialization != null)
+                        {
+                            int newYear = this.CalculateTrainingYear(specialization.StartDate, this.Date);
+
+                            // Przełącz na wątek UI, aby zaktualizować właściwość
+                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                this.Year = newYear;
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd podczas obliczania roku szkolenia: {ex.Message}");
+                    }
+                });
+            }
+        }
+
+        // Metoda pomocnicza do obliczania roku szkolenia na podstawie daty rozpoczęcia specjalizacji
+        private int CalculateTrainingYear(DateTime specializationStartDate, DateTime currentDate)
+        {
+            int yearsDifference = currentDate.Year - specializationStartDate.Year;
+
+            // Jeśli jeszcze nie minęła rocznica rozpoczęcia w bieżącym roku
+            if (currentDate.Month < specializationStartDate.Month ||
+                (currentDate.Month == specializationStartDate.Month && currentDate.Day < specializationStartDate.Day))
+            {
+                yearsDifference--;
+            }
+
+            // Rok szkolenia to różnica lat + 1
+            int trainingYear = yearsDifference + 1;
+
+            // Zapewniamy, że rok szkolenia jest w przedziale 1-6
+            return Math.Max(1, Math.Min(6, trainingYear));
         }
 
         private async Task LoadShiftAsync(int shiftId)
@@ -372,6 +429,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
 
             if (string.IsNullOrWhiteSpace(this.Location))
+            {
+                isValid = false;
+            }
+
+            // Walidacja pola Minutes (wymagane w starym SMK)
+            if (this.IsOldSmkVersion && this.Minutes < 0)
             {
                 isValid = false;
             }

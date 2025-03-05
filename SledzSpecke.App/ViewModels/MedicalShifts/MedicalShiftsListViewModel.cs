@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
+using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
@@ -15,13 +16,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
 
-        // Filter state
+        // Nowe pola dla funkcjonalności zgodnej ze starym SMK
+        private MedicalShiftsSummary shiftsSummary;
+        private bool hasUnsavedChanges;
+        private ObservableCollection<MedicalShift> shiftsToDelete;
+
+        // Istniejące pola
         private bool allShiftsSelected = true;
         private bool currentInternshipSelected = false;
         private string searchText = string.Empty;
         private MedicalShift selectedShift;
-
-        // Data
         private ObservableCollection<MedicalShift> shifts;
         private int currentInternshipId;
         private int? currentModuleId;
@@ -35,22 +39,49 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.databaseService = databaseService;
             this.dialogService = dialogService;
 
-            // Initialize commands
+            // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadShiftsAsync);
             this.FilterShiftsCommand = new AsyncRelayCommand<string>(this.OnFilterShiftsAsync);
             this.FilterCommand = new AsyncRelayCommand(this.ApplyFiltersAsync);
             this.ShiftSelectedCommand = new AsyncRelayCommand(this.OnShiftSelectedAsync);
             this.AddShiftCommand = new AsyncRelayCommand(this.OnAddShiftAsync);
 
-            // Initialize properties
+            // Nowe komendy zgodne ze starym SMK
+            this.DeleteShiftCommand = new AsyncRelayCommand<MedicalShift>(this.OnDeleteShiftAsync);
+            this.SaveChangesCommand = new AsyncRelayCommand(this.OnSaveChangesAsync);
+            this.CancelChangesCommand = new AsyncRelayCommand(this.OnCancelChangesAsync);
+
+            // Inicjalizacja właściwości
             this.Title = "Dyżury medyczne";
             this.Shifts = new ObservableCollection<MedicalShift>();
+            this.ShiftsSummary = new MedicalShiftsSummary();
+            this.ShiftsToDelete = new ObservableCollection<MedicalShift>();
+            this.HasUnsavedChanges = false;
 
-            // Load data
+            // Wczytanie danych
             this.LoadShiftsAsync().ConfigureAwait(false);
         }
 
-        // Properties
+        // Nowe właściwości zgodne ze starym SMK
+        public MedicalShiftsSummary ShiftsSummary
+        {
+            get => this.shiftsSummary;
+            set => this.SetProperty(ref this.shiftsSummary, value);
+        }
+
+        public bool HasUnsavedChanges
+        {
+            get => this.hasUnsavedChanges;
+            set => this.SetProperty(ref this.hasUnsavedChanges, value);
+        }
+
+        public ObservableCollection<MedicalShift> ShiftsToDelete
+        {
+            get => this.shiftsToDelete;
+            set => this.SetProperty(ref this.shiftsToDelete, value);
+        }
+
+        // Istniejące właściwości
         public ObservableCollection<MedicalShift> Shifts
         {
             get => this.shifts;
@@ -81,18 +112,19 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.searchText, value);
         }
 
-        // Commands
+        // Istniejące komendy
         public ICommand RefreshCommand { get; }
-
         public ICommand FilterShiftsCommand { get; }
-
         public ICommand FilterCommand { get; }
-
         public ICommand ShiftSelectedCommand { get; }
-
         public ICommand AddShiftCommand { get; }
 
-        // Methods
+        // Nowe komendy zgodne ze starym SMK
+        public ICommand DeleteShiftCommand { get; }
+        public ICommand SaveChangesCommand { get; }
+        public ICommand CancelChangesCommand { get; }
+
+        // Metody
         private async Task LoadShiftsAsync()
         {
             if (this.IsBusy)
@@ -104,7 +136,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             try
             {
-                // Pobierz bieżącą specjalizację i moduł (jeśli specjalizacja ma moduły)
+                // Pobranie danych specjalizacji i modułu
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
@@ -115,7 +147,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     return;
                 }
 
-                // Ustaw bieżący moduł, jeśli specjalizacja ma moduły
+                // Ustawienie modułu
                 if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
                 {
                     this.currentModuleId = specialization.CurrentModuleId.Value;
@@ -125,7 +157,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     this.currentModuleId = null;
                 }
 
-                // Get current internship if filtering is active
+                // Ustawienie bieżącego stażu dla filtrowania
                 if (this.CurrentInternshipSelected)
                 {
                     var currentInternship = await this.specializationService.GetCurrentInternshipAsync();
@@ -136,10 +168,10 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     this.currentInternshipId = 0;
                 }
 
-                // Clear existing shifts
+                // Wyczyszczenie istniejących dyżurów
                 this.Shifts.Clear();
 
-                // Pobierz wszystkie staże dla bieżącego modułu (jeśli jest wybrany)
+                // Pobranie staży
                 var internships = new List<Internship>();
                 if (this.currentModuleId.HasValue)
                 {
@@ -151,26 +183,25 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     internships = await this.databaseService.GetInternshipsAsync(specializationId: specializationId);
                 }
 
-                // Pobierz dyżury dla staży
+                // Pobranie dyżurów
                 var allShifts = new List<MedicalShift>();
 
                 if (this.currentInternshipId > 0)
                 {
-                    // Filtrowanie tylko dla bieżącego stażu
+                    // Filtrowanie dla bieżącego stażu
                     var shifts = await this.databaseService.GetMedicalShiftsAsync(this.currentInternshipId);
                     allShifts.AddRange(shifts);
                 }
                 else
                 {
-                    // Pobierz dyżury dla wszystkich staży w module lub całej specjalizacji
+                    // Pobranie dyżurów dla wszystkich staży
                     foreach (var internship in internships)
                     {
                         var shifts = await this.databaseService.GetMedicalShiftsAsync(internship.InternshipId);
 
-                        // Dodaj informacje o stażu do każdego dyżuru (do wyświetlenia w UI)
+                        // Dodanie informacji o stażu do każdego dyżuru
                         foreach (var shift in shifts)
                         {
-                            // Używamy AdditionalFields do tymczasowego przechowywania danych o stażu
                             var additionalFields = new Dictionary<string, object>();
                             if (!string.IsNullOrEmpty(shift.AdditionalFields))
                             {
@@ -192,7 +223,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     }
                 }
 
-                // Apply search filter if needed
+                // Filtrowanie wyszukiwania
                 if (!string.IsNullOrEmpty(this.SearchText))
                 {
                     var searchLower = this.SearchText.ToLowerInvariant();
@@ -202,41 +233,14 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     ).ToList();
                 }
 
-                // Add shifts to collection
+                // Dodanie dyżurów do kolekcji
                 foreach (var shift in allShifts.OrderByDescending(s => s.Date))
                 {
-                    // Pobierz nazwę stażu z AdditionalFields (jeśli dostępne)
-                    string internshipName = string.Empty;
-                    if (!string.IsNullOrEmpty(shift.AdditionalFields))
-                    {
-                        try
-                        {
-                            var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(shift.AdditionalFields);
-                            if (additionalFields.TryGetValue("InternshipName", out object name))
-                            {
-                                internshipName = name?.ToString() ?? string.Empty;
-                            }
-                        }
-                        catch
-                        {
-                            // Ignorowanie błędów deserializacji
-                        }
-                    }
-
-                    // Ustaw właściwość InternshipName w VM dla każdego dyżuru
-                    var shiftVM = new MedicalShiftViewModel
-                    {
-                        ShiftId = shift.ShiftId,
-                        Date = shift.Date,
-                        Hours = shift.Hours,
-                        Minutes = shift.Minutes,
-                        Location = shift.Location,
-                        Year = shift.Year,
-                        InternshipName = internshipName,
-                    };
-
                     this.Shifts.Add(shift);
                 }
+
+                // Obliczenie podsumowania
+                this.ShiftsSummary = MedicalShiftsSummary.CalculateFromShifts(allShifts);
             }
             catch (Exception ex)
             {
@@ -252,6 +256,114 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
         }
 
+        // Nowe metody zgodne ze starym SMK
+        private async Task OnDeleteShiftAsync(MedicalShift shift)
+        {
+            if (shift == null || shift.IsApproved)
+            {
+                // Nie można usunąć zatwierdzonego dyżuru
+                await this.dialogService.DisplayAlertAsync(
+                    "Informacja",
+                    "Nie można usunąć zatwierdzonego dyżuru.",
+                    "OK");
+                return;
+            }
+
+            // Dodanie dyżuru do listy do usunięcia
+            if (!this.ShiftsToDelete.Contains(shift))
+            {
+                this.ShiftsToDelete.Add(shift);
+                this.HasUnsavedChanges = true;
+            }
+
+            // Usunięcie z listy wyświetlanej
+            this.Shifts.Remove(shift);
+
+            // Przeliczenie podsumowania
+            this.ShiftsSummary = MedicalShiftsSummary.CalculateFromShifts(this.Shifts.ToList());
+        }
+
+        private async Task OnSaveChangesAsync()
+        {
+            if (!this.HasUnsavedChanges)
+            {
+                return;
+            }
+
+            this.IsBusy = true;
+
+            try
+            {
+                // Prośba o potwierdzenie
+                bool confirmDelete = await this.dialogService.DisplayAlertAsync(
+                    "Potwierdź zmiany",
+                    $"Czy na pewno chcesz usunąć {this.ShiftsToDelete.Count} dyżur(y)?",
+                    "Zapisz",
+                    "Anuluj");
+
+                if (!confirmDelete)
+                {
+                    return;
+                }
+
+                // Usunięcie dyżurów z bazy danych
+                foreach (var shift in this.ShiftsToDelete)
+                {
+                    await this.databaseService.DeleteMedicalShiftAsync(shift);
+                }
+
+                // Wyczyszczenie listy do usunięcia
+                this.ShiftsToDelete.Clear();
+                this.HasUnsavedChanges = false;
+
+                await this.dialogService.DisplayAlertAsync(
+                    "Sukces",
+                    "Zmiany zostały zapisane pomyślnie.",
+                    "OK");
+
+                // Odświeżenie listy
+                await this.LoadShiftsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania zmian: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie udało się zapisać zmian. Spróbuj ponownie.",
+                    "OK");
+            }
+            finally
+            {
+                this.IsBusy = false;
+            }
+        }
+
+        private async Task OnCancelChangesAsync()
+        {
+            if (!this.HasUnsavedChanges)
+            {
+                return;
+            }
+
+            // Prośba o potwierdzenie anulowania
+            bool confirmCancel = await this.dialogService.DisplayAlertAsync(
+                "Anuluj zmiany",
+                "Czy na pewno chcesz anulować wprowadzone zmiany?",
+                "Tak",
+                "Nie");
+
+            if (confirmCancel)
+            {
+                // Wyczyszczenie listy do usunięcia
+                this.ShiftsToDelete.Clear();
+                this.HasUnsavedChanges = false;
+
+                // Odświeżenie listy
+                await this.LoadShiftsAsync();
+            }
+        }
+
+        // Istniejące metody (bez zmian)
         private async Task OnFilterShiftsAsync(string filter)
         {
             if (filter == "All")

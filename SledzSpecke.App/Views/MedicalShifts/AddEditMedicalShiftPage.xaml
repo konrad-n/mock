@@ -3,87 +3,100 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.MedicalShifts.AddEditMedicalShiftPage"
              Title="{Binding Title}">
+
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Internship selection -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Staż:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                    <Picker ItemsSource="{Binding AvailableInternships}" 
+        <StackLayout Padding="20" Spacing="15">
+            <!-- Indykator ładowania -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" 
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
+                  IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+                  ColumnSpacing="15" RowSpacing="15">
+
+                <!-- Wybór stażu -->
+                <Label Grid.Row="0" Grid.Column="0" 
+                       Text="Staż:" 
+                       VerticalOptions="Center" />
+                <Picker Grid.Row="0" Grid.Column="1" 
+                        ItemsSource="{Binding AvailableInternships}" 
                         SelectedItem="{Binding SelectedInternship}"
-                        ItemDisplayBinding="{Binding DisplayName}" 
-                        BackgroundColor="Transparent"/>
-                </VerticalStackLayout>
-            </Frame>
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        Title="Wybierz staż" />
 
-            <!-- Date and time -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Data i czas dyżuru:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                <!-- Data rozpoczęcia - zmieniono nazwę z "Data dyżuru" -->
+                <Label Grid.Row="1" Grid.Column="0" 
+                       Text="Data rozpoczęcia:" 
+                       VerticalOptions="Center" />
+                <DatePicker Grid.Row="1" Grid.Column="1" 
+                            Date="{Binding Date}" 
+                            Format="yyyy-MM-dd" />
 
-                    <!-- Date picker -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Data dyżuru:" TextColor="{StaticResource TextMutedColor}" />
-                        <DatePicker Date="{Binding Date}" Format="D" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
+                <!-- Liczba godzin - zmieniono nazwę z "Godziny" -->
+                <Label Grid.Row="2" Grid.Column="0" 
+                       Text="Liczba godzin:" 
+                       VerticalOptions="Center" />
+                <Entry Grid.Row="2" Grid.Column="1" 
+                       Text="{Binding Hours}" 
+                       Keyboard="Numeric" />
 
-                    <!-- Time duration -->
-                    <Grid ColumnDefinitions="*, 20, *" RowSpacing="5">
-                        <VerticalStackLayout Grid.Column="0">
-                            <Label Text="Godziny:" TextColor="{StaticResource TextMutedColor}" />
-                            <Entry Text="{Binding Hours}" Keyboard="Numeric" BackgroundColor="Transparent" />
-                        </VerticalStackLayout>
+                <!-- Liczba minut - zmieniono nazwę z "Minuty" -->
+                <Label Grid.Row="3" Grid.Column="0" 
+                       Text="Liczba minut:" 
+                       VerticalOptions="Center" />
+                <Entry Grid.Row="3" Grid.Column="1" 
+                       Text="{Binding Minutes}" 
+                       Keyboard="Numeric" />
 
-                        <VerticalStackLayout Grid.Column="2">
-                            <Label Text="Minuty:" TextColor="{StaticResource TextMutedColor}" />
-                            <Entry Text="{Binding Minutes}" Keyboard="Numeric" BackgroundColor="Transparent" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                <!-- Nazwa komórki organizacyjnej - zmieniono nazwę z "Miejsce dyżuru" -->
+                <Label Grid.Row="4" Grid.Column="0" 
+                       Text="Nazwa komórki organizacyjnej:" 
+                       VerticalOptions="Center" />
+                <Entry Grid.Row="4" Grid.Column="1" 
+                       Text="{Binding Location}" 
+                       Placeholder="Wpisz nazwę komórki organizacyjnej" />
 
-            <!-- Location and year -->
-            <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15">
-                    <!-- Place of shift -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Miejsce dyżuru:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <Entry Text="{Binding Location}" Placeholder="Oddział/komórka organizacyjna" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
+                <!-- Rok szkolenia -->
+                <Label Grid.Row="5" Grid.Column="0" 
+                       Text="Rok szkolenia:" 
+                       VerticalOptions="Center" />
+                <Picker Grid.Row="5" Grid.Column="1" 
+                        ItemsSource="{Binding YearOptions}" 
+                        SelectedItem="{Binding Year}" 
+                        Title="Wybierz rok szkolenia" />
 
-                    <!-- Training year -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Rok szkolenia:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <Picker ItemsSource="{Binding YearOptions}" SelectedItem="{Binding Year}" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
+                <!-- Osoba nadzorująca - dla starego SMK -->
+                <Label Grid.Row="6" Grid.Column="0" 
+                       Text="Osoba nadzorująca:" 
+                       VerticalOptions="Center" 
+                       IsVisible="{Binding IsOldSmkVersion}" />
+                <Entry Grid.Row="6" Grid.Column="1" 
+                       Text="{Binding OldSMKField1}" 
+                       Placeholder="Wpisz osobę nadzorującą dyżur"
+                       IsVisible="{Binding IsOldSmkVersion}" />
 
-            <!-- Old SMK specific fields -->
-            <Frame IsVisible="{Binding IsOldSmkVersion}" Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Pola dodatkowe (Stara wersja SMK):" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" />
+                <!-- Oddział - dla starego SMK -->
+                <Label Grid.Row="7" Grid.Column="0" 
+                       Text="Oddział:" 
+                       VerticalOptions="Center"
+                       IsVisible="{Binding IsOldSmkVersion}" />
+                <Entry Grid.Row="7" Grid.Column="1" 
+                       Text="{Binding OldSMKField2}" 
+                       Placeholder="Wpisz oddział"
+                       IsVisible="{Binding IsOldSmkVersion}" />
+            </Grid>
 
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Osoba nadzorująca:" TextColor="{StaticResource TextMutedColor}" />
-                        <Entry Text="{Binding OldSMKField1}" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Oddział:" TextColor="{StaticResource TextMutedColor}" />
-                        <Entry Text="{Binding OldSMKField2}" BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- Action buttons -->
-            <VerticalStackLayout Spacing="10" Margin="0,10,0,20">
-                <Button Text="Zapisz" Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}" Style="{StaticResource PrimaryButton}" />
-                <Button Text="Anuluj" Command="{Binding CancelCommand}" Style="{StaticResource OutlineButton}" />
-            </VerticalStackLayout>
-
-            <!-- Activity indicator -->
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
-        </VerticalStackLayout>
+            <!-- Przyciski akcji -->
+            <StackLayout Orientation="Horizontal" Spacing="15" HorizontalOptions="Center"
+                         IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}">
+                <Button Text="Zapisz" 
+                        Command="{Binding SaveCommand}" 
+                        IsEnabled="{Binding CanSave}" 
+                        Style="{StaticResource PrimaryButton}" />
+                <Button Text="Anuluj" 
+                        Command="{Binding CancelCommand}" 
+                        Style="{StaticResource OutlineButton}" />
+            </StackLayout>
+        </StackLayout>
     </ScrollView>
 </ContentPage>
