@@ -517,22 +517,19 @@ namespace SledzSpecke.App.Services.Export
 
             if (oldSmkFormat)
             {
-                // Nagłówki dla starej wersji SMK w kolejności zgodnej z układem formularza
-                worksheet.Cells[1, col++].Value = "Zaliczenie na podstawie uznania";
-                worksheet.Cells[1, col++].Value = "Nazwa podmiotu prowadzącego staż";
-                worksheet.Cells[1, col++].Value = "Nazwa komórki organizacyjnej (miejsce odbywania stażu)";
+                // Nagłówki specyficzne dla starego SMK w odpowiedniej kolejności
                 worksheet.Cells[1, col++].Value = "Nazwa stażu";
-                worksheet.Cells[1, col++].Value = "Rok szkolenia";
+                worksheet.Cells[1, col++].Value = "Nazwa podmiotu prowadzącego staż";
+                worksheet.Cells[1, col++].Value = "Nazwa komórki organizacyjnej (miejsce realizacji stażu)";
+                worksheet.Cells[1, col++].Value = "Kierownik stażu";
                 worksheet.Cells[1, col++].Value = "Data rozpoczęcia";
                 worksheet.Cells[1, col++].Value = "Data zakończenia";
-                worksheet.Cells[1, col++].Value = "Liczba dni stażu";
-                worksheet.Cells[1, col++].Value = "Kierownik stażu";
-                worksheet.Cells[1, col++].Value = "Status";
+                worksheet.Cells[1, col++].Value = "Rok szkolenia";
                 worksheet.Cells[1, col++].Value = "Realizacja częściowa";
+                worksheet.Cells[1, col++].Value = "Status";
             }
             else
             {
-                // Nagłówki dla nowej wersji SMK
                 worksheet.Cells[1, col++].Value = "Nazwa stażu";
                 worksheet.Cells[1, col++].Value = "Nazwa instytucji";
                 worksheet.Cells[1, col++].Value = "Nazwa oddziału";
@@ -554,89 +551,33 @@ namespace SledzSpecke.App.Services.Export
 
                 var internship = internships[i];
 
-                // Pobierz dane z AdditionalFields, jeśli istnieją
-                Dictionary<string, object> additionalFields = new Dictionary<string, object>();
-                if (!string.IsNullOrEmpty(internship.AdditionalFields))
-                {
-                    try
-                    {
-                        additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
-                            internship.AdditionalFields) ?? new Dictionary<string, object>();
-                    }
-                    catch
-                    {
-                        // Ignoruj błędy deserializacji
-                    }
-                }
-
                 if (oldSmkFormat)
                 {
-                    // Eksport danych dla starej wersji SMK
-
-                    // Zaliczenie na podstawie uznania
-                    string recognitionType = string.Empty;
-                    if (additionalFields.TryGetValue("RecognitionType", out object recType))
-                    {
-                        recognitionType = recType?.ToString() ?? string.Empty;
-                    }
-                    else if (!string.IsNullOrEmpty(internship.RecognitionReason))
-                    {
-                        recognitionType = internship.RecognitionReason;
-                    }
-                    worksheet.Cells[row, col++].Value = recognitionType;
-
-                    // Podstawowe dane stażu
+                    // Dane w kolejności dla starego SMK
+                    worksheet.Cells[row, col++].Value = internship.InternshipName;
                     worksheet.Cells[row, col++].Value = internship.InstitutionName;
                     worksheet.Cells[row, col++].Value = internship.DepartmentName;
-                    worksheet.Cells[row, col++].Value = internship.InternshipName;
-                    worksheet.Cells[row, col++].Value = internship.Year;
+                    worksheet.Cells[row, col++].Value = internship.SupervisorName;
 
-                    // Daty
                     worksheet.Cells[row, col++].Value = internship.StartDate;
                     worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
 
                     worksheet.Cells[row, col++].Value = internship.EndDate;
                     worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
 
-                    // Liczba dni
-                    worksheet.Cells[row, col++].Value = internship.DaysCount;
+                    worksheet.Cells[row, col++].Value = internship.Year;
 
-                    // Kierownik stażu
-                    string supervisorName = string.Empty;
-                    if (additionalFields.TryGetValue("OldSMKField1", out object supervisor))
-                    {
-                        supervisorName = supervisor?.ToString() ?? string.Empty;
-                    }
-                    worksheet.Cells[row, col++].Value = supervisorName;
+                    // Realizacja częściowa
+                    worksheet.Cells[row, col++].Value = internship.IsPartialRealization ? "Tak" : "Nie";
 
                     // Status
                     string status = internship.IsCompleted ?
                         (internship.IsApproved ? "Ukończony i zatwierdzony" : "Ukończony") :
                         "W trakcie";
                     worksheet.Cells[row, col++].Value = status;
-
-                    // Realizacja częściowa
-                    bool isPartialCompletion = false;
-                    if (additionalFields.TryGetValue("IsPartialCompletion", out object partial))
-                    {
-                        if (partial is bool isPartial)
-                        {
-                            isPartialCompletion = isPartial;
-                        }
-                        else
-                        {
-                            // Próba konwersji jeśli wartość to string lub JsonElement
-                            if (bool.TryParse(partial?.ToString(), out bool parsedValue))
-                            {
-                                isPartialCompletion = parsedValue;
-                            }
-                        }
-                    }
-                    worksheet.Cells[row, col++].Value = isPartialCompletion ? "Tak" : "Nie";
                 }
                 else
                 {
-                    // Eksport danych dla nowej wersji SMK
                     worksheet.Cells[row, col++].Value = internship.InternshipName;
                     worksheet.Cells[row, col++].Value = internship.InstitutionName;
                     worksheet.Cells[row, col++].Value = internship.DepartmentName;

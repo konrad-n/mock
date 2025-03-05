@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
@@ -32,6 +29,11 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool isNotSynced;
         private string moduleInfo;
 
+        // Pola specyficzne dla starego SMK
+        private bool isPartialRealization;
+        private string supervisorName;
+        private bool isOldSmkVersion;
+
         public InternshipDetailsViewModel(
             IDatabaseService databaseService,
             IDialogService dialogService)
@@ -46,6 +48,9 @@ namespace SledzSpecke.App.ViewModels.Internships
 
             // Inicjalizacja właściwości
             this.Title = "Szczegóły stażu";
+
+            // Sprawdzenie wersji SMK
+            this.CheckSmkVersionAsync().ConfigureAwait(false);
         }
 
         // Właściwości
@@ -137,23 +142,53 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
+        // Właściwości specyficzne dla starego SMK
+        public bool IsPartialRealization
+        {
+            get => this.isPartialRealization;
+            set => this.SetProperty(ref this.isPartialRealization, value);
+        }
+
+        public string SupervisorName
+        {
+            get => this.supervisorName;
+            set => this.SetProperty(ref this.supervisorName, value);
+        }
+
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
+        }
+
         public string DateRange => $"{this.startDate:d} - {this.endDate:d}";
 
         public string Status
         {
             get
             {
+                string status = string.Empty;
+
                 if (this.isApproved)
                 {
-                    return "Zatwierdzony";
+                    status = "Zatwierdzony";
                 }
-
-                if (this.isCompleted)
+                else if (this.isCompleted)
                 {
-                    return "Ukończony";
+                    status = "Ukończony";
+                }
+                else
+                {
+                    status = "W trakcie";
                 }
 
-                return "W trakcie";
+                // Dodaj informację o realizacji częściowej w starym SMK
+                if (this.IsOldSmkVersion && this.IsPartialRealization)
+                {
+                    status += " (realizacja częściowa)";
+                }
+
+                return status;
             }
         }
 
@@ -163,6 +198,19 @@ namespace SledzSpecke.App.ViewModels.Internships
         public ICommand GoBackCommand { get; }
 
         // Metody
+        private async Task CheckSmkVersionAsync()
+        {
+            try
+            {
+                var user = await this.databaseService.GetCurrentUserAsync();
+                this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
+            }
+        }
+
         private async Task LoadInternshipAsync(int internshipId)
         {
             if (this.IsBusy)
@@ -196,6 +244,10 @@ namespace SledzSpecke.App.ViewModels.Internships
                 this.Year = this.Internship.Year;
                 this.IsCompleted = this.Internship.IsCompleted;
                 this.IsApproved = this.Internship.IsApproved;
+
+                // Właściwości specyficzne dla starego SMK
+                this.IsPartialRealization = this.Internship.IsPartialRealization;
+                this.SupervisorName = this.Internship.SupervisorName ?? string.Empty;
 
                 // Ustawienie statusu synchronizacji
                 this.IsNotSynced = this.Internship.SyncStatus != SyncStatus.Synced;

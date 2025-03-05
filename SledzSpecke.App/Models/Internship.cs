@@ -45,6 +45,11 @@ namespace SledzSpecke.App.Models
 
         public int RecognitionDaysReduction { get; set; }
 
+        // Pola specyficzne dla starego SMK
+        public bool IsPartialRealization { get; set; }  // Oznaczenie stażu jako "realizacja częściowa"
+
+        public string SupervisorName { get; set; }  // Kierownik stażu (odpowiednik OldSMKField1)
+
         public SyncStatus SyncStatus { get; set; }
 
         public string AdditionalFields { get; set; } // JSON

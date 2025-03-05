@@ -5,7 +5,6 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
-using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -18,7 +17,6 @@ namespace SledzSpecke.App.ViewModels.Internships
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
-        private readonly ISmkVersionStrategy smkStrategy;
 
         private int internshipId;
         private int? moduleId;
@@ -33,28 +31,26 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool canSave;
         private string moduleInfo = string.Empty;
         private bool hasModules;
-        private bool isPartialCompletion;
-        private string supervisorName = string.Empty;
-        private string selectedRecognitionType = string.Empty;
-        private int daysCount;
+        private string selectedInternshipType;
+        private string selectedInternshipName;
         private bool isOldSmkVersion;
-        private bool isEditMode;
+
+        // Pola specyficzne dla starego SMK
+        private bool isPartialRealization;
+        private string supervisorName = string.Empty;
 
         private ObservableCollection<string> availableInternshipTypes;
-        private string selectedInternshipType;
-        private ObservableCollection<string> availableRecognitionTypes;
+        private ObservableCollection<string> availableInternshipNames;
         private ObservableCollection<int> availableYears;
 
         public AddEditInternshipViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
-            IDialogService dialogService,
-            ISmkVersionStrategy smkStrategy)
+            IDialogService dialogService)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
             this.dialogService = dialogService;
-            this.smkStrategy = smkStrategy;
 
             // Inicjalizacja tytułu
             this.Title = "Nowy staż";
@@ -62,7 +58,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync, () => this.CanSave);
             this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
-            this.SelectInternshipCommand = new AsyncRelayCommand(this.OnSelectInternshipAsync);
             this.SelectInstitutionCommand = new AsyncRelayCommand(this.OnSelectInstitutionAsync);
 
             // Inicjalizacja kolekcji
@@ -80,19 +75,11 @@ namespace SledzSpecke.App.ViewModels.Internships
                 "Inny staż kierunkowy",
             };
 
+            this.AvailableInternshipNames = new ObservableCollection<string>(this.AvailableInternshipTypes);
+
             this.AvailableYears = new ObservableCollection<int> { 1, 2, 3, 4, 5, 6 };
 
-            // Inicjalizacja listy typów uznania dla starego SMK
-            this.AvailableRecognitionTypes = new ObservableCollection<string>
-            {
-                string.Empty,
-                "Uznanie na podstawie decyzji CMKP",
-                "Uznanie na podstawie par. 13 ust.2 rozporządzenia z 29.03.2019 w sprawie specjalizacji lekarzy i lekarzy dentystów",
-                "Uznanie na podstawie decyzji CMKP – realizacja zadań wynikających z wprowadzenia stanu zagrożenia epidemicznego lub stanu epidemii",
-                "Uznanie na podstawie potwierdzenia realizacji w ramach programu specjalizacji"
-            };
-
-            // Sprawdź wersję SMK
+            // Sprawdzenie wersji SMK użytkownika
             this.CheckSmkVersionAsync().ConfigureAwait(false);
         }
 
@@ -106,7 +93,6 @@ namespace SledzSpecke.App.ViewModels.Internships
                 {
                     // Aktualizacja tytułu dla trybu edycji
                     this.Title = "Edytuj staż";
-                    this.IsEditMode = true;
 
                     // Wczytanie danych stażu
                     this.LoadInternshipAsync(value).ConfigureAwait(false);
@@ -199,6 +185,22 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => this.SetProperty(ref this.isApproved, value);
         }
 
+        public bool IsPartialRealization
+        {
+            get => this.isPartialRealization;
+            set => this.SetProperty(ref this.isPartialRealization, value);
+        }
+
+        public string SupervisorName
+        {
+            get => this.supervisorName;
+            set
+            {
+                this.SetProperty(ref this.supervisorName, value);
+                this.ValidateInput();
+            }
+        }
+
         public bool CanSave
         {
             get => this.canSave;
@@ -223,6 +225,24 @@ namespace SledzSpecke.App.ViewModels.Internships
             }
         }
 
+        public ObservableCollection<string> AvailableInternshipNames
+        {
+            get => this.availableInternshipNames;
+            set => this.SetProperty(ref this.availableInternshipNames, value);
+        }
+
+        public string SelectedInternshipName
+        {
+            get => this.selectedInternshipName;
+            set
+            {
+                if (this.SetProperty(ref this.selectedInternshipName, value))
+                {
+                    this.InternshipName = value;
+                }
+            }
+        }
+
         public ObservableCollection<int> AvailableYears
         {
             get => this.availableYears;
@@ -241,55 +261,17 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => this.SetProperty(ref this.hasModules, value);
         }
 
-        public bool IsPartialCompletion
-        {
-            get => this.isPartialCompletion;
-            set => this.SetProperty(ref this.isPartialCompletion, value);
-        }
-
-        public string SupervisorName
-        {
-            get => this.supervisorName;
-            set => this.SetProperty(ref this.supervisorName, value);
-        }
-
-        public ObservableCollection<string> AvailableRecognitionTypes
-        {
-            get => this.availableRecognitionTypes;
-            set => this.SetProperty(ref this.availableRecognitionTypes, value);
-        }
-
-        public string SelectedRecognitionType
-        {
-            get => this.selectedRecognitionType;
-            set => this.SetProperty(ref this.selectedRecognitionType, value);
-        }
-
-        public int DaysCount
-        {
-            get => this.daysCount;
-            set => this.SetProperty(ref this.daysCount, value);
-        }
-
         public bool IsOldSmkVersion
         {
             get => this.isOldSmkVersion;
             set => this.SetProperty(ref this.isOldSmkVersion, value);
         }
 
-        public bool IsEditMode
-        {
-            get => this.isEditMode;
-            set => this.SetProperty(ref this.isEditMode, value);
-        }
+        public int DurationDays { get; private set; }
 
         // Komendy
         public ICommand SaveCommand { get; }
-
         public ICommand CancelCommand { get; }
-
-        public ICommand SelectInternshipCommand { get; }
-
         public ICommand SelectInstitutionCommand { get; }
 
         // Metody
@@ -328,42 +310,16 @@ namespace SledzSpecke.App.ViewModels.Internships
                 this.Year = internship.Year;
                 this.IsCompleted = internship.IsCompleted;
                 this.IsApproved = internship.IsApproved;
-                this.DaysCount = internship.DaysCount;
 
-                // Interpretacja dodatkowych pól dla starego SMK
-                if (!string.IsNullOrEmpty(internship.AdditionalFields))
-                {
-                    var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
-                        internship.AdditionalFields) ?? new Dictionary<string, object>();
-
-                    // Ustaw pole kierownika stażu
-                    if (additionalFields.TryGetValue("OldSMKField1", out object supervisor))
-                    {
-                        this.SupervisorName = supervisor?.ToString() ?? string.Empty;
-                    }
-
-                    // Sprawdź flagę częściowej realizacji
-                    if (additionalFields.TryGetValue("IsPartialCompletion", out object partialCompletion))
-                    {
-                        if (partialCompletion is bool isPartial)
-                        {
-                            this.IsPartialCompletion = isPartial;
-                        }
-                        else if (partialCompletion is System.Text.Json.JsonElement element && element.ValueKind == System.Text.Json.JsonValueKind.True)
-                        {
-                            this.IsPartialCompletion = true;
-                        }
-                    }
-
-                    // Pobierz uznanie stażu
-                    if (additionalFields.TryGetValue("RecognitionType", out object recognitionType))
-                    {
-                        this.SelectedRecognitionType = recognitionType?.ToString() ?? string.Empty;
-                    }
-                }
+                // Pola specyficzne dla starego SMK
+                this.IsPartialRealization = internship.IsPartialRealization;
+                this.SupervisorName = internship.SupervisorName ?? string.Empty;
 
                 // Spróbuj znaleźć odpowiadający typ stażu
                 this.SelectedInternshipType = this.AvailableInternshipTypes
+                    .FirstOrDefault(t => t == internship.InternshipName) ?? string.Empty;
+
+                this.SelectedInternshipName = this.AvailableInternshipNames
                     .FirstOrDefault(t => t == internship.InternshipName) ?? string.Empty;
 
                 // Wczytaj dane o module, jeśli istnieje
@@ -434,8 +390,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
-                // Domyślnie ustawiamy na nową wersję
-                this.IsOldSmkVersion = false;
             }
         }
 
@@ -446,42 +400,15 @@ namespace SledzSpecke.App.ViewModels.Internships
             {
                 // Liczba dni włącznie z dniem rozpoczęcia i zakończenia
                 int days = (this.EndDate - this.StartDate).Days + 1;
-                this.DaysCount = days;
+                this.DurationDays = days;
             }
             else
             {
-                this.DaysCount = 0;
+                this.DurationDays = 0;
             }
 
             // Walidacja po zmianie dat
             this.ValidateInput();
-        }
-
-        private async Task OnSelectInternshipAsync()
-        {
-            if (this.IsBusy)
-            {
-                return;
-            }
-
-            try
-            {
-                // W prawdziwej implementacji tutaj należałoby otworzyć dialog wyboru stażu
-                var result = await this.dialogService.DisplayPromptAsync(
-                    "Wybór stażu",
-                    "Podaj nazwę stażu lub wyszukaj go na liście",
-                    "OK",
-                    "Anuluj");
-
-                if (!string.IsNullOrEmpty(result))
-                {
-                    this.InternshipName = result;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas wyboru stażu: {ex.Message}");
-            }
         }
 
         private async Task OnSelectInstitutionAsync()
@@ -514,27 +441,18 @@ namespace SledzSpecke.App.ViewModels.Internships
         private void ValidateInput()
         {
             // Sprawdź czy wszystkie wymagane pola są wypełnione
+            bool baseFieldsValid = !string.IsNullOrWhiteSpace(this.InternshipName)
+                        && !string.IsNullOrWhiteSpace(this.InstitutionName)
+                        && this.EndDate >= this.StartDate;
+
+            // Dodatkowa walidacja dla starego SMK
             if (this.IsOldSmkVersion)
             {
-                // Walidacja dla starego SMK
-                this.CanSave = !string.IsNullOrWhiteSpace(this.InternshipName)
-                            && !string.IsNullOrWhiteSpace(this.InstitutionName)
-                            && !string.IsNullOrWhiteSpace(this.DepartmentName)
-                            && this.EndDate >= this.StartDate
-                            && this.DaysCount > 0;
-
-                // Dla stażu uznanego sprawdź dodatkowe pola
-                if (!string.IsNullOrWhiteSpace(this.SelectedRecognitionType))
-                {
-                    this.CanSave = this.CanSave && !string.IsNullOrWhiteSpace(this.SupervisorName);
-                }
+                this.CanSave = baseFieldsValid && !string.IsNullOrWhiteSpace(this.SupervisorName);
             }
             else
             {
-                // Walidacja dla nowej wersji SMK
-                this.CanSave = !string.IsNullOrWhiteSpace(this.InternshipName)
-                            && !string.IsNullOrWhiteSpace(this.InstitutionName)
-                            && this.EndDate >= this.StartDate;
+                this.CanSave = baseFieldsValid;
             }
         }
 
@@ -590,29 +508,13 @@ namespace SledzSpecke.App.ViewModels.Internships
                 internship.Year = this.Year;
                 internship.IsCompleted = this.IsCompleted;
                 internship.IsApproved = this.IsApproved;
-                internship.DaysCount = this.DaysCount;
+                internship.DaysCount = this.DurationDays;
 
-                // Przygotowanie dodatkowych pól dla starego SMK
+                // Aktualizacja pól specyficznych dla starego SMK
                 if (this.IsOldSmkVersion)
                 {
-                    var additionalFields = new Dictionary<string, object>();
-
-                    // Dodaj informacje o kierowniku stażu
-                    additionalFields["OldSMKField1"] = this.SupervisorName;
-
-                    // Dodaj informacje o częściowej realizacji
-                    additionalFields["IsPartialCompletion"] = this.IsPartialCompletion;
-
-                    // Dodaj informacje o uznaniu stażu
-                    if (!string.IsNullOrEmpty(this.SelectedRecognitionType))
-                    {
-                        additionalFields["RecognitionType"] = this.SelectedRecognitionType;
-                        internship.IsRecognition = true;
-                        internship.RecognitionReason = this.SelectedRecognitionType;
-                    }
-
-                    // Serializacja dodatkowych pól
-                    internship.AdditionalFields = System.Text.Json.JsonSerializer.Serialize(additionalFields);
+                    internship.IsPartialRealization = this.IsPartialRealization;
+                    internship.SupervisorName = this.SupervisorName;
                 }
 
                 // Ustaw moduł, jeśli specjalizacja ma moduły

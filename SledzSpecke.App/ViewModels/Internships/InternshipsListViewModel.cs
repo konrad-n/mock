@@ -23,6 +23,10 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool showSpecialisticModule = false;
         private Internship selectedInternship;
 
+        // Dla starego SMK
+        private bool showPartialOnly = false;
+        private bool isOldSmkVersion = false;
+
         // Dane
         private ObservableCollection<InternshipViewModel> internships;
         private int? currentModuleId;
@@ -45,11 +49,15 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.InternshipSelectedCommand = new AsyncRelayCommand(this.OnInternshipSelectedAsync);
             this.AddInternshipCommand = new AsyncRelayCommand(this.OnAddInternshipAsync);
             this.ToggleActiveCommand = new RelayCommand(this.OnToggleActive);
+            this.TogglePartialCommand = new RelayCommand(this.OnTogglePartial);
             this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
 
             // Inicjalizacja właściwości
             this.Title = "Staże specjalizacyjne";
             this.Internships = new ObservableCollection<InternshipViewModel>();
+
+            // Sprawdzenie wersji SMK
+            this.CheckSmkVersionAsync().ConfigureAwait(false);
 
             // Wczytanie danych
             this.LoadInternshipsAsync().ConfigureAwait(false);
@@ -78,6 +86,18 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             get => this.showOnlyActive;
             set => this.SetProperty(ref this.showOnlyActive, value);
+        }
+
+        public bool ShowPartialOnly
+        {
+            get => this.showPartialOnly;
+            set => this.SetProperty(ref this.showPartialOnly, value);
+        }
+
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
         }
 
         public bool HasModules
@@ -110,9 +130,23 @@ namespace SledzSpecke.App.ViewModels.Internships
         public ICommand InternshipSelectedCommand { get; }
         public ICommand AddInternshipCommand { get; }
         public ICommand ToggleActiveCommand { get; }
+        public ICommand TogglePartialCommand { get; }
         public ICommand SelectModuleCommand { get; }
 
         // Metody
+        private async Task CheckSmkVersionAsync()
+        {
+            try
+            {
+                var user = await this.databaseService.GetCurrentUserAsync();
+                this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
+            }
+        }
+
         private async Task LoadInternshipsAsync()
         {
             if (this.IsBusy)
@@ -188,6 +222,12 @@ namespace SledzSpecke.App.ViewModels.Internships
                     items = items.Where(i => !i.IsCompleted).ToList();
                 }
 
+                // Filtrowanie po realizacji częściowej (tylko dla starego SMK)
+                if (this.IsOldSmkVersion && this.ShowPartialOnly)
+                {
+                    items = items.Where(i => i.IsPartialRealization).ToList();
+                }
+
                 // Sortowanie staży - najpierw według roku, potem według daty rozpoczęcia (od najnowszych)
                 var sortedItems = items
                     .OrderBy(i => i.Year)
@@ -197,21 +237,12 @@ namespace SledzSpecke.App.ViewModels.Internships
                 // Dodaj staże do kolekcji
                 foreach (var item in sortedItems)
                 {
-                    var viewModel = new InternshipViewModel
-                    {
-                        InternshipId = item.InternshipId,
-                        InternshipName = item.InternshipName,
-                        InstitutionName = item.InstitutionName,
-                        DepartmentName = item.DepartmentName,
-                        StartDate = item.StartDate,
-                        EndDate = item.EndDate,
-                        DaysCount = item.DaysCount,
-                        Year = item.Year,
-                        IsCompleted = item.IsCompleted,
-                        IsApproved = item.IsApproved,
-                        SyncStatus = item.SyncStatus,
-                        IsBasic = this.IsBasicInternship(item),
-                    };
+                    // Utwórz model widoku z uwzględnieniem wersji SMK
+                    var viewModel = InternshipViewModel.FromModel(
+                        item,
+                        moduleName: string.Empty,
+                        moduleType: ModuleType.Basic,
+                        isOldSmk: this.IsOldSmkVersion);
 
                     // Pobierz nazwę modułu, jeśli dostępna
                     if (this.HasModules && item.ModuleId.HasValue)
@@ -241,14 +272,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             }
         }
 
-        private bool IsBasicInternship(Internship internship)
-        {
-            // Sprawdzenie, czy to staż podstawowy na podstawie nazwy
-            // Można dostosować tę logikę do konkretnych wymagań aplikacji
-            return internship.InternshipName.Contains("podstawowy") ||
-                   (this.currentModule != null && this.currentModule.Type == ModuleType.Basic);
-        }
-
         private async Task ApplyFiltersAsync()
         {
             await this.LoadInternshipsAsync();
@@ -257,6 +280,12 @@ namespace SledzSpecke.App.ViewModels.Internships
         private void OnToggleActive()
         {
             this.ShowOnlyActive = !this.ShowOnlyActive;
+            this.ApplyFiltersAsync().ConfigureAwait(false);
+        }
+
+        private void OnTogglePartial()
+        {
+            this.ShowPartialOnly = !this.ShowPartialOnly;
             this.ApplyFiltersAsync().ConfigureAwait(false);
         }
 

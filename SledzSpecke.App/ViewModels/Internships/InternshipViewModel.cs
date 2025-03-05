@@ -25,6 +25,11 @@ namespace SledzSpecke.App.ViewModels.Internships
         private string moduleName = string.Empty;
         private ModuleType moduleType;
 
+        // Pola specyficzne dla starego SMK
+        private bool isPartialRealization;
+        private string supervisorName = string.Empty;
+        private bool isOldSmkVersion;
+
         /// <summary>
         /// Pobiera lub ustawia identyfikator stażu.
         /// </summary>
@@ -125,6 +130,33 @@ namespace SledzSpecke.App.ViewModels.Internships
         }
 
         /// <summary>
+        /// Pobiera lub ustawia wartość wskazującą, czy to realizacja częściowa stażu (stary SMK).
+        /// </summary>
+        public bool IsPartialRealization
+        {
+            get => this.isPartialRealization;
+            set => this.SetProperty(ref this.isPartialRealization, value);
+        }
+
+        /// <summary>
+        /// Pobiera lub ustawia kierownika stażu (stary SMK).
+        /// </summary>
+        public string SupervisorName
+        {
+            get => this.supervisorName;
+            set => this.SetProperty(ref this.supervisorName, value);
+        }
+
+        /// <summary>
+        /// Pobiera lub ustawia wartość wskazującą, czy używana jest stara wersja SMK.
+        /// </summary>
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
+        }
+
+        /// <summary>
         /// Pobiera lub ustawia status synchronizacji z systemem SMK.
         /// </summary>
         public SyncStatus SyncStatus
@@ -181,17 +213,28 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             get
             {
+                string status = string.Empty;
+
                 if (this.isApproved)
                 {
-                    return "Zatwierdzony";
+                    status = "Zatwierdzony";
                 }
-
-                if (this.isCompleted)
+                else if (this.isCompleted)
                 {
-                    return "Ukończony";
+                    status = "Ukończony";
+                }
+                else
+                {
+                    status = "W trakcie";
                 }
 
-                return "W trakcie";
+                // Dodaj informację o realizacji częściowej w starym SMK
+                if (this.IsOldSmkVersion && this.IsPartialRealization)
+                {
+                    status += " (realizacja częściowa)";
+                }
+
+                return status;
             }
         }
 
@@ -217,8 +260,10 @@ namespace SledzSpecke.App.ViewModels.Internships
         /// </summary>
         /// <param name="internship">Obiekt stażu z modelu danych.</param>
         /// <param name="moduleName">Opcjonalna nazwa modułu.</param>
+        /// <param name="moduleType">Typ modułu.</param>
+        /// <param name="isOldSmk">Czy używana jest stara wersja SMK.</param>
         /// <returns>Obiekt ViewModel stażu.</returns>
-        public static InternshipViewModel FromModel(Internship internship, string moduleName = null, ModuleType moduleType = ModuleType.Basic)
+        public static InternshipViewModel FromModel(Internship internship, string moduleName = null, ModuleType moduleType = ModuleType.Basic, bool isOldSmk = false)
         {
             if (internship == null)
             {
@@ -241,6 +286,10 @@ namespace SledzSpecke.App.ViewModels.Internships
                 SyncStatus = internship.SyncStatus,
                 ModuleName = moduleName ?? string.Empty,
                 ModuleType = moduleType,
+                // Pola specyficzne dla starego SMK
+                IsPartialRealization = internship.IsPartialRealization,
+                SupervisorName = internship.SupervisorName ?? string.Empty,
+                IsOldSmkVersion = isOldSmk
             };
         }
 
@@ -267,6 +316,9 @@ namespace SledzSpecke.App.ViewModels.Internships
                 IsCompleted = this.IsCompleted,
                 IsApproved = this.IsApproved,
                 SyncStatus = this.SyncStatus,
+                // Pola specyficzne dla starego SMK
+                IsPartialRealization = this.IsPartialRealization,
+                SupervisorName = this.SupervisorName
             };
         }
     }

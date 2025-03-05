@@ -52,6 +52,24 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Pola specyficzne dla starego SMK -->
+            <Frame Style="{StaticResource CardFrame}" Padding="15" IsVisible="{Binding IsOldSmkVersion}">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Dane dla starego SMK" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextColor}"/>
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="10" ColumnSpacing="15">
+                        <!-- Kierownik stażu -->
+                        <Label Grid.Row="0" Grid.Column="0" Text="Kierownik stażu:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding SupervisorName}" TextColor="{StaticResource TextColor}"/>
+
+                        <!-- Realizacja częściowa -->
+                        <Label Grid.Row="1" Grid.Column="0" Text="Realizacja częściowa:" FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding IsPartialRealization, Converter={StaticResource BoolToTextConverter}}" TextColor="{StaticResource TextColor}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Informacja o module (widoczna tylko gdy istnieje) -->
             <Frame Style="{StaticResource CardFrame}" Padding="15" IsVisible="{Binding ModuleInfo, Converter={StaticResource StringToBoolConverter}}">
                 <VerticalStackLayout Spacing="5">
