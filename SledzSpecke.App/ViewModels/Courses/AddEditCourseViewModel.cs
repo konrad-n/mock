@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
@@ -60,6 +60,8 @@ namespace SledzSpecke.App.ViewModels.Courses
             // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync, () => this.CanSave);
             this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
+            this.SelectCourseNumberCommand = new AsyncRelayCommand(this.OnSelectCourseNumberAsync);
+            this.SelectInstitutionCommand = new AsyncRelayCommand(this.OnSelectInstitutionAsync);
 
             // Inicjalizacja kolekcji
             this.AvailableCourseTypes = new ObservableCollection<string>
@@ -80,6 +82,9 @@ namespace SledzSpecke.App.ViewModels.Courses
 
             // Inicjalizacja dla starego SMK
             this.AvailableRecognitionTypes = new ObservableCollection<string>();
+
+            // Domyślne wartości dla starego SMK
+            this.CertificateIssueDate = DateTime.Today;
 
             // Sprawdzenie wersji SMK użytkownika
             this.CheckSmkVersionAsync().ConfigureAwait(false);
@@ -282,8 +287,9 @@ namespace SledzSpecke.App.ViewModels.Courses
 
         // Komendy
         public ICommand SaveCommand { get; }
-
         public ICommand CancelCommand { get; }
+        public ICommand SelectCourseNumberCommand { get; }
+        public ICommand SelectInstitutionCommand { get; }
 
         // Metody
         private async Task LoadCourseAsync(int courseId)
@@ -419,6 +425,60 @@ namespace SledzSpecke.App.ViewModels.Courses
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
+            }
+        }
+
+        private async Task OnSelectCourseNumberAsync()
+        {
+            if (this.IsBusy)
+            {
+                return;
+            }
+
+            try
+            {
+                // W prawdziwej implementacji tutaj należałoby otworzyć dialog wyboru kursu
+                var result = await this.dialogService.DisplayPromptAsync(
+                    "Wybór kursu",
+                    "Podaj numer kursu lub wyszukaj go na liście",
+                    "OK",
+                    "Anuluj");
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    this.CourseNumber = result;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas wyboru numeru kursu: {ex.Message}");
+            }
+        }
+
+        private async Task OnSelectInstitutionAsync()
+        {
+            if (this.IsBusy)
+            {
+                return;
+            }
+
+            try
+            {
+                // W prawdziwej implementacji tutaj należałoby otworzyć dialog wyboru instytucji
+                var result = await this.dialogService.DisplayPromptAsync(
+                    "Wybór instytucji",
+                    "Podaj nazwę instytucji lub wyszukaj ją na liście",
+                    "OK",
+                    "Anuluj");
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    this.InstitutionName = result;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas wyboru instytucji: {ex.Message}");
             }
         }
 
