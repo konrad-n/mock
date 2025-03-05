@@ -31,6 +31,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private DateTime date = DateTime.Today;
         private string code = string.Empty;
         private string operatorCode = "A";
+        private string oldSmkOperatorCode = "A - operator";
         private string location = string.Empty;
         private string patientInitials = string.Empty;
         private string patientGender = string.Empty;
@@ -199,8 +200,26 @@ namespace SledzSpecke.App.ViewModels.Procedures
             get => this.operatorCode;
             set
             {
-                this.SetProperty(ref this.operatorCode, value);
-                this.ValidateInput();
+                if (this.SetProperty(ref this.operatorCode, value))
+                {
+                    // Aktualizuj format dla starego SMK
+                    this.OldSmkOperatorCode = value == "A" ? "A - operator" : "B - asysta";
+                    this.ValidateInput();
+                }
+            }
+        }
+
+        public string OldSmkOperatorCode
+        {
+            get => this.oldSmkOperatorCode;
+            set
+            {
+                if (this.SetProperty(ref this.oldSmkOperatorCode, value))
+                {
+                    // Aktualizuj wewnętrzny kod operatora
+                    this.operatorCode = value.StartsWith("A") ? "A" : "B";
+                    this.ValidateInput();
+                }
             }
         }
 
@@ -724,7 +743,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             try
             {
-                // Utwórz lub pobierz procedurę
                 Procedure procedure;
                 if (this.ProcedureId > 0)
                 {
@@ -734,7 +752,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         throw new Exception("Nie znaleziono procedury do edycji.");
                     }
 
-                    // Oznacz jako zmodyfikowane, jeśli było wcześniej zsynchronizowane
                     if (procedure.SyncStatus == SyncStatus.Synced)
                     {
                         procedure.SyncStatus = SyncStatus.Modified;
@@ -751,18 +768,17 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 // Aktualizacja właściwości
                 procedure.InternshipId = this.SelectedInternship.InternshipId;
                 procedure.Date = this.Date;
-                procedure.Code = this.Code;
-                procedure.OperatorCode = this.OperatorCode;
+                procedure.Year = this.Year;
+                procedure.OperatorCode = this.OperatorCode; // Zawsze zapisujemy prosty kod A/B
+                procedure.Code = this.IsOldSmkVersion ? this.OldSmkOperatorCode : this.Code; // Dla starego SMK zapisujemy pełną nazwę
+                procedure.PerformingPerson = this.PerformingPerson;
                 procedure.Location = this.Location;
                 procedure.PatientInitials = this.PatientInitials;
                 procedure.PatientGender = this.PatientGender;
                 procedure.AssistantData = this.AssistantData;
                 procedure.ProcedureGroup = this.ProcedureGroup;
                 procedure.Status = this.Status;
-                procedure.PerformingPerson = this.PerformingPerson;
-                procedure.Year = this.Year;
 
-                // Zapisz do bazy danych
                 await this.databaseService.SaveProcedureAsync(procedure);
 
                 await this.dialogService.DisplayAlertAsync(
@@ -772,7 +788,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         : "Procedura została pomyślnie dodana.",
                     "OK");
 
-                // Powrót
                 await this.OnCancelAsync();
             }
             catch (Exception ex)

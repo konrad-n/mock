@@ -17,7 +17,10 @@ namespace SledzSpecke.App.Models
         public int Year { get; set; } // Rok szkolenia - wymagany w starym SMK
 
         [MaxLength(20)]
-        public string Code { get; set; } // "A - operator" lub "B - asysta"
+        public string Code { get; set; }
+
+        [MaxLength(10)]
+        public string OperatorCode { get; set; } // A lub B - zachowujemy dla wewnętrznej logiki
 
         [MaxLength(100)]
         public string PerformingPerson { get; set; } // Osoba wykonująca - wymagana w starym SMK
