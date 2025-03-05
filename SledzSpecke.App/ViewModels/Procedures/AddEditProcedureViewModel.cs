@@ -37,7 +37,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private string patientGender = string.Empty;
         private string assistantData = string.Empty;
         private string procedureGroup = string.Empty;
-        private string status = string.Empty;
+        private string status = "Wykonana";
         private string performingPerson = string.Empty;
         private bool canSave;
         private bool isOldSmkVersion;
@@ -216,7 +216,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 if (this.SetProperty(ref this.oldSmkOperatorCode, value))
                 {
-                    // Aktualizuj wewnętrzny kod operatora
                     this.operatorCode = value.StartsWith("A") ? "A" : "B";
                     this.ValidateInput();
                 }
@@ -304,10 +303,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
             get => this.performingPerson;
             set
             {
-                this.SetProperty(ref this.performingPerson, value);
-                this.ValidateInput();
+                if (this.SetProperty(ref this.performingPerson, value))
+                {
+                    this.ValidateInput();
+                }
             }
         }
+
 
         public bool CanSave
         {
@@ -391,23 +393,41 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private void InitializePickerOptions()
         {
-            // Pobierz opcje dla pickerów z wybranej strategii SMK
-            var statusOptions = this.smkStrategy.GetPickerOptions("AddEditProcedure", "Status");
-            this.AvailableStatuses.Clear();
-            foreach (var status in statusOptions.Values)
+            if (this.IsOldSmkVersion)
             {
-                this.AvailableStatuses.Add(status);
-            }
+                // Dla starego SMK mamy tylko te dwie opcje
+                this.AvailableOperatorCodes = new ObservableCollection<string>
+                {
+                    "A - operator",
+                    "B - asysta",
+                };
 
-            // Domyślny status
-            if (this.AvailableStatuses.Count > 0)
+                // Status jest zawsze "Wykonana" w starym SMK
+                this.Status = "Wykonana";
+
+                // Lata w formacie starego SMK
+                this.AvailableYears = new ObservableCollection<int> { 1, 2, 3, 4, 5, 6 };
+            }
+            else
             {
-                this.Status = this.AvailableStatuses[0];
-            }
+                // Pobierz opcje dla pickerów z wybranej strategii SMK
+                var statusOptions = this.smkStrategy.GetPickerOptions("AddEditProcedure", "Status");
+                this.AvailableStatuses.Clear();
+                foreach (var status in statusOptions.Values)
+                {
+                    this.AvailableStatuses.Add(status);
+                }
 
-            // Domyślny kod operatora
-            var operatorOptions = this.smkStrategy.GetPickerOptions("AddEditProcedure", "OperatorCode");
-            this.OperatorCode = operatorOptions.Keys.FirstOrDefault() ?? "A";
+                // Domyślny status
+                if (this.AvailableStatuses.Count > 0)
+                {
+                    this.Status = this.AvailableStatuses[0];
+                }
+
+                // Domyślny kod operatora
+                var operatorOptions = this.smkStrategy.GetPickerOptions("AddEditProcedure", "OperatorCode");
+                this.OperatorCode = operatorOptions.Keys.FirstOrDefault() ?? "A";
+            }
         }
 
         private async Task LoadModuleInfoAsync()
@@ -680,56 +700,51 @@ namespace SledzSpecke.App.ViewModels.Procedures
             Preferences.Default.Set(LocationListKey, locationsJson);
         }
 
-        // Aktualizacja metody walidacji, aby uwzględnić nowe wymogi
         private void ValidateInput()
         {
-            // Sprawdź czy wszystkie wymagane pola są wypełnione
-            var requiredFields = this.smkStrategy.GetRequiredFields("AddEditProcedure");
-
-            bool isValid = true;
-
-            // Musi być wybrany staż
-            if (this.selectedInternship == null)
-            {
-                isValid = false;
-            }
-
-            // Sprawdź pola wymagane
-            if (requiredFields.Contains("Date") && this.Date == default)
-            {
-                isValid = false;
-            }
-
-            if (requiredFields.Contains("Code") && string.IsNullOrWhiteSpace(this.Code))
-            {
-                isValid = false;
-            }
-
-            if (requiredFields.Contains("OperatorCode") && string.IsNullOrWhiteSpace(this.OperatorCode))
-            {
-                isValid = false;
-            }
-
-            if (requiredFields.Contains("Location") && string.IsNullOrWhiteSpace(this.Location))
-            {
-                isValid = false;
-            }
-
-            // Dla starej wersji SMK sprawdź dodatkowe pola
             if (this.IsOldSmkVersion)
             {
-                if (requiredFields.Contains("PerformingPerson") && string.IsNullOrWhiteSpace(this.PerformingPerson))
-                {
-                    isValid = false;
-                }
-
-                if (requiredFields.Contains("Year") && this.Year <= 0)
-                {
-                    isValid = false;
-                }
+                // Walidacja dla starego SMK
+                this.CanSave = this.selectedInternship != null
+                    && this.Date != default
+                    && !string.IsNullOrWhiteSpace(this.OldSmkOperatorCode)
+                    && !string.IsNullOrWhiteSpace(this.PerformingPerson)
+                    && !string.IsNullOrWhiteSpace(this.Location)
+                    && this.Year > 0;
             }
+            else
+            {
+                // Walidacja dla nowego SMK pozostaje bez zmian
+                var requiredFields = this.smkStrategy.GetRequiredFields("AddEditProcedure");
+                bool isValid = true;
 
-            this.CanSave = isValid;
+                if (this.selectedInternship == null)
+                {
+                    isValid = false;
+                }
+
+                if (requiredFields.Contains("Date") && this.Date == default)
+                {
+                    isValid = false;
+                }
+
+                if (requiredFields.Contains("Code") && string.IsNullOrWhiteSpace(this.Code))
+                {
+                    isValid = false;
+                }
+
+                if (requiredFields.Contains("OperatorCode") && string.IsNullOrWhiteSpace(this.OperatorCode))
+                {
+                    isValid = false;
+                }
+
+                if (requiredFields.Contains("Location") && string.IsNullOrWhiteSpace(this.Location))
+                {
+                    isValid = false;
+                }
+
+                this.CanSave = isValid;
+            }
         }
 
         private async Task OnSaveAsync()
@@ -769,15 +784,27 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 procedure.InternshipId = this.SelectedInternship.InternshipId;
                 procedure.Date = this.Date;
                 procedure.Year = this.Year;
-                procedure.OperatorCode = this.OperatorCode; // Zawsze zapisujemy prosty kod A/B
-                procedure.Code = this.IsOldSmkVersion ? this.OldSmkOperatorCode : this.Code; // Dla starego SMK zapisujemy pełną nazwę
-                procedure.PerformingPerson = this.PerformingPerson;
+
+                if (this.IsOldSmkVersion)
+                {
+                    // W starym SMK kod zabiegu jest albo "A - operator" albo "B - asysta"
+                    procedure.OperatorCode = this.OldSmkOperatorCode.StartsWith("A") ? "A" : "B";
+                    procedure.Code = this.OldSmkOperatorCode;
+                    procedure.PerformingPerson = this.PerformingPerson;
+                    procedure.Status = "Wykonana"; // Status zawsze "Wykonana" w starym SMK
+                }
+                else
+                {
+                    procedure.OperatorCode = this.OperatorCode;
+                    procedure.Code = this.Code;
+                    procedure.Status = this.Status;
+                }
+
                 procedure.Location = this.Location;
                 procedure.PatientInitials = this.PatientInitials;
                 procedure.PatientGender = this.PatientGender;
                 procedure.AssistantData = this.AssistantData;
                 procedure.ProcedureGroup = this.ProcedureGroup;
-                procedure.Status = this.Status;
 
                 await this.databaseService.SaveProcedureAsync(procedure);
 

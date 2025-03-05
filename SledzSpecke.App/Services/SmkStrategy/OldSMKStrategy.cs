@@ -299,32 +299,31 @@ namespace SledzSpecke.App.Services.SmkStrategy
                     {
                         case "Code":
                             return new Dictionary<string, string>
-                    {
-                        { "A - operator", "A - operator" },
-                        { "B - asysta", "B - asysta" },
-                    };
+                            {
+                                { "A", "A - operator" },
+                                { "B", "B - asysta" },
+                            };
                         case "PatientGender":
                             return new Dictionary<string, string>
-                    {
-                        { "M", "mężczyzna" },
-                        { "K", "kobieta" },
-                    };
+                            {
+                                { "M", "mężczyzna" },
+                                { "K", "kobieta" },
+                            };
                         case "Status":
                             return new Dictionary<string, string>
-                    {
-                        { "Wykonana", "Wykonana" },
-                        { "Niezatwierdzona", "Niezatwierdzona" },
-                    };
+                            {
+                                { "Wykonana", "Wykonana" },
+                            };
                         case "Year":
                             return new Dictionary<string, string>
-                    {
-                        { "1", "Uzupełnienie po weryfikacji 1" },
-                        { "2", "Uzupełnienie po weryfikacji 2" },
-                        { "3", "Uzupełnienie po weryfikacji 3" },
-                        { "4", "Uzupełnienie po weryfikacji 4" },
-                        { "5", "Uzupełnienie po weryfikacji 5" },
-                        { "6", "Uzupełnienie po weryfikacji 6" },
-                    };
+                            {
+                                { "1", "Uzupełnienie po weryfikacji 1" },
+                                { "2", "Uzupełnienie po weryfikacji 2" },
+                                { "3", "Uzupełnienie po weryfikacji 3" },
+                                { "4", "Uzupełnienie po weryfikacji 4" },
+                                { "5", "Uzupełnienie po weryfikacji 5" },
+                                { "6", "Uzupełnienie po weryfikacji 6" },
+                            };
                         default:
                             return new Dictionary<string, string>();
                     }
