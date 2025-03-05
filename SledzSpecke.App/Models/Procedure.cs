@@ -17,32 +17,32 @@ namespace SledzSpecke.App.Models
         public int Year { get; set; } // Rok szkolenia - wymagany w starym SMK
 
         [MaxLength(20)]
-        public string Code { get; set; }
+        public required string Code { get; set; }
 
         [MaxLength(10)]
-        public string OperatorCode { get; set; } // A lub B - zachowujemy dla wewnętrznej logiki
+        public required string OperatorCode { get; set; } // A lub B - zachowujemy dla wewnętrznej logiki
 
         [MaxLength(100)]
-        public string PerformingPerson { get; set; } // Osoba wykonująca - wymagana w starym SMK
+        public required string PerformingPerson { get; set; } // Osoba wykonująca - wymagana w starym SMK
 
         [MaxLength(100)]
-        public string Location { get; set; }
+        public required string Location { get; set; }
 
         [MaxLength(10)]
-        public string PatientInitials { get; set; }
+        public string? PatientInitials { get; set; }
 
         [MaxLength(1)]
-        public string PatientGender { get; set; }
+        public string? PatientGender { get; set; }
 
-        public string AssistantData { get; set; } // Dane osoby wykonującej I i II asystę
+        public string? AssistantData { get; set; } // Dane osoby wykonującej I i II asystę
 
-        public string ProcedureGroup { get; set; } // Procedura z grupy
+        public required string ProcedureGroup { get; set; } // Procedura z grupy
 
         [MaxLength(20)]
-        public string Status { get; set; }
+        public required string Status { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string? AdditionalFields { get; set; } // JSON
     }
 }

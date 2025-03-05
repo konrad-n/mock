@@ -16,7 +16,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private readonly IDialogService dialogService;
 
         private int procedureId;
-        private Procedure procedure;
+        private required Procedure procedure;
         private string code = string.Empty;
         private string operatorCode = string.Empty;
         private DateTime date;
@@ -32,28 +32,38 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private string internshipName = string.Empty;
         private string internshipInstitution = string.Empty;
         private string moduleInfo = string.Empty;
-        private bool isOldSmkVersion; private int year;
+        private bool isOldSmkVersion;
+        private int year;
 
         public ProcedureDetailsViewModel(
             IDatabaseService databaseService,
             IDialogService dialogService)
         {
-            this.databaseService = databaseService;
-            this.dialogService = dialogService;
+            this.databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
+            this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
-            // Inicjalizacja komend
+            // Initialize commands
             this.EditCommand = new AsyncRelayCommand(this.OnEditAsync);
             this.DeleteCommand = new AsyncRelayCommand(this.OnDeleteAsync);
             this.GoBackCommand = new AsyncRelayCommand(this.OnGoBackAsync);
 
-            // Inicjalizacja właściwości
+            // Initialize properties
             this.Title = "Szczegóły procedury";
+            this.procedure = new Procedure
+            {
+                Code = string.Empty,
+                OperatorCode = string.Empty,
+                PerformingPerson = string.Empty,
+                Location = string.Empty,
+                ProcedureGroup = string.Empty,
+                Status = string.Empty
+            };
 
-            // Sprawdzenie wersji SMK (można pobierać z ustawień lub usługi)
-            this.isOldSmkVersion = false; // Domyślnie nowy SMK, faktyczna wartość będzie ustawiana w aplikacji
+            // Check SMK version (can be loaded from settings or service)
+            this.isOldSmkVersion = false; // Default to new SMK, actual value will be set in the application
         }
 
-        // Właściwości
+        // Properties
         public int ProcedureId
         {
             get => this.procedureId;
@@ -207,14 +217,14 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        // Komendy
+        // Commands
         public ICommand EditCommand { get; }
 
         public ICommand DeleteCommand { get; }
 
         public ICommand GoBackCommand { get; }
 
-        // Metody
+        // Methods
         private async Task LoadProcedureAsync(int procedureId)
         {
             if (this.IsBusy)
@@ -226,7 +236,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             try
             {
-                // Wczytanie procedury
+                // Load procedure
                 this.Procedure = await this.databaseService.GetProcedureAsync(procedureId);
                 if (this.Procedure == null)
                 {
@@ -238,7 +248,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     return;
                 }
 
-                // Ustawienie właściwości
+                // Set properties
                 this.Code = this.Procedure.Code;
                 this.OperatorCode = this.Procedure.OperatorCode;
                 this.Date = this.Procedure.Date;
@@ -251,11 +261,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.PerformingPerson = this.Procedure.PerformingPerson;
                 this.Year = this.Procedure.Year;
 
-                // Ustawienie statusu synchronizacji
+                // Set synchronization status
                 this.IsNotSynced = this.Procedure.SyncStatus != SyncStatus.Synced;
                 this.SyncStatusText = this.GetSyncStatusText(this.Procedure.SyncStatus);
 
-                // Wczytaj informacje o stażu
+                // Load internship information
                 if (this.Procedure.InternshipId > 0)
                 {
                     var internship = await this.databaseService.GetInternshipAsync(this.Procedure.InternshipId);
@@ -264,7 +274,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         this.InternshipName = internship.InternshipName;
                         this.InternshipInstitution = internship.InstitutionName;
 
-                        // Wczytaj informacje o module, jeśli staż jest przypisany do modułu
+                        // Load module information if internship is assigned to a module
                         if (internship.ModuleId.HasValue && internship.ModuleId.Value > 0)
                         {
                             var module = await this.databaseService.GetModuleAsync(internship.ModuleId.Value);
@@ -276,7 +286,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
 
-                // Parsowanie dodatkowych pól
+                // Parsing additional fields
                 if (!string.IsNullOrEmpty(this.Procedure.AdditionalFields))
                 {
                     try
@@ -284,8 +294,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         var additionalFields = JsonSerializer.Deserialize<Dictionary<string, object>>(
                             this.Procedure.AdditionalFields);
 
-                        // Odczytywanie specyficznych pól z danych dodatkowych
-                        // Można dodać więcej pól w miarę potrzeb
+                        // Reading specific fields from additional data
+                        // More fields can be added as needed
                     }
                     catch (Exception ex)
                     {

@@ -19,21 +19,21 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool typeASelected = true;
         private bool typeBSelected = false;
         private string searchText = string.Empty;
-        private Procedure selectedProcedure;
+        private Procedure? selectedProcedure;
 
         // Dane
-        private ObservableCollection<Procedure> procedures;
+        private ObservableCollection<Procedure> procedures = new();
         private int? currentModuleId;
-        private ObservableCollection<ProcedureGrouping> groupedProcedures;
+        private ObservableCollection<ProcedureGrouping> groupedProcedures = new();
 
         public ProceduresListViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
             IDialogService dialogService)
         {
-            this.specializationService = specializationService;
-            this.databaseService = databaseService;
-            this.dialogService = dialogService;
+            this.specializationService = specializationService ?? throw new ArgumentNullException(nameof(specializationService));
+            this.databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
+            this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
             // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadProceduresAsync);
@@ -44,8 +44,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             // Inicjalizacja właściwości
             this.Title = "Procedury i zabiegi";
-            this.Procedures = new ObservableCollection<Procedure>();
-            this.GroupedProcedures = new ObservableCollection<ProcedureGrouping>();
 
             // Wczytanie danych
             this.LoadProceduresAsync().ConfigureAwait(false);
@@ -64,7 +62,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.groupedProcedures, value);
         }
 
-        public Procedure SelectedProcedure
+        public Procedure? SelectedProcedure
         {
             get => this.selectedProcedure;
             set => this.SetProperty(ref this.selectedProcedure, value);

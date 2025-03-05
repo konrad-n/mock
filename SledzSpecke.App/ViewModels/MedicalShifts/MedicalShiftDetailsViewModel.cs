@@ -17,20 +17,20 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly IDialogService dialogService;
 
         private int shiftId;
-        private MedicalShift shift;
-        private string internshipName;
-        private string internshipInstitution;
-        private string durationText;
-        private string syncStatusText;
+        private MedicalShift shift = null!;
+        private string internshipName = string.Empty;
+        private string internshipInstitution = string.Empty;
+        private string durationText = string.Empty;
+        private string syncStatusText = string.Empty;
         private bool isNotSynced;
         private bool isOldSMKVersion;
-        private string oldSMKField1;
-        private string oldSMKField2;
+        private string oldSMKField1 = string.Empty;
+        private string oldSMKField2 = string.Empty;
 
         // Nowe pola związane z zatwierdzaniem
         private DateTime? approvalDate;
-        private string approverName;
-        private string approverRole;
+        private string approverName = string.Empty;
+        private string approverRole = string.Empty;
         private bool isApproved;
 
         public MedicalShiftDetailsViewModel(
@@ -58,7 +58,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set
             {
                 this.SetProperty(ref this.shiftId, value);
-                this.LoadShiftAsync(value);
+                _ = this.LoadShiftAsync(value);
             }
         }
 
