@@ -87,6 +87,41 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Sekcja dla starego SMK - wyświetlana tylko gdy IsOldSmkVersion=true -->
+            <Frame IsVisible="{Binding IsOldSmkVersion}" Style="{StaticResource CardFrame}" Margin="0,0,0,20">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Informacje specyficzne dla starego SMK" 
+                          FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+
+                    <!-- Uznanie lub zwolnienie z realizacji -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Uznanie lub zwolnienie z realizacji:" 
+                              FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableRecognitionTypes}" 
+                                SelectedItem="{Binding SelectedRecognitionType}"
+                                Title="Wybierz rodzaj uznania lub zwolnienia"
+                                BackgroundColor="Transparent"/>
+                    </VerticalStackLayout>
+
+                    <!-- Akceptacja kierownika specjalizacji -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Akceptacja:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <CheckBox IsChecked="{Binding RequiresApproval, Converter={StaticResource InvertedBoolConverter}}" />
+                            <Label Text="Kurs zaliczony na podstawie elektronicznego zaświadczenia o ukończeniu kursu. Nie wymaga dodatkowej akceptacji"
+                                  VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Data wystawienia zaświadczenia (widoczne tylko gdy kurs nie wymaga akceptacji) -->
+                    <VerticalStackLayout Spacing="5" IsVisible="{Binding RequiresApproval, Converter={StaticResource InvertedBoolConverter}}">
+                        <Label Text="Data wygenerowania zaświadczenia:" 
+                              FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <DatePicker Date="{Binding CertificateIssueDate}" Format="D" BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Przyciski akcji -->
             <VerticalStackLayout Spacing="10" Margin="0,10,0,20">
                 <Button Text="Zapisz" Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}" Style="{StaticResource PrimaryButton}" />

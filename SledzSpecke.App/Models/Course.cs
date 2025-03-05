@@ -41,6 +41,16 @@ namespace SledzSpecke.App.Models
 
         public DateTime? CertificateDate { get; set; }
 
+        // Nowe pole dla rodzaju uznania kursu (stary SMK)
+        [MaxLength(100)]
+        public string RecognitionType { get; set; }
+
+        // Czy kurs wymaga akceptacji kierownika (stary SMK)
+        public bool RequiresApproval { get; set; }
+
+        // Nowe pole dla daty wystawienia certyfikatu (stary SMK)
+        public DateTime? CertificateIssueDate { get; set; }
+
         public SyncStatus SyncStatus { get; set; }
 
         public string AdditionalFields { get; set; } // JSON

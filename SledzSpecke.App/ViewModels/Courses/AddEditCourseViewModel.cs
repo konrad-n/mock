@@ -33,9 +33,16 @@ namespace SledzSpecke.App.ViewModels.Courses
         private bool canSave;
         private string moduleInfo = string.Empty;
         private bool hasModules;
+        private string selectedCourseType;
+        private string recognitionType = string.Empty;
+        private bool requiresApproval = true;
+        private DateTime? certificateIssueDate;
+        private bool isOldSmkVersion;
+
+        private string selectedRecognitionType;
 
         private ObservableCollection<string> availableCourseTypes;
-        private string selectedCourseType;
+        private ObservableCollection<string> availableRecognitionTypes;
         private ObservableCollection<int> availableYears;
 
         public AddEditCourseViewModel(
@@ -70,6 +77,12 @@ namespace SledzSpecke.App.ViewModels.Courses
             };
 
             this.AvailableYears = new ObservableCollection<int> { 1, 2, 3, 4, 5, 6 };
+
+            // Inicjalizacja dla starego SMK
+            this.AvailableRecognitionTypes = new ObservableCollection<string>();
+
+            // Sprawdzenie wersji SMK użytkownika
+            this.CheckSmkVersionAsync().ConfigureAwait(false);
         }
 
         // Właściwości
@@ -225,8 +238,51 @@ namespace SledzSpecke.App.ViewModels.Courses
             set => this.SetProperty(ref this.hasModules, value);
         }
 
+        public string RecognitionType
+        {
+            get => this.recognitionType;
+            set => this.SetProperty(ref this.recognitionType, value);
+        }
+
+        public bool RequiresApproval
+        {
+            get => this.requiresApproval;
+            set => this.SetProperty(ref this.requiresApproval, value);
+        }
+
+        public DateTime? CertificateIssueDate
+        {
+            get => this.certificateIssueDate;
+            set => this.SetProperty(ref this.certificateIssueDate, value);
+        }
+
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
+        }
+
+        public ObservableCollection<string> AvailableRecognitionTypes
+        {
+            get => this.availableRecognitionTypes;
+            set => this.SetProperty(ref this.availableRecognitionTypes, value);
+        }
+
+        public string SelectedRecognitionType
+        {
+            get => this.selectedRecognitionType;
+            set
+            {
+                if (this.SetProperty(ref this.selectedRecognitionType, value))
+                {
+                    this.RecognitionType = value;
+                }
+            }
+        }
+
         // Komendy
         public ICommand SaveCommand { get; }
+
         public ICommand CancelCommand { get; }
 
         // Metody
@@ -268,9 +324,21 @@ namespace SledzSpecke.App.ViewModels.Courses
                 this.CertificateNumber = course.CertificateNumber;
                 this.CertificateDate = course.CertificateDate;
 
+                // Nowe pola dla starego SMK
+                this.RecognitionType = course.RecognitionType ?? string.Empty;
+                this.RequiresApproval = course.RequiresApproval;
+                this.CertificateIssueDate = course.CertificateIssueDate;
+
                 // Spróbuj znaleźć odpowiadający typ kursu
                 this.SelectedCourseType = this.AvailableCourseTypes
                     .FirstOrDefault(t => t == course.CourseType) ?? string.Empty;
+
+                // Spróbuj znaleźć odpowiadający typ uznania (dla starego SMK)
+                if (this.IsOldSmkVersion)
+                {
+                    this.SelectedRecognitionType = this.AvailableRecognitionTypes
+                        .FirstOrDefault(r => r == course.RecognitionType) ?? string.Empty;
+                }
 
                 // Wczytaj dane o module, jeśli istnieje
                 if (course.ModuleId.HasValue)
@@ -327,6 +395,30 @@ namespace SledzSpecke.App.ViewModels.Courses
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd ładowania informacji o module: {ex.Message}");
                 this.ModuleInfo = string.Empty;
+            }
+        }
+
+        private async Task CheckSmkVersionAsync()
+        {
+            try
+            {
+                var user = await this.specializationService.GetCurrentUserAsync();
+                this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
+
+                // Jeśli jest to stary SMK, załaduj dostępne typy uznania
+                if (this.IsOldSmkVersion)
+                {
+                    this.AvailableRecognitionTypes.Clear();
+                    this.AvailableRecognitionTypes.Add(string.Empty);
+                    this.AvailableRecognitionTypes.Add("Uznanie na podstawie decyzji CMKP");
+                    this.AvailableRecognitionTypes.Add("Uznanie na podstawie par. 13 ust.2 rozporządzenia z 29.03.2019 w sprawie specjalizacji lekarzy i lekarzy dentystów");
+                    this.AvailableRecognitionTypes.Add("Uznanie na podstawie decyzji CMKP – realizacja zadań wynikających z wprowadzenia stanu zagrożenia epidemicznego lub stanu epidemii");
+                    this.AvailableRecognitionTypes.Add("Zwolnienie z realizacji – kurs został odwołany w związku ze stanem zagrożenia epidemicznego lub stanem epidemii");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
             }
         }
 
@@ -392,6 +484,14 @@ namespace SledzSpecke.App.ViewModels.Courses
                 course.HasCertificate = this.HasCertificate;
                 course.CertificateNumber = this.CertificateNumber;
                 course.CertificateDate = this.CertificateDate;
+
+                // Pola specyficzne dla starego SMK
+                if (this.IsOldSmkVersion)
+                {
+                    course.RecognitionType = this.RecognitionType;
+                    course.RequiresApproval = this.RequiresApproval;
+                    course.CertificateIssueDate = this.CertificateIssueDate;
+                }
 
                 // Ustaw moduł, jeśli specjalizacja ma moduły
                 if (specialization.HasModules)

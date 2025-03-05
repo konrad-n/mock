@@ -591,21 +591,33 @@ namespace SledzSpecke.App.Services.Export
 
             // Headers
             int col = 1;
+
+            // Standardowe nagłówki dla wszystkich wersji SMK
             worksheet.Cells[1, col++].Value = "Nazwa kursu";
             worksheet.Cells[1, col++].Value = "Typ kursu";
             worksheet.Cells[1, col++].Value = "Numer kursu";
             worksheet.Cells[1, col++].Value = "Instytucja";
             worksheet.Cells[1, col++].Value = "Data ukończenia";
             worksheet.Cells[1, col++].Value = "Rok szkolenia";
+            worksheet.Cells[1, col++].Value = "Numer kolejny";
 
+            // Pola specyficzne dla starego SMK
             if (oldSmkFormat)
             {
-                worksheet.Cells[1, col++].Value = "Numer kolejny";
+                worksheet.Cells[1, col++].Value = "Uznanie lub zwolnienie z realizacji";
+                worksheet.Cells[1, col++].Value = "Wymaga akceptacji kierownika";
             }
 
+            // Pola certyfikatu dla wszystkich wersji
             worksheet.Cells[1, col++].Value = "Posiada certyfikat";
             worksheet.Cells[1, col++].Value = "Numer certyfikatu";
             worksheet.Cells[1, col++].Value = "Data certyfikatu";
+
+            // Dodatkowe pole dla starego SMK
+            if (oldSmkFormat)
+            {
+                worksheet.Cells[1, col++].Value = "Data wygenerowania zaświadczenia";
+            }
 
             // Format nagłówków
             this.FormatHeaders(worksheet, col - 1);
@@ -627,10 +639,13 @@ namespace SledzSpecke.App.Services.Export
                 worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
 
                 worksheet.Cells[row, col++].Value = course.Year;
+                worksheet.Cells[row, col++].Value = course.CourseSequenceNumber;
 
+                // Dane specyficzne dla starego SMK
                 if (oldSmkFormat)
                 {
-                    worksheet.Cells[row, col++].Value = course.CourseSequenceNumber;
+                    worksheet.Cells[row, col++].Value = course.RecognitionType;
+                    worksheet.Cells[row, col++].Value = !course.RequiresApproval ? "Tak" : "Nie"; // Odwrócona logika
                 }
 
                 worksheet.Cells[row, col++].Value = course.HasCertificate ? "Tak" : "Nie";
@@ -644,6 +659,20 @@ namespace SledzSpecke.App.Services.Export
                 else
                 {
                     col++;
+                }
+
+                // Data wygenerowania zaświadczenia dla starego SMK
+                if (oldSmkFormat)
+                {
+                    if (course.CertificateIssueDate.HasValue)
+                    {
+                        worksheet.Cells[row, col++].Value = course.CertificateIssueDate;
+                        worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
+                    }
+                    else
+                    {
+                        col++;
+                    }
                 }
             }
 
