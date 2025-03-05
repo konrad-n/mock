@@ -1,9 +1,16 @@
-namespace SledzSpecke.App.Views.Export;
+using SledzSpecke.App.ViewModels.Export;
 
-public partial class ExportPage : ContentView
+namespace SledzSpecke.App.Views.Export
 {
-    public ExportPage()
+    public partial class ExportPage : ContentPage
     {
-        this.InitializeComponent();
+        private readonly ExportViewModel viewModel;
+
+        public ExportPage(ExportViewModel viewModel)
+        {
+            this.InitializeComponent();
+            this.BindingContext = viewModel;
+            this.viewModel = viewModel;
+        }
     }
 }
