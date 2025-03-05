@@ -1,5 +1,5 @@
 using SledzSpecke.App.Models.Enums;
-using SledzSpecke.App.ViewModels.Specialization;
+using SledzSpecke.App.ViewModels.Specializations;
 
 namespace SledzSpecke.App.Views.Specialization
 {

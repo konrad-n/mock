@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Helpers;
@@ -9,7 +8,7 @@ using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.ViewModels.Base;
 
-namespace SledzSpecke.App.ViewModels.Specialization
+namespace SledzSpecke.App.ViewModels.Specializations
 {
     /// <summary>
     /// ViewModel do inicjalizacji nowej specjalizacji z modułami.
@@ -35,65 +34,65 @@ namespace SledzSpecke.App.ViewModels.Specialization
             this.dialogService = dialogService;
 
             // Inicjalizacja komend
-            this.InitializeCommand = new AsyncRelayCommand(this.OnInitializeAsync, () => this.selectedSpecialization != null);
-            this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
+            InitializeCommand = new AsyncRelayCommand(OnInitializeAsync, () => selectedSpecialization != null);
+            CancelCommand = new AsyncRelayCommand(OnCancelAsync);
 
             // Inicjalizacja właściwości
-            this.Title = "Inicjalizacja specjalizacji";
-            this.AvailableSpecializations = new ObservableCollection<SpecializationProgram>();
+            Title = "Inicjalizacja specjalizacji";
+            AvailableSpecializations = new ObservableCollection<SpecializationProgram>();
 
             // Wczytanie dostępnych specjalizacji
-            this.LoadSpecializationsAsync().ConfigureAwait(false);
+            LoadSpecializationsAsync().ConfigureAwait(false);
         }
 
         // Właściwości
         public ObservableCollection<SpecializationProgram> AvailableSpecializations
         {
-            get => this.availableSpecializations;
-            set => this.SetProperty(ref this.availableSpecializations, value);
+            get => availableSpecializations;
+            set => SetProperty(ref availableSpecializations, value);
         }
 
         public SpecializationProgram SelectedSpecialization
         {
-            get => this.selectedSpecialization;
+            get => selectedSpecialization;
             set
             {
-                if (this.SetProperty(ref this.selectedSpecialization, value))
+                if (SetProperty(ref selectedSpecialization, value))
                 {
-                    this.HasModules = value?.HasModules ?? false;
-                    ((AsyncRelayCommand)this.InitializeCommand).NotifyCanExecuteChanged();
+                    HasModules = value?.HasModules ?? false;
+                    ((AsyncRelayCommand)InitializeCommand).NotifyCanExecuteChanged();
                 }
             }
         }
 
         public SmkVersion SmkVersion
         {
-            get => this.smkVersion;
-            set => this.SetProperty(ref this.smkVersion, value);
+            get => smkVersion;
+            set => SetProperty(ref smkVersion, value);
         }
 
         public DateTime StartDate
         {
-            get => this.startDate;
-            set => this.SetProperty(ref this.startDate, value);
+            get => startDate;
+            set => SetProperty(ref startDate, value);
         }
 
         public bool IsInitializing
         {
-            get => this.isInitializing;
-            set => this.SetProperty(ref this.isInitializing, value);
+            get => isInitializing;
+            set => SetProperty(ref isInitializing, value);
         }
 
         public bool HasModules
         {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
+            get => hasModules;
+            set => SetProperty(ref hasModules, value);
         }
 
         public string StatusMessage
         {
-            get => this.statusMessage;
-            set => this.SetProperty(ref this.statusMessage, value);
+            get => statusMessage;
+            set => SetProperty(ref statusMessage, value);
         }
 
         // Komendy
@@ -103,45 +102,45 @@ namespace SledzSpecke.App.ViewModels.Specialization
         // Metody
         private async Task LoadSpecializationsAsync()
         {
-            if (this.IsBusy)
+            if (IsBusy)
             {
                 return;
             }
 
-            this.IsBusy = true;
+            IsBusy = true;
 
             try
             {
                 // Pobierz wszystkie dostępne programy specjalizacji
-                var programs = await this.databaseService.GetAllSpecializationProgramsAsync();
+                var programs = await databaseService.GetAllSpecializationProgramsAsync();
 
-                this.AvailableSpecializations.Clear();
+                AvailableSpecializations.Clear();
 
                 foreach (var program in programs)
                 {
-                    this.AvailableSpecializations.Add(program);
+                    AvailableSpecializations.Add(program);
                 }
 
                 // Jeśli nie ma dostępnych programów, wczytaj domyślne
-                if (this.AvailableSpecializations.Count == 0)
+                if (AvailableSpecializations.Count == 0)
                 {
-                    await this.LoadDefaultSpecializationsAsync();
+                    await LoadDefaultSpecializationsAsync();
                 }
 
                 // Wybierz pierwszą dostępną specjalizację
-                if (this.AvailableSpecializations.Count > 0)
+                if (AvailableSpecializations.Count > 0)
                 {
-                    this.SelectedSpecialization = this.AvailableSpecializations[0];
+                    SelectedSpecialization = AvailableSpecializations[0];
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd ładowania specjalizacji: {ex.Message}");
-                this.StatusMessage = "Nie udało się załadować dostępnych specjalizacji.";
+                StatusMessage = "Nie udało się załadować dostępnych specjalizacji.";
             }
             finally
             {
-                this.IsBusy = false;
+                IsBusy = false;
             }
         }
 
@@ -157,15 +156,15 @@ namespace SledzSpecke.App.ViewModels.Specialization
                     try
                     {
                         // Próba wczytania programu specjalizacji
-                        var program = await SpecializationLoader.LoadSpecializationProgramAsync(code, this.SmkVersion);
+                        var program = await SpecializationLoader.LoadSpecializationProgramAsync(code, SmkVersion);
 
                         if (program != null)
                         {
                             // Zapisz program w bazie danych
-                            await this.databaseService.SaveSpecializationProgramAsync(program);
+                            await databaseService.SaveSpecializationProgramAsync(program);
 
                             // Dodaj do listy dostępnych specjalizacji
-                            this.AvailableSpecializations.Add(program);
+                            AvailableSpecializations.Add(program);
                         }
                     }
                     catch (Exception ex)
@@ -182,34 +181,34 @@ namespace SledzSpecke.App.ViewModels.Specialization
 
         private async Task OnInitializeAsync()
         {
-            if (this.IsInitializing || this.SelectedSpecialization == null)
+            if (IsInitializing || SelectedSpecialization == null)
             {
                 return;
             }
 
-            this.IsInitializing = true;
-            this.StatusMessage = "Inicjalizacja specjalizacji...";
+            IsInitializing = true;
+            StatusMessage = "Inicjalizacja specjalizacji...";
 
             try
             {
                 // Utwórz nową specjalizację
-                var specialization = new Models.Specialization
+                var specialization = new Specialization
                 {
-                    Name = this.SelectedSpecialization.Name,
-                    ProgramCode = this.SelectedSpecialization.Code,
-                    StartDate = this.StartDate,
-                    PlannedEndDate = this.CalculatePlannedEndDate(this.StartDate, this.SelectedSpecialization),
-                    HasModules = this.SelectedSpecialization.HasModules,
-                    ProgramStructure = this.SelectedSpecialization.Structure,
+                    Name = SelectedSpecialization.Name,
+                    ProgramCode = SelectedSpecialization.Code,
+                    StartDate = StartDate,
+                    PlannedEndDate = CalculatePlannedEndDate(StartDate, SelectedSpecialization),
+                    HasModules = SelectedSpecialization.HasModules,
+                    ProgramStructure = SelectedSpecialization.Structure,
                 };
 
-                this.StatusMessage = "Zapisywanie specjalizacji...";
+                StatusMessage = "Zapisywanie specjalizacji...";
 
                 // Zapisz specjalizację w bazie danych
-                int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
+                int specializationId = await databaseService.SaveSpecializationAsync(specialization);
 
                 // Pobierz zapisaną specjalizację z ID
-                specialization = await this.databaseService.GetSpecializationAsync(specializationId);
+                specialization = await databaseService.GetSpecializationAsync(specializationId);
 
                 if (specialization == null)
                 {
@@ -219,7 +218,7 @@ namespace SledzSpecke.App.ViewModels.Specialization
                 // Jeśli specjalizacja ma moduły, utwórz je
                 if (specialization.HasModules)
                 {
-                    this.StatusMessage = "Tworzenie modułów...";
+                    StatusMessage = "Tworzenie modułów...";
 
                     // Utwórz moduły specjalizacji
                     var modules = ModuleHelper.CreateModulesForSpecialization(
@@ -234,52 +233,52 @@ namespace SledzSpecke.App.ViewModels.Specialization
                             module.SpecializationId = specializationId;
 
                             // Zapisz moduł w bazie danych
-                            await this.databaseService.SaveModuleAsync(module);
+                            await databaseService.SaveModuleAsync(module);
                         }
 
                         // Aktualizuj specjalizację o listę modułów
-                        specialization.Modules = await this.databaseService.GetModulesAsync(specializationId);
+                        specialization.Modules = await databaseService.GetModulesAsync(specializationId);
 
                         // Ustaw pierwszy moduł jako aktualny
                         if (specialization.Modules.Count > 0)
                         {
                             specialization.CurrentModuleId = specialization.Modules[0].ModuleId;
-                            await this.databaseService.UpdateSpecializationAsync(specialization);
+                            await databaseService.UpdateSpecializationAsync(specialization);
                         }
 
                         // Inicjalizuj moduły z danymi z plików JSON
-                        this.StatusMessage = "Inicjalizacja danych modułów...";
+                        StatusMessage = "Inicjalizacja danych modułów...";
                         await ModuleHelper.InitializeModulesAsync(
-                            this.databaseService,
+                            databaseService,
                             specializationId,
                             specialization.Modules);
                     }
                 }
 
-                this.StatusMessage = "Specjalizacja została pomyślnie zainicjalizowana.";
+                StatusMessage = "Specjalizacja została pomyślnie zainicjalizowana.";
 
                 // Wyświetl komunikat o sukcesie
-                await this.dialogService.DisplayAlertAsync(
+                await dialogService.DisplayAlertAsync(
                     "Sukces",
                     "Specjalizacja została pomyślnie zainicjalizowana.",
                     "OK");
 
                 // Przekieruj do dashboardu
-                await this.OnCancelAsync();
+                await OnCancelAsync();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd inicjalizacji specjalizacji: {ex.Message}");
-                this.StatusMessage = $"Błąd inicjalizacji specjalizacji: {ex.Message}";
+                StatusMessage = $"Błąd inicjalizacji specjalizacji: {ex.Message}";
 
-                await this.dialogService.DisplayAlertAsync(
+                await dialogService.DisplayAlertAsync(
                     "Błąd",
                     $"Nie udało się zainicjalizować specjalizacji: {ex.Message}",
                     "OK");
             }
             finally
             {
-                this.IsInitializing = false;
+                IsInitializing = false;
             }
         }
 

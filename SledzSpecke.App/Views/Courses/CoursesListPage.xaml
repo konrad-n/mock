@@ -50,7 +50,7 @@
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="vm:CourseViewModel">
                         <Frame Style="{StaticResource CardFrame}" Margin="10,5">
                             <Grid ColumnDefinitions="*, Auto">
                                 <VerticalStackLayout Grid.Column="0">

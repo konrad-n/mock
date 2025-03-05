@@ -94,7 +94,7 @@
     <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="ViewModels\Specialization\InitializeSpecializationPage.xaml">
+    <MauiXaml Update="Views\Specializations\InitializeSpecializationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\Absences\AbsenceDetailsPage.xaml">
@@ -199,6 +199,10 @@
     <MauiXaml Update="Views\Statistics\StatisticsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\NewFolder\" />
   </ItemGroup>
 
 </Project>
