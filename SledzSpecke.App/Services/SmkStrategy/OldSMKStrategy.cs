@@ -67,6 +67,16 @@ namespace SledzSpecke.App.Services.SmkStrategy
                         { "RequiresApproval", true },       // Pole specyficzne dla starego SMK
                     };
 
+                case "AddEditSelfEducation":
+                    return new Dictionary<string, bool>
+                {
+                    { "Year", true },
+                    { "Type", true },
+                    { "Title", true },
+                    { "Publisher", true },
+                    { "RequiresAcceptance", true }, // Pole akceptacji dla starego SMK
+                };
+
                 default:
                     return new Dictionary<string, bool>();
             }
@@ -135,6 +145,16 @@ namespace SledzSpecke.App.Services.SmkStrategy
                         { "RequiresApproval", "Wymaga akceptacji kierownika specjalizacji" },
                     };
 
+                case "AddEditSelfEducation":
+                    return new Dictionary<string, string>
+                    {
+                        { "Year", "Rok szkolenia" },
+                        { "Type", "Rodzaj" },
+                        { "Title", "Tytuł" },
+                        { "Publisher", "Wydawnictwo" },
+                        { "RequiresAcceptance", "Akceptacja" },
+                    };
+
                 default:
                     return new Dictionary<string, string>();
             }
@@ -185,6 +205,15 @@ namespace SledzSpecke.App.Services.SmkStrategy
                         "CourseSequenceNumber",
                         "CompletionDate",
                     };
+
+                case "AddEditSelfEducation":
+                    return new List<string>
+                {
+                    "Year",
+                    "Type",
+                    "Title",
+                    "Publisher",
+                };
 
                 default:
                     return new List<string>();
@@ -237,6 +266,16 @@ namespace SledzSpecke.App.Services.SmkStrategy
                         { "HasCertificate", false },
                         { "RequiresApproval", true },
                         { "RecognitionType", string.Empty },
+                    };
+
+                case "AddEditSelfEducation":
+                    return new Dictionary<string, object>
+                    {
+                        { "Year", 1 },
+                        { "Type", string.Empty },
+                        { "Title", string.Empty },
+                        { "Publisher", string.Empty },
+                        { "RequiresAcceptance", false },
                     };
 
                 default:
@@ -461,6 +500,23 @@ namespace SledzSpecke.App.Services.SmkStrategy
                                   "Uznanie na podstawie decyzji CMKP – realizacja zadań wynikających z wprowadzenia stanu zagrożenia epidemicznego lub stanu epidemii" },
                                 { "Zwolnienie z realizacji – kurs został odwołany w związku ze stanem zagrożenia epidemicznego lub stanem epidemii",
                                   "Zwolnienie z realizacji – kurs został odwołany w związku ze stanem zagrożenia epidemicznego lub stanem epidemii" },
+                            };
+                        default:
+                            return new Dictionary<string, string>();
+                    }
+
+                case "AddEditSelfEducation":
+                    switch (fieldName)
+                    {
+                        case "Year":
+                            return new Dictionary<string, string>
+                            {
+                                { "1", "Rok 1" },
+                                { "2", "Rok 2" },
+                                { "3", "Rok 3" },
+                                { "4", "Rok 4" },
+                                { "5", "Rok 5" },
+                                { "6", "Rok 6" },
                             };
                         default:
                             return new Dictionary<string, string>();

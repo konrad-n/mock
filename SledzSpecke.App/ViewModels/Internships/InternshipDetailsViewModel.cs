@@ -4,6 +4,7 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Internships
@@ -13,6 +14,7 @@ namespace SledzSpecke.App.ViewModels.Internships
     {
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
+        private readonly ISpecializationService specializationService;
 
         private int internshipId;
         private Internship internship;
@@ -36,10 +38,12 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         public InternshipDetailsViewModel(
             IDatabaseService databaseService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            ISpecializationService specializationService)
         {
             this.databaseService = databaseService;
             this.dialogService = dialogService;
+            this.specializationService = specializationService;
 
             // Inicjalizacja komend
             this.EditCommand = new AsyncRelayCommand(this.OnEditAsync);
@@ -194,7 +198,9 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         // Komendy
         public ICommand EditCommand { get; }
+
         public ICommand DeleteCommand { get; }
+
         public ICommand GoBackCommand { get; }
 
         // Metody
@@ -202,7 +208,7 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             try
             {
-                var user = await this.databaseService.GetCurrentUserAsync();
+                var user = await this.specializationService.GetCurrentUserAsync();
                 this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
             }
             catch (Exception ex)

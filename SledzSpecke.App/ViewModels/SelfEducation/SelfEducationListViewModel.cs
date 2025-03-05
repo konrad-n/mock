@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
@@ -22,6 +23,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         private ObservableCollection<SelfEducationViewModel> selfEducationItems;
         private int? currentModuleId;
         private bool hasModules;
+        private bool isOldSmkVersion;
 
         public SelfEducationListViewModel(
             ISpecializationService specializationService,
@@ -41,6 +43,9 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
             // Inicjalizacja właściwości
             this.Title = "Samokształcenie";
             this.SelfEducationItems = new ObservableCollection<SelfEducationViewModel>();
+
+            // Sprawdź wersję SMK
+            this.CheckSmkVersionAsync().ConfigureAwait(false);
 
             // Wczytanie danych
             this.LoadSelfEducationItemsAsync().ConfigureAwait(false);
@@ -71,13 +76,35 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
             set => this.SetProperty(ref this.hasModules, value);
         }
 
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
+        }
+
         // Komendy
         public ICommand RefreshCommand { get; }
+
         public ICommand FilterCommand { get; }
+
         public ICommand SelfEducationSelectedCommand { get; }
+
         public ICommand AddSelfEducationCommand { get; }
 
         // Metody
+        private async Task CheckSmkVersionAsync()
+        {
+            try
+            {
+                var user = await this.specializationService.GetCurrentUserAsync();
+                this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
+            }
+        }
+
         private async Task LoadSelfEducationItemsAsync()
         {
             if (this.IsBusy)
@@ -144,6 +171,23 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                         Year = item.Year,
                         SyncStatus = item.SyncStatus,
                     };
+
+                    // Sprawdź czy istnieje informacja o wymaganiu akceptacji (tylko dla starego SMK)
+                    if (this.IsOldSmkVersion && !string.IsNullOrEmpty(item.AdditionalFields))
+                    {
+                        try
+                        {
+                            var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(item.AdditionalFields);
+                            if (additionalFields != null && additionalFields.TryGetValue("RequiresAcceptance", out object requiresAcceptance))
+                            {
+                                viewModel.RequiresAcceptance = Convert.ToBoolean(requiresAcceptance);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Błąd parsowania pól dodatkowych: {ex.Message}");
+                        }
+                    }
 
                     // Pobierz nazwę modułu, jeśli dostępna
                     if (this.HasModules && item.ModuleId.HasValue)

@@ -17,6 +17,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         private SyncStatus syncStatus;
         private string syncStatusText = string.Empty;
         private string moduleName = string.Empty;
+        private bool requiresAcceptance;
 
         /// <summary>
         /// Pobiera lub ustawia identyfikator elementu samokształcenia.
@@ -61,6 +62,15 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         {
             get => this.year;
             set => this.SetProperty(ref this.year, value);
+        }
+
+        /// <summary>
+        /// Pobiera lub ustawia wartość wskazującą, czy samokształcenie wymaga akceptacji (tylko stary SMK).
+        /// </summary>
+        public bool RequiresAcceptance
+        {
+            get => this.requiresAcceptance;
+            set => this.SetProperty(ref this.requiresAcceptance, value);
         }
 
         /// <summary>
@@ -109,7 +119,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 return null;
             }
 
-            return new SelfEducationViewModel
+            var viewModel = new SelfEducationViewModel
             {
                 SelfEducationId = selfEducation.SelfEducationId,
                 Title = selfEducation.Title,
@@ -119,6 +129,25 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 SyncStatus = selfEducation.SyncStatus,
                 ModuleName = moduleName ?? string.Empty,
             };
+
+            // Parsowanie dodatkowych pól
+            if (!string.IsNullOrEmpty(selfEducation.AdditionalFields))
+            {
+                try
+                {
+                    var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(selfEducation.AdditionalFields);
+                    if (additionalFields != null && additionalFields.TryGetValue("RequiresAcceptance", out object acceptanceValue))
+                    {
+                        viewModel.RequiresAcceptance = Convert.ToBoolean(acceptanceValue);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas parsowania pól dodatkowych: {ex.Message}");
+                }
+            }
+
+            return viewModel;
         }
 
         /// <summary>
@@ -129,7 +158,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         /// <returns>Obiekt modelu samokształcenia.</returns>
         public Models.SelfEducation ToModel(int specializationId, int? moduleId = null)
         {
-            return new Models.SelfEducation
+            var selfEducation = new Models.SelfEducation
             {
                 SelfEducationId = this.SelfEducationId,
                 SpecializationId = specializationId,
@@ -140,6 +169,16 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 Year = this.Year,
                 SyncStatus = this.SyncStatus,
             };
+
+            // Dodanie pól dodatkowych
+            var additionalFields = new Dictionary<string, object>
+            {
+                { "RequiresAcceptance", this.RequiresAcceptance },
+            };
+
+            selfEducation.AdditionalFields = System.Text.Json.JsonSerializer.Serialize(additionalFields);
+
+            return selfEducation;
         }
 
         /// <summary>

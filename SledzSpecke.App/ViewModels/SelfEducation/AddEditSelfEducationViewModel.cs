@@ -24,6 +24,8 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         private string publisher = string.Empty;
         private int year = DateTime.Now.Year;
         private bool canSave;
+        private bool isOldSmkVersion;
+        private bool requiresAcceptance;
 
         private ObservableCollection<string> availableTypes;
         private ObservableCollection<int> availableYears;
@@ -63,6 +65,9 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
             {
                 this.AvailableYears.Add(i);
             }
+
+            // Sprawdź wersję SMK
+            this.CheckSmkVersionAsync().ConfigureAwait(false);
         }
 
         // Właściwości
@@ -155,11 +160,37 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
+        // Dodane właściwości dla starego SMK
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
+        }
+
+        public bool RequiresAcceptance
+        {
+            get => this.requiresAcceptance;
+            set => this.SetProperty(ref this.requiresAcceptance, value);
+        }
+
         // Komendy
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
         // Metody
+        private async Task CheckSmkVersionAsync()
+        {
+            try
+            {
+                var user = await this.specializationService.GetCurrentUserAsync();
+                this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
+            }
+        }
+
         private async Task LoadSelfEducationAsync(int selfEducationId)
         {
             if (this.IsBusy)
@@ -196,6 +227,24 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 if (selfEducation.ModuleId.HasValue)
                 {
                     await this.LoadModuleInfoAsync();
+                }
+
+                // Wczytaj dodatkowe pola, jeśli jest to stara wersja SMK
+                if (this.IsOldSmkVersion && !string.IsNullOrEmpty(selfEducation.AdditionalFields))
+                {
+                    try
+                    {
+                        var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(selfEducation.AdditionalFields);
+
+                        if (additionalFields != null && additionalFields.TryGetValue("RequiresAcceptance", out object requiresAcceptance))
+                        {
+                            this.RequiresAcceptance = Convert.ToBoolean(requiresAcceptance);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd parsowania pól dodatkowych: {ex.Message}");
+                    }
                 }
 
                 // Walidacja
@@ -309,6 +358,30 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 selfEducation.Type = this.Type;
                 selfEducation.Publisher = this.Publisher;
                 selfEducation.Year = this.Year;
+
+                // Dodaj pola specyficzne dla starej wersji SMK w AdditionalFields
+                if (this.IsOldSmkVersion)
+                {
+                    var additionalFields = new Dictionary<string, object>();
+
+                    if (!string.IsNullOrEmpty(selfEducation.AdditionalFields))
+                    {
+                        try
+                        {
+                            additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(selfEducation.AdditionalFields);
+                        }
+                        catch
+                        {
+                            additionalFields = new Dictionary<string, object>();
+                        }
+                    }
+
+                    // Dodaj informację o akceptacji
+                    additionalFields["RequiresAcceptance"] = this.RequiresAcceptance;
+
+                    // Serializuj z powrotem do właściwości AdditionalFields
+                    selfEducation.AdditionalFields = System.Text.Json.JsonSerializer.Serialize(additionalFields);
+                }
 
                 // Ustaw moduł, jeśli specjalizacja ma moduły
                 if (specialization.HasModules)

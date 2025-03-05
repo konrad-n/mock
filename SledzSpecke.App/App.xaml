@@ -29,6 +29,12 @@
             <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
             <converters:NotNullConverter x:Key="NotNullConverter" />
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <converters:BoolToYesNoConverter x:Key="BoolToYesNoConverter" />
+            <converters:StringMatchConverter x:Key="StringMatchConverter" />
+            <converters:StringMatchToBgColorConverter x:Key="StringMatchToBgColorConverter" />
+            <converters:StringMatchToTextColorConverter x:Key="StringMatchToTextColorConverter" />
+            <converters:BoolToBackgroundColorConverter x:Key="BoolToBackgroundColorConverter" />
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
 
             <!-- Button Styles -->
             <Style TargetType="Button" x:Key="PrimaryButton" BasedOn="{StaticResource MaterialButtonPrimary}">

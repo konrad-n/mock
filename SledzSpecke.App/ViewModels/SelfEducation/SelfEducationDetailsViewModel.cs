@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.SelfEducation
@@ -12,6 +13,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
     {
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
+        private readonly ISpecializationService specializationService;
 
         private int selfEducationId;
         private Models.SelfEducation selfEducation;
@@ -23,13 +25,17 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         private bool isNotSynced;
         private string additionalDetails;
         private string moduleInfo;
+        private bool isOldSmkVersion;
+        private bool requiresAcceptance;
 
         public SelfEducationDetailsViewModel(
             IDatabaseService databaseService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            ISpecializationService specializationService)
         {
             this.databaseService = databaseService;
             this.dialogService = dialogService;
+            this.specializationService = specializationService;
 
             // Inicjalizacja komend
             this.EditCommand = new AsyncRelayCommand(this.OnEditAsync);
@@ -38,6 +44,9 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
 
             // Inicjalizacja właściwości
             this.Title = "Szczegóły samokształcenia";
+
+            // Sprawdź wersję SMK
+            this.CheckSmkVersionAsync().ConfigureAwait(false);
         }
 
         // Właściwości
@@ -105,12 +114,39 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
+        public bool IsOldSmkVersion
+        {
+            get => this.isOldSmkVersion;
+            set => this.SetProperty(ref this.isOldSmkVersion, value);
+        }
+
+        public bool RequiresAcceptance
+        {
+            get => this.requiresAcceptance;
+            set => this.SetProperty(ref this.requiresAcceptance, value);
+        }
+
         // Komendy
         public ICommand EditCommand { get; }
+
         public ICommand DeleteCommand { get; }
+
         public ICommand GoBackCommand { get; }
 
         // Metody
+        private async Task CheckSmkVersionAsync()
+        {
+            try
+            {
+                var user = await this.specializationService.GetCurrentUserAsync();
+                this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas sprawdzania wersji SMK: {ex.Message}");
+            }
+        }
+
         private async Task LoadSelfEducationAsync(int selfEducationId)
         {
             if (this.IsBusy)
@@ -160,6 +196,24 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 else
                 {
                     this.ModuleInfo = string.Empty;
+                }
+
+                // Wczytaj dodatkowe pola dla starej wersji SMK
+                if (this.IsOldSmkVersion && !string.IsNullOrEmpty(this.SelfEducation.AdditionalFields))
+                {
+                    try
+                    {
+                        var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(this.SelfEducation.AdditionalFields);
+
+                        if (additionalFields != null && additionalFields.TryGetValue("RequiresAcceptance", out object requiresAcceptance))
+                        {
+                            this.RequiresAcceptance = Convert.ToBoolean(requiresAcceptance);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd parsowania pól dodatkowych: {ex.Message}");
+                    }
                 }
 
                 // Parsowanie dodatkowych pól

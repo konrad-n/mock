@@ -16,32 +16,41 @@
             <!-- Podstawowe informacje o samokształceniu -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="15">
+                    <!-- Rok szkolenia -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Rok szkolenia:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableYears}" 
+                                SelectedItem="{Binding Year}" 
+                                BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
+                    <!-- Rodzaj -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Rodzaj:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Picker ItemsSource="{Binding AvailableTypes}" 
+                                SelectedItem="{Binding Type}" 
+                                BackgroundColor="Transparent" />
+                    </VerticalStackLayout>
+
                     <!-- Tytuł -->
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Tytuł:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                         <Entry Text="{Binding SelfEducationTitle}" Placeholder="Podaj tytuł samokształcenia" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
 
-                    <!-- Typ -->
+                    <!-- Wydawnictwo -->
                     <VerticalStackLayout Spacing="5">
-                        <Label Text="Typ:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <Picker ItemsSource="{Binding AvailableTypes}" 
-                                SelectedItem="{Binding Type}" 
-                                BackgroundColor="Transparent" />
-                    </VerticalStackLayout>
-
-                    <!-- Organizator/Wydawca -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Organizator/Wydawca:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <Label Text="Wydawnictwo/Organizator:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
                         <Entry Text="{Binding Publisher}" Placeholder="Podaj nazwę organizatora lub wydawcy" BackgroundColor="Transparent" />
                     </VerticalStackLayout>
 
-                    <!-- Rok -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Rok:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
-                        <Picker ItemsSource="{Binding AvailableYears}" 
-                                SelectedItem="{Binding Year}" 
-                                BackgroundColor="Transparent" />
+                    <!-- Akceptacja - widoczna tylko w starej wersji SMK -->
+                    <VerticalStackLayout Spacing="5" IsVisible="{Binding IsOldSmkVersion}">
+                        <Label Text="Akceptacja:" FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <CheckBox IsChecked="{Binding RequiresAcceptance}" />
+                            <Label Text="Wymaga akceptacji kierownika specjalizacji" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>

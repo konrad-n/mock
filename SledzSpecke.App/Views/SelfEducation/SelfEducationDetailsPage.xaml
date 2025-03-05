@@ -40,6 +40,20 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Pola dla starej wersji SMK -->
+            <Frame Style="{StaticResource CardFrame}" Padding="15" IsVisible="{Binding IsOldSmkVersion}">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Dane dla starej wersji SMK" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}"/>
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray200}" Margin="0,5"/>
+                    <Grid ColumnDefinitions="Auto, *" RowSpacing="10">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Akceptacja:" 
+                               FontAttributes="Bold" TextColor="{StaticResource TextMutedColor}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding RequiresAcceptance, Converter={StaticResource BoolToYesNoConverter}}" 
+                               TextColor="{StaticResource TextColor}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Status synchronizacji -->
             <Frame Style="{StaticResource CardFrame}" Padding="15">
                 <VerticalStackLayout Spacing="5">

@@ -126,11 +126,17 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         // Komendy
         public ICommand RefreshCommand { get; }
+
         public ICommand FilterCommand { get; }
+
         public ICommand InternshipSelectedCommand { get; }
+
         public ICommand AddInternshipCommand { get; }
+
         public ICommand ToggleActiveCommand { get; }
+
         public ICommand TogglePartialCommand { get; }
+
         public ICommand SelectModuleCommand { get; }
 
         // Metody
@@ -138,7 +144,7 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             try
             {
-                var user = await this.databaseService.GetCurrentUserAsync();
+                var user = await this.specializationService.GetCurrentUserAsync();
                 this.IsOldSmkVersion = user?.SmkVersion == SmkVersion.Old;
             }
             catch (Exception ex)

@@ -557,7 +557,25 @@ namespace SledzSpecke.App.Services.Export
                     worksheet.Cells[row, col++].Value = internship.InternshipName;
                     worksheet.Cells[row, col++].Value = internship.InstitutionName;
                     worksheet.Cells[row, col++].Value = internship.DepartmentName;
-                    worksheet.Cells[row, col++].Value = internship.SupervisorName;
+
+                    // Pobierz dane kierownika stażu z dodatkowych pól
+                    string supervisorName = string.Empty;
+                    if (!string.IsNullOrEmpty(internship.AdditionalFields))
+                    {
+                        try
+                        {
+                            var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(internship.AdditionalFields);
+                            if (additionalFields != null && additionalFields.TryGetValue("OldSMKField1", out object supervisor))
+                            {
+                                supervisorName = supervisor?.ToString() ?? string.Empty;
+                            }
+                        }
+                        catch
+                        {
+                            // Ignorujemy błędy deserializacji
+                        }
+                    }
+                    worksheet.Cells[row, col++].Value = supervisorName;
 
                     worksheet.Cells[row, col++].Value = internship.StartDate;
                     worksheet.Cells[row, col - 1].Style.Numberformat.Format = "yyyy-MM-dd";
@@ -568,7 +586,23 @@ namespace SledzSpecke.App.Services.Export
                     worksheet.Cells[row, col++].Value = internship.Year;
 
                     // Realizacja częściowa
-                    worksheet.Cells[row, col++].Value = internship.IsPartialRealization ? "Tak" : "Nie";
+                    bool isPartialRealization = false;
+                    if (!string.IsNullOrEmpty(internship.AdditionalFields))
+                    {
+                        try
+                        {
+                            var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(internship.AdditionalFields);
+                            if (additionalFields != null && additionalFields.TryGetValue("IsPartialRealization", out object partialValue))
+                            {
+                                isPartialRealization = Convert.ToBoolean(partialValue);
+                            }
+                        }
+                        catch
+                        {
+                            // Ignorujemy błędy deserializacji
+                        }
+                    }
+                    worksheet.Cells[row, col++].Value = isPartialRealization ? "Tak" : "Nie";
 
                     // Status
                     string status = internship.IsCompleted ?
@@ -927,7 +961,7 @@ namespace SledzSpecke.App.Services.Export
 
             if (oldSmkFormat)
             {
-                worksheet.Cells[1, col++].Value = "Dodatkowe informacje";
+                worksheet.Cells[1, col++].Value = "Wymaga akceptacji";
             }
 
             // Format nagłówków
@@ -946,34 +980,28 @@ namespace SledzSpecke.App.Services.Export
                 worksheet.Cells[row, col++].Value = item.Title;
                 worksheet.Cells[row, col++].Value = item.Publisher;
 
-                if (oldSmkFormat && !string.IsNullOrEmpty(item.AdditionalFields))
+                if (oldSmkFormat)
                 {
-                    try
+                    // Sprawdź czy istnieje informacja o wymaganiu akceptacji
+                    bool requiresAcceptance = false;
+
+                    if (!string.IsNullOrEmpty(item.AdditionalFields))
                     {
-                        var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(item.AdditionalFields);
-                        string additionalInfo = string.Empty;
-
-                        foreach (var field in additionalFields)
+                        try
                         {
-                            additionalInfo += $"{field.Key}: {field.Value}, ";
+                            var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(item.AdditionalFields);
+                            if (additionalFields != null && additionalFields.TryGetValue("RequiresAcceptance", out object acceptanceValue))
+                            {
+                                requiresAcceptance = Convert.ToBoolean(acceptanceValue);
+                            }
                         }
-
-                        // Usunięcie ostatniego przecinka i spacji
-                        if (additionalInfo.Length > 2)
+                        catch (Exception ex)
                         {
-                            additionalInfo = additionalInfo.Substring(0, additionalInfo.Length - 2);
+                            System.Diagnostics.Debug.WriteLine($"Błąd podczas parsowania pól dodatkowych: {ex.Message}");
                         }
+                    }
 
-                        worksheet.Cells[row, col++].Value = additionalInfo;
-                    }
-                    catch
-                    {
-                        col++;
-                    }
-                }
-                else if (oldSmkFormat)
-                {
-                    col++;
+                    worksheet.Cells[row, col++].Value = requiresAcceptance ? "Tak" : "Nie";
                 }
             }
 

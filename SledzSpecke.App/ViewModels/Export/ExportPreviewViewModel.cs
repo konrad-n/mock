@@ -29,6 +29,7 @@ namespace SledzSpecke.App.ViewModels.Export
         private bool showProcedures;
         private bool showInternships;
         private ExportOptions exportOptions;
+        private string selectedTab = "Kursy"; // Domyślna zakładka
 
         private ObservableCollection<CoursePreviewItem> coursesPreviews;
         private ObservableCollection<ShiftPreviewItem> shiftsPreviews;
@@ -58,9 +59,16 @@ namespace SledzSpecke.App.ViewModels.Export
             // Inicjalizacja komend
             this.BackCommand = new AsyncRelayCommand(this.OnBackAsync);
             this.ContinueExportCommand = new AsyncRelayCommand(this.OnContinueExportAsync);
+            this.SelectTabCommand = new RelayCommand<string>(this.OnSelectTab);
         }
 
         // Właściwości
+        public string SelectedTab
+        {
+            get => this.selectedTab;
+            set => this.SetProperty(ref this.selectedTab, value);
+        }
+
         public string PreviewDescription
         {
             get => this.previewDescription;
@@ -123,7 +131,10 @@ namespace SledzSpecke.App.ViewModels.Export
 
         // Komendy
         public ICommand BackCommand { get; }
+
         public ICommand ContinueExportCommand { get; }
+
+        public ICommand SelectTabCommand { get; }
 
         // Metoda inicjalizacji z parametrami eksportu
         public async Task InitializeAsync(ExportOptions options)
@@ -427,6 +438,14 @@ namespace SledzSpecke.App.ViewModels.Export
             await Shell.Current.GoToAsync("..");
         }
 
+        private void OnSelectTab(string tabName)
+        {
+            if (!string.IsNullOrEmpty(tabName))
+            {
+                this.SelectedTab = tabName;
+            }
+        }
+
         private async Task OnContinueExportAsync()
         {
             if (this.IsBusy)
@@ -476,42 +495,5 @@ namespace SledzSpecke.App.ViewModels.Export
                 this.IsBusy = false;
             }
         }
-    }
-
-    // Klasy pomocnicze do prezentacji danych w podglądzie
-    public class CoursePreviewItem
-    {
-        public string CourseName { get; set; }
-        public string InstitutionName { get; set; }
-        public DateTime CompletionDate { get; set; }
-        public string Status { get; set; }
-        public bool IsAlternate { get; set; }
-    }
-
-    public class ShiftPreviewItem
-    {
-        public DateTime Date { get; set; }
-        public string Location { get; set; }
-        public string Duration { get; set; }
-        public string Year { get; set; }
-        public bool IsAlternate { get; set; }
-    }
-
-    public class ProcedurePreviewItem
-    {
-        public DateTime Date { get; set; }
-        public string Code { get; set; }
-        public string OperatorCode { get; set; }
-        public string Location { get; set; }
-        public bool IsAlternate { get; set; }
-    }
-
-    public class InternshipPreviewItem
-    {
-        public string InternshipName { get; set; }
-        public string InstitutionName { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public bool IsAlternate { get; set; }
     }
 }

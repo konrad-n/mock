@@ -71,8 +71,6 @@ namespace SledzSpecke.App
             // UI related services
             services.AddSingleton<IDialogService, DialogService>();
 
-            // Strategy services - register based on user preferences
-            // For now, we'll register New SMK strategy as default
             // Strategy services - rejestrujemy fabrykę zamiast bezpośrednio strategii
             services.AddTransient<ISmkVersionStrategy>(provider =>
             {
