@@ -10,13 +10,13 @@ namespace SledzSpecke.App.Converters
             {
                 return code switch
                 {
-                    "A" => Color.FromHex("#24C1DE"),  // Primary color for operator
-                    "B" => Color.FromHex("#F59E0B"),  // Warning color for assistant
-                    _ => Color.FromHex("#547E9E"),    // Default text-muted color
+                    "A" => Color.FromArgb("#24C1DE"),  // Primary color for operator
+                    "B" => Color.FromArgb("#F59E0B"),  // Warning color for assistant
+                    _ => Color.FromArgb("#547E9E"),    // Default text-muted color
                 };
             }
 
-            return Color.FromHex("#547E9E");
+            return Color.FromArgb("#547E9E");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

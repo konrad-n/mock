@@ -508,7 +508,7 @@ namespace SledzSpecke.App.ViewModels.Courses
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    throw new Exception("Nie znaleziono aktywnej specjalizacji.");
+                    throw new InvalidOperationException("Nie znaleziono aktywnej specjalizacji.");
                 }
 
                 // Utwórz lub pobierz kurs
@@ -518,7 +518,7 @@ namespace SledzSpecke.App.ViewModels.Courses
                     course = await this.databaseService.GetCourseAsync(this.CourseId);
                     if (course == null)
                     {
-                        throw new Exception("Nie znaleziono kursu do edycji.");
+                        throw new InvalidOperationException("Nie znaleziono kursu do edycji.");
                     }
 
                     // Oznacz jako zmodyfikowane, jeśli było wcześniej zsynchronizowane

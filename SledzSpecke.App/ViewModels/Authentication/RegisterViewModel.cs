@@ -625,7 +625,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
                     if (string.IsNullOrEmpty(specializationStructure))
                     {
-                        throw new Exception("Nie udało się załadować struktury specjalizacji - zawartość jest pusta");
+                        throw new InvalidOperationException("Nie udało się załadować struktury specjalizacji - zawartość jest pusta");
                     }
                 }
                 catch (Exception ex)

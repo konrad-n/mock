@@ -404,7 +404,7 @@ namespace SledzSpecke.Tests.Services.Export
                 IncludeShifts = true
             };
 
-            this.databaseService.GetInternshipsAsync(Arg.Any<int>(), Arg.Any<int?>()).Throws(new Exception("Database error"));
+            this.databaseService.GetInternshipsAsync(Arg.Any<int>(), Arg.Any<int?>()).Throws(new InvalidOperationException("Database error"));
 
             // Act & Assert
             var ex = Assert.ThrowsAsync<Exception>(async () => await this.exportService.ExportToExcelAsync(options));

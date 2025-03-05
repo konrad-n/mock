@@ -2,6 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.Courses.CoursesListPage"
+             xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Courses"
+             x:DataType="vm:CoursesListViewModel"
              Title="{Binding Title}">
     <Grid RowDefinitions="Auto, Auto, Auto, *, Auto">
         <!-- Przełącznik modułów - widoczny tylko dla specjalizacji modułowych -->

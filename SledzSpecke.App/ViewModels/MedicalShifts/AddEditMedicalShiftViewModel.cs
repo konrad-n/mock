@@ -474,7 +474,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     shift = await this.databaseService.GetMedicalShiftAsync(this.ShiftId);
                     if (shift == null)
                     {
-                        throw new Exception("Nie znaleziono dyżuru do edycji.");
+                        throw new InvalidOperationException("Nie znaleziono dyżuru do edycji.");
                     }
 
                     // Mark as modified if previously synced
