@@ -108,14 +108,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_old.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry_old.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\recommended_json_structure.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\allergology_new.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\allergology_specialistic_new.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\anesthesiology_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_new.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\cardiology_specialistic_new.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\emergency_medicine_new.json" />
-    <EmbeddedResource Include="Resources\Raw\To be redifined\internal_medicine_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry_new.json" />
   </ItemGroup>
 
