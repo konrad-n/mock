@@ -14,6 +14,8 @@ namespace SledzSpecke.App.Services.Database
 
         Task<int> SaveUserAsync(User user);
 
+        Task<List<User>> GetAllUsersAsync();
+
         // Specialization
         Task<Models.Specialization> GetSpecializationAsync(int id);
 

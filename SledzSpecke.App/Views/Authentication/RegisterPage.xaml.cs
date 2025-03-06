@@ -19,13 +19,17 @@ namespace SledzSpecke.App.Views.Authentication
 
             try
             {
-                // Krytyczne - to zapewnia załadowanie danych przed pokazaniem ekranu
+                System.Diagnostics.Debug.WriteLine("RegisterPage.OnAppearing - inicjalizacja ViewModel");
+
+                // Inicjalizacja ViewModel powinna być wykonana po przejściu do strony
                 await this.viewModel.InitializeAsync();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas inicjalizacji RegisterViewModel: {ex.Message}");
-                await this.DisplayAlert("Błąd", "Nie udało się załadować listy specjalizacji.", "OK");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                await this.DisplayAlert("Błąd", "Nie udało się załadować listy specjalizacji. Spróbuj ponownie później.", "OK");
             }
         }
     }

@@ -59,6 +59,12 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username);
         }
 
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            await this.InitializeAsync();
+            return await this.database.Table<User>().ToListAsync();
+        }
+
         public async Task<int> SaveUserAsync(User user)
         {
             await this.InitializeAsync();

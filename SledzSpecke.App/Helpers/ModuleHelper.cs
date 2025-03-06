@@ -22,7 +22,7 @@ namespace SledzSpecke.App.Helpers
             // Lista specjalizacji z modułami
             var moduleSpecializations = new[]
             {
-                "kardiologia",
+                "cardiology",
                 "nefrologia",
                 "gastroenterologia",
                 "endokrynologia",
@@ -35,7 +35,7 @@ namespace SledzSpecke.App.Helpers
                 "pulmonologia",
             };
 
-            return moduleSpecializations.Contains(specializationCode.ToLower());
+            return moduleSpecializations.Contains(specializationCode.ToLowerInvariant());
         }
 
         /// <summary>
@@ -50,27 +50,29 @@ namespace SledzSpecke.App.Helpers
                 return null;
             }
 
+            System.Diagnostics.Debug.WriteLine($"Szukam modułu podstawowego dla specjalizacji: {specializationCode}");
+
             // Dla kardiologii i pokrewnych specjalizacji wewnętrznych
             if (new[]
                 {
-                    "kardiologia",
+                    "cardiology",
                     "nefrologia",
                     "gastroenterologia",
                     "endokrynologia",
                     "diabetologia",
                     "reumatologia",
-                    "hematologia",
                     "alergologia",
                     "angiologia",
+                    "hematologia",
                     "onkologia kliniczna",
                     "pulmonologia",
-                }.Contains(specializationCode.ToLower()))
+                }.Contains(specializationCode.ToLowerInvariant()))
             {
+                System.Diagnostics.Debug.WriteLine("Znaleziono moduł podstawowy - internal_medicine");
                 return "internal_medicine";
             }
 
-            // Dla innych specjalizacji można dodać podobne mapowania
-
+            System.Diagnostics.Debug.WriteLine("Nie znaleziono modułu podstawowego");
             return null;
         }
 
@@ -115,7 +117,15 @@ namespace SledzSpecke.App.Helpers
                     Name = "Moduł podstawowy w zakresie chorób wewnętrznych",
                     StartDate = startDate,
                     EndDate = startDate.AddYears(2),
-                    Structure = null, // Zostanie wypełnione później po załadowaniu programu specjalizacji
+                    Structure = $"{{ \"moduleName\": \"Moduł podstawowy w zakresie chorób wewnętrznych\", \"moduleType\": \"Basic\", \"durationMonths\": 24 }}",
+                    CompletedInternships = 0,
+                    TotalInternships = 10,
+                    CompletedCourses = 0,
+                    TotalCourses = 10,
+                    CompletedProceduresA = 0,
+                    TotalProceduresA = 50,
+                    CompletedProceduresB = 0,
+                    TotalProceduresB = 30
                 };
                 System.Diagnostics.Debug.WriteLine("Utworzono moduł podstawowy.");
 
@@ -126,7 +136,15 @@ namespace SledzSpecke.App.Helpers
                     Name = $"Moduł specjalistyczny w zakresie {specializationCode}",
                     StartDate = startDate.AddYears(2),
                     EndDate = startDate.AddYears(5), // Standardowo 5 lat dla pełnej specjalizacji
-                    Structure = null, // Zostanie wypełnione później po załadowaniu programu specjalizacji
+                    Structure = $"{{ \"moduleName\": \"Moduł specjalistyczny w zakresie {specializationCode}\", \"moduleType\": \"Specialistic\", \"durationMonths\": 36 }}",
+                    CompletedInternships = 0,
+                    TotalInternships = 8,
+                    CompletedCourses = 0,
+                    TotalCourses = 18,
+                    CompletedProceduresA = 0,
+                    TotalProceduresA = 100,
+                    CompletedProceduresB = 0,
+                    TotalProceduresB = 50
                 };
                 System.Diagnostics.Debug.WriteLine("Utworzono moduł specjalistyczny.");
 
@@ -148,9 +166,9 @@ namespace SledzSpecke.App.Helpers
         /// <param name="modules">Lista modułów do inicjalizacji.</param>
         /// <returns>True, jeśli inicjalizacja się powiodła; w przeciwnym razie false.</returns>
         public static async Task<bool> InitializeModulesAsync(
-    IDatabaseService databaseService,
-    int specializationId,
-    List<Module> modules)
+            IDatabaseService databaseService,
+            int specializationId,
+            List<Module> modules)
         {
             try
             {
@@ -166,8 +184,9 @@ namespace SledzSpecke.App.Helpers
                     return false;
                 }
 
-                // Pobierz użytkownika, aby uzyskać wersję SMK
-                var user = await databaseService.GetUserAsync(0); // Tutaj potrzebujemy uzyskać ID użytkownika
+                // Pobierz użytkownika
+                var users = await databaseService.GetAllUsersAsync();
+                var user = users.FirstOrDefault();
                 if (user == null)
                 {
                     return false;
@@ -183,27 +202,6 @@ namespace SledzSpecke.App.Helpers
                         ? GetBasicModuleName(specialization.ProgramCode)
                         : specialization.ProgramCode + "_specialistic";
 
-                    // Załaduj strukturę modułu
-                    SpecializationProgram program = null;
-                    try
-                    {
-                        program = await databaseService.GetSpecializationProgramByCodeAsync(
-                            moduleCode,
-                            user.SmkVersion); // Pobierz wersję SMK z użytkownika, nie ze specjalizacji
-
-                        if (program != null && !string.IsNullOrEmpty(program.Structure))
-                        {
-                            module.Structure = program.Structure;
-
-                            // Ustaw statystyki modułu na podstawie struktury
-                            UpdateModuleStatisticsFromStructure(module, program.Structure);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Błąd ładowania programu modułu: {ex.Message}");
-                    }
-
                     // Zapisz moduł
                     await databaseService.SaveModuleAsync(module);
                 }
@@ -214,66 +212,6 @@ namespace SledzSpecke.App.Helpers
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd inicjalizacji modułów: {ex.Message}");
                 return false;
-            }
-        }
-
-        /// <summary>
-        /// Aktualizuje statystyki modułu na podstawie struktury programu specjalizacji.
-        /// </summary>
-        /// <param name="module">Moduł do aktualizacji.</param>
-        /// <param name="structureJson">Struktura programu w formacie JSON.</param>
-        private static void UpdateModuleStatisticsFromStructure(Module module, string structureJson)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(structureJson))
-                {
-                    return;
-                }
-
-                // Deserializuj strukturę
-                JsonDocument doc = JsonDocument.Parse(structureJson);
-                JsonElement root = doc.RootElement;
-
-                // Pobierz liczby staży, kursów i procedur
-                if (root.TryGetProperty("internships", out JsonElement internshipsElement) &&
-                    internshipsElement.ValueKind == JsonValueKind.Array)
-                {
-                    module.TotalInternships = internshipsElement.GetArrayLength();
-                }
-
-                if (root.TryGetProperty("courses", out JsonElement coursesElement) &&
-                    coursesElement.ValueKind == JsonValueKind.Array)
-                {
-                    module.TotalCourses = coursesElement.GetArrayLength();
-                }
-
-                if (root.TryGetProperty("procedures", out JsonElement proceduresElement) &&
-                    proceduresElement.ValueKind == JsonValueKind.Array)
-                {
-                    int totalProceduresA = 0;
-                    int totalProceduresB = 0;
-
-                    foreach (JsonElement procedure in proceduresElement.EnumerateArray())
-                    {
-                        if (procedure.TryGetProperty("requiredCountA", out JsonElement requiredCountA))
-                        {
-                            totalProceduresA += requiredCountA.GetInt32();
-                        }
-
-                        if (procedure.TryGetProperty("requiredCountB", out JsonElement requiredCountB))
-                        {
-                            totalProceduresB += requiredCountB.GetInt32();
-                        }
-                    }
-
-                    module.TotalProceduresA = totalProceduresA;
-                    module.TotalProceduresB = totalProceduresB;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd aktualizacji statystyk modułu: {ex.Message}");
             }
         }
 
@@ -327,7 +265,7 @@ namespace SledzSpecke.App.Helpers
                 .Where(a => a.Type == AbsenceType.Recognition)
                 .Sum(a => (a.EndDate - a.StartDate).Days + 1);
 
-            // Obliczenie finalnej daty zakończenia
+            // Finalna data zakończenia
             return baseEndDate.AddDays(extensionDays - reductionDays);
         }
     }
