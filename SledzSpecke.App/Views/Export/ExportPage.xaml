@@ -6,192 +6,113 @@
              x:DataType="vm:ExportViewModel"
              Title="{Binding Title}">
     <ScrollView>
-        <VerticalStackLayout Padding="20"
-                             Spacing="20"
-                             x:DataType="vm:ExportViewModel">
+        <VerticalStackLayout Padding="20" Spacing="20">
             <!-- Nagłówek -->
-            <Label Text="Eksport danych do systemu SMK"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"/>
+            <Label Text="Eksport danych do systemu SMK" 
+                  FontSize="24" 
+                  FontAttributes="Bold" 
+                  HorizontalOptions="Center" />
 
             <!-- Zakres dat -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="15">
-                    <Label Text="Zakres dat"
-                           FontSize="18"
-                           FontAttributes="Bold"/>
+                    <Label Text="Zakres dat" FontSize="18" FontAttributes="Bold" />
 
                     <!-- Przyciski szybkiego wyboru zakresu dat -->
-                    <Grid ColumnDefinitions="*, *, *"
-                          ColumnSpacing="10">
-                        <Button Grid.Column="0"
-                                Text="Ostatni miesiąc"
+                    <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
+                        <Button Grid.Column="0" 
+                                Text="Ostatni miesiąc" 
                                 Command="{Binding SetLastMonthCommand}"
-                                Style="{StaticResource OutlineButton}"/>
-                        <Button Grid.Column="1"
-                                Text="Ostatni rok"
+                                Style="{StaticResource OutlineButton}" />
+                        <Button Grid.Column="1" 
+                                Text="Ostatni rok" 
                                 Command="{Binding SetLastYearCommand}"
-                                Style="{StaticResource OutlineButton}"/>
-                        <Button Grid.Column="2"
-                                Text="Cała specjalizacja"
+                                Style="{StaticResource OutlineButton}" />
+                        <Button Grid.Column="2" 
+                                Text="Cała specjalizacja" 
                                 Command="{Binding SetAllTimeCommand}"
-                                Style="{StaticResource OutlineButton}"/>
+                                Style="{StaticResource OutlineButton}" />
                     </Grid>
 
                     <!-- Wybór dokładnych dat -->
-                    <Grid ColumnDefinitions="Auto, *"
-                          RowDefinitions="Auto, Auto"
-                          ColumnSpacing="15"
-                          RowSpacing="15">
-                        <Label Grid.Row="0"
-                               Grid.Column="0"
-                               Text="Data początkowa:"
-                               VerticalOptions="Center"/>
-                        <DatePicker Grid.Row="0"
-                                    Grid.Column="1"
-                                    Date="{Binding StartDate}"
-                                    Format="d"
-                                    BackgroundColor="Transparent"
-                                    Margin="0"/>
+                    <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" ColumnSpacing="15" RowSpacing="15">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Data początkowa:" 
+                              VerticalOptions="Center" />
+                        <DatePicker Grid.Row="0" Grid.Column="1" Date="{Binding StartDate}" 
+                                   Format="d" 
+                                   BackgroundColor="Transparent" 
+                                   Margin="0" />
 
-                        <Label Grid.Row="1"
-                               Grid.Column="0"
-                               Text="Data końcowa:"
-                               VerticalOptions="Center"/>
-                        <DatePicker Grid.Row="1"
-                                    Grid.Column="1"
-                                    Date="{Binding EndDate}"
-                                    Format="d"
-                                    BackgroundColor="Transparent"
-                                    Margin="0"/>
+                        <Label Grid.Row="1" Grid.Column="0" Text="Data końcowa:" 
+                              VerticalOptions="Center" />
+                        <DatePicker Grid.Row="1" Grid.Column="1" Date="{Binding EndDate}" 
+                                   Format="d" 
+                                   BackgroundColor="Transparent" 
+                                   Margin="0" />
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Wybór modułu - wyświetlane tylko dla specjalizacji modułowych -->
-            <Frame Style="{StaticResource CardFrame}"
-                   IsVisible="{Binding HasModules}">
+            <Frame Style="{StaticResource CardFrame}" IsVisible="{Binding HasModules}">
                 <VerticalStackLayout Spacing="15">
-                    <Label Text="Wybór modułu"
-                           FontSize="18"
-                           FontAttributes="Bold"/>
-                    <Label Text="Wybierz moduł, z którego dane mają zostać wyeksportowane:"/>
-                    <Picker ItemsSource="{Binding AvailableModules}"
+                    <Label Text="Wybór modułu" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="Wybierz moduł, z którego dane mają zostać wyeksportowane:" />
+                    <Picker ItemsSource="{Binding AvailableModules}" 
                             SelectedItem="{Binding SelectedModule}"
-                            ItemDisplayBinding="{Binding Name}"
-                            Title="Wybierz moduł"
-                            BackgroundColor="Transparent"/>
+                            ItemDisplayBinding="{Binding Name}" 
+                            Title="Wybierz moduł" 
+                            BackgroundColor="Transparent" />
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Wybór typów danych do eksportu -->
             <Frame Style="{StaticResource CardFrame}">
-                <VerticalStackLayout Spacing="15"
-                                     x:DataType="vm:ExportViewModel">
-                    <Label Text="Wybór danych"
-                           FontSize="18"
-                           FontAttributes="Bold"/>
-                    <Label Text="Zaznacz rodzaje danych, które chcesz wyeksportować:"/>
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Wybór danych" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="Zaznacz rodzaje danych, które chcesz wyeksportować:" />
 
                     <!-- Przyciski wyboru wszystkich/żadnych -->
-                    <Grid ColumnDefinitions="*, *"
-                          ColumnSpacing="10">
-                        <Button Grid.Column="0"
-                                Text="Zaznacz wszystkie"
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                        <Button Grid.Column="0" 
+                                Text="Zaznacz wszystkie" 
                                 Command="{Binding SelectAllCommand}"
-                                Style="{StaticResource OutlineButton}"/>
-                        <Button Grid.Column="1"
-                                Text="Odznacz wszystkie"
+                                Style="{StaticResource OutlineButton}" />
+                        <Button Grid.Column="1" 
+                                Text="Odznacz wszystkie" 
                                 Command="{Binding DeselectAllCommand}"
-                                Style="{StaticResource OutlineButton}"/>
+                                Style="{StaticResource OutlineButton}" />
                     </Grid>
 
                     <!-- Checkboxy dla typów danych -->
-                    <Grid ColumnDefinitions="*, *"
-                          RowDefinitions="Auto, Auto, Auto, Auto, Auto"
-                          RowSpacing="15"
-                          ColumnSpacing="15">
-                        <CheckBox Grid.Row="0"
-                                  Grid.Column="0"
-                                  IsChecked="{Binding IncludeInternships}"/>
-                        <Label Grid.Row="0"
-                               Grid.Column="0"
-                               Text="Staże kierunkowe"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto, Auto, Auto" 
+                          RowSpacing="15" ColumnSpacing="15">
+                        <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding IncludeInternships}" />
+                        <Label Grid.Row="0" Grid.Column="0" Text="Staże kierunkowe" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="0"
-                                  Grid.Column="1"
-                                  IsChecked="{Binding IncludeShifts}"/>
-                        <Label Grid.Row="0"
-                               Grid.Column="1"
-                               Text="Dyżury medyczne"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding IncludeShifts}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Dyżury medyczne" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="1"
-                                  Grid.Column="0"
-                                  IsChecked="{Binding IncludeProcedures}"/>
-                        <Label Grid.Row="1"
-                               Grid.Column="0"
-                               Text="Zabiegi i procedury"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="{Binding IncludeProcedures}" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Zabiegi i procedury" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="1"
-                                  Grid.Column="1"
-                                  IsChecked="{Binding IncludeCourses}"/>
-                        <Label Grid.Row="1"
-                               Grid.Column="1"
-                               Text="Kursy specjalizacyjne"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding IncludeCourses}" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="Kursy specjalizacyjne" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="2"
-                                  Grid.Column="0"
-                                  IsChecked="{Binding IncludeSelfEducation}"/>
-                        <Label Grid.Row="2"
-                               Grid.Column="0"
-                               Text="Samokształcenie"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="{Binding IncludeSelfEducation}" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Samokształcenie" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="2"
-                                  Grid.Column="1"
-                                  IsChecked="{Binding IncludePublications}"/>
-                        <Label Grid.Row="2"
-                               Grid.Column="1"
-                               Text="Publikacje"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding IncludePublications}" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="Publikacje" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="3"
-                                  Grid.Column="0"
-                                  IsChecked="{Binding IncludeAbsences}"/>
-                        <Label Grid.Row="3"
-                               Grid.Column="0"
-                               Text="Nieobecności"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding IncludeAbsences}" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Nieobecności" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="3"
-                                  Grid.Column="1"
-                                  IsChecked="{Binding IncludeEducationalActivities}"/>
-                        <Label Grid.Row="3"
-                               Grid.Column="1"
-                               Text="Działalność edukacyjna"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding IncludeEducationalActivities}" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="Działalność edukacyjna" Margin="40,0,0,0" VerticalOptions="Center" />
 
-                        <CheckBox Grid.Row="4"
-                                  Grid.Column="0"
-                                  IsChecked="{Binding IncludeRecognitions}"/>
-                        <Label Grid.Row="4"
-                               Grid.Column="0"
-                               Text="Uznania/skrócenia"
-                               Margin="40,0,0,0"
-                               VerticalOptions="Center"/>
+                        <CheckBox Grid.Row="4" Grid.Column="0" IsChecked="{Binding IncludeRecognitions}" />
+                        <Label Grid.Row="4" Grid.Column="0" Text="Uznania/skrócenia" Margin="40,0,0,0" VerticalOptions="Center" />
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
@@ -199,71 +120,60 @@
             <!-- Format SMK -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="Format danych"
-                           FontSize="18"
-                           FontAttributes="Bold"/>
-                    <Label Text="Określ format danych odpowiedni dla Twojej wersji SMK:"/>
+                    <Label Text="Format danych" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="Określ format danych odpowiedni dla Twojej wersji SMK:" />
 
                     <HorizontalStackLayout Spacing="10">
-                        <CheckBox IsChecked="{Binding FormatForOldSmk}"/>
-                        <Label Text="Format dla starej wersji SMK"
-                               VerticalOptions="Center"/>
+                        <CheckBox IsChecked="{Binding FormatForOldSmk}" />
+                        <Label Text="Format dla starej wersji SMK" VerticalOptions="Center" />
                     </HorizontalStackLayout>
 
-                    <Label Text="Zaznacz powyższą opcję, jeśli korzystasz ze starej wersji systemu SMK. W przeciwnym razie dane będą eksportowane w formacie dopasowanym do nowej wersji."
-                           TextColor="{StaticResource TextMutedColor}"
-                           FontSize="12"/>
+                    <Label Text="Zaznacz powyższą opcję, jeśli korzystasz ze starej wersji systemu SMK. W przeciwnym razie dane będą eksportowane w formacie dopasowanym do nowej wersji." 
+                          TextColor="{StaticResource TextMutedColor}" 
+                          FontSize="12" />
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Informacje o ostatnim eksporcie -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="Informacje o eksporcie"
-                           FontSize="18"
-                           FontAttributes="Bold"/>
+                    <Label Text="Informacje o eksporcie" FontSize="18" FontAttributes="Bold" />
 
-                    <Grid ColumnDefinitions="Auto, *"
-                          RowSpacing="10">
-                        <Label Grid.Row="0"
-                               Grid.Column="0"
-                               Text="Data ostatniego eksportu: "
-                               FontAttributes="Bold"
-                               VerticalOptions="Center"/>
-                        <Label Grid.Row="0"
-                               Grid.Column="1"
-                               Text="{Binding FormattedLastExportDate}"
-                               VerticalOptions="Center"/>
+                    <Grid ColumnDefinitions="Auto, *" RowSpacing="10">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Data ostatniego eksportu: " 
+                              FontAttributes="Bold" VerticalOptions="Center" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding FormattedLastExportDate}" 
+                              VerticalOptions="Center" />
                     </Grid>
 
-                    <Button Text="Udostępnij ostatni plik eksportu"
-                            Command="{Binding ShareLastExportCommand}"
+                    <Button Text="Udostępnij ostatni plik eksportu" 
+                            Command="{Binding ShareLastExportCommand}" 
                             IsEnabled="{Binding LastExportDate, Converter={StaticResource NotNullConverter}}"
-                            Style="{StaticResource OutlineButton}"/>
+                            Style="{StaticResource OutlineButton}" />
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Przyciski akcji -->
-            <Button Text="Generuj plik eksportu"
-                    Command="{Binding ExportCommand}"
+            <Button Text="Generuj plik eksportu" 
+                    Command="{Binding ExportCommand}" 
                     IsEnabled="{Binding CanExport}"
-                    Style="{StaticResource PrimaryButton}"
-                    FontAttributes="Bold"
-                    Margin="0,10"/>
+                    Style="{StaticResource PrimaryButton}" 
+                    FontAttributes="Bold" 
+                    Margin="0,10" />
 
             <!-- Status eksportu -->
-            <Label Text="{Binding ExportStatusMessage}"
-                   IsVisible="{Binding ExportStatusMessage, Converter={StaticResource StringToBoolConverter}}"
-                   HorizontalOptions="Center"
-                   TextColor="{StaticResource PrimaryColor}"/>
+            <Label Text="{Binding ExportStatusMessage}" 
+                  IsVisible="{Binding ExportStatusMessage, Converter={StaticResource StringToBoolConverter}}"
+                  HorizontalOptions="Center" 
+                  TextColor="{StaticResource PrimaryColor}" />
 
             <!-- Wskaźnik aktywności -->
-            <ActivityIndicator IsRunning="{Binding IsExporting}"
-                               IsVisible="{Binding IsExporting}"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               HeightRequest="50"
-                               WidthRequest="50"/>
+            <ActivityIndicator IsRunning="{Binding IsExporting}" 
+                              IsVisible="{Binding IsExporting}" 
+                              HorizontalOptions="Center" 
+                              VerticalOptions="Center"
+                              HeightRequest="50" 
+                              WidthRequest="50" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

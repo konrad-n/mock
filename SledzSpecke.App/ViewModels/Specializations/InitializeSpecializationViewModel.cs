@@ -194,12 +194,12 @@ namespace SledzSpecke.App.ViewModels.Specializations
                 // Utwórz nową specjalizację
                 var specialization = new Specialization
                 {
-                    Name = SelectedSpecialization.Name ?? string.Empty,
-                    ProgramCode = SelectedSpecialization.Code ?? string.Empty,
+                    Name = SelectedSpecialization.Name,
+                    ProgramCode = SelectedSpecialization.Code,
                     StartDate = StartDate,
                     PlannedEndDate = CalculatePlannedEndDate(StartDate, SelectedSpecialization),
                     HasModules = SelectedSpecialization.HasModules,
-                    ProgramStructure = SelectedSpecialization.Structure ?? string.Empty,
+                    ProgramStructure = SelectedSpecialization.Structure,
                 };
 
                 StatusMessage = "Zapisywanie specjalizacji...";
@@ -248,17 +248,33 @@ namespace SledzSpecke.App.ViewModels.Specializations
 
                         // Inicjalizuj moduły z danymi z plików JSON
                         StatusMessage = "Inicjalizacja danych modułów...";
+                        await ModuleHelper.InitializeModulesAsync(
+                            databaseService,
+                            specializationId,
+                            specialization.Modules);
                     }
                 }
 
-                StatusMessage = "Specjalizacja została zainicjalizowana.";
-                await dialogService.DisplayAlertAsync("Sukces", "Specjalizacja została pomyślnie zainicjalizowana.", "OK");
+                StatusMessage = "Specjalizacja została pomyślnie zainicjalizowana.";
+
+                // Wyświetl komunikat o sukcesie
+                await dialogService.DisplayAlertAsync(
+                    "Sukces",
+                    "Specjalizacja została pomyślnie zainicjalizowana.",
+                    "OK");
+
+                // Przekieruj do dashboardu
+                await OnCancelAsync();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd inicjalizacji specjalizacji: {ex.Message}");
-                StatusMessage = "Nie udało się zainicjalizować specjalizacji.";
-                await dialogService.DisplayAlertAsync("Błąd", "Nie udało się zainicjalizować specjalizacji.", "OK");
+                StatusMessage = $"Błąd inicjalizacji specjalizacji: {ex.Message}";
+
+                await dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    $"Nie udało się zainicjalizować specjalizacji: {ex.Message}",
+                    "OK");
             }
             finally
             {

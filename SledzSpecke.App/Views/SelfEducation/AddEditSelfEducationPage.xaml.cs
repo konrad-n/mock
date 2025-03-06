@@ -1,5 +1,4 @@
 using SledzSpecke.App.ViewModels.SelfEducation;
-using SledzSpecke.App.Models;
 
 namespace SledzSpecke.App.Views.SelfEducation
 {

@@ -4,80 +4,52 @@
              x:Class="SledzSpecke.App.Views.SelfEducation.SelfEducationListPage"
              xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.SelfEducation"
              x:DataType="vm:SelfEducationListViewModel"
-             x:Name="SelfEducationListPageRoot"
              Title="{Binding Title}">
     <Grid RowDefinitions="Auto, Auto, *, Auto">
         <!-- Pasek wyszukiwania i filtrowania -->
-        <Grid Grid.Row="0"
-              ColumnDefinitions="*, Auto"
-              Padding="10">
-            <SearchBar Placeholder="Szukaj samokształcenia"
-                       Text="{Binding SearchText}"/>
-            <Button Grid.Column="1"
-                    Text="Filtruj"
-                    Command="{Binding FilterCommand}"/>
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10">
+            <SearchBar Placeholder="Szukaj samokształcenia" Text="{Binding SearchText}" />
+            <Button Grid.Column="1" Text="Filtruj" Command="{Binding FilterCommand}" />
         </Grid>
 
         <!-- Informacja o module (widoczna tylko dla specjalizacji modułowych) -->
-        <Frame Grid.Row="1"
-               BorderColor="{StaticResource Primary}"
-               HasShadow="False"
-               Margin="10,0,10,10"
-               Padding="10"
-               CornerRadius="5"
-               IsVisible="{Binding HasModules}">
+        <Frame Grid.Row="1" BorderColor="{StaticResource Primary}" HasShadow="False" 
+               Margin="10,0,10,10" Padding="10" CornerRadius="5" IsVisible="{Binding HasModules}">
             <Label Text="Wyświetlanie samokształcenia dla bieżącego modułu. Możesz zmienić moduł na głównym ekranie aplikacji."
-                   TextColor="{StaticResource TextColor}"
-                   FontSize="14"/>
+                   TextColor="{StaticResource TextColor}" FontSize="14" />
         </Frame>
 
         <!-- Lista samokształcenia -->
-        <RefreshView Grid.Row="2"
-                     IsRefreshing="{Binding IsBusy}"
-                     Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding SelfEducationItems}"
-                            SelectionMode="Single"
-                            SelectedItem="{Binding SelectedSelfEducation}"
-                            SelectionChangedCommand="{Binding SelfEducationSelectedCommand}">
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding SelfEducationItems}" 
+                           SelectionMode="Single" 
+                           SelectedItem="{Binding SelectedSelfEducation}" 
+                           SelectionChangedCommand="{Binding SelfEducationSelectedCommand}">
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout VerticalOptions="Center"
-                                         HorizontalOptions="Center">
-                        <Label Text="Brak elementów samokształcenia"
-                               FontSize="18"
-                               HorizontalOptions="Center"/>
-                        <Label Text="Dodaj nowy element klikając przycisk poniżej"
-                               HorizontalOptions="Center"/>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                        <Label Text="Brak elementów samokształcenia" FontSize="18" HorizontalOptions="Center" />
+                        <Label Text="Dodaj nowy element klikając przycisk poniżej" HorizontalOptions="Center" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:SelfEducationViewModel">
-                        <Frame Style="{StaticResource CardFrame}"
-                               Margin="10,5">
+                    <DataTemplate>
+                        <Frame Style="{StaticResource CardFrame}" Margin="10,5">
                             <Grid ColumnDefinitions="*, Auto">
                                 <VerticalStackLayout Grid.Column="0">
-                                    <Label Text="{Binding Title}"
-                                           FontAttributes="Bold"/>
-                                    <Label Text="{Binding Type, StringFormat='Typ: {0}'}"/>
-                                    <Label Text="{Binding Publisher, StringFormat='Wydawca/Organizator: {0}'}"/>
+                                    <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                    <Label Text="{Binding Type, StringFormat='Typ: {0}'}" />
+                                    <Label Text="{Binding Publisher, StringFormat='Wydawca/Organizator: {0}'}" />
                                     <!-- Informacja o wymaganiu akceptacji - widoczna tylko dla starej wersji SMK -->
-                                    <Label Text="{Binding RequiresAcceptance, Converter={StaticResource BoolToYesNoConverter}, StringFormat='Wymaga akceptacji: {0}'}"
-                                           IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsOldSmkVersion}"
-                                           FontSize="13"
-                                           TextColor="{StaticResource WarningColor}"/>
-                                    <Label Text="{Binding ModuleName}"
-                                           IsVisible="{Binding ModuleName, Converter={StaticResource StringToBoolConverter}}"
-                                           FontSize="13"
-                                           TextColor="{StaticResource TextMutedColor}"/>
+                                    <Label Text="{Binding RequiresAcceptance, Converter={StaticResource BoolToYesNoConverter}, StringFormat='Wymaga akceptacji: {0}'}" 
+                                           IsVisible="{Binding Path=BindingContext.IsOldSmkVersion, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                           FontSize="13" TextColor="{StaticResource WarningColor}" />
+                                    <Label Text="{Binding ModuleName}" IsVisible="{Binding ModuleName, Converter={StaticResource StringToBoolConverter}}"
+                                           FontSize="13" TextColor="{StaticResource TextMutedColor}" />
                                 </VerticalStackLayout>
-                                <VerticalStackLayout Grid.Column="1"
-                                                     VerticalOptions="Center"
-                                                     HorizontalOptions="End">
-                                    <Label Text="{Binding Year, StringFormat='{0}'}"
-                                           FontSize="20"
-                                           FontAttributes="Bold"
-                                           TextColor="{StaticResource Primary}"
-                                           HorizontalOptions="Center"/>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End">
+                                    <Label Text="{Binding Year, StringFormat='{0}'}" FontSize="20" FontAttributes="Bold" 
+                                           TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Grid>
                         </Frame>
@@ -87,11 +59,8 @@
         </RefreshView>
 
         <!-- Przycisk dodawania -->
-        <Button Grid.Row="3"
-                Text="Dodaj nowe samokształcenie"
-                Command="{Binding AddSelfEducationCommand}"
+        <Button Grid.Row="3" Text="Dodaj nowe samokształcenie" Command="{Binding AddSelfEducationCommand}"
                 Style="{StaticResource PrimaryButton}"
-                Margin="20"
-                HorizontalOptions="Center"/>
+                Margin="20" HorizontalOptions="Center" />
     </Grid>
 </ContentPage>

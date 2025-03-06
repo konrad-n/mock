@@ -17,13 +17,13 @@ namespace SledzSpecke.App.Models
         public int? ModuleId { get; set; }
 
         [MaxLength(100)]
-        public string? InstitutionName { get; set; }
+        public string InstitutionName { get; set; }
 
         [MaxLength(100)]
-        public string? DepartmentName { get; set; }
+        public string DepartmentName { get; set; }
 
         [MaxLength(100)]
-        public string? InternshipName { get; set; }
+        public string InternshipName { get; set; }
 
         public int Year { get; set; }
 
@@ -41,20 +41,17 @@ namespace SledzSpecke.App.Models
         // Recognition fields
         public bool IsRecognition { get; set; }
 
-        public string? RecognitionReason { get; set; }
+        public string RecognitionReason { get; set; }
 
         public int RecognitionDaysReduction { get; set; }
 
         // Pola specyficzne dla starego SMK
         public bool IsPartialRealization { get; set; }  // Oznaczenie stażu jako "realizacja częściowa"
 
-        public string? SupervisorName { get; set; }  // Kierownik stażu (odpowiednik OldSMKField1)
-
-        // Określa, czy jest to staż podstawowy
-        public bool IsBasic { get; set; }
+        public string SupervisorName { get; set; }  // Kierownik stażu (odpowiednik OldSMKField1)
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string? AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; } // JSON
     }
 }

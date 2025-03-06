@@ -16,12 +16,12 @@ namespace SledzSpecke.App.Models
         [Indexed]
         public int? ModuleId { get; set; }
 
-        public string? Description { get; set; }
+        public string Description { get; set; }
 
-        public string? FilePath { get; set; }
+        public string FilePath { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string? AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; } // JSON
     }
 }

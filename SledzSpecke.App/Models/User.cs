@@ -10,12 +10,12 @@ namespace SledzSpecke.App.Models
         public int UserId { get; set; }
 
         [MaxLength(50)]
-        public string Username { get; set; } = string.Empty;
+        public string Username { get; set; }
 
         [MaxLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string Email { get; set; }
 
-        public string PasswordHash { get; set; } = string.Empty;
+        public string PasswordHash { get; set; }
 
         public SmkVersion SmkVersion { get; set; }
 

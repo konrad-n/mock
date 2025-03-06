@@ -19,10 +19,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool typeASelected = true;
         private bool typeBSelected = false;
         private string searchText = string.Empty;
-        private ProcedureViewModel selectedProcedure;
+        private Procedure? selectedProcedure;
 
         // Dane
-        private ObservableCollection<ProcedureViewModel> procedures = new();
+        private ObservableCollection<Procedure> procedures = new();
         private int? currentModuleId;
         private ObservableCollection<ProcedureGrouping> groupedProcedures = new();
 
@@ -50,7 +50,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         }
 
         // Właściwości
-        public ObservableCollection<ProcedureViewModel> Procedures
+        public ObservableCollection<Procedure> Procedures
         {
             get => this.procedures;
             set => this.SetProperty(ref this.procedures, value);
@@ -62,7 +62,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.groupedProcedures, value);
         }
 
-        public ProcedureViewModel SelectedProcedure
+        public Procedure? SelectedProcedure
         {
             get => this.selectedProcedure;
             set => this.SetProperty(ref this.selectedProcedure, value);
@@ -130,40 +130,75 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.Procedures.Clear();
                 this.GroupedProcedures.Clear();
 
-                // Pobierz procedury z bazy danych
-                var procedures = await this.databaseService.GetProceduresAsync(
-                    internshipId: null,
-                    searchText: this.SearchText);
-
-                // Filtrowanie według typu operatora
-                if (!this.TypeASelected || !this.TypeBSelected)
+                // Pobierz wszystkie staże dla bieżącego modułu (jeśli jest wybrany) lub całej specjalizacji
+                var internships = new List<Internship>();
+                if (this.currentModuleId.HasValue)
                 {
-                    procedures = procedures.Where(p =>
-                        (this.TypeASelected && p.OperatorCode == "A") ||
-                        (this.TypeBSelected && p.OperatorCode == "B")).ToList();
+                    internships = await this.databaseService.GetInternshipsAsync(moduleId: this.currentModuleId.Value);
+                }
+                else
+                {
+                    internships = await this.databaseService.GetInternshipsAsync(
+                        specializationId: specialization.SpecializationId);
                 }
 
-                // Filtrowanie według wyszukiwanego tekstu
-                if (!string.IsNullOrEmpty(this.SearchText))
+                // Pobierz procedury dla każdego stażu
+                var allProcedures = new List<Procedure>();
+
+                foreach (var internship in internships)
                 {
-                    var searchLower = this.SearchText.ToLowerInvariant();
-                    procedures = procedures.Where(p =>
-                        p.Code.ToLowerInvariant().Contains(searchLower) ||
-                        p.Location.ToLowerInvariant().Contains(searchLower) ||
-                        p.PatientInitials.ToLowerInvariant().Contains(searchLower)).ToList();
+                    var procedures = await this.databaseService.GetProceduresAsync(
+                        internshipId: internship.InternshipId,
+                        searchText: this.SearchText);
+
+                    // Filtruj według typu (A lub B)
+                    if (this.TypeASelected && !this.TypeBSelected)
+                    {
+                        procedures = procedures.Where(p => p.OperatorCode == "A").ToList();
+                    }
+                    else if (!this.TypeASelected && this.TypeBSelected)
+                    {
+                        procedures = procedures.Where(p => p.OperatorCode == "B").ToList();
+                    }
+
+                    // Dodaj informacje o stażu do każdej procedury (do wyświetlenia w UI)
+                    foreach (var procedure in procedures)
+                    {
+                        // Używamy AdditionalFields do tymczasowego przechowywania danych o stażu
+                        var additionalFields = new Dictionary<string, object>();
+                        if (!string.IsNullOrEmpty(procedure.AdditionalFields))
+                        {
+                            try
+                            {
+                                additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(procedure.AdditionalFields);
+                            }
+                            catch
+                            {
+                                additionalFields = new Dictionary<string, object>();
+                            }
+                        }
+
+                        additionalFields["InternshipName"] = internship.InternshipName;
+                        additionalFields["InternshipLocation"] = internship.DepartmentName;
+                        procedure.AdditionalFields = System.Text.Json.JsonSerializer.Serialize(additionalFields);
+                    }
+
+                    allProcedures.AddRange(procedures);
                 }
 
-                // Konwersja na ViewModele i dodanie do kolekcji
-                foreach (var procedure in procedures)
+                // Sortowanie procedur wg daty (od najnowszej)
+                var sortedProcedures = allProcedures.OrderByDescending(p => p.Date).ToList();
+
+                // Dodanie procedur do kolekcji
+                foreach (var procedure in sortedProcedures)
                 {
-                    this.Procedures.Add(ProcedureViewModel.FromModel(procedure));
+                    this.Procedures.Add(procedure);
                 }
 
-                // Grupowanie procedur
-                var groupedByCode = procedures
-                    .GroupBy(p => p.ProcedureGroup)
+                // Grupowanie procedur według kodów/typów
+                var groupedByCode = sortedProcedures
+                    .GroupBy(p => p.Code)
                     .Select(g => new ProcedureGrouping(g.Key, g.ToList()))
-                    .OrderBy(g => g.GroupName)
                     .ToList();
 
                 foreach (var group in groupedByCode)
@@ -228,7 +263,24 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnAddProcedureAsync()
         {
-            await Shell.Current.GoToAsync("AddProcedure");
+            // Pobierz identyfikator bieżącego modułu, aby przekazać do strony dodawania
+            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+            int? moduleId = null;
+
+            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            {
+                moduleId = specialization.CurrentModuleId.Value;
+            }
+
+            // Nawigacja do strony dodawania procedury, przekazując identyfikator modułu, jeśli dostępny
+            if (moduleId.HasValue)
+            {
+                await Shell.Current.GoToAsync($"AddEditProcedure?moduleId={moduleId.Value}");
+            }
+            else
+            {
+                await Shell.Current.GoToAsync("AddEditProcedure");
+            }
         }
     }
 }

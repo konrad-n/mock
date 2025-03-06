@@ -15,13 +15,13 @@ namespace SledzSpecke.App.Models
         public ModuleType Type { get; set; }
 
         [MaxLength(100)]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
 
-        public string? Structure { get; set; } // JSON struktura modułu
+        public string Structure { get; set; } // JSON struktura modułu
 
         // Statystyki postępu
         public int CompletedInternships { get; set; }

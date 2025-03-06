@@ -50,24 +50,13 @@ namespace SledzSpecke.App.Services.Database
         public async Task<User> GetUserAsync(int id)
         {
             await this.InitializeAsync();
-            var user = await this.database.Table<User>().FirstOrDefaultAsync(u => u.UserId == id);
-            if (user == null)
-            {
-                throw new KeyNotFoundException($"User with ID {id} not found.");
-            }
-            return user;
+            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.UserId == id);
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            ArgumentNullException.ThrowIfNull(username, nameof(username));
             await this.InitializeAsync();
-            var user = await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username);
-            if (user == null)
-            {
-                throw new KeyNotFoundException($"User with username '{username}' not found.");
-            }
-            return user;
+            return await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<int> SaveUserAsync(User user)
@@ -88,12 +77,8 @@ namespace SledzSpecke.App.Services.Database
         {
             await this.InitializeAsync();
             var specialization = await this.database.Table<Models.Specialization>().FirstOrDefaultAsync(s => s.SpecializationId == id);
-            if (specialization == null)
-            {
-                throw new KeyNotFoundException($"Specialization with ID {id} not found.");
-            }
 
-            if (specialization.HasModules)
+            if (specialization != null && specialization.HasModules)
             {
                 specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
             }
@@ -130,12 +115,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Module> GetModuleAsync(int id)
         {
             await this.InitializeAsync();
-            var module = await this.database.Table<Module>().FirstOrDefaultAsync(m => m.ModuleId == id);
-            if (module == null)
-            {
-                throw new KeyNotFoundException($"Module with ID {id} not found.");
-            }
-            return module;
+            return await this.database.Table<Module>().FirstOrDefaultAsync(m => m.ModuleId == id);
         }
 
         public async Task<List<Module>> GetModulesAsync(int specializationId)
@@ -167,12 +147,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Internship> GetInternshipAsync(int id)
         {
             await this.InitializeAsync();
-            var internship = await this.database.Table<Internship>().FirstOrDefaultAsync(i => i.InternshipId == id);
-            if (internship == null)
-            {
-                throw new KeyNotFoundException($"Internship with ID {id} not found.");
-            }
-            return internship;
+            return await this.database.Table<Internship>().FirstOrDefaultAsync(i => i.InternshipId == id);
         }
 
         public async Task<List<Internship>> GetInternshipsAsync(int? specializationId = null, int? moduleId = null)
@@ -216,12 +191,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<MedicalShift> GetMedicalShiftAsync(int id)
         {
             await this.InitializeAsync();
-            var shift = await this.database.Table<MedicalShift>().FirstOrDefaultAsync(s => s.ShiftId == id);
-            if (shift == null)
-            {
-                throw new KeyNotFoundException($"Medical shift with ID {id} not found.");
-            }
-            return shift;
+            return await this.database.Table<MedicalShift>().FirstOrDefaultAsync(s => s.ShiftId == id);
         }
 
         public async Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null)
@@ -260,12 +230,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Procedure> GetProcedureAsync(int id)
         {
             await this.InitializeAsync();
-            var procedure = await this.database.Table<Procedure>().FirstOrDefaultAsync(p => p.ProcedureId == id);
-            if (procedure == null)
-            {
-                throw new KeyNotFoundException($"Procedure with ID {id} not found.");
-            }
-            return procedure;
+            return await this.database.Table<Procedure>().FirstOrDefaultAsync(p => p.ProcedureId == id);
         }
 
         public async Task<List<Procedure>> GetProceduresAsync(int? internshipId = null, string searchText = null)
@@ -318,12 +283,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Course> GetCourseAsync(int id)
         {
             await this.InitializeAsync();
-            var course = await this.database.Table<Course>().FirstOrDefaultAsync(c => c.CourseId == id);
-            if (course == null)
-            {
-                throw new KeyNotFoundException($"Course with ID {id} not found.");
-            }
-            return course;
+            return await this.database.Table<Course>().FirstOrDefaultAsync(c => c.CourseId == id);
         }
 
         public async Task<List<Course>> GetCoursesAsync(int? specializationId = null, int? moduleId = null)
@@ -367,12 +327,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<SelfEducation> GetSelfEducationAsync(int id)
         {
             await this.InitializeAsync();
-            var selfEducation = await this.database.Table<SelfEducation>().FirstOrDefaultAsync(s => s.SelfEducationId == id);
-            if (selfEducation == null)
-            {
-                throw new KeyNotFoundException($"Self education with ID {id} not found.");
-            }
-            return selfEducation;
+            return await this.database.Table<SelfEducation>().FirstOrDefaultAsync(s => s.SelfEducationId == id);
         }
 
         public async Task<List<SelfEducation>> GetSelfEducationItemsAsync(int? specializationId = null, int? moduleId = null)
@@ -416,12 +371,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Publication> GetPublicationAsync(int id)
         {
             await this.InitializeAsync();
-            var publication = await this.database.Table<Publication>().FirstOrDefaultAsync(p => p.PublicationId == id);
-            if (publication == null)
-            {
-                throw new KeyNotFoundException($"Publication with ID {id} not found.");
-            }
-            return publication;
+            return await this.database.Table<Publication>().FirstOrDefaultAsync(p => p.PublicationId == id);
         }
 
         public async Task<List<Publication>> GetPublicationsAsync(int? specializationId = null, int? moduleId = null)
@@ -465,12 +415,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<EducationalActivity> GetEducationalActivityAsync(int id)
         {
             await this.InitializeAsync();
-            var activity = await this.database.Table<EducationalActivity>().FirstOrDefaultAsync(a => a.ActivityId == id);
-            if (activity == null)
-            {
-                throw new KeyNotFoundException($"Educational activity with ID {id} not found.");
-            }
-            return activity;
+            return await this.database.Table<EducationalActivity>().FirstOrDefaultAsync(a => a.ActivityId == id);
         }
 
         public async Task<List<EducationalActivity>> GetEducationalActivitiesAsync(int? specializationId = null, int? moduleId = null)
@@ -514,12 +459,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Absence> GetAbsenceAsync(int id)
         {
             await this.InitializeAsync();
-            var absence = await this.database.Table<Absence>().FirstOrDefaultAsync(a => a.AbsenceId == id);
-            if (absence == null)
-            {
-                throw new KeyNotFoundException($"Absence with ID {id} not found.");
-            }
-            return absence;
+            return await this.database.Table<Absence>().FirstOrDefaultAsync(a => a.AbsenceId == id);
         }
 
         public async Task<List<Absence>> GetAbsencesAsync(int specializationId)
@@ -551,12 +491,7 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Models.Recognition> GetRecognitionAsync(int id)
         {
             await this.InitializeAsync();
-            var recognition = await this.database.Table<Models.Recognition>().FirstOrDefaultAsync(r => r.RecognitionId == id);
-            if (recognition == null)
-            {
-                throw new KeyNotFoundException($"Recognition with ID {id} not found.");
-            }
-            return recognition;
+            return await this.database.Table<Models.Recognition>().FirstOrDefaultAsync(r => r.RecognitionId == id);
         }
 
         public async Task<List<Models.Recognition>> GetRecognitionsAsync(int specializationId)
@@ -588,24 +523,13 @@ namespace SledzSpecke.App.Services.Database
         public async Task<SpecializationProgram> GetSpecializationProgramAsync(int id)
         {
             await this.InitializeAsync();
-            var program = await this.database.Table<SpecializationProgram>().FirstOrDefaultAsync(p => p.ProgramId == id);
-            if (program == null)
-            {
-                throw new KeyNotFoundException($"Specialization program with ID {id} not found.");
-            }
-            return program;
+            return await this.database.Table<SpecializationProgram>().FirstOrDefaultAsync(p => p.ProgramId == id);
         }
 
         public async Task<SpecializationProgram> GetSpecializationProgramByCodeAsync(string code, SmkVersion smkVersion)
         {
-            ArgumentNullException.ThrowIfNull(code, nameof(code));
             await this.InitializeAsync();
-            var program = await this.database.Table<SpecializationProgram>().FirstOrDefaultAsync(p => p.Code == code && p.SmkVersion == smkVersion);
-            if (program == null)
-            {
-                throw new KeyNotFoundException($"Specialization program with code '{code}' and SMK version {smkVersion} not found.");
-            }
-            return program;
+            return await this.database.Table<SpecializationProgram>().FirstOrDefaultAsync(p => p.Code == code && p.SmkVersion == smkVersion);
         }
 
         public async Task<List<SpecializationProgram>> GetAllSpecializationProgramsAsync()

@@ -26,7 +26,7 @@
             {
                 return Task.FromResult(value);
             }
-            return Task.FromResult(string.Empty);
+            return Task.FromResult<string>(null);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@
         /// <param name="value">The value to store.</param>
         public static Task SetAsync(string key, string value)
         {
-            SettingsStorage[key] = value ?? string.Empty;
+            SettingsStorage[key] = value;
             return Task.CompletedTask;
         }
 

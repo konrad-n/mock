@@ -9,13 +9,12 @@ namespace SledzSpecke.Tests.TestUtilities
     public class SqliteTestDatabaseService : IDatabaseService
     {
         private readonly SQLiteConnection connection;
-        private readonly SQLiteAsyncConnection database;
+        private SQLiteAsyncConnection database;
         private bool isInitialized = false;
 
         public SqliteTestDatabaseService(SQLiteConnection connection)
         {
             this.connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            this.database = new SQLiteAsyncConnection(connection.DatabasePath);
         }
 
         public async Task InitializeAsync()
@@ -24,6 +23,9 @@ namespace SledzSpecke.Tests.TestUtilities
             {
                 return;
             }
+
+            // Create an async connection that uses our existing open connection
+            this.database = new SQLiteAsyncConnection(this.connection.DatabasePath);
 
             // Create all tables
             await this.database.CreateTableAsync<User>();
@@ -43,11 +45,11 @@ namespace SledzSpecke.Tests.TestUtilities
             this.isInitialized = true;
         }
 
+        // Implement only the methods needed for the test
         public async Task<Internship> GetInternshipAsync(int id)
         {
             await this.InitializeAsync();
-            return await this.database.Table<Internship>().FirstOrDefaultAsync(i => i.InternshipId == id)
-                ?? throw new KeyNotFoundException($"Internship with ID {id} not found");
+            return await this.database.Table<Internship>().FirstOrDefaultAsync(i => i.InternshipId == id);
         }
 
         public async Task<int> SaveInternshipAsync(Internship internship)

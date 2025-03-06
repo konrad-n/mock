@@ -4,20 +4,6 @@ namespace SledzSpecke.App.Models
 {
     public class SpecializationStructure
     {
-        public SpecializationStructure()
-        {
-            Courses = new List<CourseRequirement>();
-            Internships = new List<InternshipRequirement>();
-            Procedures = new List<ProcedureRequirement>();
-            Name = string.Empty;
-            Code = string.Empty;
-            TotalDuration = new TotalDuration();
-            BasicInfo = new BasicInfo();
-            SelfEducation = new SelfEducationInfo();
-            Holidays = new HolidaysInfo();
-            MedicalShifts = new MedicalShiftsInfo();
-        }
-
         public string Name { get; set; }
 
         public string Code { get; set; }

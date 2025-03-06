@@ -240,59 +240,28 @@ namespace SledzSpecke.App.ViewModels.Internships
                     .ThenByDescending(i => i.StartDate)
                     .ToList();
 
-                // Konwersja na ViewModele
-                this.Internships.Clear();
+                // Dodaj staże do kolekcji
                 foreach (var item in sortedItems)
                 {
-                    string moduleName = string.Empty;
-                    if (item.ModuleId.HasValue)
+                    // Utwórz model widoku z uwzględnieniem wersji SMK
+                    var viewModel = InternshipViewModel.FromModel(
+                        item,
+                        moduleName: string.Empty,
+                        moduleType: ModuleType.Basic,
+                        isOldSmk: this.IsOldSmkVersion);
+
+                    // Pobierz nazwę modułu, jeśli dostępna
+                    if (this.HasModules && item.ModuleId.HasValue)
                     {
                         var module = await this.databaseService.GetModuleAsync(item.ModuleId.Value);
-                        moduleName = module?.Name ?? string.Empty;
+                        if (module != null)
+                        {
+                            viewModel.ModuleName = module.Name;
+                            viewModel.ModuleType = module.Type;
+                        }
                     }
 
-                    var vm = new InternshipViewModel
-                    {
-                        InternshipId = item.InternshipId,
-                        InternshipName = item.InternshipName,
-                        InstitutionName = item.InstitutionName,
-                        DepartmentName = item.DepartmentName,
-                        StartDate = item.StartDate,
-                        EndDate = item.EndDate,
-                        Year = item.Year,
-                        IsCompleted = item.IsCompleted,
-                        IsApproved = item.IsApproved,
-                        IsPartialRealization = item.IsPartialRealization,
-                        SupervisorName = item.SupervisorName,
-                        IsOldSmkVersion = this.IsOldSmkVersion,
-                        ModuleName = moduleName,
-                        DaysCount = (item.EndDate - item.StartDate).Days + 1,
-                        DateRange = $"{item.StartDate:d} - {item.EndDate:d}"
-                    };
-
-                    // Set the status
-                    string status;
-                    if (item.IsApproved)
-                    {
-                        status = "Zatwierdzony";
-                    }
-                    else if (item.IsCompleted)
-                    {
-                        status = "Ukończony";
-                    }
-                    else
-                    {
-                        status = "W trakcie";
-                    }
-
-                    // Add partial realization info for old SMK version
-                    if (this.IsOldSmkVersion && item.IsPartialRealization)
-                    {
-                        status += " (realizacja częściowa)";
-                    }
-
-                    vm.Status = status;
-                    this.Internships.Add(vm);
+                    this.Internships.Add(viewModel);
                 }
             }
             catch (Exception ex)

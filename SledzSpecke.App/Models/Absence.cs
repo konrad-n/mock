@@ -18,11 +18,11 @@ namespace SledzSpecke.App.Models
 
         public DateTime EndDate { get; set; }
 
-        public string? Description { get; set; }
+        public string Description { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string? AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; } // JSON
 
         // Liczba dni (automatycznie obliczana)
         [Ignore]

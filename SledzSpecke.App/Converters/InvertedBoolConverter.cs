@@ -4,7 +4,7 @@ namespace SledzSpecke.App.Converters
 {
     public class InvertedBoolConverter : IValueConverter
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool boolValue)
             {
@@ -14,7 +14,7 @@ namespace SledzSpecke.App.Converters
             return value;
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool boolValue)
             {
