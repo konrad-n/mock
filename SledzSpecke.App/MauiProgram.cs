@@ -9,17 +9,17 @@ using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
+using SledzSpecke.App.ViewModels.Export;
 using SledzSpecke.App.ViewModels.Internships;
 using SledzSpecke.App.ViewModels.MedicalShifts;
 using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.ViewModels.SelfEducation;
-using SledzSpecke.App.ViewModels.Specialization;
 using SledzSpecke.App.Views.Authentication;
+using SledzSpecke.App.Views.Export;
 using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
 using SledzSpecke.App.Views.Procedures;
 using SledzSpecke.App.Views.SelfEducation;
-using SledzSpecke.App.Views.Specialization;
 
 namespace SledzSpecke.App
 {
@@ -49,91 +49,65 @@ namespace SledzSpecke.App
 
         private static void RegisterServices(IServiceCollection services)
         {
-            // Helpers
             services.AddSingleton<IFileAccessHelper, FileAccessHelper>();
-
-            // Core app services
             services.AddSingleton<App>();
             services.AddSingleton<NavigationPage>();
             services.AddSingleton<AppShell>();
             services.AddSingleton<SplashPage>();
-
-            // Database and storage services
             services.AddSingleton<IDatabaseService, DatabaseService>();
             services.AddSingleton<IFileSystemService, FileSystemService>();
             services.AddSingleton<ISecureStorageService, SecureStorageService>();
-
-            // Business services
             services.AddSingleton<ISpecializationService, SpecializationService>();
             services.AddSingleton<INotificationService, NotificationService>();
             services.AddSingleton<IAuthService, AuthService>();
-
-            // UI related services
             services.AddSingleton<IDialogService, DialogService>();
-
-            // Strategy services - rejestrujemy fabrykę zamiast bezpośrednio strategii
             services.AddTransient<ISmkVersionStrategy>(provider =>
             {
-                // Próba uzyskania aktualnego użytkownika
                 var authService = provider.GetService<IAuthService>();
                 var user = authService?.GetCurrentUserAsync().GetAwaiter().GetResult();
 
-                // Jeśli użytkownik istnieje, zwróć strategię zgodną z jego wersją SMK
                 if (user != null)
                 {
                     return SmkStrategyFactory.CreateStrategy(user.SmkVersion);
                 }
 
-                // Domyślnie nowa wersja SMK
                 return new NewSmkStrategy();
             });
         }
 
         private static void RegisterViewModels(IServiceCollection services)
         {
-            // Rejestracja ViewModeli autentykacji
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegisterViewModel>();
-
-            // Pozostałe ViewModele
             services.AddTransient<MedicalShiftsListViewModel>();
             services.AddTransient<MedicalShiftDetailsViewModel>();
             services.AddTransient<AddEditMedicalShiftViewModel>();
-
             services.AddTransient<SelfEducationListViewModel>();
             services.AddTransient<SelfEducationDetailsViewModel>();
             services.AddTransient<AddEditSelfEducationViewModel>();
-
-            services.AddTransient<InitializeSpecializationViewModel>();
-
+            services.AddTransient<ExportViewModel>();
+            services.AddTransient<ExportPreviewViewModel>();
             services.AddTransient<InternshipsListViewModel>();
             services.AddTransient<InternshipDetailsViewModel>();
             services.AddTransient<AddEditInternshipViewModel>();
-
             services.AddTransient<ProceduresListViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
         {
-            // Rejestracja widoków autentykacji
             services.AddTransient<LoginPage>();
             services.AddTransient<RegisterPage>();
-
-            // Pozostałe widoki
             services.AddTransient<MedicalShiftsListPage>();
             services.AddTransient<MedicalShiftDetailsPage>();
             services.AddTransient<AddEditMedicalShiftPage>();
-
             services.AddTransient<SelfEducationListPage>();
             services.AddTransient<SelfEducationDetailsPage>();
             services.AddTransient<AddEditSelfEducationPage>();
-
-            services.AddTransient<InitializeSpecializationPage>();
-
+            services.AddTransient<ExportPage>();
+            services.AddTransient<ExportPreviewPage>();
             services.AddTransient<InternshipsListPage>();
             services.AddTransient<InternshipDetailsPage>();
             services.AddTransient<AddEditInternshipPage>();
-
             services.AddTransient<ProcedureDetailsPage>();
         }
     }

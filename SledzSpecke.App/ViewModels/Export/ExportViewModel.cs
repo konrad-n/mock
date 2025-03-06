@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
+using SledzSpecke.App.Models.Enums;
+using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.Services.Specialization;
@@ -14,6 +16,7 @@ namespace SledzSpecke.App.ViewModels.Export
         private readonly IExportService exportService;
         private readonly ISpecializationService specializationService;
         private readonly IDialogService dialogService;
+        private readonly IAuthService authService;
 
         private DateTime startDate;
         private DateTime endDate;
@@ -34,15 +37,18 @@ namespace SledzSpecke.App.ViewModels.Export
         private ObservableCollection<ModuleInfo> availableModules;
         private ModuleInfo selectedModule;
         private bool canExport;
+        private SmkVersion userSmkVersion; // Added to track user's SMK version
 
         public ExportViewModel(
             IExportService exportService,
             ISpecializationService specializationService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IAuthService authService)
         {
             this.exportService = exportService;
             this.specializationService = specializationService;
             this.dialogService = dialogService;
+            this.authService = authService;
 
             // Ustawienie tytułu
             this.Title = "Eksport danych do SMK";
@@ -217,6 +223,12 @@ namespace SledzSpecke.App.ViewModels.Export
             }
         }
 
+        public SmkVersion UserSmkVersion
+        {
+            get => this.userSmkVersion;
+            private set => this.SetProperty(ref this.userSmkVersion, value);
+        }
+
         public bool HasAnyOptionSelected =>
             this.IncludeShifts ||
             this.IncludeProcedures ||
@@ -231,6 +243,11 @@ namespace SledzSpecke.App.ViewModels.Export
         public string FormattedLastExportDate => this.LastExportDate.HasValue
             ? this.LastExportDate.Value.ToString("dd.MM.yyyy HH:mm")
             : "Brak";
+
+        // New property to display SMK version info in UI
+        public string SmkVersionInfo => this.UserSmkVersion == SmkVersion.New
+            ? "Format danych: Nowa wersja SMK"
+            : "Format danych: Stara wersja SMK";
 
         // Komendy
         public ICommand ExportCommand { get; }
@@ -267,10 +284,12 @@ namespace SledzSpecke.App.ViewModels.Export
                 this.HasModules = specialization.HasModules;
 
                 // Wczytaj user settings dla formatu SMK
-                var user = await this.specializationService.GetCurrentUserAsync();
+                var user = await this.authService.GetCurrentUserAsync();
                 if (user != null)
                 {
-                    this.FormatForOldSmk = user.SmkVersion == Models.Enums.SmkVersion.Old;
+                    this.UserSmkVersion = user.SmkVersion;
+                    // Ustaw format eksportu na podstawie wersji SMK użytkownika
+                    this.FormatForOldSmk = user.SmkVersion == SmkVersion.Old;
                 }
 
                 // Wczytaj dostępne moduły, jeśli specjalizacja jest modułowa
@@ -494,87 +513,6 @@ namespace SledzSpecke.App.ViewModels.Export
                     System.Diagnostics.Debug.WriteLine($"Błąd podczas ustawiania zakresu dat: {ex.Message}");
                 }
             });
-        }
-
-        private async Task OnContinueExportAsync()
-        {
-            if (this.IsBusy)
-            {
-                return;
-            }
-
-            this.IsBusy = true;
-            this.ExportStatusMessage = "Weryfikacja danych przed eksportem...";
-
-            try
-            {
-                // Najpierw próbujemy wykonać eksport - jeśli wystąpią błędy walidacji, 
-                // zostanie zgłoszony wyjątek ValidationException
-                try
-                {
-                    // Przygotuj opcje eksportu
-                    var options = new ExportOptions
-                    {
-                        StartDate = this.StartDate,
-                        EndDate = this.EndDate,
-                        IncludeShifts = this.IncludeShifts,
-                        IncludeProcedures = this.IncludeProcedures,
-                        IncludeInternships = this.IncludeInternships,
-                        IncludeCourses = this.IncludeCourses,
-                        IncludeSelfEducation = this.IncludeSelfEducation,
-                        IncludePublications = this.IncludePublications,
-                        IncludeAbsences = this.IncludeAbsences,
-                        IncludeEducationalActivities = this.IncludeEducationalActivities,
-                        IncludeRecognitions = this.IncludeRecognitions,
-                        FormatForOldSMK = this.FormatForOldSmk,
-                        ModuleId = this.HasModules && this.SelectedModule != null && this.SelectedModule.Id > 0
-                            ? this.SelectedModule.Id
-                            : null,
-                    };
-
-                    // Testowy eksport - tylko weryfikacja danych
-                    this.ExportStatusMessage = "Weryfikacja danych - sprawdzanie kompletności...";
-                    await this.exportService.ValidateExportDataAsync(options);
-
-                    // Jeśli dotarliśmy tutaj, oznacza to, że walidacja przebiegła pomyślnie
-                    // Nawiguj do strony podglądu z opcjami eksportu
-                    string serializedOptions = System.Text.Json.JsonSerializer.Serialize(options);
-                    await Shell.Current.GoToAsync($"ExportPreview?options={Uri.EscapeDataString(serializedOptions)}");
-                }
-                catch (ValidationException ex)
-                {
-                    // Pokazujemy komunikat z błędami walidacji
-                    this.ExportStatusMessage = "Znaleziono błędy w danych";
-
-                    bool showDetails = await this.dialogService.DisplayAlertAsync(
-                        "Błędy walidacji",
-                        "Znaleziono błędy w danych, które uniemożliwiają eksport. Czy chcesz zobaczyć szczegóły?",
-                        "Tak",
-                        "Nie");
-
-                    if (showDetails)
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Szczegóły błędów",
-                            ex.Message,
-                            "OK");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas eksportu: {ex.Message}");
-                this.ExportStatusMessage = "Wystąpił błąd podczas eksportu.";
-
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd eksportu",
-                    $"Wystąpił problem podczas eksportu danych: {ex.Message}",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-            }
         }
     }
 }

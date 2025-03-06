@@ -11,6 +11,21 @@
                   FontAttributes="Bold" 
                   HorizontalOptions="Center" />
 
+            <!-- Informacja o wersji SMK -->
+            <Frame Style="{StaticResource CardFrame}" BackgroundColor="#EFF8FF">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Informacja o wersji SMK" 
+                           FontSize="18" 
+                           FontAttributes="Bold" />
+                    <Label Text="{Binding SmkVersionInfo}" 
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource PrimaryColor}" />
+                    <Label Text="Format eksportu jest dostosowany do wersji SMK wybranej podczas rejestracji." 
+                           TextColor="{StaticResource TextMutedColor}" 
+                           FontSize="14" />
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Zakres dat -->
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="15">
@@ -119,14 +134,14 @@
             <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Format danych" FontSize="18" FontAttributes="Bold" />
-                    <Label Text="Określ format danych odpowiedni dla Twojej wersji SMK:" />
+                    <Label Text="Format eksportu jest dostosowany do Twojej wersji SMK." />
 
                     <HorizontalStackLayout Spacing="10">
-                        <CheckBox IsChecked="{Binding FormatForOldSmk}" />
+                        <CheckBox IsChecked="{Binding FormatForOldSmk}" IsEnabled="False" />
                         <Label Text="Format dla starej wersji SMK" VerticalOptions="Center" />
                     </HorizontalStackLayout>
 
-                    <Label Text="Zaznacz powyższą opcję, jeśli korzystasz ze starej wersji systemu SMK. W przeciwnym razie dane będą eksportowane w formacie dopasowanym do nowej wersji." 
+                    <Label Text="Ta opcja jest ustawiona automatycznie na podstawie wersji SMK wybranej podczas rejestracji." 
                           TextColor="{StaticResource TextMutedColor}" 
                           FontSize="12" />
                 </VerticalStackLayout>

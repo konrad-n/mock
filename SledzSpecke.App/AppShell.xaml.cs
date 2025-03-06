@@ -16,44 +16,25 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
-            // Rejestracja tras do stron dyżurów
             Routing.RegisterRoute("MedicalShiftDetails", typeof(Views.MedicalShifts.MedicalShiftDetailsPage));
             Routing.RegisterRoute("AddEditMedicalShift", typeof(Views.MedicalShifts.AddEditMedicalShiftPage));
-
-            // Rejestracja tras do stron procedur
             Routing.RegisterRoute("ProcedureDetails", typeof(Views.Procedures.ProcedureDetailsPage));
             Routing.RegisterRoute("AddEditProcedure", typeof(Views.Procedures.AddEditProcedurePage));
-
-            // Rejestracja tras do stron staży
             Routing.RegisterRoute("InternshipDetails", typeof(Views.Internships.InternshipDetailsPage));
             Routing.RegisterRoute("AddEditInternship", typeof(Views.Internships.AddEditInternshipPage));
-
-            // Rejestracja tras do stron kursów
             Routing.RegisterRoute("CourseDetails", typeof(Views.Courses.CourseDetailsPage));
             Routing.RegisterRoute("AddEditCourse", typeof(Views.Courses.AddEditCoursePage));
-
-            // Rejestracja tras do stron samokształcenia
             Routing.RegisterRoute("SelfEducationDetails", typeof(Views.SelfEducation.SelfEducationDetailsPage));
             Routing.RegisterRoute("AddEditSelfEducation", typeof(Views.SelfEducation.AddEditSelfEducationPage));
-
-            // Rejestracja tras do stron publikacji
             Routing.RegisterRoute("PublicationDetails", typeof(Views.Publications.PublicationDetailsPage));
             Routing.RegisterRoute("AddEditPublication", typeof(Views.Publications.AddEditPublicationPage));
-
-            // Rejestracja tras do stron absencji
             Routing.RegisterRoute("AbsenceDetails", typeof(Views.Absences.AbsenceDetailsPage));
             Routing.RegisterRoute("AddEditAbsence", typeof(Views.Absences.AddEditAbsencePage));
-
-            // Rejestracja tras do stron uznań
             Routing.RegisterRoute("RecognitionDetails", typeof(Views.Recognitions.RecognitionDetailsPage));
             Routing.RegisterRoute("AddEditRecognition", typeof(Views.Recognitions.AddEditRecognitionPage));
-
-            // Rejestracja tras do stron samokształcenia
             Routing.RegisterRoute("SelfEducationDetails", typeof(Views.SelfEducation.SelfEducationDetailsPage));
             Routing.RegisterRoute("AddEditSelfEducation", typeof(Views.SelfEducation.AddEditSelfEducationPage));
-
-            // Rejestracja tras do stron specjalizacji
-            Routing.RegisterRoute("InitializeSpecialization", typeof(Views.Specialization.InitializeSpecializationPage));
+            Routing.RegisterRoute("ExportPreview", typeof(Views.Export.ExportPreviewPage));
         }
 
         private async void InitializeUserInfoAsync()
@@ -63,13 +44,11 @@ namespace SledzSpecke.App
                 var user = await this.authService.GetCurrentUserAsync();
                 if (user != null)
                 {
-                    // Aktualizacja informacji o użytkowniku w ShellHeader
                     if (this.UserNameLabel != null)
                     {
                         this.UserNameLabel.Text = user.Username;
                     }
 
-                    // Pobierz informacje o specjalizacji dla użytkownika
                     var specializationService = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.Services.Specialization.ISpecializationService>();
                     if (specializationService != null)
                     {
@@ -101,11 +80,9 @@ namespace SledzSpecke.App
                 {
                     await this.authService.LogoutAsync();
 
-                    // Przejście do ekranu logowania
                     var loginViewModel = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.ViewModels.Authentication.LoginViewModel>();
                     var loginPage = new SledzSpecke.App.Views.Authentication.LoginPage(loginViewModel);
 
-                    // Zamieniamy główną stronę aplikacji
                     Application.Current.MainPage = new NavigationPage(loginPage);
                 }
             }

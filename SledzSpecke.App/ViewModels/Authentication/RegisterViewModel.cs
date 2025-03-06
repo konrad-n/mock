@@ -1,6 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Helpers;
@@ -155,7 +158,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (this.SetProperty(ref this.isNewSmkVersion, value) && value)
                 {
                     this.IsOldSmkVersion = false;
-                    (this.RegisterCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+
+                    // Reload specializations with the new SMK version
+                    this.LoadSpecializationsAsync().ConfigureAwait(false);
+
+                    ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
                 }
             }
         }
@@ -168,7 +175,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (this.SetProperty(ref this.isOldSmkVersion, value) && value)
                 {
                     this.IsNewSmkVersion = false;
-                    (this.RegisterCommand as AsyncRelayCommand)?.NotifyCanExecuteChanged();
+
+                    // Reload specializations with the new SMK version
+                    this.LoadSpecializationsAsync().ConfigureAwait(false);
+
+                    ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
                 }
             }
         }
@@ -198,20 +209,40 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     Directory.CreateDirectory(templatesDirPath);
                 }
 
-                // Próba załadowania szablonów z zasobów
-                await this.LoadSpecializationTemplatesFromResourcesAsync();
+                // Pobierz aktualnie wybraną wersję SMK
+                SmkVersion selectedVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
+
+                // Użyj nowej metody z SpecializationLoader do załadowania programów specjalizacji dla wybranej wersji SMK
+                var programs = await SpecializationLoader.LoadAllSpecializationProgramsForVersionAsync(selectedVersion);
+
+                // Wyczyść i dodaj do kolekcji
+                this.AvailableSpecializations.Clear();
+                foreach (var program in programs)
+                {
+                    this.AvailableSpecializations.Add(program);
+                }
 
                 // Jeśli nie ma dostępnych specjalizacji, spróbuj załadować z zasobów
                 if (this.AvailableSpecializations.Count == 0)
                 {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie znaleziono dostępnych specjalizacji. Sprawdź zasoby aplikacji.",
-                        "OK");
+                    // Jeśli nadal nie ma, spróbuj załadować stare metody
+                    await this.LoadSpecializationTemplatesFromResourcesAsync();
+
+                    // Filtruj specjalizacje według wybranej wersji SMK
+                    this.FilterSpecializationsBySmkVersion();
+
+                    if (this.AvailableSpecializations.Count == 0)
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Błąd",
+                            "Nie znaleziono dostępnych specjalizacji. Sprawdź zasoby aplikacji.",
+                            "OK");
+                    }
                 }
-                else
+
+                // Wybierz pierwszą dostępną specjalizację
+                if (this.AvailableSpecializations.Count > 0)
                 {
-                    // Wybierz pierwszą specjalizację jako domyślną
                     this.SelectedSpecialization = this.AvailableSpecializations[0];
                 }
             }
@@ -226,6 +257,43 @@ namespace SledzSpecke.App.ViewModels.Authentication
             finally
             {
                 this.IsBusy = false;
+            }
+        }
+
+        // Dodana metoda do filtrowania specjalizacji według wersji SMK
+        private void FilterSpecializationsBySmkVersion()
+        {
+            if (this.AvailableSpecializations == null || this.AvailableSpecializations.Count == 0)
+            {
+                return;
+            }
+
+            // Pobierz wszystkie załadowane specjalizacje
+            var allSpecializations = this.AvailableSpecializations.ToList();
+
+            // Wyczyść aktualną listę
+            this.AvailableSpecializations.Clear();
+
+            // Dodaj tylko specjalizacje pasujące do wybranej wersji SMK
+            SmkVersion selectedVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
+
+            foreach (var program in allSpecializations)
+            {
+                if (program.SmkVersion == selectedVersion)
+                {
+                    this.AvailableSpecializations.Add(program);
+                }
+            }
+
+            // Wybierz pierwszą dostępną specjalizację, jeśli istnieje
+            if (this.AvailableSpecializations.Count > 0)
+            {
+                this.SelectedSpecialization = this.AvailableSpecializations[0];
+            }
+            else
+            {
+                this.SelectedSpecialization = null;
+                System.Diagnostics.Debug.WriteLine($"Nie znaleziono specjalizacji dla wersji SMK: {selectedVersion}");
             }
         }
 
@@ -503,7 +571,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
             // Wyczyść kolekcję na wszelki wypadek
             this.AvailableSpecializations.Clear();
 
-            // Dodaj kilka podstawowych specjalizacji z pełnymi danymi
+            // Dodaj specjalizacje dla nowej wersji SMK
             var internalMedicine = new SpecializationProgram
             {
                 ProgramId = 1,
@@ -514,7 +582,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 TotalDurationMonths = 48,
             };
             this.AvailableSpecializations.Add(internalMedicine);
-            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {internalMedicine.Name}");
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {internalMedicine.Name} (Nowy SMK)");
 
             var cardiology = new SpecializationProgram
             {
@@ -528,7 +596,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 TotalDurationMonths = 60,
             };
             this.AvailableSpecializations.Add(cardiology);
-            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {cardiology.Name}");
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {cardiology.Name} (Nowy SMK)");
 
             var psychiatry = new SpecializationProgram
             {
@@ -540,7 +608,46 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 TotalDurationMonths = 48,
             };
             this.AvailableSpecializations.Add(psychiatry);
-            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {psychiatry.Name}");
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {psychiatry.Name} (Nowy SMK)");
+
+            // Dodaj te same specjalizacje dla starej wersji SMK
+            var internalMedicineOld = new SpecializationProgram
+            {
+                ProgramId = 4,
+                Name = "Choroby wewnętrzne",
+                Code = "internal_medicine",
+                SmkVersion = SmkVersion.Old,
+                HasModules = false,
+                TotalDurationMonths = 48,
+            };
+            this.AvailableSpecializations.Add(internalMedicineOld);
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {internalMedicineOld.Name} (Stary SMK)");
+
+            var cardiologyOld = new SpecializationProgram
+            {
+                ProgramId = 5,
+                Name = "Kardiologia",
+                Code = "cardiology",
+                SmkVersion = SmkVersion.Old,
+                HasModules = true,
+                BasicModuleCode = "internal_medicine",
+                BasicModuleDurationMonths = 24,
+                TotalDurationMonths = 60,
+            };
+            this.AvailableSpecializations.Add(cardiologyOld);
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {cardiologyOld.Name} (Stary SMK)");
+
+            var psychiatryOld = new SpecializationProgram
+            {
+                ProgramId = 6,
+                Name = "Psychiatria",
+                Code = "psychiatry",
+                SmkVersion = SmkVersion.Old,
+                HasModules = false,
+                TotalDurationMonths = 48,
+            };
+            this.AvailableSpecializations.Add(psychiatryOld);
+            System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {psychiatryOld.Name} (Stary SMK)");
 
             System.Diagnostics.Debug.WriteLine($"Łącznie dodano {this.AvailableSpecializations.Count} specjalizacji");
         }
