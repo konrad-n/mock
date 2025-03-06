@@ -22,13 +22,13 @@ namespace SledzSpecke.App.Models
         public int Minutes { get; set; }
 
         [MaxLength(100)]
-        public required string Location { get; set; }
+        public string Location { get; set; }
 
         public int Year { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public required string AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; } // JSON
 
         // Nowe pola związane z zatwierdzaniem
 
@@ -41,13 +41,13 @@ namespace SledzSpecke.App.Models
         /// Imię i nazwisko osoby zatwierdzającej..
         /// </summary>
         [MaxLength(100)]
-        public required string ApproverName { get; set; }
+        public string ApproverName { get; set; }
 
         /// <summary>
         /// Funkcja osoby zatwierdzającej (np. Kierownik Specjalizacji)..
         /// </summary>
         [MaxLength(100)]
-        public required string ApproverRole { get; set; }
+        public string ApproverRole { get; set; }
 
         /// <summary>
         /// Czy dyżur został zatwierdzony..

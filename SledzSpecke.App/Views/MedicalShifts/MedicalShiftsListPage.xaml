@@ -3,302 +3,249 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.MedicalShifts.MedicalShiftsListPage"
              xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.MedicalShifts"
-             xmlns:models="clr-namespace:SledzSpecke.App.Models"
              x:DataType="vm:MedicalShiftsListViewModel"
              Title="{Binding Title}">
 
-       <Grid RowDefinitions="Auto,Auto,Auto,*,Auto"
-                     Padding="20">
-              <!-- Nagłówek -->
-              <Label Text="Dyżury medyczne"
-                     Style="{StaticResource HeaderLabel}"
-                     Grid.Row="0"/>
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Padding="20">
+        <!-- Nagłówek -->
+        <Label Text="Dyżury medyczne" 
+               Style="{StaticResource HeaderLabel}" 
+               Grid.Row="0" />
 
-              <!-- Podsumowanie dyżurów - zgodnie ze starym SMK -->
-              <Frame Grid.Row="1"
-                            Padding="15"
-                            Margin="0,0,0,10"
-                            BorderColor="#95B8CE"
-                            BackgroundColor="#E4F0F5">
-                     <Grid RowDefinitions="Auto,Auto,Auto"
-                                   ColumnDefinitions="Auto,Auto,Auto">
-                            <Label Text="Dyżury medyczne - podsumowanie"
-                                   Grid.Row="0"
-                                          Grid.Column="0"
-                                          Grid.ColumnSpan="3"
-                                   FontSize="16"
-                                          FontAttributes="Bold"
-                                          Margin="0,0,0,10"/>
+        <!-- Podsumowanie dyżurów - zgodnie ze starym SMK -->
+        <Frame Grid.Row="1" Padding="15" Margin="0,0,0,10" BorderColor="#95B8CE" BackgroundColor="#E4F0F5">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,Auto">
+                <Label Text="Dyżury medyczne - podsumowanie" 
+                       Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                       FontSize="16" FontAttributes="Bold" Margin="0,0,0,10" />
 
-                            <!-- Etykiety kolumn -->
-                            <Label Grid.Row="1"
-                                          Grid.Column="1"
-                                   Text="Liczba godzin"
-                                   HorizontalOptions="Center"
-                                   FontAttributes="Bold"
-                                   Margin="20,0,20,5"/>
+                <!-- Etykiety kolumn -->
+                <Label Grid.Row="1" Grid.Column="1" 
+                       Text="Liczba godzin" 
+                       HorizontalOptions="Center" 
+                       FontAttributes="Bold" 
+                       Margin="20,0,20,5" />
 
-                            <Label Grid.Row="1"
-                                          Grid.Column="2"
-                                   Text="Liczba minut"
-                                   HorizontalOptions="Center"
-                                   FontAttributes="Bold"
-                                   Margin="20,0,20,5"/>
+                <Label Grid.Row="1" Grid.Column="2" 
+                       Text="Liczba minut" 
+                       HorizontalOptions="Center" 
+                       FontAttributes="Bold"
+                       Margin="20,0,20,5" />
 
-                            <!-- Dyżury zrealizowane -->
-                            <Label Grid.Row="2"
-                                          Grid.Column="0"
-                                   Text="Dyżury zrealizowane"
-                                   VerticalOptions="Center"
-                                   FontAttributes="Bold"/>
+                <!-- Dyżury zrealizowane -->
+                <Label Grid.Row="2" Grid.Column="0" 
+                       Text="Dyżury zrealizowane" 
+                       VerticalOptions="Center" 
+                       FontAttributes="Bold" />
 
-                            <Frame Grid.Row="2"
-                                          Grid.Column="1"
-                                   BackgroundColor="White"
-                                   BorderColor="LightGray"
-                                   Padding="10,5"
-                                   CornerRadius="5"
-                                   Margin="15,0">
-                                   <Label Text="{Binding ShiftsSummary.TotalHours}"
-                                          HorizontalOptions="End"/>
-                            </Frame>
+                <Frame Grid.Row="2" Grid.Column="1" 
+                       BackgroundColor="White" 
+                       BorderColor="LightGray" 
+                       Padding="10,5" 
+                       CornerRadius="5" 
+                       Margin="15,0">
+                    <Label Text="{Binding ShiftsSummary.TotalHours}" 
+                           HorizontalOptions="End" />
+                </Frame>
 
-                            <Frame Grid.Row="2"
-                                          Grid.Column="2"
-                                   BackgroundColor="White"
-                                   BorderColor="LightGray"
-                                   Padding="10,5"
-                                   CornerRadius="5"
-                                   Margin="15,0">
-                                   <Label Text="{Binding ShiftsSummary.TotalMinutes}"
-                                          HorizontalOptions="End"/>
-                            </Frame>
+                <Frame Grid.Row="2" Grid.Column="2" 
+                       BackgroundColor="White" 
+                       BorderColor="LightGray" 
+                       Padding="10,5" 
+                       CornerRadius="5" 
+                       Margin="15,0">
+                    <Label Text="{Binding ShiftsSummary.TotalMinutes}" 
+                           HorizontalOptions="End" />
+                </Frame>
 
-                            <!-- Dyżury zatwierdzone -->
-                            <Label Grid.Row="3"
-                                          Grid.Column="0"
-                                   Text="Dyżury zatwierdzone"
-                                   VerticalOptions="Center"
-                                   FontAttributes="Bold"/>
+                <!-- Dyżury zatwierdzone -->
+                <Label Grid.Row="3" Grid.Column="0" 
+                       Text="Dyżury zatwierdzone" 
+                       VerticalOptions="Center"
+                       FontAttributes="Bold" />
 
-                            <Frame Grid.Row="3"
-                                          Grid.Column="1"
-                                   BackgroundColor="White"
-                                   BorderColor="LightGray"
-                                   Padding="10,5"
-                                   CornerRadius="5"
-                                   Margin="15,0">
-                                   <Label Text="{Binding ShiftsSummary.ApprovedHours}"
-                                          HorizontalOptions="End"/>
-                            </Frame>
+                <Frame Grid.Row="3" Grid.Column="1" 
+                       BackgroundColor="White" 
+                       BorderColor="LightGray" 
+                       Padding="10,5" 
+                       CornerRadius="5" 
+                       Margin="15,0">
+                    <Label Text="{Binding ShiftsSummary.ApprovedHours}" 
+                           HorizontalOptions="End" />
+                </Frame>
 
-                            <Frame Grid.Row="3"
-                                          Grid.Column="2"
-                                   BackgroundColor="White"
-                                   BorderColor="LightGray"
-                                   Padding="10,5"
-                                   CornerRadius="5"
-                                   Margin="15,0">
-                                   <Label Text="{Binding ShiftsSummary.ApprovedMinutes}"
-                                          HorizontalOptions="End"/>
-                            </Frame>
-                     </Grid>
-              </Frame>
+                <Frame Grid.Row="3" Grid.Column="2" 
+                       BackgroundColor="White" 
+                       BorderColor="LightGray" 
+                       Padding="10,5" 
+                       CornerRadius="5" 
+                       Margin="15,0">
+                    <Label Text="{Binding ShiftsSummary.ApprovedMinutes}" 
+                           HorizontalOptions="End" />
+                </Frame>
+            </Grid>
+        </Frame>
 
-              <!-- Filtry i wyszukiwanie -->
-              <Frame Grid.Row="2"
-                            Padding="10"
-                            Margin="0,0,0,10"
-                            BorderColor="LightGray">
-                     <Grid ColumnDefinitions="*,*"
-                                   RowDefinitions="Auto,Auto">
-                            <!-- Przyciski filtrów -->
-                            <StackLayout Grid.Row="0"
-                                          Grid.Column="0"
-                                          Grid.ColumnSpan="2"
-                                         Orientation="Horizontal"
-                                          Spacing="15">
-                                   <Button Text="Wszystkie"
-                                           Command="{Binding FilterShiftsCommand}"
-                                           CommandParameter="All"
-                                           BackgroundColor="{Binding AllShiftsSelected, Converter={StaticResource BoolToBackgroundColorConverter}}"/>
-                                   <Button Text="Bieżący staż"
-                                           Command="{Binding FilterShiftsCommand}"
-                                           CommandParameter="Current"
-                                           BackgroundColor="{Binding CurrentInternshipSelected, Converter={StaticResource BoolToBackgroundColorConverter}}"/>
+        <!-- Filtry i wyszukiwanie -->
+        <Frame Grid.Row="2" Padding="10" Margin="0,0,0,10" BorderColor="LightGray">
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                <!-- Przyciski filtrów -->
+                <StackLayout Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                             Orientation="Horizontal" Spacing="15">
+                    <Button Text="Wszystkie" 
+                            Command="{Binding FilterShiftsCommand}" 
+                            CommandParameter="All"
+                            BackgroundColor="{Binding AllShiftsSelected, Converter={StaticResource BoolToBackgroundColorConverter}}" />
+                    <Button Text="Bieżący staż" 
+                            Command="{Binding FilterShiftsCommand}" 
+                            CommandParameter="Current"
+                            BackgroundColor="{Binding CurrentInternshipSelected, Converter={StaticResource BoolToBackgroundColorConverter}}" />
+                </StackLayout>
+
+                <!-- Wyszukiwarka -->
+                <SearchBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                           Placeholder="Szukaj dyżurów..." 
+                           Text="{Binding SearchText}" 
+                           SearchCommand="{Binding FilterCommand}" 
+                           Margin="0,10,0,0" />
+            </Grid>
+        </Frame>
+
+        <!-- Etykieta listy i instrukcja -->
+        <StackLayout Grid.Row="3">
+            <Label Text="Lista zrealizowanych dyżurów medycznych" 
+                   FontSize="16" 
+                   FontAttributes="Bold" 
+                   Margin="0,0,0,5" />
+
+            <Label Text="Aby dodać nowy dyżur użyj przycisku 'Dodaj'. Uzupełnij wymagane pola i zapisz zmiany" 
+                   TextColor="Gray" 
+                   Margin="0,0,0,5" />
+
+            <!-- Informacja o niezapisanych zmianach -->
+            <Label Text="UWAGA: Masz niezapisane zmiany. Użyj przycisku 'Zapisz', aby potwierdzić usunięcie dyżurów." 
+                   TextColor="Red" 
+                   FontAttributes="Bold"
+                   IsVisible="{Binding HasUnsavedChanges}" 
+                   Margin="0,0,0,5" />
+
+            <!-- Przyciski potwierdzenia/anulowania zmian -->
+            <Grid ColumnDefinitions="*,*" 
+                  IsVisible="{Binding HasUnsavedChanges}">
+                <Button Grid.Column="0" 
+                        Text="Zapisz zmiany" 
+                        Command="{Binding SaveChangesCommand}" 
+                        BackgroundColor="{StaticResource SuccessColor}" 
+                        Margin="0,0,5,10" />
+                <Button Grid.Column="1" 
+                        Text="Anuluj zmiany" 
+                        Command="{Binding CancelChangesCommand}" 
+                        BackgroundColor="{StaticResource DangerColor}" 
+                        Margin="5,0,0,10" />
+            </Grid>
+
+            <!-- Lista dyżurów -->
+            <Grid RowDefinitions="Auto,*">
+                <!-- Nagłówki tabeli -->
+                <Grid Grid.Row="0" 
+                      ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto" 
+                      BackgroundColor="#F0F0F0" 
+                      Padding="5">
+                    <Label Grid.Column="0" Text="Lp" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="1" Text="Rok szkolenia" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="2" Text="Liczba godzin" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="3" Text="Liczba minut" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="4" Text="Data rozpoczęcia" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="5" Text="Nazwa komórki organizacyjnej" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="6" Text="Data akceptacji" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="7" Text="Imię i nazwisko" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="8" Text="Pełniona Funkcja" FontAttributes="Bold" Margin="5,0" />
+                    <Label Grid.Column="9" Text="Akcje" FontAttributes="Bold" Margin="5,0" />
+                </Grid>
+
+                <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}">
+                    <CollectionView ItemsSource="{Binding Shifts}" 
+                                   SelectedItem="{Binding SelectedShift}" 
+                                   SelectionMode="Single" 
+                                   SelectionChangedCommand="{Binding ShiftSelectedCommand}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto" 
+                                      Padding="5" 
+                                      BackgroundColor="{Binding IsApproved, Converter={StaticResource BoolToBackgroundColorConverter}}">
+                                    <!-- Lp (zostanie wypełnione w code-behind) -->
+                                    <Label Grid.Column="0" Text="{Binding ShiftId}" Margin="5,0" />
+
+                                    <!-- Rok szkolenia -->
+                                    <Label Grid.Column="1" Text="{Binding Year, StringFormat='Rok {0}'}" Margin="5,0" />
+
+                                    <!-- Liczba godzin -->
+                                    <Label Grid.Column="2" Text="{Binding Hours}" HorizontalOptions="Center" Margin="5,0" />
+
+                                    <!-- Liczba minut -->
+                                    <Label Grid.Column="3" Text="{Binding Minutes}" HorizontalOptions="Center" Margin="5,0" />
+
+                                    <!-- Data rozpoczęcia -->
+                                    <Label Grid.Column="4" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" Margin="5,0" />
+
+                                    <!-- Nazwa komórki organizacyjnej -->
+                                    <Label Grid.Column="5" Text="{Binding Location}" Margin="5,0" />
+
+                                    <!-- Data akceptacji -->
+                                    <Label Grid.Column="6" Text="{Binding ApprovalDate, StringFormat='{0:yyyy-MM-dd}'}" Margin="5,0" />
+
+                                    <!-- Imię i nazwisko -->
+                                    <Label Grid.Column="7" Text="{Binding ApproverName}" Margin="5,0" />
+
+                                    <!-- Pełniona Funkcja -->
+                                    <Label Grid.Column="8" Text="{Binding ApproverRole}" Margin="5,0" />
+
+                                    <!-- Akcje -->
+                                    <Button Grid.Column="9" 
+                                            Text="Usuń" 
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteShiftCommand}" 
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanBeDeleted}"
+                                            BackgroundColor="#30A9DE" 
+                                            TextColor="White"
+                                            FontSize="12"
+                                            HeightRequest="30"
+                                            CornerRadius="5"
+                                            Margin="5,0" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                                <Label Text="Brak dyżurów" 
+                                       HorizontalOptions="Center" 
+                                       FontSize="18" 
+                                       TextColor="Gray" />
+                                <Label Text="Naciśnij przycisk 'Dodaj', aby dodać nowy dyżur" 
+                                       HorizontalOptions="Center" 
+                                       FontSize="14" 
+                                       TextColor="Gray" 
+                                       Margin="0,10,0,0" />
                             </StackLayout>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+                </RefreshView>
+            </Grid>
+        </StackLayout>
 
-                            <!-- Wyszukiwarka -->
-                            <SearchBar Grid.Row="1"
-                                          Grid.Column="0"
-                                          Grid.ColumnSpan="2"
-                                       Placeholder="Szukaj dyżurów..."
-                                       Text="{Binding SearchText}"
-                                       SearchCommand="{Binding FilterCommand}"
-                                       Margin="0,10,0,0"/>
-                     </Grid>
-              </Frame>
-
-              <!-- Etykieta listy i instrukcja -->
-              <StackLayout Grid.Row="3">
-                     <Label Text="Lista zrealizowanych dyżurów medycznych"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            Margin="0,0,0,5"/>
-
-                     <Label Text="Aby dodać nowy dyżur użyj przycisku 'Dodaj'. Uzupełnij wymagane pola i zapisz zmiany"
-                            TextColor="Gray"
-                            Margin="0,0,0,5"/>
-
-                     <!-- Informacja o niezapisanych zmianach -->
-                     <Label Text="UWAGA: Masz niezapisane zmiany. Użyj przycisku 'Zapisz', aby potwierdzić usunięcie dyżurów."
-                            TextColor="Red"
-                            FontAttributes="Bold"
-                            IsVisible="{Binding HasUnsavedChanges}"
-                            Margin="0,0,0,5"/>
-
-                     <!-- Przyciski potwierdzenia/anulowania zmian -->
-                     <Grid ColumnDefinitions="*,*"
-                           IsVisible="{Binding HasUnsavedChanges}">
-                            <Button Grid.Column="0"
-                                    Text="Zapisz zmiany"
-                                    Command="{Binding SaveChangesCommand}"
-                                    BackgroundColor="{StaticResource SuccessColor}"
-                                    Margin="0,0,5,10"/>
-                            <Button Grid.Column="1"
-                                    Text="Anuluj zmiany"
-                                    Command="{Binding CancelChangesCommand}"
-                                    BackgroundColor="{StaticResource DangerColor}"
-                                    Margin="5,0,0,10"/>
-                     </Grid>
-
-                     <!-- Lista dyżurów -->
-                     <Grid RowDefinitions="Auto,*">
-                            <!-- Nagłówki tabeli -->
-                            <Grid Grid.Row="0"
-                                  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto,Auto,Auto,Auto"
-                                  BackgroundColor="#F0F0F0"
-                                  Padding="5">
-                                   <Label Grid.Column="0"
-                                                 Text="Lp"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="1"
-                                                 Text="Rok szkolenia"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="2"
-                                                 Text="Liczba godzin"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="3"
-                                                 Text="Liczba minut"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="4"
-                                                 Text="Data rozpoczęcia"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="5"
-                                                 Text="Nazwa komórki organizacyjnej"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="6"
-                                                 Text="Data akceptacji"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="7"
-                                                 Text="Imię i nazwisko"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="8"
-                                                 Text="Pełniona Funkcja"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                                   <Label Grid.Column="9"
-                                                 Text="Akcje"
-                                                 FontAttributes="Bold"
-                                                 Margin="5,0"/>
-                            </Grid>
-
-                            <RefreshView Grid.Row="1"
-                                          Command="{Binding RefreshCommand}"
-                                          IsRefreshing="{Binding IsBusy}">
-                                   <CollectionView ItemsSource="{Binding Shifts}"
-                                                   SelectedItem="{Binding SelectedShift}"
-                                                   SelectionMode="Single"
-                                                   SelectionChangedCommand="{Binding ShiftSelectedCommand}">
-                                          <CollectionView.ItemTemplate>
-                                                 <DataTemplate x:DataType="models:MedicalShift">
-                                                        <ViewCell>
-                                                               <Grid Padding="10">
-                                                                      <Grid.RowDefinitions>
-                                                                             <RowDefinition Height="Auto"/>
-                                                                             <RowDefinition Height="Auto"/>
-                                                                      </Grid.RowDefinitions>
-                                                                      <Grid.ColumnDefinitions>
-                                                                             <ColumnDefinition Width="*"/>
-                                                                             <ColumnDefinition Width="Auto"/>
-                                                                      </Grid.ColumnDefinitions>
-
-                                                                      <StackLayout Grid.Row="0"
-                                                                                    Grid.Column="0">
-                                                                             <Label Text="{Binding Location}"
-                                                                                           FontAttributes="Bold"/>
-                                                                             <Label>
-                                                                                    <Label.Text>
-                                                                                           <MultiBinding StringFormat="{}{0}h {1}min">
-                                                                                                  <Binding Path="Hours"/>
-                                                                                                  <Binding Path="Minutes"/>
-                                                                                           </MultiBinding>
-                                                                                    </Label.Text>
-                                                                             </Label>
-                                                                             <Label Text="{Binding Date, StringFormat='{0:d}'}"/>
-                                                                      </StackLayout>
-
-                                                                      <StackLayout Grid.Row="0"
-                                                                                    Grid.Column="1"
-                                                                                   HorizontalOptions="End">
-                                                                             <Label Text="{Binding IsApproved}"/>
-                                                                             <Label Text="{Binding ApprovalDate, StringFormat='{0:d}'}"
-                                                                                    IsVisible="{Binding IsApproved}"/>
-                                                                      </StackLayout>
-                                                               </Grid>
-                                                        </ViewCell>
-                                                 </DataTemplate>
-                                          </CollectionView.ItemTemplate>
-                                          <CollectionView.EmptyView>
-                                                 <StackLayout VerticalOptions="Center"
-                                                               HorizontalOptions="Center">
-                                                        <Label Text="Brak dyżurów"
-                                                               HorizontalOptions="Center"
-                                                               FontSize="18"
-                                                               TextColor="Gray"/>
-                                                        <Label Text="Naciśnij przycisk 'Dodaj', aby dodać nowy dyżur"
-                                                               HorizontalOptions="Center"
-                                                               FontSize="14"
-                                                               TextColor="Gray"
-                                                               Margin="0,10,0,0"/>
-                                                 </StackLayout>
-                                          </CollectionView.EmptyView>
-                                   </CollectionView>
-                            </RefreshView>
-                     </Grid>
-              </StackLayout>
-
-              <!-- Przycisk dodawania nowego dyżuru -->
-              <Button Grid.Row="4"
-                      Text="Dodaj"
-                      Command="{Binding AddShiftCommand}"
-                      HorizontalOptions="Start"
-                      VerticalOptions="End"
-                      WidthRequest="100"
-                      HeightRequest="50"
-                      CornerRadius="10"
-                      FontSize="16"
-                      FontAttributes="Bold"
-                      BackgroundColor="{StaticResource PrimaryColor}"
-                      TextColor="White"
-                      Margin="0,15,0,0"/>
-       </Grid>
+        <!-- Przycisk dodawania nowego dyżuru -->
+        <Button Grid.Row="4"
+                Text="Dodaj" 
+                Command="{Binding AddShiftCommand}" 
+                HorizontalOptions="Start" 
+                VerticalOptions="End" 
+                WidthRequest="100" 
+                HeightRequest="50" 
+                CornerRadius="10" 
+                FontSize="16" 
+                FontAttributes="Bold"
+                BackgroundColor="{StaticResource PrimaryColor}" 
+                TextColor="White" 
+                Margin="0,15,0,0" />
+    </Grid>
 </ContentPage>

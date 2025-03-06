@@ -46,14 +46,16 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private int year = 1;
         private bool showOnlyActiveInternships = true;
 
-        private ObservableCollection<InternshipListItem> availableInternships = new();
-        private required InternshipListItem selectedInternship;
-        private ObservableCollection<string> availableProcedureCodes = new();
-        private ObservableCollection<string> availableGenders = new();
-        private ObservableCollection<string> availableStatuses = new();
-        private ObservableCollection<string> availableOperatorCodes = new();
-        private ObservableCollection<int> availableYears = new();
-        private ObservableCollection<string> availableLocations = new();
+        private ObservableCollection<InternshipListItem> availableInternships;
+        private InternshipListItem selectedInternship;
+        private ObservableCollection<string> availableProcedureCodes;
+        private ObservableCollection<string> availableGenders;
+        private ObservableCollection<string> availableStatuses;
+        private ObservableCollection<string> availableOperatorCodes;
+        private ObservableCollection<int> availableYears;
+
+        // Nowe pola dla comboboxów
+        private ObservableCollection<string> availableLocations;
 
         // Konstruktor i inicjalizacja
         public AddEditProcedureViewModel(
@@ -62,10 +64,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
             ISmkVersionStrategy smkStrategy,
             IDialogService dialogService)
         {
-            this.specializationService = specializationService ?? throw new ArgumentNullException(nameof(specializationService));
-            this.databaseService = databaseService ?? throw new ArgumentNullException(nameof(databaseService));
-            this.smkStrategy = smkStrategy ?? throw new ArgumentNullException(nameof(smkStrategy));
-            this.dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            this.specializationService = specializationService;
+            this.databaseService = databaseService;
+            this.smkStrategy = smkStrategy;
+            this.dialogService = dialogService;
 
             // Inicjalizacja tytułu
             this.Title = "Nowa procedura";

@@ -17,16 +17,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly IDialogService dialogService;
 
         // Nowe pola dla funkcjonalności zgodnej ze starym SMK
-        private MedicalShiftsSummary shiftsSummary = new();
+        private MedicalShiftsSummary shiftsSummary;
         private bool hasUnsavedChanges;
-        private ObservableCollection<MedicalShift> shiftsToDelete = new();
+        private ObservableCollection<MedicalShift> shiftsToDelete;
 
         // Istniejące pola
         private bool allShiftsSelected = true;
         private bool currentInternshipSelected = false;
         private string searchText = string.Empty;
-        private MedicalShift selectedShift = null!;
-        private ObservableCollection<MedicalShift> shifts = new();
+        private MedicalShift selectedShift;
+        private ObservableCollection<MedicalShift> shifts;
         private int currentInternshipId;
         private int? currentModuleId;
 

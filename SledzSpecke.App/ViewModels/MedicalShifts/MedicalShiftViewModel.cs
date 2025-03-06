@@ -139,7 +139,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         /// <param name="shift">Obiekt dyżuru z modelu danych.</param>
         /// <param name="internshipName">Opcjonalna nazwa stażu.</param>
         /// <returns>Obiekt ViewModel dyżuru.</returns>
-        public static MedicalShiftViewModel? FromModel(MedicalShift? shift, string? internshipName = null)
+        public static MedicalShiftViewModel FromModel(MedicalShift shift, string internshipName = null)
         {
             if (shift == null)
             {
