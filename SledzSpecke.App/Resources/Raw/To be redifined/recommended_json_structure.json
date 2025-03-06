@@ -1,0 +1,106 @@
+{
+  "specialization": {
+    "name": "Nazwa specjalizacji",
+    "code": "kod_specjalizacji",
+    "version": "Wersja (np. CMKP 2023)",
+    "hasModules": true,
+    "totalDuration": {
+      "years": 5,
+      "months": 0,
+      "days": 0
+    },
+    "totalWorkingDays": 1305,
+    "basicInfo": {
+      "targetGroup": "Lekarze nieposiadający specjalizacji I lub II stopnia lub tytułu specjalisty w odpowiedniej dziedzinie medycyny",
+      "qualificationProcedure": "wiosna 2023"
+    },
+    "modules": [
+      {
+        "moduleId": 1,
+        "type": "Unified/Basic/Specialistic",
+        "name": "Nazwa modułu",
+        "code": "kod_modułu",
+        "duration": {
+          "years": 5,
+          "months": 0,
+          "days": 0
+        },
+        "workingDays": 1305,
+        "courses": [
+          {
+            "id": 1,
+            "name": "Nazwa kursu",
+            "weeks": 1,
+            "workingDays": 5,
+            "required": true
+          }
+        ],
+        "internships": [
+          {
+            "id": 1,
+            "name": "Nazwa stażu",
+            "weeks": 148,
+            "workingDays": 740,
+            "isBasic": true,
+            "location": "Opis lokalizacji"
+          }
+        ],
+        "procedures": [
+          {
+            "id": 1,
+            "name": "Nazwa procedury",
+            "type": "Typ procedury",
+            "requiredCountA": 20,
+            "requiredCountB": 0,
+            "internshipId": 1
+          }
+        ],
+        "yearlyColloquia": [
+          {
+            "id": 1,
+            "name": "Nazwa kolokwium",
+            "topics": [
+              "temat 1",
+              "temat 2"
+            ]
+          }
+        ],
+        "requiredPracticalSkills": [
+          "umiejętność 1",
+          "umiejętność 2"
+        ]
+      }
+    ],
+    "selfEducation": {
+      "daysPerYear": 6,
+      "totalDays": 30,
+      "description": "Opis samokształcenia"
+    },
+    "holidays": {
+      "vacationDays": 130,
+      "nationalHolidays": 65,
+      "examPreparationDays": 6
+    },
+    "medicalShifts": {
+      "hoursPerWeek": 10.08,
+      "description": "Opis dyżurów"
+    },
+    "procedureCodeDescription": {
+      "codeA": "Opis kodu A",
+      "codeB": "Opis kodu B"
+    },
+    "examinationInfo": {
+      "examType": "Państwowy Egzamin Specjalizacyjny",
+      "components": [
+        {
+          "name": "egzamin testowy",
+          "description": "Opis egzaminu testowego"
+        },
+        {
+          "name": "egzamin ustny",
+          "description": "Opis egzaminu ustnego"
+        }
+      ]
+    }
+  }
+}

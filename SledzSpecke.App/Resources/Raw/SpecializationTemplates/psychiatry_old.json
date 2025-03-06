@@ -2,7 +2,6 @@
   "name": "Psychiatria",
   "code": "psychiatry",
   "version": "CMKP 2014",
-  "hasModules": false,
   "totalDuration": {
     "years": 5,
     "months": 0,
@@ -13,272 +12,258 @@
     "targetGroup": "Lekarze nieposiadający specjalizacji I lub II stopnia lub tytułu specjalisty w odpowiedniej dziedzinie medycyny",
     "qualificationProcedure": "CMKP 2014"
   },
-  "courses": [
+  "modules": [
     {
-      "id": 1,
-      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie psychiatrii\"",
-      "weeks": 1,
-      "workingDays": 5,
-      "required": true
-    },
-    {
-      "id": 2,
-      "name": "Kurs: \"Psychiatria sądowa i orzecznictwo sądowo-psychiatryczne\"",
-      "weeks": 2,
-      "workingDays": 10,
-      "required": true
-    },
-    {
-      "id": 3,
-      "name": "Kurs: \"Psychogeriatria\"",
-      "weeks": 1,
-      "workingDays": 5,
-      "required": true
-    },
-    {
-      "id": 4,
-      "name": "Kurs: \"Wprowadzenie do psychoterapii\"",
-      "weeks": 1,
-      "workingDays": 5,
-      "required": true
-    },
-    {
-      "id": 5,
-      "name": "Kurs: \"Ratownictwo medyczne\"",
-      "weeks": 1,
-      "workingDays": 5,
-      "required": true
-    },
-    {
-      "id": 6,
-      "name": "Kurs: \"Zdrowie publiczne\"",
-      "weeks": 1.6,
-      "workingDays": 8,
-      "required": true
-    },
-    {
-      "id": 7,
-      "name": "Kurs: \"Prawo medyczne\"",
-      "weeks": 0.6,
-      "workingDays": 3,
-      "required": true
-    }
-  ],
-  "internships": [
-    {
-      "id": 1,
-      "name": "Staż podstawowy w zakresie psychiatrii - ROK I",
-      "weeks": 15,
-      "workingDays": 75,
-      "isBasic": true,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny lub kliniczny oddział psychiatryczny"
-    },
-    {
-      "id": 2,
-      "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK II",
-      "weeks": 27,
-      "workingDays": 135,
-      "isBasic": true,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych"
-    },
-    {
-      "id": 3,
-      "name": "Staż kierunkowy w zakresie neurologii",
-      "weeks": 8,
-      "workingDays": 40,
-      "isBasic": false,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie neurologii lub ww. stażu – oddział neurologiczny (kliniczny, szpitalny)"
-    },
-    {
-      "id": 4,
-      "name": "Staż kierunkowy w zakresie psychiatrii dzieci i młodzieży",
-      "weeks": 8,
-      "workingDays": 40,
-      "isBasic": false,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii dzieci i młodzieży lub ww. stażu – oddział lub poradnia czynna we wszystkie dni robocze w tygodniu lub oddział dzienny psychiatrii dzieci i młodzieży"
-    },
-    {
-      "id": 5,
-      "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK III",
-      "weeks": 26,
-      "workingDays": 130,
-      "isBasic": true,
-      "location": null
-    },
-    {
-      "id": 6,
-      "name": "Staż kierunkowy w zakresie zaburzeń nerwicowych i psychoterapii",
-      "weeks": 12,
-      "workingDays": 60,
-      "isBasic": false,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – oddział (lub poradnia lub oddział dzienny) nerwic"
-    },
-    {
-      "id": 7,
-      "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK IV",
-      "weeks": 32,
-      "workingDays": 160,
-      "isBasic": true,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych lub centrum zdrowia psychicznego"
-    },
-    {
-      "id": 8,
-      "name": "Staż kierunkowy w zakresie leczenia uzależnień",
-      "weeks": 8,
-      "workingDays": 40,
-      "isBasic": false,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – ośrodek (oddział) leczenia uzależnień"
-    },
-    {
-      "id": 9,
-      "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK V",
-      "weeks": 34,
-      "workingDays": 170,
-      "isBasic": true,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych lub centrum zdrowia psychicznego"
-    },
-    {
-      "id": 10,
-      "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK V cd.",
-      "weeks": 42,
-      "workingDays": 210,
-      "isBasic": true,
-      "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych lub centrum zdrowia psychicznego"
-    }
-  ],
-  "procedures": [
-    {
-      "id": 1,
-      "name": "oceny za pomocą nie mniej niż 3 różnych standaryzowanych skal klinicznych (np. PANSS, HDRS, MADRS, CGI, MMSE itp.)",
-      "type": "Procedury medyczne",
-      "requiredCountA": 20,
-      "requiredCountB": 0
-    },
-    {
-      "id": 2,
-      "name": "współudział w przygotowaniu i przeprowadzeniu co najmniej 3 zabiegów elektrowstrząsowych",
-      "type": "Procedury medyczne",
-      "requiredCountA": 3,
-      "requiredCountB": 0
-    },
-    {
-      "id": 3,
-      "name": "współudział w przygotowaniu co najmniej 20 opinii w sprawie zasadności przyjęcia bez zgody do szpitala psychiatrycznego",
-      "type": "Procedury medyczne",
-      "requiredCountA": 20,
-      "requiredCountB": 0
-    },
-    {
-      "id": 4,
-      "name": "współudział w przygotowaniu 15 opinii sądowo-psychiatrycznych w sprawach karnych",
-      "type": "Procedury medyczne",
-      "requiredCountA": 15,
-      "requiredCountB": 0
-    },
-    {
-      "id": 5,
-      "name": "współudział w przygotowaniu 3 opinii sądowo-psychiatrycznych w sprawach cywilnych",
-      "type": "Procedury medyczne",
-      "requiredCountA": 3,
-      "requiredCountB": 0
-    },
-    {
-      "id": 6,
-      "name": "współudział w co najmniej 20 konsultacjach psychiatrycznych dla innych lekarzy",
-      "type": "Procedury medyczne",
-      "requiredCountA": 20,
-      "requiredCountB": 0
-    }
-  ],
-  "selfEducation": {
-    "daysPerYear": 6,
-    "totalDays": 30,
-    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
-  },
-  "holidays": {
-    "vacationDays": 130,
-    "nationalHolidays": 65,
-    "examPreparationDays": null
-  },
-  "medicalShifts": {
-    "hoursPerWeek": 10.08,
-    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
-  },
-  "yearlyColloquia": [
-    {
-      "id": 1,
-      "name": "Kolokwium roczne 1",
-      "topics": [
-        "psychopatologia ogólna i szczegółowa",
-        "diagnostyka i klasyfikacja zaburzeń psychicznych",
-        "farmakoterapia i inne metody leczenia biologicznego",
-        "podstawy psychoterapii i socjoterapii",
-        "ustawodawstwo psychiatryczne"
-      ]
-    },
-    {
-      "id": 2,
-      "name": "Kolokwium roczne 2",
-      "topics": [
-        "aktualne kierunki i historyczne tradycje psychiatrii",
-        "teoretyczne i metodologiczne podstawy psychiatrii",
-        "podstawy nauk o układzie nerwowym (neurologia kliniczna, neurofizjologia, neuroanatomia)",
-        "psychiatria dzieci i młodzieży"
-      ]
-    },
-    {
-      "id": 3,
-      "name": "Kolokwium roczne 3",
-      "topics": [
-        "psychoterapia",
-        "terapie społeczne",
-        "psychiatria środowiskowa"
-      ]
-    },
-    {
-      "id": 4,
-      "name": "Kolokwium roczne 4",
-      "topics": [
-        "diagnostyka i leczenie zaburzeń nerwicowych",
-        "zasady prowadzenia psychoterapii",
-        "orzecznictwo o niezdolności do pracy w zaburzeniach psychicznych",
-        "organizacja lecznictwa",
-        "prawo medyczne",
-        "psychiatria konsultacyjna"
-      ]
-    }
-  ],
-  "requiredPracticalSkills": [
-    "przeprowadzenia badania psychiatrycznego i sporządzenia opisu stanu psychicznego osoby badanej (z uwzględnieniem historii życia i aktualnej sytuacji życiowej)",
-    "badania neurologicznego, zbierania wywiadów z wykorzystaniem różnych źródeł, krytycznej oceny ich rzetelności oraz ich znaczenia w rozpoznaniu i leczeniu",
-    "wykorzystania i oceny standaryzowanych inwentarzy i skal klinicznych",
-    "ustalania rozpoznania i przeprowadzania różnicowania",
-    "właściwego wyboru i uzasadnienia wskazań do wykonania badań diagnostycznych i konsultacji oraz ich oceny i interpretacji, w tym wstępnej oceny i interpretacji wyników badań EEG, KT, MR",
-    "przygotowania optymalnego (kompleksowego i zindywidualizowanego) planu leczenia",
-    "prawidłowego prowadzenia farmakoterapii i innych metod terapii biologicznej, w tym kwalifikacji i przygotowania do zabiegów elektrowstrząsowych",
-    "nawiązania kontaktu terapeutycznego, dostrzegania własnych reakcji emocjonalnych i interpersonalnych oddziałujących w kontakcie indywidualnym i w psychoterapii, prowadzenia interwencji kryzysowej, oceny kompetencji społecznej chorego i jego zasobów oparcia społecznego oraz ich wzmacniania w czasie leczenia i rehabilitacji",
-    "współdziałania w zakresie diagnostyki i leczenia z konsultantami z zakresu innych dziedzin medycyny oraz udzielania konsultacji dla lekarzy innych specjalności",
-    "współpracy w wielospecjalistycznym zespole terapeutycznym i kierowania nim (psycholodzy, pielęgniarki, asystenci socjalni, terapeuci zajęciowi i inni)",
-    "współpracy z grupami i organizacjami samopomocy",
-    "orzekania o potrzebie rehabilitacji leczniczej, czasowej niezdolności do pracy, uszczerbku na zdrowiu, wydawania zaświadczeń lekarskich o stanie zdrowia pacjentom ubiegającym się o przyznanie świadczeń z zabezpieczenia społecznego choroby i jej następstw",
-    "opracowania opinii sądowo-psychiatrycznych ambulatoryjnych i po obserwacji szpitalnej, w sprawach karnych i w sprawach cywilnych",
-    "krytycznego korzystania z fachowych publikacji psychiatrycznych"
-  ],
-  "procedureCodeDescription": {
-    "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
-    "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
-  },
-  "examinationInfo": {
-    "examType": "Państwowy Egzamin Specjalizacyjny",
-    "components": [
-      {
-        "name": "egzamin testowy",
-        "description": "zbiór pytań testowych wielokrotnego wyboru z zakresu wymaganej wiedzy określonej w programie specjalizacji"
+      "moduleId": 1,
+      "name": "Moduł specjalistyczny w zakresie psychiatrii",
+      "code": "psychiatry_specialistic",
+      "moduleType": "Specialistic",
+      "version": "CMKP 2014",
+      "duration": {
+        "years": 5,
+        "months": 0,
+        "days": 0
       },
-      {
-        "name": "egzamin ustny",
-        "description": "pytania ustne problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
+      "workingDays": 1111,
+      "courses": [
+        {
+          "id": 1,
+          "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie psychiatrii\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 2,
+          "name": "Kurs: \"Psychiatria sądowa i orzecznictwo sądowo-psychiatryczne\"",
+          "weeks": 2,
+          "workingDays": 10,
+          "required": true
+        },
+        {
+          "id": 3,
+          "name": "Kurs: \"Psychogeriatria\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 4,
+          "name": "Kurs: \"Wprowadzenie do psychoterapii\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 5,
+          "name": "Kurs: \"Ratownictwo medyczne\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 6,
+          "name": "Kurs: \"Zdrowie publiczne\"",
+          "weeks": 1.6,
+          "workingDays": 8,
+          "required": true
+        },
+        {
+          "id": 7,
+          "name": "Kurs: \"Prawo medyczne\"",
+          "weeks": 0.6,
+          "workingDays": 3,
+          "required": true
+        }
+      ],
+      "internships": [
+        {
+          "id": 1,
+          "name": "Staż podstawowy w zakresie psychiatrii - ROK I",
+          "weeks": 15,
+          "workingDays": 75,
+          "isBasic": true,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny lub kliniczny oddział psychiatryczny"
+        },
+        {
+          "id": 2,
+          "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK II",
+          "weeks": 27,
+          "workingDays": 135,
+          "isBasic": true,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych"
+        },
+        {
+          "id": 3,
+          "name": "Staż kierunkowy w zakresie neurologii",
+          "weeks": 8,
+          "workingDays": 40,
+          "isBasic": false,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie neurologii lub ww. stażu – oddział neurologiczny (kliniczny, szpitalny)"
+        },
+        {
+          "id": 4,
+          "name": "Staż kierunkowy w zakresie psychiatrii dzieci i młodzieży",
+          "weeks": 8,
+          "workingDays": 40,
+          "isBasic": false,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii dzieci i młodzieży lub ww. stażu – oddział lub poradnia czynna we wszystkie dni robocze w tygodniu lub oddział dzienny psychiatrii dzieci i młodzieży"
+        },
+        {
+          "id": 5,
+          "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK III",
+          "weeks": 26,
+          "workingDays": 130,
+          "isBasic": true,
+          "location": null
+        },
+        {
+          "id": 6,
+          "name": "Staż kierunkowy w zakresie zaburzeń nerwicowych i psychoterapii",
+          "weeks": 12,
+          "workingDays": 60,
+          "isBasic": false,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – oddział (lub poradnia lub oddział dzienny) nerwic"
+        },
+        {
+          "id": 7,
+          "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK IV",
+          "weeks": 32,
+          "workingDays": 160,
+          "isBasic": true,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych lub centrum zdrowia psychicznego"
+        },
+        {
+          "id": 8,
+          "name": "Staż kierunkowy w zakresie leczenia uzależnień",
+          "weeks": 8,
+          "workingDays": 40,
+          "isBasic": false,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – ośrodek (oddział) leczenia uzależnień"
+        },
+        {
+          "id": 9,
+          "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK V",
+          "weeks": 34,
+          "workingDays": 170,
+          "isBasic": true,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych lub centrum zdrowia psychicznego"
+        },
+        {
+          "id": 10,
+          "name": "Staż podstawowy w zakresie psychiatrii (cd.) - ROK V cd.",
+          "weeks": 42,
+          "workingDays": 210,
+          "isBasic": true,
+          "location": "jednostka, która uzyskała akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział psychiatryczny ogólny (kliniczny lub szpitalny) dorosłych lub centrum zdrowia psychicznego"
+        }
+      ],
+      "procedures": [
+        {
+          "id": 1,
+          "name": "oceny za pomocą nie mniej niż 3 różnych standaryzowanych skal klinicznych (np. PANSS, HDRS, MADRS, CGI, MMSE itp.)",
+          "type": "Procedury medyczne",
+          "requiredCountA": 20,
+          "requiredCountB": 0
+        },
+        {
+          "id": 2,
+          "name": "współudział w przygotowaniu i przeprowadzeniu co najmniej 3 zabiegów elektrowstrząsowych",
+          "type": "Procedury medyczne",
+          "requiredCountA": 3,
+          "requiredCountB": 0
+        },
+        {
+          "id": 3,
+          "name": "współudział w przygotowaniu co najmniej 20 opinii w sprawie zasadności przyjęcia bez zgody do szpitala psychiatrycznego",
+          "type": "Procedury medyczne",
+          "requiredCountA": 20,
+          "requiredCountB": 0
+        },
+        {
+          "id": 4,
+          "name": "współudział w przygotowaniu 15 opinii sądowo-psychiatrycznych w sprawach karnych",
+          "type": "Procedury medyczne",
+          "requiredCountA": 15,
+          "requiredCountB": 0
+        },
+        {
+          "id": 5,
+          "name": "współudział w przygotowaniu 3 opinii sądowo-psychiatrycznych w sprawach cywilnych",
+          "type": "Procedury medyczne",
+          "requiredCountA": 3,
+          "requiredCountB": 0
+        },
+        {
+          "id": 6,
+          "name": "współudział w co najmniej 20 konsultacjach psychiatrycznych dla innych lekarzy",
+          "type": "Procedury medyczne",
+          "requiredCountA": 20,
+          "requiredCountB": 0
+        }
+      ],
+      "selfEducation": {
+        "daysPerYear": 6,
+        "totalDays": 30,
+        "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+      },
+      "holidays": {
+        "vacationDays": 130,
+        "nationalHolidays": 65,
+        "examPreparationDays": null
+      },
+      "medicalShifts": {
+        "hoursPerWeek": 10.08,
+        "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
+      },
+      "procedureCodeDescription": {
+        "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
+        "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
+      },
+      "examinationInfo": {
+        "examType": "Państwowy Egzamin Specjalizacyjny",
+        "components": [
+          {
+            "name": "egzamin testowy",
+            "description": "zbiór pytań testowych wielokrotnego wyboru z zakresu wymaganej wiedzy określonej w programie specjalizacji"
+          },
+          {
+            "name": "egzamin ustny",
+            "description": "pytania ustne problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
+          }
+        ]
       }
-    ]
-  }
+    }
+  ],
+    "selfEducation": {
+      "daysPerYear": 6,
+      "totalDays": 30,
+      "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+    },
+    "holidays": {
+      "vacationDays": 130,
+      "nationalHolidays": 65,
+      "examPreparationDays": null
+    },
+    "medicalShifts": {
+      "hoursPerWeek": 10.08,
+      "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
+    },
+    "procedureCodeDescription": {
+      "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
+      "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
+    },
+    "examinationInfo": {
+      "examType": "Państwowy Egzamin Specjalizacyjny",
+      "components": [
+        {
+          "name": "egzamin testowy",
+          "description": "zbiór pytań testowych wielokrotnego wyboru z zakresu wymaganej wiedzy określonej w programie specjalizacji"
+        },
+        {
+          "name": "egzamin ustny",
+          "description": "pytania ustne problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
+        }
+      ]
+    }
 }
