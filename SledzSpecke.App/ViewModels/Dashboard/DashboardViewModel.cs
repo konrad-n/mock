@@ -422,7 +422,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 }
                 else
                 {
-                    this.ShiftProgress = 0.3; // Wartość domyślna
+                    this.ShiftProgress = 0; // Wartość domyślna
                 }
 
                 // Pozostałe liczniki
