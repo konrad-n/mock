@@ -2,13 +2,13 @@
   "name": "Moduł specjalistyczny w zakresie kardiologii",
   "code": "cardiology_specialistic",
   "moduleType": "Specialistic",
-  "smkVersion": "New",
+  "version": "CMKP 2023",
   "duration": {
     "years": 3,
     "months": 0,
     "days": 0
   },
-  "workingDays": 783,
+  "workingDays": 660,
   "courses": [
     {
       "id": 1,
@@ -143,77 +143,88 @@
       "name": "Staż podstawowy w zakresie kardiologii",
       "weeks": 64,
       "workingDays": 320,
-      "isBasic": true
+      "isBasic": true,
+      "location": "oddział kardiologii posiadający akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii oraz poradnia będąca w strukturze oddziału/jednostki"
     },
     {
       "id": 2,
       "name": "Staż kierunkowy w zakresie intensywnej terapii kardiologicznej",
       "weeks": 16,
       "workingDays": 80,
-      "isBasic": false
+      "isBasic": false,
+      "location": "oddział intensywnej terapii kardiologicznej lub oddział kardiologii z łóżkami intensywnego nadzoru kardiologicznego"
     },
     {
       "id": 3,
       "name": "Staż kierunkowy w zakresie elektrofizjologii i elektroterapii",
       "weeks": 8,
       "workingDays": 40,
-      "isBasic": false
+      "isBasic": false,
+      "location": "zakład lub pracownia elektrofizjologii będąca w strukturze oddziału/szpitala posiadającego akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii"
     },
     {
       "id": 4,
       "name": "Staż kierunkowy w zakresie kardiologii interwencyjnej",
       "weeks": 8,
       "workingDays": 40,
-      "isBasic": false
+      "isBasic": false,
+      "location": "zakład lub pracownia kardiologii interwencyjnej będąca w strukturze oddziału/szpitala posiadającego akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii"
     },
     {
       "id": 5,
       "name": "Staż kierunkowy w zakresie echokardiografii",
       "weeks": 4,
       "workingDays": 20,
-      "isBasic": false
+      "isBasic": false,
+      "location": "zakład lub pracownia echokardiograficzna będąca w strukturze oddziału/szpitala posiadającego akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii"
     },
     {
       "id": 6,
       "name": "Staż kierunkowy w zakresie kardiologii dziecięcej",
       "weeks": 4,
       "workingDays": 20,
-      "isBasic": false
+      "isBasic": false,
+      "location": "oddział kardiologii dziecięcej posiadający akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii dziecięcej"
     },
     {
       "id": 7,
-      "name": "Staż kierunkowy w zakresie nabytych wrodzonych wad serca u dorosłych",
+      "name": "Staż kierunkowy w zakresie nabytych i wrodzonych wad serca u dorosłych",
       "weeks": 4,
       "workingDays": 20,
-      "isBasic": false
+      "isBasic": false,
+      "location": "oddział kardiologii zajmujący się diagnostyką i leczeniem wad serca posiadający akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii"
     },
     {
       "id": 8,
       "name": "Staż kierunkowy w zakresie kardiochirurgii",
       "weeks": 4,
       "workingDays": 20,
-      "isBasic": false
+      "isBasic": false,
+      "location": "oddział kardiochirurgii posiadający akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiochirurgii"
     },
     {
       "id": 9,
       "name": "Staż kierunkowy w zakresie nieinwazyjnej diagnostyki elektrokardiograficznej",
       "weeks": 6,
       "workingDays": 30,
-      "isBasic": false
+      "isBasic": false,
+      "location": "oddział kardiologii posiadający akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie kardiologii"
     },
     {
       "id": 10,
       "name": "Staż kierunkowy w zakresie radiologii i diagnostyki obrazowej",
       "weeks": 4,
       "workingDays": 20,
-      "isBasic": false
+      "isBasic": false,
+      "location": "jednostka posiadająca akredytację do prowadzenia specjalizacji w dziedzinie radiologii i diagnostyki obrazowej"
     },
     {
       "id": 11,
       "name": "Staż kierunkowy w zakresie angiologii",
       "weeks": 2,
       "workingDays": 10,
-      "isBasic": false
+      "isBasic": false,
+      "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie angiologii lub chirurgii naczyniowej"
     }
   ],
   "procedures": [
@@ -222,105 +233,168 @@
       "name": "badanie elektrokardiograficzne",
       "type": "Staż podstawowy",
       "requiredCountA": 200,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 1
     },
     {
       "id": 2,
-      "name": "24-godzinne, ambulatoryjne monitorowanie EKG",
+      "name": "24-godzinne ambulatoryjne monitorowanie EKG",
       "type": "Staż podstawowy",
       "requiredCountA": 50,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 1
     },
     {
       "id": 3,
-      "name": "24-godzinne, ambulatoryjne monitorowanie ciśnienia tętniczego",
+      "name": "24-godzinne ambulatoryjne monitorowanie ciśnienia tętniczego",
       "type": "Staż podstawowy",
       "requiredCountA": 50,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 1
     },
     {
       "id": 4,
       "name": "próba wysiłkowa elektrokardiograficzna",
       "type": "Staż podstawowy",
       "requiredCountA": 50,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 1
     },
     {
       "id": 5,
       "name": "badanie echokardiograficzne przezklatkowe",
       "type": "Staż podstawowy",
       "requiredCountA": 200,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 1
     },
     {
       "id": 6,
       "name": "badanie echokardiograficzne przezprzełykowe",
       "type": "Staż podstawowy",
       "requiredCountA": 0,
-      "requiredCountB": 50
+      "requiredCountB": 50,
+      "internshipId": 5
     },
     {
       "id": 7,
       "name": "badanie echokardiograficzne obciążeniowe",
       "type": "Staż podstawowy",
       "requiredCountA": 0,
-      "requiredCountB": 50
+      "requiredCountB": 50,
+      "internshipId": 5
     },
     {
       "id": 8,
-      "name": "nakłucie opłucnej, otrzewnej",
+      "name": "nakłucie osierdzia, opłucnej, otrzewnej",
       "type": "Staż podstawowy",
       "requiredCountA": 25,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 1
     },
     {
       "id": 9,
       "name": "wszczepienie stymulatora",
       "type": "Staże kierunkowe",
       "requiredCountA": 0,
-      "requiredCountB": 5
+      "requiredCountB": 5,
+      "internshipId": 3
     },
     {
       "id": 10,
       "name": "wszczepienie kardiowertera-defibrylatora",
       "type": "Staże kierunkowe",
       "requiredCountA": 0,
-      "requiredCountB": 5
+      "requiredCountB": 5,
+      "internshipId": 3
     },
     {
       "id": 11,
       "name": "kontrola stymulatora",
       "type": "Staże kierunkowe",
       "requiredCountA": 5,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 3
     },
     {
       "id": 12,
       "name": "kontrola kardiowertera-defibrylatora",
       "type": "Staże kierunkowe",
       "requiredCountA": 5,
-      "requiredCountB": 0
+      "requiredCountB": 0,
+      "internshipId": 3
     },
     {
       "id": 13,
       "name": "badanie elektrofizjologiczne",
       "type": "Staże kierunkowe",
       "requiredCountA": 0,
-      "requiredCountB": 5
+      "requiredCountB": 5,
+      "internshipId": 3
     },
     {
       "id": 14,
       "name": "ablacja podłoża zaburzeń rytmu",
       "type": "Staże kierunkowe",
       "requiredCountA": 0,
-      "requiredCountB": 5
+      "requiredCountB": 5,
+      "internshipId": 3
     },
     {
       "id": 15,
       "name": "koronarografia",
       "type": "Staże kierunkowe",
       "requiredCountA": 0,
-      "requiredCountB": 50
+      "requiredCountB": 50,
+      "internshipId": 4
+    },
+    {
+      "id": 16,
+      "name": "wprowadzenie elektrody endokawitarnej do stymulacji zewnętrznej",
+      "type": "Wykonanie zabiegów ratujących życie",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 2
+    },
+    {
+      "id": 17,
+      "name": "wykonanie centralnego wkłucia żylnego",
+      "type": "Wykonanie zabiegów ratujących życie",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 2
+    },
+    {
+      "id": 18,
+      "name": "wykonanie wkłucia do tętnicy obwodowej",
+      "type": "Wykonanie zabiegów ratujących życie",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 2
+    },
+    {
+      "id": 19,
+      "name": "intubacja dotchawicza",
+      "type": "Wykonanie zabiegów ratujących życie",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 2
+    },
+    {
+      "id": 20,
+      "name": "prowadzenie resuscytacji, różnych metod stymulacji serca, kardiowersji i defibrylacji serca",
+      "type": "Wykonanie zabiegów ratujących życie",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 2
+    },
+    {
+      "id": 21,
+      "name": "nakłucie osierdzia, opłucnej, otrzewnej",
+      "type": "Wykonanie zabiegów ratujących życie",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "internshipId": 2
     }
   ],
   "selfEducation": {
@@ -336,5 +410,22 @@
   "medicalShifts": {
     "hoursPerWeek": 10.08,
     "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  },
+  "procedureCodeDescription": {
+    "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
+    "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
+  },
+  "examinationInfo": {
+    "examType": "Państwowy Egzamin Specjalizacyjny",
+    "components": [
+      {
+        "name": "egzamin testowy",
+        "description": "zbiór pytań z zakresu wymaganej wiedzy określonej w programie specjalizacji, zawierających pięć wariantów odpowiedzi, z których tylko jeden jest prawidłowy"
+      },
+      {
+        "name": "egzamin ustny",
+        "description": "pytania problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji oraz ocenę trzech elektrokardiogramów, dwóch koronarografii, dwóch badań obrazowych (w tym co najmniej jedno badanie echokardiograficzne)"
+      }
+    ]
   }
 }
