@@ -547,5 +547,10 @@ namespace SledzSpecke.Tests.TestUtilities
                 return await this.database.InsertAsync(program);
             }
         }
+
+        public Task<List<User>> GetAllUsersAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -165,5 +165,10 @@ namespace SledzSpecke.Tests.TestUtilities
         public Task<int> UpdateModuleAsync(Module module) => throw new NotImplementedException();
 
         public Task<int> UpdateSpecializationAsync(Specialization specialization) => throw new NotImplementedException();
+
+        public Task<List<User>> GetAllUsersAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
