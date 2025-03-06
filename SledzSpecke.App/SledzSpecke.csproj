@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net9.0-android35.0</TargetFrameworks>
+    <!-- <TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net9.0-android35.0</TargetFrameworks> -->
+    <TargetFrameworks>net9.0-android35.0;net9.0-windows10.0.19041.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
@@ -33,7 +34,39 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android35.0'">
     <RuntimeIdentifiers>android-arm64;android-arm;android-x64;android-x86</RuntimeIdentifiers>
   </PropertyGroup>
-  
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android35.0|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
+    <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="559,559" />
     <MauiSplashScreen Include="Resources\AppIcon\appicon.png" Color="#0d759c" BaseSize="559,559" />
@@ -79,7 +112,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="EPPlus" Version="7.6.0" />
+    <PackageReference Include="EPPlus" Version="7.6.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.40" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.2" />
@@ -88,17 +121,13 @@
     <PackageReference Include="Plugin.LocalNotification" Version="11.1.4" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="ViewModels\Specialization\InitializeSpecializationPage.xaml">
+    <MauiXaml Update="Views\Specializations\InitializeSpecializationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\Absences\AbsenceDetailsPage.xaml">
@@ -206,4 +235,3 @@
   </ItemGroup>
 
 </Project>
-
