@@ -370,21 +370,38 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 {
                     System.Diagnostics.Debug.WriteLine("Rejestracja zakończona sukcesem!");
 
-                    await this.dialogService.DisplayAlertAsync(
-                        "Sukces",
-                        "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
-                        "OK");
+                    try
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Sukces",
+                            "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
+                            "OK");
+                    }
+                    catch (Exception alertEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd podczas wyświetlania alertu: {alertEx.Message}");
+                        // Kontynuuj mimo błędu alertu
+                    }
 
+                    // Bezpieczne przejście do ekranu logowania
                     await this.OnGoToLoginAsync();
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Rejestracja nie powiodła się");
 
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się zarejestrować. Sprawdź podane dane i spróbuj ponownie.",
-                        "OK");
+                    try
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Błąd",
+                            "Nie udało się zarejestrować. Sprawdź podane dane i spróbuj ponownie.",
+                            "OK");
+                    }
+                    catch (Exception alertEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd podczas wyświetlania alertu: {alertEx.Message}");
+                        // Kontynuuj mimo błędu alertu
+                    }
                 }
             }
             catch (Exception ex)
@@ -392,10 +409,17 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas rejestracji: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
 
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    $"Wystąpił błąd podczas rejestracji: {ex.Message}",
-                    "OK");
+                try
+                {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        $"Wystąpił błąd podczas rejestracji: {ex.Message}",
+                        "OK");
+                }
+                catch
+                {
+                    // Ignoruj błędy alertów w przypadku wyjątku
+                }
             }
             finally
             {
@@ -405,10 +429,36 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
         private async Task OnGoToLoginAsync()
         {
-            // Powrót do strony logowania
-            if (Application.Current.MainPage is NavigationPage navigationPage)
+            try
             {
-                await navigationPage.PopAsync();
+                System.Diagnostics.Debug.WriteLine("Przechodzę do ekranu logowania...");
+
+                // Sprawdź, czy MainPage to NavigationPage
+                if (Application.Current?.MainPage is NavigationPage navigationPage)
+                {
+                    await navigationPage.PopAsync();
+                    System.Diagnostics.Debug.WriteLine("Powrót do poprzedniej strony przez PopAsync");
+                }
+                else
+                {
+                    // Jeśli nie jesteśmy w NavigationPage, spróbuj ustawić MainPage
+                    var loginViewModel = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.ViewModels.Authentication.LoginViewModel>();
+                    if (loginViewModel != null)
+                    {
+                        var loginPage = new SledzSpecke.App.Views.Authentication.LoginPage(loginViewModel);
+                        Application.Current.MainPage = new NavigationPage(loginPage);
+                        System.Diagnostics.Debug.WriteLine("Ustawiono nową stronę logowania");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Nie udało się uzyskać LoginViewModel z DI");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas przechodzenia do ekranu logowania: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
     }
