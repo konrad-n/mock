@@ -210,7 +210,7 @@
       "holidays": {
         "vacationDays": 130,
         "nationalHolidays": 65,
-        "examPreparationDays": null
+        "examPreparationDays": 0
       },
       "medicalShifts": {
         "hoursPerWeek": 10.08,
@@ -235,35 +235,35 @@
       }
     }
   ],
-    "selfEducation": {
-      "daysPerYear": 6,
-      "totalDays": 30,
-      "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
-    },
-    "holidays": {
-      "vacationDays": 130,
-      "nationalHolidays": 65,
-      "examPreparationDays": null
-    },
-    "medicalShifts": {
-      "hoursPerWeek": 10.08,
-      "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
-    },
-    "procedureCodeDescription": {
-      "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
-      "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
-    },
-    "examinationInfo": {
-      "examType": "Państwowy Egzamin Specjalizacyjny",
-      "components": [
-        {
-          "name": "egzamin testowy",
-          "description": "zbiór pytań testowych wielokrotnego wyboru z zakresu wymaganej wiedzy określonej w programie specjalizacji"
-        },
-        {
-          "name": "egzamin ustny",
-          "description": "pytania ustne problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
-        }
-      ]
-    }
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 30,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 130,
+    "nationalHolidays": 65,
+    "examPreparationDays": null
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
+  },
+  "procedureCodeDescription": {
+    "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
+    "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
+  },
+  "examinationInfo": {
+    "examType": "Państwowy Egzamin Specjalizacyjny",
+    "components": [
+      {
+        "name": "egzamin testowy",
+        "description": "zbiór pytań testowych wielokrotnego wyboru z zakresu wymaganej wiedzy określonej w programie specjalizacji"
+      },
+      {
+        "name": "egzamin ustny",
+        "description": "pytania ustne problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
+      }
+    ]
+  }
 }
