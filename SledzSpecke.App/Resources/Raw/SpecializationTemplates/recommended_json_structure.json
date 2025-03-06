@@ -1,0 +1,104 @@
+{
+  // Main Specialization JSON
+  "specialization": {
+    "name": "String - Name of specialization",
+    "code": "String - Unique code identifier",
+    "version": "String - Version identifier (e.g., 'CMKP 2023')",
+    "hasModules": "Boolean - Whether the program has modular structure",
+    "totalDuration": {
+      "years": "Number - Years",
+      "months": "Number - Months",
+      "days": "Number - Days"
+    },
+    "totalWorkingDays": "Number - Total working days",
+    "basicInfo": {
+      "targetGroup": "String - Target audience description",
+      "qualificationProcedure": "String - Qualification procedure information"
+    },
+    "modules": [
+      {
+        "moduleId": "Number - Unique identifier",
+        "type": "String - Module type (Basic/Specialistic)",
+        "name": "String - Module name",
+        "code": "String - Module code",
+        "duration": {
+          "years": "Number - Years",
+          "months": "Number - Months",
+          "days": "Number - Days"
+        },
+        "workingDays": "Number - Working days in this module"
+      }
+    ],
+    "selfEducation": {
+      "daysPerYear": "Number - Days per year",
+      "totalDays": "Number - Total days",
+      "description": "String - Description of self-education requirements"
+    },
+    "holidays": {
+      "vacationDays": "Number - Vacation days",
+      "nationalHolidays": "Number - National holiday days",
+      "examPreparationDays": "Number - Exam preparation days"
+    },
+    "medicalShifts": {
+      "hoursPerWeek": "Number - Hours per week",
+      "description": "String - Description of medical shift requirements"
+    }
+  },
+
+  // Module JSON (either Basic or Specialistic)
+  "module": {
+    "name": "String - Module name",
+    "code": "String - Module code",
+    "moduleType": "String - Module type (Basic/Specialistic)",
+    "version": "String - Version identifier",
+    "duration": {
+      "years": "Number - Years",
+      "months": "Number - Months",
+      "days": "Number - Days"
+    },
+    "workingDays": "Number - Working days",
+    "courses": [
+      {
+        "id": "Number - Course ID",
+        "name": "String - Course name",
+        "weeks": "Number - Duration in weeks",
+        "workingDays": "Number - Working days",
+        "required": "Boolean - Is required"
+      }
+    ],
+    "internships": [
+      {
+        "id": "Number - Internship ID",
+        "name": "String - Internship name",
+        "weeks": "Number - Duration in weeks",
+        "workingDays": "Number - Working days",
+        "isBasic": "Boolean - Whether it's a basic internship",
+        "location": "String - Location requirements (if any)"
+      }
+    ],
+    "procedures": [
+      {
+        "id": "Number - Procedure ID",
+        "name": "String - Procedure name",
+        "type": "String - Type or category",
+        "requiredCountA": "Number - Required count for code A (perform independently)",
+        "requiredCountB": "Number - Required count for code B (assist)",
+        "internshipId": "Number - Associated internship (optional)"
+      }
+    ],
+    "selfEducation": {
+      "daysPerYear": "Number - Days per year",
+      "totalDays": "Number - Total days",
+      "description": "String - Description"
+    },
+    "holidays": {
+      "vacationDays": "Number - Vacation days",
+      "nationalHolidays": "Number - National holiday days",
+      "examPreparationDays": "Number - Exam preparation days (if applicable)"
+    },
+    "medicalShifts": {
+      "hoursPerWeek": "Number - Hours per week",
+      "description": "String - Description of medical shift requirements"
+    }
+  }
+}

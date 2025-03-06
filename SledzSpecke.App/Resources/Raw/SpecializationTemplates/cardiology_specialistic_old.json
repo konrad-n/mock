@@ -1,0 +1,475 @@
+{
+  "name": "Moduł specjalistyczny w zakresie kardiologii",
+  "code": "cardiology_specialistic",
+  "moduleType": "Specialistic",
+  "smkVersion": "Old",
+  "duration": {
+    "years": 3,
+    "months": 0,
+    "days": 0
+  },
+  "workingDays": 783,
+  "courses": [
+    {
+      "id": 1,
+      "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie kardiologii\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 2,
+      "name": "Kurs: \"Patofizjologia chorób sercowo-naczyniowych\"",
+      "weeks": 1.0,
+      "workingDays": 5,
+      "required": true
+    },
+    {
+      "id": 3,
+      "name": "Kurs: \"Farmakoterapia chorób sercowo-naczyniowych\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 4,
+      "name": "Kurs: \"Nieinwazyjna diagnostyka elektrokardiograficzna\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 5,
+      "name": "Kurs: \"Diagnostyka obrazowa – echokardiografia\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 6,
+      "name": "Kurs: \"Diagnostyka obrazowa – nowe techniki obrazowania\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 7,
+      "name": "Kurs: \"Intensywna terapia kardiologiczna\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 8,
+      "name": "Kurs: \"Elektrofizjologia i elektroterapia\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 9,
+      "name": "Kurs: \"Diagnostyka inwazyjna i leczenie interwencyjne\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 10,
+      "name": "Kurs: \"Wrodzone i nabyte wady serca\"",
+      "weeks": 0.8,
+      "workingDays": 4,
+      "required": true
+    },
+    {
+      "id": 11,
+      "name": "Kurs: \"Onkologia w kardiologii\"",
+      "weeks": 0.2,
+      "workingDays": 1,
+      "required": true
+    },
+    {
+      "id": 12,
+      "name": "Kurs: \"Przewlekły zespół wieńcowy\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 13,
+      "name": "Kurs: \"Nadciśnienie tętnicze\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 14,
+      "name": "Kurs: \"Nadciśnienie płucne i niewydolność prawej komory serca\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 15,
+      "name": "Kurs: \"Niewydolność serca\"",
+      "weeks": 0.6,
+      "workingDays": 3,
+      "required": true
+    },
+    {
+      "id": 16,
+      "name": "Kurs: \"Diagnostyka i leczenie chorób naczyń obwodowych\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 17,
+      "name": "Kurs: \"Choroby rzadkie w kardiologii\"",
+      "weeks": 0.4,
+      "workingDays": 2,
+      "required": true
+    },
+    {
+      "id": 18,
+      "name": "Kurs atestacyjny (podsumowujący): \"Kardiologia\"",
+      "weeks": 1.0,
+      "workingDays": 5,
+      "required": true
+    }
+  ],
+  "internships": [
+    {
+      "id": 1,
+      "name": "Staż kierunkowy w zakresie intensywnej terapii kardiologicznej",
+      "weeks": 22,
+      "workingDays": 110,
+      "isBasic": false
+    },
+    {
+      "id": 2,
+      "name": "Staż kierunkowy w zakresie elektrofizjologii i elektroterapii",
+      "weeks": 18,
+      "workingDays": 90,
+      "isBasic": false
+    },
+    {
+      "id": 3,
+      "name": "Staż kierunkowy w zakresie kardiologii interwencyjnej",
+      "weeks": 22,
+      "workingDays": 110,
+      "isBasic": false
+    },
+    {
+      "id": 4,
+      "name": "Staż kierunkowy w zakresie echokardiografii",
+      "weeks": 22,
+      "workingDays": 110,
+      "isBasic": false
+    },
+    {
+      "id": 5,
+      "name": "Staż kierunkowy w zakresie kardiologii dziecięcej",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 6,
+      "name": "Staż kierunkowy w zakresie nabytych i wrodzonych wad serca u dorosłych",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false
+    },
+    {
+      "id": 7,
+      "name": "Staż kierunkowy w zakresie kardiochirurgii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 8,
+      "name": "Staż kierunkowy w zakresie nieinwazyjnej diagnostyki elektrokardiograficznej",
+      "weeks": 8,
+      "workingDays": 40,
+      "isBasic": false
+    },
+    {
+      "id": 9,
+      "name": "Staż kierunkowy w zakresie radiologii i diagnostyki obrazowej",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 10,
+      "name": "Staż kierunkowy w zakresie angiologii",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    },
+    {
+      "id": 11,
+      "name": "Staż kierunkowy w zakresie kardiologii ambulatoryjnej",
+      "weeks": 4,
+      "workingDays": 20,
+      "isBasic": false
+    }
+  ],
+  "procedures": [
+    {
+      "id": 1,
+      "name": "badanie elektrokardiograficzne",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 200,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie, interpretacja"
+    },
+    {
+      "id": 2,
+      "name": "24-godzinne monitorowanie EKG metodą Holtera",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 50,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie, interpretacja"
+    },
+    {
+      "id": 3,
+      "name": "24-godzinne monitorowanie ciśnienia tętniczego",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 50,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie, interpretacja"
+    },
+    {
+      "id": 4,
+      "name": "próby wysiłkowe elektrokardiograficzne",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 50,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie, interpretacja"
+    },
+    {
+      "id": 5,
+      "name": "badanie echokardiograficzne przezklatkowe",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 200,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie, interpretacja"
+    },
+    {
+      "id": 6,
+      "name": "badanie echokardiograficzne przezprzełykowe",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 50,
+      "competencyLevel": "Asystowanie, interpretacja"
+    },
+    {
+      "id": 7,
+      "name": "badanie echokardiograficzne obciążeniowe",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 50,
+      "competencyLevel": "Asystowanie, interpretacja"
+    },
+    {
+      "id": 8,
+      "name": "koronarografia",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 50,
+      "competencyLevel": "Asystowanie, interpretacja"
+    },
+    {
+      "id": 9,
+      "name": "angioplastyka wieńcowa",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 10,
+      "name": "kontrola stymulatora",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie, interpretacja"
+    },
+    {
+      "id": 11,
+      "name": "kontrola i programowanie kardiowertera-defibrylatora",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 12,
+      "name": "wszczepienie stymulatorów serca",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 5,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 13,
+      "name": "wszczepienie kardiowerterów-defibrylatorów/urządzeń resynchronizujących",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 5,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 14,
+      "name": "cewnikowanie jam serca",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 15,
+      "name": "kontrapulsacja wewnątrzaortalna i inne metody mechanicznego wspomagania krążenia",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 16,
+      "name": "inwazyjne badania elektrofizjologiczne",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 5,
+      "competencyLevel": "Asystowanie, interpretacja"
+    },
+    {
+      "id": 17,
+      "name": "ablacja podłoża zaburzeń rytmu serca",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 5,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 18,
+      "name": "badania z zakresu kardiologii nuklearnej, MRI, CT",
+      "type": "Wykonywanie badań diagnostycznych",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie, interpretacja"
+    },
+    {
+      "id": 19,
+      "name": "wprowadzenie elektrody endokawitarnej do stymulacji zewnętrznej",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie"
+    },
+    {
+      "id": 20,
+      "name": "wykonanie centralnego wkłucia żylnego",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie"
+    },
+    {
+      "id": 21,
+      "name": "wykonanie wkłucia do tętnicy obwodowej",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie"
+    },
+    {
+      "id": 22,
+      "name": "intubacja dotchawicza",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie"
+    },
+    {
+      "id": 23,
+      "name": "prowadzenie resuscytacji, różnych metod stymulacji serca, kardiowersji i defibrylacji serca",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 5,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie"
+    },
+    {
+      "id": 24,
+      "name": "nakłucie osierdzia, opłucnej, otrzewnej",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 25,
+      "requiredCountB": 0,
+      "competencyLevel": "Wykonanie"
+    },
+    {
+      "id": 25,
+      "name": "echokardiografia przezklatkowa w stanach nagłych",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie, interpretacja"
+    },
+    {
+      "id": 26,
+      "name": "leczenie z użyciem respiratora",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 27,
+      "name": "hipotermia terapeutyczna",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 28,
+      "name": "kontrapulsacja wewnątrzaortalna i inne metody mechanicznego wspomagania pracy serca",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 29,
+      "name": "monitorowanie hemodynamiczne",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    },
+    {
+      "id": 30,
+      "name": "ciągła pozaustrojowa terapia nerkozastępcza",
+      "type": "Wykonanie zabiegów ratujących życie i niezbędnych w intensywnej terapii kardiologicznej",
+      "requiredCountA": 0,
+      "requiredCountB": 0,
+      "competencyLevel": "Asystowanie"
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 18,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 78,
+    "nationalHolidays": 39,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  }
+}
