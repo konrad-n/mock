@@ -3,64 +3,56 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.Export.ExportPreviewPage"
              xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Export"
-             xmlns:models="clr-namespace:SledzSpecke.App.Models"
              x:DataType="vm:ExportPreviewViewModel"
              Title="{Binding Title}">
     <Grid RowDefinitions="Auto, Auto, *, Auto">
         <!-- Nagłówek -->
-        <Frame Grid.Row="0"
-                Style="{StaticResource CardFrame}"
-                Margin="10">
+        <Frame Grid.Row="0" Style="{StaticResource CardFrame}" Margin="10">
             <VerticalStackLayout Spacing="5">
-                <Label Text="Podgląd danych do eksportu"
-                        FontSize="18"
-                        FontAttributes="Bold"
-                        HorizontalOptions="Center"/>
-                <Label Text="{Binding PreviewDescription}"
-                       HorizontalOptions="Center"
-                       TextColor="{StaticResource TextMutedColor}"/>
-                <Label Text="{Binding SmkVersionInfo}"
-                       HorizontalOptions="Center"
-                       TextColor="{StaticResource PrimaryColor}"
+                <Label Text="Podgląd danych do eksportu" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" />
+                <Label Text="{Binding PreviewDescription}" 
+                       HorizontalOptions="Center" 
+                       TextColor="{StaticResource TextMutedColor}" />
+                <Label Text="{Binding SmkVersionInfo}" 
+                       HorizontalOptions="Center" 
+                       TextColor="{StaticResource PrimaryColor}" 
                        FontAttributes="Italic"/>
-                <Label Text="Przejrzyj dane przed eksportem, aby upewnić się, że są zgodne z formatem SMK"
-                       HorizontalOptions="Center"
-                       TextColor="{StaticResource TextMutedColor}"
+                <Label Text="Przejrzyj dane przed eksportem, aby upewnić się, że są zgodne z formatem SMK" 
+                       HorizontalOptions="Center" 
+                       TextColor="{StaticResource TextMutedColor}" 
                        FontSize="12"/>
             </VerticalStackLayout>
         </Frame>
 
         <!-- Przyciski zakładek -->
-        <Grid Grid.Row="1"
-                ColumnDefinitions="*, *, *, *"
-                Padding="5">
-            <Button Grid.Column="0"
-                    Text="Kursy"
-                    Command="{Binding SelectTabCommand}"
+        <Grid Grid.Row="1" ColumnDefinitions="*, *, *, *" Padding="5">
+            <Button Grid.Column="0" 
+                    Text="Kursy" 
+                    Command="{Binding SelectTabCommand}" 
                     CommandParameter="Kursy"
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Kursy'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Kursy'}"
                     IsVisible="{Binding ShowCourses}"/>
 
-            <Button Grid.Column="1"
-                    Text="Dyżury"
-                    Command="{Binding SelectTabCommand}"
+            <Button Grid.Column="1" 
+                    Text="Dyżury" 
+                    Command="{Binding SelectTabCommand}" 
                     CommandParameter="Dyżury"
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Dyżury'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Dyżury'}"
                     IsVisible="{Binding ShowShifts}"/>
 
-            <Button Grid.Column="2"
-                    Text="Procedury"
-                    Command="{Binding SelectTabCommand}"
+            <Button Grid.Column="2" 
+                    Text="Procedury" 
+                    Command="{Binding SelectTabCommand}" 
                     CommandParameter="Procedury"
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Procedury'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Procedury'}"
                     IsVisible="{Binding ShowProcedures}"/>
 
-            <Button Grid.Column="3"
-                    Text="Staże"
-                    Command="{Binding SelectTabCommand}"
+            <Button Grid.Column="3" 
+                    Text="Staże" 
+                    Command="{Binding SelectTabCommand}" 
                     CommandParameter="Staże"
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Staże'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Staże'}"
@@ -73,52 +65,27 @@
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Kursy'}"
                   RowDefinitions="Auto, *">
                 <!-- Nagłówki kolumn -->
-                <Grid Grid.Row="0"
-                        ColumnDefinitions="4*, 3*, 2*, 2*"
-                        BackgroundColor="{StaticResource Primary}"
-                        Padding="10,5">
-                    <Label Grid.Column="0"
-                            Text="Nazwa kursu"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="1"
-                            Text="Instytucja"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="2"
-                            Text="Data"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="3"
-                            Text="Status"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
+                <Grid Grid.Row="0" ColumnDefinitions="4*, 3*, 2*, 2*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
+                    <Label Grid.Column="0" Text="Nazwa kursu" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="1" Text="Instytucja" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="2" Text="Data" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="3" Text="Status" TextColor="White" FontAttributes="Bold" />
                 </Grid>
 
                 <!-- Lista kursów -->
-                <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding CoursesPreviews}">
+                <CollectionView Grid.Row="1" ItemsSource="{Binding CoursesPreviews}">
                     <CollectionView.EmptyView>
-                        <VerticalStackLayout HorizontalOptions="Center"
-                                VerticalOptions="Center">
-                            <Label Text="Brak kursów do wyświetlenia"/>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="Brak kursów do wyświetlenia" />
                         </VerticalStackLayout>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:CoursePreviewItem">
-                            <Grid ColumnDefinitions="4*, 3*, 2*, 2*"
-                                    Padding="10,15"
-                                    BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
-                                <Label Grid.Column="0"
-                                        Text="{Binding CourseName}"/>
-                                <Label Grid.Column="1"
-                                        Text="{Binding InstitutionName}"
-                                        LineBreakMode="TailTruncation"/>
-                                <Label Grid.Column="2"
-                                        Text="{Binding CompletionDate, StringFormat='{0:dd.MM.yyyy}'}"/>
-                                <Label Grid.Column="3"
-                                        Text="{Binding Status}"
-                                        TextColor="{Binding Status, Converter={StaticResource StatusToColorConverter}}"/>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="4*, 3*, 2*, 2*" Padding="10,15" BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
+                                <Label Grid.Column="0" Text="{Binding CourseName}" />
+                                <Label Grid.Column="1" Text="{Binding InstitutionName}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="2" Text="{Binding CompletionDate, StringFormat='{0:dd.MM.yyyy}'}" />
+                                <Label Grid.Column="3" Text="{Binding Status}" TextColor="{Binding Status, Converter={StaticResource StatusToColorConverter}}" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -129,51 +96,27 @@
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Dyżury'}"
                   RowDefinitions="Auto, *">
                 <!-- Nagłówki kolumn -->
-                <Grid Grid.Row="0"
-                        ColumnDefinitions="2*, 3*, 2*, 2*"
-                        BackgroundColor="{StaticResource Primary}"
-                        Padding="10,5">
-                    <Label Grid.Column="0"
-                            Text="Data"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="1"
-                            Text="Miejsce"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="2"
-                            Text="Godziny"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="3"
-                            Text="Rok"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
+                <Grid Grid.Row="0" ColumnDefinitions="2*, 3*, 2*, 2*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
+                    <Label Grid.Column="0" Text="Data" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="1" Text="Miejsce" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="2" Text="Godziny" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="3" Text="Rok" TextColor="White" FontAttributes="Bold" />
                 </Grid>
 
                 <!-- Lista dyżurów -->
-                <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding ShiftsPreviews}">
+                <CollectionView Grid.Row="1" ItemsSource="{Binding ShiftsPreviews}">
                     <CollectionView.EmptyView>
-                        <VerticalStackLayout HorizontalOptions="Center"
-                                VerticalOptions="Center">
-                            <Label Text="Brak dyżurów do wyświetlenia"/>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="Brak dyżurów do wyświetlenia" />
                         </VerticalStackLayout>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:ShiftPreviewItem">
-                            <Grid ColumnDefinitions="2*, 3*, 2*, 2*"
-                                    Padding="10,15"
-                                    BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
-                                <Label Grid.Column="0"
-                                        Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}"/>
-                                <Label Grid.Column="1"
-                                        Text="{Binding Location}"
-                                        LineBreakMode="TailTruncation"/>
-                                <Label Grid.Column="2"
-                                        Text="{Binding Duration}"/>
-                                <Label Grid.Column="3"
-                                        Text="{Binding Year}"/>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="2*, 3*, 2*, 2*" Padding="10,15" BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
+                                <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" />
+                                <Label Grid.Column="1" Text="{Binding Location}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="2" Text="{Binding Duration}" />
+                                <Label Grid.Column="3" Text="{Binding Year}" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -184,52 +127,27 @@
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Procedury'}"
                   RowDefinitions="Auto, *">
                 <!-- Nagłówki kolumn -->
-                <Grid Grid.Row="0"
-                        ColumnDefinitions="2*, 2*, 2*, 3*"
-                        BackgroundColor="{StaticResource Primary}"
-                        Padding="10,5">
-                    <Label Grid.Column="0"
-                            Text="Data"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="1"
-                            Text="Kod"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="2"
-                            Text="Operator"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="3"
-                            Text="Miejsce"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
+                <Grid Grid.Row="0" ColumnDefinitions="2*, 2*, 2*, 3*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
+                    <Label Grid.Column="0" Text="Data" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="1" Text="Kod" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="2" Text="Operator" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="3" Text="Miejsce" TextColor="White" FontAttributes="Bold" />
                 </Grid>
 
                 <!-- Lista procedur -->
-                <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding ProceduresPreviews}">
+                <CollectionView Grid.Row="1" ItemsSource="{Binding ProceduresPreviews}">
                     <CollectionView.EmptyView>
-                        <VerticalStackLayout HorizontalOptions="Center"
-                                VerticalOptions="Center">
-                            <Label Text="Brak procedur do wyświetlenia"/>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="Brak procedur do wyświetlenia" />
                         </VerticalStackLayout>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:ProcedurePreviewItem">
-                            <Grid ColumnDefinitions="2*, 2*, 2*, 3*"
-                                    Padding="10,15"
-                                    BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
-                                <Label Grid.Column="0"
-                                        Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}"/>
-                                <Label Grid.Column="1"
-                                        Text="{Binding Code}"/>
-                                <Label Grid.Column="2"
-                                        Text="{Binding OperatorCode}"
-                                        TextColor="{Binding OperatorCode, Converter={StaticResource CodeToColorConverter}}"/>
-                                <Label Grid.Column="3"
-                                        Text="{Binding Location}"
-                                        LineBreakMode="TailTruncation"/>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="2*, 2*, 2*, 3*" Padding="10,15" BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
+                                <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" />
+                                <Label Grid.Column="1" Text="{Binding Code}" />
+                                <Label Grid.Column="2" Text="{Binding OperatorCode}" TextColor="{Binding OperatorCode, Converter={StaticResource CodeToColorConverter}}" />
+                                <Label Grid.Column="3" Text="{Binding Location}" LineBreakMode="TailTruncation" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -240,51 +158,27 @@
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Staże'}"
                   RowDefinitions="Auto, *">
                 <!-- Nagłówki kolumn -->
-                <Grid Grid.Row="0"
-                        ColumnDefinitions="4*, 3*, 2*, 2*"
-                        BackgroundColor="{StaticResource Primary}"
-                        Padding="10,5">
-                    <Label Grid.Column="0"
-                            Text="Nazwa stażu"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="1"
-                            Text="Instytucja"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="2"
-                            Text="Początek"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
-                    <Label Grid.Column="3"
-                            Text="Koniec"
-                            TextColor="White"
-                            FontAttributes="Bold"/>
+                <Grid Grid.Row="0" ColumnDefinitions="4*, 3*, 2*, 2*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
+                    <Label Grid.Column="0" Text="Nazwa stażu" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="1" Text="Instytucja" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="2" Text="Początek" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Column="3" Text="Koniec" TextColor="White" FontAttributes="Bold" />
                 </Grid>
 
                 <!-- Lista staży -->
-                <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding InternshipsPreviews}">
+                <CollectionView Grid.Row="1" ItemsSource="{Binding InternshipsPreviews}">
                     <CollectionView.EmptyView>
-                        <VerticalStackLayout HorizontalOptions="Center"
-                                VerticalOptions="Center">
-                            <Label Text="Brak staży do wyświetlenia"/>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="Brak staży do wyświetlenia" />
                         </VerticalStackLayout>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:InternshipPreviewItem">
-                            <Grid ColumnDefinitions="4*, 3*, 2*, 2*"
-                                    Padding="10,15"
-                                    BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
-                                <Label Grid.Column="0"
-                                        Text="{Binding InternshipName}"/>
-                                <Label Grid.Column="1"
-                                        Text="{Binding InstitutionName}"
-                                        LineBreakMode="TailTruncation"/>
-                                <Label Grid.Column="2"
-                                        Text="{Binding StartDate, StringFormat='{0:dd.MM.yyyy}'}"/>
-                                <Label Grid.Column="3"
-                                        Text="{Binding EndDate, StringFormat='{0:dd.MM.yyyy}'}"/>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="4*, 3*, 2*, 2*" Padding="10,15" BackgroundColor="{Binding IsAlternate, Converter={StaticResource BoolToBackgroundColorConverter}}">
+                                <Label Grid.Column="0" Text="{Binding InternshipName}" />
+                                <Label Grid.Column="1" Text="{Binding InstitutionName}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="2" Text="{Binding StartDate, StringFormat='{0:dd.MM.yyyy}'}" />
+                                <Label Grid.Column="3" Text="{Binding EndDate, StringFormat='{0:dd.MM.yyyy}'}" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -293,18 +187,9 @@
         </Grid>
 
         <!-- Przyciski na dole -->
-        <Grid Grid.Row="3"
-                ColumnDefinitions="*, *"
-                Padding="20"
-                ColumnSpacing="20">
-            <Button Grid.Column="0"
-                    Text="Wróć i zmień"
-                    Command="{Binding BackCommand}"
-                    Style="{StaticResource OutlineButton}"/>
-            <Button Grid.Column="1"
-                    Text="Kontynuuj eksport"
-                    Command="{Binding ContinueExportCommand}"
-                    Style="{StaticResource PrimaryButton}"/>
+        <Grid Grid.Row="3" ColumnDefinitions="*, *" Padding="20" ColumnSpacing="20">
+            <Button Grid.Column="0" Text="Wróć i zmień" Command="{Binding BackCommand}" Style="{StaticResource OutlineButton}" />
+            <Button Grid.Column="1" Text="Kontynuuj eksport" Command="{Binding ContinueExportCommand}" Style="{StaticResource PrimaryButton}" />
         </Grid>
     </Grid>
 </ContentPage>

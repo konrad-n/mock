@@ -13,7 +13,7 @@ using SledzSpecke.App.ViewModels.Internships;
 using SledzSpecke.App.ViewModels.MedicalShifts;
 using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.ViewModels.SelfEducation;
-using SledzSpecke.App.ViewModels.Specializations;
+using SledzSpecke.App.ViewModels.Specialization;
 using SledzSpecke.App.Views.Authentication;
 using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;

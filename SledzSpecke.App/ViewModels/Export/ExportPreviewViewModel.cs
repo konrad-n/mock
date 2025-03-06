@@ -18,8 +18,8 @@ namespace SledzSpecke.App.ViewModels.Export
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
 
-        private string previewDescription = string.Empty;
-        private string smkVersionInfo = string.Empty;
+        private string previewDescription;
+        private string smkVersionInfo;
         private bool formatForOldSmk;
         private DateTime startDate;
         private DateTime endDate;
@@ -28,13 +28,13 @@ namespace SledzSpecke.App.ViewModels.Export
         private bool showShifts;
         private bool showProcedures;
         private bool showInternships;
-        private ExportOptions exportOptions = null!;
+        private ExportOptions exportOptions;
         private string selectedTab = "Kursy"; // Domyślna zakładka
 
-        private ObservableCollection<CoursePreviewItem> coursesPreviews = new();
-        private ObservableCollection<ShiftPreviewItem> shiftsPreviews = new();
-        private ObservableCollection<ProcedurePreviewItem> proceduresPreviews = new();
-        private ObservableCollection<InternshipPreviewItem> internshipsPreviews = new();
+        private ObservableCollection<CoursePreviewItem> coursesPreviews;
+        private ObservableCollection<ShiftPreviewItem> shiftsPreviews;
+        private ObservableCollection<ProcedurePreviewItem> proceduresPreviews;
+        private ObservableCollection<InternshipPreviewItem> internshipsPreviews;
 
         public ExportPreviewViewModel(
             IExportService exportService,
@@ -160,8 +160,8 @@ namespace SledzSpecke.App.ViewModels.Export
                 this.PreviewDescription = $"Dane w zakresie dat: {dateRange}";
 
                 // Ustawiamy informację o wersji SMK
-                this.SmkVersionInfo = this.formatForOldSmk ?
-                    "Format danych: Stara wersja SMK" :
+                this.SmkVersionInfo = this.formatForOldSmk ? 
+                    "Format danych: Stara wersja SMK" : 
                     "Format danych: Nowa wersja SMK";
 
                 // Ustawiamy widoczność zakładek
@@ -245,8 +245,8 @@ namespace SledzSpecke.App.ViewModels.Export
                     if (this.formatForOldSmk)
                     {
                         // Status w starym SMK
-                        status = !course.RequiresApproval ?
-                            "Zaliczony elektronicznie" :
+                        status = !course.RequiresApproval ? 
+                            "Zaliczony elektronicznie" : 
                             string.IsNullOrEmpty(course.RecognitionType) ? "Wymaga akceptacji" : "Uznany";
                     }
                     else
@@ -307,8 +307,8 @@ namespace SledzSpecke.App.ViewModels.Export
                 for (int i = 0; i < allShifts.Count; i++)
                 {
                     var shift = allShifts[i];
-                    string duration = shift.Minutes > 0 ?
-                        $"{shift.Hours}:{shift.Minutes:D2}h" :
+                    string duration = shift.Minutes > 0 ? 
+                        $"{shift.Hours}:{shift.Minutes:D2}h" : 
                         $"{shift.Hours}h";
 
                     this.ShiftsPreviews.Add(new ShiftPreviewItem
@@ -363,7 +363,7 @@ namespace SledzSpecke.App.ViewModels.Export
                 for (int i = 0; i < allProcedures.Count; i++)
                 {
                     var procedure = allProcedures[i];
-
+                    
                     string operatorCode = procedure.OperatorCode;
                     if (this.formatForOldSmk)
                     {
@@ -414,7 +414,7 @@ namespace SledzSpecke.App.ViewModels.Export
                 for (int i = 0; i < internships.Count; i++)
                 {
                     var internship = internships[i];
-
+                    
                     this.InternshipsPreviews.Add(new InternshipPreviewItem
                     {
                         InternshipName = internship.InternshipName,
@@ -438,7 +438,7 @@ namespace SledzSpecke.App.ViewModels.Export
             await Shell.Current.GoToAsync("..");
         }
 
-        private void OnSelectTab(string? tabName)
+        private void OnSelectTab(string tabName)
         {
             if (!string.IsNullOrEmpty(tabName))
             {
