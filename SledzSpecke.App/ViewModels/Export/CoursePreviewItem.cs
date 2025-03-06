@@ -5,11 +5,8 @@
     {
         public string CourseName { get; set; }
         public string InstitutionName { get; set; }
-
         public DateTime CompletionDate { get; set; }
-
         public string Status { get; set; }
-
         public bool IsAlternate { get; set; }
     }
 }

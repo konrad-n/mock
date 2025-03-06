@@ -4,7 +4,7 @@ using SQLite;
 namespace SledzSpecke.App.Models
 {
     /// <summary>
-    /// Rozszerzenie modelu MedicalShift o pola związane z zatwierdzaniem.
+    /// Rozszerzenie modelu MedicalShift o pola związane z zatwierdzaniem
     /// </summary>
     public class MedicalShift
     {
@@ -33,24 +33,24 @@ namespace SledzSpecke.App.Models
         // Nowe pola związane z zatwierdzaniem
 
         /// <summary>
-        /// Data zatwierdzenia dyżuru..
+        /// Data zatwierdzenia dyżuru
         /// </summary>
         public DateTime? ApprovalDate { get; set; }
 
         /// <summary>
-        /// Imię i nazwisko osoby zatwierdzającej..
+        /// Imię i nazwisko osoby zatwierdzającej
         /// </summary>
         [MaxLength(100)]
         public string ApproverName { get; set; }
 
         /// <summary>
-        /// Funkcja osoby zatwierdzającej (np. Kierownik Specjalizacji)..
+        /// Funkcja osoby zatwierdzającej (np. Kierownik Specjalizacji)
         /// </summary>
         [MaxLength(100)]
         public string ApproverRole { get; set; }
 
         /// <summary>
-        /// Czy dyżur został zatwierdzony..
+        /// Czy dyżur został zatwierdzony
         /// </summary>
         public bool IsApproved
         {
@@ -61,7 +61,7 @@ namespace SledzSpecke.App.Models
         }
 
         /// <summary>
-        /// Czy dyżur może być usunięty (tylko niezatwierdzone)..
+        /// Czy dyżur może być usunięty (tylko niezatwierdzone)
         /// </summary>
         public bool CanBeDeleted
         {

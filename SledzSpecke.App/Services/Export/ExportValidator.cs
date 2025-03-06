@@ -6,11 +6,11 @@ namespace SledzSpecke.App.Services.Export
     public static class ExportValidator
     {
         /// <summary>
-        /// Weryfikuje poprawność danych dyżurów przed eksportem.
+        /// Weryfikuje poprawność danych dyżurów przed eksportem
         /// </summary>
-        /// <param name="shifts">Lista dyżurów do zweryfikowania.</param>
-        /// <param name="isOldSmk">Czy eksport jest dla starego SMK..</param>
-        /// <returns>Wynik walidacji zawierający informację o błędach.</returns>
+        /// <param name="shifts">Lista dyżurów do zweryfikowania</param>
+        /// <param name="isOldSmk">Czy eksport jest dla starego SMK</param>
+        /// <returns>Wynik walidacji zawierający informację o błędach</returns>
         public static ValidationResult ValidateMedicalShifts(List<MedicalShift> shifts, bool isOldSmk)
         {
             var result = new ValidationResult { IsValid = true };
