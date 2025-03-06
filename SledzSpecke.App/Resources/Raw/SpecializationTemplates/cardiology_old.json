@@ -1,7 +1,7 @@
 {
   "name": "Kardiologia",
   "code": "cardiology",
-  "smkVersion": "Old",
+  "version": "CMKP 2014",
   "hasModules": true,
   "totalDuration": {
     "years": 5,
@@ -18,6 +18,7 @@
       "moduleId": 1,
       "type": "Basic",
       "name": "Moduł podstawowy w zakresie chorób wewnętrznych",
+      "code": "internal_medicine",
       "duration": {
         "years": 2,
         "months": 0,
@@ -29,6 +30,7 @@
       "moduleId": 2,
       "type": "Specialistic",
       "name": "Moduł specjalistyczny w zakresie kardiologii",
+      "code": "cardiology_specialistic",
       "duration": {
         "years": 3,
         "months": 0,
@@ -50,5 +52,18 @@
   "medicalShifts": {
     "hoursPerWeek": 10.08,
     "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym."
+  },
+  "examinationInfo": {
+    "examType": "Państwowy Egzamin Specjalizacyjny",
+    "components": [
+      {
+        "name": "egzamin testowy",
+        "description": "zbiór pytań z zakresu wymaganej wiedzy określonej w programie specjalizacji, zawierających pięć wariantów odpowiedzi, z których tylko jeden jest prawidłowy"
+      },
+      {
+        "name": "egzamin ustny",
+        "description": "pytania problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji oraz ocenę trzech elektrokardiogramów, dwóch koronarografii, dwóch badań obrazowych (w tym co najmniej jedno badanie echokardiograficzne)"
+      }
+    ]
   }
 }
