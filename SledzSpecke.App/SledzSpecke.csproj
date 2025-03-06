@@ -90,6 +90,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiAsset Remove="Resources\Raw\SpecializationTemplates\cardiology_old.json" />
+    <MauiAsset Remove="Resources\Raw\SpecializationTemplates\cardiology_specialistic_old.json" />
+    <MauiAsset Remove="Resources\Raw\SpecializationTemplates\internal_medicine_old.json" />
+    <MauiAsset Remove="Resources\Raw\SpecializationTemplates\psychiatry_old.json" />
+    <MauiAsset Remove="Resources\Raw\SpecializationTemplates\recommended_json_structure.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiImage Remove="Resources\Images\appicon.png" />
   </ItemGroup>
 
@@ -100,12 +108,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\allergology_new.json" />
-    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\allergology_specialistic_new.json" />
-    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\anesthesiology_new.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_old.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_specialistic_old.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\internal_medicine_old.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry_old.json" />
+    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\recommended_json_structure.json" />
+    <EmbeddedResource Include="Resources\Raw\To be redifined\allergology_new.json" />
+    <EmbeddedResource Include="Resources\Raw\To be redifined\allergology_specialistic_new.json" />
+    <EmbeddedResource Include="Resources\Raw\To be redifined\anesthesiology_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_specialistic_new.json" />
-    <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\emergency_medicine_new.json" />
+    <EmbeddedResource Include="Resources\Raw\To be redifined\emergency_medicine_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\internal_medicine_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry_new.json" />
   </ItemGroup>
