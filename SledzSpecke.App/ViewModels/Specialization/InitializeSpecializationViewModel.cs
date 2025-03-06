@@ -213,7 +213,7 @@ namespace SledzSpecke.App.ViewModels.Specialization
 
                 if (specialization == null)
                 {
-                    throw new InvalidOperationException("Nie udało się zapisać specjalizacji.");
+                    throw new Exception("Nie udało się zapisać specjalizacji.");
                 }
 
                 // Jeśli specjalizacja ma moduły, utwórz je

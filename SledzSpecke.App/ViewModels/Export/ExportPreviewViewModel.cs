@@ -174,7 +174,7 @@ namespace SledzSpecke.App.ViewModels.Export
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnej specjalizacji");
+                    throw new Exception("Nie znaleziono aktywnej specjalizacji");
                 }
 
                 // Wczytujemy dane do podglądu

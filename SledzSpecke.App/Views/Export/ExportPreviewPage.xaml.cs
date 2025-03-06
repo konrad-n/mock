@@ -42,7 +42,7 @@ namespace SledzSpecke.App.Views.Export
                 var options = System.Text.Json.JsonSerializer.Deserialize<ExportOptions>(this.serializedOptions);
                 if (options == null)
                 {
-                    throw new InvalidOperationException("Nie udało się zdekodować opcji eksportu");
+                    throw new Exception("Nie udało się zdekodować opcji eksportu");
                 }
 
                 // Inicjalizujemy ViewModel z opcjami

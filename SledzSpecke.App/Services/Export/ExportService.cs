@@ -44,14 +44,14 @@ namespace SledzSpecke.App.Services.Export
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnej specjalizacji");
+                    throw new Exception("Nie znaleziono aktywnej specjalizacji");
                 }
 
                 // Pobierz dane użytkownika
                 var user = await this.specializationService.GetCurrentUserAsync();
                 if (user == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnego użytkownika");
+                    throw new Exception("Nie znaleziono aktywnego użytkownika");
                 }
 
                 // Flaga określająca czy używamy starego formatu SMK
@@ -226,14 +226,14 @@ namespace SledzSpecke.App.Services.Export
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnej specjalizacji");
+                    throw new Exception("Nie znaleziono aktywnej specjalizacji");
                 }
 
                 // Pobierz dane użytkownika
                 var user = await this.specializationService.GetCurrentUserAsync();
                 if (user == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnego użytkownika");
+                    throw new Exception("Nie znaleziono aktywnego użytkownika");
                 }
 
                 // Flaga określająca czy używamy starego formatu SMK

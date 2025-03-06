@@ -325,7 +325,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnej specjalizacji.");
+                    throw new Exception("Nie znaleziono aktywnej specjalizacji.");
                 }
 
                 // Utwórz lub pobierz samokształcenie
@@ -335,7 +335,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                     selfEducation = await this.databaseService.GetSelfEducationAsync(this.SelfEducationId);
                     if (selfEducation == null)
                     {
-                        throw new InvalidOperationException("Nie znaleziono samokształcenia do edycji.");
+                        throw new Exception("Nie znaleziono samokształcenia do edycji.");
                     }
 
                     // Oznacz jako zmodyfikowane, jeśli było wcześniej zsynchronizowane

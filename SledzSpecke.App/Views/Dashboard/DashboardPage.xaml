@@ -1,8 +1,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.Dashboard.DashboardPage"
-             xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Dashboard"
-             x:DataType="vm:DashboardViewModel"
              Title="SledzSpecke">
     <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding RefreshCommand}">
         <ScrollView>

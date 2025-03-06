@@ -1,0 +1,33 @@
+# top-most EditorConfig file
+root = true
+
+# C# files
+[*.cs]
+# Require "this." for instance members
+dotnet_diagnostic.SA1101.severity = error
+
+# Disable SA1200 (Using Directives Must Be Placed Correctly)
+dotnet_diagnostic.SA1200.severity = none
+
+# Disable SA1600 (Elements must be documented)
+dotnet_diagnostic.SA1600.severity = none
+
+# Disable SA1633 (The file header is missing or not located at the top of the file)
+dotnet_diagnostic.SA1633.severity = none
+
+# Disable SA1601 (Document partials)
+dotnet_diagnostic.SA1601.severity = none
+
+# Disable SA1602 (Document enums)
+dotnet_diagnostic.SA1602.severity = none
+
+# Disable SA1615 (Document enums)
+dotnet_diagnostic.SA1615.severity = none
+
+# Disable SA1611 (Document enums)
+dotnet_diagnostic.SA1611.severity = none
+
+dotnet_diagnostic.SA0001.severity = none
+
+# Disable CS8618
+dotnet_diagnostic.CS8618.severity = none

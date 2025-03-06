@@ -754,7 +754,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     procedure = await this.databaseService.GetProcedureAsync(this.ProcedureId);
                     if (procedure == null)
                     {
-                        throw new InvalidOperationException("Nie znaleziono procedury do edycji.");
+                        throw new Exception("Nie znaleziono procedury do edycji.");
                     }
 
                     if (procedure.SyncStatus == SyncStatus.Synced)

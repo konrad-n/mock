@@ -471,7 +471,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    throw new InvalidOperationException("Nie znaleziono aktywnej specjalizacji.");
+                    throw new Exception("Nie znaleziono aktywnej specjalizacji.");
                 }
 
                 // Utwórz lub pobierz staż
@@ -481,7 +481,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                     internship = await this.databaseService.GetInternshipAsync(this.InternshipId);
                     if (internship == null)
                     {
-                        throw new InvalidOperationException("Nie znaleziono stażu do edycji.");
+                        throw new Exception("Nie znaleziono stażu do edycji.");
                     }
 
                     // Oznacz jako zmodyfikowane, jeśli było wcześniej zsynchronizowane
