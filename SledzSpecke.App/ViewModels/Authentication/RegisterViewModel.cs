@@ -6,6 +6,7 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Authentication
@@ -14,6 +15,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
     {
         private readonly IAuthService authService;
         private readonly IDialogService dialogService;
+        private readonly ISpecializationService specializationService;
 
         private string username;
         private string password;
@@ -25,10 +27,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private bool isNewSmkVersion = true;
         private bool passwordsNotMatch;
 
-        public RegisterViewModel(IAuthService authService, IDialogService dialogService)
+        public RegisterViewModel(IAuthService authService, IDialogService dialogService, ISpecializationService specializationService)
         {
             this.authService = authService;
             this.dialogService = dialogService;
+            this.specializationService = specializationService;
 
             this.Title = "Rejestracja";
             this.AvailableSpecializations = new ObservableCollection<SpecializationProgram>();
@@ -370,6 +373,18 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (success)
                 {
                     System.Diagnostics.Debug.WriteLine("Rejestracja zakończona sukcesem!");
+
+                    try
+                    {
+                        // Inicjalizacja modułów po rejestracji
+                        await this.specializationService.InitializeSpecializationModulesAsync(specialization.SpecializationId);
+                        System.Diagnostics.Debug.WriteLine("Inicjalizacja modułów po rejestracji zakończona");
+                    }
+                    catch (Exception initEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd inicjalizacji modułów po rejestracji: {initEx.Message}");
+                        // Kontynuuj mimo błędu inicjalizacji
+                    }
 
                     try
                     {

@@ -3,8 +3,11 @@ using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.Services.FileSystem;
 using SledzSpecke.App.Services.Notification;
+using SledzSpecke.App.Services.Recognition;
+using SledzSpecke.App.Services.Settings;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
@@ -63,6 +66,13 @@ namespace SledzSpecke.App
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<ISpecializationService, SpecializationService>();
             services.AddSingleton<INotificationService, NotificationService>();
+            services.AddSingleton<IExportService, ExportService>();
+            services.AddSingleton<IRecognitionService, RecognitionService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
+            services.AddSingleton<ISettingsService, SettingsService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
+            services.AddSingleton<ISecureStorageService, SecureStorageService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
+
+            // Dodajemy ModuleInitializer jako usługę
+            services.AddTransient<ModuleInitializer>();
 
             services.AddTransient<ISmkVersionStrategy>(provider =>
             {

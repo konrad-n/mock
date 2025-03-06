@@ -12,12 +12,14 @@ namespace SledzSpecke.App.Services.Specialization
         private readonly IDatabaseService databaseService;
         private readonly IAuthService authService;
         private readonly IDialogService dialogService;
+        private readonly ModuleInitializer moduleInitializer;
 
         public SpecializationService(IDatabaseService databaseService, IAuthService authService, IDialogService dialogService)
         {
             this.databaseService = databaseService;
             this.authService = authService;
             this.dialogService = dialogService;
+            this.moduleInitializer = new ModuleInitializer(databaseService);
         }
 
         public async Task<Models.Specialization> GetCurrentSpecializationAsync()
@@ -33,6 +35,21 @@ namespace SledzSpecke.App.Services.Specialization
 
                 var specialization = await this.databaseService.GetSpecializationAsync(user.SpecializationId);
                 System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Znaleziono specjalizację {specialization?.Name ?? "null"}");
+
+                // Jeśli specjalizacja ma moduły, ale ich nie załadowaliśmy, spróbuj je zainicjalizować
+                if (specialization != null && specialization.HasModules)
+                {
+                    var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
+                    if (modules == null || modules.Count == 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Specjalizacja ma moduły, ale nie są zainicjalizowane. Inicjalizuję...");
+                        await this.moduleInitializer.InitializeModulesIfNeededAsync(specialization.SpecializationId);
+
+                        // Pobierz specjalizację ponownie, aby zawierała zaktualizowane moduły
+                        specialization = await this.databaseService.GetSpecializationAsync(user.SpecializationId);
+                    }
+                }
+
                 return specialization;
             }
             catch (Exception ex)
@@ -478,6 +495,11 @@ namespace SledzSpecke.App.Services.Specialization
                 System.Diagnostics.Debug.WriteLine($"Błąd w LoadSpecializationProgramAsync: {ex.Message}");
                 return null;
             }
+        }
+
+        public async Task<bool> InitializeSpecializationModulesAsync(int specializationId)
+        {
+            return await this.moduleInitializer.InitializeModulesIfNeededAsync(specializationId);
         }
 
         public Task<User> GetCurrentUserAsync()

@@ -24,6 +24,9 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> HasModulesAsync(int specializationId);
 
+        // Dodana nowa metoda
+        Task<bool> InitializeSpecializationModulesAsync(int specializationId);
+
         // Internships
         Task<List<Internship>> GetInternshipsAsync(int? moduleId = null);
 

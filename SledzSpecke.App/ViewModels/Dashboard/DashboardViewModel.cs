@@ -272,9 +272,12 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.HasModules = this.CurrentSpecialization.HasModules;
                 System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Specjalizacja ma moduły: {this.HasModules}");
 
-                // Jeśli specjalizacja ma moduły, załaduj i ustaw bieżący moduł
+                // Jeśli specjalizacja ma moduły, inicjalizuj je jeśli nie istnieją
                 if (this.CurrentSpecialization.HasModules)
                 {
+                    // Upewnij się, że moduły są zainicjalizowane
+                    await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
+
                     // Załaduj wszystkie moduły
                     var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
                     System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano {modules.Count} modułów");
