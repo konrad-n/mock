@@ -31,48 +31,48 @@
     </Shell.FlyoutHeader>
 
     <!-- Main application tabs/items -->
-    <FlyoutItem Title="Dashboard" Icon="dashboard.png">
-        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="Dashboard" />
+    <FlyoutItem Title="Dashboard" Icon="dashboard.png" Route="dashboard">
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Staże" Icon="internship.png">
-        <ShellContent ContentTemplate="{DataTemplate internships:InternshipsListPage}" Route="Internships" />
+    <FlyoutItem Title="Staże" Icon="internship.png" Route="internships">
+        <ShellContent ContentTemplate="{DataTemplate internships:InternshipsListPage}" Route="internships" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Dyżury" Icon="duty.png">
-        <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsListPage}" Route="MedicalShifts" />
+    <FlyoutItem Title="Dyżury" Icon="duty.png" Route="medicalshifts">
+        <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsListPage}" Route="medicalshifts" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Procedury" Icon="procedure.png">
-        <ShellContent ContentTemplate="{DataTemplate procedures:ProceduresListPage}" Route="Procedures" />
+    <FlyoutItem Title="Procedury" Icon="procedure.png" Route="procedures">
+        <ShellContent ContentTemplate="{DataTemplate procedures:ProceduresListPage}" Route="procedures" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Kursy" Icon="course.png">
-        <ShellContent ContentTemplate="{DataTemplate courses:CoursesListPage}" Route="Courses" />
+    <FlyoutItem Title="Kursy" Icon="course.png" Route="courses">
+        <ShellContent ContentTemplate="{DataTemplate courses:CoursesListPage}" Route="courses" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Samokształcenie" Icon="education.png">
-        <ShellContent ContentTemplate="{DataTemplate selfEducation:SelfEducationListPage}" Route="SelfEducation" />
+    <FlyoutItem Title="Samokształcenie" Icon="education.png" Route="selfeducation">
+        <ShellContent ContentTemplate="{DataTemplate selfEducation:SelfEducationListPage}" Route="selfeducation" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Publikacje" Icon="publication.png">
-        <ShellContent ContentTemplate="{DataTemplate publications:PublicationsListPage}" Route="Publications" />
+    <FlyoutItem Title="Publikacje" Icon="publication.png" Route="publications">
+        <ShellContent ContentTemplate="{DataTemplate publications:PublicationsListPage}" Route="publications" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Nieobecności" Icon="absence.png">
-        <ShellContent ContentTemplate="{DataTemplate absences:AbsencesListPage}" Route="Absences" />
+    <FlyoutItem Title="Nieobecności" Icon="absence.png" Route="absences">
+        <ShellContent ContentTemplate="{DataTemplate absences:AbsencesListPage}" Route="absences" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Statystyki" Icon="report.png">
-        <ShellContent ContentTemplate="{DataTemplate statistics:StatisticsPage}" Route="Statistics" />
+    <FlyoutItem Title="Statystyki" Icon="report.png" Route="statistics">
+        <ShellContent ContentTemplate="{DataTemplate statistics:StatisticsPage}" Route="statistics" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Eksport" Icon="export.png">
-        <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="Export" />
+    <FlyoutItem Title="Eksport" Icon="export.png" Route="export">
+        <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="export" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Ustawienia" Icon="settings.png">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" Route="Settings" />
+    <FlyoutItem Title="Ustawienia" Icon="settings.png" Route="settings">
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" Route="settings" />
     </FlyoutItem>
 
     <Shell.FlyoutFooter>

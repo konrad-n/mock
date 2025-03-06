@@ -8,44 +8,35 @@ namespace SledzSpecke.App.Helpers
     public static class ModuleHelper
     {
         /// <summary>
-        /// Sprawdza, czy dana specjalizacja ma strukturę modułową.
+        /// Sprawdza, czy dana specjalizacja ma strukturę z modułem podstawowym i specjalistycznym (dwumodułowa).
         /// </summary>
         /// <param name="specializationCode">Kod specjalizacji.</param>
-        /// <returns>True, jeśli specjalizacja ma moduły; w przeciwnym razie false.</returns>
-        public static bool IsModuleSpecialization(string specializationCode)
+        /// <returns>True, jeśli specjalizacja ma moduł podstawowy; w przeciwnym razie false.</returns>
+        public static bool HasBasicModule(string specializationCode)
         {
             if (string.IsNullOrEmpty(specializationCode))
             {
                 return false;
             }
 
-            // Lista specjalizacji z modułami
-            var moduleSpecializations = new[]
+            // Lista specjalizacji z modułem podstawowym
+            var twoModulesSpecializations = new[]
             {
                 "cardiology",
-                "nefrologia",
-                "gastroenterologia",
-                "endokrynologia",
-                "diabetologia",
-                "reumatologia",
-                "alergologia",
-                "angiologia",
-                "hematologia",
-                "onkologia kliniczna",
-                "pulmonologia",
+                "psychiatry",
             };
 
-            return moduleSpecializations.Contains(specializationCode.ToLowerInvariant());
+            return twoModulesSpecializations.Contains(specializationCode.ToLowerInvariant());
         }
 
         /// <summary>
         /// Zwraca kod modułu podstawowego dla danej specjalizacji.
         /// </summary>
         /// <param name="specializationCode">Kod specjalizacji.</param>
-        /// <returns>Kod modułu podstawowego lub null, jeśli nie znaleziono.</returns>
+        /// <returns>Kod modułu podstawowego lub null, jeśli specjalizacja nie ma modułu podstawowego.</returns>
         public static string GetBasicModuleName(string specializationCode)
         {
-            if (string.IsNullOrEmpty(specializationCode))
+            if (string.IsNullOrEmpty(specializationCode) || !HasBasicModule(specializationCode))
             {
                 return null;
             }
@@ -56,16 +47,7 @@ namespace SledzSpecke.App.Helpers
             if (new[]
                 {
                     "cardiology",
-                    "nefrologia",
-                    "gastroenterologia",
-                    "endokrynologia",
-                    "diabetologia",
-                    "reumatologia",
-                    "alergologia",
-                    "angiologia",
-                    "hematologia",
-                    "onkologia kliniczna",
-                    "pulmonologia",
+                    "psychiatry",
                 }.Contains(specializationCode.ToLowerInvariant()))
             {
                 System.Diagnostics.Debug.WriteLine("Znaleziono moduł podstawowy - internal_medicine");
@@ -77,14 +59,15 @@ namespace SledzSpecke.App.Helpers
         }
 
         /// <summary>
-        /// Tworzy moduły dla specjalizacji na podstawie jej kodu.
+        /// Tworzy moduły dla specjalizacji na podstawie jej kodu, wykorzystując dane z plików JSON.
         /// </summary>
         /// <param name="specializationCode">Kod specjalizacji.</param>
         /// <param name="startDate">Data rozpoczęcia specjalizacji.</param>
+        /// <param name="smkVersion">Wersja SMK.</param>
         /// <returns>Lista modułów specjalizacji.</returns>
-        public static List<Module> CreateModulesForSpecialization(string specializationCode, DateTime startDate)
+        public static async Task<List<Module>> CreateModulesForSpecializationAsync(string specializationCode, DateTime startDate, SmkVersion smkVersion)
         {
-            System.Diagnostics.Debug.WriteLine($"Tworzenie modułów dla specjalizacji: {specializationCode}");
+            System.Diagnostics.Debug.WriteLine($"Tworzenie modułów dla specjalizacji: {specializationCode}, wersja SMK: {smkVersion}");
 
             try
             {
@@ -94,68 +77,216 @@ namespace SledzSpecke.App.Helpers
                     return new List<Module>();
                 }
 
-                if (!IsModuleSpecialization(specializationCode))
+                // Ładujemy program specjalizacji z pliku JSON
+                var specializationProgram = await SpecializationLoader.LoadSpecializationProgramAsync(specializationCode, smkVersion);
+                if (specializationProgram == null || string.IsNullOrEmpty(specializationProgram.Structure))
                 {
-                    System.Diagnostics.Debug.WriteLine($"Specjalizacja {specializationCode} nie zawiera modułów.");
-                    return new List<Module>();
+                    System.Diagnostics.Debug.WriteLine("Nie znaleziono programu specjalizacji lub struktura jest pusta.");
                 }
 
-                string basicCode = GetBasicModuleName(specializationCode);
+                System.Diagnostics.Debug.WriteLine("Załadowano program specjalizacji z pliku JSON.");
 
-                if (string.IsNullOrEmpty(basicCode))
+                // Deserializujemy strukturę specjalizacji
+                var options = new JsonSerializerOptions
                 {
-                    System.Diagnostics.Debug.WriteLine("Nie znaleziono kodu modułu podstawowego.");
-                    return new List<Module>();
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip
+                };
+
+                // Lista do przechowywania utworzonych modułów
+                var modules = new List<Module>();
+
+                // Parsujemy tablicę modułów z JSON
+                try
+                {
+                    var jsonDocument = JsonDocument.Parse(specializationProgram.Structure);
+                    if (!jsonDocument.RootElement.TryGetProperty("modules", out var modulesElement) ||
+                        modulesElement.ValueKind != JsonValueKind.Array)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Nie znaleziono tablicy 'modules' w JSON specjalizacji. Używam domyślnych.");
+                    }
+
+                    int moduleIndex = 0;
+                    DateTime currentStartDate = startDate;
+
+                    foreach (var moduleElement in modulesElement.EnumerateArray())
+                    {
+                        moduleIndex++;
+                        System.Diagnostics.Debug.WriteLine($"Przetwarzanie modułu {moduleIndex}...");
+
+                        // Pobieramy podstawowe informacje o module
+                        string moduleName = string.Empty;
+                        string moduleCode = string.Empty;
+                        ModuleType moduleType = ModuleType.Specialistic; // Domyślnie specjalistyczny
+                        int durationMonths = 0;
+                        int workingDays = 0;
+
+                        if (moduleElement.TryGetProperty("name", out var nameElement))
+                        {
+                            moduleName = nameElement.GetString();
+                        }
+
+                        if (moduleElement.TryGetProperty("code", out var codeElement))
+                        {
+                            moduleCode = codeElement.GetString();
+                        }
+
+                        if (moduleElement.TryGetProperty("moduleType", out var typeElement))
+                        {
+                            string typeString = typeElement.GetString();
+                            if (!string.IsNullOrEmpty(typeString))
+                            {
+                                if (typeString.Equals("Basic", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    moduleType = ModuleType.Basic;
+                                }
+                                else if (typeString.Equals("Specialistic", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    moduleType = ModuleType.Specialistic;
+                                }
+                            }
+                        }
+
+                        // Jeśli typ modułu nie jest jawnie określony, spróbujmy określić go na podstawie nazwy
+                        if (string.IsNullOrEmpty(moduleName))
+                        {
+                            if (moduleType == ModuleType.Basic)
+                            {
+                                moduleName = "Moduł podstawowy";
+                            }
+                            else
+                            {
+                                moduleName = $"Moduł specjalistyczny w zakresie {specializationCode}";
+                            }
+                        }
+
+                        // Pobranie czasu trwania
+                        if (moduleElement.TryGetProperty("duration", out var durationElement))
+                        {
+                            if (durationElement.TryGetProperty("years", out var yearsElement))
+                            {
+                                durationMonths = yearsElement.GetInt32() * 12;
+                            }
+                            if (durationElement.TryGetProperty("months", out var monthsElement))
+                            {
+                                durationMonths += monthsElement.GetInt32();
+                            }
+                        }
+                        else if (moduleElement.TryGetProperty("durationMonths", out var monthsElement))
+                        {
+                            durationMonths = monthsElement.GetInt32();
+                        }
+
+                        // Domyślne wartości, jeśli nie znaleziono
+                        if (durationMonths == 0)
+                        {
+                            if (moduleType == ModuleType.Basic)
+                            {
+                                durationMonths = 24; // 2 lata dla modułu podstawowego
+                            }
+                            else
+                            {
+                                durationMonths = 36; // 3 lata dla modułu specjalistycznego
+                            }
+                        }
+
+                        // Pobranie liczby dni roboczych
+                        if (moduleElement.TryGetProperty("workingDays", out var workingDaysElement))
+                        {
+                            workingDays = workingDaysElement.GetInt32();
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"Dane modułu: Nazwa={moduleName}, Kod={moduleCode}, Typ={moduleType}, Miesiące={durationMonths}, Dni robocze={workingDays}");
+
+                        // Obliczamy datę końcową modułu
+                        DateTime endDate = currentStartDate.AddMonths(durationMonths);
+
+                        // Zliczamy liczby staży, kursów i procedur
+                        int totalInternships = 0;
+                        int totalCourses = 0;
+                        int totalProceduresA = 0;
+                        int totalProceduresB = 0;
+
+                        // Zliczenie staży
+                        if (moduleElement.TryGetProperty("internships", out var internshipsElement) &&
+                            internshipsElement.ValueKind == JsonValueKind.Array)
+                        {
+                            totalInternships = internshipsElement.GetArrayLength();
+                        }
+
+                        // Zliczenie kursów
+                        if (moduleElement.TryGetProperty("courses", out var coursesElement) &&
+                            coursesElement.ValueKind == JsonValueKind.Array)
+                        {
+                            totalCourses = coursesElement.GetArrayLength();
+                        }
+
+                        // Zliczenie procedur
+                        if (moduleElement.TryGetProperty("procedures", out var proceduresElement) &&
+                            proceduresElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var procedureElement in proceduresElement.EnumerateArray())
+                            {
+                                if (procedureElement.TryGetProperty("requiredCountA", out var countAElement))
+                                {
+                                    totalProceduresA += countAElement.GetInt32();
+                                }
+
+                                if (procedureElement.TryGetProperty("requiredCountB", out var countBElement))
+                                {
+                                    totalProceduresB += countBElement.GetInt32();
+                                }
+                            }
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"Zliczone elementy: Staże={totalInternships}, Kursy={totalCourses}, Procedury A={totalProceduresA}, Procedury B={totalProceduresB}");
+
+                        // Tworzymy moduł
+                        var module = new Module
+                        {
+                            Name = moduleName,
+                            Type = moduleType,
+                            StartDate = currentStartDate,
+                            EndDate = endDate,
+                            Structure = moduleElement.ToString(),  // Zapisujemy cały JSON modułu
+                            CompletedInternships = 0,
+                            TotalInternships = totalInternships,
+                            CompletedCourses = 0,
+                            TotalCourses = totalCourses,
+                            CompletedProceduresA = 0,
+                            TotalProceduresA = totalProceduresA,
+                            CompletedProceduresB = 0,
+                            TotalProceduresB = totalProceduresB
+                        };
+
+                        modules.Add(module);
+                        System.Diagnostics.Debug.WriteLine($"Dodano moduł: {module.Name}");
+
+                        // Aktualizujemy datę rozpoczęcia dla następnego modułu
+                        currentStartDate = endDate.AddDays(1);
+                    }
+
+                    // Jeśli udało się utworzyć moduły, zwracamy je
+                    if (modules.Count > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Utworzono {modules.Count} modułów na podstawie danych JSON.");
+                        return modules;
+                    }
                 }
-
-                System.Diagnostics.Debug.WriteLine($"Kod modułu podstawowego: {basicCode}");
-
-                // Tworzenie modułu podstawowego (trwa zwykle 2 lata)
-                var basicModule = new Module
+                catch (Exception ex)
                 {
-                    Type = ModuleType.Basic,
-                    Name = "Moduł podstawowy w zakresie chorób wewnętrznych",
-                    StartDate = startDate,
-                    EndDate = startDate.AddYears(2),
-                    Structure = $"{{ \"moduleName\": \"Moduł podstawowy w zakresie chorób wewnętrznych\", \"moduleType\": \"Basic\", \"durationMonths\": 24 }}",
-                    CompletedInternships = 0,
-                    TotalInternships = 10,
-                    CompletedCourses = 0,
-                    TotalCourses = 10,
-                    CompletedProceduresA = 0,
-                    TotalProceduresA = 50,
-                    CompletedProceduresB = 0,
-                    TotalProceduresB = 30
-                };
-                System.Diagnostics.Debug.WriteLine("Utworzono moduł podstawowy.");
-
-                // Tworzenie modułu specjalistycznego (zwykle 3 lata lub więcej, w zależności od specjalizacji)
-                var specialisticModule = new Module
-                {
-                    Type = ModuleType.Specialistic,
-                    Name = $"Moduł specjalistyczny w zakresie {specializationCode}",
-                    StartDate = startDate.AddYears(2),
-                    EndDate = startDate.AddYears(5), // Standardowo 5 lat dla pełnej specjalizacji
-                    Structure = $"{{ \"moduleName\": \"Moduł specjalistyczny w zakresie {specializationCode}\", \"moduleType\": \"Specialistic\", \"durationMonths\": 36 }}",
-                    CompletedInternships = 0,
-                    TotalInternships = 8,
-                    CompletedCourses = 0,
-                    TotalCourses = 18,
-                    CompletedProceduresA = 0,
-                    TotalProceduresA = 100,
-                    CompletedProceduresB = 0,
-                    TotalProceduresB = 50
-                };
-                System.Diagnostics.Debug.WriteLine("Utworzono moduł specjalistyczny.");
-
-                return new List<Module> { basicModule, specialisticModule };
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas parsowania modułów z JSON: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd tworzenia modułów: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-                return new List<Module>();
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas tworzenia modułów z danych JSON: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
             }
+
+            return new List<Module>();
         }
 
         /// <summary>
@@ -184,23 +315,10 @@ namespace SledzSpecke.App.Helpers
                     return false;
                 }
 
-                // Pobierz użytkownika
-                var users = await databaseService.GetAllUsersAsync();
-                var user = users.FirstOrDefault();
-                if (user == null)
-                {
-                    return false;
-                }
-
                 // Inicjalizuj moduły
                 foreach (var module in modules)
                 {
                     module.SpecializationId = specializationId;
-
-                    // Załaduj program specjalizacji dla modułu
-                    string moduleCode = module.Type == ModuleType.Basic
-                        ? GetBasicModuleName(specialization.ProgramCode)
-                        : specialization.ProgramCode + "_specialistic";
 
                     // Zapisz moduł
                     await databaseService.SaveModuleAsync(module);

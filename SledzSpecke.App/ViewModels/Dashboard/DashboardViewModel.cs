@@ -250,11 +250,13 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             }
 
             this.IsBusy = true;
+            System.Diagnostics.Debug.WriteLine("DashboardViewModel: Rozpoczęto ładowanie danych");
 
             try
             {
                 // Load current specialization
                 this.CurrentSpecialization = await this.specializationService.GetCurrentSpecializationAsync();
+                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano specjalizację: {this.CurrentSpecialization?.Name ?? "null"}");
 
                 if (this.CurrentSpecialization == null)
                 {
@@ -262,17 +264,20 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                         "Błąd",
                         "Nie znaleziono aktywnej specjalizacji. Proszę skontaktować się z administratorem.",
                         "OK");
+                    System.Diagnostics.Debug.WriteLine("DashboardViewModel: Nie znaleziono specjalizacji");
                     return;
                 }
 
                 // Ustawienie flagi HasModules
                 this.HasModules = this.CurrentSpecialization.HasModules;
+                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Specjalizacja ma moduły: {this.HasModules}");
 
                 // Jeśli specjalizacja ma moduły, załaduj i ustaw bieżący moduł
                 if (this.CurrentSpecialization.HasModules)
                 {
                     // Załaduj wszystkie moduły
                     var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+                    System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano {modules.Count} modułów");
 
                     // Odśwież listę dostępnych modułów
                     this.AvailableModules.Clear();
@@ -283,6 +288,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                             Id = module.ModuleId,
                             Name = module.Name,
                         });
+                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Dodano moduł {module.Name}");
                     }
 
                     // Jeśli nie ustawiono bieżącego modułu, użyj zapisanego w specjalizacji lub pierwszego z listy
@@ -292,6 +298,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                         if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
                         {
                             this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
+                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ID specjalizacji: {this.CurrentModuleId}");
                         }
                         // Jeśli nie, sprawdź ustawienia aplikacji
                         else
@@ -300,11 +307,13 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                             if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
                             {
                                 this.CurrentModuleId = savedModuleId;
+                                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ustawień: {this.CurrentModuleId}");
                             }
                             // Jeśli nadal nie mamy bieżącego modułu, użyj pierwszego z listy
                             else if (modules.Count > 0)
                             {
                                 this.CurrentModuleId = modules[0].ModuleId;
+                                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono pierwszy moduł z listy: {this.CurrentModuleId}");
                             }
                         }
                     }
@@ -315,12 +324,14 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                         // Ustaw bieżący moduł w serwisie i pobierz go
                         await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
                         this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
+                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono bieżący moduł: {this.CurrentModule?.Name ?? "null"}");
 
                         // Ustaw stan wyboru modułu
                         if (this.CurrentModule != null)
                         {
                             this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
                             this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
+                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Typ modułu: {this.CurrentModule.Type}, Basic: {this.BasicModuleSelected}, Spec: {this.SpecialisticModuleSelected}");
                         }
                     }
                 }
@@ -332,15 +343,19 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     this.BasicModuleSelected = false;
                     this.SpecialisticModuleSelected = false;
                     this.AvailableModules.Clear();
+                    System.Diagnostics.Debug.WriteLine("DashboardViewModel: Specjalizacja bez modułów, wyczyszczono stan modułów");
                 }
 
                 // Załaduj statystyki i aktualizuj UI
                 await this.LoadStatisticsAsync();
                 this.UpdateUIText();
+                System.Diagnostics.Debug.WriteLine("DashboardViewModel: Zakończono ładowanie danych");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych dashboard: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Wystąpił problem podczas ładowania danych. Spróbuj ponownie później.",

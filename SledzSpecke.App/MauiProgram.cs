@@ -9,12 +9,14 @@ using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
+using SledzSpecke.App.ViewModels.Dashboard;
 using SledzSpecke.App.ViewModels.Export;
 using SledzSpecke.App.ViewModels.Internships;
 using SledzSpecke.App.ViewModels.MedicalShifts;
 using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.ViewModels.SelfEducation;
 using SledzSpecke.App.Views.Authentication;
+using SledzSpecke.App.Views.Dashboard;
 using SledzSpecke.App.Views.Export;
 using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
@@ -57,10 +59,11 @@ namespace SledzSpecke.App
             services.AddSingleton<IDatabaseService, DatabaseService>();
             services.AddSingleton<IFileSystemService, FileSystemService>();
             services.AddSingleton<ISecureStorageService, SecureStorageService>();
-            services.AddSingleton<ISpecializationService, SpecializationService>();
-            services.AddSingleton<INotificationService, NotificationService>();
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<ISpecializationService, SpecializationService>();
+            services.AddSingleton<INotificationService, NotificationService>();
+
             services.AddTransient<ISmkVersionStrategy>(provider =>
             {
                 var authService = provider.GetService<IAuthService>();
@@ -79,6 +82,7 @@ namespace SledzSpecke.App
         {
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegisterViewModel>();
+            services.AddTransient<DashboardViewModel>();
             services.AddTransient<MedicalShiftsListViewModel>();
             services.AddTransient<MedicalShiftDetailsViewModel>();
             services.AddTransient<AddEditMedicalShiftViewModel>();
@@ -97,6 +101,7 @@ namespace SledzSpecke.App
         {
             services.AddTransient<LoginPage>();
             services.AddTransient<RegisterPage>();
+            services.AddTransient<DashboardPage>();
             services.AddTransient<MedicalShiftsListPage>();
             services.AddTransient<MedicalShiftDetailsPage>();
             services.AddTransient<AddEditMedicalShiftPage>();

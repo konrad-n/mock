@@ -16,6 +16,7 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
+            // Rejestrujemy tylko ścieżki dla stron szczegółowych i edycji
             Routing.RegisterRoute("MedicalShiftDetails", typeof(Views.MedicalShifts.MedicalShiftDetailsPage));
             Routing.RegisterRoute("AddEditMedicalShift", typeof(Views.MedicalShifts.AddEditMedicalShiftPage));
             Routing.RegisterRoute("ProcedureDetails", typeof(Views.Procedures.ProcedureDetailsPage));
@@ -32,8 +33,6 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("AddEditAbsence", typeof(Views.Absences.AddEditAbsencePage));
             Routing.RegisterRoute("RecognitionDetails", typeof(Views.Recognitions.RecognitionDetailsPage));
             Routing.RegisterRoute("AddEditRecognition", typeof(Views.Recognitions.AddEditRecognitionPage));
-            Routing.RegisterRoute("SelfEducationDetails", typeof(Views.SelfEducation.SelfEducationDetailsPage));
-            Routing.RegisterRoute("AddEditSelfEducation", typeof(Views.SelfEducation.AddEditSelfEducationPage));
             Routing.RegisterRoute("ExportPreview", typeof(Views.Export.ExportPreviewPage));
         }
 

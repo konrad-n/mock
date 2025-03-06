@@ -337,27 +337,28 @@ namespace SledzSpecke.App.ViewModels.Authentication
                         ? this.SelectedSpecialization.TotalDurationMonths
                         : 60),
                     ProgramStructure = this.SelectedSpecialization.Structure,
-                    HasModules = this.SelectedSpecialization.HasModules,
+                    HasModules = true,  // Wszystkie specjalizacje mają moduły
                 };
 
-                // Jeśli specjalizacja posiada moduły, utwórz je
-                if (specialization.HasModules)
-                {
-                    System.Diagnostics.Debug.WriteLine("Tworzenie modułów dla specjalizacji...");
-                    var modules = ModuleHelper.CreateModulesForSpecialization(
-                        specialization.ProgramCode,
-                        specialization.StartDate);
+                // Tworzenie modułów dla specjalizacji
+                System.Diagnostics.Debug.WriteLine("Tworzenie modułów dla specjalizacji z użyciem rzeczywistych danych...");
 
-                    if (modules != null && modules.Count > 0)
-                    {
-                        specialization.Modules = modules;
-                        System.Diagnostics.Debug.WriteLine($"Utworzono {modules.Count} modułów");
-                    }
-                    else
-                    {
-                        specialization.Modules = new List<Models.Module>();
-                        System.Diagnostics.Debug.WriteLine("Nie udało się utworzyć modułów");
-                    }
+                // Użycie ulepszonej metody async
+                var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
+                    specialization.ProgramCode,
+                    specialization.StartDate,
+                    user.SmkVersion);
+
+                if (modules != null && modules.Count > 0)
+                {
+                    specialization.Modules = modules;
+                    System.Diagnostics.Debug.WriteLine($"Utworzono {modules.Count} modułów z rzeczywistymi danymi");
+                }
+                else
+                {
+                    // Ten przypadek nie powinien wystąpić, ale zostawiamy jako zabezpieczenie
+                    System.Diagnostics.Debug.WriteLine("Błąd: Nie utworzono żadnych modułów! Używam pustej listy jako ostateczność.");
+                    specialization.Modules = new List<Models.Module>();
                 }
 
                 // Obliczenie daty zakończenia
