@@ -188,16 +188,41 @@ namespace SledzSpecke.App.Helpers
         /// <returns>Wymagana liczba godzin dyżurów.</returns>
         private static double CalculateRequiredShiftHours(SpecializationStructure structure, TimeSpan duration)
         {
+            // Dodajemy diagnostykę, aby zobaczyć, co otrzymuje funkcja
+            System.Diagnostics.Debug.WriteLine($"CalculateRequiredShiftHours: structure is {(structure == null ? "null" : "not null")}");
+            System.Diagnostics.Debug.WriteLine($"CalculateRequiredShiftHours: duration is {duration.TotalDays} days");
+
+            // Jeśli struktura lub struktura.MedicalShifts jest null, użyj domyślnej wartości
             if (structure?.MedicalShifts == null)
             {
-                return 0;
+                System.Diagnostics.Debug.WriteLine("CalculateRequiredShiftHours: structure.MedicalShifts is null, using default value");
+
+                // Domyślna wartość - 10 godzin 5 minut tygodniowo (zgodnie z dokumentacją)
+                double defaultHoursPerWeek = 10.083; // 10 + (5/60)
+                int weeksInSpec = Math.Max(1, (int)(duration.TotalDays / 7)); // minimum 1 tydzień
+
+                double defaultValue = defaultHoursPerWeek * weeksInSpec;
+                System.Diagnostics.Debug.WriteLine($"CalculateRequiredShiftHours: Default calculation: {defaultHoursPerWeek} * {weeksInSpec} = {defaultValue}");
+
+                return defaultValue;
             }
 
             // Obliczenie na podstawie tygodniowego wymogu z JSONa
             double weeklyHours = structure.MedicalShifts.HoursPerWeek;
-            int weeks = (int)(duration.TotalDays / 7);
+            System.Diagnostics.Debug.WriteLine($"CalculateRequiredShiftHours: Weekly hours from structure: {weeklyHours}");
 
-            return weeklyHours * weeks;
+            // Jeśli weeklyHours jest zbyt małe (praktycznie zero), użyj domyślnej wartości
+            if (weeklyHours < 0.1)
+            {
+                System.Diagnostics.Debug.WriteLine("CalculateRequiredShiftHours: Weekly hours too small, using default");
+                weeklyHours = 10.083; // 10 godzin 5 minut
+            }
+
+            int weeks = Math.Max(1, (int)(duration.TotalDays / 7));
+            double result = weeklyHours * weeks;
+
+            System.Diagnostics.Debug.WriteLine($"CalculateRequiredShiftHours: Final calculation: {weeklyHours} * {weeks} = {result}");
+            return result;
         }
 
         /// <summary>
@@ -261,11 +286,28 @@ namespace SledzSpecke.App.Helpers
                     procedureProgress = 0;
                 }
 
-                // Ważony ogólny postęp
+                // Pobierz liczby elementów samokształcenia i publikacji
+                var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
+                var publications = await database.GetPublicationsAsync(moduleId: moduleId);
+                var educationalActivities = await database.GetEducationalActivitiesAsync(moduleId: moduleId);
+
+                // Zakładamy, że dla innych aktywności (samokształcenie, publikacje) 
+                // nie ma ustalonego maksimum, więc liczymy to jako proporcję do ilości
+                double otherActivitiesProgress = 0;
+                int totalOtherItems = selfEducationItems.Count + publications.Count + educationalActivities.Count;
+
+                // Jeśli są jakieś elementy, przyznajemy punkty proporcjonalnie do ich liczby
+                // (maksymalnie do 10 elementów uznajemy za 100% postępu w tej kategorii)
+                if (totalOtherItems > 0)
+                {
+                    otherActivitiesProgress = Math.Min(1.0, totalOtherItems / 10.0);
+                }
+
+                // Ważony ogólny postęp - zmieniamy obliczanie wagi innych aktywności
                 double overallProgress = (internshipProgress * internshipWeight) +
                                          (courseProgress * courseWeight) +
                                          (procedureProgress * procedureWeight) +
-                                         otherWeight; // Wkład innych aktywności
+                                         (otherActivitiesProgress * otherWeight);
 
                 return Math.Min(1.0, overallProgress);
             }

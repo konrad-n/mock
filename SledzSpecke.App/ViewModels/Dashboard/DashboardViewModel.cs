@@ -474,8 +474,8 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             this.SpecializationInfo = $"{this.CurrentSpecialization.Name}";
 
             // Ustaw zakres dat
-            string startDate = this.CurrentSpecialization.StartDate.ToString("d");
-            string endDate = this.CurrentSpecialization.CalculatedEndDate.ToString("d");
+            string startDate = this.CurrentSpecialization.StartDate.ToString("dd-MM-yyyy");
+            string endDate = this.CurrentSpecialization.CalculatedEndDate.ToString("dd-MM-yyyy");
             this.DateRangeInfo = $"{startDate} - {endDate}";
 
             // Ustaw tekst postępu

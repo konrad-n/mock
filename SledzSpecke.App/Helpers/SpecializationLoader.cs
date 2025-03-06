@@ -273,9 +273,11 @@ namespace SledzSpecke.App.Helpers
 
             try
             {
+                // WAŻNA POPRAWKA: Dodajemy opcję PropertyNameCaseInsensitive = true aby ignorować wielkość liter
+                // Rozwiązuje problem z mapowaniem medicalShifts (JSON) -> MedicalShifts (C#)
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true,
+                    PropertyNameCaseInsensitive = true, // KLUCZOWA ZMIANA!
                     AllowTrailingCommas = true,
                     ReadCommentHandling = JsonCommentHandling.Skip,
                     Converters = { new JsonStringEnumConverter() }

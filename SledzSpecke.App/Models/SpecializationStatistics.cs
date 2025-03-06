@@ -93,12 +93,40 @@ namespace SledzSpecke.App.Models
                 procedureProgress = 0;
             }
 
+            // Obliczenie postępu dla innych aktywności 
+            // (samokształcenie, publikacje, aktywności edukacyjne)
+            double otherActivitiesProgress = 0;
+            int totalOtherItems = this.PublicationsCompleted + this.EducationalActivitiesCompleted;
+
+            // Jeśli mamy dane o samokształceniu w dniach
+            if (this.SelfEducationDaysTotal > 0)
+            {
+                double selfEducationProgress = Math.Min(1.0, (double)this.SelfEducationDaysUsed / this.SelfEducationDaysTotal);
+
+                // Gdy nie mamy innych aktywności, używamy tylko postępu samokształcenia
+                if (totalOtherItems == 0)
+                {
+                    otherActivitiesProgress = selfEducationProgress;
+                }
+                else
+                {
+                    // W przeciwnym razie uśredniamy postęp samokształcenia i innych aktywności
+                    double otherProgress = Math.Min(1.0, totalOtherItems / 10.0); // max 10 elementów = 100%
+                    otherActivitiesProgress = (selfEducationProgress + otherProgress) / 2.0;
+                }
+            }
+            else if (totalOtherItems > 0)
+            {
+                // Gdy nie mamy danych o samokształceniu, ale mamy inne aktywności
+                otherActivitiesProgress = Math.Min(1.0, totalOtherItems / 10.0);
+            }
+
             // Ważony ogólny postęp
             double overallProgress =
                 (internshipProgress * internshipWeight) +
                 (courseProgress * courseWeight) +
                 (procedureProgress * procedureWeight) +
-                otherWeight; // Wkład innych aktywności
+                (otherActivitiesProgress * otherWeight);
 
             // Upewniamy się, że nie przekraczamy 100%
             return Math.Min(1.0, overallProgress);

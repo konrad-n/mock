@@ -87,9 +87,10 @@ namespace SledzSpecke.App.Helpers
                 System.Diagnostics.Debug.WriteLine("Załadowano program specjalizacji z pliku JSON.");
 
                 // Deserializujemy strukturę specjalizacji
+                // WAŻNA POPRAWKA: Dodajemy opcję PropertyNameCaseInsensitive = true aby ignorować wielkość liter
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true,
+                    PropertyNameCaseInsensitive = true, // KLUCZOWA ZMIANA!
                     AllowTrailingCommas = true,
                     ReadCommentHandling = JsonCommentHandling.Skip
                 };

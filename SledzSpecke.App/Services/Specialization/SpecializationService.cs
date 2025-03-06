@@ -222,7 +222,7 @@ namespace SledzSpecke.App.Services.Specialization
                     return 0;
                 }
 
-                int totalHours = 0;
+                double totalHoursDouble = 0;
 
                 // Pobierz staże odpowiednie dla modułu lub całej specjalizacji
                 var internships = await this.databaseService.GetInternshipsAsync(
@@ -235,11 +235,15 @@ namespace SledzSpecke.App.Services.Specialization
                     var shifts = await this.databaseService.GetMedicalShiftsAsync(internshipId: internship.InternshipId);
                     foreach (var shift in shifts)
                     {
-                        totalHours += shift.Hours + (shift.Minutes / 60);
+                        // Poprawka: używamy prawidłowego dzielenia zmiennoprzecinkowego
+                        totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
                     }
                 }
 
-                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Znaleziono {totalHours} godzin dyżurów");
+                // Zaokrąglamy do najbliższej pełnej godziny
+                int totalHours = (int)Math.Round(totalHoursDouble);
+
+                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Znaleziono {totalHours} godzin dyżurów (dokładnie {totalHoursDouble})");
                 return totalHours;
             }
             catch (Exception ex)
