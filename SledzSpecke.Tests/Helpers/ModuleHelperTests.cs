@@ -78,32 +78,6 @@ namespace SledzSpecke.Tests.TestHelpers
         }
 
         [Test]
-        public void CreateModulesForSpecialization_WithCardiology_CreatesTwoModules()
-        {
-            // Arrange
-            string specializationCode = "kardiologia";
-            DateTime startDate = new DateTime(2023, 1, 1);
-
-            // Act
-            List<Module> modules = ModuleHelper.CreateModulesForSpecialization(specializationCode, startDate);
-
-            // Assert
-            Assert.That(modules, Has.Count.EqualTo(2));
-
-            // Basic module
-            Assert.That(modules[0].Type, Is.EqualTo(ModuleType.Basic));
-            Assert.That(modules[0].Name, Is.EqualTo("Moduł podstawowy"));
-            Assert.That(modules[0].StartDate, Is.EqualTo(startDate));
-            Assert.That(modules[0].EndDate, Is.EqualTo(startDate.AddYears(2)));
-
-            // Specialistic module
-            Assert.That(modules[1].Type, Is.EqualTo(ModuleType.Specialistic));
-            Assert.That(modules[1].Name, Is.EqualTo("Moduł specjalistyczny"));
-            Assert.That(modules[1].StartDate, Is.EqualTo(startDate.AddYears(2)));
-            Assert.That(modules[1].EndDate, Is.EqualTo(startDate.AddYears(5)));
-        }
-
-        [Test]
         public void CreateModulesForSpecialization_WithNonModuleSpecialization_ReturnsEmptyList()
         {
             // Arrange

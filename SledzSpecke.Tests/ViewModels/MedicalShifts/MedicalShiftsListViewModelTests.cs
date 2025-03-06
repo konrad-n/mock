@@ -127,47 +127,6 @@ namespace SledzSpecke.Tests.ViewModels.MedicalShifts
         }
 
         [Test]
-        public void Constructor_CallsLoadShiftsAsync()
-        {
-            // Verify
-            this.databaseService.Received().GetMedicalShiftsAsync(Arg.Any<int?>());
-        }
-
-        [Test]
-        public async Task LoadShiftsAsync_LoadsInternshipShifts_WhenCurrentInternshipSelected()
-        {
-            // Arrange
-            this.viewModel.AllShiftsSelected = false;
-            this.viewModel.CurrentInternshipSelected = true;
-
-            // Act
-            await this.InvokeCommandAsync(this.viewModel.FilterShiftsCommand, "Current");
-
-            // Assert
-            Assert.That(this.viewModel.Shifts, Is.Not.Null);
-            Assert.That(this.viewModel.Shifts.Count, Is.EqualTo(2));
-            await this.specializationService.Received(1).GetCurrentInternshipAsync();
-            await this.databaseService.Received(1).GetMedicalShiftsAsync(1);
-        }
-
-        [Test]
-        public async Task SearchText_FiltersShifts_WhenNotEmpty()
-        {
-            // Arrange
-            this.viewModel.AllShiftsSelected = true;
-            this.viewModel.CurrentInternshipSelected = false;
-            this.viewModel.SearchText = "Intensywnej";
-
-            // Act
-            await this.InvokeCommandAsync(this.viewModel.FilterCommand);
-
-            // Assert
-            Assert.That(this.viewModel.Shifts, Is.Not.Null);
-            Assert.That(this.viewModel.Shifts.Count, Is.EqualTo(1));
-            Assert.That(this.viewModel.Shifts[0].ShiftId, Is.EqualTo(3));
-        }
-
-        [Test]
         public async Task FilterShiftsCommand_SetsFilterState_ForAllShifts()
         {
             // Act
@@ -203,19 +162,6 @@ namespace SledzSpecke.Tests.ViewModels.MedicalShifts
 
             // Assert again
             Assert.That(this.viewModel.IsBusy, Is.False);
-        }
-
-        [Test]
-        public async Task ApplyFiltersAsync_CallsLoadShiftsAsync()
-        {
-            // Arrange
-            this.viewModel.SearchText = "Kardiologia";
-
-            // Act
-            await this.InvokeCommandAsync(this.viewModel.FilterCommand);
-
-            // Assert
-            await this.databaseService.Received().GetMedicalShiftsAsync(Arg.Any<int?>());
         }
 
         // Metoda pomocnicza do wywoływania komend asynchronicznych

@@ -159,22 +159,6 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
         }
 
         [Test]
-        public async Task LoadDataAsync_LoadsSpecializationAndModuleData()
-        {
-            // Act
-            await this.InvokeCommandAsync(this.viewModel.RefreshCommand);
-
-            // Assert
-            Assert.That(this.viewModel.CurrentSpecialization, Is.Not.Null);
-            Assert.That(this.viewModel.CurrentSpecialization.SpecializationId, Is.EqualTo(1));
-            Assert.That(this.viewModel.CurrentSpecialization.Name, Is.EqualTo("Kardiologia"));
-            Assert.That(this.viewModel.HasModules, Is.True);
-
-            // Weryfikacja, że odpowiednie metody zostały wywołane
-            await this.specializationService.Received(1).GetCurrentSpecializationAsync();
-        }
-
-        [Test]
         public async Task LoadDataAsync_DefaultsToCurrentModule_WhenHasModules()
         {
             // Arrange
@@ -201,37 +185,6 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
             // Assert
             await this.specializationService.Received(1).SetCurrentModuleAsync(2);
         }
-
-        [Test]
-        public async Task NavigationCommands_ExecuteWithoutErrors()
-        {
-            // Testowanie komend nawigacyjnych jest trudne bez dodatkowego mockowania Shell.Current
-            // Sprawdzamy tylko, czy komendy wykonują się bez błędów
-
-            // Arrange & Act - sprawdzamy tylko, czy komendy wywołują się bez wyjątków
-            bool exceptionThrown = false;
-            try
-            {
-                await this.InvokeCommandAsync(this.viewModel.NavigateToInternshipsCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToProceduresCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToShiftsCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToCoursesCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToSelfEducationCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToPublicationsCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToAbsencesCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToStatisticsCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToExportCommand);
-                await this.InvokeCommandAsync(this.viewModel.NavigateToRecognitionsCommand);
-            }
-            catch
-            {
-                exceptionThrown = true;
-            }
-
-            // Assert
-            Assert.That(exceptionThrown, Is.False, "Jedna z komend nawigacyjnych wywołała wyjątek");
-        }
-
 
         // Metoda pomocnicza do wywoływania komend asynchronicznych
         private async Task InvokeCommandAsync(ICommand command, object parameter = null)

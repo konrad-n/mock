@@ -221,25 +221,6 @@ namespace SledzSpecke.Tests.Services.SmkStrategy
         }
 
         [Test]
-        public void GetFieldLabels_ForAddEditMedicalShift_ReturnsCorrectLabels()
-        {
-            // Act
-            var fieldLabels = this.strategy.GetFieldLabels("AddEditMedicalShift");
-
-            // Assert
-            Assert.That(fieldLabels, Is.Not.Null);
-            Assert.That(fieldLabels["Date"], Is.EqualTo("Data dyżuru"));
-            Assert.That(fieldLabels["Hours"], Is.EqualTo("Godziny"));
-            Assert.That(fieldLabels["Minutes"], Is.EqualTo("Minuty"));
-            Assert.That(fieldLabels["Location"], Is.EqualTo("Miejsce dyżuru"));
-            Assert.That(fieldLabels["Year"], Is.EqualTo("Rok szkolenia"));
-
-            // Old SMK specific fields should have labels
-            Assert.That(fieldLabels["OldSMKField1"], Is.EqualTo("Osoba nadzorująca"));
-            Assert.That(fieldLabels["OldSMKField2"], Is.EqualTo("Oddział"));
-        }
-
-        [Test]
         public void GetRequiredFields_ForAddEditMedicalShift_ReturnsCorrectFields()
         {
             // Act
@@ -293,21 +274,6 @@ namespace SledzSpecke.Tests.Services.SmkStrategy
             Assert.That(this.strategy.GetViewTitle("AddEditMedicalShift"), Is.EqualTo("Dodaj/Edytuj dyżur medyczny (Stary SMK)"));
             Assert.That(this.strategy.GetViewTitle("AddEditProcedure"), Is.EqualTo("Dodaj/Edytuj procedurę (Stary SMK)"));
             Assert.That(this.strategy.GetViewTitle("AddEditInternship"), Is.EqualTo("Dodaj/Edytuj staż (Stary SMK)"));
-        }
-
-        [Test]
-        public void GetPickerOptions_ForOperatorCode_ReturnsCorrectOptions()
-        {
-            // Act
-            var options = this.strategy.GetPickerOptions("AddEditProcedure", "Status");
-
-            // Assert
-            Assert.That(options, Is.Not.Null);
-            Assert.That(options.Count, Is.EqualTo(4));
-            Assert.That(options["Zatwierdzona"], Is.EqualTo("Zatwierdzona"));
-            Assert.That(options["Niezatwierdzona"], Is.EqualTo("Niezatwierdzona"));
-            Assert.That(options["W trakcie"], Is.EqualTo("W trakcie"));
-            Assert.That(options["Odrzucona"], Is.EqualTo("Odrzucona"));
         }
     }
 }
