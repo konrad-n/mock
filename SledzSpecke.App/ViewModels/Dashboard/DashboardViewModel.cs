@@ -374,8 +374,8 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         {
             try
             {
-                // Określ ID modułu do filtrowania (null jeśli specjalizacja nie ma modułów)
-                int? moduleId = this.HasModules ? this.CurrentModuleId : null;
+                // Określ ID aktualnie wybranego modułu
+                int? moduleId = this.CurrentModuleId;
 
                 // Pobierz ogólny postęp
                 this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
@@ -383,46 +383,63 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     this.CurrentSpecialization.SpecializationId,
                     moduleId);
 
-                // Pobierz liczby staży
+                // Staże
                 int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
-                int totalInternships = moduleId.HasValue && this.CurrentModule != null
-                    ? this.CurrentModule.TotalInternships
-                    : this.CurrentSpecialization.TotalInternships;
+                int totalInternships = 0;
+
+                if (this.CurrentModule != null)
+                {
+                    totalInternships = this.CurrentModule.TotalInternships;
+                }
 
                 this.InternshipCount = $"{completedInternships}/{totalInternships}";
-                this.InternshipProgress = totalInternships > 0 ? (double)completedInternships / totalInternships : 0;
-
-                // Pobierz liczby procedur
-                int completedProceduresA = await this.specializationService.GetProcedureCountAsync(moduleId);
-                int totalProcedures = moduleId.HasValue && this.CurrentModule != null
-                    ? this.CurrentModule.TotalProceduresA + this.CurrentModule.TotalProceduresB
+                this.InternshipProgress = totalInternships > 0
+                    ? (double)completedInternships / totalInternships
                     : 0;
 
-                this.ProcedureCount = $"{completedProceduresA}/{totalProcedures}";
-                this.ProcedureProgress = totalProcedures > 0 ? (double)completedProceduresA / totalProcedures : 0.5;
+                // Procedury (skupiamy się na procedurach typu A zgodnie z JSONem)
+                int completedProceduresA = await this.specializationService.GetProcedureCountAsync(moduleId);
+                int totalProceduresA = 0;
 
-                // Pobierz liczby kursów
+                if (this.CurrentModule != null)
+                {
+                    totalProceduresA = this.CurrentModule.TotalProceduresA;
+                }
+
+                this.ProcedureCount = $"{completedProceduresA}/{totalProceduresA}";
+                this.ProcedureProgress = totalProceduresA > 0
+                    ? (double)completedProceduresA / totalProceduresA
+                    : 0;
+
+                // Kursy
                 int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
-                int totalCourses = moduleId.HasValue && this.CurrentModule != null
-                    ? this.CurrentModule.TotalCourses
-                    : this.CurrentSpecialization.TotalCourses;
+                int totalCourses = 0;
+
+                if (this.CurrentModule != null)
+                {
+                    totalCourses = this.CurrentModule.TotalCourses;
+                }
 
                 this.CourseCount = $"{completedCourses}/{totalCourses}";
-                this.CourseProgress = totalCourses > 0 ? (double)completedCourses / totalCourses : 0;
+                this.CourseProgress = totalCourses > 0
+                    ? (double)completedCourses / totalCourses
+                    : 0;
 
-                // Pobierz statystyki dyżurów
+                // Dyżury
                 int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
-                this.ShiftStats = $"{completedShiftHours}h";
 
-                // Oszacowanie postępu dyżurów - wymaga dostępu do wymagań z programu specjalizacji
+                // Pobierz pełne statystyki, aby uzyskać dostęp do wymaganych godzin dyżurów
                 SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync();
-                if (stats != null && stats.RequiredShiftHours > 0)
+
+                if (stats.RequiredShiftHours > 0)
                 {
-                    this.ShiftProgress = (double)completedShiftHours / stats.RequiredShiftHours;
+                    this.ShiftStats = $"{completedShiftHours}/{stats.RequiredShiftHours}h";
+                    this.ShiftProgress = Math.Min(1.0, (double)completedShiftHours / stats.RequiredShiftHours);
                 }
                 else
                 {
-                    this.ShiftProgress = 0; // Wartość domyślna
+                    this.ShiftStats = $"{completedShiftHours}h";
+                    this.ShiftProgress = 0;
                 }
 
                 // Pozostałe liczniki
