@@ -241,6 +241,32 @@ namespace SledzSpecke.App.Helpers
                             }
                         }
 
+                        int requiredShiftHours = 0;
+                        double hoursPerWeek = 0;
+                        string medicalShiftsDescription = null;
+
+                        if (moduleElement.TryGetProperty("medicalShifts", out var medicalShiftsElement) &&
+                            medicalShiftsElement.ValueKind == JsonValueKind.Object)
+                        {
+                            // Próbujemy pobrać bezpośrednio requiredShiftHours
+                            if (medicalShiftsElement.TryGetProperty("requiredShiftHours", out var requiredHoursElement))
+                            {
+                                requiredShiftHours = requiredHoursElement.GetInt32();
+                            }
+
+                            // Pobieramy hoursPerWeek
+                            if (medicalShiftsElement.TryGetProperty("hoursPerWeek", out var hoursPerWeekElement))
+                            {
+                                hoursPerWeek = hoursPerWeekElement.GetDouble();
+                            }
+
+                            // Pobieramy opis
+                            if (medicalShiftsElement.TryGetProperty("description", out var descriptionElement))
+                            {
+                                medicalShiftsDescription = descriptionElement.GetString();
+                            }
+                        }
+
                         System.Diagnostics.Debug.WriteLine($"Zliczone elementy: Staże={totalInternships}, Kursy={totalCourses}, Procedury A={totalProceduresA}, Procedury B={totalProceduresB}");
 
                         // Tworzymy moduł
@@ -258,7 +284,8 @@ namespace SledzSpecke.App.Helpers
                             CompletedProceduresA = 0,
                             TotalProceduresA = totalProceduresA,
                             CompletedProceduresB = 0,
-                            TotalProceduresB = totalProceduresB
+                            TotalProceduresB = totalProceduresB,
+                            // Można tu również zapisać informacje o dyżurach, jeśli model Module ma takie pola
                         };
 
                         modules.Add(module);

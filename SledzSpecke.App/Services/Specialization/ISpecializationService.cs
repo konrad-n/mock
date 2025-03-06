@@ -129,7 +129,8 @@ namespace SledzSpecke.App.Services.Specialization
         Task<bool> DeleteRecognitionAsync(int recognitionId);
 
         // Statistics & Progress
-        Task<SpecializationStatistics> GetSpecializationStatisticsAsync();
+        // ZMIANA: Dodano parametr moduleId
+        Task<SpecializationStatistics> GetSpecializationStatisticsAsync(int? moduleId = null);
 
         Task UpdateSpecializationProgressAsync(int specializationId);
 

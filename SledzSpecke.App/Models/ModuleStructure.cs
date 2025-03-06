@@ -19,5 +19,11 @@ namespace SledzSpecke.App.Models
         public int RequiredShiftHours { get; set; }
 
         public int SelfEducationDays { get; set; }
+
+        // Dodane pole dla informacji o dyżurach medycznych
+        public MedicalShiftsInfo MedicalShifts { get; set; }
+
+        // Dodane pole dla opisu kodów procedur
+        public ProcedureCodeDescription ProcedureCodeDescription { get; set; }
     }
 }

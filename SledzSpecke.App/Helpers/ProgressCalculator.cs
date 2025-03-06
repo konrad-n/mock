@@ -99,14 +99,16 @@ namespace SledzSpecke.App.Helpers
         }
 
         /// <summary>
-        /// Obliczanie pełnych statystyk dla specjalizacji.
+        /// Obliczanie pełnych statystyk dla specjalizacji lub modułu.
         /// </summary>
         /// <param name="database">Serwis dostępu do bazy danych.</param>
         /// <param name="specializationId">ID specjalizacji.</param>
+        /// <param name="moduleId">ID modułu (opcjonalnie).</param>
         /// <returns>Pełne statystyki specjalizacji.</returns>
         public static async Task<SpecializationStatistics> CalculateFullStatisticsAsync(
             IDatabaseService database,
-            int specializationId)
+            int specializationId,
+            int? moduleId = null)
         {
             var specialization = await database.GetSpecializationAsync(specializationId);
             if (specialization == null)
@@ -122,60 +124,173 @@ namespace SledzSpecke.App.Helpers
             {
                 structure = JsonSerializer.Deserialize<SpecializationStructure>(specialization.ProgramStructure);
             }
-
-            var modules = await database.GetModulesAsync(specializationId);
-
-            // Agregacja danych ze wszystkich modułów
-            stats.CompletedInternships = modules.Sum(m => m.CompletedInternships);
-            stats.RequiredInternships = modules.Sum(m => m.TotalInternships);
-            stats.CompletedCourses = modules.Sum(m => m.CompletedCourses);
-            stats.RequiredCourses = modules.Sum(m => m.TotalCourses);
-            stats.CompletedProceduresA = modules.Sum(m => m.CompletedProceduresA);
-            stats.RequiredProceduresA = modules.Sum(m => m.TotalProceduresA);
-            stats.CompletedProceduresB = modules.Sum(m => m.CompletedProceduresB);
-            stats.RequiredProceduresB = modules.Sum(m => m.TotalProceduresB);
-
-            // Obliczenie dni stażowych
-            var internships = new List<Internship>();
-            foreach (var module in modules)
+            if (moduleId.HasValue)
             {
-                var moduleInternships = await database.GetInternshipsAsync(moduleId: module.ModuleId);
-                internships.AddRange(moduleInternships.Where(i => i.IsCompleted));
+                // Jeśli podano moduleId, obliczamy statystyki tylko dla tego modułu
+                var module = await database.GetModuleAsync(moduleId.Value);
+                if (module == null)
+                {
+                    return stats;
+                }
+
+                // Ustawiamy bazowe statystyki z obiektu modułu
+                stats.CompletedInternships = module.CompletedInternships;
+                stats.RequiredInternships = module.TotalInternships;
+                stats.CompletedCourses = module.CompletedCourses;
+                stats.RequiredCourses = module.TotalCourses;
+                stats.CompletedProceduresA = module.CompletedProceduresA;
+                stats.RequiredProceduresA = module.TotalProceduresA;
+                stats.CompletedProceduresB = module.CompletedProceduresB;
+                stats.RequiredProceduresB = module.TotalProceduresB;
+
+                // Parsowanie struktury modułu
+                ModuleStructure moduleStructure = null;
+                if (!string.IsNullOrEmpty(module.Structure))
+                {
+                    try
+                    {
+                        // Dodajemy opcję PropertyNameCaseInsensitive, żeby adresować problem z wielkością liter
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
+
+                        System.Diagnostics.Debug.WriteLine($"Sparsowano strukturę modułu: {(moduleStructure == null ? "null" : "ok")}");
+                        if (moduleStructure?.MedicalShifts != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"MedicalShifts znalezione: {moduleStructure.MedicalShifts.HoursPerWeek} h/tydzień");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("MedicalShifts nie znalezione w strukturze modułu");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd podczas deserializacji struktury modułu: {ex.Message}");
+                    }
+                }
+
+                // Obliczenie dni stażowych
+                var internships = await database.GetInternshipsAsync(moduleId: moduleId);
+                var completedInternships = internships.Where(i => i.IsCompleted).ToList();
+
+                stats.CompletedInternshipDays = completedInternships.Sum(i => i.DaysCount);
+                stats.RequiredInternshipDays = moduleStructure?.Internships?.Sum(i => i.DurationDays) ?? 0;
+
+                // Pobierz dyżury powiązane ze stażami w danym module
+                var allShifts = new List<MedicalShift>();
+                foreach (var internship in internships)
+                {
+                    var shifts = await database.GetMedicalShiftsAsync(internship.InternshipId);
+                    allShifts.AddRange(shifts);
+                }
+
+                stats.CompletedShiftHours = (int)Math.Round(allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0)));
+
+                // Obliczamy wymagane godziny dyżurów dla modułu
+                // Używamy czasu trwania modułu zamiast całej specjalizacji
+                TimeSpan moduleDuration = module.EndDate - module.StartDate;
+
+                // Sprawdźmy najpierw, czy bezpośrednio mamy podaną liczbę godzin
+                if (moduleStructure != null && moduleStructure.RequiredShiftHours > 0)
+                {
+                    stats.RequiredShiftHours = moduleStructure.RequiredShiftHours;
+                    System.Diagnostics.Debug.WriteLine($"Używam RequiredShiftHours z ModuleStructure: {stats.RequiredShiftHours} h");
+                }
+                else
+                {
+                    // Jeśli nie mamy bezpośrednio podanej liczby godzin, obliczamy na podstawie hoursPerWeek
+                    double weeklyHours = 10.083; // Domyślna wartość - 10 godz. 5 min. tygodniowo
+
+                    if (moduleStructure?.MedicalShifts != null && moduleStructure.MedicalShifts.HoursPerWeek > 0)
+                    {
+                        weeklyHours = moduleStructure.MedicalShifts.HoursPerWeek;
+                        System.Diagnostics.Debug.WriteLine($"Używam niestandardowych godzin dyżurów: {weeklyHours} h/tydzień");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Używam domyślnych godzin dyżurów: 10h 5min/tydzień");
+                    }
+
+                    // Obliczenie liczby tygodni
+                    int weeks = Math.Max(1, (int)(moduleDuration.TotalDays / 7));
+                    stats.RequiredShiftHours = (int)Math.Round(weeklyHours * weeks);
+                    System.Diagnostics.Debug.WriteLine($"Obliczone wymagane godziny dyżurów: {stats.RequiredShiftHours} h ({weeklyHours} h/tydzień × {weeks} tygodni)");
+                }
+
+                // Samokształcenie
+                var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
+                stats.SelfEducationDaysUsed = selfEducationItems.Count;
+                stats.SelfEducationDaysTotal = moduleStructure?.SelfEducationDays ?? 0;
+
+                // Inne aktywności
+                var educationalActivities = await database.GetEducationalActivitiesAsync(moduleId: moduleId);
+                stats.EducationalActivitiesCompleted = educationalActivities.Count;
+
+                var publications = await database.GetPublicationsAsync(moduleId: moduleId);
+                stats.PublicationsCompleted = publications.Count;
+
+                return stats;
             }
-
-            stats.CompletedInternshipDays = internships.Sum(i => i.DaysCount);
-            stats.RequiredInternshipDays = structure?.TotalWorkingDays ?? 0;
-
-            // Pobierz dyżury powiązane ze stażami
-            var allShifts = new List<MedicalShift>();
-            foreach (var internship in internships)
+            else
             {
-                var shifts = await database.GetMedicalShiftsAsync(internship.InternshipId);
-                allShifts.AddRange(shifts);
+                // Jeśli nie podano moduleId, obliczamy statystyki dla całej specjalizacji (dotychczasowa implementacja)
+                var modules = await database.GetModulesAsync(specializationId);
+
+                // Agregacja danych ze wszystkich modułów
+                stats.CompletedInternships = modules.Sum(m => m.CompletedInternships);
+                stats.RequiredInternships = modules.Sum(m => m.TotalInternships);
+                stats.CompletedCourses = modules.Sum(m => m.CompletedCourses);
+                stats.RequiredCourses = modules.Sum(m => m.TotalCourses);
+                stats.CompletedProceduresA = modules.Sum(m => m.CompletedProceduresA);
+                stats.RequiredProceduresA = modules.Sum(m => m.TotalProceduresA);
+                stats.CompletedProceduresB = modules.Sum(m => m.CompletedProceduresB);
+                stats.RequiredProceduresB = modules.Sum(m => m.TotalProceduresB);
+
+                // Obliczenie dni stażowych
+                var internships = new List<Internship>();
+                foreach (var module in modules)
+                {
+                    var moduleInternships = await database.GetInternshipsAsync(moduleId: module.ModuleId);
+                    internships.AddRange(moduleInternships.Where(i => i.IsCompleted));
+                }
+
+                stats.CompletedInternshipDays = internships.Sum(i => i.DaysCount);
+                stats.RequiredInternshipDays = structure?.TotalWorkingDays ?? 0;
+
+                // Pobierz dyżury powiązane ze stażami
+                var allShifts = new List<MedicalShift>();
+                foreach (var internship in internships)
+                {
+                    var shifts = await database.GetMedicalShiftsAsync(internship.InternshipId);
+                    allShifts.AddRange(shifts);
+                }
+
+                stats.CompletedShiftHours = (int)Math.Round(allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0)));
+                stats.RequiredShiftHours = (int)Math.Round(
+                    CalculateRequiredShiftHours(structure, specialization.PlannedEndDate - specialization.StartDate));
+
+                // Samokształcenie
+                var selfEducationItems = await database.GetSelfEducationItemsAsync(specializationId: specializationId);
+                stats.SelfEducationDaysUsed = selfEducationItems.Count;
+                stats.SelfEducationDaysTotal = structure?.SelfEducation?.TotalDays ?? 0;
+
+                // Inne aktywności
+                var educationalActivities = await database.GetEducationalActivitiesAsync(specializationId: specializationId);
+                stats.EducationalActivitiesCompleted = educationalActivities.Count;
+
+                var publications = await database.GetPublicationsAsync(specializationId: specializationId);
+                stats.PublicationsCompleted = publications.Count;
+
+                // Nieobecności
+                var absences = await database.GetAbsencesAsync(specializationId);
+                stats.AbsenceDays = absences.Sum(a => a.DaysCount);
+                stats.AbsenceDaysExtendingSpecialization = absences
+                    .Where(a => a.ExtendsSpecialization)
+                    .Sum(a => a.DaysCount);
             }
-
-            stats.CompletedShiftHours = (int)Math.Round(allShifts.Sum(s => s.Hours + (s.Minutes / 60.0)));
-            stats.RequiredShiftHours = (int)Math.Round(
-                CalculateRequiredShiftHours(structure, specialization.PlannedEndDate - specialization.StartDate));
-
-            // Samokształcenie
-            var selfEducationItems = await database.GetSelfEducationItemsAsync(specializationId: specializationId);
-            stats.SelfEducationDaysUsed = selfEducationItems.Count;
-            stats.SelfEducationDaysTotal = structure?.SelfEducation?.TotalDays ?? 0;
-
-            // Inne aktywności
-            var educationalActivities = await database.GetEducationalActivitiesAsync(specializationId: specializationId);
-            stats.EducationalActivitiesCompleted = educationalActivities.Count;
-
-            var publications = await database.GetPublicationsAsync(specializationId: specializationId);
-            stats.PublicationsCompleted = publications.Count;
-
-            // Nieobecności
-            var absences = await database.GetAbsencesAsync(specializationId);
-            stats.AbsenceDays = absences.Sum(a => a.DaysCount);
-            stats.AbsenceDaysExtendingSpecialization = absences
-                .Where(a => a.ExtendsSpecialization)
-                .Sum(a => a.DaysCount);
 
             return stats;
         }

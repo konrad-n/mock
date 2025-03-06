@@ -367,7 +367,7 @@ namespace SledzSpecke.App.Services.Specialization
             }
         }
 
-        public async Task<SpecializationStatistics> GetSpecializationStatisticsAsync()
+        public async Task<SpecializationStatistics> GetSpecializationStatisticsAsync(int? moduleId = null)
         {
             try
             {
@@ -378,9 +378,11 @@ namespace SledzSpecke.App.Services.Specialization
                     return new SpecializationStatistics();
                 }
 
+                // Dodany parametr moduleId - teraz przekazujemy go do CalculateFullStatisticsAsync
                 var stats = await ProgressCalculator.CalculateFullStatisticsAsync(
                     this.databaseService,
-                    specialization.SpecializationId);
+                    specialization.SpecializationId,
+                    moduleId);
 
                 if (stats == null)
                 {

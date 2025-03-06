@@ -425,11 +425,11 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     ? (double)completedCourses / totalCourses
                     : 0;
 
-                // Dyżury
+                // Dyżury - POPRAWKA: Przekazujemy moduleId do GetSpecializationStatisticsAsync
                 int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
 
-                // Pobierz pełne statystyki, aby uzyskać dostęp do wymaganych godzin dyżurów
-                SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync();
+                // Pobierz pełne statystyki dla WYBRANEGO MODUŁU, a nie całej specjalizacji
+                SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
 
                 if (stats.RequiredShiftHours > 0)
                 {
