@@ -30,10 +30,36 @@ namespace SledzSpecke.App.Models
         // Kod modułu specjalistycznego (zawsze występuje)
         public string SpecialisticModuleCode { get; set; }
 
-        // Domyślna długość całej specjalizacji
-        public TotalDuration Duration { get; set; }
+        // Podstawowe typy do przechowywania w bazie danych
+        public int DurationYears { get; set; }
+        public int DurationMonths { get; set; }
+        public int DurationDays { get; set; }
 
         // Całkowita liczba dni roboczych
         public int TotalWorkingDays { get; set; }
+
+        // Domyślna długość całej specjalizacji
+        [Ignore]
+        public TotalDuration Duration
+        {
+            get
+            {
+                return new TotalDuration
+                {
+                    Years = this.DurationYears,
+                    Months = this.DurationMonths,
+                    Days = this.DurationDays
+                };
+            }
+            set
+            {
+                if (value != null)
+                {
+                    this.DurationYears = value.Years;
+                    this.DurationMonths = value.Months;
+                    this.DurationDays = value.Days;
+                }
+            }
+        }
     }
 }

@@ -53,18 +53,12 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             try
             {
-                System.Diagnostics.Debug.WriteLine("Inicjalizacja RegisterViewModel...");
-
                 // Załadowanie dostępnych specjalizacji dla domyślnie wybranej wersji (Nowej)
                 await this.LoadSpecializationsAsync();
 
-                System.Diagnostics.Debug.WriteLine($"Inicjalizacja zakończona. Załadowano {this.AvailableSpecializations.Count} specjalizacji.");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas inicjalizacji RegisterViewModel: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować listy specjalizacji. Spróbuj ponownie.",
@@ -196,15 +190,12 @@ namespace SledzSpecke.App.ViewModels.Authentication
             try
             {
                 this.IsBusy = true;
-                System.Diagnostics.Debug.WriteLine("Rozpoczynam ładowanie specjalizacji...");
 
                 // Wybierz aktualną wersję SMK na podstawie zaznaczenia checkbox'ów
                 SmkVersion currentVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
-                System.Diagnostics.Debug.WriteLine($"Wybrana wersja SMK: {currentVersion}");
 
                 // Użyj ulepszonego SpecializationLoader do załadowania programów specjalizacji
                 var programs = await SpecializationLoader.LoadAllSpecializationProgramsForVersionAsync(currentVersion);
-                System.Diagnostics.Debug.WriteLine($"Załadowano {programs.Count} programów specjalizacji");
 
                 // Zaktualizuj kolekcję w bezpieczny sposób na głównym wątku UI
                 await MainThread.InvokeOnMainThreadAsync(() =>
@@ -213,27 +204,21 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     foreach (var program in programs)
                     {
                         this.AvailableSpecializations.Add(program);
-                        System.Diagnostics.Debug.WriteLine($"Dodano specjalizację: {program.Name} ({program.SmkVersion})");
                     }
 
                     // Wybierz pierwszą dostępną specjalizację jeśli istnieje
                     if (this.AvailableSpecializations.Count > 0)
                     {
                         this.SelectedSpecialization = this.AvailableSpecializations[0];
-                        System.Diagnostics.Debug.WriteLine($"Wybrano specjalizację: {this.SelectedSpecialization.Name}");
                     }
                     else
                     {
                         this.SelectedSpecialization = null;
-                        System.Diagnostics.Debug.WriteLine("Brak dostępnych specjalizacji!");
                     }
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania specjalizacji: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Nie udało się załadować listy specjalizacji. Spróbuj ponownie.",
@@ -296,9 +281,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Wybrana specjalizacja: {this.SelectedSpecialization.Name}");
-                System.Diagnostics.Debug.WriteLine($"Wersja SMK: {(this.IsNewSmkVersion ? "Nowa" : "Stara")}");
-
                 // Utworzenie obiektu użytkownika
                 var user = new User
                 {
@@ -321,11 +303,9 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     if (fullSpecialization != null && !string.IsNullOrEmpty(fullSpecialization.Structure))
                     {
                         this.SelectedSpecialization.Structure = fullSpecialization.Structure;
-                        System.Diagnostics.Debug.WriteLine("Pomyślnie załadowano strukturę specjalizacji");
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("Nie udało się załadować struktury, używam domyślnej");
                         this.SelectedSpecialization.Structure = $"{{ \"name\": \"{this.SelectedSpecialization.Name}\", \"code\": \"{this.SelectedSpecialization.Code}\" }}";
                     }
                 }
@@ -344,9 +324,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     ProgramStructure = this.SelectedSpecialization.Structure,
                 };
 
-                // Tworzenie modułów dla specjalizacji
-                System.Diagnostics.Debug.WriteLine("Tworzenie modułów dla specjalizacji z użyciem rzeczywistych danych...");
-
                 // Użycie ulepszonej metody async
                 var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
                     specialization.ProgramCode,
@@ -356,12 +333,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (modules != null && modules.Count > 0)
                 {
                     specialization.Modules = modules;
-                    System.Diagnostics.Debug.WriteLine($"Utworzono {modules.Count} modułów z rzeczywistymi danymi");
                 }
                 else
                 {
                     // Ten przypadek nie powinien wystąpić, ale zostawiamy jako zabezpieczenie
-                    System.Diagnostics.Debug.WriteLine("Błąd: Nie utworzono żadnych modułów! Używam pustej listy jako ostateczność.");
                     specialization.Modules = new List<Models.Module>();
                 }
 
@@ -373,17 +348,13 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
                 if (success)
                 {
-                    System.Diagnostics.Debug.WriteLine("Rejestracja zakończona sukcesem!");
-
                     try
                     {
                         // Inicjalizacja modułów po rejestracji
                         await this.specializationService.InitializeSpecializationModulesAsync(specialization.SpecializationId);
-                        System.Diagnostics.Debug.WriteLine("Inicjalizacja modułów po rejestracji zakończona");
                     }
                     catch (Exception initEx)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Błąd inicjalizacji modułów po rejestracji: {initEx.Message}");
                         // Kontynuuj mimo błędu inicjalizacji
                     }
 
@@ -396,7 +367,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     }
                     catch (Exception alertEx)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Błąd podczas wyświetlania alertu: {alertEx.Message}");
                         // Kontynuuj mimo błędu alertu
                     }
 
@@ -405,8 +375,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("Rejestracja nie powiodła się");
-
                     try
                     {
                         await this.dialogService.DisplayAlertAsync(
@@ -416,16 +384,12 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     }
                     catch (Exception alertEx)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Błąd podczas wyświetlania alertu: {alertEx.Message}");
                         // Kontynuuj mimo błędu alertu
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas rejestracji: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-
                 try
                 {
                     await this.dialogService.DisplayAlertAsync(
@@ -448,13 +412,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("Przechodzę do ekranu logowania...");
-
                 // Sprawdź, czy MainPage to NavigationPage
                 if (Application.Current?.MainPage is NavigationPage navigationPage)
                 {
                     await navigationPage.PopAsync();
-                    System.Diagnostics.Debug.WriteLine("Powrót do poprzedniej strony przez PopAsync");
                 }
                 else
                 {
@@ -464,18 +425,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     {
                         var loginPage = new SledzSpecke.App.Views.Authentication.LoginPage(loginViewModel);
                         Application.Current.MainPage = new NavigationPage(loginPage);
-                        System.Diagnostics.Debug.WriteLine("Ustawiono nową stronę logowania");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("Nie udało się uzyskać LoginViewModel z DI");
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas przechodzenia do ekranu logowania: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
     }
