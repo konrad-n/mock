@@ -18,7 +18,6 @@ namespace SledzSpecke.Tests.Models
                 PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 CalculatedEndDate = new DateTime(2028, 6, 1, 0, 0, 0, DateTimeKind.Local), // With extensions
                 ProgramStructure = "{\"testKey\":\"testValue\"}",
-                HasModules = true,
                 CurrentModuleId = 2,
                 Modules = new List<Module>
                 {
@@ -39,7 +38,6 @@ namespace SledzSpecke.Tests.Models
             Assert.That(specialization.PlannedEndDate, Is.EqualTo(new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local)));
             Assert.That(specialization.CalculatedEndDate, Is.EqualTo(new DateTime(2028, 6, 1, 0, 0, 0, DateTimeKind.Local)));
             Assert.That(specialization.ProgramStructure, Is.EqualTo("{\"testKey\":\"testValue\"}"));
-            Assert.That(specialization.HasModules, Is.True);
             Assert.That(specialization.CurrentModuleId, Is.EqualTo(2));
             Assert.That(specialization.Modules, Has.Count.EqualTo(2));
             Assert.That(specialization.CompletedInternships, Is.EqualTo(8));

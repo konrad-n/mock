@@ -1,4 +1,13 @@
 ﻿using SledzSpecke.App.Services.Authentication;
+using SledzSpecke.App.Views.Absences;
+using SledzSpecke.App.Views.Courses;
+using SledzSpecke.App.Views.Export;
+using SledzSpecke.App.Views.Internships;
+using SledzSpecke.App.Views.MedicalShifts;
+using SledzSpecke.App.Views.Procedures;
+using SledzSpecke.App.Views.Publications;
+using SledzSpecke.App.Views.SelfEducation;
+using SledzSpecke.App.Views.Settings;
 
 namespace SledzSpecke.App
 {
@@ -16,24 +25,17 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
-            // Rejestrujemy tylko ścieżki dla stron szczegółowych i edycji
-            Routing.RegisterRoute("MedicalShiftDetails", typeof(Views.MedicalShifts.MedicalShiftDetailsPage));
-            Routing.RegisterRoute("AddEditMedicalShift", typeof(Views.MedicalShifts.AddEditMedicalShiftPage));
-            Routing.RegisterRoute("ProcedureDetails", typeof(Views.Procedures.ProcedureDetailsPage));
-            Routing.RegisterRoute("AddEditProcedure", typeof(Views.Procedures.AddEditProcedurePage));
-            Routing.RegisterRoute("InternshipDetails", typeof(Views.Internships.InternshipDetailsPage));
-            Routing.RegisterRoute("AddEditInternship", typeof(Views.Internships.AddEditInternshipPage));
-            Routing.RegisterRoute("CourseDetails", typeof(Views.Courses.CourseDetailsPage));
-            Routing.RegisterRoute("AddEditCourse", typeof(Views.Courses.AddEditCoursePage));
-            Routing.RegisterRoute("SelfEducationDetails", typeof(Views.SelfEducation.SelfEducationDetailsPage));
-            Routing.RegisterRoute("AddEditSelfEducation", typeof(Views.SelfEducation.AddEditSelfEducationPage));
-            Routing.RegisterRoute("PublicationDetails", typeof(Views.Publications.PublicationDetailsPage));
-            Routing.RegisterRoute("AddEditPublication", typeof(Views.Publications.AddEditPublicationPage));
-            Routing.RegisterRoute("AbsenceDetails", typeof(Views.Absences.AbsenceDetailsPage));
-            Routing.RegisterRoute("AddEditAbsence", typeof(Views.Absences.AddEditAbsencePage));
-            Routing.RegisterRoute("RecognitionDetails", typeof(Views.Recognitions.RecognitionDetailsPage));
-            Routing.RegisterRoute("AddEditRecognition", typeof(Views.Recognitions.AddEditRecognitionPage));
-            Routing.RegisterRoute("ExportPreview", typeof(Views.Export.ExportPreviewPage));
+           
+            Routing.RegisterRoute("settings", typeof(SettingsPage));
+            Routing.RegisterRoute("procedures", typeof(ProceduresListPage));
+            Routing.RegisterRoute("medicalshifts", typeof(MedicalShiftsListPage));
+            Routing.RegisterRoute("internships", typeof(InternshipsListPage));
+            Routing.RegisterRoute("courses", typeof(CoursesListPage));
+            Routing.RegisterRoute("selfeducation", typeof(SelfEducationListPage));
+            Routing.RegisterRoute("publications", typeof(PublicationsListPage));
+            Routing.RegisterRoute("absences", typeof(AbsencesListPage));
+            Routing.RegisterRoute("export", typeof(ExportPage));
+            Routing.RegisterRoute("exportpreview", typeof(ExportPreviewPage));
         }
 
         private async void InitializeUserInfoAsync()

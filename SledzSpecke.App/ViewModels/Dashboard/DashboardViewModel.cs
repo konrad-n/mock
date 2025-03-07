@@ -525,47 +525,47 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         // Metody nawigacji
         private async Task NavigateToInternshipsAsync()
         {
-            await Shell.Current.GoToAsync("Internships");
+            await Shell.Current.GoToAsync("internships");
         }
 
         private async Task NavigateToProceduresAsync()
         {
-            await Shell.Current.GoToAsync("Procedures");
+            await Shell.Current.GoToAsync("procedures");
         }
 
         private async Task NavigateToShiftsAsync()
         {
-            await Shell.Current.GoToAsync("MedicalShifts");
+            await Shell.Current.GoToAsync("medicalshifts");
         }
 
         private async Task NavigateToCoursesAsync()
         {
-            await Shell.Current.GoToAsync("Courses");
+            await Shell.Current.GoToAsync("courses");
         }
 
         private async Task NavigateToSelfEducationAsync()
         {
-            await Shell.Current.GoToAsync("SelfEducation");
+            await Shell.Current.GoToAsync("selfeducation");
         }
 
         private async Task NavigateToPublicationsAsync()
         {
-            await Shell.Current.GoToAsync("Publications");
+            await Shell.Current.GoToAsync("publications");
         }
 
         private async Task NavigateToAbsencesAsync()
         {
-            await Shell.Current.GoToAsync("Absences");
+            await Shell.Current.GoToAsync("absences");
         }
 
         private async Task NavigateToStatisticsAsync()
         {
-            await Shell.Current.GoToAsync("Statistics");
+            await Shell.Current.GoToAsync("statistics");
         }
 
         private async Task NavigateToExportAsync()
         {
-            await Shell.Current.GoToAsync("Export");
+            await Shell.Current.GoToAsync("export");
         }
 
         private async Task NavigateToRecognitionsAsync()

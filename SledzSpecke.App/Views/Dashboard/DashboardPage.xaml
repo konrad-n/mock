@@ -39,13 +39,13 @@
 
                 <!-- Kategorie aktywności -->
                 <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*" RowSpacing="15" ColumnSpacing="15">
-                    <!-- Staże -->
-                    <Frame Grid.Row="0" Grid.Column="0" BorderColor="LightGray" HasShadow="True">
+                    <!-- Procedury -->
+                    <Frame Grid.Row="1" Grid.Column="0" BorderColor="LightGray" HasShadow="True">
                         <VerticalStackLayout>
-                            <Label Text="Staże" FontAttributes="Bold" />
-                            <Label Text="{Binding InternshipCount, StringFormat='{0} z {1}'}" FontSize="24" HorizontalOptions="Center" />
-                            <ProgressBar Progress="{Binding InternshipProgress}" />
-                            <Button Text="Przejdź" Command="{Binding NavigateToInternshipsCommand}" />
+                            <Label Text="Procedury" FontAttributes="Bold" />
+                            <Label Text="{Binding ProcedureCount, StringFormat='{0} z {1}'}" FontSize="24" HorizontalOptions="Center" />
+                            <ProgressBar Progress="{Binding ProcedureProgress}" />
+                            <Button Text="Przejdź" Command="{Binding NavigateToProceduresCommand}" />
                         </VerticalStackLayout>
                     </Frame>
 
@@ -59,13 +59,13 @@
                         </VerticalStackLayout>
                     </Frame>
 
-                    <!-- Procedury -->
-                    <Frame Grid.Row="1" Grid.Column="0" BorderColor="LightGray" HasShadow="True">
+                    <!-- Staże -->
+                    <Frame Grid.Row="0" Grid.Column="0" BorderColor="LightGray" HasShadow="True">
                         <VerticalStackLayout>
-                            <Label Text="Procedury" FontAttributes="Bold" />
-                            <Label Text="{Binding ProcedureCount, StringFormat='{0} z {1}'}" FontSize="24" HorizontalOptions="Center" />
-                            <ProgressBar Progress="{Binding ProcedureProgress}" />
-                            <Button Text="Przejdź" Command="{Binding NavigateToProceduresCommand}" />
+                            <Label Text="Staże" FontAttributes="Bold" />
+                            <Label Text="{Binding InternshipCount, StringFormat='{0} z {1}'}" FontSize="24" HorizontalOptions="Center" />
+                            <ProgressBar Progress="{Binding InternshipProgress}" />
+                            <Button Text="Przejdź" Command="{Binding NavigateToInternshipsCommand}" />
                         </VerticalStackLayout>
                     </Frame>
 
@@ -101,8 +101,7 @@
                 <!-- Przyciski dodatkowych funkcji -->
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <Button Grid.Column="0" Text="Nieobecności" Command="{Binding NavigateToAbsencesCommand}" />
-                    <Button Grid.Column="1" Text="Statystyki" Command="{Binding NavigateToStatisticsCommand}" />
-                    <Button Grid.Column="2" Text="Eksport" Command="{Binding NavigateToExportCommand}" />
+                    <Button Grid.Column="1" Text="Eksport" Command="{Binding NavigateToExportCommand}" />
                 </Grid>
 
                 <!-- Uznania/skrócenia - tylko dla modułów specjalistycznych -->

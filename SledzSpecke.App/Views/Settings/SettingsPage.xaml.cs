@@ -1,9 +1,9 @@
 namespace SledzSpecke.App.Views.Settings;
 
-public partial class SettingsPage : ContentView
+public partial class SettingsPage : ContentPage
 {
-    public SettingsPage()
-    {
-        this.InitializeComponent();
-    }
+	public SettingsPage()
+	{
+		InitializeComponent();
+	}
 }

@@ -24,7 +24,6 @@ namespace SledzSpecke.Tests.TestHelpers
                 Name = "Test Specialization",
                 StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                HasModules = false,
                 CompletedInternships = 0,
                 TotalInternships = 10,
                 CompletedCourses = 0,

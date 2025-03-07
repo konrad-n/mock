@@ -1,9 +1,9 @@
 namespace SledzSpecke.App.Views.Absences;
 
-public partial class AbsencesListPage : ContentView
+public partial class AbsencesListPage : ContentPage
 {
-    public AbsencesListPage()
-    {
-        this.InitializeComponent();
-    }
+	public AbsencesListPage()
+	{
+		InitializeComponent();
+	}
 }

@@ -12,7 +12,6 @@
     xmlns:selfEducation="clr-namespace:SledzSpecke.App.Views.SelfEducation"
     xmlns:publications="clr-namespace:SledzSpecke.App.Views.Publications"
     xmlns:absences="clr-namespace:SledzSpecke.App.Views.Absences"
-    xmlns:statistics="clr-namespace:SledzSpecke.App.Views.Statistics"
     xmlns:export="clr-namespace:SledzSpecke.App.Views.Export"
     xmlns:settings="clr-namespace:SledzSpecke.App.Views.Settings"
     Shell.FlyoutBehavior="Flyout"
@@ -35,16 +34,16 @@
         <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Staże" Icon="internship.png" Route="internships">
-        <ShellContent ContentTemplate="{DataTemplate internships:InternshipsListPage}" Route="internships" />
+    <FlyoutItem Title="Procedury" Icon="procedure.png" Route="procedures">
+        <ShellContent ContentTemplate="{DataTemplate procedures:ProceduresListPage}" Route="procedures" />
     </FlyoutItem>
 
     <FlyoutItem Title="Dyżury" Icon="duty.png" Route="medicalshifts">
         <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsListPage}" Route="medicalshifts" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Procedury" Icon="procedure.png" Route="procedures">
-        <ShellContent ContentTemplate="{DataTemplate procedures:ProceduresListPage}" Route="procedures" />
+    <FlyoutItem Title="Staże" Icon="internship.png" Route="internships">
+        <ShellContent ContentTemplate="{DataTemplate internships:InternshipsListPage}" Route="internships" />
     </FlyoutItem>
 
     <FlyoutItem Title="Kursy" Icon="course.png" Route="courses">
@@ -61,10 +60,6 @@
 
     <FlyoutItem Title="Nieobecności" Icon="absence.png" Route="absences">
         <ShellContent ContentTemplate="{DataTemplate absences:AbsencesListPage}" Route="absences" />
-    </FlyoutItem>
-
-    <FlyoutItem Title="Statystyki" Icon="report.png" Route="statistics">
-        <ShellContent ContentTemplate="{DataTemplate statistics:StatisticsPage}" Route="statistics" />
     </FlyoutItem>
 
     <FlyoutItem Title="Eksport" Icon="export.png" Route="export">
