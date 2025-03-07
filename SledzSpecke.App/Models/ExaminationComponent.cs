@@ -1,8 +1,8 @@
 ﻿namespace SledzSpecke.App.Models
 {
-    public class MedicalShiftsInfo
+    public class ExaminationComponent
     {
-        public double HoursPerWeek { get; set; }
+        public string Name { get; set; }
         public string Description { get; set; }
     }
 }

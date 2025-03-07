@@ -2,12 +2,10 @@
 {
     public class CourseRequirement
     {
-        public string CourseName { get; set; }
-
-        public double DurationWeeks { get; set; }
-
-        public int DurationDays { get; set; }
-
-        public bool IsMandatory { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public double Weeks { get; set; }
+        public int WorkingDays { get; set; }
+        public bool Required { get; set; }
     }
 }

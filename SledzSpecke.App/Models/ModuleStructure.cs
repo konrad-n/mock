@@ -4,26 +4,24 @@ namespace SledzSpecke.App.Models
 {
     public class ModuleStructure
     {
-        public string ModuleName { get; set; }
-
+        public int ModuleId { get; set; }
+        public string Name { get; set; }
+        public string Code { get; set; }
         public ModuleType ModuleType { get; set; }
-
-        public int DurationMonths { get; set; }
-
-        public List<InternshipRequirement> Internships { get; set; }
-
+        public string Version { get; set; }
+        public TotalDuration Duration { get; set; }
+        public int WorkingDays { get; set; }
         public List<CourseRequirement> Courses { get; set; }
-
+        public List<InternshipRequirement> Internships { get; set; }
         public List<ProcedureRequirement> Procedures { get; set; }
-
-        public int RequiredShiftHours { get; set; }
-
-        public int SelfEducationDays { get; set; }
-
-        // Dodane pole dla informacji o dyżurach medycznych
+        public SelfEducationInfo SelfEducation { get; set; }
+        public HolidaysInfo Holidays { get; set; }
         public MedicalShiftsInfo MedicalShifts { get; set; }
-
-        // Dodane pole dla opisu kodów procedur
         public ProcedureCodeDescription ProcedureCodeDescription { get; set; }
+        public ExaminationInfo ExaminationInfo { get; set; }
+
+        // Pomocnicze pola dla aplikacji
+        public int RequiredShiftHours { get; set; }
+        public int SelfEducationDays { get; set; }
     }
 }

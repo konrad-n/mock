@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
@@ -67,7 +68,13 @@ namespace SledzSpecke.App.Helpers
             if (!string.IsNullOrEmpty(module.Structure))
             {
                 moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip,
+                        Converters = { new JsonStringEnumConverter() }
+                    });
             }
 
             // Aktualizacja statystyk modułu
@@ -212,7 +219,10 @@ namespace SledzSpecke.App.Helpers
                         // Dodajemy opcję PropertyNameCaseInsensitive, żeby adresować problem z wielkością liter
                         var options = new JsonSerializerOptions
                         {
-                            PropertyNameCaseInsensitive = true
+                            PropertyNameCaseInsensitive = true,
+                            AllowTrailingCommas = true,
+                            ReadCommentHandling = JsonCommentHandling.Skip,
+                            Converters = { new JsonStringEnumConverter() }
                         };
                         moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
 
@@ -237,7 +247,7 @@ namespace SledzSpecke.App.Helpers
                 var completedInternships = internships.Where(i => i.IsCompleted).ToList();
 
                 stats.CompletedInternshipDays = completedInternships.Sum(i => i.DaysCount);
-                stats.RequiredInternshipDays = moduleStructure?.Internships?.Sum(i => i.DurationDays) ?? 0;
+                stats.RequiredInternshipWorkingDays = moduleStructure?.Internships?.Sum(i => i.WorkingDays) ?? 0;
 
                 // Pobierz dyżury powiązane ze stażami w danym module
                 var allShifts = new List<MedicalShift>();
@@ -355,7 +365,7 @@ namespace SledzSpecke.App.Helpers
                 }
 
                 stats.CompletedInternshipDays = internships.Sum(i => i.DaysCount);
-                stats.RequiredInternshipDays = structure?.TotalWorkingDays ?? 0;
+                stats.RequiredInternshipWorkingDays = structure?.TotalWorkingDays ?? 0;
 
                 // Pobierz dyżury powiązane ze stażami
                 var allShifts = new List<MedicalShift>();

@@ -11,7 +11,7 @@ namespace SledzSpecke.App.Models
 
         public int CompletedInternshipDays { get; set; }
 
-        public int RequiredInternshipDays { get; set; }
+        public int RequiredInternshipWorkingDays { get; set; }
 
         // Kursy
         public int CompletedCourses { get; set; }

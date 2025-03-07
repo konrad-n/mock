@@ -271,7 +271,7 @@ namespace SledzSpecke.App.Helpers
                 // Rozwiązuje problem z mapowaniem medicalShifts (JSON) -> MedicalShifts (C#)
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true, // KLUCZOWA ZMIANA!
+                    PropertyNameCaseInsensitive = true,
                     AllowTrailingCommas = true,
                     ReadCommentHandling = JsonCommentHandling.Skip,
                     Converters = { new JsonStringEnumConverter() }

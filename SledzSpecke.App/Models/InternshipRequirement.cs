@@ -2,16 +2,12 @@
 {
     public class InternshipRequirement
     {
-        public string InternshipCode { get; set; }
-
-        public string InternshipName { get; set; }
-
-        public int DurationWeeks { get; set; }
-
-        public int DurationDays { get; set; }
-
-        public bool IsMandatory { get; set; }
-
-        public List<string> ProcedureCodes { get; set; } // Powiązane procedury
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public double Weeks { get; set; }
+        public int WorkingDays { get; set; }
+        public bool IsBasic { get; set; }
+        public string Location { get; set; }
+        public List<string> ProcedureCodes { get; set; }
     }
 }

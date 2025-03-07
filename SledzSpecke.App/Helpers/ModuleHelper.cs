@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
@@ -90,9 +91,10 @@ namespace SledzSpecke.App.Helpers
                 // WAŻNA POPRAWKA: Dodajemy opcję PropertyNameCaseInsensitive = true aby ignorować wielkość liter
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true, // KLUCZOWA ZMIANA!
+                    PropertyNameCaseInsensitive = true,
                     AllowTrailingCommas = true,
-                    ReadCommentHandling = JsonCommentHandling.Skip
+                    ReadCommentHandling = JsonCommentHandling.Skip,
+                    Converters = { new JsonStringEnumConverter() }
                 };
 
                 // Lista do przechowywania utworzonych modułów
