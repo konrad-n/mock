@@ -173,12 +173,6 @@
     <MauiXaml Update="Views\Internships\AddEditInternshipPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Internships\InternshipDetailsPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Internships\InternshipsListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Views\MedicalShifts\AddEditMedicalShiftPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -233,6 +227,11 @@
     <MauiXaml Update="Views\Statistics\StatisticsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\Internships\" />
+    <Folder Include="Views\Internships\" />
   </ItemGroup>
 
 </Project>
