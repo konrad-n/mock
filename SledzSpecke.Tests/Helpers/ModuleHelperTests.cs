@@ -15,7 +15,7 @@ namespace SledzSpecke.Tests.TestHelpers
         public void GetBasicModuleName_WithCardiology_ReturnsInternalMedicine()
         {
             // Arrange
-            string specializationCode = "kardiologia";
+            string specializationCode = "cardiology";
             string expectedModuleName = "internal_medicine";
 
             // Act
