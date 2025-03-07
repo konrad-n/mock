@@ -11,7 +11,6 @@ using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
-    [QueryProperty(nameof(ShiftId), "shiftId")]
     [QueryProperty(nameof(InternshipId), "internshipId")]
     public class AddEditMedicalShiftViewModel : BaseViewModel
     {
@@ -20,8 +19,8 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly IDialogService dialogService;
         private readonly ISmkVersionStrategy smkStrategy;
 
-        private string shiftId;
-        private string internshipId;
+        private int shiftId;
+        private int internshipId;
         private MedicalShift shift;
         private Internship internship;
 
@@ -126,20 +125,18 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.Title = this.smkStrategy.GetViewTitle("AddEditMedicalShift");
         }
 
-        #region Properties
-
-        public string ShiftId
+        public int ShiftId
         {
             get => this.shiftId;
             set
             {
                 this.SetProperty(ref this.shiftId, value);
-                this.IsNewMode = string.IsNullOrEmpty(value);
+                this.IsNewMode = value <= 0;
                 this.LoadShiftAsync().ConfigureAwait(false);
             }
         }
 
-        public string InternshipId
+        public int InternshipId
         {
             get => this.internshipId;
             set
@@ -309,20 +306,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.yearOptions, value);
         }
 
-        #endregion
-
-        #region Commands
-
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        #endregion
-
-        #region Methods
-
         private async Task LoadShiftAsync()
         {
-            if (!int.TryParse(this.ShiftId, out int id) || id <= 0)
+            if (this.ShiftId <= 0)
             {
                 return;
             }
@@ -331,7 +320,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             {
                 this.IsBusy = true;
 
-                var shift = await this.specializationService.GetMedicalShiftAsync(id);
+                var shift = await this.specializationService.GetMedicalShiftAsync(this.ShiftId);
                 if (shift == null)
                 {
                     return;
@@ -381,12 +370,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         private async Task LoadInternshipAsync()
         {
-            if (!int.TryParse(this.InternshipId, out int id) || id <= 0)
+            if (this.internshipId <= 0)
             {
                 return;
             }
 
-            await this.LoadInternshipAsync(id);
+            await this.LoadInternshipAsync(this.internshipId);
         }
 
         private async Task LoadInternshipAsync(int id)
@@ -446,7 +435,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return false;
             }
 
-            if (int.TryParse(this.InternshipId, out int internshipId) && internshipId <= 0)
+            if (this.InternshipId <= 0)
             {
                 return false;
             }
@@ -465,7 +454,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            if (!int.TryParse(this.InternshipId, out int internshipId) || internshipId <= 0)
+            if (this.InternshipId <= 0)
             {
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
@@ -577,7 +566,5 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         {
             await Shell.Current.GoToAsync("..");
         }
-
-        #endregion
     }
 }

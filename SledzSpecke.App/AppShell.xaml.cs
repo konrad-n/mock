@@ -36,6 +36,7 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("absences", typeof(AbsencesListPage));
             Routing.RegisterRoute("export", typeof(ExportPage));
             Routing.RegisterRoute("exportpreview", typeof(ExportPreviewPage));
+            Routing.RegisterRoute("addeditmedicalshifts", typeof(AddEditMedicalShiftPage));
         }
 
         private async void InitializeUserInfoAsync()

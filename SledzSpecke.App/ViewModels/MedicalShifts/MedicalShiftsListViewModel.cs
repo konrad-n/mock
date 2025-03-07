@@ -310,7 +310,29 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             if (this.SelectedInternship != null)
             {
-                await Shell.Current.GoToAsync($"AddEditMedicalShift?internshipId={this.SelectedInternship.InternshipId}");
+                await this.AddMedicalShiftAsync(this.SelectedInternship.InternshipId);
+            }
+        }
+
+        public async Task AddMedicalShiftAsync(int internshipId)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, object>
+                {
+                    { "internshipId", internshipId }
+                };
+
+                await Shell.Current.GoToAsync("addeditmedicalshifts", parameters);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
+                // Wyświetl dialog z informacją o błędzie
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie można przejść do ekranu dodawania dyżuru. Spróbuj ponownie.",
+                    "OK");
             }
         }
 

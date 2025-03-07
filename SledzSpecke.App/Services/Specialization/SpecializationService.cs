@@ -608,7 +608,6 @@ namespace SledzSpecke.App.Services.Specialization
         }
 
         // Metoda zwracająca wszystkie staże z modułu (zdefiniowane w JSON)
-        // Metoda zwracająca wszystkie staże z modułu (zdefiniowane w JSON)
         public async Task<List<Internship>> GetInternshipsAsync(int? moduleId = null)
         {
             try
@@ -647,14 +646,28 @@ namespace SledzSpecke.App.Services.Specialization
                     return results;
                 }
 
-                // Parsuj strukturę modułu z JSON
                 var options = new System.Text.Json.JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
                 };
 
-                var moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(
-                    module.Structure, options);
+                // Deserializacja z poprawionymi opcjami
+                ModuleStructure moduleStructure = null;
+                try
+                {
+                    moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(
+                        module.Structure, options);
+
+                    System.Diagnostics.Debug.WriteLine($"Module structure deserialized: {moduleStructure != null}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Deserializacja struktury modułu nie powiodła się: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"JSON struktury: {module.Structure.Substring(0, Math.Min(200, module.Structure.Length))}...");
+                }
 
                 if (moduleStructure?.Internships == null)
                 {
