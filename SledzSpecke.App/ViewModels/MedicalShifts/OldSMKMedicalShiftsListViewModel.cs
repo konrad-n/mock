@@ -203,14 +203,9 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 this.SelectedYear = this.AvailableYears[0];
             }
 
-            // Przejdź do ekranu dodawania dyżuru
-            var parameters = new Dictionary<string, object>
-            {
-                { "year", this.SelectedYear.ToString() }
-            };
-
             System.Diagnostics.Debug.WriteLine($"Dodawanie dyżuru dla roku: {this.SelectedYear}");
-            await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", parameters);
+
+            await Shell.Current.GoToAsync($"AddEditOldSMKMedicalShift?ShiftId=-1&YearParam={this.SelectedYear}");
         }
 
         private async Task EditShiftAsync(RealizedMedicalShiftOldSMK shift)
@@ -220,13 +215,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            // Przejdź do ekranu edycji dyżuru
-            var parameters = new Dictionary<string, object>
-            {
-                { "shiftId", shift.ShiftId }
-            };
-
-            await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", parameters);
+            await Shell.Current.GoToAsync($"AddEditOldSMKMedicalShift?ShiftId={shift.ShiftId.ToString()}&YearParam={shift.Year.ToString()}");
         }
 
         private async Task DeleteShiftAsync(RealizedMedicalShiftOldSMK shift)

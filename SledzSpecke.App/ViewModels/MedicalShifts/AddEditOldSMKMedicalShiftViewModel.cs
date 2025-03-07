@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,12 +9,13 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.MedicalShifts;
+using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
     [QueryProperty(nameof(ShiftId), nameof(ShiftId))]
-    [QueryProperty(nameof(Year), nameof(Year))]
+    [QueryProperty(nameof(YearParam), nameof(YearParam))]
     public class AddEditOldSMKMedicalShiftViewModel : BaseViewModel
     {
         private readonly IMedicalShiftsService medicalShiftsService;
@@ -38,13 +41,18 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             {
                 StartDate = DateTime.Today,
                 Hours = 24,
-                Minutes = 0
+                Minutes = 0,
+                Year = 1 // Domyślnie rok 1
             };
 
             // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.SaveAsync);
             this.CancelCommand = new AsyncRelayCommand(this.CancelAsync);
+
+            System.Diagnostics.Debug.WriteLine("Konstruktor AddEditOldSMKMedicalShiftViewModel wywołany");
         }
+
+        private string yearParam;
 
         // Właściwości QueryProperties
         public string ShiftId
@@ -64,19 +72,26 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
         }
 
-        public string Year
+        public string YearParam
         {
             set
             {
-                if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int year))
+                this.yearParam = value;
+                System.Diagnostics.Debug.WriteLine($"YearParam ustawiony na: {value}");
+
+                if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int yearValue))
                 {
-                    this.year = year;
-                    this.shift.Year = year;
-                    System.Diagnostics.Debug.WriteLine($"Ustawiono rok: {year}");
+                    this.year = yearValue;
+                    this.shift.Year = yearValue;
+
+                    this.OnPropertyChanged(nameof(Shift));
+                    this.OnPropertyChanged(nameof(Shift.Year));
+
+                    System.Diagnostics.Debug.WriteLine($"Rok został ustawiony na: {yearValue}");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Nie udało się sparsować roku: {value}");
+                    System.Diagnostics.Debug.WriteLine($"Nie udało się sparsować roku z: {value}");
                 }
             }
         }

@@ -9,7 +9,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="15">
             <!-- Rok szkolenia (informacyjnie) -->
-            <Label Text="{Binding Shift.Year, StringFormat='Rok szkolenia: {0}'}" 
+            <Label Text="{Binding Shift.Year, StringFormat='Rok: {0}'}" 
                    FontSize="16" 
                    FontAttributes="Bold" />
 
