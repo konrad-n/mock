@@ -2,24 +2,32 @@
 
 namespace SledzSpecke.App.Converters
 {
-    /// <summary>
-    /// Konwerter do ustawiania koloru tła wiersza w zależności od wartości logicznej.
-    /// </summary>
     public class BoolToBackgroundColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue)
+            if (value == null || parameter == null)
             {
-                return boolValue ? Colors.WhiteSmoke : Colors.White;
+                return Colors.Gray;
             }
 
-            return Colors.White;
+            try
+            {
+                // Porównaj wartość z parametrem - jeśli są równe, zwróć kolor główny
+                int selectedValue = (int)parameter;
+                int currentValue = (int)value;
+
+                return selectedValue == currentValue ? Colors.DarkBlue : Colors.LightSlateGray;
+            }
+            catch
+            {
+                return Colors.Gray;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return null;
+            throw new NotImplementedException();
         }
     }
 }

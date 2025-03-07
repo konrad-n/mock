@@ -72,6 +72,11 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 {
                     this.year = year;
                     this.shift.Year = year;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono rok: {year}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Nie udało się sparsować roku: {value}");
                 }
             }
         }

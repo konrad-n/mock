@@ -186,18 +186,30 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         private async Task SelectYearAsync(int year)
         {
+            if (this.IsBusy)
+            {
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Wybrano rok: {year}");
             this.SelectedYear = year;
             await this.LoadDataAsync();
         }
 
         private async Task AddShiftAsync()
         {
+            if (this.SelectedYear <= 0 && this.AvailableYears.Count > 0)
+            {
+                this.SelectedYear = this.AvailableYears[0];
+            }
+
             // Przejdź do ekranu dodawania dyżuru
             var parameters = new Dictionary<string, object>
             {
-                { "year", this.SelectedYear }
+                { "year", this.SelectedYear.ToString() }
             };
 
+            System.Diagnostics.Debug.WriteLine($"Dodawanie dyżuru dla roku: {this.SelectedYear}");
             await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", parameters);
         }
 

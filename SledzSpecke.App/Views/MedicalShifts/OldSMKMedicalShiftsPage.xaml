@@ -47,26 +47,19 @@
                     <VerticalStackLayout>
                         <Label Text="Wybierz rok specjalizacji, dla którego chcesz zobaczyć dyżury:" Style="{StaticResource HeaderStyle}" />
 
-                        <CollectionView ItemsSource="{Binding AvailableYears}" SelectionMode="None">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="x:Int32">
-                                    <Frame Padding="10" 
-                                           BorderColor="{Binding ., Converter={StaticResource CodeToColorConverter}, ConverterParameter={Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=SelectedYear}}">
-                                        <Frame.GestureRecognizers>
-                                            <TapGestureRecognizer 
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=SelectYearCommand}" 
-                                                CommandParameter="{Binding .}" />
-                                        </Frame.GestureRecognizers>
-                                        <Label Text="{Binding ., StringFormat='Rok {0}'}" 
-                                               FontSize="16" 
-                                               HorizontalOptions="Center" />
-                                    </Frame>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                        <!-- Prosty widok lat z automatycznym zawijaniem wierszy -->
+                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center" Margin="0,10">
+                            <Label Text="Wybierz rok:" HorizontalOptions="Center" FontAttributes="Bold" />
+                            <FlexLayout x:Name="YearsContainer"
+                                       Direction="Row"
+                                       Wrap="Wrap"
+                                       JustifyContent="Center"
+                                       AlignItems="Center"
+                                       AlignContent="Center"
+                                       Margin="0,5,0,0">
+                                <!-- Przyciski lat zostaną dodane w code-behind -->
+                            </FlexLayout>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Frame>
 
@@ -113,14 +106,15 @@
                                                 <SwipeItem Text="Usuń" 
                                                            BackgroundColor="{StaticResource DangerColor}" 
                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=DeleteShiftCommand}" 
-                                                           CommandParameter="{Binding}" />
+                                                           CommandParameter="{Binding .}" />
                                             </SwipeItems>
                                         </SwipeView.RightItems>
 
                                         <Grid ColumnDefinitions="Auto,Auto,2*,Auto" Padding="5">
                                             <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=EditShiftCommand}" 
-                                                                      CommandParameter="{Binding}" />
+                                                <TapGestureRecognizer 
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=EditShiftCommand}" 
+                                                    CommandParameter="{Binding .}" />
                                             </Grid.GestureRecognizers>
 
                                             <Label Grid.Column="0" Text="{Binding StartDate, StringFormat='{0:yyyy-MM-dd}'}" Style="{StaticResource ColumnValueStyle}" />

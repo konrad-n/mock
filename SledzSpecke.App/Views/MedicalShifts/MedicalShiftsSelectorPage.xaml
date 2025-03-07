@@ -3,17 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SledzSpecke.App.Views.MedicalShifts.MedicalShiftsSelectorPage"
              Title="Dyżury medyczne">
-    <VerticalStackLayout Padding="20" Spacing="20">
-        <Label Text="Wybierz wersję SMK:" FontSize="Title" FontAttributes="Bold" />
-
-        <Button Text="Stary SMK" 
-                Command="{Binding NavigateToOldSMKCommand}"
-                Style="{StaticResource PrimaryButton}"
-                HeightRequest="60" />
-
-        <Button Text="Nowy SMK" 
-                Command="{Binding NavigateToNewSMKCommand}"
-                Style="{StaticResource PrimaryButton}"
-                HeightRequest="60" />
+    <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center" HorizontalOptions="Center">
+        <ActivityIndicator IsRunning="True" />
+        <Label Text="Ładowanie dyżurów..." HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>
