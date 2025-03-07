@@ -5,6 +5,7 @@ using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.Services.FileSystem;
+using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Notification;
 using SledzSpecke.App.Services.Recognition;
 using SledzSpecke.App.Services.Settings;
@@ -71,6 +72,7 @@ namespace SledzSpecke.App
             services.AddSingleton<IRecognitionService, RecognitionService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<ISettingsService, SettingsService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<ISecureStorageService, SecureStorageService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
+            services.AddSingleton<IMedicalShiftsService, MedicalShiftsService>();
 
             // Dodajemy ModuleInitializer jako usługę
             services.AddTransient<ModuleInitializer>();
@@ -95,8 +97,11 @@ namespace SledzSpecke.App
             services.AddTransient<RegisterViewModel>();
             services.AddTransient<DashboardViewModel>();
 
-            services.AddTransient<MedicalShiftsListViewModel>();
-            services.AddTransient<AddEditMedicalShiftViewModel>();
+            services.AddTransient<MedicalShiftsSelectorViewModel>();
+            services.AddTransient<OldSMKMedicalShiftsListViewModel>();
+            services.AddTransient<NewSMKMedicalShiftsListViewModel>();
+            services.AddTransient<AddEditOldSMKMedicalShiftViewModel>();
+
 
             services.AddTransient<ExportViewModel>();
             services.AddTransient<ExportPreviewViewModel>();
@@ -109,8 +114,10 @@ namespace SledzSpecke.App
             services.AddTransient<DashboardPage>();
 
             services.AddTransient<ProceduresListPage>();
-            services.AddTransient<MedicalShiftsListPage>();
-            services.AddTransient<AddEditMedicalShiftPage>();
+            services.AddTransient<MedicalShiftsSelectorPage>();
+            services.AddTransient<OldSMKMedicalShiftsPage>();
+            services.AddTransient<NewSMKMedicalShiftsPage>();
+            services.AddTransient<AddEditOldSMKMedicalShiftPage>();
             services.AddTransient<InternshipsListPage>();
             services.AddTransient<CoursesListPage>();
             services.AddTransient<SelfEducationListPage>();

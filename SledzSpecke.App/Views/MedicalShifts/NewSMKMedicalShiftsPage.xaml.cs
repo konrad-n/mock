@@ -2,11 +2,11 @@
 
 namespace SledzSpecke.App.Views.MedicalShifts
 {
-    public partial class MedicalShiftsListPage : ContentPage
+    public partial class NewSMKMedicalShiftsPage : ContentPage
     {
-        private readonly MedicalShiftsListViewModel viewModel;
+        private readonly NewSMKMedicalShiftsListViewModel viewModel;
 
-        public MedicalShiftsListPage(MedicalShiftsListViewModel viewModel)
+        public NewSMKMedicalShiftsPage(NewSMKMedicalShiftsListViewModel viewModel)
         {
             this.InitializeComponent();
             this.viewModel = viewModel;

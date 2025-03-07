@@ -39,7 +39,7 @@
     </FlyoutItem>
 
     <FlyoutItem Title="Dyżury" Icon="duty.png" Route="medicalshifts">
-        <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsListPage}" Route="medicalshifts" />
+        <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsSelectorPage}" Route="medicalshifts" />
     </FlyoutItem>
 
     <FlyoutItem Title="Staże" Icon="internship.png" Route="internships">

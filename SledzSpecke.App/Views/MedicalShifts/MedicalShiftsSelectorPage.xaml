@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SledzSpecke.App.Views.MedicalShifts.MedicalShiftsSelectorPage"
+             Title="Dyżury medyczne">
+    <VerticalStackLayout Padding="20" Spacing="20">
+        <Label Text="Wybierz wersję SMK:" FontSize="Title" FontAttributes="Bold" />
+
+        <Button Text="Stary SMK" 
+                Command="{Binding NavigateToOldSMKCommand}"
+                Style="{StaticResource PrimaryButton}"
+                HeightRequest="60" />
+
+        <Button Text="Nowy SMK" 
+                Command="{Binding NavigateToNewSMKCommand}"
+                Style="{StaticResource PrimaryButton}"
+                HeightRequest="60" />
+    </VerticalStackLayout>
+</ContentPage>

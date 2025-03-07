@@ -137,10 +137,16 @@
     <MauiXaml Update="Views\Internships\InternshipsListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\MedicalShifts\AddEditMedicalShiftPage.xaml">
+    <MauiXaml Update="Views\MedicalShifts\AddEditOldSMKMedicalShiftPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\MedicalShifts\MedicalShiftsListPage.xaml">
+    <MauiXaml Update="Views\MedicalShifts\MedicalShiftsSelectorPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\MedicalShifts\NewSMKMedicalShiftsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\MedicalShifts\OldSMKMedicalShiftsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\Procedures\ProceduresListPage.xaml">

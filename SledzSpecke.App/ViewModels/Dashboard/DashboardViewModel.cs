@@ -267,7 +267,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     return;
                 }
 
-                this.HasTwoModules = this.CurrentSpecialization.Modules.Count == 2;
+                this.HasTwoModules = this.CurrentSpecialization.Modules.Any(x => x.Type == ModuleType.Basic);
 
 
                 // Upewnij się, że moduły są zainicjalizowane

@@ -224,20 +224,58 @@ namespace SledzSpecke.App.Services.Specialization
 
                 double totalHoursDouble = 0;
 
-                // Pobierz staże odpowiednie dla modułu lub całej specjalizacji
-                var internships = await this.databaseService.GetInternshipsAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
+                // Dla starego SMK - pobierz wszystkie dyżury
+                var oldSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ?";
+                var oldSmkShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(oldSmkShiftsQuery, specialization.SpecializationId);
 
-                // Dla każdego stażu pobierz dyżury
-                foreach (var internship in internships)
+                // Dla nowego SMK - pobierz staże w module, a następnie dyżury dla tych internshipRequirementId
+                var newSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ?";
+                var newSmkShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(newSmkShiftsQuery, specialization.SpecializationId);
+
+                // Filtruj dyżury nowego SMK według modułu, jeśli podano
+                if (moduleId.HasValue)
                 {
-                    var shifts = await this.databaseService.GetMedicalShiftsAsync(internshipId: internship.InternshipId);
-                    foreach (var shift in shifts)
+                    // Pobierz wymagania stażowe dla tego modułu
+                    var module = await this.databaseService.GetModuleAsync(moduleId.Value);
+                    if (module != null && !string.IsNullOrEmpty(module.Structure))
                     {
-                        // Poprawka: używamy prawidłowego dzielenia zmiennoprzecinkowego
-                        totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
+                        try
+                        {
+                            // Deserializuj strukturę modułu, aby uzyskać listę wymagań stażowych
+                            var options = new System.Text.Json.JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true,
+                                AllowTrailingCommas = true,
+                                ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
+                                Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+                            };
+
+                            var moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
+                            if (moduleStructure?.Internships != null)
+                            {
+                                // Pobierz identyfikatory wymagań stażowych dla tego modułu
+                                var internshipRequirementIds = moduleStructure.Internships.Select(i => i.Id).ToList();
+
+                                // Filtruj dyżury według wymagań stażowych z tego modułu
+                                newSmkShifts = newSmkShifts.Where(s => internshipRequirementIds.Contains(s.InternshipRequirementId)).ToList();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Błąd podczas deserializacji struktury modułu: {ex.Message}");
+                        }
                     }
+                }
+
+                // Suma godzin z obu typów dyżurów
+                foreach (var shift in oldSmkShifts)
+                {
+                    totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
+                }
+
+                foreach (var shift in newSmkShifts)
+                {
+                    totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
                 }
 
                 // Zaokrąglamy do najbliższej pełnej godziny

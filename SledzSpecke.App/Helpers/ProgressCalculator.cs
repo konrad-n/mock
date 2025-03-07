@@ -249,25 +249,29 @@ namespace SledzSpecke.App.Helpers
                 stats.CompletedInternshipDays = completedInternships.Sum(i => i.DaysCount);
                 stats.RequiredInternshipWorkingDays = moduleStructure?.Internships?.Sum(i => i.WorkingDays) ?? 0;
 
-                // Pobierz dyżury powiązane ze stażami w danym module
-                var allShifts = new List<MedicalShift>();
-                foreach (var internship in internships)
+                // Pobierz dyżury medyczne (zarówno dla nowego jak i starego SMK)
+                var oldSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ?";
+                var oldSmkShifts = await database.QueryAsync<RealizedMedicalShiftOldSMK>(oldSmkShiftsQuery, specialization.SpecializationId);
+
+                var newSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ?";
+                var newSmkShifts = await database.QueryAsync<RealizedMedicalShiftNewSMK>(newSmkShiftsQuery, specialization.SpecializationId);
+
+                // Oblicz całkowitą liczbę godzin dyżurów
+                double totalShiftHours = 0;
+
+                // Oblicz godziny z dyżurów starego SMK
+                foreach (var shift in oldSmkShifts)
                 {
-                    var shifts = await database.GetMedicalShiftsAsync(internship.InternshipId);
-                    allShifts.AddRange(shifts);
+                    totalShiftHours += shift.Hours + ((double)shift.Minutes / 60.0);
                 }
 
-                // Obliczenie całkowitej liczby godzin dyżurów
-                double totalShiftHours = allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0));
+                // Oblicz godziny z dyżurów nowego SMK
+                foreach (var shift in newSmkShifts)
+                {
+                    totalShiftHours += shift.Hours + ((double)shift.Minutes / 60.0);
+                }
+
                 stats.CompletedShiftHours = (int)Math.Round(totalShiftHours);
-
-                // Aktualizacja liczby wykonanych godzin dyżurów w module
-                if (module.CompletedShiftHours != stats.CompletedShiftHours)
-                {
-                    module.CompletedShiftHours = stats.CompletedShiftHours;
-                    await database.UpdateModuleAsync(module);
-                    System.Diagnostics.Debug.WriteLine($"Zaktualizowano CompletedShiftHours w module: {module.CompletedShiftHours} h");
-                }
 
                 // Pobieramy liczbę wymaganych godzin dyżurów bezpośrednio z modułu
                 stats.RequiredShiftHours = module.RequiredShiftHours;
