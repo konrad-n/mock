@@ -66,10 +66,6 @@ namespace SledzSpecke.App.ViewModels.Export
             this.IncludeEducationalActivities = true;
             this.IncludeRecognitions = true;
 
-            // Ustawienie domyślnego zakresu dat (ostatni miesiąc)
-            this.EndDate = DateTime.Today;
-            this.StartDate = this.EndDate.AddMonths(-1);
-
             // Inicjalizacja komend
             this.ExportCommand = new AsyncRelayCommand(this.OnExportAsync, this.CanExecuteExport);
             this.ShareLastExportCommand = new AsyncRelayCommand(this.OnShareLastExportAsync);
@@ -78,6 +74,10 @@ namespace SledzSpecke.App.ViewModels.Export
             this.SetLastMonthCommand = new RelayCommand(this.SetLastMonthRange);
             this.SetLastYearCommand = new RelayCommand(this.SetLastYearRange);
             this.SetAllTimeCommand = new RelayCommand(this.SetAllTimeRange);
+
+            // Ustawienie domyślnego zakresu dat (ostatni miesiąc)
+            this.EndDate = DateTime.Today;
+            this.StartDate = this.EndDate.AddMonths(-1);
 
             // Wczytanie danych
             this.LoadDataAsync().ConfigureAwait(false);
