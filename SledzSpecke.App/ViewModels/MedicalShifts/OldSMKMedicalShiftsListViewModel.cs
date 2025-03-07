@@ -205,7 +205,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             System.Diagnostics.Debug.WriteLine($"Dodawanie dyżuru dla roku: {this.SelectedYear}");
 
-            await Shell.Current.GoToAsync($"AddEditOldSMKMedicalShift?ShiftId=-1&YearParam={this.SelectedYear}");
+            // Poprawiona nawigacja z parametrami
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "ShiftId", "-1" },  // -1 oznacza nowy dyżur
+                { "YearParam", this.SelectedYear.ToString() }
+            };
+
+            await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", navigationParameter);
+
+            System.Diagnostics.Debug.WriteLine("Nawigacja do strony dodawania została wywołana");
         }
 
         private async Task EditShiftAsync(RealizedMedicalShiftOldSMK shift)
@@ -215,7 +224,19 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            await Shell.Current.GoToAsync($"AddEditOldSMKMedicalShift?ShiftId={shift.ShiftId.ToString()}&YearParam={shift.Year.ToString()}");
+            // Dodane szczegółowe logowanie dla diagnostyki
+            System.Diagnostics.Debug.WriteLine($"Edycja dyżuru: ID={shift.ShiftId}, Rok={shift.Year}");
+
+            // Poprawiona nawigacja z parametrami
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "ShiftId", shift.ShiftId.ToString() },
+                { "YearParam", shift.Year.ToString() }
+            };
+
+            await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", navigationParameter);
+
+            System.Diagnostics.Debug.WriteLine("Nawigacja do strony edycji została wywołana");
         }
 
         private async Task DeleteShiftAsync(RealizedMedicalShiftOldSMK shift)

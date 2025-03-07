@@ -89,14 +89,13 @@
                                HorizontalOptions="Center" Margin="0,20" />
 
                         <!-- Lista dyżurów -->
-                        <CollectionView ItemsSource="{Binding Shifts}">
+                        <CollectionView ItemsSource="{Binding Shifts}" Margin="0,10">
                             <CollectionView.Header>
-                                <Grid ColumnDefinitions="Auto,Auto,2*,Auto" Padding="5">
-                                    <Label Grid.Column="0" Text="Data rozpoczęcia" Style="{StaticResource ColumnHeaderStyle}" />
-                                    <Label Grid.Column="1" Text="Czas" Style="{StaticResource ColumnHeaderStyle}" />
-                                    <Label Grid.Column="2" Text="Nazwa komórki organizacyjnej" Style="{StaticResource ColumnHeaderStyle}" />
-                                    <Label Grid.Column="3" Text="Rok" Style="{StaticResource ColumnHeaderStyle}" />
-                                </Grid>
+                                <Label Text="Swipe w lewo aby usunąć dyżur" 
+                                       HorizontalOptions="Center" 
+                                       TextColor="{StaticResource TextMutedColor}" 
+                                       FontSize="12" 
+                                       Margin="0,0,0,10" />
                             </CollectionView.Header>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:RealizedMedicalShiftOldSMK">
@@ -104,32 +103,69 @@
                                         <SwipeView.RightItems>
                                             <SwipeItems>
                                                 <SwipeItem Text="Usuń" 
-                                                           BackgroundColor="{StaticResource DangerColor}" 
-                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=DeleteShiftCommand}" 
-                                                           CommandParameter="{Binding .}" />
+                                           BackgroundColor="{StaticResource DangerColor}" 
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=DeleteShiftCommand}" 
+                                           CommandParameter="{Binding .}" />
                                             </SwipeItems>
                                         </SwipeView.RightItems>
 
-                                        <Grid ColumnDefinitions="Auto,Auto,2*,Auto" Padding="5">
-                                            <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer 
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=EditShiftCommand}" 
-                                                    CommandParameter="{Binding .}" />
-                                            </Grid.GestureRecognizers>
+                                        <Frame Margin="0,5,0,5" Padding="12" BorderColor="LightGray" HasShadow="False" CornerRadius="8">
+                                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                                                <!-- Główne dane dyżuru -->
+                                                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3">
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <Label Text="Rok szkolenia: " FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                                                        <Label Grid.Column="1" Text="{Binding Year, StringFormat='Rok {0}'}" TextColor="{StaticResource TextColor}" />
+                                                    </Grid>
 
-                                            <Label Grid.Column="0" Text="{Binding StartDate, StringFormat='{0:yyyy-MM-dd}'}" Style="{StaticResource ColumnValueStyle}" />
-                                            <StackLayout Grid.Column="1" Orientation="Horizontal">
-                                                <Label Text="{Binding Hours}" Style="{StaticResource ColumnValueStyle}" />
-                                                <Label Text="h " Style="{StaticResource ColumnValueStyle}" />
-                                                <Label Text="{Binding Minutes}" Style="{StaticResource ColumnValueStyle}" />
-                                                <Label Text="m" Style="{StaticResource ColumnValueStyle}" />
-                                            </StackLayout>
-                                            <Label Grid.Column="2" Text="{Binding Location}" Style="{StaticResource ColumnValueStyle}" LineBreakMode="TailTruncation" />
-                                            <Label Grid.Column="3" Text="{Binding Year, StringFormat='Rok {0}'}" Style="{StaticResource ColumnValueStyle}" />
-                                        </Grid>
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <Label Text="Liczba godzin: " FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                                                        <StackLayout Grid.Column="1" Orientation="Horizontal">
+                                                            <Label Text="{Binding Hours}" TextColor="{StaticResource TextColor}" />
+                                                        </StackLayout>
+                                                    </Grid>
+
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <Label Text="Liczba minut: " FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                                                        <StackLayout Grid.Column="1" Orientation="Horizontal">
+                                                            <Label Text="{Binding Minutes}" TextColor="{StaticResource TextColor}" />
+                                                        </StackLayout>
+                                                    </Grid>
+
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <Label Text="Data rozpoczęcia: " FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                                                        <Label Grid.Column="1" Text="{Binding StartDate, StringFormat='{0:yyyy-MM-dd}'}" TextColor="{StaticResource TextColor}" />
+                                                    </Grid>
+
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <Label Text="Nazwa komórki organizacyjnej: " FontAttributes="Bold" TextColor="{StaticResource TextColor}" />
+                                                    </Grid>                                                    
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <Label Grid.Column="1" Text="{Binding Location}" LineBreakMode="TailTruncation" TextColor="{StaticResource TextColor}" />
+                                                    </Grid>
+                                                </VerticalStackLayout>
+
+                                                <!-- Przycisk edycji -->
+                                                <Button Grid.Row="0" Grid.Column="1"
+                                        Text="Edytuj"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OldSMKMedicalShiftsListViewModel}}, Path=EditShiftCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Style="{StaticResource OutlineButton}"
+                                        HeightRequest="40"
+                                        WidthRequest="80"
+                                        VerticalOptions="Center"
+                                        Margin="0,0,0,0" />
+                                            </Grid>
+                                        </Frame>
                                     </SwipeView>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                                    <Label Text="Brak dodanych dyżurów" FontSize="16" HorizontalOptions="Center" TextColor="{StaticResource TextMutedColor}" />
+                                    <Label Text="Użyj przycisku + aby dodać nowy dyżur" FontSize="14" HorizontalOptions="Center" TextColor="{StaticResource TextMutedColor}" Margin="0,10,0,0" />
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
                         </CollectionView>
                     </VerticalStackLayout>
                 </Frame>
