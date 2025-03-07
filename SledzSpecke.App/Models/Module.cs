@@ -23,15 +23,17 @@ namespace SledzSpecke.App.Models
 
         public string Structure { get; set; } // JSON struktura modułu
 
-        // Statystyki postępu
+        // Statystyki postępu - staże
         public int CompletedInternships { get; set; }
 
         public int TotalInternships { get; set; }
 
+        // Statystyki postępu - kursy
         public int CompletedCourses { get; set; }
 
         public int TotalCourses { get; set; }
 
+        // Statystyki postępu - procedury
         public int CompletedProceduresA { get; set; }
 
         public int TotalProceduresA { get; set; }
@@ -39,5 +41,17 @@ namespace SledzSpecke.App.Models
         public int CompletedProceduresB { get; set; }
 
         public int TotalProceduresB { get; set; }
+
+        // Statystyki postępu - dyżury medyczne (NOWE POLA)
+        public int CompletedShiftHours { get; set; }
+
+        public int RequiredShiftHours { get; set; }
+
+        public double WeeklyShiftHours { get; set; }
+
+        // Statystyki postępu - samokształcenie (NOWE POLA)
+        public int CompletedSelfEducationDays { get; set; }
+
+        public int TotalSelfEducationDays { get; set; }
     }
 }

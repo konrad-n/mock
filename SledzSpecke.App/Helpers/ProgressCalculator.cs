@@ -18,8 +18,8 @@ namespace SledzSpecke.App.Helpers
         /// <param name="moduleId">ID modułu do aktualizacji.</param>
         /// <returns>Zadanie asynchroniczne.</returns>
         public static async Task UpdateModuleProgressAsync(
-            IDatabaseService database,
-            int moduleId)
+    IDatabaseService database,
+    int moduleId)
         {
             var module = await database.GetModuleAsync(moduleId);
             if (module == null)
@@ -46,11 +46,28 @@ namespace SledzSpecke.App.Helpers
             var proceduresA = procedures.Count(p => p.OperatorCode == "A");
             var proceduresB = procedures.Count(p => p.OperatorCode == "B");
 
+            // Pobranie dyżurów powiązanych ze stażami w module
+            var shifts = new List<MedicalShift>();
+            foreach (var internship in internships)
+            {
+                var internshipShifts = await database.GetMedicalShiftsAsync(internshipId: internship.InternshipId);
+                shifts.AddRange(internshipShifts);
+            }
+
+            // Obliczenie całkowitej liczby godzin dyżurów
+            double totalShiftHours = shifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0));
+            int completedShiftHours = (int)Math.Round(totalShiftHours);
+
+            // Pobranie elementów samokształcenia
+            var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
+            int completedSelfEducationDays = selfEducationItems.Count;
+
             // Parsowanie struktury modułu z JSON
             ModuleStructure moduleStructure = null;
             if (!string.IsNullOrEmpty(module.Structure))
             {
-                moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure);
+                moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
 
             // Aktualizacja statystyk modułu
@@ -62,6 +79,49 @@ namespace SledzSpecke.App.Helpers
             module.TotalProceduresA = moduleStructure?.Procedures?.Sum(p => p.RequiredCountA) ?? 0;
             module.CompletedProceduresB = proceduresB;
             module.TotalProceduresB = moduleStructure?.Procedures?.Sum(p => p.RequiredCountB) ?? 0;
+
+            // Aktualizacja nowych pól
+            module.CompletedShiftHours = completedShiftHours;
+            module.CompletedSelfEducationDays = completedSelfEducationDays;
+
+            // Jeśli RequiredShiftHours nie jest jeszcze ustawione, a mamy dane w strukturze,
+            // ustawiamy je teraz
+            if (module.RequiredShiftHours <= 0)
+            {
+                if (moduleStructure?.RequiredShiftHours > 0)
+                {
+                    module.RequiredShiftHours = moduleStructure.RequiredShiftHours;
+                }
+                else if (moduleStructure?.MedicalShifts?.HoursPerWeek > 0)
+                {
+                    // Obliczenie liczby tygodni
+                    TimeSpan moduleDuration = module.EndDate - module.StartDate;
+                    int weeks = Math.Max(1, (int)(moduleDuration.TotalDays / 7));
+
+                    // Ustawienie wymaganej liczby godzin
+                    module.WeeklyShiftHours = moduleStructure.MedicalShifts.HoursPerWeek;
+                    module.RequiredShiftHours = (int)Math.Round(module.WeeklyShiftHours * weeks);
+                }
+                else
+                {
+                    // Domyślna wartość - 10 godz. 5 min. tygodniowo
+                    module.WeeklyShiftHours = 10.083;
+
+                    // Obliczenie liczby tygodni
+                    TimeSpan moduleDuration = module.EndDate - module.StartDate;
+                    int weeks = Math.Max(1, (int)(moduleDuration.TotalDays / 7));
+
+                    // Ustawienie wymaganej liczby godzin
+                    module.RequiredShiftHours = (int)Math.Round(module.WeeklyShiftHours * weeks);
+                }
+            }
+
+            // Jeśli TotalSelfEducationDays nie jest jeszcze ustawione, a mamy dane w strukturze,
+            // ustawiamy je teraz
+            if (module.TotalSelfEducationDays <= 0 && moduleStructure?.SelfEducationDays > 0)
+            {
+                module.TotalSelfEducationDays = moduleStructure.SelfEducationDays;
+            }
 
             // Zapisanie zaktualizowanego modułu
             await database.UpdateModuleAsync(module);
@@ -187,37 +247,74 @@ namespace SledzSpecke.App.Helpers
                     allShifts.AddRange(shifts);
                 }
 
-                stats.CompletedShiftHours = (int)Math.Round(allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0)));
+                // Obliczenie całkowitej liczby godzin dyżurów
+                double totalShiftHours = allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0));
+                stats.CompletedShiftHours = (int)Math.Round(totalShiftHours);
 
-                // Obliczamy wymagane godziny dyżurów dla modułu
-                // Używamy czasu trwania modułu zamiast całej specjalizacji
-                TimeSpan moduleDuration = module.EndDate - module.StartDate;
-
-                // Sprawdźmy najpierw, czy bezpośrednio mamy podaną liczbę godzin
-                if (moduleStructure != null && moduleStructure.RequiredShiftHours > 0)
+                // Aktualizacja liczby wykonanych godzin dyżurów w module
+                if (module.CompletedShiftHours != stats.CompletedShiftHours)
                 {
-                    stats.RequiredShiftHours = moduleStructure.RequiredShiftHours;
-                    System.Diagnostics.Debug.WriteLine($"Używam RequiredShiftHours z ModuleStructure: {stats.RequiredShiftHours} h");
+                    module.CompletedShiftHours = stats.CompletedShiftHours;
+                    await database.UpdateModuleAsync(module);
+                    System.Diagnostics.Debug.WriteLine($"Zaktualizowano CompletedShiftHours w module: {module.CompletedShiftHours} h");
                 }
-                else
-                {
-                    // Jeśli nie mamy bezpośrednio podanej liczby godzin, obliczamy na podstawie hoursPerWeek
-                    double weeklyHours = 10.083; // Domyślna wartość - 10 godz. 5 min. tygodniowo
 
-                    if (moduleStructure?.MedicalShifts != null && moduleStructure.MedicalShifts.HoursPerWeek > 0)
+                // Pobieramy liczbę wymaganych godzin dyżurów bezpośrednio z modułu
+                stats.RequiredShiftHours = module.RequiredShiftHours;
+
+                // Jeśli z jakiegoś powodu RequiredShiftHours w module jest zerem,
+                // próbujemy pobrać tę wartość z struktury modułu lub obliczyć
+                if (stats.RequiredShiftHours == 0)
+                {
+                    // Sprawdźmy najpierw, czy bezpośrednio mamy podaną liczbę godzin w JSON
+                    if (moduleStructure != null && moduleStructure.RequiredShiftHours > 0)
                     {
-                        weeklyHours = moduleStructure.MedicalShifts.HoursPerWeek;
-                        System.Diagnostics.Debug.WriteLine($"Używam niestandardowych godzin dyżurów: {weeklyHours} h/tydzień");
+                        stats.RequiredShiftHours = moduleStructure.RequiredShiftHours;
+                        System.Diagnostics.Debug.WriteLine($"Używam RequiredShiftHours z ModuleStructure JSON: {stats.RequiredShiftHours} h");
+
+                        // Aktualizujemy pole w module
+                        module.RequiredShiftHours = stats.RequiredShiftHours;
+                        await database.UpdateModuleAsync(module);
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("Używam domyślnych godzin dyżurów: 10h 5min/tydzień");
-                    }
+                        // Jeśli nie mamy bezpośrednio podanej liczby godzin, obliczamy na podstawie hoursPerWeek
+                        double weeklyHours = module.WeeklyShiftHours;
 
-                    // Obliczenie liczby tygodni
-                    int weeks = Math.Max(1, (int)(moduleDuration.TotalDays / 7));
-                    stats.RequiredShiftHours = (int)Math.Round(weeklyHours * weeks);
-                    System.Diagnostics.Debug.WriteLine($"Obliczone wymagane godziny dyżurów: {stats.RequiredShiftHours} h ({weeklyHours} h/tydzień × {weeks} tygodni)");
+                        // Jeśli WeeklyShiftHours w module jest zerem, próbujemy pobrać z JSON lub używamy domyślnej
+                        if (weeklyHours <= 0)
+                        {
+                            if (moduleStructure?.MedicalShifts != null && moduleStructure.MedicalShifts.HoursPerWeek > 0)
+                            {
+                                weeklyHours = moduleStructure.MedicalShifts.HoursPerWeek;
+                                System.Diagnostics.Debug.WriteLine($"Używam hoursPerWeek z ModuleStructure JSON: {weeklyHours} h/tydzień");
+
+                                // Aktualizujemy pole w module
+                                module.WeeklyShiftHours = weeklyHours;
+                            }
+                            else
+                            {
+                                // Domyślna wartość
+                                weeklyHours = 10.083; // 10 godz. 5 min. tygodniowo
+                                System.Diagnostics.Debug.WriteLine($"Używam domyślnych godzin dyżurów: {weeklyHours} h/tydzień");
+
+                                // Aktualizujemy pole w module
+                                module.WeeklyShiftHours = weeklyHours;
+                            }
+                        }
+
+                        // Obliczenie liczby tygodni
+                        TimeSpan moduleDuration = module.EndDate - module.StartDate;
+                        int weeks = Math.Max(1, (int)(moduleDuration.TotalDays / 7));
+
+                        // Obliczamy wymaganą liczbę godzin
+                        stats.RequiredShiftHours = (int)Math.Round(weeklyHours * weeks);
+                        System.Diagnostics.Debug.WriteLine($"Obliczone wymagane godziny dyżurów: {stats.RequiredShiftHours} h ({weeklyHours} h/tydzień × {weeks} tygodni)");
+
+                        // Aktualizujemy pole w module
+                        module.RequiredShiftHours = stats.RequiredShiftHours;
+                        await database.UpdateModuleAsync(module);
+                    }
                 }
 
                 // Samokształcenie

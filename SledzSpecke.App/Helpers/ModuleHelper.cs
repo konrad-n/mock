@@ -269,7 +269,31 @@ namespace SledzSpecke.App.Helpers
 
                         System.Diagnostics.Debug.WriteLine($"Zliczone elementy: Staże={totalInternships}, Kursy={totalCourses}, Procedury A={totalProceduresA}, Procedury B={totalProceduresB}");
 
-                        // Tworzymy moduł
+                        // Pobieramy dane o samokształceniu
+                        int selfEducationDays = 0;
+
+                        // Próbujemy pobrać SelfEducationDays z moduleElement
+                        if (moduleElement.TryGetProperty("selfEducation", out var selfEducationElement) &&
+                            selfEducationElement.ValueKind == JsonValueKind.Object)
+                        {
+                            // Próbujemy pobrać totalDays
+                            if (selfEducationElement.TryGetProperty("totalDays", out var totalDaysElement))
+                            {
+                                selfEducationDays = totalDaysElement.GetInt32();
+                            }
+                            // Alternatywnie, jeśli jest daysPerYear, możemy je wykorzystać
+                            else if (selfEducationElement.TryGetProperty("daysPerYear", out var daysPerYearElement))
+                            {
+                                int daysPerYear = daysPerYearElement.GetInt32();
+                                // Obliczenie liczby lat z czasu trwania modułu
+                                int years = (int)Math.Ceiling(durationMonths / 12.0);
+                                selfEducationDays = daysPerYear * years;
+                            }
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"Pobrano dane o samokształceniu: SelfEducationDays={selfEducationDays}");
+
+                        // Teraz tworzymy moduł z poprawnymi wartościami
                         var module = new Module
                         {
                             Name = moduleName,
@@ -277,6 +301,8 @@ namespace SledzSpecke.App.Helpers
                             StartDate = currentStartDate,
                             EndDate = endDate,
                             Structure = moduleElement.ToString(),  // Zapisujemy cały JSON modułu
+
+                            // Podstawowe statystyki zliczone wcześniej
                             CompletedInternships = 0,
                             TotalInternships = totalInternships,
                             CompletedCourses = 0,
@@ -285,8 +311,44 @@ namespace SledzSpecke.App.Helpers
                             TotalProceduresA = totalProceduresA,
                             CompletedProceduresB = 0,
                             TotalProceduresB = totalProceduresB,
-                            // Można tu również zapisać informacje o dyżurach, jeśli model Module ma takie pola
+
+                            // Nowe pola dotyczące dyżurów
+                            CompletedShiftHours = 0,
+                            RequiredShiftHours = requiredShiftHours,
+                            WeeklyShiftHours = hoursPerWeek,
+
+                            // Nowe pola dotyczące samokształcenia - POPRAWKA
+                            CompletedSelfEducationDays = 0,
+                            TotalSelfEducationDays = selfEducationDays
                         };
+
+                        // Jeśli nie mamy bezpośrednio podanej wartości RequiredShiftHours, ale mamy hoursPerWeek,
+                        // obliczamy wymaganą liczbę godzin
+                        if (module.RequiredShiftHours == 0 && module.WeeklyShiftHours > 0)
+                        {
+                            // Obliczamy liczbę tygodni trwania modułu
+                            TimeSpan duration = module.EndDate - module.StartDate;
+                            int weeks = Math.Max(1, (int)(duration.TotalDays / 7));
+
+                            // Obliczamy wymaganą liczbę godzin dyżurów
+                            module.RequiredShiftHours = (int)Math.Round(module.WeeklyShiftHours * weeks);
+                            System.Diagnostics.Debug.WriteLine($"Obliczono RequiredShiftHours: {module.RequiredShiftHours} h ({module.WeeklyShiftHours} h/tydzień × {weeks} tygodni)");
+                        }
+                        // Jeśli nie mamy ani RequiredShiftHours, ani WeeklyShiftHours, ustawiamy domyślną wartość
+                        else if (module.RequiredShiftHours == 0 && module.WeeklyShiftHours == 0)
+                        {
+                            // Domyślna wartość - 10 godz. 5 min. tygodniowo
+                            double defaultWeeklyHours = 10.083;
+
+                            // Obliczamy liczbę tygodni trwania modułu
+                            TimeSpan duration = module.EndDate - module.StartDate;
+                            int weeks = Math.Max(1, (int)(duration.TotalDays / 7));
+
+                            // Ustawiamy wartości
+                            module.WeeklyShiftHours = defaultWeeklyHours;
+                            module.RequiredShiftHours = (int)Math.Round(defaultWeeklyHours * weeks);
+                            System.Diagnostics.Debug.WriteLine($"Ustawiono domyślne wartości dyżurów: {module.RequiredShiftHours} h ({defaultWeeklyHours} h/tydzień × {weeks} tygodni)");
+                        }
 
                         modules.Add(module);
                         System.Diagnostics.Debug.WriteLine($"Dodano moduł: {module.Name}");
