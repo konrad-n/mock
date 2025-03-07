@@ -14,6 +14,7 @@ using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
 using SledzSpecke.App.ViewModels.Dashboard;
 using SledzSpecke.App.ViewModels.Export;
+using SledzSpecke.App.ViewModels.MedicalShifts;
 using SledzSpecke.App.Views.Absences;
 using SledzSpecke.App.Views.Authentication;
 using SledzSpecke.App.Views.Courses;
@@ -93,6 +94,10 @@ namespace SledzSpecke.App
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegisterViewModel>();
             services.AddTransient<DashboardViewModel>();
+
+            services.AddTransient<MedicalShiftsListViewModel>();
+            services.AddTransient<AddEditMedicalShiftViewModel>();
+
             services.AddTransient<ExportViewModel>();
             services.AddTransient<ExportPreviewViewModel>();
         }
@@ -105,6 +110,7 @@ namespace SledzSpecke.App
 
             services.AddTransient<ProceduresListPage>();
             services.AddTransient<MedicalShiftsListPage>();
+            services.AddTransient<AddEditMedicalShiftPage>();
             services.AddTransient<InternshipsListPage>();
             services.AddTransient<CoursesListPage>();
             services.AddTransient<SelfEducationListPage>();

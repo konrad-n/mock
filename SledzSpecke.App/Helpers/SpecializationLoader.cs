@@ -33,7 +33,9 @@ namespace SledzSpecke.App.Helpers
             {
                 System.Diagnostics.Debug.WriteLine($"Znaleziono lokalny plik: {filePath}");
                 string json = await File.ReadAllTextAsync(filePath);
-                var program = JsonSerializer.Deserialize<SpecializationProgram>(json);
+
+                // ZMIANA: Użycie własnej metody deserializacji zamiast bezpośredniego JsonSerializer.Deserialize
+                var program = DeserializeSpecializationProgram(json);
                 if (program != null)
                 {
                     program.SmkVersion = smkVersion;
@@ -138,6 +140,8 @@ namespace SledzSpecke.App.Helpers
                         try
                         {
                             string json = await File.ReadAllTextAsync(file);
+
+                            // ZMIANA: Użycie własnej metody deserializacji zamiast bezpośredniego deserializowania
                             var program = DeserializeSpecializationProgram(json);
 
                             if (program != null)
@@ -276,7 +280,7 @@ namespace SledzSpecke.App.Helpers
                 var program = JsonSerializer.Deserialize<SpecializationProgram>(json, options);
 
                 // Jeśli deserializacja standardowa nie zadziała, próbujemy dostosowania
-                if (program == null || string.IsNullOrEmpty(program.Name))
+                if (program == null || program.TotalDurationMonths <= 0 || string.IsNullOrEmpty(program.Structure))
                 {
                     // Deserializuj do słownika
                     var jsonObj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, options);

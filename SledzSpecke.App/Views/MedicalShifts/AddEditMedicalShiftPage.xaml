@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.MedicalShifts"
+             x:DataType="vm:AddEditMedicalShiftViewModel"
+             x:Class="SledzSpecke.App.Views.MedicalShifts.AddEditMedicalShiftPage"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="FieldLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource TextColor}" />
+                <Setter Property="Margin" Value="0,10,0,5" />
+            </Style>
+
+            <Style x:Key="FormEntryStyle" TargetType="Entry">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="BackgroundColor" Value="White" />
+                <Setter Property="Margin" Value="0,0,0,10" />
+            </Style>
+
+            <Style x:Key="SectionHeaderStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{StaticResource Primary}" />
+                <Setter Property="Margin" Value="0,20,0,10" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+
+            <!-- Dane stażu powiązanego -->
+            <Frame BorderColor="LightGray" HasShadow="True" CornerRadius="10" Padding="15" IsVisible="{Binding Internship, Converter={StaticResource NotNullConverter}}">
+                <VerticalStackLayout>
+                    <Label Text="Staż" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                    <Label Text="{Binding Internship.InternshipName, StringFormat='Nazwa stażu: {0}'}" />
+                    <Label Text="{Binding Internship.InstitutionName, StringFormat='Instytucja: {0}'}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto">
+                        <Label Grid.Column="0" Text="Okres:" />
+                        <Label Grid.Column="1" Text="{Binding Internship.StartDate, StringFormat='{0:dd-MM-yyyy}'}" />
+                        <Label Grid.Column="2" Text="{Binding Internship.EndDate, StringFormat='{0:dd-MM-yyyy}'}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Formularz -->
+            <Frame BorderColor="LightGray" HasShadow="True" CornerRadius="10" Padding="15">
+                <VerticalStackLayout>
+                    <Label Text="Dane dyżuru" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+
+                    <!-- Data dyżuru -->
+                    <Label IsVisible="{Binding IsDateVisible}" Text="{Binding DateLabel}" Style="{StaticResource FieldLabelStyle}" />
+                    <DatePicker IsVisible="{Binding IsDateVisible}" Date="{Binding Date}" Format="dd-MM-yyyy" Margin="0,0,0,10" />
+
+                    <!-- Liczba godzin -->
+                    <Label IsVisible="{Binding IsHoursVisible}" Text="{Binding HoursLabel}" Style="{StaticResource FieldLabelStyle}" />
+                    <Entry IsVisible="{Binding IsHoursVisible}" Text="{Binding Hours}" Keyboard="Numeric" Style="{StaticResource FormEntryStyle}" />
+
+                    <!-- Liczba minut -->
+                    <Label IsVisible="{Binding IsMinutesVisible}" Text="{Binding MinutesLabel}" Style="{StaticResource FieldLabelStyle}" />
+                    <Entry IsVisible="{Binding IsMinutesVisible}" Text="{Binding Minutes}" Keyboard="Numeric" Style="{StaticResource FormEntryStyle}" />
+
+                    <!-- Miejsce dyżuru -->
+                    <Label IsVisible="{Binding IsLocationVisible}" Text="{Binding LocationLabel}" Style="{StaticResource FieldLabelStyle}" />
+                    <Entry IsVisible="{Binding IsLocationVisible}" Text="{Binding Location}" Style="{StaticResource FormEntryStyle}" />
+
+                    <!-- Rok szkolenia -->
+                    <Label IsVisible="{Binding IsYearVisible}" Text="{Binding YearLabel}" Style="{StaticResource FieldLabelStyle}" />
+                    <Picker IsVisible="{Binding IsYearVisible}" ItemsSource="{Binding YearOptions}" 
+                            ItemDisplayBinding="{Binding Value}" 
+                            SelectedItem="{Binding Year, Converter={StaticResource StringToIntConverter}}" 
+                            Margin="0,0,0,10" />
+
+                    <!-- Pola specyficzne dla starego SMK -->
+                    <Label IsVisible="{Binding IsOldSmkField1Visible}" Text="{Binding OldSmkField1Label}" Style="{StaticResource FieldLabelStyle}" />
+                    <Entry IsVisible="{Binding IsOldSmkField1Visible}" Text="{Binding OldSmkField1}" Style="{StaticResource FormEntryStyle}" />
+
+                    <Label IsVisible="{Binding IsOldSmkField2Visible}" Text="{Binding OldSmkField2Label}" Style="{StaticResource FieldLabelStyle}" />
+                    <Entry IsVisible="{Binding IsOldSmkField2Visible}" Text="{Binding OldSmkField2}" Style="{StaticResource FormEntryStyle}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Przyciski akcji -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,20,0,0">
+                <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelCommand}" BackgroundColor="Gray" />
+                <Button Grid.Column="1" Text="Zapisz" Command="{Binding SaveCommand}" BackgroundColor="{StaticResource Primary}" />
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
