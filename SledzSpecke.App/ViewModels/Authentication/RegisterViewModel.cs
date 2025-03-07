@@ -337,9 +337,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     ProgramCode = this.SelectedSpecialization.Code,
                     SmkVersion = user.SmkVersion,
                     StartDate = DateTime.Now,
-                    PlannedEndDate = DateTime.Now.AddMonths(this.SelectedSpecialization.TotalDurationMonths > 0
-                        ? this.SelectedSpecialization.TotalDurationMonths
-                        : 60),
+                    PlannedEndDate = DateTime.Now.AddMonths(
+                        this.SelectedSpecialization.Duration != null && this.SelectedSpecialization.Duration.TotalMonths > 0
+                            ? this.SelectedSpecialization.Duration.TotalMonths
+                            : 60), // Domyślnie 5 lat (60 miesięcy)
                     ProgramStructure = this.SelectedSpecialization.Structure,
                 };
 

@@ -608,6 +608,7 @@ namespace SledzSpecke.App.Services.Specialization
         }
 
         // Metoda zwracająca wszystkie staże z modułu (zdefiniowane w JSON)
+        // Metoda zwracająca wszystkie staże z modułu (zdefiniowane w JSON)
         public async Task<List<Internship>> GetInternshipsAsync(int? moduleId = null)
         {
             try
@@ -671,7 +672,7 @@ namespace SledzSpecke.App.Services.Specialization
                 {
                     // Sprawdź, czy staż o tym kodzie już istnieje w bazie
                     var existingInternship = userInternships.FirstOrDefault(
-                        i => i.InternshipName == requirement.InternshipName);
+                        i => i.InternshipName == requirement.Name);
 
                     if (existingInternship != null)
                     {
@@ -686,10 +687,10 @@ namespace SledzSpecke.App.Services.Specialization
                             InternshipId = -id,  // Tymczasowe ID (ujemne, by nie kolidowało z ID z bazy)
                             SpecializationId = currentSpecialization.SpecializationId,
                             ModuleId = moduleId,
-                            InternshipName = requirement.InternshipName,
-                            DaysCount = requirement.DurationDays,
+                            InternshipName = requirement.Name,
+                            DaysCount = requirement.WorkingDays,
                             StartDate = DateTime.Today,
-                            EndDate = DateTime.Today.AddDays(requirement.DurationDays),
+                            EndDate = DateTime.Today.AddDays(requirement.WorkingDays),
                             Year = 1, // Domyślnie pierwszy rok
                             IsCompleted = false,
                             IsApproved = false
@@ -703,6 +704,7 @@ namespace SledzSpecke.App.Services.Specialization
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd w GetInternshipsAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 return new List<Internship>();
             }
         }

@@ -280,7 +280,7 @@ namespace SledzSpecke.App.Helpers
                 var program = JsonSerializer.Deserialize<SpecializationProgram>(json, options);
 
                 // Jeśli deserializacja standardowa nie zadziała, próbujemy dostosowania
-                if (program == null || program.TotalDurationMonths <= 0 || string.IsNullOrEmpty(program.Structure))
+                if (program == null || program.Duration == null || string.IsNullOrEmpty(program.Structure))
                 {
                     // Deserializuj do słownika
                     var jsonObj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json, options);
@@ -304,14 +304,25 @@ namespace SledzSpecke.App.Helpers
                             durationElement.ValueKind == JsonValueKind.Object)
                         {
                             var durationObj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(durationElement.GetRawText(), options);
-                            if (durationObj.TryGetValue("years", out var yearsElement))
+                            if (durationObj != null)
                             {
-                                program.TotalDurationMonths = yearsElement.GetInt32() * 12;
+                                program.Duration = new TotalDuration();
+
+                                if (durationObj.TryGetValue("years", out var yearsElement))
+                                {
+                                    program.Duration.Years = yearsElement.GetInt32();
+                                }
+
+                                if (durationObj.TryGetValue("months", out var monthsElement))
+                                {
+                                    program.Duration.Months = monthsElement.GetInt32();
+                                }
+
+                                if (durationObj.TryGetValue("days", out var daysElement))
+                                {
+                                    program.Duration.Days = daysElement.GetInt32();
+                                }
                             }
-                        }
-                        else if (jsonObj.TryGetValue("totalDurationMonths", out var monthsElement))
-                        {
-                            program.TotalDurationMonths = monthsElement.GetInt32();
                         }
 
                         // Pobierz dane o module podstawowym
@@ -333,9 +344,12 @@ namespace SledzSpecke.App.Helpers
                                         moduleDurationElement.ValueKind == JsonValueKind.Object)
                                     {
                                         var moduleDurationObj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(moduleDurationElement.GetRawText(), options);
-                                        if (moduleDurationObj.TryGetValue("years", out var moduleYearsElement))
+                                        if (moduleDurationObj != null && moduleDurationObj.TryGetValue("years", out var moduleYearsElement))
                                         {
-                                            program.BasicModuleDurationMonths = moduleYearsElement.GetInt32() * 12;
+                                            int years = moduleYearsElement.GetInt32();
+                                            // Zamiast ustawiać nieistniejącą właściwość BasicModuleDurationMonths
+                                            // możemy ustawić informację o module podstawowym w sposób odpowiedni dla struktury
+                                            program.HasBasicModule = true;
                                         }
                                     }
 
