@@ -1,9 +1,12 @@
-﻿using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
-using SledzSpecke.App.Services.Authentication;
+using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
@@ -11,151 +14,54 @@ using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
-    [QueryProperty(nameof(InternshipId), "internshipId")]
     public class AddEditMedicalShiftViewModel : BaseViewModel
     {
         private readonly ISpecializationService specializationService;
-        private readonly IAuthService authService;
+        private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
         private readonly ISmkVersionStrategy smkStrategy;
 
-        private int shiftId;
-        private int internshipId;
+        private bool isEdit;
         private MedicalShift shift;
-        private Internship internship;
-
-        // Pola formularza
-        private DateTime date;
-        private int hours;
-        private int minutes;
-        private string location;
-        private int year;
-        private string oldSmkField1; // Osoba nadzorująca (stary SMK)
-        private string oldSmkField2; // Oddział (stary SMK)
-
-        // Flagi widoczności pól
-        private bool isDateVisible;
-        private bool isHoursVisible;
-        private bool isMinutesVisible;
-        private bool isLocationVisible;
-        private bool isYearVisible;
-        private bool isOldSmkField1Visible;
-        private bool isOldSmkField2Visible;
-
-        // Etykiety pól
-        private string dateLabel;
-        private string hoursLabel;
-        private string minutesLabel;
-        private string locationLabel;
-        private string yearLabel;
-        private string oldSmkField1Label;
-        private string oldSmkField2Label;
-
-        // Opcje wyboru roku
-        private Dictionary<string, string> yearOptions;
-
-        private bool isNewMode;
-        private bool isSmkNew;
+        private Internship selectedInternship;
+        private ObservableCollection<Internship> availableInternships;
+        private ObservableCollection<KeyValuePair<string, string>> yearOptions;
+        private string selectedYear;
 
         public AddEditMedicalShiftViewModel(
             ISpecializationService specializationService,
-            IAuthService authService,
+            IDatabaseService databaseService,
             IDialogService dialogService,
             ISmkVersionStrategy smkStrategy)
         {
             this.specializationService = specializationService;
-            this.authService = authService;
+            this.databaseService = databaseService;
             this.dialogService = dialogService;
             this.smkStrategy = smkStrategy;
 
-            this.SaveCommand = new AsyncRelayCommand(this.SaveAsync, this.CanSave);
-            this.CancelCommand = new AsyncRelayCommand(this.CancelAsync);
+            this.AvailableInternships = new ObservableCollection<Internship>();
+            this.YearOptions = new ObservableCollection<KeyValuePair<string, string>>();
 
-            this.YearOptions = this.smkStrategy.GetPickerOptions("AddEditMedicalShift", "Year");
+            // Inicjalizacja komend
+            this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync, this.CanSave);
+            this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
 
-            // Określenie czy jest to nowy SMK
-            this.IsSmkNew = this.smkStrategy is NewSmkStrategy;
-
-            // Ustawienie widoczności pól na podstawie strategii SMK
-            var visibleFields = this.smkStrategy.GetVisibleFields("AddEditMedicalShift");
-            this.IsDateVisible = visibleFields.TryGetValue("Date", out bool dateVisible) && dateVisible;
-            this.IsHoursVisible = visibleFields.TryGetValue("Hours", out bool hoursVisible) && hoursVisible;
-            this.IsMinutesVisible = visibleFields.TryGetValue("Minutes", out bool minutesVisible) && minutesVisible;
-            this.IsLocationVisible = visibleFields.TryGetValue("Location", out bool locationVisible) && locationVisible;
-            this.IsYearVisible = visibleFields.TryGetValue("Year", out bool yearVisible) && yearVisible;
-            this.IsOldSmkField1Visible = visibleFields.TryGetValue("OldSMKField1", out bool field1Visible) && field1Visible;
-            this.IsOldSmkField2Visible = visibleFields.TryGetValue("OldSMKField2", out bool field2Visible) && field2Visible;
-
-            // Ustawienie etykiet pól
-            var fieldLabels = this.smkStrategy.GetFieldLabels("AddEditMedicalShift");
-            this.DateLabel = fieldLabels.TryGetValue("Date", out string dateLabel) ? dateLabel : "Data dyżuru";
-            this.HoursLabel = fieldLabels.TryGetValue("Hours", out string hoursLabel) ? hoursLabel : "Godziny";
-            this.MinutesLabel = fieldLabels.TryGetValue("Minutes", out string minutesLabel) ? minutesLabel : "Minuty";
-            this.LocationLabel = fieldLabels.TryGetValue("Location", out string locationLabel) ? locationLabel : "Miejsce dyżuru";
-            this.YearLabel = fieldLabels.TryGetValue("Year", out string yearLabel) ? yearLabel : "Rok szkolenia";
-            this.OldSmkField1Label = fieldLabels.TryGetValue("OldSMKField1", out string field1Label) ? field1Label : "Osoba nadzorująca";
-            this.OldSmkField2Label = fieldLabels.TryGetValue("OldSMKField2", out string field2Label) ? field2Label : "Oddział";
-
-            // Ustawienie domyślnych wartości
-            var defaultValues = this.smkStrategy.GetDefaultValues("AddEditMedicalShift");
-            this.Date = defaultValues.TryGetValue("Date", out object dateValue) && dateValue is DateTime dateTime
-                ? dateTime
-                : DateTime.Today;
-
-            this.Hours = defaultValues.TryGetValue("Hours", out object hoursValue) && hoursValue is int hoursInt
-                ? hoursInt
-                : 10;
-
-            this.Minutes = defaultValues.TryGetValue("Minutes", out object minutesValue) && minutesValue is int minutesInt
-                ? minutesInt
-                : 0;
-
-            this.Year = defaultValues.TryGetValue("Year", out object yearValue) && yearValue is int yearInt
-                ? yearInt
-                : 1;
-
-            this.OldSmkField1 = defaultValues.TryGetValue("OldSMKField1", out object field1Value) && field1Value is string field1String
-                ? field1String
-                : string.Empty;
-
-            this.OldSmkField2 = defaultValues.TryGetValue("OldSMKField2", out object field2Value) && field2Value is string field2String
-                ? field2String
-                : string.Empty;
-
-            this.Title = this.smkStrategy.GetViewTitle("AddEditMedicalShift");
-        }
-
-        public int ShiftId
-        {
-            get => this.shiftId;
-            set
+            // Utworzenie nowego dyżuru
+            this.shift = new MedicalShift
             {
-                this.SetProperty(ref this.shiftId, value);
-                this.IsNewMode = value <= 0;
-                this.LoadShiftAsync().ConfigureAwait(false);
-            }
+                Date = DateTime.Now,
+                Hours = 10,
+                Minutes = 5,
+                Year = 1,
+                SyncStatus = SyncStatus.NotSynced
+            };
         }
 
-        public int InternshipId
+        // Właściwości
+        public bool IsEdit
         {
-            get => this.internshipId;
-            set
-            {
-                this.SetProperty(ref this.internshipId, value);
-                this.LoadInternshipAsync().ConfigureAwait(false);
-            }
-        }
-
-        public bool IsNewMode
-        {
-            get => this.isNewMode;
-            set => this.SetProperty(ref this.isNewMode, value);
-        }
-
-        public bool IsSmkNew
-        {
-            get => this.isSmkNew;
-            set => this.SetProperty(ref this.isSmkNew, value);
+            get => this.isEdit;
+            set => this.SetProperty(ref this.isEdit, value);
         }
 
         public MedicalShift Shift
@@ -164,202 +70,103 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.shift, value);
         }
 
-        public Internship Internship
+        public ObservableCollection<Internship> AvailableInternships
         {
-            get => this.internship;
-            set => this.SetProperty(ref this.internship, value);
+            get => this.availableInternships;
+            set => this.SetProperty(ref this.availableInternships, value);
         }
 
-        // Pola formularza
-        public DateTime Date
+        public Internship SelectedInternship
         {
-            get => this.date;
-            set => this.SetProperty(ref this.date, value);
+            get => this.selectedInternship;
+            set
+            {
+                if (this.SetProperty(ref this.selectedInternship, value) && value != null)
+                {
+                    this.Shift.InternshipId = value.InternshipId;
+                    ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
+                }
+            }
         }
 
-        public int Hours
-        {
-            get => this.hours;
-            set => this.SetProperty(ref this.hours, value);
-        }
-
-        public int Minutes
-        {
-            get => this.minutes;
-            set => this.SetProperty(ref this.minutes, value);
-        }
-
-        public string Location
-        {
-            get => this.location;
-            set => this.SetProperty(ref this.location, value);
-        }
-
-        public int Year
-        {
-            get => this.year;
-            set => this.SetProperty(ref this.year, value);
-        }
-
-        public string OldSmkField1
-        {
-            get => this.oldSmkField1;
-            set => this.SetProperty(ref this.oldSmkField1, value);
-        }
-
-        public string OldSmkField2
-        {
-            get => this.oldSmkField2;
-            set => this.SetProperty(ref this.oldSmkField2, value);
-        }
-
-        // Flagi widoczności pól
-        public bool IsDateVisible
-        {
-            get => this.isDateVisible;
-            set => this.SetProperty(ref this.isDateVisible, value);
-        }
-
-        public bool IsHoursVisible
-        {
-            get => this.isHoursVisible;
-            set => this.SetProperty(ref this.isHoursVisible, value);
-        }
-
-        public bool IsMinutesVisible
-        {
-            get => this.isMinutesVisible;
-            set => this.SetProperty(ref this.isMinutesVisible, value);
-        }
-
-        public bool IsLocationVisible
-        {
-            get => this.isLocationVisible;
-            set => this.SetProperty(ref this.isLocationVisible, value);
-        }
-
-        public bool IsYearVisible
-        {
-            get => this.isYearVisible;
-            set => this.SetProperty(ref this.isYearVisible, value);
-        }
-
-        public bool IsOldSmkField1Visible
-        {
-            get => this.isOldSmkField1Visible;
-            set => this.SetProperty(ref this.isOldSmkField1Visible, value);
-        }
-
-        public bool IsOldSmkField2Visible
-        {
-            get => this.isOldSmkField2Visible;
-            set => this.SetProperty(ref this.isOldSmkField2Visible, value);
-        }
-
-        // Etykiety pól
-        public string DateLabel
-        {
-            get => this.dateLabel;
-            set => this.SetProperty(ref this.dateLabel, value);
-        }
-
-        public string HoursLabel
-        {
-            get => this.hoursLabel;
-            set => this.SetProperty(ref this.hoursLabel, value);
-        }
-
-        public string MinutesLabel
-        {
-            get => this.minutesLabel;
-            set => this.SetProperty(ref this.minutesLabel, value);
-        }
-
-        public string LocationLabel
-        {
-            get => this.locationLabel;
-            set => this.SetProperty(ref this.locationLabel, value);
-        }
-
-        public string YearLabel
-        {
-            get => this.yearLabel;
-            set => this.SetProperty(ref this.yearLabel, value);
-        }
-
-        public string OldSmkField1Label
-        {
-            get => this.oldSmkField1Label;
-            set => this.SetProperty(ref this.oldSmkField1Label, value);
-        }
-
-        public string OldSmkField2Label
-        {
-            get => this.oldSmkField2Label;
-            set => this.SetProperty(ref this.oldSmkField2Label, value);
-        }
-
-        // Opcje wyboru roku
-        public Dictionary<string, string> YearOptions
+        public ObservableCollection<KeyValuePair<string, string>> YearOptions
         {
             get => this.yearOptions;
             set => this.SetProperty(ref this.yearOptions, value);
         }
 
+        public string SelectedYear
+        {
+            get => this.selectedYear;
+            set
+            {
+                if (this.SetProperty(ref this.selectedYear, value) && !string.IsNullOrEmpty(value))
+                {
+                    this.Shift.Year = int.Parse(value);
+                    ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        // Komendy
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        private async Task LoadShiftAsync()
+        public async Task InitializeAsync(int? shiftId = null)
         {
-            if (this.ShiftId <= 0)
+            if (this.IsBusy)
             {
                 return;
             }
 
+            this.IsBusy = true;
+
             try
             {
-                this.IsBusy = true;
+                // Określ czy to edycja czy nowy
+                this.IsEdit = shiftId.HasValue && shiftId.Value > 0;
 
-                var shift = await this.specializationService.GetMedicalShiftAsync(this.ShiftId);
-                if (shift == null)
+                // Ustawienie tytułu strony
+                this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj nowy dyżur";
+
+                // Ładowanie opcji roku z odpowiedniej strategii SMK
+                await this.LoadYearOptionsAsync();
+
+                // Ładowanie dostępnych staży
+                await this.LoadInternshipsAsync();
+
+                // Jeśli edycja, załaduj istniejący dyżur
+                if (this.IsEdit && shiftId.HasValue)
                 {
-                    return;
+                    var existingShift = await this.databaseService.GetMedicalShiftAsync(shiftId.Value);
+                    if (existingShift != null)
+                    {
+                        this.Shift = existingShift;
+
+                        // Ustaw wybrany staż
+                        this.SelectedInternship = this.AvailableInternships.FirstOrDefault(i => i.InternshipId == existingShift.InternshipId);
+
+                        // Ustaw wybrany rok
+                        this.SelectedYear = existingShift.Year.ToString();
+                    }
                 }
-
-                this.Shift = shift;
-
-                // Jeśli mamy dyżur, ale nie mamy stażu, pobierz staż
-                if (this.Internship == null)
+                else
                 {
-                    await this.LoadInternshipAsync(shift.InternshipId);
-                }
+                    // Dla nowego dyżuru, ustaw domyślny staż (jeśli istnieje)
+                    if (this.AvailableInternships.Count > 0)
+                    {
+                        this.SelectedInternship = this.AvailableInternships[0];
+                    }
 
-                // Wypełnij pola formularza
-                this.Date = shift.Date;
-                this.Hours = shift.Hours;
-                this.Minutes = shift.Minutes;
-                this.Location = shift.Location;
-                this.Year = shift.Year;
-
-                // Odczytaj pola dodatkowe z JSON
-                var additionalFields = this.smkStrategy.ParseAdditionalFields(shift.AdditionalFields);
-
-                if (additionalFields.TryGetValue("OldSMKField1", out object field1) && field1 is string field1Str)
-                {
-                    this.OldSmkField1 = field1Str;
-                }
-
-                if (additionalFields.TryGetValue("OldSMKField2", out object field2) && field2 is string field2Str)
-                {
-                    this.OldSmkField2 = field2Str;
+                    // Ustaw domyślny rok
+                    this.SelectedYear = "1";
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania dyżuru: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas ładowania danych dyżuru. Spróbuj ponownie.",
+                    $"Wystąpił problem podczas ładowania danych: {ex.Message}",
                     "OK");
             }
             finally
@@ -368,192 +175,122 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
         }
 
-        private async Task LoadInternshipAsync()
-        {
-            if (this.internshipId <= 0)
-            {
-                return;
-            }
-
-            await this.LoadInternshipAsync(this.internshipId);
-        }
-
-        private async Task LoadInternshipAsync(int id)
+        private async Task LoadYearOptionsAsync()
         {
             try
             {
-                this.IsBusy = true;
+                // Pobierz opcje roku z odpowiedniej strategii
+                var options = this.smkStrategy.GetPickerOptions("AddEditMedicalShift", "Year");
 
-                var internship = await this.specializationService.GetInternshipAsync(id);
-                if (internship == null)
+                this.YearOptions.Clear();
+                foreach (var option in options)
                 {
-                    return;
+                    this.YearOptions.Add(new KeyValuePair<string, string>(option.Key, option.Value));
                 }
 
-                this.Internship = internship;
-
-                // Ustaw rok szkolenia na podstawie stażu
-                this.Year = internship.Year;
+                // Jeśli nie ma opcji roku, dodaj domyślne
+                if (this.YearOptions.Count == 0)
+                {
+                    for (int i = 1; i <= 5; i++)
+                    {
+                        this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
+                    }
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania stażu: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania opcji roku: {ex.Message}");
+
+                // Awaryjnie dodaj domyślne wartości
+                this.YearOptions.Clear();
+                for (int i = 1; i <= 5; i++)
+                {
+                    this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
+                }
             }
-            finally
+        }
+
+        private async Task LoadInternshipsAsync()
+        {
+            try
             {
-                this.IsBusy = false;
+                // Pobierz aktualny moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+
+                // Używamy dostępnej metody GetInternshipsAsync zamiast GetUserInternshipsAsync
+                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
+
+                // Filtrujemy tylko rzeczywiste staże (z ID > 0, nie szablony)
+                var userInternships = internships.Where(i => i.InternshipId > 0).ToList();
+
+                this.AvailableInternships.Clear();
+                foreach (var internship in userInternships)
+                {
+                    this.AvailableInternships.Add(internship);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania staży: {ex.Message}");
             }
         }
 
         private bool CanSave()
         {
-            // Walidacja pól
-            var requiredFields = this.smkStrategy.GetRequiredFields("AddEditMedicalShift");
-
-            if (requiredFields.Contains("Date") && !this.IsDateVisible)
-            {
-                return false;
-            }
-
-            if (requiredFields.Contains("Hours") && this.Hours <= 0)
-            {
-                return false;
-            }
-
-            if (requiredFields.Contains("Location") && string.IsNullOrEmpty(this.Location))
-            {
-                return false;
-            }
-
-            if (requiredFields.Contains("OldSMKField1") && string.IsNullOrEmpty(this.OldSmkField1) && this.IsOldSmkField1Visible)
-            {
-                return false;
-            }
-
-            if (requiredFields.Contains("OldSMKField2") && string.IsNullOrEmpty(this.OldSmkField2) && this.IsOldSmkField2Visible)
-            {
-                return false;
-            }
-
-            if (this.InternshipId <= 0)
-            {
-                return false;
-            }
-
-            return true;
+            // Sprawdzenie czy wszystkie wymagane pola są wypełnione
+            return this.Shift != null
+                && this.Shift.Hours > 0
+                && this.SelectedInternship != null;
         }
 
-        private async Task SaveAsync()
+        private async Task OnSaveAsync()
         {
-            if (!this.CanSave())
+            if (this.IsBusy)
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Walidacja",
-                    "Proszę wypełnić wszystkie wymagane pola.",
-                    "OK");
                 return;
             }
 
-            if (this.InternshipId <= 0)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie wybrano stażu dla dyżuru.",
-                    "OK");
-                return;
-            }
+            this.IsBusy = true;
 
             try
             {
-                this.IsBusy = true;
+                // Upewnij się, że ID stażu jest ustawione
+                this.Shift.InternshipId = this.SelectedInternship.InternshipId;
 
-                // Przygotuj pola dodatkowe jako słownik
-                var additionalFields = new Dictionary<string, object>();
-                if (this.IsOldSmkField1Visible)
+                // Zapisz dyżur
+                bool success;
+                if (this.IsEdit)
                 {
-                    additionalFields["OldSMKField1"] = this.OldSmkField1;
-                }
-
-                if (this.IsOldSmkField2Visible)
-                {
-                    additionalFields["OldSMKField2"] = this.OldSmkField2;
-                }
-
-                // Stwórz lub uaktualnij obiekt dyżuru
-                if (this.Shift == null || this.IsNewMode)
-                {
-                    this.Shift = new MedicalShift
-                    {
-                        InternshipId = internshipId,
-                        Date = this.Date,
-                        Hours = this.Hours,
-                        Minutes = this.Minutes,
-                        Location = this.Location,
-                        Year = this.Year,
-                        SyncStatus = SyncStatus.NotSynced,
-                        AdditionalFields = this.smkStrategy.FormatAdditionalFields(additionalFields)
-                    };
-
-                    bool success = await this.specializationService.AddMedicalShiftAsync(this.Shift);
-                    if (success)
-                    {
-                        // Aktualizuj postęp modułu
-                        var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                        if (currentModule != null)
-                        {
-                            await this.specializationService.UpdateModuleProgressAsync(currentModule.ModuleId);
-                        }
-
-                        // Wróć do listy
-                        await Shell.Current.GoToAsync("..");
-                    }
-                    else
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się dodać dyżuru. Spróbuj ponownie.",
-                            "OK");
-                    }
+                    success = await this.specializationService.UpdateMedicalShiftAsync(this.Shift);
                 }
                 else
                 {
-                    // Aktualizuj istniejący dyżur
-                    this.Shift.Date = this.Date;
-                    this.Shift.Hours = this.Hours;
-                    this.Shift.Minutes = this.Minutes;
-                    this.Shift.Location = this.Location;
-                    this.Shift.Year = this.Year;
-                    this.Shift.SyncStatus = SyncStatus.Modified;
-                    this.Shift.AdditionalFields = this.smkStrategy.FormatAdditionalFields(additionalFields);
+                    success = await this.specializationService.AddMedicalShiftAsync(this.Shift);
+                }
 
-                    bool success = await this.specializationService.UpdateMedicalShiftAsync(this.Shift);
-                    if (success)
-                    {
-                        // Aktualizuj postęp modułu
-                        var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                        if (currentModule != null)
-                        {
-                            await this.specializationService.UpdateModuleProgressAsync(currentModule.ModuleId);
-                        }
+                if (success)
+                {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Sukces",
+                        this.IsEdit ? "Dyżur został zaktualizowany." : "Dyżur został dodany.",
+                        "OK");
 
-                        // Wróć do listy
-                        await Shell.Current.GoToAsync("..");
-                    }
-                    else
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się zaktualizować dyżuru. Spróbuj ponownie.",
-                            "OK");
-                    }
+                    // Wróć do poprzedniej strony
+                    await Shell.Current.GoToAsync("..");
+                }
+                else
+                {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Nie udało się zapisać dyżuru. Sprawdź poprawność danych.",
+                        "OK");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania dyżuru: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas zapisywania dyżuru. Spróbuj ponownie.",
+                    $"Wystąpił problem podczas zapisywania dyżuru: {ex.Message}",
                     "OK");
             }
             finally
@@ -562,7 +299,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
         }
 
-        private async Task CancelAsync()
+        private async Task OnCancelAsync()
         {
             await Shell.Current.GoToAsync("..");
         }
