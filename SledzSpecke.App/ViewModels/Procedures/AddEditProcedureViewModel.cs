@@ -42,7 +42,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool canSave;
         private bool isOldSmkVersion;
         private string moduleInfo = string.Empty;
-        private bool hasModules;
         private int year = 1;
         private bool showOnlyActiveInternships = true;
 
@@ -329,12 +328,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
-        }
-
         public ObservableCollection<InternshipListItem> AvailableInternships
         {
             get => this.availableInternships;
@@ -440,18 +433,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     return;
                 }
 
-                // Sprawdź, czy specjalizacja ma moduły
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                this.HasModules = specialization?.HasModules ?? false;
-
-                // Jeśli specjalizacja ma moduły, pobierz dane modułu
-                if (this.HasModules)
+                // Pobierz dane modułu
+                var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
+                if (module != null)
                 {
-                    var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
-                    if (module != null)
-                    {
-                        this.ModuleInfo = $"Ta procedura będzie dodana do modułu: {module.Name}";
-                    }
+                    this.ModuleInfo = $"Ta procedura będzie dodana do modułu: {module.Name}";
                 }
                 else
                 {

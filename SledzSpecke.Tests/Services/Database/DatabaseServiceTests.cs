@@ -152,7 +152,6 @@ namespace SledzSpecke.Tests.Services.Database
                 StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 CalculatedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                HasModules = false,
                 CurrentModuleId = null,
                 CompletedInternships = 0,
                 TotalInternships = 10,
@@ -523,7 +522,6 @@ namespace SledzSpecke.Tests.Services.Database
                 Code = "TEST",
                 Structure = "{\"testKey\":\"testValue\"}",
                 SmkVersion = SmkVersion.New,
-                HasModules = true,
                 BasicModuleCode = "TEST_BASIC",
                 BasicModuleDurationMonths = 24,
                 TotalDurationMonths = 60,
@@ -762,7 +760,6 @@ namespace SledzSpecke.Tests.Services.Database
                 ProgramCode = "TEST",
                 StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                HasModules = true,
                 Modules = new List<Module>
         {
             new Module
@@ -787,7 +784,6 @@ namespace SledzSpecke.Tests.Services.Database
             var updatedSpec = await this.databaseService.GetSpecializationAsync(specId);
             Assert.That(updatedSpec.Name, Is.EqualTo("Updated Specialization"));
             Assert.That(updatedSpec.ProgramCode, Is.EqualTo("UPDATED"));
-            Assert.That(updatedSpec.HasModules, Is.True);
         }
 
         [Test]

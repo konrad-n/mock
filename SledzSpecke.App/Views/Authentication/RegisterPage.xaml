@@ -44,13 +44,6 @@
                         Title="Wybierz specjalizację"
                         BackgroundColor="Transparent"/>
 
-                <!-- Informacja o strukturze modułowej -->
-                <Label Text="Ta specjalizacja posiada modułową strukturę" 
-                       IsVisible="{Binding SelectedSpecialization.HasModules}"
-                       TextColor="{StaticResource PrimaryColor}"
-                       FontAttributes="Italic"
-                       Margin="0,5,0,0"/>
-
                 <!-- Przycisk rejestracji -->
                 <Button Text="Zarejestruj się" Command="{Binding RegisterCommand}" 
                         Style="{StaticResource PrimaryButton}" Margin="0,20,0,0"/>

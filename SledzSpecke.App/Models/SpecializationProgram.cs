@@ -19,8 +19,6 @@ namespace SledzSpecke.App.Models
 
         public SmkVersion SmkVersion { get; set; }
 
-        public bool HasModules { get; set; }
-
         // Program modułu podstawowego (jeśli specjalizacja ma moduły)
         public string BasicModuleCode { get; set; }
 

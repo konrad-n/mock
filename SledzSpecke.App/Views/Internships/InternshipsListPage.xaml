@@ -28,27 +28,6 @@
             <Label Text="{Binding ModuleInfo}" TextColor="{StaticResource PrimaryColor}" FontSize="14" />
         </Frame>
 
-        <!-- Filtr aktywne/wszystkie -->
-        <Frame Grid.Row="2" Padding="5" Margin="10,5,10,5" BorderColor="{StaticResource Gray300}" HasShadow="False" 
-               CornerRadius="5" IsClippedToBounds="True">
-            <Grid ColumnDefinitions="*, Auto, *">
-                <Button Text="Aktywne staże" 
-                        Command="{Binding ToggleActiveCommand}"
-                        IsEnabled="{Binding ShowOnlyActive}"
-                        BackgroundColor="{Binding ShowOnlyActive, Converter={StaticResource BoolToColorConverter}}"
-                        TextColor="{Binding ShowOnlyActive, Converter={StaticResource BoolToTextColorConverter}}" />
-
-                <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="30" 
-                         BackgroundColor="{StaticResource Gray300}" VerticalOptions="Center" />
-
-                <Button Grid.Column="2" Text="Wszystkie staże" 
-                        Command="{Binding ToggleActiveCommand}"
-                        IsEnabled="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}}"
-                        BackgroundColor="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=Color}"
-                        TextColor="{Binding ShowOnlyActive, Converter={StaticResource InvertedBoolConverter}, ConverterParameter=TextColor}" />
-            </Grid>
-        </Frame>
-
         <!-- Filtr realizacja częściowa - widoczny tylko dla Starego SMK -->
         <Frame Grid.Row="3" Padding="5" Margin="10,0,10,10" BorderColor="{StaticResource Gray300}" HasShadow="False" 
                CornerRadius="5" IsClippedToBounds="True" IsVisible="{Binding IsOldSmkVersion}">

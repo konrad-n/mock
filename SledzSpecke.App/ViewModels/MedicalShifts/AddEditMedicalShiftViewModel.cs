@@ -216,8 +216,8 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     return;
                 }
 
-                // Jeśli nie przekazano moduleId, a specjalizacja ma moduły, użyj bieżącego modułu
-                if (!this.moduleId.HasValue && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                // Jeśli nie przekazano moduleId, użyj bieżącego modułu
+                if (!this.moduleId.HasValue && specialization.CurrentModuleId.HasValue)
                 {
                     this.moduleId = specialization.CurrentModuleId.Value;
                 }

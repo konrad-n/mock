@@ -84,7 +84,7 @@ namespace SledzSpecke.App.Services.Database
             await this.InitializeAsync();
             var specialization = await this.database.Table<Models.Specialization>().FirstOrDefaultAsync(s => s.SpecializationId == id);
 
-            if (specialization != null && specialization.HasModules)
+            if (specialization != null)
             {
                 specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
             }

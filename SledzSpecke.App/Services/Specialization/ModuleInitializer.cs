@@ -32,7 +32,7 @@ namespace SledzSpecke.App.Services.Specialization
             {
                 // Pobierz specjalizację
                 var specialization = await this.databaseService.GetSpecializationAsync(specializationId);
-                if (specialization == null || !specialization.HasModules)
+                if (specialization == null)
                 {
                     System.Diagnostics.Debug.WriteLine($"Specjalizacja {specializationId} nie istnieje lub nie ma modułów");
                     return false;

@@ -10,8 +10,6 @@ namespace SledzSpecke.App.Models
 
         public SmkVersion SmkVersion { get; set; }
 
-        public bool HasModules { get; set; }
-
         public TotalDuration TotalDuration { get; set; }
 
         public int TotalWorkingDays { get; set; }

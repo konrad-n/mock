@@ -48,8 +48,7 @@ namespace SledzSpecke.Tests.Services.Export
                 SpecializationId = 1,
                 Name = "Test Specialization",
                 StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                HasModules = false,
+                PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local)
             };
 
             this.testUser = new User

@@ -24,7 +24,6 @@ namespace SledzSpecke.App.ViewModels.Courses
         private Course selectedCourse;
 
         // Moduły
-        private bool hasModules;
         private bool showBasicModule;
         private bool showSpecialisticModule;
         private string moduleInfo = string.Empty;
@@ -77,12 +76,6 @@ namespace SledzSpecke.App.ViewModels.Courses
             set => this.SetProperty(ref this.searchText, value);
         }
 
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
-        }
-
         public string ModuleInfo
         {
             get => this.moduleInfo;
@@ -131,32 +124,18 @@ namespace SledzSpecke.App.ViewModels.Courses
                     return;
                 }
 
-                // Aktualizacja flagi modułów
-                this.HasModules = specialization.HasModules;
-
-                // Ustaw bieżący moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                // Ustaw bieżący moduł
+                this.currentModuleId = specialization.CurrentModuleId.Value;
+                var module = await this.databaseService.GetModuleAsync(this.currentModuleId.Value);
+                if (module != null)
                 {
-                    this.currentModuleId = specialization.CurrentModuleId.Value;
-                    var module = await this.databaseService.GetModuleAsync(this.currentModuleId.Value);
-                    if (module != null)
-                    {
-                        this.currentModule = module;
+                    this.currentModule = module;
 
-                        // Ustaw stan przycisków wyboru modułu
-                        this.ShowBasicModule = module.Type == ModuleType.Basic;
-                        this.ShowSpecialisticModule = module.Type == ModuleType.Specialistic;
+                    // Ustaw stan przycisków wyboru modułu
+                    this.ShowBasicModule = module.Type == ModuleType.Basic;
+                    this.ShowSpecialisticModule = module.Type == ModuleType.Specialistic;
 
-                        this.ModuleInfo = $"Kursy dla modułu: {module.Name}";
-                    }
-                }
-                else
-                {
-                    this.currentModuleId = null;
-                    this.currentModule = null;
-                    this.ShowBasicModule = false;
-                    this.ShowSpecialisticModule = false;
-                    this.ModuleInfo = string.Empty;
+                    this.ModuleInfo = $"Kursy dla modułu: {module.Name}";
                 }
 
                 // Wyczyść istniejące kursy
@@ -189,14 +168,14 @@ namespace SledzSpecke.App.ViewModels.Courses
                 {
                     var viewModel = CourseViewModel.FromModel(item);
 
-                    // Pobierz nazwę modułu, jeśli dostępna
-                    if (this.HasModules && item.ModuleId.HasValue)
+                    // Pobierz nazwę modułu
+                    if (item.ModuleId.HasValue)
                     {
-                        var module = await this.databaseService.GetModuleAsync(item.ModuleId.Value);
-                        if (module != null)
+                        var moduleFromModel = await this.databaseService.GetModuleAsync(item.ModuleId.Value);
+                        if (moduleFromModel != null)
                         {
-                            viewModel.ModuleName = module.Name;
-                            viewModel.ModuleType = module.Type;
+                            viewModel.ModuleName = moduleFromModel.Name;
+                            viewModel.ModuleType = moduleFromModel.Type;
                         }
                     }
 
@@ -224,15 +203,10 @@ namespace SledzSpecke.App.ViewModels.Courses
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            if (!this.HasModules)
-            {
-                return;
-            }
-
             try
             {
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null || !specialization.HasModules)
+                if (specialization == null)
                 {
                     return;
                 }
@@ -310,7 +284,7 @@ namespace SledzSpecke.App.ViewModels.Courses
             var specialization = await this.specializationService.GetCurrentSpecializationAsync();
             int? moduleId = null;
 
-            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            if (specialization != null && specialization.CurrentModuleId.HasValue)
             {
                 moduleId = specialization.CurrentModuleId.Value;
             }

@@ -12,45 +12,6 @@ namespace SledzSpecke.Tests.TestHelpers
         }
 
         [Test]
-        public void IsModuleSpecialization_WithCardiology_ReturnsTrue()
-        {
-            // Arrange
-            string specializationCode = "kardiologia";
-
-            // Act
-            bool isModuleSpecialization = ModuleHelper.IsModuleSpecialization(specializationCode);
-
-            // Assert
-            Assert.That(isModuleSpecialization, Is.True);
-        }
-
-        [Test]
-        public void IsModuleSpecialization_WithCardiologyMixedCase_ReturnsTrue()
-        {
-            // Arrange
-            string specializationCode = "KaRdIoLoGiA";
-
-            // Act
-            bool isModuleSpecialization = ModuleHelper.IsModuleSpecialization(specializationCode);
-
-            // Assert
-            Assert.That(isModuleSpecialization, Is.True);
-        }
-
-        [Test]
-        public void IsModuleSpecialization_WithNonModuleSpecialization_ReturnsFalse()
-        {
-            // Arrange
-            string specializationCode = "psychiatria";
-
-            // Act
-            bool isModuleSpecialization = ModuleHelper.IsModuleSpecialization(specializationCode);
-
-            // Assert
-            Assert.That(isModuleSpecialization, Is.False);
-        }
-
-        [Test]
         public void GetBasicModuleName_WithCardiology_ReturnsInternalMedicine()
         {
             // Arrange
@@ -75,35 +36,6 @@ namespace SledzSpecke.Tests.TestHelpers
 
             // Assert
             Assert.That(basicModuleName, Is.Null);
-        }
-
-        [Test]
-        public void CreateModulesForSpecialization_WithNonModuleSpecialization_ReturnsEmptyList()
-        {
-            // Arrange
-            string specializationCode = "psychiatria";
-            DateTime startDate = new DateTime(2023, 1, 1);
-
-            // Act
-            List<Module> modules = ModuleHelper.CreateModulesForSpecialization(specializationCode, startDate);
-
-            // Assert
-            Assert.That(modules, Is.Empty);
-        }
-
-        [Test]
-        public void CreateModulesForSpecialization_WithNullBasicCode_ReturnsEmptyList()
-        {
-            // Arrange
-            // Create a mock specialization that would return null from GetBasicModuleName
-            string specializationCode = "mockedSpecialization";
-            DateTime startDate = new DateTime(2023, 1, 1);
-
-            // Act
-            List<Module> modules = ModuleHelper.CreateModulesForSpecialization(specializationCode, startDate);
-
-            // Assert
-            Assert.That(modules, Is.Empty);
         }
     }
 }

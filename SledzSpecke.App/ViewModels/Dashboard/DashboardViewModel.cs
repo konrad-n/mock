@@ -22,7 +22,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private Module currentModule;
         private bool basicModuleSelected;
         private bool specialisticModuleSelected;
-        private bool hasModules;
+        private bool hasTwoModules;
         private ObservableCollection<ModuleInfo> availableModules;
 
         // Progress statistics
@@ -90,12 +90,11 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             }
         }
 
-        public bool HasModules
+        public bool HasTwoModules
         {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
+            get => this.hasTwoModules;
+            set => this.SetProperty(ref this.hasTwoModules, value);
         }
-
         public Models.Specialization CurrentSpecialization
         {
             get => this.currentSpecialization;
@@ -268,85 +267,70 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     return;
                 }
 
-                // Ustawienie flagi HasModules
-                this.HasModules = this.CurrentSpecialization.HasModules;
-                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Specjalizacja ma moduły: {this.HasModules}");
+                this.HasTwoModules = this.CurrentSpecialization.Modules.Count == 2;
 
-                // Jeśli specjalizacja ma moduły, inicjalizuj je jeśli nie istnieją
-                if (this.CurrentSpecialization.HasModules)
+
+                // Upewnij się, że moduły są zainicjalizowane
+                await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
+
+                // Załaduj wszystkie moduły
+                var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano {modules.Count} modułów");
+
+                // Odśwież listę dostępnych modułów
+                this.AvailableModules.Clear();
+                foreach (var module in modules)
                 {
-                    // Upewnij się, że moduły są zainicjalizowane
-                    await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
-
-                    // Załaduj wszystkie moduły
-                    var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
-                    System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano {modules.Count} modułów");
-
-                    // Odśwież listę dostępnych modułów
-                    this.AvailableModules.Clear();
-                    foreach (var module in modules)
+                    this.AvailableModules.Add(new ModuleInfo
                     {
-                        this.AvailableModules.Add(new ModuleInfo
-                        {
-                            Id = module.ModuleId,
-                            Name = module.Name,
-                        });
-                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Dodano moduł {module.Name}");
+                        Id = module.ModuleId,
+                        Name = module.Name,
+                    });
+                    System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Dodano moduł {module.Name}");
+                }
+
+                // Jeśli nie ustawiono bieżącego modułu, użyj zapisanego w specjalizacji lub pierwszego z listy
+                if (this.CurrentModuleId == 0)
+                {
+                    // Najpierw sprawdź, czy specjalizacja ma zdefiniowany bieżący moduł
+                    if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
+                    {
+                        this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
+                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ID specjalizacji: {this.CurrentModuleId}");
                     }
-
-                    // Jeśli nie ustawiono bieżącego modułu, użyj zapisanego w specjalizacji lub pierwszego z listy
-                    if (this.CurrentModuleId == 0)
+                    // Jeśli nie, sprawdź ustawienia aplikacji
+                    else
                     {
-                        // Najpierw sprawdź, czy specjalizacja ma zdefiniowany bieżący moduł
-                        if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
+                        int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
+                        if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
                         {
-                            this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
-                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ID specjalizacji: {this.CurrentModuleId}");
+                            this.CurrentModuleId = savedModuleId;
+                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ustawień: {this.CurrentModuleId}");
                         }
-                        // Jeśli nie, sprawdź ustawienia aplikacji
-                        else
+                        // Jeśli nadal nie mamy bieżącego modułu, użyj pierwszego z listy
+                        else if (modules.Count > 0)
                         {
-                            int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
-                            if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
-                            {
-                                this.CurrentModuleId = savedModuleId;
-                                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ustawień: {this.CurrentModuleId}");
-                            }
-                            // Jeśli nadal nie mamy bieżącego modułu, użyj pierwszego z listy
-                            else if (modules.Count > 0)
-                            {
-                                this.CurrentModuleId = modules[0].ModuleId;
-                                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono pierwszy moduł z listy: {this.CurrentModuleId}");
-                            }
-                        }
-                    }
-
-                    // Pobierz bieżący moduł
-                    if (this.CurrentModuleId > 0)
-                    {
-                        // Ustaw bieżący moduł w serwisie i pobierz go
-                        await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
-                        this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
-                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono bieżący moduł: {this.CurrentModule?.Name ?? "null"}");
-
-                        // Ustaw stan wyboru modułu
-                        if (this.CurrentModule != null)
-                        {
-                            this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
-                            this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
-                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Typ modułu: {this.CurrentModule.Type}, Basic: {this.BasicModuleSelected}, Spec: {this.SpecialisticModuleSelected}");
+                            this.CurrentModuleId = modules[0].ModuleId;
+                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono pierwszy moduł z listy: {this.CurrentModuleId}");
                         }
                     }
                 }
-                else
+
+                // Pobierz bieżący moduł
+                if (this.CurrentModuleId > 0)
                 {
-                    // Dla specjalizacji bez modułów, wyczyść stan modułów
-                    this.CurrentModule = null;
-                    this.CurrentModuleId = 0;
-                    this.BasicModuleSelected = false;
-                    this.SpecialisticModuleSelected = false;
-                    this.AvailableModules.Clear();
-                    System.Diagnostics.Debug.WriteLine("DashboardViewModel: Specjalizacja bez modułów, wyczyszczono stan modułów");
+                    // Ustaw bieżący moduł w serwisie i pobierz go
+                    await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
+                    this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
+                    System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono bieżący moduł: {this.CurrentModule?.Name ?? "null"}");
+
+                    // Ustaw stan wyboru modułu
+                    if (this.CurrentModule != null)
+                    {
+                        this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
+                        this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
+                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Typ modułu: {this.CurrentModule.Type}, Basic: {this.BasicModuleSelected}, Spec: {this.SpecialisticModuleSelected}");
+                    }
                 }
 
                 // Załaduj statystyki i aktualizuj UI
@@ -461,7 +445,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             }
 
             // Ustaw tytuł na podstawie bieżącego modułu
-            if (this.HasModules && this.CurrentModule != null)
+            if (this.CurrentModule != null)
             {
                 this.ModuleTitle = this.CurrentModule.Name;
             }
@@ -485,7 +469,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            if (this.CurrentSpecialization == null || !this.HasModules)
+            if (this.CurrentSpecialization == null)
             {
                 return;
             }
@@ -587,7 +571,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private async Task NavigateToRecognitionsAsync()
         {
             // Uznania są tylko dla modułu specjalistycznego
-            if (this.HasModules && !this.SpecialisticModuleSelected)
+            if (!this.SpecialisticModuleSelected)
             {
                 await this.dialogService.DisplayAlertAsync(
                     "Informacja",

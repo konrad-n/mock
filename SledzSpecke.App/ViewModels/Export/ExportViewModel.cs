@@ -30,7 +30,6 @@ namespace SledzSpecke.App.ViewModels.Export
         private bool includeEducationalActivities;
         private bool includeRecognitions;
         private bool formatForOldSmk;
-        private bool hasModules;
         private bool isExporting;
         private string exportStatusMessage;
         private DateTime? lastExportDate;
@@ -169,12 +168,6 @@ namespace SledzSpecke.App.ViewModels.Export
             set => this.SetProperty(ref this.formatForOldSmk, value);
         }
 
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
-        }
-
         public bool IsExporting
         {
             get => this.isExporting;
@@ -281,8 +274,6 @@ namespace SledzSpecke.App.ViewModels.Export
                     return;
                 }
 
-                this.HasModules = specialization.HasModules;
-
                 // Wczytaj user settings dla formatu SMK
                 var user = await this.authService.GetCurrentUserAsync();
                 if (user != null)
@@ -292,27 +283,24 @@ namespace SledzSpecke.App.ViewModels.Export
                     this.FormatForOldSmk = user.SmkVersion == SmkVersion.Old;
                 }
 
-                // Wczytaj dostępne moduły, jeśli specjalizacja jest modułowa
-                if (this.HasModules)
+                // Wczytaj dostępne moduły
+                // Pobierz moduły dla bieżącej specjalizacji
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+
+                this.AvailableModules.Clear();
+                this.AvailableModules.Add(new ModuleInfo { Id = 0, Name = "Wszystkie moduły" });
+
+                foreach (var module in modules)
                 {
-                    // Pobierz moduły dla bieżącej specjalizacji
-                    var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-
-                    this.AvailableModules.Clear();
-                    this.AvailableModules.Add(new ModuleInfo { Id = 0, Name = "Wszystkie moduły" });
-
-                    foreach (var module in modules)
+                    this.AvailableModules.Add(new ModuleInfo
                     {
-                        this.AvailableModules.Add(new ModuleInfo
-                        {
-                            Id = module.ModuleId,
-                            Name = module.Name,
-                        });
-                    }
-
-                    // Wybierz opcję "Wszystkie moduły" jako domyślną
-                    this.SelectedModule = this.AvailableModules[0];
+                        Id = module.ModuleId,
+                        Name = module.Name,
+                    });
                 }
+
+                // Wybierz opcję "Wszystkie moduły" jako domyślną
+                this.SelectedModule = this.AvailableModules[0];
 
                 // Wczytaj datę ostatniego eksportu
                 this.LastExportDate = await this.exportService.GetLastExportDateAsync();
@@ -372,7 +360,7 @@ namespace SledzSpecke.App.ViewModels.Export
                     IncludeEducationalActivities = this.IncludeEducationalActivities,
                     IncludeRecognitions = this.IncludeRecognitions,
                     FormatForOldSMK = this.FormatForOldSmk,
-                    ModuleId = this.HasModules && this.SelectedModule != null && this.SelectedModule.Id > 0
+                    ModuleId = this.SelectedModule != null && this.SelectedModule.Id > 0
                         ? this.SelectedModule.Id
                         : null,
                 };

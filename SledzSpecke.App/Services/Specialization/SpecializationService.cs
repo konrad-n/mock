@@ -37,7 +37,7 @@ namespace SledzSpecke.App.Services.Specialization
                 System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Znaleziono specjalizację {specialization?.Name ?? "null"}");
 
                 // Jeśli specjalizacja ma moduły, ale ich nie załadowaliśmy, spróbuj je zainicjalizować
-                if (specialization != null && specialization.HasModules)
+                if (specialization != null)
                 {
                     var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
                     if (modules == null || modules.Count == 0)
@@ -64,7 +64,7 @@ namespace SledzSpecke.App.Services.Specialization
             try
             {
                 var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null || !specialization.HasModules || !specialization.CurrentModuleId.HasValue)
+                if (specialization == null || !specialization.CurrentModuleId.HasValue)
                 {
                     System.Diagnostics.Debug.WriteLine("GetCurrentModuleAsync: Nie znaleziono modułu");
                     return null;
@@ -447,20 +447,6 @@ namespace SledzSpecke.App.Services.Specialization
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd w CalculateSpecializationEndDateAsync: {ex.Message}");
                 return DateTime.Now.AddYears(5); // Domyślnie 5 lat
-            }
-        }
-
-        public async Task<bool> HasModulesAsync(int specializationId)
-        {
-            try
-            {
-                var specialization = await this.databaseService.GetSpecializationAsync(specializationId);
-                return specialization != null && specialization.HasModules;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w HasModulesAsync: {ex.Message}");
-                return false;
             }
         }
 

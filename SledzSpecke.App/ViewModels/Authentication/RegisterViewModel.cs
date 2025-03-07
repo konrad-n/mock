@@ -335,12 +335,12 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 {
                     Name = this.SelectedSpecialization.Name,
                     ProgramCode = this.SelectedSpecialization.Code,
+                    SmkVersion = user.SmkVersion,
                     StartDate = DateTime.Now,
                     PlannedEndDate = DateTime.Now.AddMonths(this.SelectedSpecialization.TotalDurationMonths > 0
                         ? this.SelectedSpecialization.TotalDurationMonths
                         : 60),
                     ProgramStructure = this.SelectedSpecialization.Structure,
-                    HasModules = true,  // Wszystkie specjalizacje mają moduły
                 };
 
                 // Tworzenie modułów dla specjalizacji

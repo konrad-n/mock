@@ -32,7 +32,6 @@ namespace SledzSpecke.App.ViewModels.Courses
         private DateTime? certificateDate;
         private bool canSave;
         private string moduleInfo = string.Empty;
-        private bool hasModules;
         private string selectedCourseType;
         private string recognitionType = string.Empty;
         private bool requiresApproval = true;
@@ -237,12 +236,6 @@ namespace SledzSpecke.App.ViewModels.Courses
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
-        }
-
         public string RecognitionType
         {
             get => this.recognitionType;
@@ -379,18 +372,10 @@ namespace SledzSpecke.App.ViewModels.Courses
                     return;
                 }
 
-                // Sprawdź, czy specjalizacja ma moduły
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                this.HasModules = specialization?.HasModules ?? false;
-
-                // Jeśli specjalizacja ma moduły, pobierz dane modułu
-                if (this.HasModules)
+                var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
+                if (module != null)
                 {
-                    var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
-                    if (module != null)
-                    {
-                        this.ModuleInfo = $"Ten kurs będzie dodany do modułu: {module.Name}";
-                    }
+                    this.ModuleInfo = $"Ten kurs będzie dodany do modułu: {module.Name}";
                 }
                 else
                 {
@@ -553,23 +538,15 @@ namespace SledzSpecke.App.ViewModels.Courses
                     course.CertificateIssueDate = this.CertificateIssueDate;
                 }
 
-                // Ustaw moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules)
+                // Jeśli przekazano moduleId, użyj go
+                if (this.moduleId.HasValue)
                 {
-                    // Jeśli przekazano moduleId, użyj go
-                    if (this.moduleId.HasValue)
-                    {
-                        course.ModuleId = this.moduleId.Value;
-                    }
-                    // W przeciwnym razie użyj bieżącego modułu specjalizacji
-                    else if (specialization.CurrentModuleId.HasValue)
-                    {
-                        course.ModuleId = specialization.CurrentModuleId.Value;
-                    }
+                    course.ModuleId = this.moduleId.Value;
                 }
-                else
+                // W przeciwnym razie użyj bieżącego modułu specjalizacji
+                else if (specialization.CurrentModuleId.HasValue)
                 {
-                    course.ModuleId = null;
+                    course.ModuleId = specialization.CurrentModuleId.Value;
                 }
 
                 // Zapisz do bazy danych

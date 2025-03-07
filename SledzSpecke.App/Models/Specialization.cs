@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using SledzSpecke.App.Models.Enums;
+using SQLite;
 
 namespace SledzSpecke.App.Models
 {
@@ -14,6 +15,8 @@ namespace SledzSpecke.App.Models
         [MaxLength(20)]
         public string ProgramCode { get; set; }
 
+        public SmkVersion SmkVersion { get; set; }
+
         public DateTime StartDate { get; set; }
 
         public DateTime PlannedEndDate { get; set; }
@@ -21,9 +24,6 @@ namespace SledzSpecke.App.Models
         public DateTime CalculatedEndDate { get; set; }
 
         public string ProgramStructure { get; set; } // JSON
-
-        // Nowe pola dla modułów
-        public bool HasModules { get; set; }
 
         public int? CurrentModuleId { get; set; }
 

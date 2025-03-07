@@ -29,7 +29,6 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
 
         private ObservableCollection<string> availableTypes;
         private ObservableCollection<int> availableYears;
-        private bool? hasModules;
         private string moduleInfo = string.Empty;
 
         public AddEditSelfEducationViewModel(
@@ -274,21 +273,11 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                     return;
                 }
 
-                // Sprawdź, czy specjalizacja ma moduły
-                if (!this.hasModules.HasValue)
+                // Pobierz dane modułu
+                var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
+                if (module != null)
                 {
-                    var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                    this.hasModules = specialization?.HasModules ?? false;
-                }
-
-                // Jeśli specjalizacja ma moduły, pobierz dane modułu
-                if (this.hasModules.Value)
-                {
-                    var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
-                    if (module != null)
-                    {
-                        this.ModuleInfo = $"To samokształcenie będzie dodane do modułu: {module.Name}";
-                    }
+                    this.ModuleInfo = $"To samokształcenie będzie dodane do modułu: {module.Name}";
                 }
                 else
                 {
@@ -383,19 +372,15 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                     selfEducation.AdditionalFields = System.Text.Json.JsonSerializer.Serialize(additionalFields);
                 }
 
-                // Ustaw moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules)
+                // Jeśli przekazano moduleId, użyj go
+                if (this.moduleId.HasValue)
                 {
-                    // Jeśli przekazano moduleId, użyj go
-                    if (this.moduleId.HasValue)
-                    {
-                        selfEducation.ModuleId = this.moduleId.Value;
-                    }
-                    // W przeciwnym razie użyj bieżącego modułu specjalizacji
-                    else if (specialization.CurrentModuleId.HasValue)
-                    {
-                        selfEducation.ModuleId = specialization.CurrentModuleId.Value;
-                    }
+                    selfEducation.ModuleId = this.moduleId.Value;
+                }
+                // W przeciwnym razie użyj bieżącego modułu specjalizacji
+                else if (specialization.CurrentModuleId.HasValue)
+                {
+                    selfEducation.ModuleId = specialization.CurrentModuleId.Value;
                 }
                 else
                 {

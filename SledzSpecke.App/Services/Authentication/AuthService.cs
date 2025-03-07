@@ -181,27 +181,20 @@ namespace SledzSpecke.App.Services.Authentication
                 await this.databaseService.SaveUserAsync(user);
                 System.Diagnostics.Debug.WriteLine("Użytkownik zaktualizowany o ID specjalizacji.");
 
-                // Jeśli specjalizacja posiada moduły, zapisz je
-                if (specialization.HasModules && specialization.Modules != null && specialization.Modules.Count > 0)
+                System.Diagnostics.Debug.WriteLine($"Zapisuję {specialization.Modules.Count} moduły...");
+
+                foreach (var module in specialization.Modules)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Zapisuję {specialization.Modules.Count} moduły...");
-
-                    foreach (var module in specialization.Modules)
-                    {
-                        module.ModuleId = 0; // Upewnij się, że ID jest 0 przed zapisem
-                        module.SpecializationId = specializationId;
-                        int moduleId = await this.databaseService.SaveModuleAsync(module);
-                        System.Diagnostics.Debug.WriteLine($"Moduł zapisany z ID: {moduleId}");
-                    }
-
-                    // Ustawienie aktualnego modułu (domyślnie pierwszy moduł)
-                    if (specialization.Modules.Count > 0 && specialization.Modules[0].ModuleId > 0)
-                    {
-                        specialization.CurrentModuleId = specialization.Modules[0].ModuleId;
-                        await this.databaseService.UpdateSpecializationAsync(specialization);
-                        System.Diagnostics.Debug.WriteLine($"Ustawiono bieżący moduł na ID: {specialization.CurrentModuleId}");
-                    }
+                    module.ModuleId = 0; // Upewnij się, że ID jest 0 przed zapisem
+                    module.SpecializationId = specializationId;
+                    int moduleId = await this.databaseService.SaveModuleAsync(module);
+                    System.Diagnostics.Debug.WriteLine($"Moduł zapisany z ID: {moduleId}");
                 }
+
+                // Ustawienie aktualnego modułu (domyślnie pierwszy moduł)
+                specialization.CurrentModuleId = specialization.Modules[0].ModuleId;
+                await this.databaseService.UpdateSpecializationAsync(specialization);
+                System.Diagnostics.Debug.WriteLine($"Ustawiono bieżący moduł na ID: {specialization.CurrentModuleId}");
 
                 System.Diagnostics.Debug.WriteLine("Rejestracja zakończona pomyślnie!");
                 return true;

@@ -22,7 +22,6 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         // Dane
         private ObservableCollection<SelfEducationViewModel> selfEducationItems;
         private int? currentModuleId;
-        private bool hasModules;
         private bool isOldSmkVersion;
 
         public SelfEducationListViewModel(
@@ -68,12 +67,6 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
         {
             get => this.searchText;
             set => this.SetProperty(ref this.searchText, value);
-        }
-
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
         }
 
         public bool IsOldSmkVersion
@@ -127,11 +120,8 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                     return;
                 }
 
-                // Aktualizacja flagi modułów
-                this.HasModules = specialization.HasModules;
-
-                // Ustaw bieżący moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                // Ustaw bieżący moduł
+                if (specialization.CurrentModuleId.HasValue)
                 {
                     this.currentModuleId = specialization.CurrentModuleId.Value;
                 }
@@ -189,8 +179,8 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
                         }
                     }
 
-                    // Pobierz nazwę modułu, jeśli dostępna
-                    if (this.HasModules && item.ModuleId.HasValue)
+                    // Pobierz nazwę modułu
+                    if (item.ModuleId.HasValue)
                     {
                         var module = await this.databaseService.GetModuleAsync(item.ModuleId.Value);
                         if (module != null)
@@ -241,7 +231,7 @@ namespace SledzSpecke.App.ViewModels.SelfEducation
             var specialization = await this.specializationService.GetCurrentSpecializationAsync();
             int? moduleId = null;
 
-            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            if (specialization != null && specialization.CurrentModuleId.HasValue)
             {
                 moduleId = specialization.CurrentModuleId.Value;
             }

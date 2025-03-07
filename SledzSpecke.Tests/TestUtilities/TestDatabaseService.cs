@@ -74,10 +74,7 @@ namespace SledzSpecke.Tests.TestUtilities
             await this.InitializeAsync();
             var specialization = await this.database.Table<SledzSpecke.App.Models.Specialization>().FirstOrDefaultAsync(s => s.SpecializationId == id);
 
-            if (specialization != null && specialization.HasModules)
-            {
-                specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
-            }
+            specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
 
             return specialization;
         }

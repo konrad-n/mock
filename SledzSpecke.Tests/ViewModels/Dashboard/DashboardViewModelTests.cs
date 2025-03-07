@@ -50,7 +50,6 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
             {
                 SpecializationId = 1,
                 Name = "Kardiologia",
-                HasModules = true,
                 StartDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 PlannedEndDate = new DateTime(2028, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 CalculatedEndDate = new DateTime(2028, 3, 1, 0, 0, 0, DateTimeKind.Local),
@@ -159,7 +158,7 @@ namespace SledzSpecke.Tests.ViewModels.Dashboard
         }
 
         [Test]
-        public async Task LoadDataAsync_DefaultsToCurrentModule_WhenHasModules()
+        public async Task LoadDataAsync_DefaultsToCurrentModule()
         {
             // Arrange
             this.viewModel.CurrentModuleId = 0;  // Resetuj ID modułu

@@ -18,7 +18,6 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         // Filtry
         private string searchText = string.Empty;
-        private bool showOnlyActive = true;
         private bool showBasicModule = false;
         private bool showSpecialisticModule = false;
         private Internship selectedInternship;
@@ -30,7 +29,6 @@ namespace SledzSpecke.App.ViewModels.Internships
         // Dane
         private ObservableCollection<InternshipViewModel> internships;
         private int? currentModuleId;
-        private bool hasModules;
         private string moduleInfo = string.Empty;
         private Module currentModule;
 
@@ -48,7 +46,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.FilterCommand = new AsyncRelayCommand(this.ApplyFiltersAsync);
             this.InternshipSelectedCommand = new AsyncRelayCommand(this.OnInternshipSelectedAsync);
             this.AddInternshipCommand = new AsyncRelayCommand(this.OnAddInternshipAsync);
-            this.ToggleActiveCommand = new RelayCommand(this.OnToggleActive);
             this.TogglePartialCommand = new RelayCommand(this.OnTogglePartial);
             this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
 
@@ -82,12 +79,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => this.SetProperty(ref this.searchText, value);
         }
 
-        public bool ShowOnlyActive
-        {
-            get => this.showOnlyActive;
-            set => this.SetProperty(ref this.showOnlyActive, value);
-        }
-
         public bool ShowPartialOnly
         {
             get => this.showPartialOnly;
@@ -98,12 +89,6 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             get => this.isOldSmkVersion;
             set => this.SetProperty(ref this.isOldSmkVersion, value);
-        }
-
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
         }
 
         public string ModuleInfo
@@ -175,11 +160,8 @@ namespace SledzSpecke.App.ViewModels.Internships
                     return;
                 }
 
-                // Aktualizacja flagi modułów
-                this.HasModules = specialization.HasModules;
-
-                // Ustaw bieżący moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                // Ustaw bieżący moduł
+                if (specialization.CurrentModuleId.HasValue)
                 {
                     this.currentModuleId = specialization.CurrentModuleId.Value;
                     var module = await this.databaseService.GetModuleAsync(this.currentModuleId.Value);
@@ -222,12 +204,6 @@ namespace SledzSpecke.App.ViewModels.Internships
                         .ToList();
                 }
 
-                // Filtrowanie według statusu (aktywne/wszystkie)
-                if (this.ShowOnlyActive)
-                {
-                    items = items.Where(i => !i.IsCompleted).ToList();
-                }
-
                 // Filtrowanie po realizacji częściowej (tylko dla starego SMK)
                 if (this.IsOldSmkVersion && this.ShowPartialOnly)
                 {
@@ -250,8 +226,8 @@ namespace SledzSpecke.App.ViewModels.Internships
                         moduleType: ModuleType.Basic,
                         isOldSmk: this.IsOldSmkVersion);
 
-                    // Pobierz nazwę modułu, jeśli dostępna
-                    if (this.HasModules && item.ModuleId.HasValue)
+                    // Pobierz nazwę modułu
+                    if (item.ModuleId.HasValue)
                     {
                         var module = await this.databaseService.GetModuleAsync(item.ModuleId.Value);
                         if (module != null)
@@ -283,12 +259,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             await this.LoadInternshipsAsync();
         }
 
-        private void OnToggleActive()
-        {
-            this.ShowOnlyActive = !this.ShowOnlyActive;
-            this.ApplyFiltersAsync().ConfigureAwait(false);
-        }
-
         private void OnTogglePartial()
         {
             this.ShowPartialOnly = !this.ShowPartialOnly;
@@ -297,15 +267,10 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            if (!this.HasModules)
-            {
-                return;
-            }
-
             try
             {
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null || !specialization.HasModules)
+                if (specialization == null)
                 {
                     return;
                 }
@@ -383,7 +348,7 @@ namespace SledzSpecke.App.ViewModels.Internships
             var specialization = await this.specializationService.GetCurrentSpecializationAsync();
             int? moduleId = null;
 
-            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            if (specialization != null && specialization.CurrentModuleId.HasValue)
             {
                 moduleId = specialization.CurrentModuleId.Value;
             }

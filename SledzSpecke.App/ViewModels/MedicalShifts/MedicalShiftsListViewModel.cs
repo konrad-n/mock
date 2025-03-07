@@ -148,7 +148,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 }
 
                 // Ustawienie modułu
-                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                if (specialization.CurrentModuleId.HasValue)
                 {
                     this.currentModuleId = specialization.CurrentModuleId.Value;
                 }
@@ -405,7 +405,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             var specialization = await this.specializationService.GetCurrentSpecializationAsync();
             int? moduleId = null;
 
-            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            if (specialization != null && specialization.CurrentModuleId.HasValue)
             {
                 moduleId = specialization.CurrentModuleId.Value;
             }

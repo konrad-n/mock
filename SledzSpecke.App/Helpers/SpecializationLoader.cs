@@ -103,19 +103,9 @@ namespace SledzSpecke.App.Helpers
                 }
             }
 
-            // Jeśli nic nie znaleziono, zwracamy podstawową specjalizację
-            System.Diagnostics.Debug.WriteLine("Tworzę domyślny program specjalizacji");
-            return new SpecializationProgram
-            {
-                ProgramId = 1,
-                Name = code.First().ToString().ToUpperInvariant() + code.Substring(1).ToLowerInvariant().Replace("_", " "),
-                Code = code,
-                SmkVersion = smkVersion,
-                HasModules = code.ToLowerInvariant() == "cardiology",
-                BasicModuleCode = code.ToLowerInvariant() == "cardiology" ? "internal_medicine" : null,
-                BasicModuleDurationMonths = code.ToLowerInvariant() == "cardiology" ? 24 : 0,
-                TotalDurationMonths = 60
-            };
+            System.Diagnostics.Debug.WriteLine("Nie znaleziono specjalizacji");
+
+            return new SpecializationProgram();
         }
 
         /// <summary>
@@ -305,17 +295,6 @@ namespace SledzSpecke.App.Helpers
                             program.Code = codeElement.GetString();
                         }
 
-                        if (jsonObj.TryGetValue("hasModules", out var hasModulesElement))
-                        {
-                            program.HasModules = hasModulesElement.GetBoolean();
-                        }
-                        else if (jsonObj.TryGetValue("modules", out var modulesElement) &&
-                                modulesElement.ValueKind == JsonValueKind.Array &&
-                                modulesElement.GetArrayLength() > 0)
-                        {
-                            program.HasModules = true;
-                        }
-
                         // Pobierz czas trwania
                         if (jsonObj.TryGetValue("totalDuration", out var durationElement) &&
                             durationElement.ValueKind == JsonValueKind.Object)
@@ -332,7 +311,7 @@ namespace SledzSpecke.App.Helpers
                         }
 
                         // Pobierz dane o module podstawowym
-                        if (program.HasModules && jsonObj.TryGetValue("modules", out var modules) &&
+                        if (jsonObj.TryGetValue("modules", out var modules) &&
                             modules.ValueKind == JsonValueKind.Array)
                         {
                             for (int i = 0; i < modules.GetArrayLength(); i++)

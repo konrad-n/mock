@@ -30,7 +30,6 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool isApproved;
         private bool canSave;
         private string moduleInfo = string.Empty;
-        private bool hasModules;
         private string selectedInternshipType;
         private string selectedInternshipName;
         private bool isOldSmkVersion;
@@ -255,12 +254,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => this.SetProperty(ref this.moduleInfo, value);
         }
 
-        public bool HasModules
-        {
-            get => this.hasModules;
-            set => this.SetProperty(ref this.hasModules, value);
-        }
-
         public bool IsOldSmkVersion
         {
             get => this.isOldSmkVersion;
@@ -355,18 +348,11 @@ namespace SledzSpecke.App.ViewModels.Internships
                     return;
                 }
 
-                // Sprawdź, czy specjalizacja ma moduły
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                this.HasModules = specialization?.HasModules ?? false;
-
-                // Jeśli specjalizacja ma moduły, pobierz dane modułu
-                if (this.HasModules)
+                // Pobierz dane modułu
+                var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
+                if (module != null)
                 {
-                    var module = await this.databaseService.GetModuleAsync(this.moduleId.Value);
-                    if (module != null)
-                    {
-                        this.ModuleInfo = $"Ten staż będzie dodany do modułu: {module.Name}";
-                    }
+                    this.ModuleInfo = $"Ten staż będzie dodany do modułu: {module.Name}";
                 }
                 else
                 {
@@ -517,23 +503,15 @@ namespace SledzSpecke.App.ViewModels.Internships
                     internship.SupervisorName = this.SupervisorName;
                 }
 
-                // Ustaw moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules)
+                // Jeśli przekazano moduleId, użyj go
+                if (this.moduleId.HasValue)
                 {
-                    // Jeśli przekazano moduleId, użyj go
-                    if (this.moduleId.HasValue)
-                    {
-                        internship.ModuleId = this.moduleId.Value;
-                    }
-                    // W przeciwnym razie użyj bieżącego modułu specjalizacji
-                    else if (specialization.CurrentModuleId.HasValue)
-                    {
-                        internship.ModuleId = specialization.CurrentModuleId.Value;
-                    }
+                    internship.ModuleId = this.moduleId.Value;
                 }
-                else
+                // W przeciwnym razie użyj bieżącego modułu specjalizacji
+                else if (specialization.CurrentModuleId.HasValue)
                 {
-                    internship.ModuleId = null;
+                    internship.ModuleId = specialization.CurrentModuleId.Value;
                 }
 
                 // Zapisz do bazy danych

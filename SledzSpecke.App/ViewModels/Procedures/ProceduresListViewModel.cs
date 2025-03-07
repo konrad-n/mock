@@ -118,8 +118,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     return;
                 }
 
-                // Ustaw bieżący moduł, jeśli specjalizacja ma moduły
-                if (specialization.HasModules && specialization.CurrentModuleId.HasValue)
+                // Ustaw bieżący moduł
+                if (specialization.CurrentModuleId.HasValue)
                 {
                     this.currentModuleId = specialization.CurrentModuleId.Value;
                 }
@@ -269,7 +269,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             var specialization = await this.specializationService.GetCurrentSpecializationAsync();
             int? moduleId = null;
 
-            if (specialization != null && specialization.HasModules && specialization.CurrentModuleId.HasValue)
+            if (specialization != null && specialization.CurrentModuleId.HasValue)
             {
                 moduleId = specialization.CurrentModuleId.Value;
             }
