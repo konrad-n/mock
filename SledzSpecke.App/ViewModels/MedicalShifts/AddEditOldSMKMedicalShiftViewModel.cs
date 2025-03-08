@@ -190,18 +190,43 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             try
             {
-                // Ustawienie tytułu strony
-                this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj dyżur";
-                System.Diagnostics.Debug.WriteLine($"InitializeAsync: Ustawiono tytuł strony: {this.Title}");
+                // Najpierw sprawdzamy, czy mamy do czynienia z edycją (ShiftId > 0)
+                bool isEditMode = !string.IsNullOrEmpty(this.shiftId) &&
+                                  int.TryParse(this.shiftId, out int shiftIdValue) &&
+                                  shiftIdValue > 0;
 
-                // Jeśli to nowy dyżur i ID specjalizacji nie zostało jeszcze ustawione
-                if (!this.IsEdit && this.shift.SpecializationId <= 0)
+                // Ustawiamy tryb (edycja/dodawanie)
+                this.IsEdit = isEditMode;
+                this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj dyżur";
+
+                // Dla trybu edycji, ładujemy istniejący dyżur
+                if (this.IsEdit)
                 {
+                    await this.LoadShiftAsync(int.Parse(this.shiftId));
+                }
+                else
+                {
+                    // Dla nowego dyżuru, ustawiamy rok z parametru
+                    if (this.year > 0)
+                    {
+                        this.shift.Year = this.year;
+                        this.OnPropertyChanged(nameof(Shift));
+                        this.OnPropertyChanged(nameof(Shift.Year));
+                        System.Diagnostics.Debug.WriteLine($"InitializeAsync: Ustawiono rok dyżuru: {this.shift.Year}");
+                    }
+
+                    // Pobieramy ID specjalizacji
                     var user = await this.authService.GetCurrentUserAsync();
                     if (user != null)
                     {
                         this.shift.SpecializationId = user.SpecializationId;
                         System.Diagnostics.Debug.WriteLine($"InitializeAsync: Ustawiono ID specjalizacji: {this.shift.SpecializationId}");
+                    }
+
+                    // Ładujemy ostatnią lokację dla nowego dyżuru
+                    if (!this.lastLocationLoaded)
+                    {
+                        await this.LoadLastLocationAsync();
                     }
                 }
             }
