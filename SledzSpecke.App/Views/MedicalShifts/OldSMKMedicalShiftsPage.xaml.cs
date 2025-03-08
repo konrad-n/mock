@@ -16,6 +16,21 @@ namespace SledzSpecke.App.Views.MedicalShifts
             this.viewModel.PropertyChanged += this.ViewModel_PropertyChanged;
         }
 
+        protected override void OnNavigatedTo(NavigatedToEventArgs args)
+        {
+            base.OnNavigatedTo(args);
+
+            // Ustaw właściwość BackButtonBehavior dla Shell'a
+            Shell.SetBackButtonBehavior(this, new BackButtonBehavior
+            {
+                Command = new Command(async () =>
+                {
+                    await Shell.Current.GoToAsync("///dashboard");
+                })
+            });
+        }
+
+
         protected override void OnAppearing()
         {
             base.OnAppearing();

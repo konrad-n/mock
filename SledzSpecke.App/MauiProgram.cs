@@ -3,7 +3,6 @@ using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
-using SledzSpecke.App.Services.Export;
 using SledzSpecke.App.Services.FileSystem;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Notification;
@@ -14,7 +13,6 @@ using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
 using SledzSpecke.App.ViewModels.Dashboard;
-using SledzSpecke.App.ViewModels.Export;
 using SledzSpecke.App.ViewModels.MedicalShifts;
 using SledzSpecke.App.Views.Absences;
 using SledzSpecke.App.Views.Authentication;
@@ -68,7 +66,6 @@ namespace SledzSpecke.App
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<ISpecializationService, SpecializationService>();
             services.AddSingleton<INotificationService, NotificationService>();
-            services.AddSingleton<IExportService, ExportService>();
             services.AddSingleton<IRecognitionService, RecognitionService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<ISettingsService, SettingsService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<ISecureStorageService, SecureStorageService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
@@ -101,10 +98,6 @@ namespace SledzSpecke.App
             services.AddTransient<OldSMKMedicalShiftsListViewModel>();
             services.AddTransient<NewSMKMedicalShiftsListViewModel>();
             services.AddTransient<AddEditOldSMKMedicalShiftViewModel>();
-
-
-            services.AddTransient<ExportViewModel>();
-            services.AddTransient<ExportPreviewViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)

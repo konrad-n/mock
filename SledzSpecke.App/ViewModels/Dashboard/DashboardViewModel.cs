@@ -535,7 +535,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         private async Task NavigateToShiftsAsync()
         {
-            await Shell.Current.GoToAsync("medicalshifts");
+            await Shell.Current.GoToAsync("///medicalshifts");
         }
 
         private async Task NavigateToCoursesAsync()

@@ -244,4 +244,12 @@
   <ItemGroup>
     <PRIResource Remove="ViewModels\Base\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="Models\" />
+    <Folder Include="Services\" />
+    <Folder Include="TestHelpers\" />
+    <Folder Include="TestUtilities\" />
+    <Folder Include="ViewModels\Dashboard\" />
+  </ItemGroup>
 </Project>
