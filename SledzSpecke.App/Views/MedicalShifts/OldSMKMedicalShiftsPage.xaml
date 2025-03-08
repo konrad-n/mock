@@ -68,13 +68,13 @@
                     <VerticalStackLayout>
                         <Label Text="Dyżury medyczne - podsumowanie" Style="{StaticResource HeaderStyle}" />
 
-                        <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto">
-                            <Label Grid.Row="0" Grid.Column="0" Text="Liczba godzin" Style="{StaticResource ColumnHeaderStyle}" />
-                            <Label Grid.Row="0" Grid.Column="2" Text="Liczba minut" Style="{StaticResource ColumnHeaderStyle}" />
+                        <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto">
+                            <Label Grid.Row="0" Grid.Column="1" Text="Liczba godzin" Style="{StaticResource ColumnHeaderStyle}" HorizontalOptions="End"/>
+                            <Label Grid.Row="0" Grid.Column="2" Text="Liczba minut" Style="{StaticResource ColumnHeaderStyle}" HorizontalOptions="End"/>
 
                             <Label Grid.Row="1" Grid.Column="0" Text="Dyżury zrealizowane" />
-                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Summary.TotalHours}" FontAttributes="Bold" HorizontalOptions="End" Margin="0,0,20,0" />
-                            <Label Grid.Row="1" Grid.Column="3" Text="{Binding Summary.TotalMinutes}" FontAttributes="Bold" HorizontalOptions="End" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Summary.TotalHours}" FontAttributes="Bold" HorizontalOptions="End" />
+                            <Label Grid.Row="1" Grid.Column="2" Text="{Binding Summary.TotalMinutes}" FontAttributes="Bold" HorizontalOptions="End" />
                         </Grid>
                     </VerticalStackLayout>
                 </Frame>
