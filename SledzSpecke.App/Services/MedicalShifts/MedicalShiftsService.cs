@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,7 +13,7 @@ using SledzSpecke.App.Services.Specialization;
 
 namespace SledzSpecke.App.Services.MedicalShifts
 {
-    public class MedicalShiftsService : IMedicalShiftsService
+    public partial class MedicalShiftsService : IMedicalShiftsService
     {
         private readonly IDatabaseService databaseService;
         private readonly IAuthService authService;
@@ -33,25 +34,34 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
-
-                // Pobierz obecną specjalizację
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("GetOldSMKShiftsAsync: Brak zalogowanego użytkownika");
                     return new List<RealizedMedicalShiftOldSMK>();
                 }
 
-                // Pobierz wszystkie dyżury dla danej specjalizacji i roku szkolenia
-                var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ? ORDER BY StartDate DESC";
-                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, specialization.SpecializationId, year);
+                System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftsAsync: Pobieranie dyżurów dla użytkownika {user.Username}, ID={user.UserId}, SpecializationId={user.SpecializationId}, rok={year}");
 
-                return shifts;
+                // Pobierz dyżury dla wybranego roku i specjalizacji użytkownika
+                var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ? ORDER BY StartDate DESC";
+                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, user.SpecializationId, year);
+
+                System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftsAsync: Pobrano {shifts.Count} dyżurów dla specjalizacji {user.SpecializationId}, rok {year}");
+
+                // Dodatkowe zabezpieczenie - sprawdź, czy każdy dyżur ma poprawne ID specjalizacji
+                var filteredShifts = shifts.Where(s => s.SpecializationId == user.SpecializationId).ToList();
+
+                if (filteredShifts.Count != shifts.Count)
+                {
+                    System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftsAsync: UWAGA! Po dodatkowym filtrowaniu zostało {filteredShifts.Count} z {shifts.Count} dyżurów");
+                }
+
+                return filteredShifts;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania dyżurów starego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftsAsync: Błąd - {ex.Message}");
                 return new List<RealizedMedicalShiftOldSMK>();
             }
         }
@@ -60,64 +70,99 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
+                // Pobierz aktualnego użytkownika
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("GetOldSMKShiftAsync: Brak zalogowanego użytkownika");
+                    return null;
+                }
 
-                // Pobierz dyżur o danym ID
-                var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE ShiftId = ?";
-                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, shiftId);
+                System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftAsync: Pobieranie dyżuru ID={shiftId} dla użytkownika {user.Username}, SpecializationId={user.SpecializationId}");
 
-                return shifts.FirstOrDefault();
+                // Pobierz dyżur o podanym ID, ale tylko dla specjalizacji bieżącego użytkownika
+                var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE ShiftId = ? AND SpecializationId = ?";
+                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, shiftId, user.SpecializationId);
+
+                if (shifts.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftAsync: Pobrano dyżur o ID {shiftId} dla specjalizacji {user.SpecializationId}");
+                    return shifts[0];
+                }
+                else
+                {
+                    // Sprawdźmy czy dyżur w ogóle istnieje (nawet jeśli należy do innego użytkownika)
+                    var checkQuery = "SELECT COUNT(*) FROM RealizedMedicalShiftOldSMK WHERE ShiftId = ?";
+                    var count = await this.databaseService.QueryAsync<CountResult>(checkQuery, shiftId);
+
+                    if (count.Count > 0 && count[0].Count > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftAsync: Dyżur o ID {shiftId} istnieje, ale NIE należy do użytkownika {user.Username}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftAsync: Nie znaleziono dyżuru o ID {shiftId}");
+                    }
+
+                    return null;
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania dyżuru starego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"GetOldSMKShiftAsync: Błąd - {ex.Message}");
                 return null;
             }
+        }
+
+        // Klasa pomocnicza do zliczania wyników
+        private class CountResult
+        {
+            public int Count { get; set; }
         }
 
         public async Task<bool> SaveOldSMKShiftAsync(RealizedMedicalShiftOldSMK shift)
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
-
-                // Pobierz obecną specjalizację
-                if (shift.SpecializationId <= 0)
+                // Pobierz aktualnego użytkownika
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
                 {
-                    var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                    if (specialization == null)
-                    {
-                        return false;
-                    }
-
-                    shift.SpecializationId = specialization.SpecializationId;
+                    System.Diagnostics.Debug.WriteLine("SaveOldSMKShiftAsync: Brak zalogowanego użytkownika");
+                    return false;
                 }
 
-                // Ustaw status synchronizacji
-                if (shift.SyncStatus == 0)
-                {
-                    shift.SyncStatus = SyncStatus.NotSynced;
-                }
+                // Zawsze aktualizuj ID specjalizacji na bieżące
+                shift.SpecializationId = user.SpecializationId;
+                System.Diagnostics.Debug.WriteLine($"SaveOldSMKShiftAsync: Ustawiono SpecializationId={shift.SpecializationId} dla użytkownika {user.Username}");
 
-                // Zapisz dyżur
-                if (shift.ShiftId > 0)
+                // Sprawdź, czy to nowy dyżur czy aktualizacja istniejącego
+                if (shift.ShiftId == 0)
                 {
-                    // Aktualizacja istniejącego dyżuru
-                    await this.databaseService.UpdateAsync(shift);
+                    // Dodawanie nowego dyżuru
+                    int result = await this.databaseService.InsertAsync(shift);
+                    System.Diagnostics.Debug.WriteLine($"SaveOldSMKShiftAsync: Dodano nowy dyżur z ID {result}, SpecializationId={shift.SpecializationId}");
+                    return result > 0;
                 }
                 else
                 {
-                    // Dodanie nowego dyżuru
-                    await this.databaseService.InsertAsync(shift);
-                }
+                    // Dodatkowe zabezpieczenie - sprawdź, czy dyżur należy do bieżącego użytkownika
+                    var existingShift = await this.GetOldSMKShiftAsync(shift.ShiftId);
+                    if (existingShift != null && existingShift.SpecializationId != user.SpecializationId)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"SaveOldSMKShiftAsync: ODMOWA DOSTĘPU - próba edycji dyżuru innego użytkownika! ShiftId={shift.ShiftId}, SpecializationId dyżuru={existingShift.SpecializationId}, SpecializationId użytkownika={user.SpecializationId}");
+                        return false;
+                    }
 
-                return true;
+                    // Aktualizacja istniejącego dyżuru
+                    int result = await this.databaseService.UpdateAsync(shift);
+                    System.Diagnostics.Debug.WriteLine($"SaveOldSMKShiftAsync: Zaktualizowano dyżur o ID {shift.ShiftId}, SpecializationId={shift.SpecializationId}, wynik: {result}");
+                    return result > 0;
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania dyżuru starego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"SaveOldSMKShiftAsync: Błąd - {ex.Message}");
                 return false;
             }
         }
@@ -126,24 +171,41 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
+                System.Diagnostics.Debug.WriteLine($"DeleteOldSMKShiftAsync: Rozpoczęto usuwanie dyżuru o ID {shiftId}");
 
-                // Pobierz dyżur o danym ID
+                // Pobierz aktualnego użytkownika
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("DeleteOldSMKShiftAsync: Brak zalogowanego użytkownika");
+                    return false;
+                }
+
+                // Znajdź dyżur do usunięcia
                 var shift = await this.GetOldSMKShiftAsync(shiftId);
                 if (shift == null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"DeleteOldSMKShiftAsync: Nie znaleziono dyżuru o ID {shiftId}");
+                    return false;
+                }
+
+                // Sprawdź, czy dyżur należy do bieżącego użytkownika
+                if (shift.SpecializationId != user.SpecializationId)
+                {
+                    System.Diagnostics.Debug.WriteLine($"DeleteOldSMKShiftAsync: ODMOWA DOSTĘPU - próba usunięcia dyżuru innego użytkownika! ShiftId={shiftId}, SpecializationId dyżuru={shift.SpecializationId}, SpecializationId użytkownika={user.SpecializationId}");
                     return false;
                 }
 
                 // Usuń dyżur
-                await this.databaseService.DeleteAsync(shift);
+                var query = "DELETE FROM RealizedMedicalShiftOldSMK WHERE ShiftId = ? AND SpecializationId = ?";
+                int result = await this.databaseService.ExecuteAsync(query, shiftId, user.SpecializationId);
 
-                return true;
+                System.Diagnostics.Debug.WriteLine($"DeleteOldSMKShiftAsync: Usunięto dyżur o ID {shiftId}, SpecializationId={user.SpecializationId}, wynik: {result}");
+                return result > 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania dyżuru starego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"DeleteOldSMKShiftAsync: Błąd - {ex.Message}");
                 return false;
             }
         }
@@ -153,38 +215,37 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
-
-                // Pobierz obecną specjalizację
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("GetNewSMKShiftsAsync: Brak zalogowanego użytkownika");
                     return new List<RealizedMedicalShiftNewSMK>();
                 }
 
-                // Pobierz wszystkie dyżury dla danej specjalizacji i wymagania stażowego
+                System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: Pobieranie dyżurów dla użytkownika {user.Username}, ID={user.UserId}, SpecializationId={user.SpecializationId}, wymaganie={internshipRequirementId}");
+
+                // Pobierz dyżury dla wybranego wymagania stażowego i specjalizacji użytkownika
                 var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND InternshipRequirementId = ? ORDER BY StartDate DESC";
-                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, specialization.SpecializationId, internshipRequirementId);
+                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, user.SpecializationId, internshipRequirementId);
 
-                // Uzupełnij nazwę stażu
-                var internshipRequirements = await this.GetAvailableInternshipRequirementsAsync();
-                var requirement = internshipRequirements.FirstOrDefault(r => r.Id == internshipRequirementId);
+                System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: Pobrano {shifts.Count} dyżurów dla specjalizacji {user.SpecializationId}, wymaganie {internshipRequirementId}");
 
-                foreach (var shift in shifts)
+                // Dodatkowe zabezpieczenie - sprawdź, czy każdy dyżur ma poprawne ID specjalizacji
+                var filteredShifts = shifts.Where(s => s.SpecializationId == user.SpecializationId).ToList();
+
+                if (filteredShifts.Count != shifts.Count)
                 {
-                    shift.InternshipName = requirement?.Name ?? string.Empty;
+                    System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: UWAGA! Po dodatkowym filtrowaniu zostało {filteredShifts.Count} z {shifts.Count} dyżurów");
                 }
 
-                return shifts;
+                return filteredShifts;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania dyżurów nowego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: Błąd - {ex.Message}");
                 return new List<RealizedMedicalShiftNewSMK>();
             }
         }
-
         public async Task<RealizedMedicalShiftNewSMK> GetNewSMKShiftAsync(int shiftId)
         {
             try
@@ -286,8 +347,8 @@ namespace SledzSpecke.App.Services.MedicalShifts
             }
         }
 
-        // Implementacja wspólnych metod
-        public async Task<MedicalShiftsSummary> GetShiftsSummaryAsync(int? internshipRequirementId = null, int? year = null)
+        // Zmień sygnaturę metody GetShiftsSummaryAsync, aby była zgodna z interfejsem
+        public async Task<MedicalShiftsSummary> GetShiftsSummaryAsync(int? year = null, int? internshipRequirementId = null)
         {
             try
             {
@@ -398,26 +459,92 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                // Pobierz obecną specjalizację
+                // Pobierz aktualnego użytkownika
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("GetAvailableYearsAsync: Brak zalogowanego użytkownika");
+                    return new List<int> { 1 }; // Zwracamy domyślny rok 1
+                }
+
+                System.Diagnostics.Debug.WriteLine($"GetAvailableYearsAsync: Pobieranie lat dla użytkownika {user.Username}, ID={user.UserId}, SpecializationId={user.SpecializationId}");
+
+                // Pobierz aktualną specjalizację
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    return new List<int>();
+                    System.Diagnostics.Debug.WriteLine("GetAvailableYearsAsync: Nie znaleziono aktualnej specjalizacji");
+                    return new List<int> { 1 }; // Zwracamy domyślny rok 1
                 }
 
-                // Oblicz liczbę lat na podstawie planowanego czasu trwania specjalizacji
-                var years = (specialization.PlannedEndDate.Year - specialization.StartDate.Year) + 1;
+                // Pobierz strukturę specjalizacji z JSON
+                if (string.IsNullOrEmpty(specialization.ProgramStructure))
+                {
+                    System.Diagnostics.Debug.WriteLine("GetAvailableYearsAsync: Brak struktury programu specjalizacji");
+                    return new List<int> { 1, 2, 3, 4, 5 }; // Domyślnie 5 lat specjalizacji
+                }
 
-                // Ogranicz do co najmniej 1 roku i maksymalnie 6 lat
-                years = Math.Max(1, Math.Min(years, 6));
+                try
+                {
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip,
+                        Converters = { new JsonStringEnumConverter() }
+                    };
 
-                // Zwróć listę lat od 1 do obliczonej liczby lat
-                return Enumerable.Range(1, years).ToList();
+                    // Deserializuj strukturę specjalizacji
+                    var specializationStructure = JsonSerializer.Deserialize<SpecializationStructure>(
+                        specialization.ProgramStructure, options);
+
+                    if (specializationStructure == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("GetAvailableYearsAsync: Nie udało się zdeserializować struktury");
+                        return new List<int> { 1, 2, 3, 4, 5 }; // Domyślnie 5 lat specjalizacji
+                    }
+
+                    // Oblicz liczbę lat specjalizacji na podstawie całkowitego czasu trwania
+                    int totalYears = 0;
+                    if (specializationStructure.TotalDuration != null)
+                    {
+                        totalYears = specializationStructure.TotalDuration.Years;
+                        if (specializationStructure.TotalDuration.Months > 0)
+                        {
+                            totalYears++; // Dodaj dodatkowy rok, jeśli są dodatkowe miesiące
+                        }
+                    }
+                    else
+                    {
+                        // Alternatywne podejście: sprawdź czas trwania z modułów
+                        totalYears = specializationStructure.Modules?.Sum(m => m.Duration?.Years ?? 0) ?? 0;
+                        int additionalMonths = specializationStructure.Modules?.Sum(m => m.Duration?.Months ?? 0) ?? 0;
+                        if (additionalMonths > 0)
+                        {
+                            totalYears += (additionalMonths / 12) + (additionalMonths % 12 > 0 ? 1 : 0);
+                        }
+                    }
+
+                    // Upewnij się, że mamy co najmniej 1 rok
+                    totalYears = Math.Max(1, totalYears);
+                    totalYears = Math.Min(6, totalYears); // Maksymalnie 6 lat
+
+                    // Utwórz listę lat od 1 do całkowitej liczby lat
+                    var years = Enumerable.Range(1, totalYears).ToList();
+                    System.Diagnostics.Debug.WriteLine($"GetAvailableYearsAsync: Wygenerowano {years.Count} lat z JSON specjalizacji");
+
+                    return years;
+                }
+                catch (Exception jsonEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"GetAvailableYearsAsync: Błąd deserializacji JSON - {jsonEx.Message}");
+                    return new List<int> { 1, 2, 3, 4, 5 }; // Domyślnie 5 lat specjalizacji
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania dostępnych lat: {ex.Message}");
-                return Enumerable.Range(1, 5).ToList(); // Domyślnie 5 lat
+                System.Diagnostics.Debug.WriteLine($"GetAvailableYearsAsync: Błąd - {ex.Message}");
+                return new List<int> { 1, 2, 3, 4, 5 }; // W przypadku błędu, zwróć 5 lat jako domyślne
             }
         }
 

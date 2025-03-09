@@ -111,11 +111,40 @@ namespace SledzSpecke.App.Services.Authentication
 
         public async Task LogoutAsync()
         {
-            // Usunięcie ID użytkownika z ustawień
-            await SettingsHelper.SetCurrentUserIdAsync(0);
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("LogoutAsync: Rozpoczęto wylogowywanie użytkownika");
 
-            // Wyczyszczenie pamięci podręcznej bieżącego użytkownika
-            this.currentUser = null;
+                // Zapamiętaj ID użytkownika przed wylogowaniem (do celów diagnostycznych)
+                int userId = 0;
+                if (this.currentUser != null)
+                {
+                    userId = this.currentUser.UserId;
+                    System.Diagnostics.Debug.WriteLine($"LogoutAsync: Wylogowywanie użytkownika {this.currentUser.Username}, ID={userId}");
+                }
+
+                // Usuń ID użytkownika z ustawień
+                await SettingsHelper.SetCurrentUserIdAsync(0);
+                System.Diagnostics.Debug.WriteLine("LogoutAsync: Usunięto ID użytkownika z ustawień");
+
+                // Wyczyszczenie pamięci podręcznej bieżącego użytkownika
+                this.currentUser = null;
+                System.Diagnostics.Debug.WriteLine("LogoutAsync: Wyczyszczono pamięć podręczną użytkownika");
+
+                // Wyczyść inne ustawienia powiązane z użytkownikiem
+                await SettingsHelper.SetCurrentModuleIdAsync(0);
+                System.Diagnostics.Debug.WriteLine("LogoutAsync: Zresetowano ID aktualnego modułu");
+
+                // Dodatkowe czyszczenie - można tu dodać inne operacje czyszczenia stanu aplikacji
+
+                System.Diagnostics.Debug.WriteLine($"LogoutAsync: Użytkownik (ID={userId}) został pomyślnie wylogowany");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LogoutAsync: Błąd podczas wylogowywania - {ex.Message}");
+                // Nawet w przypadku błędu, upewnij się że pamięć podręczna jest wyczyszczona
+                this.currentUser = null;
+            }
         }
 
         public async Task<bool> RegisterAsync(User user, string password, Models.Specialization specialization)

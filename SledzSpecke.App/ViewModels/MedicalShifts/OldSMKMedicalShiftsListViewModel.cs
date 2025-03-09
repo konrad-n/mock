@@ -224,19 +224,33 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            // Dodane szczegółowe logowanie dla diagnostyki
-            System.Diagnostics.Debug.WriteLine($"Edycja dyżuru: ID={shift.ShiftId}, Rok={shift.Year}");
-
-            // Poprawiona nawigacja z parametrami
-            var navigationParameter = new Dictionary<string, object>
+            try
             {
-                { "ShiftId", shift.ShiftId.ToString() },
-                { "YearParam", shift.Year.ToString() }
-            };
+                // Dodane szczegółowe logowanie dla diagnostyki
+                System.Diagnostics.Debug.WriteLine($"EditShiftAsync: Edycja dyżuru: ID={shift.ShiftId}, Rok={shift.Year}");
 
-            await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", navigationParameter);
+                // Poprawiona nawigacja z parametrami
+                var navigationParameter = new Dictionary<string, object>
+        {
+            { "ShiftId", shift.ShiftId.ToString() },
+            { "YearParam", shift.Year.ToString() }
+        };
 
-            System.Diagnostics.Debug.WriteLine("Nawigacja do strony edycji została wywołana");
+                // Bardziej szczegółowa ścieżka nawigacji
+                await Shell.Current.GoToAsync("//medicalshifts/AddEditOldSMKMedicalShift", navigationParameter);
+
+                System.Diagnostics.Debug.WriteLine("EditShiftAsync: Nawigacja do strony edycji została wywołana");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"EditShiftAsync: Błąd podczas nawigacji: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"EditShiftAsync: Stack trace: {ex.StackTrace}");
+
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    $"Wystąpił problem podczas przejścia do edycji dyżuru: {ex.Message}",
+                    "OK");
+            }
         }
 
         private async Task DeleteShiftAsync(RealizedMedicalShiftOldSMK shift)
@@ -246,19 +260,24 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            bool confirm = await this.dialogService.DisplayAlertAsync(
-                "Potwierdzenie",
-                "Czy na pewno chcesz usunąć ten dyżur?",
-                "Tak",
-                "Nie");
-
-            if (confirm)
+            try
             {
-                try
+                System.Diagnostics.Debug.WriteLine($"DeleteShiftAsync: Usuwanie dyżuru: ID={shift.ShiftId}, Rok={shift.Year}");
+
+                bool confirm = await this.dialogService.DisplayAlertAsync(
+                    "Potwierdzenie",
+                    "Czy na pewno chcesz usunąć ten dyżur?",
+                    "Tak",
+                    "Nie");
+
+                if (confirm)
                 {
+                    System.Diagnostics.Debug.WriteLine("DeleteShiftAsync: Użytkownik potwierdził usunięcie");
+
                     bool success = await this.medicalShiftsService.DeleteOldSMKShiftAsync(shift.ShiftId);
                     if (success)
                     {
+                        System.Diagnostics.Debug.WriteLine("DeleteShiftAsync: Pomyślnie usunięto dyżur");
                         this.Shifts.Remove(shift);
 
                         // Odśwież podsumowanie
@@ -266,20 +285,27 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     }
                     else
                     {
+                        System.Diagnostics.Debug.WriteLine("DeleteShiftAsync: Nie udało się usunąć dyżuru (usługa zwróciła false)");
                         await this.dialogService.DisplayAlertAsync(
                             "Błąd",
                             "Nie udało się usunąć dyżuru.",
                             "OK");
                     }
                 }
-                catch (System.Exception ex)
+                else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania dyżuru: {ex.Message}");
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Wystąpił problem podczas usuwania dyżuru.",
-                        "OK");
+                    System.Diagnostics.Debug.WriteLine("DeleteShiftAsync: Użytkownik anulował usunięcie");
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DeleteShiftAsync: Błąd podczas usuwania dyżuru: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"DeleteShiftAsync: Stack trace: {ex.StackTrace}");
+
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    $"Wystąpił problem podczas usuwania dyżuru: {ex.Message}",
+                    "OK");
             }
         }
     }

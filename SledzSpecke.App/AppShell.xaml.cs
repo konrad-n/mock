@@ -25,7 +25,7 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
-           
+            // Zarejestruj wszystkie trasy nawigacyjne
             Routing.RegisterRoute("settings", typeof(SettingsPage));
             Routing.RegisterRoute("procedures", typeof(ProceduresListPage));
             Routing.RegisterRoute("internships", typeof(InternshipsListPage));
@@ -36,10 +36,14 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("export", typeof(ExportPage));
             Routing.RegisterRoute("exportpreview", typeof(ExportPreviewPage));
 
+            // Trasy dla dyżurów medycznych - dodane bardziej szczegółowe trasy
             Routing.RegisterRoute("MedicalShiftsSelector", typeof(MedicalShiftsSelectorPage));
             Routing.RegisterRoute("OldSMKMedicalShifts", typeof(OldSMKMedicalShiftsPage));
             Routing.RegisterRoute("NewSMKMedicalShifts", typeof(NewSMKMedicalShiftsPage));
             Routing.RegisterRoute("AddEditOldSMKMedicalShift", typeof(AddEditOldSMKMedicalShiftPage));
+
+            // Dodane aliasy dla zwiększenia elastyczności nawigacji
+            Routing.RegisterRoute("medicalshifts/AddEditOldSMKMedicalShift", typeof(AddEditOldSMKMedicalShiftPage));
         }
 
         private async void InitializeUserInfoAsync()
