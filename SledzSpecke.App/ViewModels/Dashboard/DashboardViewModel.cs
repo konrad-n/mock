@@ -10,7 +10,7 @@ using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Dashboard
 {
-    public class DashboardViewModel : BaseViewModel
+    public class DashboardViewModel : BaseViewModel, IDisposable
     {
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
@@ -71,6 +71,9 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             this.NavigateToStatisticsCommand = new AsyncRelayCommand(this.NavigateToStatisticsAsync);
             this.NavigateToExportCommand = new AsyncRelayCommand(this.NavigateToExportAsync);
             this.NavigateToRecognitionsCommand = new AsyncRelayCommand(this.NavigateToRecognitionsAsync);
+
+            // Add listener for module change events
+            this.specializationService.CurrentModuleChanged += this.OnModuleChanged;
 
             // Load data on initialization
             this.LoadDataAsync().ConfigureAwait(false);
@@ -217,28 +220,50 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         // Commands
         public ICommand RefreshCommand { get; }
-
         public ICommand SelectModuleCommand { get; }
-
         public ICommand NavigateToInternshipsCommand { get; }
-
         public ICommand NavigateToProceduresCommand { get; }
-
         public ICommand NavigateToShiftsCommand { get; }
-
         public ICommand NavigateToCoursesCommand { get; }
-
         public ICommand NavigateToSelfEducationCommand { get; }
-
         public ICommand NavigateToPublicationsCommand { get; }
-
         public ICommand NavigateToAbsencesCommand { get; }
-
         public ICommand NavigateToStatisticsCommand { get; }
-
         public ICommand NavigateToExportCommand { get; }
-
         public ICommand NavigateToRecognitionsCommand { get; }
+
+        // Method handling module change event
+        private async void OnModuleChanged(object sender, int moduleId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("-------------------------------");
+                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Wykryto zmianę modułu na ID: {moduleId}");
+
+                // Przypisz nowy moduł
+                this.CurrentModuleId = moduleId;
+
+                // Pobierz obiekt modułu, aby wyświetlić więcej informacji
+                var module = await this.databaseService.GetModuleAsync(moduleId);
+                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Zmieniono na moduł '{module?.Name}', typ: {module?.Type}");
+
+                // Odśwież dane dashboard
+                await this.LoadDataAsync();
+                System.Diagnostics.Debug.WriteLine("DashboardViewModel: Zakończono odświeżanie danych po zmianie modułu");
+                System.Diagnostics.Debug.WriteLine("-------------------------------");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd w OnModuleChanged: {ex.Message}");
+            }
+        }
+
+        // IDisposable implementation for cleanup
+        public void Dispose()
+        {
+            // Odłącz obsługę zdarzenia, gdy ViewModel nie jest już używany
+            this.specializationService.CurrentModuleChanged -= this.OnModuleChanged;
+        }
 
         // Methods
         public async Task LoadDataAsync()
@@ -268,7 +293,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 }
 
                 this.HasTwoModules = this.CurrentSpecialization.Modules.Any(x => x.Type == ModuleType.Basic);
-
 
                 // Upewnij się, że moduły są zainicjalizowane
                 await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
@@ -360,14 +384,16 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             {
                 // Określ ID aktualnie wybranego modułu
                 int? moduleId = this.CurrentModuleId;
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Ładowanie statystyk dla modułu ID={moduleId}");
 
-                // Pobierz ogólny postęp
+                // Pobierz ogólny postęp - upewnij się, że przekazujesz ID modułu
                 this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
                     this.databaseService,
                     this.CurrentSpecialization.SpecializationId,
                     moduleId);
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Ogólny postęp: {this.OverallProgress}");
 
-                // Staże
+                // Staże - przekaż ID modułu
                 int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
                 int totalInternships = 0;
 
@@ -380,8 +406,9 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.InternshipProgress = totalInternships > 0
                     ? (double)completedInternships / totalInternships
                     : 0;
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Staże: {this.InternshipCount}, Postęp: {this.InternshipProgress}");
 
-                // Procedury (skupiamy się na procedurach typu A zgodnie z JSONem)
+                // Procedury - przekaż ID modułu
                 int completedProceduresA = await this.specializationService.GetProcedureCountAsync(moduleId);
                 int totalProceduresA = 0;
 
@@ -394,8 +421,9 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.ProcedureProgress = totalProceduresA > 0
                     ? (double)completedProceduresA / totalProceduresA
                     : 0;
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Procedury: {this.ProcedureCount}, Postęp: {this.ProcedureProgress}");
 
-                // Kursy
+                // Kursy - przekaż ID modułu
                 int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
                 int totalCourses = 0;
 
@@ -408,12 +436,14 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.CourseProgress = totalCourses > 0
                     ? (double)completedCourses / totalCourses
                     : 0;
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Kursy: {this.CourseCount}, Postęp: {this.CourseProgress}");
 
-                // Dyżury - POPRAWKA: Przekazujemy moduleId do GetSpecializationStatisticsAsync
+                // Dyżury - przekaż ID modułu
                 int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
 
                 // Pobierz pełne statystyki dla WYBRANEGO MODUŁU, a nie całej specjalizacji
                 SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Statystyki pobrane pomyślnie");
 
                 if (stats.RequiredShiftHours > 0)
                 {
@@ -425,10 +455,12 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     this.ShiftStats = $"{completedShiftHours}h";
                     this.ShiftProgress = 0;
                 }
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Dyżury: {this.ShiftStats}, Postęp: {this.ShiftProgress}");
 
-                // Pozostałe liczniki
+                // Pozostałe liczniki - przekaż ID modułu
                 this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
                 this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
+                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Samokształcenie: {this.SelfEducationCount}, Publikacje: {this.PublicationCount}");
             }
             catch (Exception ex)
             {

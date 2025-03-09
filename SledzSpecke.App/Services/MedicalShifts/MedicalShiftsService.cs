@@ -215,37 +215,23 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetNewSMKShiftsAsync: Brak zalogowanego użytkownika");
-                    return new List<RealizedMedicalShiftNewSMK>();
-                }
+                // Pobierz aktualny moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                int? moduleId = currentModule?.ModuleId;
 
-                System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: Pobieranie dyżurów dla użytkownika {user.Username}, ID={user.UserId}, SpecializationId={user.SpecializationId}, wymaganie={internshipRequirementId}");
+                // Pobierz dyżury dla konkretnego wymagania stażowego I dla konkretnego modułu
+                var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE InternshipRequirementId = ? AND ModuleId = ?";
+                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, internshipRequirementId, moduleId);
 
-                // Pobierz dyżury dla wybranego wymagania stażowego i specjalizacji użytkownika
-                var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND InternshipRequirementId = ? ORDER BY StartDate DESC";
-                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, user.SpecializationId, internshipRequirementId);
-
-                System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: Pobrano {shifts.Count} dyżurów dla specjalizacji {user.SpecializationId}, wymaganie {internshipRequirementId}");
-
-                // Dodatkowe zabezpieczenie - sprawdź, czy każdy dyżur ma poprawne ID specjalizacji
-                var filteredShifts = shifts.Where(s => s.SpecializationId == user.SpecializationId).ToList();
-
-                if (filteredShifts.Count != shifts.Count)
-                {
-                    System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: UWAGA! Po dodatkowym filtrowaniu zostało {filteredShifts.Count} z {shifts.Count} dyżurów");
-                }
-
-                return filteredShifts;
+                return shifts;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"GetNewSMKShiftsAsync: Błąd - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania dyżurów: {ex.Message}");
                 return new List<RealizedMedicalShiftNewSMK>();
             }
         }
+
         public async Task<RealizedMedicalShiftNewSMK> GetNewSMKShiftAsync(int shiftId)
         {
             try
@@ -279,44 +265,33 @@ namespace SledzSpecke.App.Services.MedicalShifts
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
-
-                // Pobierz obecną specjalizację
-                if (shift.SpecializationId <= 0)
+                // Pobierz ID aktualnego modułu
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule == null)
                 {
-                    var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                    if (specialization == null)
-                    {
-                        return false;
-                    }
-
-                    shift.SpecializationId = specialization.SpecializationId;
+                    return false;
                 }
 
-                // Ustaw status synchronizacji
-                if (shift.SyncStatus == 0)
+                // Przypisz ID modułu do dyżuru
+                shift.ModuleId = currentModule.ModuleId;
+
+                // Pobierz ID specjalizacji
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
-                    shift.SyncStatus = SyncStatus.NotSynced;
+                    return false;
                 }
+
+                // Przypisz ID specjalizacji
+                shift.SpecializationId = specialization.SpecializationId;
 
                 // Zapisz dyżur
-                if (shift.ShiftId > 0)
-                {
-                    // Aktualizacja istniejącego dyżuru
-                    await this.databaseService.UpdateAsync(shift);
-                }
-                else
-                {
-                    // Dodanie nowego dyżuru
-                    await this.databaseService.InsertAsync(shift);
-                }
-
-                return true;
+                int result = await this.databaseService.InsertAsync(shift);
+                return result > 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania dyżuru nowego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania dyżuru: {ex.Message}");
                 return false;
             }
         }
@@ -347,110 +322,96 @@ namespace SledzSpecke.App.Services.MedicalShifts
             }
         }
 
-        // Zmień sygnaturę metody GetShiftsSummaryAsync, aby była zgodna z interfejsem
         public async Task<MedicalShiftsSummary> GetShiftsSummaryAsync(int? year = null, int? internshipRequirementId = null)
         {
             try
             {
-                // Inicjalizacja bazy danych w razie potrzeby
-                await this.databaseService.InitializeAsync();
+                var summary = new MedicalShiftsSummary();
 
-                // Pobierz obecną specjalizację
+                // Pobierz aktualny moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                int? moduleId = currentModule?.ModuleId;
+
+                // Pobierz specjalizację
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    return new MedicalShiftsSummary();
+                    return summary;
                 }
 
-                // Pobierz dyżury w zależności od wersji SMK
-                var user = await this.authService.GetCurrentUserAsync();
-
-                if (user.SmkVersion == SmkVersion.Old)
+                // Rozdzielimy zapytania na dwa rodzaje, zamiast używać abstrakcyjnej klasy bazowej
+                if (internshipRequirementId.HasValue)
                 {
-                    // Dla starego SMK - pobierz dyżury dla danego roku
-                    if (!year.HasValue)
+                    // Filtruj po ID wymagania stażowego I po module - używamy konkretnego typu RealizedMedicalShiftNewSMK
+                    string query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND InternshipRequirementId = ? AND ModuleId = ?";
+                    var newSmkShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(
+                        query, specialization.SpecializationId, internshipRequirementId.Value, moduleId);
+
+                    // Oblicz sumę godzin i minut dla nowego SMK
+                    foreach (var shift in newSmkShifts)
                     {
-                        return new MedicalShiftsSummary();
-                    }
+                        summary.TotalHours += shift.Hours;
+                        summary.TotalMinutes += shift.Minutes;
 
-                    var shifts = await this.GetOldSMKShiftsAsync(year.Value);
-
-                    // Oblicz sumę godzin i minut
-                    int totalHours = 0;
-                    int totalMinutes = 0;
-                    int approvedHours = 0;
-                    int approvedMinutes = 0;
-
-                    foreach (var shift in shifts)
-                    {
-                        totalHours += shift.Hours;
-                        totalMinutes += shift.Minutes;
-
+                        // Dla dyżurów zsynchronizowanych, dodaj do sumy zatwierdzonych
                         if (shift.SyncStatus == SyncStatus.Synced)
                         {
-                            approvedHours += shift.Hours;
-                            approvedMinutes += shift.Minutes;
+                            summary.ApprovedHours += shift.Hours;
+                            summary.ApprovedMinutes += shift.Minutes;
                         }
                     }
+                }
+                else if (year.HasValue)
+                {
+                    // Filtruj po roku - używamy konkretnego typu RealizedMedicalShiftOldSMK
+                    string query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ?";
+                    var oldSmkShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(
+                        query, specialization.SpecializationId, year.Value);
 
-                    var summary = new MedicalShiftsSummary
+                    // Oblicz sumę godzin i minut dla starego SMK
+                    foreach (var shift in oldSmkShifts)
                     {
-                        TotalHours = totalHours,
-                        TotalMinutes = totalMinutes,
-                        ApprovedHours = approvedHours,
-                        ApprovedMinutes = approvedMinutes
-                    };
+                        summary.TotalHours += shift.Hours;
+                        summary.TotalMinutes += shift.Minutes;
 
-                    // Normalizacja czasu
-                    summary.NormalizeTime();
-
-                    return summary;
+                        // Dla dyżurów zsynchronizowanych, dodaj do sumy zatwierdzonych
+                        if (shift.SyncStatus == SyncStatus.Synced)
+                        {
+                            summary.ApprovedHours += shift.Hours;
+                            summary.ApprovedMinutes += shift.Minutes;
+                        }
+                    }
                 }
                 else
                 {
-                    // Dla nowego SMK - pobierz dyżury dla danego wymagania stażowego
-                    if (!internshipRequirementId.HasValue)
+                    // Domyślnie pobierz wszystkie dyżury dla bieżącego modułu - używamy konkretnego typu RealizedMedicalShiftNewSMK
+                    string query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND ModuleId = ?";
+                    var newSmkShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(
+                        query, specialization.SpecializationId, moduleId);
+
+                    // Oblicz sumę godzin i minut dla nowego SMK
+                    foreach (var shift in newSmkShifts)
                     {
-                        return new MedicalShiftsSummary();
-                    }
+                        summary.TotalHours += shift.Hours;
+                        summary.TotalMinutes += shift.Minutes;
 
-                    var shifts = await this.GetNewSMKShiftsAsync(internshipRequirementId.Value);
-
-                    // Oblicz sumę godzin i minut
-                    int totalHours = 0;
-                    int totalMinutes = 0;
-                    int approvedHours = 0;
-                    int approvedMinutes = 0;
-
-                    foreach (var shift in shifts)
-                    {
-                        totalHours += shift.Hours;
-                        totalMinutes += shift.Minutes;
-
+                        // Dla dyżurów zsynchronizowanych, dodaj do sumy zatwierdzonych
                         if (shift.SyncStatus == SyncStatus.Synced)
                         {
-                            approvedHours += shift.Hours;
-                            approvedMinutes += shift.Minutes;
+                            summary.ApprovedHours += shift.Hours;
+                            summary.ApprovedMinutes += shift.Minutes;
                         }
                     }
-
-                    var summary = new MedicalShiftsSummary
-                    {
-                        TotalHours = totalHours,
-                        TotalMinutes = totalMinutes,
-                        ApprovedHours = approvedHours,
-                        ApprovedMinutes = approvedMinutes
-                    };
-
-                    // Normalizacja czasu
-                    summary.NormalizeTime();
-
-                    return summary;
                 }
+
+                // Normalizacja czasu (60 minut = 1 godzina)
+                summary.NormalizeTime();
+
+                return summary;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania podsumowania dyżurów: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas obliczania podsumowania dyżurów: {ex.Message}");
                 return new MedicalShiftsSummary();
             }
         }

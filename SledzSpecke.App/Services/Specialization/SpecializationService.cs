@@ -81,37 +81,6 @@ namespace SledzSpecke.App.Services.Specialization
             }
         }
 
-        public async Task SetCurrentModuleAsync(int moduleId)
-        {
-            try
-            {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return;
-                }
-
-                var module = await this.databaseService.GetModuleAsync(moduleId);
-                if (module == null || module.SpecializationId != specialization.SpecializationId)
-                {
-                    return;
-                }
-
-                // Aktualizuj bieżący moduł w specjalizacji
-                specialization.CurrentModuleId = moduleId;
-                await this.databaseService.UpdateSpecializationAsync(specialization);
-
-                // Zapisz też w ustawieniach aplikacji
-                await SettingsHelper.SetCurrentModuleIdAsync(moduleId);
-
-                System.Diagnostics.Debug.WriteLine($"SetCurrentModuleAsync: Ustawiono moduł {moduleId}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w SetCurrentModuleAsync: {ex.Message}");
-            }
-        }
-
         public async Task<int> GetInternshipCountAsync(int? moduleId = null)
         {
             try
@@ -219,16 +188,17 @@ namespace SledzSpecke.App.Services.Specialization
                 var specialization = await this.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Brak specjalizacji");
                     return 0;
                 }
 
-                // Pobierz aktualne modułu, jeśli nie podano
+                // Jeśli nie podano ModuleId, używamy bieżącego
                 if (!moduleId.HasValue && specialization.CurrentModuleId.HasValue)
                 {
                     moduleId = specialization.CurrentModuleId.Value;
                 }
 
-                // Jeśli nadal nie mamy moduleId, użyj pierwszego dostępnego modułu
+                // Jeśli nadal nie mamy ModuleId, znajdź pierwszy moduł
                 if (!moduleId.HasValue)
                 {
                     var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
@@ -238,64 +208,85 @@ namespace SledzSpecke.App.Services.Specialization
                     }
                 }
 
-                // Jeśli nie mamy żadnego modułu, zwróć 0
                 if (!moduleId.HasValue)
                 {
+                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Brak modułu");
                     return 0;
                 }
 
+                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Liczenie dyżurów dla modułu ID={moduleId.Value}");
+
+                // Pobierz moduł
                 var module = await this.databaseService.GetModuleAsync(moduleId.Value);
                 if (module == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Nie znaleziono modułu");
                     return 0;
                 }
 
-                // Pobierz użytkownika, aby określić wersję SMK
+                // Pobierz użytkownika aby określić wersję SMK
                 var user = await this.authService.GetCurrentUserAsync();
                 if (user == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Brak użytkownika");
                     return 0;
                 }
 
                 double totalHoursDouble = 0;
 
-                if (user.SmkVersion == SmkVersion.Old)
+                if (user.SmkVersion == SmkVersion.New)
                 {
-                    // Dla starego SMK, oblicz dyżury na podstawie lat szkolenia specjalizacji
-                    // Określ, które lata szkolenia należą do danego modułu
-                    int moduleStartYear = 1; // domyślnie rok pierwszy
-                    int moduleEndYear = 1;
+                    // Dla nowego SMK - bezpośrednie zapytanie filtrujące po ModuleId
+                    var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND ModuleId = ?";
+                    var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, specialization.SpecializationId, moduleId.Value);
 
-                    // Oblicz lata modułu na podstawie typu i struktury specjalizacji
+                    System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Pobrano {shifts.Count} dyżurów nowego SMK dla modułu {moduleId.Value}");
+
+                    // Oblicz sumę godzin
+                    foreach (var shift in shifts)
+                    {
+                        totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
+                    }
+                }
+                else // Stary SMK
+                {
+                    // Ustal lata odpowiadające modułowi
+                    int startYear = 1;
+                    int endYear = 6;
+
                     if (module.Type == ModuleType.Basic)
                     {
-                        // Moduł podstawowy zazwyczaj obejmuje pierwsze 2 lata
-                        moduleEndYear = 2;
+                        // Dla modułu podstawowego - lata 1-2
+                        startYear = 1;
+                        endYear = 2;
                     }
                     else if (module.Type == ModuleType.Specialistic)
                     {
-                        // Moduł specjalistyczny zazwyczaj obejmuje lata 3+
-                        // Sprawdź, czy jest moduł podstawowy
+                        // Dla modułu specjalistycznego - lata 3-6 (lub 1-6 jeśli nie ma modułu podstawowego)
                         var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
-                        var hasBasicModule = modules.Any(m => m.Type == ModuleType.Basic);
+                        bool hasBasicModule = modules.Any(m => m.Type == ModuleType.Basic);
 
                         if (hasBasicModule)
                         {
-                            moduleStartYear = 3;
-                            moduleEndYear = 6; // maksymalnie 6 lat
+                            startYear = 3;
+                            endYear = 6;
                         }
                         else
                         {
-                            moduleStartYear = 1;
-                            moduleEndYear = 6;
+                            startYear = 1;
+                            endYear = 6;
                         }
                     }
 
-                    // Pobierz dyżury tylko dla lat należących do tego modułu
-                    for (int year = moduleStartYear; year <= moduleEndYear; year++)
+                    System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Lata dla modułu {module.Type}: {startYear}-{endYear}");
+
+                    // Pobierz dyżury dla odpowiednich lat
+                    for (int year = startYear; year <= endYear; year++)
                     {
-                        var oldSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ?";
-                        var yearShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(oldSmkShiftsQuery, specialization.SpecializationId, year);
+                        var yearQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ?";
+                        var yearShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(yearQuery, specialization.SpecializationId, year);
+
+                        System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Rok {year}: {yearShifts.Count} dyżurów");
 
                         foreach (var shift in yearShifts)
                         {
@@ -303,58 +294,17 @@ namespace SledzSpecke.App.Services.Specialization
                         }
                     }
                 }
-                else // Nowy SMK
-                {
-                    // Dla nowego SMK, filtruj dyżury na podstawie internshipRequirementId powiązanych z modułem
-                    try
-                    {
-                        // Deserializuj strukturę modułu, aby uzyskać listę wymagań stażowych
-                        var options = new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true,
-                            AllowTrailingCommas = true,
-                            ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
-                            Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-                        };
 
-                        if (!string.IsNullOrEmpty(module.Structure))
-                        {
-                            var moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
-                            if (moduleStructure?.Internships != null)
-                            {
-                                // Pobierz identyfikatory wymagań stażowych dla tego modułu
-                                var internshipRequirementIds = moduleStructure.Internships.Select(i => i.Id).ToList();
-
-                                // Dla każdego identyfikatora wymagania, pobierz dyżury i oblicz sumę
-                                foreach (var requirementId in internshipRequirementIds)
-                                {
-                                    var newSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND InternshipRequirementId = ?";
-                                    var requirementShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(
-                                        newSmkShiftsQuery, specialization.SpecializationId, requirementId);
-
-                                    foreach (var shift in requirementShifts)
-                                    {
-                                        totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Błąd podczas obliczania dyżurów dla nowego SMK: {ex.Message}");
-                    }
-                }
-
-                // Zaokrąglamy do najbliższej pełnej godziny
+                // Zaokrągl do pełnych godzin
                 int totalHours = (int)Math.Round(totalHoursDouble);
 
-                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Znaleziono {totalHours} godzin dyżurów dla modułu {module.Name} (dokładnie {totalHoursDouble})");
+                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Łączna liczba godzin: {totalHours} (dokładnie: {totalHoursDouble})");
+
                 return totalHours;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetShiftCountAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd w GetShiftCountAsync: {ex.Message}, StackTrace: {ex.StackTrace}");
                 return 0;
             }
         }
@@ -974,6 +924,44 @@ namespace SledzSpecke.App.Services.Specialization
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd w DeleteInternshipAsync: {ex.Message}");
                 return false;
+            }
+        }
+
+        // Implementacja zdarzenia
+        public event EventHandler<int> CurrentModuleChanged;
+
+        // Modyfikacja istniejącej metody SetCurrentModuleAsync
+        public async Task SetCurrentModuleAsync(int moduleId)
+        {
+            try
+            {
+                var specialization = await this.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    return;
+                }
+
+                var module = await this.databaseService.GetModuleAsync(moduleId);
+                if (module == null || module.SpecializationId != specialization.SpecializationId)
+                {
+                    return;
+                }
+
+                // Aktualizuj bieżący moduł w specjalizacji
+                specialization.CurrentModuleId = moduleId;
+                await this.databaseService.UpdateSpecializationAsync(specialization);
+
+                // Zapisz też w ustawieniach aplikacji
+                await SettingsHelper.SetCurrentModuleIdAsync(moduleId);
+
+                System.Diagnostics.Debug.WriteLine($"SetCurrentModuleAsync: Ustawiono moduł {moduleId}");
+
+                // Wywołaj zdarzenie zmiany modułu
+                this.CurrentModuleChanged?.Invoke(this, moduleId);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd w SetCurrentModuleAsync: {ex.Message}");
             }
         }
 

@@ -558,5 +558,112 @@ namespace SledzSpecke.App.Services.Database
                 return await this.database.InsertAsync(program);
             }
         }
+
+        public async Task MigrateShiftDataForModulesAsync()
+        {
+            try
+            {
+                await this.InitializeAsync();
+                System.Diagnostics.Debug.WriteLine("Rozpoczynanie migracji danych dyżurów...");
+
+                // Sprawdź, czy kolumna ModuleId istnieje
+                bool columnExists = false;
+                try
+                {
+                    var testQuery = "SELECT ModuleId FROM RealizedMedicalShiftNewSMK LIMIT 1";
+                    await this.database.ExecuteScalarAsync<int>(testQuery);
+                    columnExists = true;
+                }
+                catch
+                {
+                    // Kolumna nie istnieje, musimy ją dodać
+                    System.Diagnostics.Debug.WriteLine("Kolumna ModuleId nie istnieje, dodawanie...");
+                    await this.database.ExecuteAsync("ALTER TABLE RealizedMedicalShiftNewSMK ADD COLUMN ModuleId INTEGER");
+                }
+
+                // Pobierz wszystkie dyżury bez przypisanego ModuleId
+                var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE ModuleId IS NULL OR ModuleId = 0";
+                var shiftsToUpdate = await this.QueryAsync<RealizedMedicalShiftNewSMK>(query);
+                System.Diagnostics.Debug.WriteLine($"Znaleziono {shiftsToUpdate.Count} dyżurów do zaktualizowania");
+
+                if (shiftsToUpdate.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Brak dyżurów do migracji");
+                    return;
+                }
+
+                // Pobierz wszystkie specjalizacje
+                var specializations = await this.GetAllSpecializationsAsync();
+
+                foreach (var specialization in specializations)
+                {
+                    // Pobierz moduły dla tej specjalizacji
+                    var modules = await this.GetModulesAsync(specialization.SpecializationId);
+                    if (modules.Count == 0) continue;
+
+                    // Filtruj dyżury dla tej specjalizacji
+                    var specializationShifts = shiftsToUpdate.Where(s => s.SpecializationId == specialization.SpecializationId).ToList();
+                    if (specializationShifts.Count == 0) continue;
+
+                    System.Diagnostics.Debug.WriteLine($"Migracja {specializationShifts.Count} dyżurów dla specjalizacji {specialization.Name}");
+
+                    foreach (var shift in specializationShifts)
+                    {
+                        // Znajdź odpowiedni moduł dla dyżuru
+                        // Dla nowego SMK, każdy staż ma ściśle przypisany moduł
+                        // Sprawdzamy, czy moduł ma danego stażu wśród swoich wymagań
+                        Module appropriateModule = null;
+
+                        foreach (var module in modules)
+                        {
+                            if (string.IsNullOrEmpty(module.Structure)) continue;
+
+                            try
+                            {
+                                var options = new System.Text.Json.JsonSerializerOptions
+                                {
+                                    PropertyNameCaseInsensitive = true,
+                                    AllowTrailingCommas = true,
+                                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip
+                                };
+
+                                var moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
+                                if (moduleStructure?.Internships != null &&
+                                    moduleStructure.Internships.Any(i => i.Id == shift.InternshipRequirementId))
+                                {
+                                    appropriateModule = module;
+                                    break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Błąd podczas deserializacji struktury modułu: {ex.Message}");
+                            }
+                        }
+
+                        // Jeśli nie znaleziono odpowiedniego modułu, użyj pierwszego
+                        if (appropriateModule == null && modules.Count > 0)
+                        {
+                            appropriateModule = modules[0];
+                            System.Diagnostics.Debug.WriteLine("Nie znaleziono odpowiedniego modułu, używam pierwszego");
+                        }
+
+                        // Aktualizuj dyżur o ID modułu
+                        if (appropriateModule != null)
+                        {
+                            shift.ModuleId = appropriateModule.ModuleId;
+                            await this.UpdateAsync(shift);
+                            System.Diagnostics.Debug.WriteLine($"Zaktualizowano dyżur ID={shift.ShiftId}, przypisano ModuleId={shift.ModuleId}");
+                        }
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("Migracja danych dyżurów zakończona");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas migracji danych dyżurów: {ex.Message}");
+            }
+        }
     }
 }

@@ -1,13 +1,18 @@
-﻿namespace SledzSpecke.App.Views.Dashboard
+﻿using SledzSpecke.App.ViewModels.Dashboard;
+
+namespace SledzSpecke.App.Views.Dashboard
 {
-    public partial class DashboardPage : ContentPage
+    public partial class DashboardPage : ContentPage, IDisposable
     {
+        private readonly DashboardViewModel viewModel;
+
         public DashboardPage()
         {
             this.InitializeComponent();
 
             // Pobranie ViewModel z kontenera DI
-            this.BindingContext = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.ViewModels.Dashboard.DashboardViewModel>();
+            this.viewModel = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.ViewModels.Dashboard.DashboardViewModel>();
+            this.BindingContext = this.viewModel;
 
             System.Diagnostics.Debug.WriteLine("DashboardPage: Konstruktor wywołany, BindingContext ustawiony");
         }
@@ -23,6 +28,18 @@
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Odświeżanie danych...");
                 viewModel.RefreshCommand?.Execute(null);
             }
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            System.Diagnostics.Debug.WriteLine("DashboardPage: OnDisappearing");
+        }
+
+        public void Dispose()
+        {
+            // Zwolnij zasoby ViewModel przy zwalnianiu strony
+            (this.BindingContext as DashboardViewModel)?.Dispose();
         }
     }
 }

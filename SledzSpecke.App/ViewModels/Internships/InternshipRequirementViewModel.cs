@@ -35,7 +35,8 @@ namespace SledzSpecke.App.ViewModels.Internships
             MedicalShiftsSummary summary,
             List<RealizedMedicalShiftNewSMK> shifts,
             IMedicalShiftsService medicalShiftsService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            int? currentModuleId) // Dodany parametr
         {
             this.requirement = requirement;
             this.summary = summary;
@@ -46,6 +47,7 @@ namespace SledzSpecke.App.ViewModels.Internships
             currentShift = new RealizedMedicalShiftNewSMK
             {
                 InternshipRequirementId = requirement.Id,
+                ModuleId = currentModuleId, // Ustawienie ID modułu
                 StartDate = DateTime.Today,
                 EndDate = DateTime.Today,
                 Hours = summary.TotalHours,

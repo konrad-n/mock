@@ -77,7 +77,7 @@
                                         <Label Text="{Binding Title}" Style="{StaticResource RequirementTitleStyle}" />
                                         <Label Grid.Column="1" Text="{Binding Summary}" Style="{StaticResource RequirementSummaryStyle}" />
                                     </Grid>
-
+    
                                     <Button Text="Edytuj" 
                                             Command="{Binding ToggleExpandCommand}" 
                                             Style="{StaticResource OutlineButton}" 

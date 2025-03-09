@@ -49,6 +49,8 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteMedicalShiftAsync(int shiftId);
 
+        event EventHandler<int> CurrentModuleChanged;
+
         // Procedures
         Task<List<Procedure>> GetProceduresAsync(string searchText = null, int? internshipId = null);
 

@@ -50,6 +50,8 @@ namespace SledzSpecke.App.Services.Database
 
         Task<int> DeleteMedicalShiftAsync(MedicalShift shift);
 
+        Task MigrateShiftDataForModulesAsync();
+
         // Procedures
         Task<Procedure> GetProcedureAsync(int id);
 

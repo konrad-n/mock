@@ -83,6 +83,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.specialisticModuleSelected, value);
         }
 
+
         public bool HasTwoModules
         {
             get => this.hasTwoModules;
@@ -92,11 +93,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         public ICommand RefreshCommand { get; }
         public ICommand SelectModuleCommand { get; }
 
-        // Dodana metoda do obsługi przełączania modułów
         private async Task OnSelectModuleAsync(string moduleType)
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"NewSMKMedicalShiftsListViewModel: Wybrano typ modułu: {moduleType}");
+
                 // Pobierz specjalizację
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
@@ -107,11 +109,15 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 // Pobierz moduły
                 var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
 
+                int? newModuleId = null;
+
                 if (moduleType == "Basic")
                 {
                     var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
                     if (basicModule != null)
                     {
+                        newModuleId = basicModule.ModuleId;
+                        System.Diagnostics.Debug.WriteLine($"NewSMKMedicalShiftsListViewModel: Znaleziono moduł podstawowy, ID={newModuleId}");
                         await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
                         this.BasicModuleSelected = true;
                         this.SpecialisticModuleSelected = false;
@@ -122,6 +128,8 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
                     if (specialisticModule != null)
                     {
+                        newModuleId = specialisticModule.ModuleId;
+                        System.Diagnostics.Debug.WriteLine($"NewSMKMedicalShiftsListViewModel: Znaleziono moduł specjalistyczny, ID={newModuleId}");
                         await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
                         this.BasicModuleSelected = false;
                         this.SpecialisticModuleSelected = true;
@@ -129,7 +137,9 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 }
 
                 // Odśwież dane
+                System.Diagnostics.Debug.WriteLine($"NewSMKMedicalShiftsListViewModel: Odświeżanie danych po zmianie modułu na ID={newModuleId}");
                 await this.LoadDataAsync();
+                System.Diagnostics.Debug.WriteLine("NewSMKMedicalShiftsListViewModel: Dane odświeżone po zmianie modułu");
             }
             catch (System.Exception ex)
             {
@@ -193,13 +203,14 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     // Pobierz wszystkie dyżury dla tego wymagania
                     var shifts = await this.medicalShiftsService.GetNewSMKShiftsAsync(requirement.Id);
 
-                    // Utwórz ViewModel
+                    // Utwórz ViewModel, przekazując ID bieżącego modułu
                     var viewModel = new InternshipRequirementViewModel(
                         requirement,
                         summary,
                         shifts,
                         this.medicalShiftsService,
-                        this.dialogService);
+                        this.dialogService,
+                        currentModule?.ModuleId); // Przekazujemy ID modułu
 
                     viewModels.Add(viewModel);
                 }
