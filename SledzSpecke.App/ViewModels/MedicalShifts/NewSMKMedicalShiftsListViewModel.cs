@@ -4,6 +4,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
+using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.MedicalShifts;
@@ -24,6 +25,11 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private bool isRefreshing;
         private string moduleTitle;
 
+        // Dodane właściwości do obsługi przełączania modułów
+        private bool basicModuleSelected;
+        private bool specialisticModuleSelected;
+        private bool hasTwoModules;
+
         public NewSMKMedicalShiftsListViewModel(
             IMedicalShiftsService medicalShiftsService,
             IAuthService authService,
@@ -40,6 +46,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
+            this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
 
             // Załaduj dane
             this.LoadDataAsync().ConfigureAwait(false);
@@ -63,7 +70,76 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.moduleTitle, value);
         }
 
+        // Dodane właściwości dla przełączania modułów
+        public bool BasicModuleSelected
+        {
+            get => this.basicModuleSelected;
+            set => this.SetProperty(ref this.basicModuleSelected, value);
+        }
+
+        public bool SpecialisticModuleSelected
+        {
+            get => this.specialisticModuleSelected;
+            set => this.SetProperty(ref this.specialisticModuleSelected, value);
+        }
+
+        public bool HasTwoModules
+        {
+            get => this.hasTwoModules;
+            set => this.SetProperty(ref this.hasTwoModules, value);
+        }
+
         public ICommand RefreshCommand { get; }
+        public ICommand SelectModuleCommand { get; }
+
+        // Dodana metoda do obsługi przełączania modułów
+        private async Task OnSelectModuleAsync(string moduleType)
+        {
+            try
+            {
+                // Pobierz specjalizację
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    return;
+                }
+
+                // Pobierz moduły
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+
+                if (moduleType == "Basic")
+                {
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                    if (basicModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
+                        this.BasicModuleSelected = true;
+                        this.SpecialisticModuleSelected = false;
+                    }
+                }
+                else if (moduleType == "Specialistic")
+                {
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                    if (specialisticModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
+                        this.BasicModuleSelected = false;
+                        this.SpecialisticModuleSelected = true;
+                    }
+                }
+
+                // Odśwież dane
+                await this.LoadDataAsync();
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zmiany modułu: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas zmiany modułu. Spróbuj ponownie.",
+                    "OK");
+            }
+        }
 
         public async Task LoadDataAsync()
         {
@@ -77,11 +153,30 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             try
             {
-                // Pobierz tytuł modułu
-                var module = await this.specializationService.GetCurrentModuleAsync();
-                if (module != null)
+                // Pobierz specjalizację
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
-                    this.ModuleTitle = module.Name;
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Nie znaleziono aktywnej specjalizacji.",
+                        "OK");
+                    return;
+                }
+
+                // Sprawdź, czy specjalizacja ma moduł podstawowy i specjalistyczny
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+
+                // Pobierz bieżący moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule != null)
+                {
+                    this.ModuleTitle = currentModule.Name;
+
+                    // Ustaw właściwości wyboru modułu
+                    this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
+                    this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
                 }
 
                 // Pobierz dostępne wymagania stażowe
