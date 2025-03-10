@@ -37,6 +37,7 @@
             <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
             <converters:StringToIntConverter x:Key="StringToIntConverter" />
             <converters:BoolToTextConverter x:Key="BoolToTextConverter" />
+            <converters:DateRangeConverter x:Key="DateRangeConverter" />
 
             <!-- Button Styles -->
             <Style TargetType="Button" x:Key="PrimaryButton" BasedOn="{StaticResource MaterialButtonPrimary}">

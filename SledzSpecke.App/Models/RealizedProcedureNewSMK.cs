@@ -23,5 +23,9 @@ namespace SledzSpecke.App.Models
 
         [Ignore]
         public string InternshipName { get; set; }
+
+        // Dodana nowa właściwość do formatowania zakresu dat
+        [Ignore]
+        public string DateRange => $"{this.StartDate:dd.MM.yyyy} - {this.EndDate:dd.MM.yyyy}";
     }
 }

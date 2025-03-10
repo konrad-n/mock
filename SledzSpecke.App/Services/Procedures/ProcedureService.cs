@@ -245,7 +245,8 @@ namespace SledzSpecke.App.Services.Procedures
                         if (requirement != null)
                         {
                             procedure.ProcedureName = requirement.Name;
-                            procedure.InternshipName = requirement.InternshipName;
+                            // W NewSMKProceduresListViewModel pobierzemy nazwę stażu z innych źródeł
+                            procedure.InternshipName = string.Empty;
                         }
                     }
                 }
@@ -275,7 +276,6 @@ namespace SledzSpecke.App.Services.Procedures
                     if (requirement != null)
                     {
                         procedure.ProcedureName = requirement.Name;
-                        // W NewSMKProceduresListViewModel pobierzemy nazwę stażu z innych źródeł
                         procedure.InternshipName = string.Empty;
                     }
                 }
@@ -515,6 +515,11 @@ namespace SledzSpecke.App.Services.Procedures
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania statystyk procedur: {ex.Message}");
                 return new ProcedureSummary();
             }
+        }
+
+        public Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
