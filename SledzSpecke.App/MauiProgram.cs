@@ -6,6 +6,7 @@ using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.FileSystem;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Notification;
+using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Recognition;
 using SledzSpecke.App.Services.Settings;
 using SledzSpecke.App.Services.SmkStrategy;
@@ -71,6 +72,7 @@ namespace SledzSpecke.App
             services.AddSingleton<ISettingsService, SettingsService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<ISecureStorageService, SecureStorageService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<IMedicalShiftsService, MedicalShiftsService>();
+            services.AddSingleton<IProcedureService, ProcedureService>();
 
             // Dodajemy ModuleInitializer jako usługę
             services.AddTransient<ModuleInitializer>();

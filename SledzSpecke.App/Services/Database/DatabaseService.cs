@@ -44,6 +44,8 @@ namespace SledzSpecke.App.Services.Database
             await this.database.CreateTableAsync<SpecializationProgram>();
             await this.database.CreateTableAsync<RealizedMedicalShiftOldSMK>();
             await this.database.CreateTableAsync<RealizedMedicalShiftNewSMK>();
+            await this.database.CreateTableAsync<RealizedProcedureNewSMK>();
+            await this.database.CreateTableAsync<RealizedProcedureOldSMK>();
 
             this.isInitialized = true;
         }
