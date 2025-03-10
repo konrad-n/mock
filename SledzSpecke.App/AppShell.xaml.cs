@@ -27,7 +27,6 @@ namespace SledzSpecke.App
         {
             // Zarejestruj wszystkie trasy nawigacyjne
             Routing.RegisterRoute("settings", typeof(SettingsPage));
-            Routing.RegisterRoute("procedures", typeof(ProceduresListPage));
             Routing.RegisterRoute("internships", typeof(InternshipsListPage));
             Routing.RegisterRoute("courses", typeof(CoursesListPage));
             Routing.RegisterRoute("selfeducation", typeof(SelfEducationListPage));

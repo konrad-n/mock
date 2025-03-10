@@ -14,6 +14,7 @@ using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
 using SledzSpecke.App.ViewModels.Dashboard;
 using SledzSpecke.App.ViewModels.MedicalShifts;
+using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.Views.Absences;
 using SledzSpecke.App.Views.Authentication;
 using SledzSpecke.App.Views.Courses;
@@ -98,6 +99,13 @@ namespace SledzSpecke.App
             services.AddTransient<OldSMKMedicalShiftsListViewModel>();
             services.AddTransient<NewSMKMedicalShiftsListViewModel>();
             services.AddTransient<AddEditOldSMKMedicalShiftViewModel>();
+
+            services.AddTransient<AddEditOldSMKProcedureViewModel>();
+            services.AddTransient<OldSMKProceduresListViewModel>();
+            services.AddTransient<NewSMKProceduresListViewModel>();
+            services.AddTransient<ProcedureSelectorViewModel>();
+            services.AddTransient<ProcedureGroupViewModel>();
+            services.AddTransient<ProcedureRequirementViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
@@ -106,17 +114,18 @@ namespace SledzSpecke.App
             services.AddTransient<RegisterPage>();
             services.AddTransient<DashboardPage>();
 
-            services.AddTransient(sp => new ProceduresListPage(
-                sp.GetRequiredService<IAuthService>()));
             services.AddTransient<MedicalShiftsSelectorPage>();
-
-            // Zaktualizowana rejestracja z nowym konstruktorem
             services.AddTransient(sp => new OldSMKMedicalShiftsPage(
                 sp.GetRequiredService<OldSMKMedicalShiftsListViewModel>(),
                 sp.GetRequiredService<IMedicalShiftsService>()));
-
             services.AddTransient<NewSMKMedicalShiftsPage>();
             services.AddTransient<AddEditOldSMKMedicalShiftPage>();
+
+            services.AddTransient<AddEditOldSMKProcedurePage>();
+            services.AddTransient<OldSMKProceduresListPage>();
+            services.AddTransient<NewSMKProceduresListPage>();
+            services.AddTransient<ProcedureSelectorPage>();
+
             services.AddTransient<InternshipsListPage>();
             services.AddTransient<CoursesListPage>();
             services.AddTransient<SelfEducationListPage>();

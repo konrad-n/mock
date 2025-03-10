@@ -161,9 +161,6 @@
     <MauiXaml Update="Views\Procedures\ProcedureSelectorPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Procedures\ProceduresListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Views\Publications\PublicationsListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
