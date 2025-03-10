@@ -149,6 +149,12 @@
     <MauiXaml Update="Views\MedicalShifts\OldSMKMedicalShiftsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Views\Procedures\OldSMKProceduresListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Procedures\ProcedureSelectorPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\Procedures\ProceduresListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -187,7 +193,6 @@
     <Folder Include="ViewModels\Courses\" />
     <Folder Include="ViewModels\EducationalActivities\" />
     <Folder Include="ViewModels\Export\" />
-    <Folder Include="ViewModels\Procedures\" />
     <Folder Include="ViewModels\Publications\" />
     <Folder Include="ViewModels\Recognitions\" />
     <Folder Include="ViewModels\SelfEducation\" />
