@@ -562,7 +562,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         private async Task NavigateToProceduresAsync()
         {
-            await Shell.Current.GoToAsync("procedures");
+            await Shell.Current.GoToAsync("/ProcedureSelector");
         }
 
         private async Task NavigateToShiftsAsync()

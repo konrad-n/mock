@@ -34,8 +34,8 @@
         <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Procedury" Icon="procedure.png" Route="procedures">
-        <ShellContent ContentTemplate="{DataTemplate procedures:ProceduresListPage}" Route="procedures" />
+    <FlyoutItem Title="Procedury" Icon="procedure.png" Route="ProcedureSelector">
+        <ShellContent ContentTemplate="{DataTemplate procedures:ProcedureSelectorPage}" Route="procedures" />
     </FlyoutItem>
 
     <FlyoutItem Title="Dyżury" Icon="duty.png" Route="medicalshifts">

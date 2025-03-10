@@ -1,4 +1,4 @@
-using SledzSpecke.App.ViewModels.Procedures;
+﻿using SledzSpecke.App.ViewModels.Procedures;
 
 namespace SledzSpecke.App.Views.Procedures
 {

@@ -42,7 +42,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas inicjalizacji: {ex.Message}");
             }
