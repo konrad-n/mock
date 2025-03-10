@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,6 +18,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private ProcedureSummary statistics;
         private ObservableCollection<RealizedProcedureOldSMK> procedures;
         private bool isExpanded;
+        private bool isLoading;
+        private bool hasLoadedData;
 
         public ProcedureGroupViewModel(
             ProcedureRequirement requirement,
@@ -30,8 +33,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.procedures = new ObservableCollection<RealizedProcedureOldSMK>(procedures);
             this.procedureService = procedureService;
             this.dialogService = dialogService;
+            this.hasLoadedData = false;
+            this.isLoading = false;
 
-            this.ToggleExpandCommand = new RelayCommand(this.OnToggleExpand);
+            this.ToggleExpandCommand = new AsyncRelayCommand(this.OnToggleExpandAsync);
             this.EditProcedureCommand = new AsyncRelayCommand<RealizedProcedureOldSMK>(this.OnEditProcedure);
             this.DeleteProcedureCommand = new AsyncRelayCommand<RealizedProcedureOldSMK>(this.OnDeleteProcedure);
             this.AddProcedureCommand = new AsyncRelayCommand(this.OnAddProcedure);
@@ -59,14 +64,82 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.isExpanded, value);
         }
 
+        public bool IsLoading
+        {
+            get => this.isLoading;
+            set => this.SetProperty(ref this.isLoading, value);
+        }
+
         public ICommand ToggleExpandCommand { get; }
         public ICommand EditProcedureCommand { get; }
         public ICommand DeleteProcedureCommand { get; }
         public ICommand AddProcedureCommand { get; }
 
-        private void OnToggleExpand()
+        private async Task OnToggleExpandAsync()
         {
-            this.IsExpanded = !this.IsExpanded;
+            // Nie rozwijaj, jeśli właśnie zwijamy
+            if (this.isExpanded)
+            {
+                this.IsExpanded = false;
+                return;
+            }
+
+            // Leniwe ładowanie danych - ładuj tylko gdy rozwijamy i nie mamy jeszcze danych
+            if (!this.hasLoadedData && !this.isLoading)
+            {
+                this.isLoading = true;
+                this.IsExpanded = true;  // Rozwiń, żeby pokazać indykator ładowania
+
+                try
+                {
+                    // Wykonaj ładowanie w tle
+                    await Task.Run(async () =>
+                    {
+                        // Pobierz procedury powiązane z tym wymaganiem
+                        // Używamy właściwej sygnatury metody bez parametru filterId
+                        var relatedProcedures = await this.procedureService.GetOldSMKProceduresAsync();
+
+                        // Filtrujemy po kodzie wymagania po stronie klienta
+                        var filteredProcedures = relatedProcedures.Where(p =>
+                            (p.Code == "A - operator" && this.requirement.RequiredCountA > 0) ||
+                            (p.Code == "B - asysta" && this.requirement.RequiredCountB > 0)).ToList();
+
+                        // Aktualizuj UI na głównym wątku
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            // Zamiast używać nieistniejącej klasy, wykonujemy operacje bezpośrednio
+                            this.Procedures.Clear();
+                            foreach (var procedure in filteredProcedures)
+                            {
+                                this.Procedures.Add(procedure);
+                            }
+
+                            this.hasLoadedData = true;
+                            this.isLoading = false;
+                            this.OnPropertyChanged(nameof(this.IsLoading));
+                        });
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania procedur: {ex.Message}");
+                        await this.dialogService.DisplayAlertAsync(
+                            "Błąd",
+                            "Wystąpił problem podczas ładowania procedur.",
+                            "OK");
+
+                        this.isLoading = false;
+                        this.OnPropertyChanged(nameof(this.IsLoading));
+                    });
+                }
+            }
+            else
+            {
+                // Jeśli już mamy dane, po prostu rozwiń sekcję
+                this.IsExpanded = !this.isExpanded;
+            }
         }
 
         private async Task OnEditProcedure(RealizedProcedureOldSMK procedure)
@@ -116,6 +189,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                     if (result)
                     {
+                        // Aktualizuj lokalne dane
                         this.Procedures.Remove(procedure);
 
                         // Aktualizuj statystyki

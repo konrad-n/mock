@@ -22,6 +22,25 @@
                 <Setter Property="TextColor" Value="{StaticResource TextMutedColor}" />
                 <Setter Property="Margin" Value="0,0,5,0" />
             </Style>
+
+            <!-- Lekki styl dla przycisków, który unika problemów z MaterialButton -->
+            <Style x:Key="LightIconButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderColor" Value="Transparent" />
+                <Setter Property="HeightRequest" Value="30" />
+                <Setter Property="WidthRequest" Value="30" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="15" />
+                <Setter Property="BorderWidth" Value="0" />
+            </Style>
+
+            <!-- Standardowy styl przycisków, aby unikać ostrzeżeń MaterialButton -->
+            <Style x:Key="StandardButton" TargetType="Button">
+                <Setter Property="Padding" Value="10,5" />
+                <Setter Property="CornerRadius" Value="5" />
+                <Setter Property="BorderWidth" Value="0" />
+                <Setter Property="FontAttributes" Value="Bold" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -47,12 +66,14 @@
                                     BackgroundColor="{Binding BasicModuleSelected, Converter={StaticResource BoolToColorConverter}}"
                                     TextColor="{Binding BasicModuleSelected, Converter={StaticResource BoolToTextColorConverter}}"
                                     Command="{Binding SelectModuleCommand}" 
-                                    CommandParameter="Basic" />
+                                    CommandParameter="Basic"
+                                    Style="{StaticResource StandardButton}" />
                             <Button Grid.Column="1" Text="Specjalistyczny" 
                                     BackgroundColor="{Binding SpecialisticModuleSelected, Converter={StaticResource BoolToColorConverter}}"
                                     TextColor="{Binding SpecialisticModuleSelected, Converter={StaticResource BoolToTextColorConverter}}"
                                     Command="{Binding SelectModuleCommand}" 
-                                    CommandParameter="Specialistic" />
+                                    CommandParameter="Specialistic"
+                                    Style="{StaticResource StandardButton}" />
                         </Grid>
                     </Frame>
                 </StackLayout>
@@ -75,7 +96,8 @@
                 </Frame>
 
                 <!-- Lista grup procedur -->
-                <CollectionView ItemsSource="{Binding ProcedureGroups}">
+                <CollectionView ItemsSource="{Binding ProcedureGroups}" 
+                                CachingStrategy="RecycleElement">
                     <CollectionView.EmptyView>
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
                             <Label Text="Brak procedur dla wybranego modułu" FontSize="16" HorizontalOptions="Center" TextColor="{StaticResource TextMutedColor}" />
@@ -102,12 +124,22 @@
                                         </VerticalStackLayout>
                                     </Grid>
 
-                                    <Button Text="Rozwiń" Command="{Binding ToggleExpandCommand}" Margin="0,10,0,0" />
+                                    <Button Text="Rozwiń" Command="{Binding ToggleExpandCommand}" 
+                                            BackgroundColor="{StaticResource Primary}" 
+                                            TextColor="White"
+                                            Style="{StaticResource StandardButton}"
+                                            Margin="0,10,0,0" />
+
+                                    <!-- Wskaźnik ładowania -->
+                                    <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                                                       IsVisible="{Binding IsLoading}"
+                                                       HorizontalOptions="Center" 
+                                                       Margin="0,10,0,0" />
 
                                     <!-- Lista procedur (rozwijana) -->
                                     <VerticalStackLayout IsVisible="{Binding IsExpanded}" Margin="0,10,0,0">
-                                        <!-- Nagłówki kolumn -->
-                                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,0,0,5">
+                                        <!-- Nagłówki kolumn - zoptymalizowane, używa mniej elementów -->
+                                        <Grid ColumnDefinitions="30,80,40,90,*,*,*,60,30,*,*,80" Margin="0,0,0,5">
                                             <Label Grid.Column="0" Text="Lp" Style="{StaticResource ColumnHeaderStyle}" />
                                             <Label Grid.Column="1" Text="Data" Style="{StaticResource ColumnHeaderStyle}" />
                                             <Label Grid.Column="2" Text="Rok" Style="{StaticResource ColumnHeaderStyle}" />
@@ -116,50 +148,46 @@
                                             <Label Grid.Column="5" Text="Miejsce wykonania" Style="{StaticResource ColumnHeaderStyle}" />
                                             <Label Grid.Column="6" Text="Nazwa stażu" Style="{StaticResource ColumnHeaderStyle}" />
                                             <Label Grid.Column="7" Text="Inicjały pacjenta" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="8" Text="Płeć pacjenta" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="9" Text="Dane osoby wykonującej I i II asystę" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="10" Text="Procedura z grupy" Style="{StaticResource ColumnHeaderStyle}" />
+                                            <Label Grid.Column="8" Text="Płeć" Style="{StaticResource ColumnHeaderStyle}" />
+                                            <Label Grid.Column="9" Text="Dane asysty" Style="{StaticResource ColumnHeaderStyle}" />
+                                            <Label Grid.Column="10" Text="Grupa" Style="{StaticResource ColumnHeaderStyle}" />
                                             <Label Grid.Column="11" Text="Akcje" Style="{StaticResource ColumnHeaderStyle}" />
                                         </Grid>
 
-                                        <!-- Lista procedur -->
-                                        <CollectionView ItemsSource="{Binding Procedures}">
+                                        <!-- Lista procedur - wirtualizowana -->
+                                        <CollectionView ItemsSource="{Binding Procedures}" 
+                                                        CachingStrategy="RecycleElement"
+                                                        RemainingItemsThreshold="5">
                                             <CollectionView.EmptyView>
                                                 <Label Text="Brak wykonanych procedur w tej grupie" Margin="0,10" TextColor="{StaticResource TextMutedColor}" />
                                             </CollectionView.EmptyView>
                                             <CollectionView.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,5">
-                                                        <Label Grid.Column="0" Text="{Binding ProcedureId}" />
-                                                        <Label Grid.Column="1" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" />
-                                                        <Label Grid.Column="2" Text="{Binding Year}" />
-                                                        <Label Grid.Column="3" Text="{Binding Code}" />
-                                                        <Label Grid.Column="4" Text="{Binding PerformingPerson}" />
-                                                        <Label Grid.Column="5" Text="{Binding Location}" />
-                                                        <Label Grid.Column="6" Text="{Binding InternshipName}" />
-                                                        <Label Grid.Column="7" Text="{Binding PatientInitials}" />
-                                                        <Label Grid.Column="8" Text="{Binding PatientGender}" />
-                                                        <Label Grid.Column="9" Text="{Binding AssistantData}" />
-                                                        <Label Grid.Column="10" Text="{Binding ProcedureGroup}" />
+                                                    <Grid ColumnDefinitions="30,80,40,90,*,*,*,60,30,*,*,80" Margin="0,5">
+                                                        <Label Grid.Column="0" Text="{Binding ProcedureId}" LineBreakMode="NoWrap" />
+                                                        <Label Grid.Column="1" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" LineBreakMode="NoWrap" />
+                                                        <Label Grid.Column="2" Text="{Binding Year}" LineBreakMode="NoWrap" />
+                                                        <Label Grid.Column="3" Text="{Binding Code}" LineBreakMode="NoWrap" />
+                                                        <Label Grid.Column="4" Text="{Binding PerformingPerson}" LineBreakMode="TailTruncation" />
+                                                        <Label Grid.Column="5" Text="{Binding Location}" LineBreakMode="TailTruncation" />
+                                                        <Label Grid.Column="6" Text="{Binding InternshipName}" LineBreakMode="TailTruncation" />
+                                                        <Label Grid.Column="7" Text="{Binding PatientInitials}" LineBreakMode="NoWrap" />
+                                                        <Label Grid.Column="8" Text="{Binding PatientGender}" LineBreakMode="NoWrap" />
+                                                        <Label Grid.Column="9" Text="{Binding AssistantData}" LineBreakMode="TailTruncation" />
+                                                        <Label Grid.Column="10" Text="{Binding ProcedureGroup}" LineBreakMode="TailTruncation" />
                                                         <HorizontalStackLayout Grid.Column="11" Spacing="5">
                                                             <Button Text="✏️" 
                                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=EditProcedureCommand}" 
                                                                     CommandParameter="{Binding .}"
-                                                                    HeightRequest="30"
-                                                                    WidthRequest="30"
-                                                                    Padding="0"
-                                                                    CornerRadius="15"
                                                                     BackgroundColor="{StaticResource Secondary}"
-                                                                    TextColor="White" />
+                                                                    TextColor="White"
+                                                                    Style="{StaticResource LightIconButton}" />
                                                             <Button Text="🗑️" 
                                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=DeleteProcedureCommand}" 
                                                                     CommandParameter="{Binding .}"
-                                                                    HeightRequest="30"
-                                                                    WidthRequest="30"
-                                                                    Padding="0"
-                                                                    CornerRadius="15"
-                                                                    BackgroundColor="{StaticResource Danger}"
-                                                                    TextColor="White" />
+                                                                    BackgroundColor="{StaticResource DangerColor}"
+                                                                    TextColor="White"
+                                                                    Style="{StaticResource LightIconButton}" />
                                                         </HorizontalStackLayout>
                                                     </Grid>
                                                 </DataTemplate>
@@ -167,7 +195,11 @@
                                         </CollectionView>
 
                                         <!-- Przycisk dodawania procedury w tej grupie -->
-                                        <Button Text="Dodaj procedurę" Command="{Binding AddProcedureCommand}" Margin="0,10,0,0" />
+                                        <Button Text="Dodaj procedurę" Command="{Binding AddProcedureCommand}" 
+                                                BackgroundColor="{StaticResource Primary}" 
+                                                TextColor="White"
+                                                Style="{StaticResource StandardButton}"
+                                                Margin="0,10,0,0" />
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </Frame>

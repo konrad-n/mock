@@ -26,6 +26,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool basicModuleSelected;
         private bool specialisticModuleSelected;
         private int currentModuleId;
+        private bool isInitialLoad = true;
+        private bool isLoadingData = false;
 
         public OldSMKProceduresListViewModel(
             IProcedureService procedureService,
@@ -49,9 +51,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             // Zarejestruj na zdarzenie zmiany modułu
             this.specializationService.CurrentModuleChanged += this.OnModuleChanged;
-
-            // Załaduj dane
-            this.LoadDataAsync().ConfigureAwait(false);
         }
 
         public ObservableCollection<ProcedureGroupViewModel> ProcedureGroups
@@ -120,17 +119,18 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public async Task LoadDataAsync()
         {
-            if (this.IsBusy)
+            if (this.IsBusy || this.isLoadingData)
             {
                 return;
             }
 
+            this.isLoadingData = true;
             this.IsBusy = true;
             this.IsRefreshing = true;
 
             try
             {
-                // Pobierz dane o specjalizacji i modułach
+                // Pobierz dane o specjalizacji i modułach - te operacje są szybkie i mogą być na głównym wątku
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
@@ -156,39 +156,48 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
                     this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
 
-                    // Pobierz podsumowanie procedur dla bieżącego modułu
+                    // Najpierw pokaż szybkie informacje podsumowujące, żeby UI było responsywne
                     this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
 
-                    // Pobierz wymagania procedur dla bieżącego modułu
-                    var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
-
-                    // Pobierz wykonane procedury
-                    var procedures = await this.procedureService.GetOldSMKProceduresAsync(currentModule.ModuleId);
-
-                    // Grupuj procedury według wymagań
-                    this.ProcedureGroups.Clear();
-
-                    foreach (var requirement in requirements)
+                    // Wykonaj pozostałe operacje w tle
+                    await Task.Run(async () =>
                     {
-                        // Pobierz procedury powiązane z tym wymaganiem
-                        var relatedProcedures = procedures.Where(p =>
-                            (p.Code == "A - operator" && requirement.RequiredCountA > 0) ||
-                            (p.Code == "B - asysta" && requirement.RequiredCountB > 0))
-                            .ToList();
+                        // Pobierz wymagania procedur dla bieżącego modułu
+                        var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
 
-                        // Pobierz statystyki dla tego wymagania
-                        var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
+                        // Utwórz nową kolekcję, żeby nie modyfikować tej, która jest wyświetlana
+                        var newGroups = new List<ProcedureGroupViewModel>();
 
-                        // Utwórz ViewModel dla grupy procedur
-                        var groupViewModel = new ProcedureGroupViewModel(
-                            requirement,
-                            relatedProcedures,
-                            stats,
-                            this.procedureService,
-                            this.dialogService);
+                        // Dodaj systematycznie grupy do kolekcji
+                        foreach (var requirement in requirements)
+                        {
+                            // Pobierz statystyki dla tego wymagania
+                            var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
 
-                        this.ProcedureGroups.Add(groupViewModel);
-                    }
+                            // Tworzenie ViewModelu dla grupy procedur - ale bez ładowania procedur od razu
+                            var groupViewModel = new ProcedureGroupViewModel(
+                                requirement,
+                                new List<RealizedProcedureOldSMK>(), // Pusta lista - procedury załadowane zostaną później
+                                stats,
+                                this.procedureService,
+                                this.dialogService);
+
+                            newGroups.Add(groupViewModel);
+                        }
+
+                        // Aktualizuj UI na głównym wątku
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            // Czyścimy całą listę naraz - jedna duża operacja zamiast wielu małych
+                            this.ProcedureGroups.Clear();
+
+                            // Dodajemy wszystkie grupy za jednym razem
+                            foreach (var group in newGroups)
+                            {
+                                this.ProcedureGroups.Add(group);
+                            }
+                        });
+                    });
                 }
             }
             catch (Exception ex)
@@ -201,8 +210,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
             finally
             {
+                this.isLoadingData = false;
                 this.IsBusy = false;
                 this.IsRefreshing = false;
+                this.isInitialLoad = false;
             }
         }
 
