@@ -95,114 +95,41 @@
                     </Grid>
                 </Frame>
 
-                <!-- Lista grup procedur -->
-                <CollectionView ItemsSource="{Binding ProcedureGroups}" 
-                                CachingStrategy="RecycleElement">
+                <!-- Lista procedur - wirtualizowana -->
+                <CollectionView ItemsSource="{Binding Procedures}" 
+                RemainingItemsThreshold="5">
                     <CollectionView.EmptyView>
-                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
-                            <Label Text="Brak procedur dla wybranego modułu" FontSize="16" HorizontalOptions="Center" TextColor="{StaticResource TextMutedColor}" />
-                            <Label Text="Użyj przycisku + aby dodać nową procedurę" FontSize="14" HorizontalOptions="Center" TextColor="{StaticResource TextMutedColor}" Margin="0,10,0,0" />
-                        </VerticalStackLayout>
+                        <Label Text="Brak wykonanych procedur w tej grupie" Margin="0,10" TextColor="{StaticResource TextMutedColor}" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:ProcedureGroupViewModel">
-                            <Frame Margin="0,5" Padding="15" BorderColor="LightGray" HasShadow="True" CornerRadius="10">
-                                <VerticalStackLayout>
-                                    <!-- Nagłówek grupy procedur -->
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <VerticalStackLayout Grid.Column="0">
-                                            <Label Text="{Binding Title}" FontSize="16" FontAttributes="Bold" />
-                                        </VerticalStackLayout>
-                                        <VerticalStackLayout Grid.Column="1">
-                                            <Grid ColumnDefinitions="Auto,Auto,Auto" RowDefinitions="Auto,Auto">
-                                                <Label Grid.Row="0" Grid.Column="0" Text="Wymagane" Style="{StaticResource ColumnHeaderStyle}" />
-                                                <Label Grid.Row="0" Grid.Column="1" Text="Wykonane" Style="{StaticResource ColumnHeaderStyle}" />
-                                                <Label Grid.Row="0" Grid.Column="2" Text="Zaakceptowane" Style="{StaticResource ColumnHeaderStyle}" />
-
-                                                <Label Grid.Row="1" Grid.Column="0" Text="{Binding StatsInfo}" />
-                                            </Grid>
-                                        </VerticalStackLayout>
-                                    </Grid>
-
-                                    <Button Text="Rozwiń" Command="{Binding ToggleExpandCommand}" 
-                                            BackgroundColor="{StaticResource Primary}" 
-                                            TextColor="White"
-                                            Style="{StaticResource StandardButton}"
-                                            Margin="0,10,0,0" />
-
-                                    <!-- Wskaźnik ładowania -->
-                                    <ActivityIndicator IsRunning="{Binding IsLoading}" 
-                                                       IsVisible="{Binding IsLoading}"
-                                                       HorizontalOptions="Center" 
-                                                       Margin="0,10,0,0" />
-
-                                    <!-- Lista procedur (rozwijana) -->
-                                    <VerticalStackLayout IsVisible="{Binding IsExpanded}" Margin="0,10,0,0">
-                                        <!-- Nagłówki kolumn - zoptymalizowane, używa mniej elementów -->
-                                        <Grid ColumnDefinitions="30,80,40,90,*,*,*,60,30,*,*,80" Margin="0,0,0,5">
-                                            <Label Grid.Column="0" Text="Lp" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="1" Text="Data" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="2" Text="Rok" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="3" Text="Kod zabiegu" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="4" Text="Osoba wykonująca" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="5" Text="Miejsce wykonania" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="6" Text="Nazwa stażu" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="7" Text="Inicjały pacjenta" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="8" Text="Płeć" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="9" Text="Dane asysty" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="10" Text="Grupa" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Column="11" Text="Akcje" Style="{StaticResource ColumnHeaderStyle}" />
-                                        </Grid>
-
-                                        <!-- Lista procedur - wirtualizowana -->
-                                        <CollectionView ItemsSource="{Binding Procedures}" 
-                                                        CachingStrategy="RecycleElement"
-                                                        RemainingItemsThreshold="5">
-                                            <CollectionView.EmptyView>
-                                                <Label Text="Brak wykonanych procedur w tej grupie" Margin="0,10" TextColor="{StaticResource TextMutedColor}" />
-                                            </CollectionView.EmptyView>
-                                            <CollectionView.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid ColumnDefinitions="30,80,40,90,*,*,*,60,30,*,*,80" Margin="0,5">
-                                                        <Label Grid.Column="0" Text="{Binding ProcedureId}" LineBreakMode="NoWrap" />
-                                                        <Label Grid.Column="1" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" LineBreakMode="NoWrap" />
-                                                        <Label Grid.Column="2" Text="{Binding Year}" LineBreakMode="NoWrap" />
-                                                        <Label Grid.Column="3" Text="{Binding Code}" LineBreakMode="NoWrap" />
-                                                        <Label Grid.Column="4" Text="{Binding PerformingPerson}" LineBreakMode="TailTruncation" />
-                                                        <Label Grid.Column="5" Text="{Binding Location}" LineBreakMode="TailTruncation" />
-                                                        <Label Grid.Column="6" Text="{Binding InternshipName}" LineBreakMode="TailTruncation" />
-                                                        <Label Grid.Column="7" Text="{Binding PatientInitials}" LineBreakMode="NoWrap" />
-                                                        <Label Grid.Column="8" Text="{Binding PatientGender}" LineBreakMode="NoWrap" />
-                                                        <Label Grid.Column="9" Text="{Binding AssistantData}" LineBreakMode="TailTruncation" />
-                                                        <Label Grid.Column="10" Text="{Binding ProcedureGroup}" LineBreakMode="TailTruncation" />
-                                                        <HorizontalStackLayout Grid.Column="11" Spacing="5">
-                                                            <Button Text="✏️" 
-                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=EditProcedureCommand}" 
-                                                                    CommandParameter="{Binding .}"
-                                                                    BackgroundColor="{StaticResource Secondary}"
-                                                                    TextColor="White"
-                                                                    Style="{StaticResource LightIconButton}" />
-                                                            <Button Text="🗑️" 
-                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=DeleteProcedureCommand}" 
-                                                                    CommandParameter="{Binding .}"
-                                                                    BackgroundColor="{StaticResource DangerColor}"
-                                                                    TextColor="White"
-                                                                    Style="{StaticResource LightIconButton}" />
-                                                        </HorizontalStackLayout>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </CollectionView.ItemTemplate>
-                                        </CollectionView>
-
-                                        <!-- Przycisk dodawania procedury w tej grupie -->
-                                        <Button Text="Dodaj procedurę" Command="{Binding AddProcedureCommand}" 
-                                                BackgroundColor="{StaticResource Primary}" 
-                                                TextColor="White"
-                                                Style="{StaticResource StandardButton}"
-                                                Margin="0,10,0,0" />
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </Frame>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="30,80,40,90,*,*,*,60,30,*,*,80" Margin="0,5">
+                                <Label Grid.Column="0" Text="{Binding ProcedureId}" LineBreakMode="NoWrap" />
+                                <Label Grid.Column="1" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" LineBreakMode="NoWrap" />
+                                <Label Grid.Column="2" Text="{Binding Year}" LineBreakMode="NoWrap" />
+                                <Label Grid.Column="3" Text="{Binding Code}" LineBreakMode="NoWrap" />
+                                <Label Grid.Column="4" Text="{Binding PerformingPerson}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="5" Text="{Binding Location}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="6" Text="{Binding InternshipName}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="7" Text="{Binding PatientInitials}" LineBreakMode="NoWrap" />
+                                <Label Grid.Column="8" Text="{Binding PatientGender}" LineBreakMode="NoWrap" />
+                                <Label Grid.Column="9" Text="{Binding AssistantData}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="10" Text="{Binding ProcedureGroup}" LineBreakMode="TailTruncation" />
+                                <HorizontalStackLayout Grid.Column="11" Spacing="5">
+                                    <Button Text="✏️" 
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=EditProcedureCommand}" 
+                            CommandParameter="{Binding .}"
+                            BackgroundColor="{StaticResource Secondary}"
+                            TextColor="White"
+                            Style="{StaticResource LightIconButton}" />
+                                    <Button Text="🗑️" 
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=DeleteProcedureCommand}" 
+                            CommandParameter="{Binding .}"
+                            BackgroundColor="{StaticResource DangerColor}"
+                            TextColor="White"
+                            Style="{StaticResource LightIconButton}" />
+                                </HorizontalStackLayout>
+                            </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
