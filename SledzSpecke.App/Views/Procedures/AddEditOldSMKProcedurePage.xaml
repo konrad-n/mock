@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Procedures"
+             x:DataType="vm:AddEditOldSMKProcedureViewModel"
+             x:Class="SledzSpecke.App.Views.Procedures.AddEditOldSMKProcedurePage"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <!-- Data -->
+            <Label Text="Data wykonania *" FontAttributes="Bold" />
+            <DatePicker Date="{Binding Procedure.Date}" Format="yyyy-MM-dd" />
+
+            <!-- Rok specjalizacji -->
+            <Label Text="Rok specjalizacji *" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding YearOptions}" 
+                    SelectedItem="{Binding SelectedYear}" 
+                    ItemDisplayBinding="{Binding Value}" />
+
+            <!-- Kod zabiegu -->
+            <Label Text="Kod zabiegu *" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding CodeOptions}" 
+                    SelectedItem="{Binding SelectedCode}" 
+                    ItemDisplayBinding="{Binding Value}" />
+
+            <!-- Osoba wykonująca -->
+            <Label Text="Osoba wykonująca *" FontAttributes="Bold" />
+            <Entry Text="{Binding Procedure.PerformingPerson}" Placeholder="Podaj imię i nazwisko osoby wykonującej" />
+
+            <!-- Miejsce wykonania -->
+            <Label Text="Miejsce wykonania *" FontAttributes="Bold" />
+            <Entry Text="{Binding Procedure.Location}" Placeholder="Np. Oddział Kardiologii" />
+
+            <!-- Nazwa stażu -->
+            <Label Text="Staż *" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding AvailableInternships}" 
+                    SelectedItem="{Binding SelectedInternship}" 
+                    ItemDisplayBinding="{Binding InternshipName}" />
+
+            <!-- Inicjały pacjenta -->
+            <Label Text="Inicjały pacjenta *" FontAttributes="Bold" />
+            <Entry Text="{Binding Procedure.PatientInitials}" Placeholder="Np. AB" MaxLength="10" />
+
+            <!-- Płeć pacjenta -->
+            <Label Text="Płeć pacjenta *" FontAttributes="Bold" />
+            <Picker ItemsSource="{Binding GenderOptions}" 
+                    SelectedItem="{Binding SelectedGender}" 
+                    ItemDisplayBinding="{Binding Value}" />
+
+            <!-- Dane asysty -->
+            <Label Text="Dane osoby wykonującej I i II asystę (opcjonalne)" FontAttributes="Bold" />
+            <Entry Text="{Binding Procedure.AssistantData}" Placeholder="Opcjonalne" />
+
+            <!-- Procedura z grupy -->
+            <Label Text="Procedura z grupy (opcjonalne)" FontAttributes="Bold" />
+            <Entry Text="{Binding Procedure.ProcedureGroup}" Placeholder="Opcjonalne" />
+
+            <!-- Przyciski -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,15,0,0">
+                <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Zapisz" Command="{Binding SaveCommand}" 
+                        BackgroundColor="{StaticResource Primary}" TextColor="White" />
+            </Grid>
+
+            <!-- Indykator ładowania -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" 
+                              HorizontalOptions="Center" Margin="0,20,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

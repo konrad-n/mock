@@ -23,184 +23,64 @@ namespace SledzSpecke.App.Services.Procedures
             this.specializationService = specializationService;
         }
 
+        #region Wymagania procedur
+
         public async Task<List<ProcedureRequirement>> GetAvailableProcedureRequirementsAsync(int? moduleId = null)
         {
             try
             {
-                var requirements = new List<ProcedureRequirement>();
-
-                // Pobierz aktualny moduł
-                var currentModule = moduleId.HasValue
-                    ? await this.databaseService.GetModuleAsync(moduleId.Value)
-                    : await this.specializationService.GetCurrentModuleAsync();
-
-                if (currentModule == null || string.IsNullOrEmpty(currentModule.Structure))
+                if (!moduleId.HasValue)
                 {
-                    return requirements;
-                }
-
-                // Deserializuj strukturę modułu
-                var options = new System.Text.Json.JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    AllowTrailingCommas = true,
-                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
-                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-                };
-
-                var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(currentModule.Structure, options);
-
-                if (moduleStructure?.Procedures != null)
-                {
-                    requirements.AddRange(moduleStructure.Procedures);
-
-                    // Dodaj informacje o stażu do każdego wymagania
-                    foreach (var requirement in requirements)
+                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                    if (currentModule != null)
                     {
-                        if (requirement.InternshipId.HasValue && moduleStructure.Internships != null)
-                        {
-                            var internship = moduleStructure.Internships.FirstOrDefault(i => i.Id == requirement.InternshipId.Value);
-                            if (internship != null)
-                            {
-                                requirement.InternshipName = internship.Name;
-                            }
-                        }
+                        moduleId = currentModule.ModuleId;
                     }
                 }
 
-                return requirements;
+                if (!moduleId.HasValue)
+                {
+                    return new List<ProcedureRequirement>();
+                }
+
+                var module = await this.databaseService.GetModuleAsync(moduleId.Value);
+                if (module == null || string.IsNullOrEmpty(module.Structure))
+                {
+                    return new List<ProcedureRequirement>();
+                }
+
+                // Deserializuj strukturę modułu
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+                };
+
+                var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
+                if (moduleStructure?.Procedures == null)
+                {
+                    return new List<ProcedureRequirement>();
+                }
+
+                // Zwróć listę wymagań bez modyfikowania ich
+                // (ponieważ nie możemy dodać InternshipName do ProcedureRequirement)
+
+                return moduleStructure.Procedures;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetAvailableProcedureRequirementsAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania wymagań procedur: {ex.Message}");
                 return new List<ProcedureRequirement>();
             }
         }
 
-        public async Task<ProcedureSummary> GetProcedureSummaryAsync(int? moduleId = null, int? procedureRequirementId = null)
-        {
-            try
-            {
-                var summary = new ProcedureSummary();
+        #endregion
 
-                // Pobierz aktualnego użytkownika i jego specjalizację
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user == null)
-                {
-                    return summary;
-                }
+        #region Stary SMK
 
-                // Dostosuj zapytanie w zależności od wersji SMK
-                if (user.SmkVersion == SmkVersion.New)
-                {
-                    string query = "SELECT SUM(CountA) as CompletedCountA, SUM(CountB) as CompletedCountB FROM RealizedProcedureNewSMK WHERE SpecializationId = ?";
-
-                    if (moduleId.HasValue)
-                    {
-                        query += " AND ModuleId = ?";
-                    }
-
-                    if (procedureRequirementId.HasValue)
-                    {
-                        query += " AND ProcedureRequirementId = ?";
-                    }
-
-                    var parameters = new List<object> { user.SpecializationId };
-                    if (moduleId.HasValue) parameters.Add(moduleId.Value);
-                    if (procedureRequirementId.HasValue) parameters.Add(procedureRequirementId.Value);
-
-                    var results = await this.databaseService.QueryAsync<ProcedureSummary>(query, parameters.ToArray());
-                    if (results.Count > 0)
-                    {
-                        summary = results[0];
-                    }
-
-                    // Pobierz także liczbę zatwierdzonych procedur
-                    query = query.Replace("SUM(CountA)", "SUM(CASE WHEN SyncStatus = 1 THEN CountA ELSE 0 END)")
-                               .Replace("SUM(CountB)", "SUM(CASE WHEN SyncStatus = 1 THEN CountB ELSE 0 END)");
-
-                    var approvedResults = await this.databaseService.QueryAsync<ProcedureSummary>(query, parameters.ToArray());
-                    if (approvedResults.Count > 0)
-                    {
-                        summary.ApprovedCountA = approvedResults[0].CompletedCountA;
-                        summary.ApprovedCountB = approvedResults[0].CompletedCountB;
-                    }
-
-                    // Pobierz wymagane liczby procedur
-                    var requirements = await this.GetAvailableProcedureRequirementsAsync(moduleId);
-
-                    if (procedureRequirementId.HasValue)
-                    {
-                        var requirement = requirements.FirstOrDefault(r => r.Id == procedureRequirementId.Value);
-                        if (requirement != null)
-                        {
-                            summary.RequiredCountA = requirement.RequiredCountA;
-                            summary.RequiredCountB = requirement.RequiredCountB;
-                        }
-                    }
-                    else
-                    {
-                        summary.RequiredCountA = requirements.Sum(r => r.RequiredCountA);
-                        summary.RequiredCountB = requirements.Sum(r => r.RequiredCountB);
-                    }
-                }
-                else // Old SMK
-                {
-                    string query = "SELECT COUNT(CASE WHEN Code = 'A - operator' THEN 1 END) as CompletedCountA, " +
-                                  "COUNT(CASE WHEN Code = 'B - asysta' THEN 1 END) as CompletedCountB " +
-                                  "FROM RealizedProcedureOldSMK WHERE SpecializationId = ?";
-
-                    if (moduleId.HasValue)
-                    {
-                        // Dla starego SMK musimy filtrować po latach powiązanych z modułem
-                        var module = await this.databaseService.GetModuleAsync(moduleId.Value);
-                        if (module != null)
-                        {
-                            if (module.Type == ModuleType.Basic)
-                            {
-                                query += " AND Year IN (1, 2)";
-                            }
-                            else
-                            {
-                                query += " AND Year > 2";
-                            }
-                        }
-                    }
-
-                    var results = await this.databaseService.QueryAsync<ProcedureSummary>(query, user.SpecializationId);
-                    if (results.Count > 0)
-                    {
-                        summary = results[0];
-                    }
-
-                    // Pobierz także liczbę zatwierdzonych procedur
-                    query = query.Replace("COUNT(CASE", "COUNT(CASE WHEN SyncStatus = 1 AND");
-
-                    var approvedResults = await this.databaseService.QueryAsync<ProcedureSummary>(query, user.SpecializationId);
-                    if (approvedResults.Count > 0)
-                    {
-                        summary.ApprovedCountA = approvedResults[0].CompletedCountA;
-                        summary.ApprovedCountB = approvedResults[0].CompletedCountB;
-                    }
-
-                    // Pobierz wymagane liczby procedur
-                    var requirements = await this.GetAvailableProcedureRequirementsAsync(moduleId);
-                    summary.RequiredCountA = requirements.Sum(r => r.RequiredCountA);
-                    summary.RequiredCountB = requirements.Sum(r => r.RequiredCountB);
-                }
-
-                return summary;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetProcedureSummaryAsync: {ex.Message}");
-                return new ProcedureSummary();
-            }
-        }
-
-        // Implementacja metod dla starej wersji SMK
-
-        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null)
+        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? internshipId = null)
         {
             try
             {
@@ -210,39 +90,22 @@ namespace SledzSpecke.App.Services.Procedures
                     return new List<RealizedProcedureOldSMK>();
                 }
 
-                string query = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ?";
+                var sql = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ?";
                 var parameters = new List<object> { user.SpecializationId };
 
-                if (moduleId.HasValue)
+                if (internshipId.HasValue)
                 {
-                    // Dla starego SMK musimy filtrować po latach powiązanych z modułem
-                    var module = await this.databaseService.GetModuleAsync(moduleId.Value);
-                    if (module != null)
-                    {
-                        if (module.Type == ModuleType.Basic)
-                        {
-                            query += " AND Year IN (1, 2)";
-                        }
-                        else
-                        {
-                            query += " AND Year > 2";
-                        }
-                    }
+                    sql += " AND InternshipId = ?";
+                    parameters.Add(internshipId.Value);
                 }
 
-                if (year.HasValue)
-                {
-                    query += " AND Year = ?";
-                    parameters.Add(year.Value);
-                }
+                sql += " ORDER BY Date DESC";
 
-                query += " ORDER BY Date DESC";
-
-                return await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(query, parameters.ToArray());
+                return await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, parameters.ToArray());
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetOldSMKProceduresAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania procedur starego SMK: {ex.Message}");
                 return new List<RealizedProcedureOldSMK>();
             }
         }
@@ -251,13 +114,13 @@ namespace SledzSpecke.App.Services.Procedures
         {
             try
             {
-                return await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(
-                    "SELECT * FROM RealizedProcedureOldSMK WHERE ProcedureId = ?", procedureId).ContinueWith(t =>
-                        t.Result.FirstOrDefault());
+                var sql = "SELECT * FROM RealizedProcedureOldSMK WHERE ProcedureId = ?";
+                var results = await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, procedureId);
+                return results.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetOldSMKProcedureAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania procedury starego SMK: {ex.Message}");
                 return null;
             }
         }
@@ -266,7 +129,7 @@ namespace SledzSpecke.App.Services.Procedures
         {
             try
             {
-                // Upewnij się, że specjalizacja jest ustawiona
+                // Ustaw specjalizację jeśli nie jest ustawiona
                 if (procedure.SpecializationId <= 0)
                 {
                     var user = await this.authService.GetCurrentUserAsync();
@@ -274,28 +137,38 @@ namespace SledzSpecke.App.Services.Procedures
                     {
                         return false;
                     }
+
                     procedure.SpecializationId = user.SpecializationId;
                 }
 
+                // Ustaw status synchronizacji
+                if (procedure.SyncStatus == SyncStatus.Synced)
+                {
+                    procedure.SyncStatus = SyncStatus.Modified;
+                }
+                else if (procedure.SyncStatus != SyncStatus.Modified)
+                {
+                    procedure.SyncStatus = SyncStatus.NotSynced;
+                }
+
                 // Zapisz procedurę
-                int result = 0;
+                int result;
                 if (procedure.ProcedureId == 0)
                 {
+                    // Nowa procedura
                     result = await this.databaseService.InsertAsync(procedure);
                 }
                 else
                 {
+                    // Aktualizacja istniejącej procedury
                     result = await this.databaseService.UpdateAsync(procedure);
                 }
-
-                // Aktualizuj statystyki modułu
-                await this.UpdateModuleStatisticsAsync();
 
                 return result > 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w SaveOldSMKProcedureAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania procedury starego SMK: {ex.Message}");
                 return false;
             }
         }
@@ -310,30 +183,30 @@ namespace SledzSpecke.App.Services.Procedures
                     return false;
                 }
 
-                // Procedury nie mogą być usunięte, jeśli są synchronizowane
+                // Nie można usunąć zsynchronizowanej procedury
                 if (procedure.SyncStatus == SyncStatus.Synced)
                 {
                     return false;
                 }
 
-                int result = await this.databaseService.ExecuteAsync(
-                    "DELETE FROM RealizedProcedureOldSMK WHERE ProcedureId = ?", procedureId);
-
-                // Aktualizuj statystyki modułu
-                await this.UpdateModuleStatisticsAsync();
+                // Usuń procedurę
+                var sql = "DELETE FROM RealizedProcedureOldSMK WHERE ProcedureId = ?";
+                int result = await this.databaseService.ExecuteAsync(sql, procedureId);
 
                 return result > 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w DeleteOldSMKProcedureAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania procedury starego SMK: {ex.Message}");
                 return false;
             }
         }
 
-        // Implementacja metod dla nowej wersji SMK
+        #endregion
 
-        public async Task<List<RealizedProcedureNewSMK>> GetNewSMKProceduresAsync(int? moduleId = null, int? procedureRequirementId = null)
+        #region Nowy SMK
+
+        public async Task<List<RealizedProcedureNewSMK>> GetNewSMKProceduresAsync(int? moduleId = null, int? requirementId = null)
         {
             try
             {
@@ -343,28 +216,45 @@ namespace SledzSpecke.App.Services.Procedures
                     return new List<RealizedProcedureNewSMK>();
                 }
 
-                string query = "SELECT * FROM RealizedProcedureNewSMK WHERE SpecializationId = ?";
+                var sql = "SELECT * FROM RealizedProcedureNewSMK WHERE SpecializationId = ?";
                 var parameters = new List<object> { user.SpecializationId };
 
                 if (moduleId.HasValue)
                 {
-                    query += " AND ModuleId = ?";
+                    sql += " AND ModuleId = ?";
                     parameters.Add(moduleId.Value);
                 }
 
-                if (procedureRequirementId.HasValue)
+                if (requirementId.HasValue)
                 {
-                    query += " AND ProcedureRequirementId = ?";
-                    parameters.Add(procedureRequirementId.Value);
+                    sql += " AND ProcedureRequirementId = ?";
+                    parameters.Add(requirementId.Value);
                 }
 
-                query += " ORDER BY Date DESC";
+                sql += " ORDER BY Date DESC";
 
-                return await this.databaseService.QueryAsync<RealizedProcedureNewSMK>(query, parameters.ToArray());
+                var procedures = await this.databaseService.QueryAsync<RealizedProcedureNewSMK>(sql, parameters.ToArray());
+
+                // Dodaj informacje o nazwach procedur z modułu
+                if (moduleId.HasValue)
+                {
+                    var requirements = await this.GetAvailableProcedureRequirementsAsync(moduleId);
+                    foreach (var procedure in procedures)
+                    {
+                        var requirement = requirements.FirstOrDefault(r => r.Id == procedure.ProcedureRequirementId);
+                        if (requirement != null)
+                        {
+                            procedure.ProcedureName = requirement.Name;
+                            procedure.InternshipName = requirement.InternshipName;
+                        }
+                    }
+                }
+
+                return procedures;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetNewSMKProceduresAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania procedur nowego SMK: {ex.Message}");
                 return new List<RealizedProcedureNewSMK>();
             }
         }
@@ -373,13 +263,28 @@ namespace SledzSpecke.App.Services.Procedures
         {
             try
             {
-                return await this.databaseService.QueryAsync<RealizedProcedureNewSMK>(
-                    "SELECT * FROM RealizedProcedureNewSMK WHERE ProcedureId = ?", procedureId).ContinueWith(t =>
-                        t.Result.FirstOrDefault());
+                var sql = "SELECT * FROM RealizedProcedureNewSMK WHERE ProcedureId = ?";
+                var results = await this.databaseService.QueryAsync<RealizedProcedureNewSMK>(sql, procedureId);
+
+                var procedure = results.FirstOrDefault();
+                if (procedure != null && procedure.ModuleId.HasValue)
+                {
+                    // Dodaj informacje o nazwie procedury
+                    var requirements = await this.GetAvailableProcedureRequirementsAsync(procedure.ModuleId);
+                    var requirement = requirements.FirstOrDefault(r => r.Id == procedure.ProcedureRequirementId);
+                    if (requirement != null)
+                    {
+                        procedure.ProcedureName = requirement.Name;
+                        // W NewSMKProceduresListViewModel pobierzemy nazwę stażu z innych źródeł
+                        procedure.InternshipName = string.Empty;
+                    }
+                }
+
+                return procedure;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetNewSMKProcedureAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania procedury nowego SMK: {ex.Message}");
                 return null;
             }
         }
@@ -388,7 +293,7 @@ namespace SledzSpecke.App.Services.Procedures
         {
             try
             {
-                // Upewnij się, że specjalizacja jest ustawiona
+                // Ustaw specjalizację jeśli nie jest ustawiona
                 if (procedure.SpecializationId <= 0)
                 {
                     var user = await this.authService.GetCurrentUserAsync();
@@ -396,29 +301,44 @@ namespace SledzSpecke.App.Services.Procedures
                     {
                         return false;
                     }
+
                     procedure.SpecializationId = user.SpecializationId;
                 }
 
-                // Zapisz procedurę
-                int result = 0;
-                if (procedure.ProcedureId == 0)
+                // Ustaw datę jeśli nie jest ustawiona
+                if (procedure.Date == default)
                 {
                     procedure.Date = DateTime.Now;
+                }
+
+                // Ustaw status synchronizacji
+                if (procedure.SyncStatus == SyncStatus.Synced)
+                {
+                    procedure.SyncStatus = SyncStatus.Modified;
+                }
+                else if (procedure.SyncStatus != SyncStatus.Modified)
+                {
+                    procedure.SyncStatus = SyncStatus.NotSynced;
+                }
+
+                // Zapisz procedurę
+                int result;
+                if (procedure.ProcedureId == 0)
+                {
+                    // Nowa procedura
                     result = await this.databaseService.InsertAsync(procedure);
                 }
                 else
                 {
+                    // Aktualizacja istniejącej procedury
                     result = await this.databaseService.UpdateAsync(procedure);
                 }
-
-                // Aktualizuj statystyki modułu
-                await this.UpdateModuleStatisticsAsync();
 
                 return result > 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w SaveNewSMKProcedureAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania procedury nowego SMK: {ex.Message}");
                 return false;
             }
         }
@@ -433,43 +353,170 @@ namespace SledzSpecke.App.Services.Procedures
                     return false;
                 }
 
-                // Procedury nie mogą być usunięte, jeśli są synchronizowane
+                // Nie można usunąć zsynchronizowanej procedury
                 if (procedure.SyncStatus == SyncStatus.Synced)
                 {
                     return false;
                 }
 
-                int result = await this.databaseService.ExecuteAsync(
-                    "DELETE FROM RealizedProcedureNewSMK WHERE ProcedureId = ?", procedureId);
-
-                // Aktualizuj statystyki modułu
-                await this.UpdateModuleStatisticsAsync();
+                // Usuń procedurę
+                var sql = "DELETE FROM RealizedProcedureNewSMK WHERE ProcedureId = ?";
+                int result = await this.databaseService.ExecuteAsync(sql, procedureId);
 
                 return result > 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w DeleteNewSMKProcedureAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania procedury nowego SMK: {ex.Message}");
                 return false;
             }
         }
 
-        // Metody pomocnicze
+        #endregion
 
-        private async Task UpdateModuleStatisticsAsync()
+        #region Statystyki
+
+        public async Task<ProcedureSummary> GetProcedureSummaryAsync(int? moduleId = null, int? requirementId = null)
         {
             try
             {
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                if (currentModule != null)
+                var summary = new ProcedureSummary();
+
+                // Jeśli podano ID wymagania, pobierz wartości wymagane z modułu
+                if (requirementId.HasValue && moduleId.HasValue)
                 {
-                    await this.specializationService.UpdateModuleProgressAsync(currentModule.ModuleId);
+                    var requirements = await this.GetAvailableProcedureRequirementsAsync(moduleId);
+                    var requirement = requirements.FirstOrDefault(r => r.Id == requirementId.Value);
+                    if (requirement != null)
+                    {
+                        summary.RequiredCountA = requirement.RequiredCountA;
+                        summary.RequiredCountB = requirement.RequiredCountB;
+                    }
                 }
+                // W przeciwnym razie sumuj wszystkie wymagania
+                else if (moduleId.HasValue)
+                {
+                    var requirements = await this.GetAvailableProcedureRequirementsAsync(moduleId);
+                    summary.RequiredCountA = requirements.Sum(r => r.RequiredCountA);
+                    summary.RequiredCountB = requirements.Sum(r => r.RequiredCountB);
+                }
+
+                // Pobierz bieżącego użytkownika i wersję SMK
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return summary;
+                }
+
+                // Obliczanie statystyk dla starego SMK
+                if (user.SmkVersion == SmkVersion.Old)
+                {
+                    if (moduleId.HasValue)
+                    {
+                        var module = await this.databaseService.GetModuleAsync(moduleId.Value);
+                        if (module != null)
+                        {
+                            // Pobierz procedury tylko dla lat odpowiadających modułowi
+                            int startYear = module.Type == ModuleType.Basic ? 1 : 3;
+                            int endYear = module.Type == ModuleType.Basic ? 2 : 6;
+
+                            // Sprawdź, czy specjalizacja ma moduł podstawowy
+                            var modules = await this.databaseService.GetModulesAsync(user.SpecializationId);
+                            if (!modules.Any(m => m.Type == ModuleType.Basic))
+                            {
+                                // Jeśli nie ma modułu podstawowego, wszystkie lata są dla modułu specjalistycznego
+                                startYear = 1;
+                            }
+
+                            // Pobierz staże w module
+                            var internships = await this.databaseService.GetInternshipsAsync(moduleId: moduleId);
+
+                            // Konstruuj zapytanie SQL
+                            var sql = "SELECT Code, SyncStatus FROM RealizedProcedureOldSMK WHERE SpecializationId = ? AND Year BETWEEN ? AND ?";
+                            var parameters = new List<object> { user.SpecializationId, startYear, endYear };
+
+                            // Jeśli podano ID wymagania i mamy staże powiązane z tym wymaganiem
+                            if (requirementId.HasValue && internships.Any())
+                            {
+                                sql += " AND (";
+                                for (int i = 0; i < internships.Count; i++)
+                                {
+                                    if (i > 0) sql += " OR ";
+                                    sql += "InternshipId = ?";
+                                    parameters.Add(internships[i].InternshipId);
+                                }
+                                sql += ")";
+                            }
+
+                            var procedures = await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, parameters.ToArray());
+
+                            // Zliczanie procedur
+                            foreach (var procedure in procedures)
+                            {
+                                if (procedure.Code == "A - operator")
+                                {
+                                    summary.CompletedCountA++;
+                                    if (procedure.SyncStatus == SyncStatus.Synced)
+                                    {
+                                        summary.ApprovedCountA++;
+                                    }
+                                }
+                                else if (procedure.Code == "B - asysta")
+                                {
+                                    summary.CompletedCountB++;
+                                    if (procedure.SyncStatus == SyncStatus.Synced)
+                                    {
+                                        summary.ApprovedCountB++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // Obliczanie statystyk dla nowego SMK
+                else
+                {
+                    // Konstruuj zapytanie SQL
+                    var sql = "SELECT CountA, CountB, SyncStatus FROM RealizedProcedureNewSMK WHERE SpecializationId = ?";
+                    var parameters = new List<object> { user.SpecializationId };
+
+                    if (moduleId.HasValue)
+                    {
+                        sql += " AND ModuleId = ?";
+                        parameters.Add(moduleId.Value);
+                    }
+
+                    if (requirementId.HasValue)
+                    {
+                        sql += " AND ProcedureRequirementId = ?";
+                        parameters.Add(requirementId.Value);
+                    }
+
+                    var procedures = await this.databaseService.QueryAsync<RealizedProcedureNewSMK>(sql, parameters.ToArray());
+
+                    // Zliczanie procedur
+                    foreach (var procedure in procedures)
+                    {
+                        summary.CompletedCountA += procedure.CountA;
+                        summary.CompletedCountB += procedure.CountB;
+
+                        if (procedure.SyncStatus == SyncStatus.Synced)
+                        {
+                            summary.ApprovedCountA += procedure.CountA;
+                            summary.ApprovedCountB += procedure.CountB;
+                        }
+                    }
+                }
+
+                return summary;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w UpdateModuleStatisticsAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania statystyk procedur: {ex.Message}");
+                return new ProcedureSummary();
             }
         }
+
+        #endregion
     }
 }

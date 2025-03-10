@@ -44,6 +44,11 @@ namespace SledzSpecke.App
 
             // Dodane aliasy dla zwiększenia elastyczności nawigacji
             Routing.RegisterRoute("medicalshifts/AddEditOldSMKMedicalShift", typeof(AddEditOldSMKMedicalShiftPage));
+
+            Routing.RegisterRoute("ProcedureSelector", typeof(ProcedureSelectorPage));
+            Routing.RegisterRoute("OldSMKProcedures", typeof(OldSMKProceduresListPage));
+            Routing.RegisterRoute("NewSMKProcedures", typeof(NewSMKProceduresListPage));
+            Routing.RegisterRoute("AddEditOldSMKProcedure", typeof(AddEditOldSMKProcedurePage));
         }
 
         private async void InitializeUserInfoAsync()

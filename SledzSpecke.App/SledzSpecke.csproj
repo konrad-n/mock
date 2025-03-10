@@ -149,6 +149,12 @@
     <MauiXaml Update="Views\MedicalShifts\OldSMKMedicalShiftsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Views\Procedures\AddEditOldSMKProcedurePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Procedures\NewSMKProceduresListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\Procedures\OldSMKProceduresListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

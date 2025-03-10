@@ -2,11 +2,11 @@
 
 namespace SledzSpecke.App.Views.Procedures
 {
-    public partial class OldSMKProceduresListPage : ContentPage
+    public partial class NewSMKProceduresListPage : ContentPage
     {
-        private readonly OldSMKProceduresListViewModel viewModel;
+        private readonly NewSMKProceduresListViewModel viewModel;
 
-        public OldSMKProceduresListPage(OldSMKProceduresListViewModel viewModel)
+        public NewSMKProceduresListPage(NewSMKProceduresListViewModel viewModel)
         {
             this.InitializeComponent();
             this.viewModel = viewModel;
@@ -33,17 +33,6 @@ namespace SledzSpecke.App.Views.Procedures
 
             // Odśwież dane przy każdym pokazaniu strony
             this.viewModel.RefreshCommand.Execute(null);
-        }
-
-        protected override void OnDisappearing()
-        {
-            base.OnDisappearing();
-
-            // Jeśli ViewModel implementuje IDisposable, wywołaj Dispose()
-            if (this.viewModel is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
         }
     }
 }

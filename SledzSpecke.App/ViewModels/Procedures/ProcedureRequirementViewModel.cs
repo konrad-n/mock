@@ -21,6 +21,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private int? moduleId;
         private bool isExpanded;
         private bool isAddingRealization;
+        private string internshipName;
 
         // Pola dla nowej realizacji
         private int countA;
@@ -36,7 +37,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             int index,
             int? moduleId,
             IProcedureService procedureService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            string internshipName = "")
         {
             this.requirement = requirement;
             this.statistics = statistics;
@@ -45,6 +47,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.moduleId = moduleId;
             this.procedureService = procedureService;
             this.dialogService = dialogService;
+            this.internshipName = internshipName;
 
             this.startDate = DateTime.Now;
             this.endDate = DateTime.Now;
@@ -61,7 +64,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public string Title => $"{this.index}. {this.requirement?.Name ?? "Nieznana procedura"}";
 
-        public string InternshipName => this.requirement?.InternshipName ?? string.Empty;
+        public string InternshipName => this.internshipName;
 
         public ProcedureSummary Statistics => this.statistics;
 
@@ -182,7 +185,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 procedure.StartDate = this.StartDate;
                 procedure.EndDate = this.EndDate;
                 procedure.ProcedureName = this.requirement.Name;
-                procedure.InternshipName = this.requirement.InternshipName;
+                procedure.InternshipName = this.internshipName;
                 procedure.SyncStatus = SyncStatus.NotSynced;
 
                 bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedure);
