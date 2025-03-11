@@ -11,7 +11,7 @@ using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Procedures
 {
-    public class NewSMKProceduresListViewModel : BaseViewModel
+    public class NewSMKProceduresListViewModel : BaseViewModel, IDisposable
     {
         private readonly IProcedureService procedureService;
         private readonly IAuthService authService;
@@ -26,6 +26,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool basicModuleSelected;
         private bool specialisticModuleSelected;
         private int currentModuleId;
+        private List<ProcedureRequirement> allRequirements;
+        private bool isLoadingData;
+        private int batchSize = 3; // Ilość elementów ładowanych w jednej partii
 
         public NewSMKProceduresListViewModel(
             IProcedureService procedureService,
@@ -41,10 +44,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.Title = "Procedury (Nowy SMK)";
             this.ProcedureRequirements = new ObservableCollection<ProcedureRequirementViewModel>();
             this.Summary = new ProcedureSummary();
+            this.allRequirements = new List<ProcedureRequirement>();
+            this.isLoadingData = false;
 
             // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
             this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
+            this.LoadMoreCommand = new AsyncRelayCommand(this.LoadMoreItemsAsync);
 
             // Zarejestruj na zdarzenie zmiany modułu
             this.specializationService.CurrentModuleChanged += this.OnModuleChanged;
@@ -109,6 +115,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public ICommand RefreshCommand { get; }
         public ICommand SelectModuleCommand { get; }
+        public ICommand LoadMoreCommand { get; }
 
         private async void OnModuleChanged(object sender, int moduleId)
         {
@@ -118,11 +125,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public async Task LoadDataAsync()
         {
-            if (this.IsBusy)
+            if (this.IsBusy || this.isLoadingData)
             {
                 return;
             }
 
+            this.isLoadingData = true;
             this.IsBusy = true;
             this.IsRefreshing = true;
 
@@ -132,6 +140,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
+                    this.isLoadingData = false;
+                    this.IsBusy = false;
+                    this.IsRefreshing = false;
                     return;
                 }
 
@@ -154,39 +165,20 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
                     this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
 
-                    // Pobierz podsumowanie procedur dla bieżącego modułu
+                    // Pobierz podsumowanie procedur dla bieżącego modułu (szybka operacja)
                     this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
 
-                    // Pobierz wymagania procedur dla bieżącego modułu
-                    var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
-
-                    // Utwórz ViewModele dla każdego wymagania
-                    this.ProcedureRequirements.Clear();
-
-                    int index = 1;
-                    foreach (var requirement in requirements)
+                    // Wyczyść listę wymagań
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        // Pobierz realizacje dla tego wymagania
-                        var realizations = await this.procedureService.GetNewSMKProceduresAsync(
-                            currentModule.ModuleId, requirement.Id);
+                        this.ProcedureRequirements.Clear();
+                    });
 
-                        // Pobierz statystyki dla tego wymagania
-                        var stats = await this.procedureService.GetProcedureSummaryAsync(
-                            currentModule.ModuleId, requirement.Id);
+                    // Pobierz wszystkie wymagania procedur
+                    this.allRequirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
 
-                        // Utwórz ViewModel
-                        var viewModel = new ProcedureRequirementViewModel(
-                            requirement,
-                            stats,
-                            realizations,
-                            index,
-                            currentModule.ModuleId,
-                            this.procedureService,
-                            this.dialogService);
-
-                        this.ProcedureRequirements.Add(viewModel);
-                        index++;
-                    }
+                    // Załaduj tylko pierwszą partię
+                    await this.LoadMoreItemsAsync();
                 }
             }
             catch (Exception ex)
@@ -201,6 +193,73 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 this.IsBusy = false;
                 this.IsRefreshing = false;
+                this.isLoadingData = false;
+            }
+        }
+
+        // Metoda do ładowania kolejnej partii procedur
+        public async Task LoadMoreItemsAsync()
+        {
+            if (this.isLoadingData || this.allRequirements == null)
+            {
+                return;
+            }
+
+            this.isLoadingData = true;
+
+            try
+            {
+                // Oblicz, ile elementów już załadowano
+                int currentCount = this.ProcedureRequirements.Count;
+
+                // Sprawdź, czy są jeszcze elementy do załadowania
+                if (currentCount >= this.allRequirements.Count)
+                {
+                    return;
+                }
+
+                // Oblicz, ile elementów załadować w tej partii
+                int itemsToLoad = Math.Min(this.batchSize, this.allRequirements.Count - currentCount);
+
+                // Pobierz elementy do załadowania
+                var requirementsToLoad = this.allRequirements.Skip(currentCount).Take(itemsToLoad).ToList();
+
+                // Utworzenie ViewModels dla każdego wymagania i dodanie do kolekcji
+                for (int i = 0; i < requirementsToLoad.Count; i++)
+                {
+                    var requirement = requirementsToLoad[i];
+
+                    // Pobierz statystyki dla tego wymagania
+                    var stats = await this.procedureService.GetProcedureSummaryAsync(
+                        this.CurrentModuleId, requirement.Id);
+
+                    // Utwórz ViewModel bez ładowania realizacji (będą ładowane na żądanie)
+                    var viewModel = new ProcedureRequirementViewModel(
+                        requirement,
+                        stats,
+                        new List<RealizedProcedureNewSMK>(),
+                        currentCount + i + 1,
+                        this.CurrentModuleId,
+                        this.procedureService,
+                        this.dialogService);
+
+                    // Dodaj ViewModel do kolekcji na wątku UI
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        this.ProcedureRequirements.Add(viewModel);
+                    });
+
+                    // Krótka pauza między dodawaniem elementów, aby dać UI czas na oddychanie
+                    await Task.Delay(50);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania dodatkowych elementów: {ex.Message}");
+            }
+            finally
+            {
+                this.isLoadingData = false;
             }
         }
 

@@ -22,6 +22,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool isExpanded;
         private bool isAddingRealization;
         private string internshipName;
+        private bool isLoading;
+        private bool hasLoadedData;
 
         // Pola dla nowej realizacji
         private int countA;
@@ -48,11 +50,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.procedureService = procedureService;
             this.dialogService = dialogService;
             this.internshipName = internshipName;
+            this.isLoading = false;
+            this.hasLoadedData = false;
 
             this.startDate = DateTime.Now;
             this.endDate = DateTime.Now;
 
-            this.ToggleExpandCommand = new RelayCommand(this.OnToggleExpand);
+            this.ToggleExpandCommand = new AsyncRelayCommand(this.OnToggleExpandAsync);
             this.ToggleAddRealizationCommand = new RelayCommand(this.OnToggleAddRealization);
             this.SaveRealizationCommand = new AsyncRelayCommand(this.OnSaveRealization, this.CanSaveRealization);
             this.CancelRealizationCommand = new RelayCommand(this.OnCancelRealization);
@@ -84,6 +88,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             get => this.isAddingRealization;
             set => this.SetProperty(ref this.isAddingRealization, value);
+        }
+
+        public bool IsLoading
+        {
+            get => this.isLoading;
+            set => this.SetProperty(ref this.isLoading, value);
         }
 
         public int CountA
@@ -149,9 +159,71 @@ namespace SledzSpecke.App.ViewModels.Procedures
         public ICommand EditRealizationCommand { get; }
         public ICommand DeleteRealizationCommand { get; }
 
-        private void OnToggleExpand()
+        private async Task OnToggleExpandAsync()
         {
-            this.IsExpanded = !this.IsExpanded;
+            // Nie rozwijaj, jeśli właśnie zwijamy
+            if (this.isExpanded)
+            {
+                this.IsExpanded = false;
+                return;
+            }
+
+            // Leniwe ładowanie danych - ładuj tylko gdy rozwijamy i nie mamy jeszcze danych
+            if (!this.hasLoadedData && !this.isLoading)
+            {
+                this.IsLoading = true;
+                this.IsExpanded = true;  // Rozwiń, żeby pokazać indykator ładowania
+
+                try
+                {
+                    // Asynchroniczne ładowanie realizacji dla tego wymagania
+                    await Task.Run(async () =>
+                    {
+                        try
+                        {
+                            // Pobierz realizacje dla tego wymagania
+                            var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                                this.moduleId, this.requirement.Id);
+
+                            // Aktualizuj UI na głównym wątku
+                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                this.Realizations.Clear();
+
+                                // Dodawaj realizacje po jednej z małymi opóźnieniami
+                                foreach (var realization in realizations)
+                                {
+                                    this.Realizations.Add(realization);
+                                }
+
+                                this.hasLoadedData = true;
+                                this.IsLoading = false;
+                                this.OnPropertyChanged(nameof(this.RealizationsCountInfo));
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
+
+                            // Aktualizuj UI na głównym wątku
+                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                this.IsLoading = false;
+                            });
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania procedur: {ex.Message}");
+                    this.IsLoading = false;
+                }
+            }
+            else if (this.hasLoadedData)
+            {
+                // Jeśli już mamy dane, po prostu rozwiń sekcję
+                this.IsExpanded = true;
+            }
         }
 
         private void OnToggleAddRealization()
@@ -174,6 +246,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnSaveRealization()
         {
+            if (this.IsLoading)
+            {
+                return;
+            }
+
+            this.IsLoading = true;
+
             try
             {
                 var procedure = this.SelectedRealization ?? new RealizedProcedureNewSMK();
@@ -238,6 +317,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     "Wystąpił problem podczas zapisywania realizacji procedury.",
                     "OK");
             }
+            finally
+            {
+                this.IsLoading = false;
+            }
         }
 
         private void OnCancelRealization()
@@ -248,7 +331,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnEditRealization(RealizedProcedureNewSMK realization)
         {
-            if (realization == null)
+            if (realization == null || this.IsLoading)
             {
                 return;
             }
@@ -276,7 +359,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnDeleteRealization(RealizedProcedureNewSMK realization)
         {
-            if (realization == null)
+            if (realization == null || this.IsLoading)
             {
                 return;
             }
@@ -297,40 +380,48 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 "Tak",
                 "Nie");
 
-            if (confirm)
+            if (!confirm)
             {
-                try
+                return;
+            }
+
+            this.IsLoading = true;
+
+            try
+            {
+                bool result = await this.procedureService.DeleteNewSMKProcedureAsync(realization.ProcedureId);
+
+                if (result)
                 {
-                    bool result = await this.procedureService.DeleteNewSMKProcedureAsync(realization.ProcedureId);
+                    // Aktualizuj statystyki
+                    this.statistics.CompletedCountA -= realization.CountA;
+                    this.statistics.CompletedCountB -= realization.CountB;
 
-                    if (result)
-                    {
-                        // Aktualizuj statystyki
-                        this.statistics.CompletedCountA -= realization.CountA;
-                        this.statistics.CompletedCountB -= realization.CountB;
+                    // Usuń z kolekcji
+                    this.Realizations.Remove(realization);
 
-                        // Usuń z kolekcji
-                        this.Realizations.Remove(realization);
-
-                        // Odśwież informacje o liczbie realizacji
-                        this.OnPropertyChanged(nameof(this.RealizationsCountInfo));
-                    }
-                    else
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się usunąć realizacji procedury.",
-                            "OK");
-                    }
+                    // Odśwież informacje o liczbie realizacji
+                    this.OnPropertyChanged(nameof(this.RealizationsCountInfo));
                 }
-                catch (Exception ex)
+                else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania realizacji: {ex.Message}");
                     await this.dialogService.DisplayAlertAsync(
                         "Błąd",
-                        "Wystąpił problem podczas usuwania realizacji procedury.",
+                        "Nie udało się usunąć realizacji procedury.",
                         "OK");
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania realizacji: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas usuwania realizacji procedury.",
+                    "OK");
+            }
+            finally
+            {
+                this.IsLoading = false;
             }
         }
     }
