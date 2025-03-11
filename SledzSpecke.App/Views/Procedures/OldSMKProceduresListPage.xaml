@@ -86,42 +86,32 @@
                                TextColor="{StaticResource Primary}" Margin="0,0,0,10"/>
 
                         <!-- Pierwsza sekcja: Typ A -->
-                        <Grid ColumnDefinitions="Auto,*,*" RowDefinitions="Auto,Auto" Margin="0,0,0,10">
-                            <Label Grid.Row="0" Grid.Column="0" Text="Typ A:" FontAttributes="Bold" />
+                        <Grid ColumnDefinitions="Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,10">
+                            <Label Grid.Row="0" Grid.Column="0" Text="A - asysta" FontAttributes="Bold" />
 
-                            <StackLayout Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                                <Label Text="Wymagane:" FontSize="12" />
-                                <Label Text="{Binding Summary.RequiredCountA}" FontAttributes="Bold" />
+                            <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                                <Label Text="Liczba procedur: " FontSize="12" />
+                                <Label Text="{Binding Summary.RequiredCountA}" FontAttributes="Bold" FontSize="12"/>
                             </StackLayout>
 
-                            <StackLayout Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-                                <Label Text="Wykonane:" FontSize="12" />
-                                <Label Text="{Binding Summary.CompletedCountA}" FontAttributes="Bold" />
-                            </StackLayout>
-
-                            <StackLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-                                <Label Text="Zatwierdzone:" FontSize="12" />
-                                <Label Text="{Binding Summary.ApprovedCountA}" FontAttributes="Bold" />
+                            <StackLayout Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                                <Label Text="Liczba wykonanych procedur: " FontSize="12" />
+                                <Label Text="{Binding Summary.CompletedCountA}" FontAttributes="Bold" FontSize="12"/>
                             </StackLayout>
                         </Grid>
 
                         <!-- Druga sekcja: Typ B -->
-                        <Grid ColumnDefinitions="Auto,*,*" RowDefinitions="Auto,Auto">
-                            <Label Grid.Row="0" Grid.Column="0" Text="Typ B:" FontAttributes="Bold" />
+                        <Grid ColumnDefinitions="Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,10">
+                            <Label Grid.Row="0" Grid.Column="0" Text="B - operator" FontAttributes="Bold" />
 
-                            <StackLayout Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                                <Label Text="Wymagane:" FontSize="12" />
-                                <Label Text="{Binding Summary.RequiredCountB}" FontAttributes="Bold" />
+                            <StackLayout Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                                <Label Text="Liczba procedur: " FontSize="12" />
+                                <Label Text="{Binding Summary.RequiredCountB}" FontAttributes="Bold" FontSize="12" />
                             </StackLayout>
 
-                            <StackLayout Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-                                <Label Text="Wykonane:" FontSize="12" />
-                                <Label Text="{Binding Summary.CompletedCountB}" FontAttributes="Bold" />
-                            </StackLayout>
-
-                            <StackLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-                                <Label Text="Zatwierdzone:" FontSize="12" />
-                                <Label Text="{Binding Summary.ApprovedCountB}" FontAttributes="Bold" />
+                            <StackLayout Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                                <Label Text="Liczba wykonanych procedur: " FontSize="12" />
+                                <Label Text="{Binding Summary.CompletedCountB}" FontAttributes="Bold" FontSize="12" />
                             </StackLayout>
                         </Grid>
                     </StackLayout>
