@@ -59,8 +59,8 @@
             <!-- Przyciski -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,15,0,0">
                 <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelCommand}" />
-                <Button Grid.Column="1" Text="Zapisz" Command="{Binding SaveCommand}" 
-                        BackgroundColor="{StaticResource Primary}" TextColor="White" />
+                <Button x:Name="BtnSave" Grid.Column="1" Text="Zapisz" Command="{Binding SaveCommand}" 
+        BackgroundColor="{StaticResource Primary}" TextColor="White" />
             </Grid>
 
             <!-- Indykator ładowania -->

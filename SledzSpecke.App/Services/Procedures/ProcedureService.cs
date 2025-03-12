@@ -517,11 +517,62 @@ namespace SledzSpecke.App.Services.Procedures
             }
         }
 
-        public Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null)
+        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return new List<RealizedProcedureOldSMK>();
+                }
 
+                var sql = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ?";
+                var parameters = new List<object> { user.SpecializationId };
+
+                // Jeśli podano ModuleId, filtruj po stażach w tym module
+                if (moduleId.HasValue)
+                {
+                    // Pobierz staże w module
+                    var internships = await this.databaseService.GetInternshipsAsync(moduleId: moduleId);
+
+                    if (internships.Any())
+                    {
+                        sql += " AND (";
+                        for (int i = 0; i < internships.Count; i++)
+                        {
+                            if (i > 0) sql += " OR ";
+                            sql += "InternshipId = ?";
+                            parameters.Add(internships[i].InternshipId);
+                        }
+                        sql += ")";
+                    }
+                }
+
+                // Jeśli podano rok, dodatkowo filtruj po nim
+                if (year.HasValue)
+                {
+                    sql += " AND Year = ?";
+                    parameters.Add(year.Value);
+                }
+
+                sql += " ORDER BY Date DESC";
+
+                System.Diagnostics.Debug.WriteLine($"SQL query: {sql}");
+                System.Diagnostics.Debug.WriteLine($"Parameters: {string.Join(", ", parameters)}");
+
+                var results = await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, parameters.ToArray());
+                System.Diagnostics.Debug.WriteLine($"Pobrano {results.Count} procedur starego SMK");
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania procedur starego SMK: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return new List<RealizedProcedureOldSMK>();
+            }
+        }
         #endregion
     }
 }
