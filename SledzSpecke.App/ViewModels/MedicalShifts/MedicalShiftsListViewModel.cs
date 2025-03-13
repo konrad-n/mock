@@ -7,7 +7,6 @@ using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
-using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
@@ -17,7 +16,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly ISpecializationService specializationService;
         private readonly IAuthService authService;
         private readonly IDialogService dialogService;
-        private readonly ISmkVersionStrategy smkStrategy;
 
         private ObservableCollection<MedicalShift> shifts;
         private MedicalShift selectedShift;
@@ -35,21 +33,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         public MedicalShiftsListViewModel(
             ISpecializationService specializationService,
             IAuthService authService,
-            IDialogService dialogService,
-            ISmkVersionStrategy smkStrategy)
+            IDialogService dialogService)
         {
             this.specializationService = specializationService;
             this.authService = authService;
             this.dialogService = dialogService;
-            this.smkStrategy = smkStrategy;
 
             this.Title = "Dyżury medyczne";
             this.Shifts = new ObservableCollection<MedicalShift>();
             this.Internships = new List<Internship>();
             this.Summary = new MedicalShiftsSummary();
-
-            // Ustalenie czy jest to nowy SMK
-            this.IsNewSmk = smkStrategy is NewSmkStrategy;
 
             // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
@@ -162,6 +155,20 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             try
             {
+                var user = await this.authService.GetCurrentUserAsync();
+
+                if (user != null)
+                {
+                    if (user.SmkVersion == SmkVersion.Old)
+                    {
+                        this.IsNewSmk = false;
+                    }
+                    else
+                    {
+                        this.IsNewSmk = true;
+                    }
+                }
+
                 // Pobierz bieżący moduł
                 var currentModule = await this.specializationService.GetCurrentModuleAsync();
                 if (currentModule != null)

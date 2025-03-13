@@ -337,6 +337,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
                             ? this.SelectedSpecialization.Duration.TotalMonths
                             : 60), // Domyślnie 5 lat (60 miesięcy)
                     ProgramStructure = this.SelectedSpecialization.Structure,
+                    DurationYears = this.SelectedSpecialization.DurationYears,
                 };
 
                 // Użycie ulepszonej metody async

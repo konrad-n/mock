@@ -8,7 +8,6 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
-using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -19,7 +18,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
-        private readonly ISmkVersionStrategy smkStrategy;
 
         private bool isEdit;
         private MedicalShift shift;
@@ -31,13 +29,11 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         public AddEditMedicalShiftViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
-            IDialogService dialogService,
-            ISmkVersionStrategy smkStrategy)
+            IDialogService dialogService)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
             this.dialogService = dialogService;
-            this.smkStrategy = smkStrategy;
 
             this.AvailableInternships = new ObservableCollection<Internship>();
             this.YearOptions = new ObservableCollection<KeyValuePair<string, string>>();
@@ -179,22 +175,11 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         {
             try
             {
-                // Pobierz opcje roku z odpowiedniej strategii
-                var options = this.smkStrategy.GetPickerOptions("AddEditMedicalShift", "Year");
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
 
-                this.YearOptions.Clear();
-                foreach (var option in options)
+                for (int i = 1; i <= specialization.DurationYears; i++)
                 {
-                    this.YearOptions.Add(new KeyValuePair<string, string>(option.Key, option.Value));
-                }
-
-                // Jeśli nie ma opcji roku, dodaj domyślne
-                if (this.YearOptions.Count == 0)
-                {
-                    for (int i = 1; i <= 5; i++)
-                    {
-                        this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
-                    }
+                    this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
                 }
             }
             catch (Exception ex)

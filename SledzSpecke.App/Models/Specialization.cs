@@ -38,5 +38,7 @@ namespace SledzSpecke.App.Models
         public int CompletedCourses { get; set; }
 
         public int TotalCourses { get; set; }
+
+        public int DurationYears { get; set; }
     }
 }

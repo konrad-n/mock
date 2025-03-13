@@ -276,8 +276,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 System.Diagnostics.Debug.WriteLine($"Załadowano opcje płci, SelectedGender: {this.SelectedGender}");
 
                 // Opcje roku
+
                 this.YearOptions.Clear();
-                for (int i = 1; i <= 6; i++)
+
+                var specialization = this.specializationService.GetCurrentSpecializationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+
+
+                for (int i = 1; i <= specialization.DurationYears; i++)
                 {
                     this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
                 }

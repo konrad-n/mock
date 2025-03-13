@@ -9,7 +9,6 @@ using SledzSpecke.App.Services.Notification;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Recognition;
 using SledzSpecke.App.Services.Settings;
-using SledzSpecke.App.Services.SmkStrategy;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
@@ -76,19 +75,6 @@ namespace SledzSpecke.App
 
             // Dodajemy ModuleInitializer jako usługę
             services.AddTransient<ModuleInitializer>();
-
-            services.AddTransient<ISmkVersionStrategy>(provider =>
-            {
-                var authService = provider.GetService<IAuthService>();
-                var user = authService?.GetCurrentUserAsync().GetAwaiter().GetResult();
-
-                if (user != null)
-                {
-                    return SmkStrategyFactory.CreateStrategy(user.SmkVersion);
-                }
-
-                return new NewSmkStrategy();
-            });
         }
 
         private static void RegisterViewModels(IServiceCollection services)
