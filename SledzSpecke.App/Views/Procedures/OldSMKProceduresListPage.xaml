@@ -153,51 +153,99 @@
                                     <StackLayout IsVisible="{Binding IsExpanded}" Margin="0,10,0,0">
                                         <!-- Jeden scrollview dla całej zawartości, poruszający się horyzontalnie -->
                                         <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Always">
-                                            <VerticalStackLayout>
-                                                <!-- Nagłówki kolumn -->
-                                                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,0,0,5">
-                                                    <Label Grid.Column="0" Text="Data" Style="{StaticResource ColumnHeaderStyle}" />
-                                                    <Label Grid.Column="1" Text="Rok" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                    <Label Grid.Column="2" Text="Kod" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                    <Label Grid.Column="3" Text="Osoba" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                    <Label Grid.Column="4" Text="Miejsce" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                    <Label Grid.Column="5" Text="Nazwa stażu" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                    <Label Grid.Column="6" Text="Inicjały/Płeć" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                    <Label Grid.Column="7" Text="Akcje" Style="{StaticResource ColumnHeaderStyle}" Margin="10,0,5,0" />
-                                                </Grid>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <!-- Wiersz nagłówków -->
+                                                    <RowDefinition Height="Auto"/>
+                                                    <!-- Wiersz dla wskaźnika ładowania -->
+                                                    <RowDefinition Height="*"/>
+                                                    <!-- Wiersz z danymi -->
+                                                </Grid.RowDefinitions>
+
+                                                <!-- WAŻNE: Te same definicje kolumn dla całej tabeli -->
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="85"/>
+                                                    <!-- Data -->
+                                                    <ColumnDefinition Width="26"/>
+                                                    <!-- Rok -->
+                                                    <ColumnDefinition Width="87"/>
+                                                    <!-- Kod -->
+                                                    <ColumnDefinition Width="150"/>
+                                                    <!-- Osoba -->
+                                                    <ColumnDefinition Width="150"/>
+                                                    <!-- Miejsce -->
+                                                    <ColumnDefinition Width="180"/>
+                                                    <!-- Nazwa stażu -->
+                                                    <ColumnDefinition Width="120"/>
+                                                    <!-- Inicjały/Płeć -->
+                                                    <ColumnDefinition Width="100"/>
+                                                    <!-- Akcje -->
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Nagłówki kolumn - teraz są elementami głównej siatki -->
+                                                <Label Grid.Row="0" Grid.Column="0" Text="Data" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center" />
+                                                <Label Grid.Row="0" Grid.Column="1" Text="Rok" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center"/>
+                                                <Label Grid.Row="0" Grid.Column="2" Text="Kod" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center"/>
+                                                <Label Grid.Row="0" Grid.Column="4" Text="Miejsce" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center"/>
+                                                <Label Grid.Row="0" Grid.Column="5" Text="Nazwa stażu" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center"/>
+                                                <Label Grid.Row="0" Grid.Column="6" Text="Inicjały/Płeć" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center"/>
+                                                <Label Grid.Row="0" Grid.Column="7" Text="Akcje" Style="{StaticResource ColumnHeaderStyle}" HorizontalTextAlignment="Center" />
 
                                                 <!-- Ładowanie wskaźnik -->
-                                                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" 
+                                                <ActivityIndicator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="8" 
+                                                                   IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                                                                    HorizontalOptions="Center" Margin="0,10" />
 
-                                                <!-- Lista procedur (bez ScrollView, bo już jesteśmy w jednym) -->
-                                                <CollectionView ItemsSource="{Binding Procedures}">
+                                                <!-- Lista procedur -->
+                                                <CollectionView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="8" 
+                                                                ItemsSource="{Binding Procedures}">
                                                     <CollectionView.EmptyView>
                                                         <Label Text="Brak procedur w tej grupie" Margin="0,10" TextColor="{StaticResource TextMutedColor}" />
                                                     </CollectionView.EmptyView>
                                                     <CollectionView.ItemTemplate>
                                                         <DataTemplate x:DataType="models:RealizedProcedureOldSMK">
-                                                            <!-- Usunąłem stąd ScrollView, ponieważ jest już w rodzicu -->
-                                                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,5">
-                                                                <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" />
-                                                                <Label Grid.Column="1" Text="{Binding Year}" Margin="10,0" />
-                                                                <Label Grid.Column="2" Text="{Binding Code}" Margin="10,0" />
-                                                                <Label Grid.Column="3" Text="{Binding PerformingPerson}" Margin="10,0" MaximumWidthRequest="120" LineBreakMode="TailTruncation" />
-                                                                <Label Grid.Column="4" Text="{Binding Location}" Margin="10,0" MaximumWidthRequest="120" LineBreakMode="TailTruncation" />
-                                                                <Label Grid.Column="5" Text="{Binding InternshipName}" Margin="10,0" MaximumWidthRequest="120" LineBreakMode="TailTruncation" />
-                                                                <StackLayout Grid.Column="6" Orientation="Horizontal" Margin="10,0">
+                                                            <!-- Używamy własnej siatki dla każdego elementu, 
+                                                                    która MUSI używać tych samych definicji kolumn co główna siatka -->
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="85"/>
+                                                                    <!-- Data - taka sama szerokość jak w głównej siatce -->
+                                                                    <ColumnDefinition Width="26"/>
+                                                                    <!-- Rok -->
+                                                                    <ColumnDefinition Width="87"/>
+                                                                    <!-- Kod -->
+                                                                    <ColumnDefinition Width="150"/>
+                                                                    <!-- Miejsce -->
+                                                                    <ColumnDefinition Width="180"/>
+                                                                    <!-- Nazwa stażu -->
+                                                                    <ColumnDefinition Width="120"/>
+                                                                    <!-- Inicjały/Płeć -->
+                                                                    <ColumnDefinition Width="100"/>
+                                                                    <!-- Akcje -->
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:yyyy-MM-dd}'}" Margin="5,0" />
+                                                                <Label Grid.Column="1" Text="{Binding Year}" Margin="5,0" />
+                                                                <Label Grid.Column="2" Text="{Binding Code}" Margin="5,0" />
+                                                                <Label Grid.Column="3" Text="{Binding PerformingPerson}" Margin="5,0" LineBreakMode="TailTruncation" />
+                                                                <Label Grid.Column="4" Text="{Binding Location}" Margin="5,0" LineBreakMode="TailTruncation" />
+                                                                <Label Grid.Column="5" Text="{Binding InternshipName}" Margin="5,0" LineBreakMode="TailTruncation" />
+
+                                                                <StackLayout Grid.Column="6" Orientation="Horizontal" Margin="5,0">
                                                                     <Label Text="{Binding PatientInitials}" />
                                                                     <Label Text="/" />
                                                                     <Label Text="{Binding PatientGender}" />
                                                                 </StackLayout>
-                                                                <HorizontalStackLayout Grid.Column="7" Spacing="5" Margin="10,0">
+
+                                                                <HorizontalStackLayout Grid.Column="7" Spacing="5" Margin="5,0">
                                                                     <Button Text="✏️" 
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=EditProcedureCommand}" 
                                                                             CommandParameter="{Binding .}"
                                                                             BackgroundColor="{StaticResource Secondary}"
                                                                             TextColor="White"
                                                                             Style="{StaticResource LightIconButton}" />
-                                                                    <Button Text="🗑️" 
+                                                                                                        <Button Text="🗑️" 
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=DeleteProcedureCommand}" 
                                                                             CommandParameter="{Binding .}"
                                                                             BackgroundColor="{StaticResource DangerColor}"
@@ -208,7 +256,7 @@
                                                         </DataTemplate>
                                                     </CollectionView.ItemTemplate>
                                                 </CollectionView>
-                                            </VerticalStackLayout>
+                                            </Grid>
                                         </ScrollView>
 
                                         <!-- Przycisk dodawania (poza ScrollView) -->
