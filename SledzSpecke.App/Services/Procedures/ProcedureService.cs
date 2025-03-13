@@ -425,24 +425,33 @@ namespace SledzSpecke.App.Services.Procedures
                                 startYear = 1;
                             }
 
-                            // Pobierz staże w module
-                            var internships = await this.databaseService.GetInternshipsAsync(moduleId: moduleId);
-
                             // Konstruuj zapytanie SQL
                             var sql = "SELECT Code, SyncStatus FROM RealizedProcedureOldSMK WHERE SpecializationId = ? AND Year BETWEEN ? AND ?";
                             var parameters = new List<object> { user.SpecializationId, startYear, endYear };
 
-                            // Jeśli podano ID wymagania i mamy staże powiązane z tym wymaganiem
-                            if (requirementId.HasValue && internships.Any())
+                            // POPRAWKA: Jeśli podano ID wymagania, filtruj najpierw po nim
+                            if (requirementId.HasValue)
                             {
-                                sql += " AND (";
-                                for (int i = 0; i < internships.Count; i++)
+                                sql += " AND ProcedureRequirementId = ?";
+                                parameters.Add(requirementId.Value);
+                            }
+                            // W przeciwnym przypadku, filtruj po stażach w module
+                            else
+                            {
+                                // Pobierz staże w module
+                                var internships = await this.databaseService.GetInternshipsAsync(moduleId: moduleId);
+
+                                if (internships.Any())
                                 {
-                                    if (i > 0) sql += " OR ";
-                                    sql += "InternshipId = ?";
-                                    parameters.Add(internships[i].InternshipId);
+                                    sql += " AND (";
+                                    for (int i = 0; i < internships.Count; i++)
+                                    {
+                                        if (i > 0) sql += " OR ";
+                                        sql += "InternshipId = ?";
+                                        parameters.Add(internships[i].InternshipId);
+                                    }
+                                    sql += ")";
                                 }
-                                sql += ")";
                             }
 
                             var procedures = await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, parameters.ToArray());
