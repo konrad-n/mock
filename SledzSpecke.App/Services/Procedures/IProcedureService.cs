@@ -10,7 +10,7 @@ namespace SledzSpecke.App.Services.Procedures
         Task<ProcedureSummary> GetProcedureSummaryAsync(int? moduleId = null, int? procedureRequirementId = null);
 
         // Metody dla starej wersji SMK
-        Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null);
+        Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null, int? requirementId = null);
         Task<RealizedProcedureOldSMK> GetOldSMKProcedureAsync(int procedureId);
         Task<bool> SaveOldSMKProcedureAsync(RealizedProcedureOldSMK procedure);
         Task<bool> DeleteOldSMKProcedureAsync(int procedureId);

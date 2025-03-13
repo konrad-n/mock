@@ -215,7 +215,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                 if (this.CurrentUser != null && string.IsNullOrEmpty(this.Procedure.PerformingPerson))
                 {
-                    this.Procedure.PerformingPerson = this.CurrentUser.Username;
+                    this.Procedure.PerformingPerson = this.CurrentUser.Name;
                     System.Diagnostics.Debug.WriteLine($"Ustawiono PerformingPerson: {this.Procedure.PerformingPerson}");
                 }
 
@@ -505,6 +505,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("BŁĄD: SelectedInternship jest null!");
+                }
+
+                // Ustawienie ProcedureRequirementId, jeśli przekazano
+                if (!string.IsNullOrEmpty(this.requirementId) && int.TryParse(this.requirementId, out int reqId))
+                {
+                    this.Procedure.ProcedureRequirementId = reqId;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono ProcedureRequirementId na {reqId}");
                 }
 
                 System.Diagnostics.Debug.WriteLine("Zapisuję procedurę...");

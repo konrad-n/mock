@@ -373,9 +373,6 @@ namespace SledzSpecke.App.Services.Procedures
         }
 
         #endregion
-
-        #region Statystyki
-
         public async Task<ProcedureSummary> GetProcedureSummaryAsync(int? moduleId = null, int? requirementId = null)
         {
             try
@@ -517,7 +514,7 @@ namespace SledzSpecke.App.Services.Procedures
             }
         }
 
-        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null)
+        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null, int? requirementId = null)
         {
             try
             {
@@ -556,6 +553,13 @@ namespace SledzSpecke.App.Services.Procedures
                     parameters.Add(year.Value);
                 }
 
+                // Jeśli podano requirementId, dodatkowo filtruj po nim
+                if (requirementId.HasValue)
+                {
+                    sql += " AND ProcedureRequirementId = ?";
+                    parameters.Add(requirementId.Value);
+                }
+
                 sql += " ORDER BY Date DESC";
 
                 System.Diagnostics.Debug.WriteLine($"SQL query: {sql}");
@@ -573,6 +577,5 @@ namespace SledzSpecke.App.Services.Procedures
                 return new List<RealizedProcedureOldSMK>();
             }
         }
-        #endregion
     }
 }

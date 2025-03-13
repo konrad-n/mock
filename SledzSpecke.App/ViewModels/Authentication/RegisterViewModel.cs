@@ -18,6 +18,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private readonly ISpecializationService specializationService;
 
         private string username;
+        private string name;
         private string password;
         private string confirmPassword;
         private string email;
@@ -77,6 +78,18 @@ namespace SledzSpecke.App.ViewModels.Authentication
             set
             {
                 if (this.SetProperty(ref this.username, value))
+                {
+                    ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        public string Name
+        {
+            get => this.name;
+            set
+            {
+                if (this.SetProperty(ref this.name, value))
                 {
                     ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
                 }
@@ -246,6 +259,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private bool CanRegister()
         {
             bool isUsernameValid = !string.IsNullOrWhiteSpace(this.Username);
+            bool isNameValid = !string.IsNullOrWhiteSpace(this.Name);
             bool isPasswordValid = !string.IsNullOrWhiteSpace(this.Password);
             bool isConfirmPasswordValid = !string.IsNullOrWhiteSpace(this.ConfirmPassword);
             bool isEmailValid = !string.IsNullOrWhiteSpace(this.Email);
@@ -253,7 +267,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
             bool isSpecializationSelected = this.SelectedSpecialization != null;
             bool isSmkVersionSelected = this.IsOldSmkVersion || this.IsNewSmkVersion;
 
-            return isUsernameValid && isPasswordValid && isConfirmPasswordValid &&
+            return isUsernameValid && isNameValid && isPasswordValid && isConfirmPasswordValid &&
                    isEmailValid && arePasswordsMatching && isSpecializationSelected &&
                    isSmkVersionSelected;
         }
@@ -285,6 +299,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 var user = new User
                 {
                     Username = this.Username,
+                    Name = this.Name,
                     Email = this.Email,
                     RegistrationDate = DateTime.Now,
                     SmkVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old,

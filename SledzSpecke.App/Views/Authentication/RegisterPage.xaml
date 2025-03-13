@@ -17,11 +17,12 @@
             <VerticalStackLayout Grid.Row="1" Spacing="15" VerticalOptions="Center">
                 <!-- Informacje o użytkowniku -->
                 <Label Text="Informacje osobiste" FontSize="18" FontAttributes="Bold"/>
-                <Entry Placeholder="Nazwa użytkownika" Text="{Binding Username}" BackgroundColor="Transparent"/>
-                <Entry Placeholder="Email" Text="{Binding Email}" Keyboard="Email" BackgroundColor="Transparent"/>
-                <Entry Placeholder="Hasło" Text="{Binding Password}" IsPassword="True" BackgroundColor="Transparent"/>
-                <Entry Placeholder="Potwierdź hasło" Text="{Binding ConfirmPassword}" IsPassword="True" BackgroundColor="Transparent"/>
-                <Label Text="Hasła nie pasują do siebie!" IsVisible="{Binding PasswordsNotMatch}" TextColor="Red"/>
+                <Entry Placeholder="Nazwa użytkownika *" Text="{Binding Username}" BackgroundColor="Transparent"/>
+                <Entry Placeholder="Email *" Text="{Binding Email}" Keyboard="Email" BackgroundColor="Transparent"/>
+                <Entry Placeholder="Hasło *" Text="{Binding Password}" IsPassword="True" BackgroundColor="Transparent"/>
+                <Entry Placeholder="Potwierdź hasło *" Text="{Binding ConfirmPassword}" IsPassword="True" BackgroundColor="Transparent"/>
+                <Label Text="Hasła nie pasują do siebie! *" IsVisible="{Binding PasswordsNotMatch}" TextColor="Red"/>
+                <Entry Placeholder="Imię i nazwisko (do wpisywania procedur) *" Text="{Binding Name}" BackgroundColor="Transparent"/>
 
                 <!-- Wybór wersji SMK -->
                 <Label Text="Wybierz wersję SMK" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>

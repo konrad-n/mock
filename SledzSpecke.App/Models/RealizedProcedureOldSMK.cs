@@ -11,7 +11,7 @@ namespace SledzSpecke.App.Models
         public string Code { get; set; } // A - operator lub B - asysta
 
         [MaxLength(100)]
-        public string PerformingPerson { get; set; } // Osoba wykonująca
+        public string PerformingPerson { get; set; } // Osoba wykonująca - wymagana w starym SMK
 
         [MaxLength(100)]
         public string Location { get; set; } // Miejsce wykonania
@@ -31,5 +31,8 @@ namespace SledzSpecke.App.Models
         public string AssistantData { get; set; } // Dane osoby wykonującej I i II asystę
 
         public string ProcedureGroup { get; set; } // Procedura z grupy
+
+        [Indexed]
+        public int? ProcedureRequirementId { get; set; } // Powiązanie z wymaganiem procedury
     }
 }

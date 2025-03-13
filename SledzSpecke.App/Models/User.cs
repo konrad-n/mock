@@ -22,5 +22,8 @@ namespace SledzSpecke.App.Models
         public int SpecializationId { get; set; }
 
         public DateTime RegistrationDate { get; set; }
+
+        [MaxLength(200)]
+        public string Name { get; set; }
     }
 }

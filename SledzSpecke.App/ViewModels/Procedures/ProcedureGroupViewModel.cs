@@ -145,22 +145,17 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     await Task.Run(async () =>
                     {
                         // Pobierz procedury powiązane z tym wymaganiem
-                        // Używamy właściwej sygnatury metody bez parametru filterId
-                        var relatedProcedures = await this.procedureService.GetOldSMKProceduresAsync();
+                        var relatedProcedures = await this.procedureService.GetOldSMKProceduresAsync(
+                            requirementId: this.requirement.Id);
 
-                        // Filtrujemy po kodzie wymagania po stronie klienta
-                        var filteredProcedures = relatedProcedures.Where(p =>
-                            (p.Code == "A - operator" && this.requirement.RequiredCountA > 0) ||
-                            (p.Code == "B - asysta" && this.requirement.RequiredCountB > 0)).ToList();
-
-                        System.Diagnostics.Debug.WriteLine($"Znaleziono {filteredProcedures.Count} procedur dla wymagania {this.requirement.Name}");
+                        System.Diagnostics.Debug.WriteLine($"Znaleziono {relatedProcedures.Count} procedur dla wymagania {this.requirement.Name}");
 
                         // Aktualizuj UI na głównym wątku
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
                             // Zamiast używać nieistniejącej klasy, wykonujemy operacje bezpośrednio
                             this.Procedures.Clear();
-                            foreach (var procedure in filteredProcedures)
+                            foreach (var procedure in relatedProcedures)
                             {
                                 this.Procedures.Add(procedure);
                             }
