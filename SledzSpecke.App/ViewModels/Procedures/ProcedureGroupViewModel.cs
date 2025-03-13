@@ -17,6 +17,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private ProcedureRequirement requirement;
         private ProcedureSummary statistics;
         private ObservableCollection<RealizedProcedureOldSMK> procedures;
+        private RealizedProcedureOldSMK selectedProcedure;
         private bool isExpanded;
         private bool isLoading;
         private bool hasLoadedData;
@@ -40,6 +41,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.EditProcedureCommand = new AsyncRelayCommand<RealizedProcedureOldSMK>(this.OnEditProcedure);
             this.DeleteProcedureCommand = new AsyncRelayCommand<RealizedProcedureOldSMK>(this.OnDeleteProcedure);
             this.AddProcedureCommand = new AsyncRelayCommand(this.OnAddProcedure);
+            this.SelectProcedureCommand = new RelayCommand<RealizedProcedureOldSMK>(this.OnSelectProcedure);
+
+            // Nasłuchuj zmian w kolekcji procedur
+            this.procedures.CollectionChanged += this.Procedures_CollectionChanged;
         }
 
         public ProcedureRequirement Requirement => this.requirement;
@@ -58,6 +63,18 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.procedures, value);
         }
 
+        public RealizedProcedureOldSMK SelectedProcedure
+        {
+            get => this.selectedProcedure;
+            set
+            {
+                if (this.SetProperty(ref this.selectedProcedure, value))
+                {
+                    this.OnPropertyChanged(nameof(this.SelectedProcedure));
+                }
+            }
+        }
+
         public bool IsExpanded
         {
             get => this.isExpanded;
@@ -74,6 +91,38 @@ namespace SledzSpecke.App.ViewModels.Procedures
         public ICommand EditProcedureCommand { get; }
         public ICommand DeleteProcedureCommand { get; }
         public ICommand AddProcedureCommand { get; }
+        public ICommand SelectProcedureCommand { get; }
+
+        private void Procedures_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Jeżeli dodano nowe procedury, a mamy już wybraną procedurę, sprawdźmy czy dalej istnieje
+            if (e.Action == NotifyCollectionChangedAction.Add && this.procedures.Count > 0 && this.selectedProcedure == null)
+            {
+                this.SelectedProcedure = this.procedures[0];
+            }
+            // Jeżeli usunięto procedury, a wybrana procedura była jedną z nich, wybierz nową lub wyczyść
+            else if (e.Action == NotifyCollectionChangedAction.Remove && this.selectedProcedure != null)
+            {
+                if (!this.procedures.Contains(this.selectedProcedure))
+                {
+                    this.SelectedProcedure = this.procedures.Count > 0 ? this.procedures[0] : null;
+                }
+            }
+            // Jeżeli zresetowano kolekcję, resetuj też wybór
+            else if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                this.SelectedProcedure = this.procedures.Count > 0 ? this.procedures[0] : null;
+            }
+        }
+
+        private void OnSelectProcedure(RealizedProcedureOldSMK procedure)
+        {
+            if (procedure != null)
+            {
+                this.SelectedProcedure = procedure;
+                System.Diagnostics.Debug.WriteLine($"Wybrano procedurę: {procedure.ProcedureId}");
+            }
+        }
 
         private async Task OnToggleExpandAsync()
         {
@@ -104,6 +153,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                             (p.Code == "A - operator" && this.requirement.RequiredCountA > 0) ||
                             (p.Code == "B - asysta" && this.requirement.RequiredCountB > 0)).ToList();
 
+                        System.Diagnostics.Debug.WriteLine($"Znaleziono {filteredProcedures.Count} procedur dla wymagania {this.requirement.Name}");
+
                         // Aktualizuj UI na głównym wątku
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
@@ -112,6 +163,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
                             foreach (var procedure in filteredProcedures)
                             {
                                 this.Procedures.Add(procedure);
+                            }
+
+                            // Ustaw pierwszą procedurę jako wybraną, jeśli jest dostępna
+                            if (this.Procedures.Count > 0 && this.SelectedProcedure == null)
+                            {
+                                this.SelectedProcedure = this.Procedures[0];
                             }
 
                             this.hasLoadedData = true;
@@ -189,6 +246,23 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                     if (result)
                     {
+                        // Sprawdź, czy usuwana procedura jest aktualnie wybrana
+                        if (this.SelectedProcedure == procedure)
+                        {
+                            // Ustaw nową wybraną procedurę (jeśli dostępna)
+                            int index = this.Procedures.IndexOf(procedure);
+                            if (index >= 0 && this.Procedures.Count > 1)
+                            {
+                                // Wybierz następną lub poprzednią procedurę
+                                int newIndex = Math.Min(index, this.Procedures.Count - 2);
+                                this.SelectedProcedure = this.Procedures[newIndex];
+                            }
+                            else
+                            {
+                                this.SelectedProcedure = null;
+                            }
+                        }
+
                         // Aktualizuj lokalne dane
                         this.Procedures.Remove(procedure);
 
