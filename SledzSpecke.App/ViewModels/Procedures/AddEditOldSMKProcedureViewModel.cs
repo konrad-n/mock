@@ -57,7 +57,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 Code = "A - operator",
                 PatientGender = "K",
                 Year = 1,
-                SyncStatus = SyncStatus.NotSynced
+                SyncStatus = SyncStatus.NotSynced,
+                PerformingPerson = this.authService.GetCurrentUserAsync().ConfigureAwait(false).GetAwaiter().GetResult()?.Name
             };
 
             // Inicjalizacja komend - KLUCZOWA ZMIANA: usuń walidację przy inicjalizacji
@@ -219,8 +220,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     System.Diagnostics.Debug.WriteLine($"Ustawiono PerformingPerson: {this.Procedure.PerformingPerson}");
                 }
 
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+
                 // Załaduj opcje dla dropdownów
-                this.LoadDropdownOptions();
+                this.LoadDropdownOptions(specialization.DurationYears);
 
                 // Załaduj dostępne staże
                 await this.LoadInternshipsAsync();
@@ -257,7 +260,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         }
 
         // Nowa metoda do ładowania opcji dropdownów
-        private void LoadDropdownOptions()
+        private void LoadDropdownOptions(int yearsFromSpecialization)
         {
             try
             {
@@ -279,10 +282,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                 this.YearOptions.Clear();
 
-                var specialization = this.specializationService.GetCurrentSpecializationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-
-
-                for (int i = 1; i <= specialization.DurationYears; i++)
+                for (int i = 1; i <= yearsFromSpecialization; i++)
                 {
                     this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
                 }
