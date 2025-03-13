@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Procedures"
+             xmlns:models="clr-namespace:SledzSpecke.App.Models"
              x:DataType="vm:NewSMKProceduresListViewModel"
              x:Class="SledzSpecke.App.Views.Procedures.NewSMKProceduresListPage"
              Title="{Binding Title}">
@@ -114,142 +115,35 @@
                                HorizontalOptions="Center" TextColor="{StaticResource TextMutedColor}" />
                     </StackLayout>
                 </CollectionView.EmptyView>
+                <!-- Zmiana 2: Dodaj x:DataType do wewnętrznego DataTemplate dla kolekcji Realizations -->
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ProcedureRequirementViewModel">
-                        <Frame Margin="0,5" Padding="15" BorderColor="LightGray" HasShadow="True" CornerRadius="10">
-                            <VerticalStackLayout>
-                                <!-- Nagłówek procedury -->
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <VerticalStackLayout Grid.Column="0">
-                                        <Label Text="{Binding Title}" FontSize="16" FontAttributes="Bold" />
-                                        <Label Text="{Binding InternshipName}" TextColor="{StaticResource TextMutedColor}" FontSize="12" />
-                                    </VerticalStackLayout>
-                                    <Button Grid.Column="1" 
-                                            Command="{Binding ToggleExpandCommand}"
-                                            Text="▼"
-                                            WidthRequest="40"
-                                            HeightRequest="40"
-                                            Padding="0"
-                                            CornerRadius="20"
-                                            BackgroundColor="{StaticResource Primary}" 
-                                            TextColor="White" />
-                                </Grid>
-
-                                <!-- Sekcja rozwijana -->
-                                <VerticalStackLayout IsVisible="{Binding IsExpanded}" Margin="0,10,0,0">
-                                    <!-- Wykonane samodzielnie -->
-                                    <Label Text="Zabiegi/procedury wykonane samodzielnie" FontAttributes="Bold" Margin="0,10,0,5" />
-                                    <Grid ColumnDefinitions="*,*,*" Margin="0,0,0,10">
-                                        <Label Grid.Column="0" Text="Wymagane" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="1" Text="Wprowadzone" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="2" Text="Zatwierdzone" Style="{StaticResource ColumnHeaderStyle}" />
-                                    </Grid>
-                                    <Grid ColumnDefinitions="*,*,*" Margin="0,0,0,10">
-                                        <Label Grid.Column="0" Text="{Binding Statistics.RequiredCountA}" FontAttributes="Bold" />
-                                        <Label Grid.Column="1" Text="{Binding Statistics.CompletedCountA}" FontAttributes="Bold" />
-                                        <Label Grid.Column="2" Text="{Binding Statistics.ApprovedCountA}" FontAttributes="Bold" />
-                                    </Grid>
-
-                                    <!-- Wykonane jako asysta -->
-                                    <Label Text="Zabiegi/procedury wykonane jako pierwsza asysta" FontAttributes="Bold" Margin="0,10,0,5" />
-                                    <Grid ColumnDefinitions="*,*,*" Margin="0,0,0,10">
-                                        <Label Grid.Column="0" Text="Wymagane" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="1" Text="Wprowadzone" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="2" Text="Zatwierdzone" Style="{StaticResource ColumnHeaderStyle}" />
-                                    </Grid>
-                                    <Grid ColumnDefinitions="*,*,*" Margin="0,0,0,10">
-                                        <Label Grid.Column="0" Text="{Binding Statistics.RequiredCountB}" FontAttributes="Bold" />
-                                        <Label Grid.Column="1" Text="{Binding Statistics.CompletedCountB}" FontAttributes="Bold" />
-                                        <Label Grid.Column="2" Text="{Binding Statistics.ApprovedCountB}" FontAttributes="Bold" />
-                                    </Grid>
-
-                                    <!-- Lista realizacji -->
-                                    <Grid ColumnDefinitions="*,*,*,*,*" IsVisible="{Binding Realizations.Count, Converter={StaticResource NotNullConverter}}" Margin="0,10,0,5">
-                                        <Label Grid.Column="0" Text="Lista realizacji" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="4" Text="{Binding RealizationsCountInfo}" HorizontalOptions="End" Style="{StaticResource ColumnHeaderStyle}" />
-                                    </Grid>
-                                    <Grid ColumnDefinitions="*,*,*,*,*" IsVisible="{Binding Realizations.Count, Converter={StaticResource NotNullConverter}}" Margin="0,0,0,5">
-                                        <Label Grid.Column="0" Text="Wykonane samodzielnie" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="1" Text="Wykonane jako asysta" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="2" Text="Daty realizacji" Style="{StaticResource ColumnHeaderStyle}" />
-                                        <Label Grid.Column="3" Text="Status" Style="{StaticResource ColumnHeaderStyle}" />
-                                    </Grid>
-
-                                    <!-- Ładowanie wskaźnik -->
-                                    <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" 
-                                                     HorizontalOptions="Center" Margin="0,10" />
-
-                                    <!-- Lista realizacji procedur -->
-                                    <CollectionView 
-                                        ItemsSource="{Binding Realizations}" 
-                                        IsVisible="{Binding Realizations.Count, Converter={StaticResource NotNullConverter}}">
-                                        <CollectionView.EmptyView>
-                                            <Label Text="Brak realizacji" Margin="0,10" TextColor="{StaticResource TextMutedColor}" />
-                                        </CollectionView.EmptyView>
-                                        <CollectionView.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid ColumnDefinitions="*,*,*,*,Auto" Margin="0,5">
-                                                    <Label Grid.Column="0" Text="{Binding CountA}" />
-                                                    <Label Grid.Column="1" Text="{Binding CountB}" />
-                                                    <Label Grid.Column="2" Text="{Binding DateRange}" />
-                                                    <Label Grid.Column="3" Text="{Binding SyncStatus, Converter={StaticResource StringMatchConverter}, ConverterParameter='Synced|Zatwierdzone|Wprowadzone'}" />
-                                                    <HorizontalStackLayout Grid.Column="4" Spacing="5">
-                                                        <Button Text="✏️" 
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=EditRealizationCommand}" 
-                                                                CommandParameter="{Binding .}"
-                                                                HeightRequest="30"
-                                                                WidthRequest="30"
-                                                                Padding="0"
-                                                                CornerRadius="15"
-                                                                BackgroundColor="{StaticResource Secondary}"
-                                                                TextColor="White" />
-                                                        <Button Text="🗑️" 
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=DeleteRealizationCommand}" 
-                                                                CommandParameter="{Binding .}"
-                                                                HeightRequest="30"
-                                                                WidthRequest="30"
-                                                                Padding="0"
-                                                                CornerRadius="15"
-                                                                BackgroundColor="{StaticResource DangerColor}"
-                                                                TextColor="White" />
-                                                    </HorizontalStackLayout>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </CollectionView.ItemTemplate>
-                                    </CollectionView>
-
-                                    <!-- Przycisk dodawania -->
-                                    <Button Text="Dodaj realizację" 
-                                            Command="{Binding ToggleAddRealizationCommand}"
-                                            IsVisible="{Binding IsAddingRealization, Converter={StaticResource InvertedBoolConverter}}"
-                                            Style="{StaticResource PrimaryButton}"
-                                            HorizontalOptions="Start"
-                                            Margin="0,10,0,0" />
-
-                                    <!-- Formularz dodawania realizacji -->
-                                    <VerticalStackLayout IsVisible="{Binding IsAddingRealization}" Margin="0,10,0,0">
-                                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,10">
-                                            <Label Grid.Row="0" Grid.Column="0" Text="Wykonane samodzielnie *" Style="{StaticResource ColumnHeaderStyle}" />
-                                            <Label Grid.Row="0" Grid.Column="1" Text="Wykonane jako asysta *" Style="{StaticResource ColumnHeaderStyle}" />
-
-                                            <Entry Grid.Row="1" Grid.Column="0" Text="{Binding CountA}" Keyboard="Numeric" />
-                                            <Entry Grid.Row="1" Grid.Column="1" Text="{Binding CountB}" Keyboard="Numeric" />
-
-                                            <Label Grid.Row="2" Grid.Column="0" Text="Data początkowa *" Style="{StaticResource ColumnHeaderStyle}" Margin="0,10,0,0" />
-                                            <Label Grid.Row="2" Grid.Column="1" Text="Data końcowa *" Style="{StaticResource ColumnHeaderStyle}" Margin="0,10,0,0" />
-
-                                            <DatePicker Grid.Row="3" Grid.Column="0" Date="{Binding StartDate}" Format="dd.MM.yyyy" />
-                                            <DatePicker Grid.Row="3" Grid.Column="1" Date="{Binding EndDate}" Format="dd.MM.yyyy" />
-                                        </Grid>
-
-                                        <Grid ColumnDefinitions="*,*" HorizontalOptions="End">
-                                            <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelRealizationCommand}" />
-                                            <Button Grid.Column="1" Text="Zapisz" Command="{Binding SaveRealizationCommand}" Style="{StaticResource PrimaryButton}" />
-                                        </Grid>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </VerticalStackLayout>
-                        </Frame>
+                    <DataTemplate x:DataType="models:RealizedProcedureNewSMK">
+                        <Grid ColumnDefinitions="*,*,*,*,Auto" Margin="0,5">
+                            <Label Grid.Column="0" Text="{Binding CountA}" />
+                            <Label Grid.Column="1" Text="{Binding CountB}" />
+                            <Label Grid.Column="2" Text="{Binding DateRange}" />
+                            <Label Grid.Column="3" Text="{Binding SyncStatus, Converter={StaticResource StringMatchConverter}, ConverterParameter='Synced|Zatwierdzone|Wprowadzone'}" />
+                            <HorizontalStackLayout Grid.Column="4" Spacing="5">
+                                <Button Text="✏️" 
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=EditRealizationCommand}" 
+                        CommandParameter="{Binding .}"
+                        HeightRequest="30"
+                        WidthRequest="30"
+                        Padding="0"
+                        CornerRadius="15"
+                        BackgroundColor="{StaticResource Secondary}"
+                        TextColor="White" />
+                                <Button Text="🗑️" 
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=DeleteRealizationCommand}" 
+                        CommandParameter="{Binding .}"
+                        HeightRequest="30"
+                        WidthRequest="30"
+                        Padding="0"
+                        CornerRadius="15"
+                        BackgroundColor="{StaticResource DangerColor}"
+                        TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
