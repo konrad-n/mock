@@ -42,7 +42,7 @@ namespace SledzSpecke.App.Models
 
         // Domyślna długość całej specjalizacji
         [Ignore]
-        public TotalDuration Duration
+        public TotalDuration TotalDuration
         {
             get
             {

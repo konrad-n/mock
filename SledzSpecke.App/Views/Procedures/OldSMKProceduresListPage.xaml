@@ -250,14 +250,16 @@
                                                                     <Button Text="✏️" 
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=EditProcedureCommand}" 
                                                                             CommandParameter="{Binding .}"
-                                                                            BackgroundColor="{StaticResource Secondary}"
+                                                                            BackgroundColor="LightGoldenrodYellow"
                                                                             TextColor="White"
+                                                                            BorderColor="Orange"
+                                                                            BorderWidth="1"
                                                                             Style="{StaticResource LightIconButton}" />
-                                                                                                        <Button Text="🗑️" 
+                                                                    <Button Text="❌" 
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=DeleteProcedureCommand}" 
                                                                             CommandParameter="{Binding .}"
-                                                                            BackgroundColor="{StaticResource DangerColor}"
-                                                                            TextColor="White"
+                                                                            BackgroundColor="LightPink"
+                                                                            TextColor="LightPink"
                                                                             Style="{StaticResource LightIconButton}" />
                                                                 </HorizontalStackLayout>
                                                             </Grid>
