@@ -29,10 +29,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private ObservableCollection<KeyValuePair<string, string>> genderOptions;
         private ObservableCollection<Internship> availableInternships;
         private Internship selectedInternship;
-        private string selectedCode;
-        private string selectedYear;
-        private string selectedGender;
+        private KeyValuePair<string, string> selectedCode;
+        private KeyValuePair<string, string> selectedYear;
+        private KeyValuePair<string, string> selectedGender;
         private User currentUser;
+        private bool isInitialized;
 
         public AddEditOldSMKProcedureViewModel(
             IProcedureService procedureService,
@@ -58,14 +59,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 PatientGender = "K",
                 Year = 1,
                 SyncStatus = SyncStatus.NotSynced,
-                PerformingPerson = this.authService.GetCurrentUserAsync().ConfigureAwait(false).GetAwaiter().GetResult()?.Name
+                PerformingPerson = string.Empty // Będzie ustawione w InitializeAsync
             };
 
-            // Inicjalizacja komend - KLUCZOWA ZMIANA: usuń walidację przy inicjalizacji
+            // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync);
             this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
 
-            System.Diagnostics.Debug.WriteLine("AddEditOldSMKProcedureViewModel: Konstruktor zakończony, SaveCommand utworzone");
+            this.isInitialized = false;
+            System.Diagnostics.Debug.WriteLine("AddEditOldSMKProcedureViewModel: Konstruktor zakończony");
         }
 
         // Właściwości QueryProperty
@@ -74,15 +76,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set
             {
                 this.procedureId = value;
-                if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int id) && id > 0)
-                {
-                    this.LoadProcedureAsync(id).ConfigureAwait(false);
-                }
-                else
-                {
-                    this.IsEdit = false;
-                    this.Title = "Dodaj procedurę";
-                }
+                System.Diagnostics.Debug.WriteLine($"ProcedureId ustawione na: {value}");
+                // Nie wywołujemy tu LoadProcedureAsync - zrobimy to w InitializeAsync
             }
         }
 
@@ -141,45 +136,58 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     this.Procedure.InternshipId = value.InternshipId;
                     this.Procedure.InternshipName = value.InternshipName;
+                    System.Diagnostics.Debug.WriteLine($"SelectedInternship zmieniony na: {value.InternshipName}");
                     ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
                 }
             }
         }
 
-        public string SelectedCode
+        public KeyValuePair<string, string> SelectedCode
         {
             get => this.selectedCode;
             set
             {
-                if (this.SetProperty(ref this.selectedCode, value) && !string.IsNullOrEmpty(value))
+                if (this.SetProperty(ref this.selectedCode, value))
                 {
-                    this.Procedure.Code = value;
+                    if (!string.IsNullOrEmpty(value.Key))
+                    {
+                        this.Procedure.Code = value.Key;
+                        System.Diagnostics.Debug.WriteLine($"SelectedCode zmieniony na: {value.Key}");
+                    }
                     ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
                 }
             }
         }
 
-        public string SelectedYear
+        public KeyValuePair<string, string> SelectedYear
         {
             get => this.selectedYear;
             set
             {
-                if (this.SetProperty(ref this.selectedYear, value) && !string.IsNullOrEmpty(value))
+                if (this.SetProperty(ref this.selectedYear, value))
                 {
-                    this.Procedure.Year = int.Parse(value);
+                    if (!string.IsNullOrEmpty(value.Key) && int.TryParse(value.Key, out int year))
+                    {
+                        this.Procedure.Year = year;
+                        System.Diagnostics.Debug.WriteLine($"SelectedYear zmieniony na: {value.Key}");
+                    }
                     ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
                 }
             }
         }
 
-        public string SelectedGender
+        public KeyValuePair<string, string> SelectedGender
         {
             get => this.selectedGender;
             set
             {
-                if (this.SetProperty(ref this.selectedGender, value) && !string.IsNullOrEmpty(value))
+                if (this.SetProperty(ref this.selectedGender, value))
                 {
-                    this.Procedure.PatientGender = value;
+                    if (!string.IsNullOrEmpty(value.Key))
+                    {
+                        this.Procedure.PatientGender = value.Key;
+                        System.Diagnostics.Debug.WriteLine($"SelectedGender zmieniony na: {value.Key}");
+                    }
                     ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
                 }
             }
@@ -198,7 +206,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         // Metody
         public async Task InitializeAsync()
         {
-            if (this.IsBusy)
+            if (this.IsBusy || this.isInitialized)
             {
                 return;
             }
@@ -222,11 +230,29 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
 
+                // Sprawdzamy czy to edycja czy dodawanie
+                int procId = 0;
+                bool isEditMode = !string.IsNullOrEmpty(this.procedureId) && int.TryParse(this.procedureId, out procId) && procId > 0;
+
+                // Jeśli to edycja, ładujemy procedurę przed inicjalizacją dropdown'ów
+                if (isEditMode)
+                {
+                    await this.LoadProcedureAsync(procId);
+                }
+                else
+                {
+                    this.IsEdit = false;
+                    this.Title = "Dodaj procedurę";
+                }
+
                 // Załaduj opcje dla dropdownów
-                this.LoadDropdownOptions(specialization.DurationYears);
+                this.LoadDropdownOptions(specialization?.DurationYears ?? 6);
 
                 // Załaduj dostępne staże
                 await this.LoadInternshipsAsync();
+
+                // Ustaw wybrane wartości w pickerach na podstawie aktualnych wartości w procedurze
+                this.SynchronizePickersWithProcedure();
 
                 // Jeśli to nowa procedura i podano ID wymagania, załaduj dane wymagania
                 if (!this.IsEdit && !string.IsNullOrEmpty(this.requirementId) && int.TryParse(this.requirementId, out int reqId))
@@ -243,6 +269,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 // Na koniec powiadom o możliwości zapisania
                 ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
                 System.Diagnostics.Debug.WriteLine("Zakończono inicjalizację AddEditOldSMKProcedureViewModel");
+
+                this.isInitialized = true;
             }
             catch (Exception ex)
             {
@@ -259,6 +287,71 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
+        // Metoda synchronizująca pickery z modelem procedury
+        private void SynchronizePickersWithProcedure()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("SynchronizePickersWithProcedure: Synchronizacja pickerów z procedurą");
+
+                // Synchronizacja kodu
+                var codeItem = this.CodeOptions.FirstOrDefault(c => c.Key == this.Procedure.Code);
+                if (codeItem.Key != null)
+                {
+                    this.SelectedCode = codeItem;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono SelectedCode: {codeItem.Key}");
+                }
+                else if (this.CodeOptions.Count > 0)
+                {
+                    this.SelectedCode = this.CodeOptions.First();
+                    System.Diagnostics.Debug.WriteLine($"Nie znaleziono kodu procedury, ustawiono domyślny: {this.CodeOptions.First().Key}");
+                }
+
+                // Synchronizacja roku
+                var yearItem = this.YearOptions.FirstOrDefault(y => y.Key == this.Procedure.Year.ToString());
+                if (yearItem.Key != null)
+                {
+                    this.SelectedYear = yearItem;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono SelectedYear: {yearItem.Key}");
+                }
+                else if (this.YearOptions.Count > 0)
+                {
+                    this.SelectedYear = this.YearOptions.First();
+                    System.Diagnostics.Debug.WriteLine($"Nie znaleziono roku procedury, ustawiono domyślny: {this.YearOptions.First().Key}");
+                }
+
+                // Synchronizacja płci
+                var genderItem = this.GenderOptions.FirstOrDefault(g => g.Key == this.Procedure.PatientGender);
+                if (genderItem.Key != null)
+                {
+                    this.SelectedGender = genderItem;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono SelectedGender: {genderItem.Key}");
+                }
+                else if (this.GenderOptions.Count > 0)
+                {
+                    this.SelectedGender = this.GenderOptions.First();
+                    System.Diagnostics.Debug.WriteLine($"Nie znaleziono płci pacjenta, ustawiono domyślną: {this.GenderOptions.First().Key}");
+                }
+
+                // Synchronizacja stażu
+                var internship = this.AvailableInternships.FirstOrDefault(i => i.InternshipId == this.Procedure.InternshipId);
+                if (internship != null)
+                {
+                    this.SelectedInternship = internship;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono SelectedInternship: {internship.InternshipName}");
+                }
+                else if (this.AvailableInternships.Count > 0)
+                {
+                    this.SelectedInternship = this.AvailableInternships.First();
+                    System.Diagnostics.Debug.WriteLine($"Nie znaleziono stażu procedury, ustawiono domyślny: {this.AvailableInternships.First().InternshipName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas synchronizacji pickerów: {ex.Message}");
+            }
+        }
+
         // Nowa metoda do ładowania opcji dropdownów
         private void LoadDropdownOptions(int yearsFromSpecialization)
         {
@@ -268,30 +361,51 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.CodeOptions.Clear();
                 this.CodeOptions.Add(new KeyValuePair<string, string>("A - operator", "A - operator"));
                 this.CodeOptions.Add(new KeyValuePair<string, string>("B - asysta", "B - asysta"));
-                this.SelectedCode = this.Procedure.Code;
-                System.Diagnostics.Debug.WriteLine($"Załadowano opcje kodu, SelectedCode: {this.SelectedCode}");
+                System.Diagnostics.Debug.WriteLine($"Załadowano opcje kodu, liczba opcji: {this.CodeOptions.Count}");
 
                 // Opcje płci
                 this.GenderOptions.Clear();
                 this.GenderOptions.Add(new KeyValuePair<string, string>("K", "K"));
                 this.GenderOptions.Add(new KeyValuePair<string, string>("M", "M"));
-                this.SelectedGender = this.Procedure.PatientGender;
-                System.Diagnostics.Debug.WriteLine($"Załadowano opcje płci, SelectedGender: {this.SelectedGender}");
+                System.Diagnostics.Debug.WriteLine($"Załadowano opcje płci, liczba opcji: {this.GenderOptions.Count}");
 
                 // Opcje roku
-
                 this.YearOptions.Clear();
-
                 for (int i = 1; i <= yearsFromSpecialization; i++)
                 {
                     this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
                 }
-                this.SelectedYear = this.Procedure.Year.ToString();
-                System.Diagnostics.Debug.WriteLine($"Załadowano opcje roku, SelectedYear: {this.SelectedYear}");
+                System.Diagnostics.Debug.WriteLine($"Załadowano opcje roku, liczba opcji: {this.YearOptions.Count}");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania opcji dropdownów: {ex.Message}");
+            }
+        }
+
+        private async Task LoadInternshipsAsync()
+        {
+            try
+            {
+                // Pobierz aktualny moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                System.Diagnostics.Debug.WriteLine($"Pobrano moduł: {currentModule?.Name ?? "null"}");
+
+                // Pobierz staże dla bieżącego modułu
+                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
+                System.Diagnostics.Debug.WriteLine($"Pobrano {internships.Count} staży");
+
+                this.AvailableInternships.Clear();
+                foreach (var internship in internships)
+                {
+                    this.AvailableInternships.Add(internship);
+                    System.Diagnostics.Debug.WriteLine($"Dodano staż: ID={internship.InternshipId}, Name={internship.InternshipName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania staży: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -342,7 +456,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     this.IsEdit = true;
                     this.Title = "Edytuj procedurę";
                     this.Procedure = loadedProcedure;
-                    System.Diagnostics.Debug.WriteLine($"Załadowano procedurę: {loadedProcedure.ProcedureId}");
+                    System.Diagnostics.Debug.WriteLine($"Załadowano procedurę: {loadedProcedure.ProcedureId}, " +
+                        $"Code={loadedProcedure.Code}, Year={loadedProcedure.Year}, " +
+                        $"PatientGender={loadedProcedure.PatientGender}, InternshipId={loadedProcedure.InternshipId}");
                 }
                 else
                 {
@@ -368,60 +484,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        private async Task LoadInternshipsAsync()
-        {
-            try
-            {
-                // Pobierz aktualny moduł
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                System.Diagnostics.Debug.WriteLine($"Pobrano moduł: {currentModule?.Name ?? "null"}");
-
-                // Pobierz staże dla bieżącego modułu
-                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
-                System.Diagnostics.Debug.WriteLine($"Pobrano {internships.Count} staży");
-
-                this.AvailableInternships.Clear();
-                foreach (var internship in internships)
-                {
-                    this.AvailableInternships.Add(internship);
-                    System.Diagnostics.Debug.WriteLine($"Dodano staż: ID={internship.InternshipId}, Name={internship.InternshipName}");
-                }
-
-                // Jeśli edytujemy procedurę, wybierz odpowiedni staż
-                if (this.IsEdit && this.Procedure.InternshipId > 0)
-                {
-                    var selectedInternship = this.AvailableInternships.FirstOrDefault(i => i.InternshipId == this.Procedure.InternshipId);
-                    if (selectedInternship != null)
-                    {
-                        this.SelectedInternship = selectedInternship;
-                        System.Diagnostics.Debug.WriteLine($"Wybrano staż dla edycji: {selectedInternship.InternshipName}");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Nie znaleziono stażu o ID={this.Procedure.InternshipId}");
-                    }
-                }
-                // Jeśli dodajemy procedurę, wybierz pierwszy staż
-                else if (this.AvailableInternships.Count > 0)
-                {
-                    this.SelectedInternship = this.AvailableInternships[0];
-                    System.Diagnostics.Debug.WriteLine($"Wybrano pierwszy staż: {this.SelectedInternship.InternshipName}");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Brak dostępnych staży!");
-                }
-
-                // Powiadom o możliwości zapisania
-                ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania staży: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-            }
-        }
-
         private async Task LoadLastLocationAsync()
         {
             try
@@ -434,13 +496,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 }
 
                 // Pobierz ostatnią procedurę
-                var query = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ? ORDER BY ProcedureId DESC LIMIT 1";
                 var lastProcedures = await this.procedureService.GetOldSMKProceduresAsync();
 
                 if (lastProcedures.Count > 0)
                 {
                     // Ustaw miejsce wykonania z ostatniej procedury
                     this.Procedure.Location = lastProcedures[0].Location;
+                    System.Diagnostics.Debug.WriteLine($"Ustawiono Location z ostatniej procedury: {this.Procedure.Location}");
                 }
             }
             catch (Exception ex)
@@ -449,22 +511,35 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        private bool CanSave()
+        private bool ValidateInputs()
         {
-            // Dodaj debugowanie, które pokazuje które pole jest niepoprawne
+            System.Diagnostics.Debug.WriteLine("ValidateInputs: Rozpoczynam walidację...");
+
+            // Sprawdzamy, czy Procedure jest null
+            if (this.Procedure == null)
+            {
+                System.Diagnostics.Debug.WriteLine("ValidateInputs: Procedure jest null");
+                return false;
+            }
+
+            // Sprawdź wszystkie pola
             bool isProcedureValid = this.Procedure != null;
-            bool isCodeValid = !string.IsNullOrWhiteSpace(this.Procedure?.Code);
-            bool isLocationValid = !string.IsNullOrWhiteSpace(this.Procedure?.Location);
-            bool isPersonValid = !string.IsNullOrWhiteSpace(this.Procedure?.PerformingPerson);
-            bool isInitialsValid = !string.IsNullOrWhiteSpace(this.Procedure?.PatientInitials);
-            bool isGenderValid = !string.IsNullOrWhiteSpace(this.Procedure?.PatientGender);
+            bool isCodeValid = !string.IsNullOrWhiteSpace(this.Procedure.Code);
+            bool isLocationValid = !string.IsNullOrWhiteSpace(this.Procedure.Location);
+            bool isPersonValid = !string.IsNullOrWhiteSpace(this.Procedure.PerformingPerson);
+            bool isInitialsValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientInitials);
+            bool isGenderValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientGender);
             bool isInternshipValid = this.SelectedInternship != null;
 
-            System.Diagnostics.Debug.WriteLine($"CanSave check: Procedure={isProcedureValid}, Code={isCodeValid}, Location={isLocationValid}, " +
-                $"Person={isPersonValid}, Initials={isInitialsValid}, Gender={isGenderValid}, Internship={isInternshipValid}");
+            System.Diagnostics.Debug.WriteLine($"ValidateInputs: Procedure={isProcedureValid}, Code={isCodeValid}, " +
+                $"Location={isLocationValid}, Person={isPersonValid}, Initials={isInitialsValid}, " +
+                $"Gender={isGenderValid}, Internship={isInternshipValid}");
 
-            return isProcedureValid && isCodeValid && isLocationValid &&
+            bool result = isProcedureValid && isCodeValid && isLocationValid &&
                    isPersonValid && isInitialsValid && isGenderValid && isInternshipValid;
+
+            System.Diagnostics.Debug.WriteLine($"ValidateInputs: Wynik={result}");
+            return result;
         }
 
         public async Task OnSaveAsync()
@@ -560,37 +635,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.IsBusy = false;
                 System.Diagnostics.Debug.WriteLine("OnSaveAsync: Zakończono (IsBusy=false)");
             }
-        }
-
-        private bool ValidateInputs()
-        {
-            System.Diagnostics.Debug.WriteLine("ValidateInputs: Rozpoczynam walidację...");
-
-            // Sprawdzamy, czy Procedure jest null
-            if (this.Procedure == null)
-            {
-                System.Diagnostics.Debug.WriteLine("ValidateInputs: Procedure jest null");
-                return false;
-            }
-
-            // Sprawdź wszystkie pola
-            bool isProcedureValid = this.Procedure != null;
-            bool isCodeValid = !string.IsNullOrWhiteSpace(this.Procedure.Code);
-            bool isLocationValid = !string.IsNullOrWhiteSpace(this.Procedure.Location);
-            bool isPersonValid = !string.IsNullOrWhiteSpace(this.Procedure.PerformingPerson);
-            bool isInitialsValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientInitials);
-            bool isGenderValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientGender);
-            bool isInternshipValid = this.SelectedInternship != null;
-
-            System.Diagnostics.Debug.WriteLine($"ValidateInputs: Procedure={isProcedureValid}, Code={isCodeValid}, " +
-                $"Location={isLocationValid}, Person={isPersonValid}, Initials={isInitialsValid}, " +
-                $"Gender={isGenderValid}, Internship={isInternshipValid}");
-
-            bool result = isProcedureValid && isCodeValid && isLocationValid &&
-                   isPersonValid && isInitialsValid && isGenderValid && isInternshipValid;
-
-            System.Diagnostics.Debug.WriteLine($"ValidateInputs: Wynik={result}");
-            return result;
         }
 
         private async Task OnCancelAsync()

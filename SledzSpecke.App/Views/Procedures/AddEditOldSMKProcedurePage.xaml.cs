@@ -29,12 +29,22 @@ namespace SledzSpecke.App.Views.Procedures
             }
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
 
-            // Wywołaj inicjalizację ViewModelu
-            this.viewModel.InitializeAsync().ConfigureAwait(false);
+            try
+            {
+                // Kluczowa zmiana - używamy await bez ConfigureAwait(false)
+                // aby upewnić się, że kontynuacja dzieje się na głównym wątku UI
+                await this.viewModel.InitializeAsync();
+                System.Diagnostics.Debug.WriteLine("OnAppearing: Zainicjalizowano ViewModel pomyślnie");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"OnAppearing: Błąd podczas inicjalizacji ViewModelu: {ex.Message}");
+                await DisplayAlert("Błąd", $"Wystąpił błąd podczas inicjalizacji: {ex.Message}", "OK");
+            }
         }
     }
 }
