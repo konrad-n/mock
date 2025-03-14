@@ -63,44 +63,17 @@ namespace SledzSpecke.App.Views.Procedures
                     try
                     {
                         var navigationParameter = new Dictionary<string, object>
-                        {
-                            { "ProcedureId", procedure.ProcedureId.ToString() }
-                        };
+                {
+                    { "ProcedureId", procedure.ProcedureId.ToString() }
+                };
 
-                        // Podejście 1: Standardowa nawigacja Shell
+                        // Standardowa nawigacja Shell
                         await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
                     }
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Błąd nawigacji: {ex.Message}");
-
-                        // Podejście 2: Alternatywna ścieżka nawigacji
-                        try
-                        {
-                            await Shell.Current.GoToAsync($"//procedures/AddEditOldSMKProcedure?ProcedureId={procedure.ProcedureId}");
-                        }
-                        catch (Exception ex2)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Błąd drugiego podejścia do nawigacji: {ex2.Message}");
-
-                            // Podejście 3: Bezpośrednie tworzenie strony
-                            try
-                            {
-                                var editViewModel = IPlatformApplication.Current.Services.GetService<AddEditOldSMKProcedureViewModel>();
-                                var page = new AddEditOldSMKProcedurePage(editViewModel);
-
-                                // Ustawienie parametrów
-                                editViewModel.ProcedureId = procedure.ProcedureId.ToString();
-
-                                // Nawigacja
-                                await Navigation.PushAsync(page);
-                            }
-                            catch (Exception ex3)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Błąd trzeciego podejścia: {ex3.Message}");
-                                await DisplayAlert("Błąd", "Nie można otworzyć edycji procedury. Spróbuj ponownie później.", "OK");
-                            }
-                        }
+                        await DisplayAlert("Błąd", $"Wystąpił problem podczas edycji procedury: {ex.Message}", "OK");
                     }
                 }
             }

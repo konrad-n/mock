@@ -35,6 +35,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private User currentUser;
         private bool isInitialized;
 
+        // Dodajemy bezpośrednie właściwości na potrzeby wiązania UI
+        private string performingPerson;
+        private string location;
+        private string patientInitials;
+        private string assistantData;
+        private string procedureGroup;
+
         public AddEditOldSMKProcedureViewModel(
             IProcedureService procedureService,
             IAuthService authService,
@@ -62,12 +69,85 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 PerformingPerson = string.Empty // Będzie ustawione w InitializeAsync
             };
 
+            // Inicjalizacja bezpośrednich właściwości
+            this.PerformingPerson = string.Empty;
+            this.Location = string.Empty;
+            this.PatientInitials = string.Empty;
+            this.AssistantData = string.Empty;
+            this.ProcedureGroup = string.Empty;
+
             // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync);
             this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
 
             this.isInitialized = false;
             System.Diagnostics.Debug.WriteLine("AddEditOldSMKProcedureViewModel: Konstruktor zakończony");
+        }
+
+        // Nowe bezpośrednie właściwości dla formularza
+        public string PerformingPerson
+        {
+            get => this.performingPerson;
+            set
+            {
+                if (this.SetProperty(ref this.performingPerson, value))
+                {
+                    this.Procedure.PerformingPerson = value;
+                    System.Diagnostics.Debug.WriteLine($"PerformingPerson zmieniony na: {value}");
+                }
+            }
+        }
+
+        public string Location
+        {
+            get => this.location;
+            set
+            {
+                if (this.SetProperty(ref this.location, value))
+                {
+                    this.Procedure.Location = value;
+                    System.Diagnostics.Debug.WriteLine($"Location zmieniony na: {value}");
+                }
+            }
+        }
+
+        public string PatientInitials
+        {
+            get => this.patientInitials;
+            set
+            {
+                if (this.SetProperty(ref this.patientInitials, value))
+                {
+                    this.Procedure.PatientInitials = value;
+                    System.Diagnostics.Debug.WriteLine($"PatientInitials zmieniony na: {value}");
+                }
+            }
+        }
+
+        public string AssistantData
+        {
+            get => this.assistantData;
+            set
+            {
+                if (this.SetProperty(ref this.assistantData, value))
+                {
+                    this.Procedure.AssistantData = value;
+                    System.Diagnostics.Debug.WriteLine($"AssistantData zmieniony na: {value}");
+                }
+            }
+        }
+
+        public string ProcedureGroup
+        {
+            get => this.procedureGroup;
+            set
+            {
+                if (this.SetProperty(ref this.procedureGroup, value))
+                {
+                    this.Procedure.ProcedureGroup = value;
+                    System.Diagnostics.Debug.WriteLine($"ProcedureGroup zmieniony na: {value}");
+                }
+            }
         }
 
         // Właściwości QueryProperty
@@ -100,7 +180,32 @@ namespace SledzSpecke.App.ViewModels.Procedures
         public RealizedProcedureOldSMK Procedure
         {
             get => this.procedure;
-            set => this.SetProperty(ref this.procedure, value);
+            set
+            {
+                if (this.SetProperty(ref this.procedure, value))
+                {
+                    // Synchronizuj nasze bezpośrednie właściwości
+                    this.SyncPropertiesFromProcedure();
+                }
+            }
+        }
+
+        // Nowa metoda do synchronizacji bezpośrednich właściwości z obiektu Procedure
+        private void SyncPropertiesFromProcedure()
+        {
+            if (this.procedure != null)
+            {
+                this.PerformingPerson = this.procedure.PerformingPerson ?? string.Empty;
+                this.Location = this.procedure.Location ?? string.Empty;
+                this.PatientInitials = this.procedure.PatientInitials ?? string.Empty;
+                this.AssistantData = this.procedure.AssistantData ?? string.Empty;
+                this.ProcedureGroup = this.procedure.ProcedureGroup ?? string.Empty;
+
+                System.Diagnostics.Debug.WriteLine($"SyncPropertiesFromProcedure: " +
+                    $"PerformingPerson={this.PerformingPerson}, " +
+                    $"Location={this.Location}, " +
+                    $"PatientInitials={this.PatientInitials}");
+            }
         }
 
         public ObservableCollection<KeyValuePair<string, string>> CodeOptions
@@ -222,12 +327,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.CurrentUser = await this.authService.GetCurrentUserAsync();
                 System.Diagnostics.Debug.WriteLine($"CurrentUser: {this.CurrentUser?.Username ?? "null"}");
 
-                if (this.CurrentUser != null && string.IsNullOrEmpty(this.Procedure.PerformingPerson))
-                {
-                    this.Procedure.PerformingPerson = this.CurrentUser.Name;
-                    System.Diagnostics.Debug.WriteLine($"Ustawiono PerformingPerson: {this.Procedure.PerformingPerson}");
-                }
-
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
 
                 // Sprawdzamy czy to edycja czy dodawanie
@@ -243,6 +342,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     this.IsEdit = false;
                     this.Title = "Dodaj procedurę";
+
+                    if (this.CurrentUser != null && string.IsNullOrEmpty(this.Procedure.PerformingPerson))
+                    {
+                        this.Procedure.PerformingPerson = this.CurrentUser.Name;
+                        this.PerformingPerson = this.CurrentUser.Name;
+                        System.Diagnostics.Debug.WriteLine($"Ustawiono PerformingPerson: {this.Procedure.PerformingPerson}");
+                    }
                 }
 
                 // Załaduj opcje dla dropdownów
@@ -265,6 +371,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     await this.LoadLastLocationAsync();
                 }
+
+                // Upewnij się, że bezpośrednie właściwości są zsynchronizowane
+                this.SyncPropertiesFromProcedure();
 
                 // Na koniec powiadom o możliwości zapisania
                 ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
@@ -352,7 +461,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        // Nowa metoda do ładowania opcji dropdownów
+        // Metoda do ładowania opcji dropdownów
         private void LoadDropdownOptions(int yearsFromSpecialization)
         {
             try
@@ -409,7 +518,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        // Nowa metoda do ładowania danych wymagania
+        // Metoda do ładowania danych wymagania
         private async Task LoadRequirementDataAsync(int reqId)
         {
             try
@@ -456,6 +565,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     this.IsEdit = true;
                     this.Title = "Edytuj procedurę";
                     this.Procedure = loadedProcedure;
+
+                    // Zapisz też w bezpośrednich właściwościach
+                    this.SyncPropertiesFromProcedure();
+
                     System.Diagnostics.Debug.WriteLine($"Załadowano procedurę: {loadedProcedure.ProcedureId}, " +
                         $"Code={loadedProcedure.Code}, Year={loadedProcedure.Year}, " +
                         $"PatientGender={loadedProcedure.PatientGender}, InternshipId={loadedProcedure.InternshipId}");
@@ -502,6 +615,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     // Ustaw miejsce wykonania z ostatniej procedury
                     this.Procedure.Location = lastProcedures[0].Location;
+                    this.Location = lastProcedures[0].Location;
                     System.Diagnostics.Debug.WriteLine($"Ustawiono Location z ostatniej procedury: {this.Procedure.Location}");
                 }
             }
@@ -525,9 +639,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
             // Sprawdź wszystkie pola
             bool isProcedureValid = this.Procedure != null;
             bool isCodeValid = !string.IsNullOrWhiteSpace(this.Procedure.Code);
-            bool isLocationValid = !string.IsNullOrWhiteSpace(this.Procedure.Location);
-            bool isPersonValid = !string.IsNullOrWhiteSpace(this.Procedure.PerformingPerson);
-            bool isInitialsValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientInitials);
+            bool isLocationValid = !string.IsNullOrWhiteSpace(this.Location); // Zmiana na bezpośrednią właściwość
+            bool isPersonValid = !string.IsNullOrWhiteSpace(this.PerformingPerson); // Zmiana na bezpośrednią właściwość
+            bool isInitialsValid = !string.IsNullOrWhiteSpace(this.PatientInitials); // Zmiana na bezpośrednią właściwość
             bool isGenderValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientGender);
             bool isInternshipValid = this.SelectedInternship != null;
 
@@ -568,6 +682,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             try
             {
+                // Upewnij się, że wszystkie wartości z bezpośrednich właściwości są skopiowane do procedury
+                this.Procedure.PerformingPerson = this.PerformingPerson;
+                this.Procedure.Location = this.Location;
+                this.Procedure.PatientInitials = this.PatientInitials;
+                this.Procedure.AssistantData = this.AssistantData;
+                this.Procedure.ProcedureGroup = this.ProcedureGroup;
+
                 // Upewnij się, że specjalizacja jest ustawiona
                 if (this.Procedure.SpecializationId <= 0 && this.CurrentUser != null)
                 {

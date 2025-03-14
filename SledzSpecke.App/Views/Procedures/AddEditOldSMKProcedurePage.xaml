@@ -26,11 +26,11 @@
 
             <!-- Osoba wykonująca -->
             <Label Text="Osoba wykonująca *" FontAttributes="Bold" />
-            <Entry Text="{Binding Procedure.PerformingPerson}" Placeholder="Podaj imię i nazwisko osoby wykonującej" />
+            <Entry Text="{Binding PerformingPerson}" Placeholder="Podaj imię i nazwisko osoby wykonującej" />
 
             <!-- Miejsce wykonania -->
             <Label Text="Miejsce wykonania *" FontAttributes="Bold" />
-            <Entry Text="{Binding Procedure.Location}" Placeholder="Np. Oddział Kardiologii" />
+            <Entry Text="{Binding Location}" Placeholder="Np. Oddział Kardiologii" />
 
             <!-- Nazwa stażu -->
             <Label Text="Staż *" FontAttributes="Bold" />
@@ -40,7 +40,7 @@
 
             <!-- Inicjały pacjenta -->
             <Label Text="Inicjały pacjenta *" FontAttributes="Bold" />
-            <Entry Text="{Binding Procedure.PatientInitials}" Placeholder="Np. AB" MaxLength="10" />
+            <Entry Text="{Binding PatientInitials}" Placeholder="Np. AB" MaxLength="10" />
 
             <!-- Płeć pacjenta -->
             <Label Text="Płeć pacjenta *" FontAttributes="Bold" />
@@ -50,11 +50,11 @@
 
             <!-- Dane asysty -->
             <Label Text="Dane osoby wykonującej I i II asystę (opcjonalne)" FontAttributes="Bold" />
-            <Entry Text="{Binding Procedure.AssistantData}" Placeholder="Opcjonalne" />
+            <Entry Text="{Binding AssistantData}" Placeholder="Opcjonalne" />
 
             <!-- Procedura z grupy -->
             <Label Text="Procedura z grupy (opcjonalne)" FontAttributes="Bold" />
-            <Entry Text="{Binding Procedure.ProcedureGroup}" Placeholder="Opcjonalne" />
+            <Entry Text="{Binding ProcedureGroup}" Placeholder="Opcjonalne" />
 
             <!-- Przyciski -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,15,0,0">
