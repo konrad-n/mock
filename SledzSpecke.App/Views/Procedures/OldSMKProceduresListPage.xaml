@@ -166,10 +166,10 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="85"/>
                                                     <!-- Data -->
-                                                    
+
                                                     <ColumnDefinition Width="26"/>
                                                     <!-- Rok -->
-                                                    
+
                                                     <ColumnDefinition Width="87"/>
                                                     <!-- Kod -->
 
@@ -178,7 +178,7 @@
 
                                                     <ColumnDefinition Width="140"/>
                                                     <!-- Nazwa stażu -->
-                                                    
+
                                                     <ColumnDefinition Width="70"/>
                                                     <!-- Inicjały/Płeć -->
 
@@ -217,7 +217,7 @@
 
                                                                     <ColumnDefinition Width="26"/>
                                                                     <!-- Rok -->
-                                                                    
+
                                                                     <ColumnDefinition Width="87"/>
                                                                     <!-- Kod -->
 
@@ -247,17 +247,16 @@
                                                                 </StackLayout>
 
                                                                 <HorizontalStackLayout Grid.Column="6" Spacing="0" Margin="0,0">
+                                                                    <!-- GŁÓWNA ZMIANA: Zastąpienie komend zdarzeniami Clicked -->
                                                                     <Button Text="✏️" 
-                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=EditProcedureCommand}" 
-                                                                            CommandParameter="{Binding .}"
+                                                                            Clicked="OnEditButtonClicked"
                                                                             BackgroundColor="LightGoldenrodYellow"
                                                                             TextColor="White"
                                                                             BorderColor="Orange"
                                                                             BorderWidth="1"
                                                                             Style="{StaticResource LightIconButton}" />
                                                                     <Button Text="❌" 
-                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureGroupViewModel}}, Path=DeleteProcedureCommand}" 
-                                                                            CommandParameter="{Binding .}"
+                                                                            Clicked="OnDeleteButtonClicked"
                                                                             BackgroundColor="LightPink"
                                                                             TextColor="LightPink"
                                                                             Style="{StaticResource LightIconButton}" />

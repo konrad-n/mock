@@ -109,8 +109,12 @@ namespace SledzSpecke.App
             services.AddTransient<NewSMKMedicalShiftsPage>();
             services.AddTransient<AddEditOldSMKMedicalShiftPage>();
 
+            // Aktualizacja rejestracji OldSMKProceduresListPage, aby przekazać serwis procedur
+            services.AddTransient(sp => new OldSMKProceduresListPage(
+                sp.GetRequiredService<OldSMKProceduresListViewModel>(),
+                sp.GetRequiredService<IProcedureService>()));
+
             services.AddTransient<AddEditOldSMKProcedurePage>();
-            services.AddTransient<OldSMKProceduresListPage>();
             services.AddTransient<NewSMKProceduresListPage>();
             services.AddTransient<ProcedureSelectorPage>();
 

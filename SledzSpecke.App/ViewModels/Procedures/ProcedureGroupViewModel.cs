@@ -220,7 +220,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        private async Task OnDeleteProcedure(RealizedProcedureOldSMK procedure)
+        // Zmiana metody na publiczną, aby była dostępna z OldSMKProceduresListPage
+        public async Task OnDeleteProcedure(RealizedProcedureOldSMK procedure)
         {
             if (procedure == null)
             {
