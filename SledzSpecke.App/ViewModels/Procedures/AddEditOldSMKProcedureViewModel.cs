@@ -204,7 +204,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 System.Diagnostics.Debug.WriteLine($"SyncPropertiesFromProcedure: " +
                     $"PerformingPerson={this.PerformingPerson}, " +
                     $"Location={this.Location}, " +
-                    $"PatientInitials={this.PatientInitials}");
+                    $"PatientInitials={this.PatientInitials}, " +
+                    $"AssistantData={this.AssistantData}, " +
+                    $"ProcedureGroup={this.ProcedureGroup}");
             }
         }
 
@@ -564,14 +566,23 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     this.IsEdit = true;
                     this.Title = "Edytuj procedurę";
+
+                    // Zapisz referencję do obiektu procedury
                     this.Procedure = loadedProcedure;
 
-                    // Zapisz też w bezpośrednich właściwościach
-                    this.SyncPropertiesFromProcedure();
+                    // Jawne przypisanie każdej właściwości, aby upewnić się, że dane są prawidłowo przesyłane
+                    this.PerformingPerson = loadedProcedure.PerformingPerson ?? string.Empty;
+                    this.Location = loadedProcedure.Location ?? string.Empty;
+                    this.PatientInitials = loadedProcedure.PatientInitials ?? string.Empty;
+                    this.AssistantData = loadedProcedure.AssistantData ?? string.Empty;
+                    this.ProcedureGroup = loadedProcedure.ProcedureGroup ?? string.Empty;
 
                     System.Diagnostics.Debug.WriteLine($"Załadowano procedurę: {loadedProcedure.ProcedureId}, " +
                         $"Code={loadedProcedure.Code}, Year={loadedProcedure.Year}, " +
-                        $"PatientGender={loadedProcedure.PatientGender}, InternshipId={loadedProcedure.InternshipId}");
+                        $"PerformingPerson={this.PerformingPerson}, Location={this.Location}, " +
+                        $"PatientInitials={this.PatientInitials}, PatientGender={loadedProcedure.PatientGender}, " +
+                        $"AssistantData={this.AssistantData}, ProcedureGroup={this.ProcedureGroup}, " +
+                        $"InternshipId={loadedProcedure.InternshipId}");
                 }
                 else
                 {
