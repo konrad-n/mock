@@ -59,28 +59,31 @@ namespace SledzSpecke.App.Views.Procedures
                 {
                     System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Edycja procedury ID={procedure.ProcedureId}");
 
-                    // Użyj bezpośredniej nawigacji zamiast komendy w ViewModel
-                    try
+                    // Przekaż wszystkie potrzebne pola procedury jako parametry nawigacji
+                    var navigationParameter = new Dictionary<string, object>
                     {
-                        var navigationParameter = new Dictionary<string, object>
-                {
-                    { "ProcedureId", procedure.ProcedureId.ToString() }
-                };
+                        { "ProcedureId", procedure.ProcedureId.ToString() },
+                        { "IsEdit", "true" },
+                        { "Date", procedure.Date.ToString("o") },
+                        { "Year", procedure.Year.ToString() },
+                        { "Code", procedure.Code ?? string.Empty },
+                        { "PerformingPerson", procedure.PerformingPerson ?? string.Empty },
+                        { "Location", procedure.Location ?? string.Empty },
+                        { "PatientInitials", procedure.PatientInitials ?? string.Empty },
+                        { "PatientGender", procedure.PatientGender ?? string.Empty },
+                        { "AssistantData", procedure.AssistantData ?? string.Empty },
+                        { "ProcedureGroup", procedure.ProcedureGroup ?? string.Empty },
+                        { "InternshipId", procedure.InternshipId.ToString() },
+                        { "InternshipName", procedure.InternshipName ?? string.Empty }
+                    };
 
-                        // Standardowa nawigacja Shell
-                        await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Błąd nawigacji: {ex.Message}");
-                        await DisplayAlert("Błąd", $"Wystąpił problem podczas edycji procedury: {ex.Message}", "OK");
-                    }
+                    await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Ogólny błąd: {ex.Message}");
-                await DisplayAlert("Błąd", $"Wystąpił problem podczas edycji procedury: {ex.Message}", "OK");
+                await this.DisplayAlert("Błąd", $"Wystąpił problem podczas edycji procedury: {ex.Message}", "OK");
             }
         }
 
