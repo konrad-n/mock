@@ -5,6 +5,7 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -15,6 +16,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private readonly ISpecializationService specializationService;
         private readonly IDatabaseService databaseService;
         private readonly IDialogService dialogService;
+        private readonly IProcedureService procedureService;
 
         // Current module selection
         private int currentModuleId;
@@ -49,11 +51,13 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         public DashboardViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IProcedureService procedureService)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
             this.dialogService = dialogService;
+            this.procedureService = procedureService;
 
             // Initialize collections
             this.AvailableModules = new ObservableCollection<ModuleInfo>();
@@ -408,18 +412,14 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     : 0;
                 System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Staże: {this.InternshipCount}, Postęp: {this.InternshipProgress}");
 
-                // Procedury - przekaż ID modułu
-                int completedProceduresA = await this.specializationService.GetProcedureCountAsync(moduleId);
-                int totalProceduresA = 0;
+                // Procedury - zaktualizowana logika
+                var procedureStats = await this.procedureService.GetProcedureStatisticsForModuleAsync(this.CurrentModuleId);
+                int completedProcedures = procedureStats.completed;
+                int totalProcedures = procedureStats.total;
 
-                if (this.CurrentModule != null)
-                {
-                    totalProceduresA = this.CurrentModule.TotalProceduresA;
-                }
-
-                this.ProcedureCount = $"{completedProceduresA}/{totalProceduresA}";
-                this.ProcedureProgress = totalProceduresA > 0
-                    ? (double)completedProceduresA / totalProceduresA
+                this.ProcedureCount = $"{completedProcedures}/{totalProcedures}";
+                this.ProcedureProgress = totalProcedures > 0
+                    ? (double)completedProcedures / totalProcedures
                     : 0;
                 System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Procedury: {this.ProcedureCount}, Postęp: {this.ProcedureProgress}");
 
@@ -461,11 +461,29 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
                 this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
                 System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Samokształcenie: {this.SelfEducationCount}, Publikacje: {this.PublicationCount}");
+
+                // Oblicz i aktualizuj ogólny postęp tylko dla aktywnego modułu
+                if (this.CurrentModule != null)
+                {
+                    double internshipWeight = 0.35;
+                    double courseWeight = 0.25;
+                    double procedureWeight = 0.30;
+                    double otherWeight = 0.10;
+
+                    this.OverallProgress =
+                        (this.InternshipProgress * internshipWeight) +
+                        (this.CourseProgress * courseWeight) +
+                        (this.ProcedureProgress * procedureWeight) +
+                        (this.ShiftProgress * otherWeight);
+
+                    this.OverallProgress = Math.Min(1.0, this.OverallProgress);
+                    System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Zaktualizowano ogólny postęp: {this.OverallProgress}");
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania statystyk: {ex.Message}");
-                // Nie wyświetlamy błędu użytkownikowi - statystyki są elementem pomocniczym
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
             }
         }
 

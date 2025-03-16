@@ -8,6 +8,7 @@ namespace SledzSpecke.App.Services.Procedures
         // Metody ogólne
         Task<List<ProcedureRequirement>> GetAvailableProcedureRequirementsAsync(int? moduleId = null);
         Task<ProcedureSummary> GetProcedureSummaryAsync(int? moduleId = null, int? procedureRequirementId = null);
+        Task<(int completed, int total)> GetProcedureStatisticsForModuleAsync(int moduleId);
 
         // Metody dla starej wersji SMK
         Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null, int? year = null, int? requirementId = null);

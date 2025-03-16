@@ -80,7 +80,7 @@ namespace SledzSpecke.App.Services.Procedures
 
         #region Stary SMK
 
-        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? internshipId = null)
+        public async Task<List<RealizedProcedureOldSMK>> GetOldSMKProceduresAsync(int? moduleId = null)
         {
             try
             {
@@ -90,18 +90,24 @@ namespace SledzSpecke.App.Services.Procedures
                     return new List<RealizedProcedureOldSMK>();
                 }
 
-                var sql = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ?";
-                var parameters = new List<object> { user.SpecializationId };
-
-                if (internshipId.HasValue)
+                // Pobierz moduł, aby określić zakres lat
+                if (moduleId.HasValue)
                 {
-                    sql += " AND InternshipId = ?";
-                    parameters.Add(internshipId.Value);
+                    var module = await this.databaseService.GetModuleAsync(moduleId.Value);
+                    if (module != null)
+                    {
+                        int startYear = module.Type == ModuleType.Basic ? 1 : 3;
+                        int endYear = module.Type == ModuleType.Basic ? 2 : 6;
+
+                        // Konstruuj zapytanie SQL z filtrowaniem po latach
+                        var sql = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ? AND Year BETWEEN ? AND ?";
+                        return await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, user.SpecializationId, startYear, endYear);
+                    }
                 }
 
-                sql += " ORDER BY Date DESC";
-
-                return await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(sql, parameters.ToArray());
+                // Jeśli nie podano modułu, zwróć wszystkie procedury
+                var defaultSql = "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ?";
+                return await this.databaseService.QueryAsync<RealizedProcedureOldSMK>(defaultSql, user.SpecializationId);
             }
             catch (Exception ex)
             {
@@ -584,6 +590,47 @@ namespace SledzSpecke.App.Services.Procedures
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania procedur starego SMK: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<RealizedProcedureOldSMK>();
+            }
+        }
+
+        public async Task<(int completed, int total)> GetProcedureStatisticsForModuleAsync(int moduleId)
+        {
+            try
+            {
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return (0, 0);
+                }
+
+                var module = await this.databaseService.GetModuleAsync(moduleId);
+                if (module == null)
+                {
+                    return (0, 0);
+                }
+
+                int completedCount = 0;
+                int totalRequired = module.TotalProceduresA + module.TotalProceduresB;
+
+                // Dla starego SMK
+                if (user.SmkVersion == SmkVersion.Old)
+                {
+                    var procedures = await this.GetOldSMKProceduresAsync(moduleId: moduleId);
+                    completedCount = procedures.Count;
+                }
+                // Dla nowego SMK
+                else
+                {
+                    var procedures = await this.GetNewSMKProceduresAsync(moduleId: moduleId);
+                    completedCount = procedures.Sum(p => p.CountA + p.CountB);
+                }
+
+                return (completedCount, totalRequired);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania statystyk procedur: {ex.Message}");
+                return (0, 0);
             }
         }
     }
