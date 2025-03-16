@@ -615,30 +615,20 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        private async Task LoadInternshipsAsync()
+        private bool isInternshipSelectionEnabled;
+
+        public bool IsInternshipSelectionEnabled
         {
-            try
-            {
-                // Pobierz aktualny moduł
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                System.Diagnostics.Debug.WriteLine($"Pobrano moduł: {currentModule?.Name ?? "null"}");
+            get => this.isInternshipSelectionEnabled;
+            set => this.SetProperty(ref this.isInternshipSelectionEnabled, value);
+        }
 
-                // Pobierz staże dla bieżącego modułu
-                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
-                System.Diagnostics.Debug.WriteLine($"Pobrano {internships.Count} staży");
+        private string internshipSelectionHint;
 
-                this.AvailableInternships.Clear();
-                foreach (var internship in internships)
-                {
-                    this.AvailableInternships.Add(internship);
-                    System.Diagnostics.Debug.WriteLine($"Dodano staż: ID={internship.InternshipId}, Name={internship.InternshipName}");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania staży: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-            }
+        public string InternshipSelectionHint
+        {
+            get => this.internshipSelectionHint;
+            set => this.SetProperty(ref this.internshipSelectionHint, value);
         }
 
         // Metoda do ładowania danych wymagania
@@ -652,21 +642,102 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
                 if (requirement != null)
                 {
-                    // Znajdź staż powiązany z wymaganiem
-                    if (requirement.InternshipId.HasValue)
+                    // Dla nowego SMK - bezpośrednie powiązanie przez InternshipId
+                    if (this.CurrentUser.SmkVersion == SmkVersion.New)
                     {
-                        var internship = this.AvailableInternships.FirstOrDefault(i => i.InternshipId == requirement.InternshipId.Value);
-                        if (internship != null)
+                        if (requirement.InternshipId.HasValue)
                         {
-                            this.SelectedInternship = internship;
-                            System.Diagnostics.Debug.WriteLine($"Ustawiono SelectedInternship: {internship.InternshipName}");
+                            var internship = this.AvailableInternships.FirstOrDefault(i =>
+                                i.InternshipId == requirement.InternshipId.Value);
+                            if (internship != null)
+                            {
+                                this.SelectedInternship = internship;
+                                this.IsInternshipSelectionEnabled = false;
+                                System.Diagnostics.Debug.WriteLine($"Nowy SMK: Ustawiono staż: {internship.InternshipName}");
+                            }
                         }
                     }
+                    // Dla starego SMK - powiązanie przez typ stażu
+                    else
+                    {
+                        // Określ typ stażu na podstawie typu procedury
+                        bool isBasicInternship = requirement.Type.Contains("podstawowy", StringComparison.OrdinalIgnoreCase);
+
+                        // Znajdź odpowiedni staż
+                        var matchingInternship = this.AvailableInternships.FirstOrDefault(i =>
+                            (isBasicInternship && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
+                            (!isBasicInternship && i.InternshipName.Contains(requirement.Type, StringComparison.OrdinalIgnoreCase)));
+
+                        if (matchingInternship != null)
+                        {
+                            this.SelectedInternship = matchingInternship;
+                            this.IsInternshipSelectionEnabled = false;
+                            System.Diagnostics.Debug.WriteLine($"Stary SMK: Ustawiono staż: {matchingInternship.InternshipName}");
+                        }
+                        else
+                        {
+                            // Jeśli nie znaleziono dokładnego dopasowania, pokaż tylko staże odpowiedniego typu
+                            var filteredInternships = this.AvailableInternships.Where(i =>
+                                (isBasicInternship && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
+                                (!isBasicInternship && !i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
+
+                            this.AvailableInternships.Clear();
+                            foreach (var internship in filteredInternships)
+                            {
+                                this.AvailableInternships.Add(internship);
+                            }
+
+                            this.IsInternshipSelectionEnabled = true;
+                            System.Diagnostics.Debug.WriteLine($"Stary SMK: Ograniczono listę do {filteredInternships.Count} staży typu {(isBasicInternship ? "podstawowego" : "kierunkowego")}");
+                        }
+                    }
+
+                    // Dodatkowo aktualizujemy wskazówkę dla użytkownika
+                    this.InternshipSelectionHint = this.IsInternshipSelectionEnabled
+                        ? "Wybierz staż z listy"
+                        : "Staż jest przypisany automatycznie do tej procedury";
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych wymagania: {ex.Message}");
+            }
+        }
+
+        // Metoda pomocnicza do filtrowania staży
+        private async Task LoadInternshipsAsync()
+        {
+            try
+            {
+                // Pobierz aktualny moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                System.Diagnostics.Debug.WriteLine($"Pobrano moduł: {currentModule?.Name ?? "null"}");
+
+                // Pobierz staże dla bieżącego modułu
+                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
+                System.Diagnostics.Debug.WriteLine($"Pobrano {internships.Count} staży");
+
+                // Filtruj staże w zależności od wersji SMK i typu modułu
+                if (this.CurrentUser.SmkVersion == SmkVersion.Old)
+                {
+                    bool isBasicModule = currentModule?.Type == ModuleType.Basic;
+                    internships = internships.Where(i =>
+                        (isBasicModule && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
+                        (!isBasicModule && !i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)))
+                        .ToList();
+                }
+
+                this.AvailableInternships.Clear();
+                foreach (var internship in internships)
+                {
+                    this.AvailableInternships.Add(internship);
+                    System.Diagnostics.Debug.WriteLine($"Dodano staż: ID={internship.InternshipId}, Name={internship.InternshipName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania staży: {ex.Message}");
             }
         }
 

@@ -32,11 +32,18 @@
             <Label Text="Miejsce wykonania *" FontAttributes="Bold" />
             <Entry Text="{Binding Location}" Placeholder="Np. Oddział Kardiologii" />
 
-            <!-- Nazwa stażu -->
-            <Label Text="Staż *" FontAttributes="Bold" />
-            <Picker ItemsSource="{Binding AvailableInternships}" 
-                    SelectedItem="{Binding SelectedInternship}" 
-                    ItemDisplayBinding="{Binding InternshipName}" />
+            <!-- Staż -->
+            <StackLayout>
+                <Label Text="Staż *" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding AvailableInternships}" 
+                        SelectedItem="{Binding SelectedInternship}" 
+                        ItemDisplayBinding="{Binding InternshipName}"
+                        IsEnabled="{Binding IsInternshipSelectionEnabled}" />
+                <Label Text="{Binding InternshipSelectionHint}" 
+                       TextColor="{StaticResource TextMutedColor}"
+                       FontSize="12"
+                       IsVisible="{Binding InternshipSelectionHint, Converter={StaticResource NotNullConverter}}" />
+            </StackLayout>
 
             <!-- Inicjały pacjenta -->
             <Label Text="Inicjały pacjenta *" FontAttributes="Bold" />
@@ -60,7 +67,7 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,15,0,0">
                 <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelCommand}" />
                 <Button x:Name="BtnSave" Grid.Column="1" Text="Zapisz" Command="{Binding SaveCommand}" 
-        BackgroundColor="{StaticResource Primary}" TextColor="White" />
+                        BackgroundColor="{StaticResource Primary}" TextColor="White" />
             </Grid>
 
             <!-- Indykator ładowania -->
