@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Procedures"
+             xmlns:models="clr-namespace:SledzSpecke.App.Models"
              x:DataType="vm:NewSMKProceduresListViewModel"
              x:Class="SledzSpecke.App.Views.Procedures.NewSMKProceduresListPage"
              Title="{Binding Title}">
@@ -183,15 +184,15 @@
                                             </Grid>
                                             <CollectionView ItemsSource="{Binding Realizations}">
                                                 <CollectionView.ItemTemplate>
-                                                    <DataTemplate>
+                                                    <DataTemplate x:DataType="models:RealizedProcedureNewSMK">
                                                         <Grid ColumnDefinitions="*,*,2*,Auto" 
                                                               Padding="5">
                                                             <Label Text="{Binding CountA}" 
                                                                    Grid.Column="0" 
                                                                    Style="{StaticResource TableCell}" />
                                                             <Label Text="{Binding CountB}" 
-                                                                   Grid.Column="1" 
-                                                                   Style="{StaticResource TableCell}" />
+                                                                    Grid.Column="1" 
+                                                                    Style="{StaticResource TableCell}" />
                                                             <Label Text="{Binding DateRange}" 
                                                                    Grid.Column="2" 
                                                                    Style="{StaticResource TableCell}" />

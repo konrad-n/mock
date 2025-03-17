@@ -29,6 +29,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private List<ProcedureRequirement> allRequirements;
         private bool isLoadingData;
         private int batchSize = 3; // Ilość elementów ładowanych w jednej partii
+        private bool isLoading;
 
         public NewSMKProceduresListViewModel(
             IProcedureService procedureService,
@@ -111,6 +112,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     this.LoadDataAsync().ConfigureAwait(false);
                 }
             }
+        }
+
+        public bool IsLoading
+        {
+            get => this.isLoading;
+            set => this.SetProperty(ref this.isLoading, value);
         }
 
         public ICommand RefreshCommand { get; }

@@ -8,5 +8,8 @@
         public int CompletedCountB { get; set; }
         public int ApprovedCountA { get; set; }
         public int ApprovedCountB { get; set; }
+
+        public int RemainingCountA => this.RequiredCountA - this.CompletedCountA;
+        public int RemainingCountB => this.RequiredCountB - this.CompletedCountB;
     }
 }
