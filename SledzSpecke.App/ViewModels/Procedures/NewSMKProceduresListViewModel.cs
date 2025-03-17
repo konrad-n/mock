@@ -142,6 +142,19 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             try
             {
+                // Pobierz specjalizację
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Nie znaleziono specjalizacji");
+                    return;
+                }
+
+                // Sprawdź, czy specjalizacja ma dwa moduły
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+                System.Diagnostics.Debug.WriteLine($"HasTwoModules: {this.HasTwoModules}");
+
                 // Pobierz bieżący moduł
                 var currentModule = await this.specializationService.GetCurrentModuleAsync();
                 if (currentModule == null)
@@ -149,6 +162,11 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     System.Diagnostics.Debug.WriteLine("Nie znaleziono aktualnego modułu");
                     return;
                 }
+
+                // Aktualizuj stan wyboru modułu
+                this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
+                this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
+                this.ModuleTitle = currentModule.Name;
 
                 // Pobierz wymagania procedur dla bieżącego modułu
                 var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);

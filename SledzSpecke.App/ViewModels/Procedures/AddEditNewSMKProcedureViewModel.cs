@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Procedures;
+using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Procedures
@@ -14,6 +15,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
     {
         private readonly IProcedureService procedureService;
         private readonly IDialogService dialogService;
+        private readonly ISpecializationService specializationService;
 
         private string procedureId;
         private string requirementId;
@@ -27,10 +29,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public AddEditNewSMKProcedureViewModel(
             IProcedureService procedureService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            ISpecializationService specializationService)
         {
             this.procedureService = procedureService;
             this.dialogService = dialogService;
+            this.specializationService = specializationService;
 
             // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync, this.CanSave);
@@ -207,23 +211,31 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             try
             {
-                
-
                 // Przygotuj obiekt procedury
                 var procedureToSave = this.procedure ?? new RealizedProcedureNewSMK();
+
+                // Pobierz bieżący moduł ze SpecializationService
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule == null)
+                {
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Nie można określić bieżącego modułu.",
+                        "OK");
+                    return;
+                }
 
                 procedureToSave.CountA = this.CountA;
                 procedureToSave.CountB = this.CountB;
                 procedureToSave.StartDate = this.StartDate;
                 procedureToSave.EndDate = this.EndDate;
                 procedureToSave.ProcedureName = this.ProcedureName;
+                procedureToSave.ModuleId = currentModule.ModuleId;  // Ustawienie ModuleId
 
                 if (!this.isEdit && !string.IsNullOrEmpty(this.requirementId))
                 {
                     procedureToSave.ProcedureRequirementId = int.Parse(this.requirementId);
                 }
-
-                procedureToSave.ModuleId = // tutaj dodaj id modulu do zapisania.
 
                 // Zapisz procedurę
                 bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedureToSave);

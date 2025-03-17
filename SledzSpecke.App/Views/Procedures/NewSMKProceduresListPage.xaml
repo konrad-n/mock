@@ -168,55 +168,57 @@
                                         <!-- Lista realizacji -->
                                         <VerticalStackLayout IsVisible="{Binding IsExpanded}">
                                             <ActivityIndicator IsRunning="{Binding IsLoading}" 
-                       IsVisible="{Binding IsLoading}" 
-                       HorizontalOptions="Center" />
-
+                                                               IsVisible="{Binding IsLoading}" 
+                                                               HorizontalOptions="Center" />
                                             <Label Text="Lista realizacji" 
-           FontAttributes="Bold" 
-           Margin="0,10,0,5"
-           IsVisible="{Binding HasRealizations}" />
-
-                                            <Grid ColumnDefinitions="*,*,2*,Auto" 
-          Padding="5"
-          IsVisible="{Binding HasRealizations}">
+                                                   FontAttributes="Bold" 
+                                                   Margin="0,10,0,5"
+                                                   IsVisible="{Binding HasRealizations}" />
+                                            <Grid ColumnDefinitions="70,70,100,Auto" 
+                                                    Padding="5"
+                                                    IsVisible="{Binding HasRealizations}">
                                                 <Label Text="Wykonane samodzielnie" 
-               Style="{StaticResource TableHeader}" 
-               Grid.Column="0" />
+                                                        Style="{StaticResource TableHeader}" 
+                                                        Grid.Column="0" />
                                                 <Label Text="Wykonane jako asysta" 
-               Style="{StaticResource TableHeader}" 
-               Grid.Column="1" />
+                                                        Style="{StaticResource TableHeader}" 
+                                                        Grid.Column="1" />
                                                 <Label Text="Daty realizacji" 
-               Style="{StaticResource TableHeader}" 
-               Grid.Column="2" />
+                                                       Style="{StaticResource TableHeader}" 
+                                                       Grid.Column="2" />
                                             </Grid>
 
                                             <CollectionView ItemsSource="{Binding Realizations}"
-                   IsVisible="{Binding HasRealizations}">
+                                                             IsVisible="{Binding HasRealizations}">
                                                 <CollectionView.ItemTemplate>
                                                     <DataTemplate x:DataType="models:RealizedProcedureNewSMK">
-                                                        <Grid ColumnDefinitions="*,*,2*,Auto" 
-                      Padding="5">
+                                                        <Grid ColumnDefinitions="70,70,100,Auto" 
+                                                              Padding="5">
                                                             <Label Text="{Binding CountA}" 
-                           Grid.Column="0" 
-                           Style="{StaticResource TableCell}" />
+                                                                    Grid.Column="0" 
+                                                                    Style="{StaticResource TableCell}" />
                                                             <Label Text="{Binding CountB}" 
-                           Grid.Column="1" 
-                           Style="{StaticResource TableCell}" />
+                                                                    Grid.Column="1" 
+                                                                    Style="{StaticResource TableCell}" />
                                                             <Label Text="{Binding DateRange}" 
-                           Grid.Column="2" 
-                           Style="{StaticResource TableCell}" />
+                                                                   Grid.Column="2" 
+                                                                   Style="{StaticResource TableCell}" />
                                                             <StackLayout Grid.Column="3" 
-                                                                        Orientation="Horizontal" 
-                                                                        Spacing="5">
+                                                                        Orientation="Horizontal" >
                                                                 <Button Text="✏️" 
                                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=EditRealizationCommand}"
                                                                         CommandParameter="{Binding .}"
+                                                                        BackgroundColor="LightGoldenrodYellow"
+                                                                        TextColor="White"
+                                                                        BorderColor="Orange"
+                                                                        BorderWidth="1"
                                                                         Style="{StaticResource LightIconButton}" />
-                                                                <Button Text="🗑️" 
+                                                                <Button Text="❌" 
                                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=DeleteRealizationCommand}"
                                                                         CommandParameter="{Binding .}"
-                                                                        Style="{StaticResource LightIconButton}"
-                                                                        BackgroundColor="{StaticResource DangerColor}" />
+                                                                        BackgroundColor="LightPink"
+                                                                        TextColor="LightPink"
+                                                                        Style="{StaticResource LightIconButton}" />
                                                             </StackLayout>
                                                         </Grid>
                                                     </DataTemplate>
