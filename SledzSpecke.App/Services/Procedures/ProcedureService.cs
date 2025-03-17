@@ -29,49 +29,37 @@ namespace SledzSpecke.App.Services.Procedures
         {
             try
             {
-                if (!moduleId.HasValue)
-                {
-                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                    if (currentModule != null)
-                    {
-                        moduleId = currentModule.ModuleId;
-                    }
-                }
-
-                if (!moduleId.HasValue)
-                {
-                    return new List<ProcedureRequirement>();
-                }
+                System.Diagnostics.Debug.WriteLine($"Pobieranie wymagań procedur dla modułu {moduleId}");
 
                 var module = await this.databaseService.GetModuleAsync(moduleId.Value);
                 if (module == null || string.IsNullOrEmpty(module.Structure))
                 {
+                    System.Diagnostics.Debug.WriteLine("Nie znaleziono modułu lub struktura jest pusta");
                     return new List<ProcedureRequirement>();
                 }
 
-                // Deserializuj strukturę modułu
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    AllowTrailingCommas = true,
-                    ReadCommentHandling = JsonCommentHandling.Skip,
-                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-                };
+                var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(
+                    module.Structure,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip
+                    });
 
-                var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
                 if (moduleStructure?.Procedures == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("Brak procedur w strukturze modułu");
                     return new List<ProcedureRequirement>();
                 }
 
-                // Zwróć listę wymagań bez modyfikowania ich
-                // (ponieważ nie możemy dodać InternshipName do ProcedureRequirement)
-
+                System.Diagnostics.Debug.WriteLine($"Znaleziono {moduleStructure.Procedures.Count} procedur");
                 return moduleStructure.Procedures;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas pobierania wymagań procedur: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 return new List<ProcedureRequirement>();
             }
         }

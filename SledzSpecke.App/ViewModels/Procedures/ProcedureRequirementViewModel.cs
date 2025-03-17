@@ -25,13 +25,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private bool isLoading;
         private bool hasLoadedData;
 
-        // Pola dla nowej realizacji
-        private int countA;
-        private int countB;
-        private DateTime startDate;
-        private DateTime endDate;
-        private RealizedProcedureNewSMK selectedRealization;
-
         public ProcedureRequirementViewModel(
             ProcedureRequirement requirement,
             ProcedureSummary statistics,
@@ -53,13 +46,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.isLoading = false;
             this.hasLoadedData = false;
 
-            this.startDate = DateTime.Now;
-            this.endDate = DateTime.Now;
-
             this.ToggleExpandCommand = new AsyncRelayCommand(this.OnToggleExpandAsync);
-            this.ToggleAddRealizationCommand = new RelayCommand(this.OnToggleAddRealization);
-            this.SaveRealizationCommand = new AsyncRelayCommand(this.OnSaveRealization, this.CanSaveRealization);
-            this.CancelRealizationCommand = new RelayCommand(this.OnCancelRealization);
+            this.ToggleAddRealizationCommand = new AsyncRelayCommand(this.OnToggleAddRealizationAsync);
             this.EditRealizationCommand = new AsyncRelayCommand<RealizedProcedureNewSMK>(this.OnEditRealization);
             this.DeleteRealizationCommand = new AsyncRelayCommand<RealizedProcedureNewSMK>(this.OnDeleteRealization);
         }
@@ -96,319 +84,154 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.isLoading, value);
         }
 
-        public int CountA
-        {
-            get => this.countA;
-            set
-            {
-                if (this.SetProperty(ref this.countA, value))
-                {
-                    ((AsyncRelayCommand)this.SaveRealizationCommand).NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public int CountB
-        {
-            get => this.countB;
-            set
-            {
-                if (this.SetProperty(ref this.countB, value))
-                {
-                    ((AsyncRelayCommand)this.SaveRealizationCommand).NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public DateTime StartDate
-        {
-            get => this.startDate;
-            set
-            {
-                if (this.SetProperty(ref this.startDate, value))
-                {
-                    ((AsyncRelayCommand)this.SaveRealizationCommand).NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public DateTime EndDate
-        {
-            get => this.endDate;
-            set
-            {
-                if (this.SetProperty(ref this.endDate, value))
-                {
-                    ((AsyncRelayCommand)this.SaveRealizationCommand).NotifyCanExecuteChanged();
-                }
-            }
-        }
-
-        public RealizedProcedureNewSMK SelectedRealization
-        {
-            get => this.selectedRealization;
-            set => this.SetProperty(ref this.selectedRealization, value);
-        }
-
-        public string RealizationsCountInfo => $"Wszystkich pozycji: {this.Realizations.Count}";
-
         public ICommand ToggleExpandCommand { get; }
         public ICommand ToggleAddRealizationCommand { get; }
-        public ICommand SaveRealizationCommand { get; }
-        public ICommand CancelRealizationCommand { get; }
         public ICommand EditRealizationCommand { get; }
         public ICommand DeleteRealizationCommand { get; }
 
         private async Task OnToggleExpandAsync()
         {
-            // Nie rozwijaj, jeśli właśnie zwijamy
             if (this.isExpanded)
             {
                 this.IsExpanded = false;
                 return;
             }
 
-            // Leniwe ładowanie danych - ładuj tylko gdy rozwijamy i nie mamy jeszcze danych
             if (!this.hasLoadedData && !this.isLoading)
             {
-                this.IsLoading = true;
-                this.IsExpanded = true;  // Rozwiń, żeby pokazać indykator ładowania
+                this.isLoading = true;
+                this.IsExpanded = true;
 
                 try
                 {
-                    // Asynchroniczne ładowanie realizacji dla tego wymagania
                     await Task.Run(async () =>
                     {
-                        try
+                        var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                            this.moduleId, this.requirement.Id);
+
+                        await MainThread.InvokeOnMainThreadAsync(() =>
                         {
-                            // Pobierz realizacje dla tego wymagania
-                            var realizations = await this.procedureService.GetNewSMKProceduresAsync(
-                                this.moduleId, this.requirement.Id);
-
-                            // Aktualizuj UI na głównym wątku
-                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            this.Realizations.Clear();
+                            foreach (var realization in realizations)
                             {
-                                this.Realizations.Clear();
+                                this.Realizations.Add(realization);
+                            }
 
-                                // Dodawaj realizacje po jednej z małymi opóźnieniami
-                                foreach (var realization in realizations)
-                                {
-                                    this.Realizations.Add(realization);
-                                }
-
-                                this.hasLoadedData = true;
-                                this.IsLoading = false;
-                                this.OnPropertyChanged(nameof(this.RealizationsCountInfo));
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
-
-                            // Aktualizuj UI na głównym wątku
-                            await MainThread.InvokeOnMainThreadAsync(() =>
-                            {
-                                this.IsLoading = false;
-                            });
-                        }
+                            this.hasLoadedData = true;
+                            this.isLoading = false;
+                        });
                     });
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania procedur: {ex.Message}");
-                    this.IsLoading = false;
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
+                    this.isLoading = false;
                 }
             }
-            else if (this.hasLoadedData)
+            else
             {
-                // Jeśli już mamy dane, po prostu rozwiń sekcję
                 this.IsExpanded = true;
             }
         }
 
-        private void OnToggleAddRealization()
+        private async Task OnToggleAddRealizationAsync()
         {
-            // Zresetuj wartości przy każdym otwarciu formularza
-            this.CountA = 0;
-            this.CountB = 0;
-            this.StartDate = DateTime.Now;
-            this.EndDate = DateTime.Now;
-            this.SelectedRealization = null;
-
-            this.IsAddingRealization = !this.IsAddingRealization;
-        }
-
-        private bool CanSaveRealization()
-        {
-            return (this.CountA > 0 || this.CountB > 0) &&
-                   this.StartDate <= this.EndDate;
-        }
-
-        private async Task OnSaveRealization()
-        {
-            if (this.IsLoading)
-            {
-                return;
-            }
-
-            this.IsLoading = true;
-
             try
             {
-                var procedure = this.SelectedRealization ?? new RealizedProcedureNewSMK();
-
-                procedure.ProcedureRequirementId = this.requirement.Id;
-                procedure.ModuleId = this.moduleId;
-                procedure.CountA = this.CountA;
-                procedure.CountB = this.CountB;
-                procedure.StartDate = this.StartDate;
-                procedure.EndDate = this.EndDate;
-                procedure.ProcedureName = this.requirement.Name;
-                procedure.InternshipName = this.internshipName;
-                procedure.SyncStatus = SyncStatus.NotSynced;
-
-                bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedure);
-
-                if (success)
+                var navigationParameter = new Dictionary<string, object>
                 {
-                    // Zaktualizuj statystyki
-                    this.statistics.CompletedCountA += this.CountA;
-                    this.statistics.CompletedCountB += this.CountB;
+                    { "RequirementId", this.requirement.Id.ToString() }
+                };
 
-                    // Jeśli to edycja, znajdź i zastąp realizację w kolekcji
-                    if (this.SelectedRealization != null)
-                    {
-                        int index = this.Realizations.IndexOf(this.SelectedRealization);
-                        if (index >= 0)
-                        {
-                            this.Realizations[index] = procedure;
-                        }
-                    }
-                    else
-                    {
-                        // Dodaj nową realizację do kolekcji
-                        this.Realizations.Add(procedure);
-                    }
-
-                    // Zresetuj formularz i zamknij go
-                    this.CountA = 0;
-                    this.CountB = 0;
-                    this.StartDate = DateTime.Now;
-                    this.EndDate = DateTime.Now;
-                    this.SelectedRealization = null;
-                    this.IsAddingRealization = false;
-
-                    // Odśwież informacje o liczbie realizacji
-                    this.OnPropertyChanged(nameof(this.RealizationsCountInfo));
-                }
-                else
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się zapisać realizacji procedury.",
-                        "OK");
-                }
+                await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania realizacji: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas zapisywania realizacji procedury.",
+                    "Wystąpił problem podczas otwierania formularza dodawania realizacji.",
                     "OK");
             }
-            finally
-            {
-                this.IsLoading = false;
-            }
-        }
-
-        private void OnCancelRealization()
-        {
-            this.IsAddingRealization = false;
-            this.SelectedRealization = null;
         }
 
         private async Task OnEditRealization(RealizedProcedureNewSMK realization)
         {
-            if (realization == null || this.IsLoading)
+            if (realization == null)
             {
                 return;
             }
 
-            // Procedury zsynchronizowane nie mogą być edytowane
             if (realization.SyncStatus == SyncStatus.Synced)
             {
                 await this.dialogService.DisplayAlertAsync(
                     "Informacja",
-                    "Nie można edytować zsynchronizowanej realizacji procedury.",
+                    "Nie można edytować zsynchronizowanej realizacji.",
                     "OK");
                 return;
             }
 
-            // Ustaw wartości formularza na podstawie wybranej realizacji
-            this.CountA = realization.CountA;
-            this.CountB = realization.CountB;
-            this.StartDate = realization.StartDate;
-            this.EndDate = realization.EndDate;
-            this.SelectedRealization = realization;
+            try
+            {
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "ProcedureId", realization.ProcedureId.ToString() },
+                    { "RequirementId", this.requirement.Id.ToString() }
+                };
 
-            // Otwórz formularz
-            this.IsAddingRealization = true;
+                await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas otwierania formularza edycji realizacji.",
+                    "OK");
+            }
         }
 
         private async Task OnDeleteRealization(RealizedProcedureNewSMK realization)
         {
-            if (realization == null || this.IsLoading)
+            if (realization == null)
             {
                 return;
             }
 
-            // Procedury zsynchronizowane nie mogą być usunięte
             if (realization.SyncStatus == SyncStatus.Synced)
             {
                 await this.dialogService.DisplayAlertAsync(
                     "Informacja",
-                    "Nie można usunąć zsynchronizowanej realizacji procedury.",
+                    "Nie można usunąć zsynchronizowanej realizacji.",
                     "OK");
                 return;
             }
 
-            bool confirm = await this.dialogService.DisplayAlertAsync(
-                "Potwierdzenie",
-                "Czy na pewno chcesz usunąć tę realizację procedury?",
-                "Tak",
-                "Nie");
-
-            if (!confirm)
-            {
-                return;
-            }
-
-            this.IsLoading = true;
-
             try
             {
-                bool result = await this.procedureService.DeleteNewSMKProcedureAsync(realization.ProcedureId);
+                bool confirm = await this.dialogService.DisplayAlertAsync(
+                    "Potwierdzenie",
+                    "Czy na pewno chcesz usunąć tę realizację?",
+                    "Tak",
+                    "Nie");
 
-                if (result)
+                if (confirm)
                 {
-                    // Aktualizuj statystyki
-                    this.statistics.CompletedCountA -= realization.CountA;
-                    this.statistics.CompletedCountB -= realization.CountB;
+                    bool success = await this.procedureService.DeleteNewSMKProcedureAsync(realization.ProcedureId);
 
-                    // Usuń z kolekcji
-                    this.Realizations.Remove(realization);
-
-                    // Odśwież informacje o liczbie realizacji
-                    this.OnPropertyChanged(nameof(this.RealizationsCountInfo));
-                }
-                else
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się usunąć realizacji procedury.",
-                        "OK");
+                    if (success)
+                    {
+                        this.statistics.CompletedCountA -= realization.CountA;
+                        this.statistics.CompletedCountB -= realization.CountB;
+                        this.Realizations.Remove(realization);
+                    }
+                    else
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Błąd",
+                            "Nie udało się usunąć realizacji.",
+                            "OK");
+                    }
                 }
             }
             catch (Exception ex)
@@ -416,12 +239,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania realizacji: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas usuwania realizacji procedury.",
+                    "Wystąpił problem podczas usuwania realizacji.",
                     "OK");
-            }
-            finally
-            {
-                this.IsLoading = false;
             }
         }
     }

@@ -125,65 +125,51 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public async Task LoadDataAsync()
         {
-            if (this.IsBusy || this.isLoadingData)
+            if (this.IsBusy)
             {
                 return;
             }
 
-            this.isLoadingData = true;
             this.IsBusy = true;
-            this.IsRefreshing = true;
+            System.Diagnostics.Debug.WriteLine("Rozpoczynam ładowanie danych procedur");
 
             try
             {
-                // Pobierz dane o specjalizacji i modułach
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
+                // Pobierz bieżący moduł
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule == null)
                 {
-                    this.isLoadingData = false;
-                    this.IsBusy = false;
-                    this.IsRefreshing = false;
+                    System.Diagnostics.Debug.WriteLine("Nie znaleziono aktualnego modułu");
                     return;
                 }
 
-                // Sprawdź, czy specjalizacja ma dwa moduły
-                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+                // Pobierz wymagania procedur dla bieżącego modułu
+                var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
+                System.Diagnostics.Debug.WriteLine($"Pobrano {requirements.Count} wymagań procedur");
 
-                // Pobierz bieżący moduł jeśli nie jest wybrany
-                if (this.CurrentModuleId == 0 && specialization.CurrentModuleId.HasValue)
+                // Czyść i wypełnij listę procedur
+                this.ProcedureRequirements.Clear();
+                for (int i = 0; i < requirements.Count; i++)
                 {
-                    this.CurrentModuleId = specialization.CurrentModuleId.Value;
-                }
+                    var requirement = requirements[i];
+                    var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
 
-                var currentModule = modules.FirstOrDefault(m => m.ModuleId == this.CurrentModuleId)
-                                     ?? modules.FirstOrDefault();
+                    var viewModel = new ProcedureRequirementViewModel(
+                        requirement,
+                        stats,
+                        new List<RealizedProcedureNewSMK>(),
+                        i + 1,
+                        currentModule.ModuleId,
+                        this.procedureService,
+                        this.dialogService);
 
-                if (currentModule != null)
-                {
-                    this.ModuleTitle = currentModule.Name;
-                    this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
-                    this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
-
-                    // Pobierz podsumowanie procedur dla bieżącego modułu (szybka operacja)
-                    this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
-
-                    // Wyczyść listę wymagań
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        this.ProcedureRequirements.Clear();
-                    });
-
-                    // Pobierz wszystkie wymagania procedur
-                    this.allRequirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
-
-                    // Załaduj tylko pierwszą partię
-                    await this.LoadMoreItemsAsync();
+                    this.ProcedureRequirements.Add(viewModel);
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Wystąpił problem podczas ładowania procedur.",
@@ -192,8 +178,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             finally
             {
                 this.IsBusy = false;
-                this.IsRefreshing = false;
-                this.isLoadingData = false;
             }
         }
 

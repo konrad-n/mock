@@ -94,6 +94,7 @@ namespace SledzSpecke.App
             services.AddTransient<ProcedureSelectorViewModel>();
             services.AddTransient<ProcedureGroupViewModel>();
             services.AddTransient<ProcedureRequirementViewModel>();
+            services.AddTransient<AddEditNewSMKProcedureViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
@@ -117,6 +118,7 @@ namespace SledzSpecke.App
             services.AddTransient<AddEditOldSMKProcedurePage>();
             services.AddTransient<NewSMKProceduresListPage>();
             services.AddTransient<ProcedureSelectorPage>();
+            services.AddTransient<AddEditNewSMKProcedurePage>();
 
             services.AddTransient<InternshipsListPage>();
             services.AddTransient<CoursesListPage>();

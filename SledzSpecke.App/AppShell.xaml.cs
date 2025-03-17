@@ -48,6 +48,7 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("OldSMKProcedures", typeof(OldSMKProceduresListPage));
             Routing.RegisterRoute("NewSMKProcedures", typeof(NewSMKProceduresListPage));
             Routing.RegisterRoute("AddEditOldSMKProcedure", typeof(AddEditOldSMKProcedurePage));
+            Routing.RegisterRoute("AddEditNewSMKProcedure", typeof(AddEditNewSMKProcedurePage));
         }
 
         private async void InitializeUserInfoAsync()
