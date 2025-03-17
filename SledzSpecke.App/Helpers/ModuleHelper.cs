@@ -94,7 +94,11 @@ namespace SledzSpecke.App.Helpers
                     PropertyNameCaseInsensitive = true,
                     AllowTrailingCommas = true,
                     ReadCommentHandling = JsonCommentHandling.Skip,
-                    Converters = { new JsonStringEnumConverter() }
+                    Converters =
+                    {
+                        new JsonStringEnumConverter(),
+                        new ModuleTypeJsonConverter() // Dodaj nowy konwerter
+                    }
                 };
 
                 // Lista do przechowywania utworzonych modułów

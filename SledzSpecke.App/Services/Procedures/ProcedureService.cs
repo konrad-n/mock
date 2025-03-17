@@ -1,9 +1,11 @@
-﻿using SledzSpecke.App.Models;
+﻿using SledzSpecke.App.Helpers;
+using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Specialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SledzSpecke.App.Services.Procedures
 {
@@ -38,14 +40,19 @@ namespace SledzSpecke.App.Services.Procedures
                     return new List<ProcedureRequirement>();
                 }
 
-                var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(
-                    module.Structure,
-                    new JsonSerializerOptions
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip,
+                    Converters =
                     {
-                        PropertyNameCaseInsensitive = true,
-                        AllowTrailingCommas = true,
-                        ReadCommentHandling = JsonCommentHandling.Skip
-                    });
+                        new JsonStringEnumConverter(),
+                        new ModuleTypeJsonConverter()
+                    }
+                };
+
+                var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
 
                 if (moduleStructure?.Procedures == null)
                 {
