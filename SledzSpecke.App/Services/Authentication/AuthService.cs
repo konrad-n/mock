@@ -185,7 +185,21 @@ namespace SledzSpecke.App.Services.Authentication
                 user.PasswordHash = this.HashPassword(password);
                 System.Diagnostics.Debug.WriteLine("Hasło zostało zahashowane.");
 
-                // Zapisanie użytkownika, aby uzyskać ID
+                // Najpierw zapisz specjalizację, aby otrzymać jej ID
+                System.Diagnostics.Debug.WriteLine("Zapisuję specjalizację...");
+                specialization.SpecializationId = 0; // Reset ID przed zapisem
+                int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
+                if (specializationId <= 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania specjalizacji - nieprawidłowe ID!");
+                    return false;
+                }
+                System.Diagnostics.Debug.WriteLine($"Specjalizacja zapisana z ID: {specializationId}");
+
+                // Aktualizacja referencji do specjalizacji dla użytkownika
+                user.SpecializationId = specializationId;
+
+                // Teraz zapisz użytkownika
                 System.Diagnostics.Debug.WriteLine("Zapisuję użytkownika...");
                 int userId = await this.databaseService.SaveUserAsync(user);
                 if (userId <= 0)
@@ -195,36 +209,47 @@ namespace SledzSpecke.App.Services.Authentication
                 }
                 System.Diagnostics.Debug.WriteLine($"Użytkownik zapisany z ID: {userId}");
 
-                // Zapisanie specjalizacji
-                System.Diagnostics.Debug.WriteLine("Zapisuję specjalizację...");
-                specialization.SpecializationId = 0; // Upewnij się, że ID jest 0 przed zapisem
-                int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
-                if (specializationId <= 0)
+                // Zapisywanie modułów
+                if (specialization.Modules != null && specialization.Modules.Count > 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania specjalizacji - nieprawidłowe ID!");
-                    return false;
+                    System.Diagnostics.Debug.WriteLine($"Zapisuję {specialization.Modules.Count} moduły...");
+
+                    // Lista dla przechowywania zapisanych modułów
+                    var savedModules = new List<Module>();
+
+                    foreach (var module in specialization.Modules)
+                    {
+                        // Reset ID i przypisanie do specjalizacji
+                        module.ModuleId = 0;
+                        module.SpecializationId = specializationId;
+
+                        int moduleId = await this.databaseService.SaveModuleAsync(module);
+                        if (moduleId <= 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania modułu {module.Name}");
+                            continue;
+                        }
+
+                        module.ModuleId = moduleId;
+                        savedModules.Add(module);
+                        System.Diagnostics.Debug.WriteLine($"Moduł {module.Name} zapisany z ID: {moduleId}");
+                    }
+
+                    // Aktualizacja referencji do modułów w specjalizacji
+                    specialization.Modules = savedModules;
+
+                    // Ustawienie domyślnego modułu (pierwszy moduł)
+                    if (savedModules.Count > 0)
+                    {
+                        specialization.CurrentModuleId = savedModules[0].ModuleId;
+                        await this.databaseService.UpdateSpecializationAsync(specialization);
+                        System.Diagnostics.Debug.WriteLine($"Ustawiono bieżący moduł na ID: {specialization.CurrentModuleId}");
+                    }
                 }
-                System.Diagnostics.Debug.WriteLine($"Specjalizacja zapisana z ID: {specializationId}");
-
-                // Aktualizacja użytkownika o ID specjalizacji
-                user.SpecializationId = specializationId;
-                await this.databaseService.SaveUserAsync(user);
-                System.Diagnostics.Debug.WriteLine("Użytkownik zaktualizowany o ID specjalizacji.");
-
-                System.Diagnostics.Debug.WriteLine($"Zapisuję {specialization.Modules.Count} moduły...");
-
-                foreach (var module in specialization.Modules)
+                else
                 {
-                    module.ModuleId = 0; // Upewnij się, że ID jest 0 przed zapisem
-                    module.SpecializationId = specializationId;
-                    int moduleId = await this.databaseService.SaveModuleAsync(module);
-                    System.Diagnostics.Debug.WriteLine($"Moduł zapisany z ID: {moduleId}");
+                    System.Diagnostics.Debug.WriteLine("Brak modułów do zapisania!");
                 }
-
-                // Ustawienie aktualnego modułu (domyślnie pierwszy moduł)
-                specialization.CurrentModuleId = specialization.Modules[0].ModuleId;
-                await this.databaseService.UpdateSpecializationAsync(specialization);
-                System.Diagnostics.Debug.WriteLine($"Ustawiono bieżący moduł na ID: {specialization.CurrentModuleId}");
 
                 System.Diagnostics.Debug.WriteLine("Rejestracja zakończona pomyślnie!");
                 return true;

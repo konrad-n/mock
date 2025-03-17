@@ -645,7 +645,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 System.Diagnostics.Debug.WriteLine($"\nUżytkownicy ({users.Count}):");
                 foreach (var user in users)
                 {
-                    System.Diagnostics.Debug.WriteLine($"ID: {user.UserId}, Nazwa: {user.Username}, Email: {user.Email}, Wersja SMK: {user.SmkVersion}");
+                    System.Diagnostics.Debug.WriteLine($"ID: {user.UserId}, Nazwa: {user.Username}, Email: {user.Email}, Wersja SMK: {user.SmkVersion}, SpecializationId: {user.SpecializationId}");
                 }
 
                 // Specjalizacje
@@ -653,7 +653,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 System.Diagnostics.Debug.WriteLine($"\nSpecjalizacje ({specializations.Count}):");
                 foreach (var spec in specializations)
                 {
-                    System.Diagnostics.Debug.WriteLine($"ID: {spec.SpecializationId}, Nazwa: {spec.Name}, Start: {spec.StartDate:d}, Koniec: {spec.PlannedEndDate:d}");
+                    System.Diagnostics.Debug.WriteLine($"ID: {spec.SpecializationId}, Nazwa: {spec.Name}, Start: {spec.StartDate:d}, Koniec: {spec.PlannedEndDate:d}, Wersja SMK: {spec.SmkVersion}");
                 }
 
                 // Moduły (dla pierwszej znalezionej specjalizacji)
@@ -663,7 +663,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     System.Diagnostics.Debug.WriteLine($"\nModuły dla specjalizacji {specializations[0].Name} ({modules.Count}):");
                     foreach (var module in modules)
                     {
-                        System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}");
+                        System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}, SpecializationId: {module.SpecializationId}");
                     }
                 }
 
