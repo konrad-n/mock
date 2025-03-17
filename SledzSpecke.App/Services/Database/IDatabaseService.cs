@@ -23,6 +23,8 @@ namespace SledzSpecke.App.Services.Database
 
         Task<List<Models.Specialization>> GetAllSpecializationsAsync();
 
+        Task CleanupSpecializationDataAsync(int specializationId);
+
         // Module
         Task<Module> GetModuleAsync(int id);
 
@@ -31,6 +33,8 @@ namespace SledzSpecke.App.Services.Database
         Task<int> SaveModuleAsync(Module module);
 
         Task<int> UpdateModuleAsync(Module module);
+
+        Task<int> DeleteModuleAsync(Module module);
 
         // Internship
         Task<Internship> GetInternshipAsync(int id);

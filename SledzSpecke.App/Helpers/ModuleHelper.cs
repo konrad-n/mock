@@ -306,7 +306,9 @@ namespace SledzSpecke.App.Helpers
                             Type = moduleType,
                             StartDate = currentStartDate,
                             EndDate = endDate,
-                            Structure = moduleElement.ToString(),  // Zapisujemy cały JSON modułu
+                            Structure = moduleElement.ToString(),
+                            SmkVersion = smkVersion,                // Dodane
+                            Version = moduleElement.GetProperty("version").GetString(),
 
                             // Podstawowe statystyki zliczone wcześniej
                             CompletedInternships = 0,

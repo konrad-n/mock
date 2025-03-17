@@ -86,13 +86,17 @@ namespace SledzSpecke.App.Services.Database
         public async Task<Models.Specialization> GetSpecializationAsync(int id)
         {
             await this.InitializeAsync();
-            var specialization = await this.database.Table<Models.Specialization>().FirstOrDefaultAsync(s => s.SpecializationId == id);
+            return await this.database.Table<Models.Specialization>()
+                .FirstOrDefaultAsync(s => s.SpecializationId == id);
+        }
 
+        public async Task<Models.Specialization> GetSpecializationWithModulesAsync(int id)
+        {
+            var specialization = await GetSpecializationAsync(id);
             if (specialization != null)
             {
-                specialization.Modules = await this.GetModulesAsync(specialization.SpecializationId);
+                specialization.Modules = await GetModulesAsync(specialization.SpecializationId);
             }
-
             return specialization;
         }
 
@@ -121,6 +125,31 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.UpdateAsync(specialization);
         }
 
+        public async Task CleanupSpecializationDataAsync(int specializationId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"=== CZYSZCZENIE DANYCH SPECJALIZACJI {specializationId} ===");
+
+                // Usuń moduły
+                var modules = await GetModulesAsync(specializationId);
+                foreach (var module in modules)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Usuwanie modułu: {module.Name} (ID: {module.ModuleId})");
+                    await DeleteModuleAsync(module);
+                }
+
+                // Możesz dodać czyszczenie innych powiązanych danych
+
+                System.Diagnostics.Debug.WriteLine("=== CZYSZCZENIE ZAKOŃCZONE ===");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas czyszczenia danych: {ex.Message}");
+                throw;
+            }
+        }
+
         // Module
         public async Task<Module> GetModuleAsync(int id)
         {
@@ -131,7 +160,9 @@ namespace SledzSpecke.App.Services.Database
         public async Task<List<Module>> GetModulesAsync(int specializationId)
         {
             await this.InitializeAsync();
-            return await this.database.Table<Module>().Where(m => m.SpecializationId == specializationId).ToListAsync();
+            return await this.database.Table<Module>()
+                .Where(m => m.SpecializationId == specializationId)
+                .ToListAsync();
         }
 
         public async Task<int> SaveModuleAsync(Module module)
@@ -151,6 +182,20 @@ namespace SledzSpecke.App.Services.Database
         {
             await this.InitializeAsync();
             return await this.database.UpdateAsync(module);
+        }
+
+        public async Task<int> DeleteModuleAsync(Module module)
+        {
+            try
+            {
+                await this.InitializeAsync();
+                return await this.database.DeleteAsync(module);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania modułu: {ex.Message}");
+                return 0;
+            }
         }
 
         // Internship

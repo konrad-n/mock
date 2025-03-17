@@ -152,106 +152,99 @@ namespace SledzSpecke.App.Services.Authentication
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("Rozpoczynam rejestrację użytkownika...");
-                System.Diagnostics.Debug.WriteLine($"Użytkownik: {user?.Username}, Specjalizacja: {specialization?.Name}");
+                System.Diagnostics.Debug.WriteLine("=== ROZPOCZĘCIE REJESTRACJI ===");
+                System.Diagnostics.Debug.WriteLine($"Użytkownik: {user?.Username}, Email: {user?.Email}");
+                System.Diagnostics.Debug.WriteLine($"Specjalizacja: {specialization?.Name}, Wersja SMK: {user?.SmkVersion}");
 
-                if (user == null)
+                // Walidacja wejścia
+                if (user == null || specialization == null || string.IsNullOrEmpty(password))
                 {
-                    System.Diagnostics.Debug.WriteLine("Obiekt użytkownika jest null!");
+                    System.Diagnostics.Debug.WriteLine("Błąd walidacji danych wejściowych!");
                     return false;
                 }
 
-                if (specialization == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("Obiekt specjalizacji jest null!");
-                    return false;
-                }
-
-                if (string.IsNullOrEmpty(password))
-                {
-                    System.Diagnostics.Debug.WriteLine("Hasło jest puste!");
-                    return false;
-                }
-
-                // Sprawdzenie, czy nazwa użytkownika już istnieje
+                // Sprawdzenie czy użytkownik już istnieje
                 var existingUser = await this.databaseService.GetUserByUsernameAsync(user.Username);
                 if (existingUser != null)
                 {
-                    System.Diagnostics.Debug.WriteLine("Użytkownik o podanej nazwie już istnieje!");
+                    System.Diagnostics.Debug.WriteLine($"Użytkownik {user.Username} już istnieje!");
                     return false;
                 }
 
-                // Hashowanie hasła
-                user.PasswordHash = this.HashPassword(password);
-                System.Diagnostics.Debug.WriteLine("Hasło zostało zahashowane.");
-
-                // Najpierw zapisz specjalizację, aby otrzymać jej ID
-                System.Diagnostics.Debug.WriteLine("Zapisuję specjalizację...");
-                specialization.SpecializationId = 0; // Reset ID przed zapisem
+                // Zapisz specjalizację
+                System.Diagnostics.Debug.WriteLine("Zapisywanie specjalizacji...");
+                specialization.SpecializationId = 0;
                 int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
                 if (specializationId <= 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania specjalizacji - nieprawidłowe ID!");
+                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania specjalizacji!");
                     return false;
                 }
                 System.Diagnostics.Debug.WriteLine($"Specjalizacja zapisana z ID: {specializationId}");
 
-                // Aktualizacja referencji do specjalizacji dla użytkownika
+                // Przygotuj i zapisz użytkownika
+                user.PasswordHash = this.HashPassword(password);
                 user.SpecializationId = specializationId;
+                user.RegistrationDate = DateTime.Now;
 
-                // Teraz zapisz użytkownika
-                System.Diagnostics.Debug.WriteLine("Zapisuję użytkownika...");
                 int userId = await this.databaseService.SaveUserAsync(user);
                 if (userId <= 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania użytkownika - nieprawidłowe ID!");
+                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania użytkownika!");
                     return false;
                 }
                 System.Diagnostics.Debug.WriteLine($"Użytkownik zapisany z ID: {userId}");
 
-                // Zapisywanie modułów
-                if (specialization.Modules != null && specialization.Modules.Count > 0)
+                // Weryfikacja zapisanego użytkownika
+                var savedUser = await this.databaseService.GetUserAsync(userId);
+                if (savedUser.SpecializationId != specializationId)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Zapisuję {specialization.Modules.Count} moduły...");
+                    System.Diagnostics.Debug.WriteLine($"BŁĄD: Niezgodność SpecializationId! User: {savedUser.SpecializationId}, Specialization: {specializationId}");
+                    savedUser.SpecializationId = specializationId;
+                    await this.databaseService.SaveUserAsync(savedUser);
+                }
 
-                    // Lista dla przechowywania zapisanych modułów
+                // Zapisz moduły
+                if (specialization.Modules?.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Zapisywanie {specialization.Modules.Count} modułów...");
                     var savedModules = new List<Module>();
 
                     foreach (var module in specialization.Modules)
                     {
-                        // Reset ID i przypisanie do specjalizacji
                         module.ModuleId = 0;
                         module.SpecializationId = specializationId;
 
-                        int moduleId = await this.databaseService.SaveModuleAsync(module);
+                        var moduleId = await this.databaseService.SaveModuleAsync(module);
                         if (moduleId <= 0)
                         {
-                            System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania modułu {module.Name}");
+                            System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania modułu {module.Name}!");
                             continue;
                         }
 
                         module.ModuleId = moduleId;
                         savedModules.Add(module);
-                        System.Diagnostics.Debug.WriteLine($"Moduł {module.Name} zapisany z ID: {moduleId}");
+                        System.Diagnostics.Debug.WriteLine($"Zapisano moduł: {module.Name} (ID: {moduleId}) dla specjalizacji {specializationId}");
                     }
 
-                    // Aktualizacja referencji do modułów w specjalizacji
-                    specialization.Modules = savedModules;
-
-                    // Ustawienie domyślnego modułu (pierwszy moduł)
+                    // Ustaw domyślny moduł
                     if (savedModules.Count > 0)
                     {
                         specialization.CurrentModuleId = savedModules[0].ModuleId;
                         await this.databaseService.UpdateSpecializationAsync(specialization);
-                        System.Diagnostics.Debug.WriteLine($"Ustawiono bieżący moduł na ID: {specialization.CurrentModuleId}");
+                        System.Diagnostics.Debug.WriteLine($"Ustawiono domyślny moduł: {savedModules[0].ModuleId}");
+                    }
+
+                    // Końcowa weryfikacja
+                    var verificationModules = await this.databaseService.GetModulesAsync(specializationId);
+                    System.Diagnostics.Debug.WriteLine($"Weryfikacja: Znaleziono {verificationModules.Count} modułów dla specjalizacji {specializationId}");
+                    foreach (var module in verificationModules)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Moduł: {module.Name}, ID: {module.ModuleId}, SpecializationId: {module.SpecializationId}");
                     }
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Brak modułów do zapisania!");
-                }
 
-                System.Diagnostics.Debug.WriteLine("Rejestracja zakończona pomyślnie!");
+                System.Diagnostics.Debug.WriteLine("=== REJESTRACJA ZAKOŃCZONA SUKCESEM ===");
                 return true;
             }
             catch (Exception ex)

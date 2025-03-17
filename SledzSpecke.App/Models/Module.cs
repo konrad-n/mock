@@ -14,6 +14,11 @@ namespace SledzSpecke.App.Models
 
         public ModuleType Type { get; set; }
 
+        [Indexed]
+        public SmkVersion SmkVersion { get; set; }
+
+        public string Version { get; set; }         // np. "CMKP 2014" lub "CMKP 2023"
+
         [MaxLength(100)]
         public string Name { get; set; }
 
