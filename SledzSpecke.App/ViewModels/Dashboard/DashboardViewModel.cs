@@ -81,6 +81,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
             // Load data on initialization
             this.LoadDataAsync().ConfigureAwait(false);
+            this.DebugDatabase(databaseService).ConfigureAwait(false);
         }
 
         // Properties
@@ -631,6 +632,88 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             }
 
             await Shell.Current.GoToAsync("Recognitions");
+        }
+
+        private async Task DebugDatabase(IDatabaseService databaseService)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("=== DEBUGOWANIE BAZY DANYCH ===");
+
+                // Użytkownicy
+                var users = await databaseService.GetAllUsersAsync();
+                System.Diagnostics.Debug.WriteLine($"\nUżytkownicy ({users.Count}):");
+                foreach (var user in users)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {user.UserId}, Nazwa: {user.Username}, Email: {user.Email}, Wersja SMK: {user.SmkVersion}");
+                }
+
+                // Specjalizacje
+                var specializations = await databaseService.GetAllSpecializationsAsync();
+                System.Diagnostics.Debug.WriteLine($"\nSpecjalizacje ({specializations.Count}):");
+                foreach (var spec in specializations)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {spec.SpecializationId}, Nazwa: {spec.Name}, Start: {spec.StartDate:d}, Koniec: {spec.PlannedEndDate:d}");
+                }
+
+                // Moduły (dla pierwszej znalezionej specjalizacji)
+                if (specializations.Any())
+                {
+                    var modules = await databaseService.GetModulesAsync(specializations[0].SpecializationId);
+                    System.Diagnostics.Debug.WriteLine($"\nModuły dla specjalizacji {specializations[0].Name} ({modules.Count}):");
+                    foreach (var module in modules)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}");
+                    }
+                }
+
+                // Staże (dla pierwszego znalezionego modułu)
+                var internships = await databaseService.GetInternshipsAsync();
+                System.Diagnostics.Debug.WriteLine($"\nStaże ({internships.Count}):");
+                foreach (var internship in internships)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {internship.InternshipId}, Nazwa: {internship.InternshipName}, ModułID: {internship.ModuleId}");
+                }
+
+                // Procedury
+                var procedures = await databaseService.GetProceduresAsync();
+                System.Diagnostics.Debug.WriteLine($"\nProcedury ({procedures.Count}):");
+                foreach (var procedure in procedures)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {procedure.ProcedureId}, Kod: {procedure.Code}, Data: {procedure.Date:d}, StażID: {procedure.InternshipId}");
+                }
+
+                // Dyżury
+                var shifts = await databaseService.GetMedicalShiftsAsync();
+                System.Diagnostics.Debug.WriteLine($"\nDyżury ({shifts.Count}):");
+                foreach (var shift in shifts)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {shift.ShiftId}, Data: {shift.Date:d}, Godziny: {shift.Hours}:{shift.Minutes}, StażID: {shift.InternshipId}");
+                }
+
+                // Kursy
+                var courses = await databaseService.GetCoursesAsync();
+                System.Diagnostics.Debug.WriteLine($"\nKursy ({courses.Count}):");
+                foreach (var course in courses)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {course.CourseId}, Nazwa: {course.CourseName}, ModułID: {course.ModuleId}");
+                }
+
+                // Samokształcenie
+                var selfEducation = await databaseService.GetSelfEducationItemsAsync();
+                System.Diagnostics.Debug.WriteLine($"\nSamokształcenie ({selfEducation.Count}):");
+                foreach (var item in selfEducation)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ID: {item.SelfEducationId}, Tytuł: {item.Title}, ModułID: {item.ModuleId}");
+                }
+
+                System.Diagnostics.Debug.WriteLine("\n=== KONIEC DEBUGOWANIA BAZY DANYCH ===");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas debugowania bazy danych: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+            }
         }
     }
 }

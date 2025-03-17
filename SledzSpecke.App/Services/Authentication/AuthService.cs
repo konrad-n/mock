@@ -100,6 +100,7 @@ namespace SledzSpecke.App.Services.Authentication
                 // Aktualizacja pamięci podręcznej bieżącego użytkownika
                 this.currentUser = user;
 
+
                 return true;
             }
             catch (Exception ex)
