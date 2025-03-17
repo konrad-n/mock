@@ -33,6 +33,12 @@ namespace SledzSpecke.App.Services.Procedures
             {
                 System.Diagnostics.Debug.WriteLine($"Pobieranie wymagań procedur dla modułu {moduleId}");
 
+                if (!moduleId.HasValue)
+                {
+                    System.Diagnostics.Debug.WriteLine("Nie podano ID modułu");
+                    return new List<ProcedureRequirement>();
+                }
+
                 var module = await this.databaseService.GetModuleAsync(moduleId.Value);
                 if (module == null || string.IsNullOrEmpty(module.Structure))
                 {
@@ -46,10 +52,10 @@ namespace SledzSpecke.App.Services.Procedures
                     AllowTrailingCommas = true,
                     ReadCommentHandling = JsonCommentHandling.Skip,
                     Converters =
-                    {
-                        new JsonStringEnumConverter(),
-                        new ModuleTypeJsonConverter()
-                    }
+            {
+                new JsonStringEnumConverter(),
+                new ModuleTypeJsonConverter()
+            }
                 };
 
                 var moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
@@ -233,6 +239,9 @@ namespace SledzSpecke.App.Services.Procedures
                 }
 
                 sql += " ORDER BY Date DESC";
+
+                var allprocedures = await this.databaseService.QueryAsync<RealizedProcedureNewSMK>("SELECT * FROM RealizedProcedureNewSMK");
+
 
                 var procedures = await this.databaseService.QueryAsync<RealizedProcedureNewSMK>(sql, parameters.ToArray());
 

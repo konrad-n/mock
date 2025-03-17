@@ -207,6 +207,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             try
             {
+                
+
                 // Przygotuj obiekt procedury
                 var procedureToSave = this.procedure ?? new RealizedProcedureNewSMK();
 
@@ -220,6 +222,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     procedureToSave.ProcedureRequirementId = int.Parse(this.requirementId);
                 }
+
+                procedureToSave.ModuleId = // tutaj dodaj id modulu do zapisania.
 
                 // Zapisz procedurę
                 bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedureToSave);

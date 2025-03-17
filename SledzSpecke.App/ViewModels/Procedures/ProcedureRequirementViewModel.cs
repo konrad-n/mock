@@ -50,6 +50,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.ToggleAddRealizationCommand = new AsyncRelayCommand(this.OnToggleAddRealizationAsync);
             this.EditRealizationCommand = new AsyncRelayCommand<RealizedProcedureNewSMK>(this.OnEditRealization);
             this.DeleteRealizationCommand = new AsyncRelayCommand<RealizedProcedureNewSMK>(this.OnDeleteRealization);
+
+            this.LoadRealizationsAsync().ConfigureAwait(false);
         }
 
         public ProcedureRequirement Requirement => this.requirement;
@@ -84,10 +86,55 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.isLoading, value);
         }
 
+        public bool HasRealizations => this.Realizations != null && this.Realizations.Any();
+
         public ICommand ToggleExpandCommand { get; }
         public ICommand ToggleAddRealizationCommand { get; }
         public ICommand EditRealizationCommand { get; }
         public ICommand DeleteRealizationCommand { get; }
+
+        private async Task LoadRealizationsAsync()
+        {
+            if (this.hasLoadedData || this.IsLoading)
+            {
+                return;
+            }
+
+            this.IsLoading = true;
+
+            try
+            {
+                var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                    this.moduleId,
+                    this.requirement.Id);
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    this.Realizations.Clear();
+                    foreach (var realization in realizations)
+                    {
+                        this.Realizations.Add(realization);
+                    }
+                    this.hasLoadedData = true;
+                });
+
+                this.OnPropertyChanged(nameof(this.Realizations));
+                this.OnPropertyChanged(nameof(this.HasRealizations));
+                this.OnPropertyChanged(nameof(this.Statistics));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Wystąpił problem podczas ładowania realizacji procedur.",
+                    "OK");
+            }
+            finally
+            {
+                this.IsLoading = false;
+            }
+        }
 
         private async Task OnToggleExpandAsync()
         {
@@ -97,41 +144,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            if (!this.hasLoadedData && !this.isLoading)
-            {
-                this.isLoading = true;
-                this.IsExpanded = true;
-
-                try
-                {
-                    await Task.Run(async () =>
-                    {
-                        var realizations = await this.procedureService.GetNewSMKProceduresAsync(
-                            this.moduleId, this.requirement.Id);
-
-                        await MainThread.InvokeOnMainThreadAsync(() =>
-                        {
-                            this.Realizations.Clear();
-                            foreach (var realization in realizations)
-                            {
-                                this.Realizations.Add(realization);
-                            }
-
-                            this.hasLoadedData = true;
-                            this.isLoading = false;
-                        });
-                    });
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
-                    this.isLoading = false;
-                }
-            }
-            else
-            {
-                this.IsExpanded = true;
-            }
+            this.IsExpanded = true;
+            await this.LoadRealizationsAsync();
         }
 
         private async Task OnToggleAddRealizationAsync()
@@ -224,6 +238,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
                         this.statistics.CompletedCountA -= realization.CountA;
                         this.statistics.CompletedCountB -= realization.CountB;
                         this.Realizations.Remove(realization);
+                        this.OnPropertyChanged(nameof(this.HasRealizations));
                     }
                     else
                     {
