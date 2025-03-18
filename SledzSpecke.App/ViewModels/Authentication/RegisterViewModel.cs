@@ -206,11 +206,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
             bool passwordsMatch = !string.IsNullOrEmpty(this.Password) &&
                                  !string.IsNullOrEmpty(this.ConfirmPassword) &&
                                  this.Password == this.ConfirmPassword;
-
             this.PasswordsNotMatch = !passwordsMatch;
-
-            System.Diagnostics.Debug.WriteLine($"Walidacja haseł: Zgodne={passwordsMatch}, NieZgodne={this.PasswordsNotMatch}");
-
             ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
         }
 

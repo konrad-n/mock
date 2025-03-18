@@ -16,11 +16,7 @@ namespace SledzSpecke.App.Views.MedicalShifts
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
-            // Wywołaj inicjalizację ViewModelu
             this.viewModel.InitializeAsync().ConfigureAwait(false);
-
-            System.Diagnostics.Debug.WriteLine("AddEditOldSMKMedicalShiftPage.OnAppearing: Inicjalizacja ViewModelu została wywołana");
         }
     }
 }

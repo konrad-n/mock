@@ -39,26 +39,18 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.authService = authService;
             this.dialogService = dialogService;
             this.databaseService = databaseService;
-
-            // Inicjalizacja pustego dyżuru
             this.shift = new RealizedMedicalShiftOldSMK
             {
                 StartDate = DateTime.Today,
                 Hours = 24,
                 Minutes = 0,
-                Year = 1 // Domyślnie rok 1
+                Year = 1,
             };
-
-            // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.SaveAsync);
             this.CancelCommand = new AsyncRelayCommand(this.CancelAsync);
-
-            System.Diagnostics.Debug.WriteLine("Konstruktor AddEditOldSMKMedicalShiftViewModel wywołany");
         }
 
         private string yearParam;
-
-        // Właściwości QueryProperties
         public string ShiftId
         {
             set
@@ -81,7 +73,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set
             {
                 this.yearParam = value;
-                System.Diagnostics.Debug.WriteLine($"YearParam ustawiony na: {value}");
 
                 if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int yearValue))
                 {
@@ -90,17 +81,10 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
                     this.OnPropertyChanged(nameof(Shift));
                     this.OnPropertyChanged(nameof(Shift.Year));
-
-                    System.Diagnostics.Debug.WriteLine($"Rok został ustawiony na: {yearValue}");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Nie udało się sparsować roku z: {value}");
                 }
             }
         }
 
-        // Pozostałe właściwości
         public bool IsEdit
         {
             get => this.isEdit;
@@ -114,7 +98,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             {
                 if (this.SetProperty(ref this.shift, value))
                 {
-                    // Jeśli to nowy dyżur i jeszcze nie pobieraliśmy lokacji, zróbmy to teraz
                     if (!this.IsEdit && !this.lastLocationLoaded)
                     {
                         this.LoadLastLocationAsync().ConfigureAwait(false);
@@ -123,129 +106,76 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
         }
 
-        // Komendy
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Metoda ładująca ostatnią lokację
         private async Task LoadLastLocationAsync()
         {
-            try
+            this.lastLocationLoaded = true;
+            var user = await this.authService.GetCurrentUserAsync();
+            if (user == null)
             {
-                // Oznacz, że już próbowaliśmy załadować lokację
-                this.lastLocationLoaded = true;
-
-                // Pobierz użytkownika
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("LoadLastLocationAsync: Nie znaleziono użytkownika");
-                    return;
-                }
-
-                // Pobierz ostatni dyżur (stary SMK)
-                var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? ORDER BY ShiftId DESC LIMIT 1";
-                var lastShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, user.SpecializationId);
-
-                if (lastShifts.Count > 0)
-                {
-                    // Ustawienie ID specjalizacji
-                    this.shift.SpecializationId = user.SpecializationId;
-
-                    // Ustawienie lokacji z ostatniego dyżuru tylko gdy pole lokacji jest puste
-                    if (string.IsNullOrEmpty(this.shift.Location))
-                    {
-                        this.shift.Location = lastShifts[0].Location;
-
-                        // Powiadom o zmianie właściwości
-                        this.OnPropertyChanged(nameof(Shift));
-
-                        System.Diagnostics.Debug.WriteLine($"LoadLastLocationAsync: Uzupełniono lokację z ostatniego dyżuru: {this.shift.Location}");
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("LoadLastLocationAsync: Brak wcześniejszych dyżurów");
-                }
+                return;
             }
-            catch (Exception ex)
+
+            var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? ORDER BY ShiftId DESC LIMIT 1";
+            var lastShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, user.SpecializationId);
+
+            if (lastShifts.Count > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadLastLocationAsync: Błąd podczas pobierania ostatniego dyżuru: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                this.shift.SpecializationId = user.SpecializationId;
+
+                if (string.IsNullOrEmpty(this.shift.Location))
+                {
+                    this.shift.Location = lastShifts[0].Location;
+                    this.OnPropertyChanged(nameof(Shift));
+                }
             }
         }
 
-        // Inicjalizacja ViewModelu
         public async Task InitializeAsync()
         {
-            System.Diagnostics.Debug.WriteLine("InitializeAsync: Rozpoczęto inicjalizację");
-
             if (this.IsBusy)
             {
-                System.Diagnostics.Debug.WriteLine("InitializeAsync: IsBusy=true, przerwanie inicjalizacji");
                 return;
             }
 
             this.IsBusy = true;
 
-            try
+            bool isEditMode = !string.IsNullOrEmpty(this.shiftId) &&
+                                int.TryParse(this.shiftId, out int shiftIdValue) &&
+                                shiftIdValue > 0;
+            this.IsEdit = isEditMode;
+            this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj dyżur";
+
+            if (this.IsEdit)
             {
-                // Najpierw sprawdzamy, czy mamy do czynienia z edycją (ShiftId > 0)
-                bool isEditMode = !string.IsNullOrEmpty(this.shiftId) &&
-                                  int.TryParse(this.shiftId, out int shiftIdValue) &&
-                                  shiftIdValue > 0;
-
-                // Ustawiamy tryb (edycja/dodawanie)
-                this.IsEdit = isEditMode;
-                this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj dyżur";
-
-                // Dla trybu edycji, ładujemy istniejący dyżur
-                if (this.IsEdit)
+                await this.LoadShiftAsync(int.Parse(this.shiftId));
+            }
+            else
+            {
+                if (this.year > 0)
                 {
-                    await this.LoadShiftAsync(int.Parse(this.shiftId));
+                    this.shift.Year = this.year;
+                    this.OnPropertyChanged(nameof(Shift));
+                    this.OnPropertyChanged(nameof(Shift.Year));
                 }
-                else
+
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user != null)
                 {
-                    // Dla nowego dyżuru, ustawiamy rok z parametru
-                    if (this.year > 0)
-                    {
-                        this.shift.Year = this.year;
-                        this.OnPropertyChanged(nameof(Shift));
-                        this.OnPropertyChanged(nameof(Shift.Year));
-                        System.Diagnostics.Debug.WriteLine($"InitializeAsync: Ustawiono rok dyżuru: {this.shift.Year}");
-                    }
+                    this.shift.SpecializationId = user.SpecializationId;
+                }
 
-                    // Pobieramy ID specjalizacji
-                    var user = await this.authService.GetCurrentUserAsync();
-                    if (user != null)
-                    {
-                        this.shift.SpecializationId = user.SpecializationId;
-                        System.Diagnostics.Debug.WriteLine($"InitializeAsync: Ustawiono ID specjalizacji: {this.shift.SpecializationId}");
-                    }
-
-                    // Ładujemy ostatnią lokację dla nowego dyżuru
-                    if (!this.lastLocationLoaded)
-                    {
-                        await this.LoadLastLocationAsync();
-                    }
+                if (!this.lastLocationLoaded)
+                {
+                    await this.LoadLastLocationAsync();
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"InitializeAsync: Błąd: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    $"Wystąpił problem podczas inicjalizacji: {ex.Message}",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-                System.Diagnostics.Debug.WriteLine("InitializeAsync: Zakończono inicjalizację");
-            }
+                
+            this.IsBusy = false;
         }
 
-        // Metody
         private async Task LoadShiftAsync(int shiftId)
         {
             if (this.IsBusy)
@@ -254,42 +184,25 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
 
             this.IsBusy = true;
-            System.Diagnostics.Debug.WriteLine($"LoadShiftAsync: Ładowanie dyżuru o ID={shiftId}");
 
-            try
+            var loadedShift = await this.medicalShiftsService.GetOldSMKShiftAsync(shiftId);
+            if (loadedShift != null)
             {
-                // Pobierz dyżur
-                var loadedShift = await this.medicalShiftsService.GetOldSMKShiftAsync(shiftId);
-                if (loadedShift != null)
-                {
-                    this.IsEdit = true;
-                    this.Title = "Edytuj dyżur";
-                    this.Shift = loadedShift;
-                    System.Diagnostics.Debug.WriteLine($"LoadShiftAsync: Załadowano dyżur: {loadedShift.Location}");
-                }
-                else
-                {
-                    this.IsEdit = false;
-                    this.Title = "Dodaj dyżur";
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie znaleziono dyżuru o podanym identyfikatorze.",
-                        "OK");
-                    System.Diagnostics.Debug.WriteLine("LoadShiftAsync: Nie znaleziono dyżuru!");
-                }
+                this.IsEdit = true;
+                this.Title = "Edytuj dyżur";
+                this.Shift = loadedShift;
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"LoadShiftAsync: Błąd: {ex.Message}");
+                this.IsEdit = false;
+                this.Title = "Dodaj dyżur";
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas ładowania dyżuru.",
+                    "Nie znaleziono dyżuru o podanym identyfikatorze.",
                     "OK");
             }
-            finally
-            {
-                this.IsBusy = false;
-            }
+
+            this.IsBusy = false;
         }
 
         private async Task SaveAsync()
@@ -301,78 +214,57 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             this.IsBusy = true;
 
-            try
+            if (this.shift.Hours <= 0 && this.shift.Minutes <= 0)
             {
-                // Walidacja danych
-                if (this.shift.Hours <= 0 && this.shift.Minutes <= 0)
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Czas dyżuru musi być większy od zera.",
-                        "OK");
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(this.shift.Location))
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nazwa komórki organizacyjnej jest wymagana.",
-                        "OK");
-                    return;
-                }
-
-                // Upewnij się, że rok jest ustawiony (dla nowego dyżuru)
-                if (this.shift.Year <= 0)
-                {
-                    this.shift.Year = this.year;
-                }
-
-                // Pobierz specjalizację
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user != null)
-                {
-                    this.shift.SpecializationId = user.SpecializationId;
-                }
-
-                // Zapisz dyżur
-                bool success = await this.medicalShiftsService.SaveOldSMKShiftAsync(this.shift);
-
-                if (success)
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Sukces",
-                        this.IsEdit ? "Dyżur został zaktualizowany." : "Dyżur został dodany.",
-                        "OK");
-
-                    // Wróć do poprzedniej strony
-                    await Shell.Current.GoToAsync("..");
-                }
-                else
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się zapisać dyżuru.",
-                        "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania dyżuru: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas zapisywania dyżuru.",
+                    "Czas dyżuru musi być większy od zera.",
+                    "OK");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(this.shift.Location))
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nazwa komórki organizacyjnej jest wymagana.",
+                    "OK");
+                return;
+            }
+
+            if (this.shift.Year <= 0)
+            {
+                this.shift.Year = this.year;
+            }
+
+            var user = await this.authService.GetCurrentUserAsync();
+            if (user != null)
+            {
+                this.shift.SpecializationId = user.SpecializationId;
+            }
+
+            bool success = await this.medicalShiftsService.SaveOldSMKShiftAsync(this.shift);
+
+            if (success)
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Sukces",
+                    this.IsEdit ? "Dyżur został zaktualizowany." : "Dyżur został dodany.",
+                    "OK");
+                await Shell.Current.GoToAsync("..");
+            }
+            else
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie udało się zapisać dyżuru.",
                     "OK");
             }
-            finally
-            {
-                this.IsBusy = false;
-            }
+            this.IsBusy = false;
         }
 
         private async Task CancelAsync()
         {
-            // Powrót do poprzedniej strony
             await Shell.Current.GoToAsync("..");
         }
     }

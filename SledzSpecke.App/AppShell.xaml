@@ -6,19 +6,12 @@
     xmlns:local="clr-namespace:SledzSpecke.App"
     xmlns:dashboard="clr-namespace:SledzSpecke.App.Views.Dashboard"
     xmlns:procedures="clr-namespace:SledzSpecke.App.Views.Procedures"
-    xmlns:internships="clr-namespace:SledzSpecke.App.Views.Internships"
-    xmlns:courses="clr-namespace:SledzSpecke.App.Views.Courses"
     xmlns:medicalShifts="clr-namespace:SledzSpecke.App.Views.MedicalShifts"
-    xmlns:selfEducation="clr-namespace:SledzSpecke.App.Views.SelfEducation"
-    xmlns:publications="clr-namespace:SledzSpecke.App.Views.Publications"
-    xmlns:absences="clr-namespace:SledzSpecke.App.Views.Absences"
     xmlns:export="clr-namespace:SledzSpecke.App.Views.Export"
-    xmlns:settings="clr-namespace:SledzSpecke.App.Views.Settings"
     Shell.FlyoutBehavior="Flyout"
     FlyoutHeaderBehavior="Fixed"
     FlyoutWidth="280"
     Title="ŚledzSpecke">
-
     <Shell.FlyoutHeader>
         <Grid HeightRequest="200" BackgroundColor="{StaticResource Primary}">
             <VerticalStackLayout Padding="20" VerticalOptions="Center">
@@ -28,48 +21,36 @@
             </VerticalStackLayout>
         </Grid>
     </Shell.FlyoutHeader>
-
-    <!-- Main application tabs/items -->
     <FlyoutItem Title="Dashboard" Icon="dashboard.png" Route="dashboard">
         <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
     </FlyoutItem>
-
     <FlyoutItem Title="Procedury" Icon="procedure.png" Route="ProcedureSelector">
         <ShellContent ContentTemplate="{DataTemplate procedures:ProcedureSelectorPage}" Route="procedures" />
     </FlyoutItem>
-
     <FlyoutItem Title="Dyżury" Icon="duty.png" Route="medicalshifts">
         <ShellContent ContentTemplate="{DataTemplate medicalShifts:MedicalShiftsSelectorPage}" Route="medicalshifts" />
     </FlyoutItem>
-
     <FlyoutItem Title="Staże" Icon="internship.png" Route="internships">
-        <ShellContent ContentTemplate="{DataTemplate internships:InternshipsListPage}" Route="internships" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" /><!-- to be implemented -->
     </FlyoutItem>
-
     <FlyoutItem Title="Kursy" Icon="course.png" Route="courses">
-        <ShellContent ContentTemplate="{DataTemplate courses:CoursesListPage}" Route="courses" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" /><!-- to be implemented -->
     </FlyoutItem>
-
     <FlyoutItem Title="Samokształcenie" Icon="education.png" Route="selfeducation">
-        <ShellContent ContentTemplate="{DataTemplate selfEducation:SelfEducationListPage}" Route="selfeducation" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" /><!-- to be implemented -->
     </FlyoutItem>
-
     <FlyoutItem Title="Publikacje" Icon="publication.png" Route="publications">
-        <ShellContent ContentTemplate="{DataTemplate publications:PublicationsListPage}" Route="publications" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" /><!-- to be implemented -->
     </FlyoutItem>
-
     <FlyoutItem Title="Nieobecności" Icon="absence.png" Route="absences">
-        <ShellContent ContentTemplate="{DataTemplate absences:AbsencesListPage}" Route="absences" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" /><!-- to be implemented -->
     </FlyoutItem>
-
     <FlyoutItem Title="Eksport" Icon="export.png" Route="export">
         <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="export" />
     </FlyoutItem>
-
     <FlyoutItem Title="Ustawienia" Icon="settings.png" Route="settings">
-        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" Route="settings" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" /><!-- to be implemented -->
     </FlyoutItem>
-
     <Shell.FlyoutFooter>
         <Grid Padding="20" BackgroundColor="{StaticResource Primary}">
             <Button Text="Wyloguj" 

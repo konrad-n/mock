@@ -17,7 +17,6 @@ using SledzSpecke.App.ViewModels.MedicalShifts;
 
 namespace SledzSpecke.App.ViewModels.Internships
 {
-    // ViewModel dla pojedynczego wymagania stażowego
     public class InternshipRequirementViewModel : ObservableObject
     {
         private readonly IMedicalShiftsService medicalShiftsService;
@@ -36,7 +35,7 @@ namespace SledzSpecke.App.ViewModels.Internships
             List<RealizedMedicalShiftNewSMK> shifts,
             IMedicalShiftsService medicalShiftsService,
             IDialogService dialogService,
-            int? currentModuleId) // Dodany parametr
+            int? currentModuleId)
         {
             this.requirement = requirement;
             this.summary = summary;
@@ -47,14 +46,12 @@ namespace SledzSpecke.App.ViewModels.Internships
             currentShift = new RealizedMedicalShiftNewSMK
             {
                 InternshipRequirementId = requirement.Id,
-                ModuleId = currentModuleId, // Ustawienie ID modułu
+                ModuleId = currentModuleId,
                 StartDate = DateTime.Today,
                 EndDate = DateTime.Today,
                 Hours = summary.TotalHours,
                 Minutes = summary.TotalMinutes
             };
-
-            // Inicjalizacja komend
             ToggleExpandCommand = new RelayCommand(ToggleExpand);
             SaveCommand = new AsyncRelayCommand(SaveShiftAsync);
             CancelCommand = new RelayCommand(CancelEdit);
@@ -102,46 +99,28 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         private async Task SaveShiftAsync()
         {
-            try
+            bool success = await medicalShiftsService.SaveNewSMKShiftAsync(CurrentShift);
+
+            if (success)
             {
-                // Zapisz dyżur
-                bool success = await medicalShiftsService.SaveNewSMKShiftAsync(CurrentShift);
-
-                if (success)
+                var shifts = await medicalShiftsService.GetNewSMKShiftsAsync(Id);
+                Shifts.Clear();
+                foreach (var shift in shifts)
                 {
-                    // Odśwież dane
-                    var shifts = await medicalShiftsService.GetNewSMKShiftsAsync(Id);
-                    Shifts.Clear();
-                    foreach (var shift in shifts)
-                    {
-                        Shifts.Add(shift);
-                    }
-
-                    // Zaktualizuj podsumowanie
-                    summary = await medicalShiftsService.GetShiftsSummaryAsync(internshipRequirementId: Id);
-
-                    // Powiadom o zmianie właściwości
-                    OnPropertyChanged(nameof(FormattedTime));
-                    OnPropertyChanged(nameof(Summary));
-
-                    // Zamknij edycję
-                    IsEditing = false;
-                    IsExpanded = false;
+                    Shifts.Add(shift);
                 }
-                else
-                {
-                    await dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się zapisać dyżuru.",
-                        "OK");
-                }
+
+                summary = await medicalShiftsService.GetShiftsSummaryAsync(internshipRequirementId: Id);
+                OnPropertyChanged(nameof(FormattedTime));
+                OnPropertyChanged(nameof(Summary));
+                IsEditing = false;
+                IsExpanded = false;
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania dyżuru: {ex.Message}");
                 await dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas zapisywania dyżuru.",
+                    "Nie udało się zapisać dyżuru.",
                     "OK");
             }
         }

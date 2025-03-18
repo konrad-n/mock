@@ -18,7 +18,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private readonly IDialogService dialogService;
         private readonly IProcedureService procedureService;
 
-        // Current module selection
         private int currentModuleId;
         private Models.Specialization currentSpecialization;
         private Module currentModule;
@@ -26,23 +25,17 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private bool specialisticModuleSelected;
         private bool hasTwoModules;
         private ObservableCollection<ModuleInfo> availableModules;
-
-        // Progress statistics
         private double overallProgress;
         private double internshipProgress;
         private double courseProgress;
         private double procedureProgress;
         private double shiftProgress;
-
-        // Counts
         private string internshipCount;
         private string procedureCount;
         private string courseCount;
         private string shiftStats;
         private int selfEducationCount;
         private int publicationCount;
-
-        // Descriptive information
         private string moduleTitle;
         private string specializationInfo;
         private string dateRangeInfo;
@@ -59,10 +52,8 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             this.dialogService = dialogService;
             this.procedureService = procedureService;
 
-            // Initialize collections
             this.AvailableModules = new ObservableCollection<ModuleInfo>();
 
-            // Initialize commands
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
             this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
             this.NavigateToInternshipsCommand = new AsyncRelayCommand(this.NavigateToInternshipsAsync);
@@ -76,15 +67,11 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             this.NavigateToExportCommand = new AsyncRelayCommand(this.NavigateToExportAsync);
             this.NavigateToRecognitionsCommand = new AsyncRelayCommand(this.NavigateToRecognitionsAsync);
 
-            // Add listener for module change events
             this.specializationService.CurrentModuleChanged += this.OnModuleChanged;
 
-            // Load data on initialization
             this.LoadDataAsync().ConfigureAwait(false);
-            this.DebugDatabase(databaseService).ConfigureAwait(false);
         }
 
-        // Properties
         public int CurrentModuleId
         {
             get => this.currentModuleId;
@@ -92,7 +79,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             {
                 if (this.SetProperty(ref this.currentModuleId, value))
                 {
-                    // Reload all data with new module filter
                     this.LoadDataAsync().ConfigureAwait(false);
                 }
             }
@@ -103,6 +89,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             get => this.hasTwoModules;
             set => this.SetProperty(ref this.hasTwoModules, value);
         }
+
         public Models.Specialization CurrentSpecialization
         {
             get => this.currentSpecialization;
@@ -223,7 +210,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             set => this.SetProperty(ref this.progressText, value);
         }
 
-        // Commands
         public ICommand RefreshCommand { get; }
         public ICommand SelectModuleCommand { get; }
         public ICommand NavigateToInternshipsCommand { get; }
@@ -237,40 +223,18 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         public ICommand NavigateToExportCommand { get; }
         public ICommand NavigateToRecognitionsCommand { get; }
 
-        // Method handling module change event
         private async void OnModuleChanged(object sender, int moduleId)
         {
-            try
-            {
-                System.Diagnostics.Debug.WriteLine("-------------------------------");
-                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Wykryto zmianę modułu na ID: {moduleId}");
-
-                // Przypisz nowy moduł
-                this.CurrentModuleId = moduleId;
-
-                // Pobierz obiekt modułu, aby wyświetlić więcej informacji
-                var module = await this.databaseService.GetModuleAsync(moduleId);
-                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Zmieniono na moduł '{module?.Name}', typ: {module?.Type}");
-
-                // Odśwież dane dashboard
-                await this.LoadDataAsync();
-                System.Diagnostics.Debug.WriteLine("DashboardViewModel: Zakończono odświeżanie danych po zmianie modułu");
-                System.Diagnostics.Debug.WriteLine("-------------------------------");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w OnModuleChanged: {ex.Message}");
-            }
+            this.CurrentModuleId = moduleId;
+            var module = await this.databaseService.GetModuleAsync(moduleId);
+            await this.LoadDataAsync();
         }
 
-        // IDisposable implementation for cleanup
         public void Dispose()
         {
-            // Odłącz obsługę zdarzenia, gdy ViewModel nie jest już używany
             this.specializationService.CurrentModuleChanged -= this.OnModuleChanged;
         }
 
-        // Methods
         public async Task LoadDataAsync()
         {
             if (this.IsBusy)
@@ -279,212 +243,142 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             }
 
             this.IsBusy = true;
-            System.Diagnostics.Debug.WriteLine("DashboardViewModel: Rozpoczęto ładowanie danych");
 
-            try
+            this.CurrentSpecialization = await this.specializationService.GetCurrentSpecializationAsync();
+
+            if (this.CurrentSpecialization == null)
             {
-                // Load current specialization
-                this.CurrentSpecialization = await this.specializationService.GetCurrentSpecializationAsync();
-                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano specjalizację: {this.CurrentSpecialization?.Name ?? "null"}");
-
-                if (this.CurrentSpecialization == null)
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie znaleziono aktywnej specjalizacji. Proszę skontaktować się z administratorem.",
-                        "OK");
-                    System.Diagnostics.Debug.WriteLine("DashboardViewModel: Nie znaleziono specjalizacji");
-                    return;
-                }
-
-                this.HasTwoModules = this.CurrentSpecialization.Modules.Any(x => x.Type == ModuleType.Basic);
-
-                // Upewnij się, że moduły są zainicjalizowane
-                await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
-
-                // Załaduj wszystkie moduły
-                var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
-                System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Pobrano {modules.Count} modułów");
-
-                // Odśwież listę dostępnych modułów
-                this.AvailableModules.Clear();
-                foreach (var module in modules)
-                {
-                    this.AvailableModules.Add(new ModuleInfo
-                    {
-                        Id = module.ModuleId,
-                        Name = module.Name,
-                    });
-                    System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Dodano moduł {module.Name}");
-                }
-
-                // Jeśli nie ustawiono bieżącego modułu, użyj zapisanego w specjalizacji lub pierwszego z listy
-                if (this.CurrentModuleId == 0)
-                {
-                    // Najpierw sprawdź, czy specjalizacja ma zdefiniowany bieżący moduł
-                    if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
-                    {
-                        this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
-                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ID specjalizacji: {this.CurrentModuleId}");
-                    }
-                    // Jeśli nie, sprawdź ustawienia aplikacji
-                    else
-                    {
-                        int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
-                        if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
-                        {
-                            this.CurrentModuleId = savedModuleId;
-                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono moduł z ustawień: {this.CurrentModuleId}");
-                        }
-                        // Jeśli nadal nie mamy bieżącego modułu, użyj pierwszego z listy
-                        else if (modules.Count > 0)
-                        {
-                            this.CurrentModuleId = modules[0].ModuleId;
-                            System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono pierwszy moduł z listy: {this.CurrentModuleId}");
-                        }
-                    }
-                }
-
-                // Pobierz bieżący moduł
-                if (this.CurrentModuleId > 0)
-                {
-                    // Ustaw bieżący moduł w serwisie i pobierz go
-                    await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
-                    this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
-                    System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Ustawiono bieżący moduł: {this.CurrentModule?.Name ?? "null"}");
-
-                    // Ustaw stan wyboru modułu
-                    if (this.CurrentModule != null)
-                    {
-                        this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
-                        this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
-                        System.Diagnostics.Debug.WriteLine($"DashboardViewModel: Typ modułu: {this.CurrentModule.Type}, Basic: {this.BasicModuleSelected}, Spec: {this.SpecialisticModuleSelected}");
-                    }
-                }
-
-                // Załaduj statystyki i aktualizuj UI
-                await this.LoadStatisticsAsync();
-                this.UpdateUIText();
-                System.Diagnostics.Debug.WriteLine("DashboardViewModel: Zakończono ładowanie danych");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych dashboard: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
-
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas ładowania danych. Spróbuj ponownie później.",
+                    "Nie znaleziono aktywnej specjalizacji. Proszę skontaktować się z administratorem.",
                     "OK");
+                return;
             }
-            finally
+
+            this.HasTwoModules = this.CurrentSpecialization.Modules.Any(x => x.Type == ModuleType.Basic);
+            await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
+            var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+            this.AvailableModules.Clear();
+
+            foreach (var module in modules)
             {
-                this.IsBusy = false;
+                this.AvailableModules.Add(new ModuleInfo
+                {
+                    Id = module.ModuleId,
+                    Name = module.Name,
+                });
             }
+
+            if (this.CurrentModuleId == 0)
+            {
+                if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
+                {
+                    this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
+                }
+                else
+                {
+                    int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
+                    if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
+                    {
+                        this.CurrentModuleId = savedModuleId;
+                    }
+                    else if (modules.Count > 0)
+                    {
+                        this.CurrentModuleId = modules[0].ModuleId;
+                    }
+                }
+            }
+
+            if (this.CurrentModuleId > 0)
+            {
+                await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
+                this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
+
+                if (this.CurrentModule != null)
+                {
+                    this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
+                    this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
+                }
+            }
+
+            await this.LoadStatisticsAsync();
+            this.UpdateUIText();
+
+            this.IsBusy = false;
         }
 
         private async Task LoadStatisticsAsync()
         {
-            try
+            int? moduleId = this.CurrentModuleId;
+            this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
+                this.databaseService,
+                this.CurrentSpecialization.SpecializationId,
+                moduleId);
+            int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
+            int totalInternships = 0;
+
+            if (this.CurrentModule != null)
             {
-                // Określ ID aktualnie wybranego modułu
-                int? moduleId = this.CurrentModuleId;
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Ładowanie statystyk dla modułu ID={moduleId}");
-
-                // Pobierz ogólny postęp - upewnij się, że przekazujesz ID modułu
-                this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
-                    this.databaseService,
-                    this.CurrentSpecialization.SpecializationId,
-                    moduleId);
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Ogólny postęp: {this.OverallProgress}");
-
-                // Staże - przekaż ID modułu
-                int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
-                int totalInternships = 0;
-
-                if (this.CurrentModule != null)
-                {
-                    totalInternships = this.CurrentModule.TotalInternships;
-                }
-
-                this.InternshipCount = $"{completedInternships}/{totalInternships}";
-                this.InternshipProgress = totalInternships > 0
-                    ? (double)completedInternships / totalInternships
-                    : 0;
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Staże: {this.InternshipCount}, Postęp: {this.InternshipProgress}");
-
-                // Procedury - zaktualizowana logika
-                var procedureStats = await this.procedureService.GetProcedureStatisticsForModuleAsync(this.CurrentModuleId);
-                int completedProcedures = procedureStats.completed;
-                int totalProcedures = procedureStats.total;
-
-                this.ProcedureCount = $"{completedProcedures}/{totalProcedures}";
-                this.ProcedureProgress = totalProcedures > 0
-                    ? (double)completedProcedures / totalProcedures
-                    : 0;
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Procedury: {this.ProcedureCount}, Postęp: {this.ProcedureProgress}");
-
-                // Kursy - przekaż ID modułu
-                int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
-                int totalCourses = 0;
-
-                if (this.CurrentModule != null)
-                {
-                    totalCourses = this.CurrentModule.TotalCourses;
-                }
-
-                this.CourseCount = $"{completedCourses}/{totalCourses}";
-                this.CourseProgress = totalCourses > 0
-                    ? (double)completedCourses / totalCourses
-                    : 0;
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Kursy: {this.CourseCount}, Postęp: {this.CourseProgress}");
-
-                // Dyżury - przekaż ID modułu
-                int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
-
-                // Pobierz pełne statystyki dla WYBRANEGO MODUŁU, a nie całej specjalizacji
-                SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Statystyki pobrane pomyślnie");
-
-                if (stats.RequiredShiftHours > 0)
-                {
-                    this.ShiftStats = $"{completedShiftHours}/{stats.RequiredShiftHours}h";
-                    this.ShiftProgress = Math.Min(1.0, (double)completedShiftHours / stats.RequiredShiftHours);
-                }
-                else
-                {
-                    this.ShiftStats = $"{completedShiftHours}h";
-                    this.ShiftProgress = 0;
-                }
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Dyżury: {this.ShiftStats}, Postęp: {this.ShiftProgress}");
-
-                // Pozostałe liczniki - przekaż ID modułu
-                this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
-                this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
-                System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Samokształcenie: {this.SelfEducationCount}, Publikacje: {this.PublicationCount}");
-
-                // Oblicz i aktualizuj ogólny postęp tylko dla aktywnego modułu
-                if (this.CurrentModule != null)
-                {
-                    double internshipWeight = 0.35;
-                    double courseWeight = 0.25;
-                    double procedureWeight = 0.30;
-                    double otherWeight = 0.10;
-
-                    this.OverallProgress =
-                        (this.InternshipProgress * internshipWeight) +
-                        (this.CourseProgress * courseWeight) +
-                        (this.ProcedureProgress * procedureWeight) +
-                        (this.ShiftProgress * otherWeight);
-
-                    this.OverallProgress = Math.Min(1.0, this.OverallProgress);
-                    System.Diagnostics.Debug.WriteLine($"LoadStatisticsAsync: Zaktualizowano ogólny postęp: {this.OverallProgress}");
-                }
+                totalInternships = this.CurrentModule.TotalInternships;
             }
-            catch (Exception ex)
+
+            this.InternshipCount = $"{completedInternships}/{totalInternships}";
+            this.InternshipProgress = totalInternships > 0
+                ? (double)completedInternships / totalInternships
+                : 0;
+            var procedureStats = await this.procedureService.GetProcedureStatisticsForModuleAsync(this.CurrentModuleId);
+            int completedProcedures = procedureStats.completed;
+            int totalProcedures = procedureStats.total;
+
+            this.ProcedureCount = $"{completedProcedures}/{totalProcedures}";
+            this.ProcedureProgress = totalProcedures > 0
+                ? (double)completedProcedures / totalProcedures
+                : 0;
+
+            int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
+            int totalCourses = 0;
+
+            if (this.CurrentModule != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania statystyk: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                totalCourses = this.CurrentModule.TotalCourses;
+            }
+
+            this.CourseCount = $"{completedCourses}/{totalCourses}";
+            this.CourseProgress = totalCourses > 0
+                ? (double)completedCourses / totalCourses
+                : 0;
+
+            int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
+            SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
+
+            if (stats.RequiredShiftHours > 0)
+            {
+                this.ShiftStats = $"{completedShiftHours}/{stats.RequiredShiftHours}h";
+                this.ShiftProgress = Math.Min(1.0, (double)completedShiftHours / stats.RequiredShiftHours);
+            }
+            else
+            {
+                this.ShiftStats = $"{completedShiftHours}h";
+                this.ShiftProgress = 0;
+            }
+
+            this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
+            this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
+
+            if (this.CurrentModule != null)
+            {
+                double internshipWeight = 0.35;
+                double courseWeight = 0.25;
+                double procedureWeight = 0.30;
+                double otherWeight = 0.10;
+
+                this.OverallProgress =
+                    (this.InternshipProgress * internshipWeight) +
+                    (this.CourseProgress * courseWeight) +
+                    (this.ProcedureProgress * procedureWeight) +
+                    (this.ShiftProgress * otherWeight);
+
+                this.OverallProgress = Math.Min(1.0, this.OverallProgress);
             }
         }
 
@@ -495,7 +389,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 return;
             }
 
-            // Ustaw tytuł na podstawie bieżącego modułu
             if (this.CurrentModule != null)
             {
                 this.ModuleTitle = this.CurrentModule.Name;
@@ -505,15 +398,10 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 this.ModuleTitle = this.CurrentSpecialization.Name;
             }
 
-            // Ustaw informacje o specjalizacji
             this.SpecializationInfo = $"{this.CurrentSpecialization.Name}";
-
-            // Ustaw zakres dat
             string startDate = this.CurrentSpecialization.StartDate.ToString("dd-MM-yyyy");
             string endDate = this.CurrentSpecialization.CalculatedEndDate.ToString("dd-MM-yyyy");
             this.DateRangeInfo = $"{startDate} - {endDate}";
-
-            // Ustaw tekst postępu
             int progressPercent = (int)(this.OverallProgress * 100);
             this.ProgressText = $"Ukończono {progressPercent}%";
         }
@@ -525,55 +413,40 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 return;
             }
 
-            try
+            var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+
+            if (moduleType == "Basic")
             {
-                var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
-
-                if (moduleType == "Basic")
+                var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                if (basicModule != null)
                 {
-                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
-                    if (basicModule != null)
-                    {
-                        this.CurrentModuleId = basicModule.ModuleId;
-                        this.BasicModuleSelected = true;
-                        this.SpecialisticModuleSelected = false;
-                    }
+                    this.CurrentModuleId = basicModule.ModuleId;
+                    this.BasicModuleSelected = true;
+                    this.SpecialisticModuleSelected = false;
                 }
-                else if (moduleType == "Specialistic")
-                {
-                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
-                    if (specialisticModule != null)
-                    {
-                        this.CurrentModuleId = specialisticModule.ModuleId;
-                        this.BasicModuleSelected = false;
-                        this.SpecialisticModuleSelected = true;
-                    }
-                }
-
-                // Zapisz wybrany moduł w ustawieniach
-                await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.CurrentModuleId);
-
-                // Ustaw bieżący moduł w specjalizacji
-                if (this.CurrentSpecialization.CurrentModuleId != this.CurrentModuleId)
-                {
-                    this.CurrentSpecialization.CurrentModuleId = this.CurrentModuleId;
-                    await this.databaseService.UpdateSpecializationAsync(this.CurrentSpecialization);
-                }
-
-                // Odśwież dane
-                await this.LoadDataAsync();
             }
-            catch (Exception ex)
+            else if (moduleType == "Specialistic")
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zmiany modułu: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas przełączania modułu. Spróbuj ponownie.",
-                    "OK");
+                var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                if (specialisticModule != null)
+                {
+                    this.CurrentModuleId = specialisticModule.ModuleId;
+                    this.BasicModuleSelected = false;
+                    this.SpecialisticModuleSelected = true;
+                }
             }
+
+            await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.CurrentModuleId);
+
+            if (this.CurrentSpecialization.CurrentModuleId != this.CurrentModuleId)
+            {
+                this.CurrentSpecialization.CurrentModuleId = this.CurrentModuleId;
+                await this.databaseService.UpdateSpecializationAsync(this.CurrentSpecialization);
+            }
+
+            await this.LoadDataAsync();
         }
 
-        // Metody nawigacji
         private async Task NavigateToInternshipsAsync()
         {
             await Shell.Current.GoToAsync("internships");
@@ -621,7 +494,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         private async Task NavigateToRecognitionsAsync()
         {
-            // Uznania są tylko dla modułu specjalistycznego
             if (!this.SpecialisticModuleSelected)
             {
                 await this.dialogService.DisplayAlertAsync(
@@ -632,85 +504,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             }
 
             await Shell.Current.GoToAsync("Recognitions");
-        }
-
-        private async Task DebugDatabase(IDatabaseService databaseService)
-        {
-            try
-            {
-                System.Diagnostics.Debug.WriteLine("=== DEBUGOWANIE BAZY DANYCH ===");
-
-                // Użytkownicy
-                var users = await databaseService.GetAllUsersAsync();
-                System.Diagnostics.Debug.WriteLine($"\nUżytkownicy ({users.Count}):");
-                foreach (var user in users)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {user.UserId}, Nazwa: {user.Username}, Email: {user.Email}, Wersja SMK: {user.SmkVersion}, SpecializationId: {user.SpecializationId}");
-                }
-
-                // Specjalizacje
-                var specializations = await databaseService.GetAllSpecializationsAsync();
-                System.Diagnostics.Debug.WriteLine($"\nSpecjalizacje ({specializations.Count}):");
-                foreach (var spec in specializations)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {spec.SpecializationId}, Nazwa: {spec.Name}, Start: {spec.StartDate:d}, Koniec: {spec.PlannedEndDate:d}, Wersja SMK: {spec.SmkVersion}");
-                }
-
-                // Moduły
-                var modules = await databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
-                System.Diagnostics.Debug.WriteLine($"\nModuły dla obecnej specjalizacji {specializations[0].Name} ({modules.Count}):");
-                foreach (var module in modules)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}, SpecializationId: {module.SpecializationId}, Wersja SMK: {module.SmkVersion}");
-                }
-
-                // Staże (dla pierwszego znalezionego modułu)
-                var internships = await databaseService.GetInternshipsAsync();
-                System.Diagnostics.Debug.WriteLine($"\nStaże ({internships.Count}):");
-                foreach (var internship in internships)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {internship.InternshipId}, Nazwa: {internship.InternshipName}, ModułID: {internship.ModuleId}");
-                }
-
-                // Procedury
-                var procedures = await databaseService.GetProceduresAsync();
-                System.Diagnostics.Debug.WriteLine($"\nProcedury ({procedures.Count}):");
-                foreach (var procedure in procedures)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {procedure.ProcedureId}, Kod: {procedure.Code}, Data: {procedure.Date:d}, StażID: {procedure.InternshipId}");
-                }
-
-                // Dyżury
-                var shifts = await databaseService.GetMedicalShiftsAsync();
-                System.Diagnostics.Debug.WriteLine($"\nDyżury ({shifts.Count}):");
-                foreach (var shift in shifts)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {shift.ShiftId}, Data: {shift.Date:d}, Godziny: {shift.Hours}:{shift.Minutes}, StażID: {shift.InternshipId}");
-                }
-
-                // Kursy
-                var courses = await databaseService.GetCoursesAsync();
-                System.Diagnostics.Debug.WriteLine($"\nKursy ({courses.Count}):");
-                foreach (var course in courses)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {course.CourseId}, Nazwa: {course.CourseName}, ModułID: {course.ModuleId}");
-                }
-
-                // Samokształcenie
-                var selfEducation = await databaseService.GetSelfEducationItemsAsync();
-                System.Diagnostics.Debug.WriteLine($"\nSamokształcenie ({selfEducation.Count}):");
-                foreach (var item in selfEducation)
-                {
-                    System.Diagnostics.Debug.WriteLine($"ID: {item.SelfEducationId}, Tytuł: {item.Title}, ModułID: {item.ModuleId}");
-                }
-
-                System.Diagnostics.Debug.WriteLine("\n=== KONIEC DEBUGOWANIA BAZY DANYCH ===");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas debugowania bazy danych: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-            }
         }
     }
 }

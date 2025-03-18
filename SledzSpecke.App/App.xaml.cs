@@ -20,15 +20,8 @@ namespace SledzSpecke.App
 
             Task.Run(async () =>
             {
-                try
-                {
-                    var dbService = IPlatformApplication.Current.Services.GetRequiredService<IDatabaseService>();
-                    await dbService.MigrateShiftDataForModulesAsync();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas migracji: {ex.Message}");
-                }
+                var dbService = IPlatformApplication.Current.Services.GetRequiredService<IDatabaseService>();
+                await dbService.MigrateShiftDataForModulesAsync();
             });
         }
 

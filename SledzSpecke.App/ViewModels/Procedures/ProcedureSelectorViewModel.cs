@@ -24,27 +24,18 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public async Task InitializeAsync()
         {
-            try
-            {
-                // Pobierz aktualnego użytkownika
-                var user = await this.authService.GetCurrentUserAsync();
+            var user = await this.authService.GetCurrentUserAsync();
 
-                if (user != null)
-                {
-                    // Przekieruj automatycznie w zależności od wersji SMK
-                    if (user.SmkVersion == SmkVersion.Old)
-                    {
-                        await Shell.Current.GoToAsync("OldSMKProcedures");
-                    }
-                    else
-                    {
-                        await Shell.Current.GoToAsync("NewSMKProcedures");
-                    }
-                }
-            }
-            catch (Exception ex)
+            if (user != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas inicjalizacji: {ex.Message}");
+                if (user.SmkVersion == SmkVersion.Old)
+                {
+                    await Shell.Current.GoToAsync("OldSMKProcedures");
+                }
+                else
+                {
+                    await Shell.Current.GoToAsync("NewSMKProcedures");
+                }
             }
         }
 

@@ -102,38 +102,25 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsLoading = true;
 
-            try
-            {
-                var realizations = await this.procedureService.GetNewSMKProceduresAsync(
-                    this.moduleId,
-                    this.requirement.Id);
+            var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                this.moduleId,
+                this.requirement.Id);
 
-                await MainThread.InvokeOnMainThreadAsync(() =>
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                this.Realizations.Clear();
+                foreach (var realization in realizations)
                 {
-                    this.Realizations.Clear();
-                    foreach (var realization in realizations)
-                    {
-                        this.Realizations.Add(realization);
-                    }
-                    this.hasLoadedData = true;
-                });
+                    this.Realizations.Add(realization);
+                }
+                this.hasLoadedData = true;
+            });
 
-                this.OnPropertyChanged(nameof(this.Realizations));
-                this.OnPropertyChanged(nameof(this.HasRealizations));
-                this.OnPropertyChanged(nameof(this.Statistics));
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas ładowania realizacji procedur.",
-                    "OK");
-            }
-            finally
-            {
-                this.IsLoading = false;
-            }
+            this.OnPropertyChanged(nameof(this.Realizations));
+            this.OnPropertyChanged(nameof(this.HasRealizations));
+            this.OnPropertyChanged(nameof(this.Statistics));
+
+            this.IsLoading = false;
         }
 
         private async Task OnToggleExpandAsync()
@@ -150,23 +137,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnToggleAddRealizationAsync()
         {
-            try
+            var navigationParameter = new Dictionary<string, object>
             {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "RequirementId", this.requirement.Id.ToString() }
-                };
+                { "RequirementId", this.requirement.Id.ToString() }
+            };
 
-                await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas otwierania formularza dodawania realizacji.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
         }
 
         private async Task OnEditRealization(RealizedProcedureNewSMK realization)
@@ -185,24 +161,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            try
+            var navigationParameter = new Dictionary<string, object>
             {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "ProcedureId", realization.ProcedureId.ToString() },
-                    { "RequirementId", this.requirement.Id.ToString() }
-                };
+                { "ProcedureId", realization.ProcedureId.ToString() },
+                { "RequirementId", this.requirement.Id.ToString() }
+            };
 
-                await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas otwierania formularza edycji realizacji.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
         }
 
         private async Task OnDeleteRealization(RealizedProcedureNewSMK realization)

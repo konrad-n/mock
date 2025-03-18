@@ -36,11 +36,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.dialogService = dialogService;
             this.specializationService = specializationService;
 
-            // Inicjalizacja komend
             this.SaveCommand = new AsyncRelayCommand(this.OnSaveAsync, this.CanSave);
             this.CancelCommand = new AsyncRelayCommand(this.OnCancelAsync);
 
-            // Inicjalizacja dat
             this.startDate = DateTime.Now;
             this.endDate = DateTime.Now;
 
@@ -131,36 +129,22 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            try
+            if (int.TryParse(this.procedureId, out int id))
             {
-                if (int.TryParse(this.procedureId, out int id))
+                this.procedure = await this.procedureService.GetNewSMKProcedureAsync(id);
+                if (this.procedure != null)
                 {
-                    this.procedure = await this.procedureService.GetNewSMKProcedureAsync(id);
-                    if (this.procedure != null)
-                    {
-                        this.isEdit = true;
-                        this.Title = "Edytuj realizację procedury";
+                    this.isEdit = true;
+                    this.Title = "Edytuj realizację procedury";
 
-                        this.CountA = this.procedure.CountA;
-                        this.CountB = this.procedure.CountB;
-                        this.StartDate = this.procedure.StartDate;
-                        this.EndDate = this.procedure.EndDate;
-                        this.ProcedureName = this.procedure.ProcedureName;
-                    }
+                    this.CountA = this.procedure.CountA;
+                    this.CountB = this.procedure.CountB;
+                    this.StartDate = this.procedure.StartDate;
+                    this.EndDate = this.procedure.EndDate;
+                    this.ProcedureName = this.procedure.ProcedureName;
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania procedury: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas ładowania procedury.",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-            }
+            this.IsBusy = false;
         }
 
         private async Task LoadRequirementAsync()
@@ -172,26 +156,17 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            try
+            if (int.TryParse(this.requirementId, out int id))
             {
-                if (int.TryParse(this.requirementId, out int id))
+                var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync();
+                var requirement = requirements.FirstOrDefault(r => r.Id == id);
+                if (requirement != null)
                 {
-                    var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync();
-                    var requirement = requirements.FirstOrDefault(r => r.Id == id);
-                    if (requirement != null)
-                    {
-                        this.ProcedureName = requirement.Name;
-                    }
+                    this.ProcedureName = requirement.Name;
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania wymagania: {ex.Message}");
-            }
-            finally
-            {
-                this.IsBusy = false;
-            }
+
+            this.IsBusy = false;
         }
 
         private bool CanSave()
@@ -209,66 +184,49 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            try
+            var procedureToSave = this.procedure ?? new RealizedProcedureNewSMK();
+            var currentModule = await this.specializationService.GetCurrentModuleAsync();
+
+            if (currentModule == null)
             {
-                // Przygotuj obiekt procedury
-                var procedureToSave = this.procedure ?? new RealizedProcedureNewSMK();
-
-                // Pobierz bieżący moduł ze SpecializationService
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                if (currentModule == null)
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie można określić bieżącego modułu.",
-                        "OK");
-                    return;
-                }
-
-                procedureToSave.CountA = this.CountA;
-                procedureToSave.CountB = this.CountB;
-                procedureToSave.StartDate = this.StartDate;
-                procedureToSave.EndDate = this.EndDate;
-                procedureToSave.ProcedureName = this.ProcedureName;
-                procedureToSave.ModuleId = currentModule.ModuleId;  // Ustawienie ModuleId
-
-                if (!this.isEdit && !string.IsNullOrEmpty(this.requirementId))
-                {
-                    procedureToSave.ProcedureRequirementId = int.Parse(this.requirementId);
-                }
-
-                // Zapisz procedurę
-                bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedureToSave);
-
-                if (success)
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Sukces",
-                        this.isEdit ? "Realizacja procedury została zaktualizowana." : "Realizacja procedury została dodana.",
-                        "OK");
-
-                    await Shell.Current.GoToAsync("..");
-                }
-                else
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się zapisać realizacji procedury.",
-                        "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania procedury: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Wystąpił problem podczas zapisywania realizacji procedury.",
+                    "Nie można określić bieżącego modułu.",
+                    "OK");
+                return;
+            }
+
+            procedureToSave.CountA = this.CountA;
+            procedureToSave.CountB = this.CountB;
+            procedureToSave.StartDate = this.StartDate;
+            procedureToSave.EndDate = this.EndDate;
+            procedureToSave.ProcedureName = this.ProcedureName;
+            procedureToSave.ModuleId = currentModule.ModuleId;
+
+            if (!this.isEdit && !string.IsNullOrEmpty(this.requirementId))
+            {
+                procedureToSave.ProcedureRequirementId = int.Parse(this.requirementId);
+            }
+
+            bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedureToSave);
+
+            if (success)
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Sukces",
+                    this.isEdit ? "Realizacja procedury została zaktualizowana." : "Realizacja procedury została dodana.",
+                    "OK");
+
+                await Shell.Current.GoToAsync("..");
+            }
+            else
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie udało się zapisać realizacji procedury.",
                     "OK");
             }
-            finally
-            {
-                this.IsBusy = false;
-            }
+            this.IsBusy = false;
         }
 
         private async Task OnCancelAsync()

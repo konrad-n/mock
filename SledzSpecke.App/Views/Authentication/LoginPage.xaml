@@ -6,14 +6,11 @@
     Title="Logowanie">
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" VerticalOptions="FillAndExpand">
-        <!-- Nagłówek -->
         <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,20,0,40">
             <Image Source="app_logo.png" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center"/>
             <Label Text="ŚledzSpecke" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center"/>
             <Label Text="Śledź swoją specjalizację medyczną" FontSize="18" HorizontalOptions="Center"/>
         </VerticalStackLayout>
-
-        <!-- Formularz logowania -->
         <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center">
             <Entry Placeholder="Nazwa użytkownika" Text="{Binding Username}" BackgroundColor="Transparent"/>
             <Entry Placeholder="Hasło" Text="{Binding Password}" IsPassword="True" BackgroundColor="Transparent"/>
@@ -25,7 +22,6 @@
                     Style="{StaticResource PrimaryButton}" Margin="0,20,0,0"/>
         </VerticalStackLayout>
 
-        <!-- Stopka -->
         <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,20,0,0">
             <Label Text="Nie masz jeszcze konta?" HorizontalOptions="Center"/>
             <Button Text="Zarejestruj się" Command="{Binding GoToRegisterCommand}" 

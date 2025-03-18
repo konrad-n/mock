@@ -17,7 +17,6 @@ namespace SledzSpecke.App.Views.MedicalShifts
         {
             base.OnNavigatedTo(args);
 
-            // Ustaw właściwość BackButtonBehavior dla Shell'a
             Shell.SetBackButtonBehavior(this, new BackButtonBehavior
             {
                 Command = new Command(async () =>
@@ -31,7 +30,6 @@ namespace SledzSpecke.App.Views.MedicalShifts
         {
             base.OnAppearing();
 
-            // Dodaj zabezpieczenie przed wielokrotnym wywołaniem
             if (!this.viewModel.IsBusy)
             {
                 this.viewModel.RefreshCommand.Execute(null);

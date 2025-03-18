@@ -7,7 +7,7 @@ namespace SledzSpecke.App.Views.Procedures
     public partial class OldSMKProceduresListPage : ContentPage
     {
         private readonly OldSMKProceduresListViewModel viewModel;
-        private readonly IProcedureService procedureService; // Dodane bezpośrednie odwołanie do serwisu
+        private readonly IProcedureService procedureService;
 
         public OldSMKProceduresListPage(OldSMKProceduresListViewModel viewModel, IProcedureService procedureService)
         {
@@ -21,7 +21,6 @@ namespace SledzSpecke.App.Views.Procedures
         {
             base.OnNavigatedTo(args);
 
-            // Ustaw właściwość BackButtonBehavior dla Shell'a
             Shell.SetBackButtonBehavior(this, new BackButtonBehavior
             {
                 Command = new Command(async () =>
@@ -34,8 +33,6 @@ namespace SledzSpecke.App.Views.Procedures
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
-            // Odśwież dane przy każdym pokazaniu strony
             this.viewModel.RefreshCommand.Execute(null);
         }
 
@@ -43,108 +40,69 @@ namespace SledzSpecke.App.Views.Procedures
         {
             base.OnDisappearing();
 
-            // Jeśli ViewModel implementuje IDisposable, wywołaj Dispose()
             if (this.viewModel is IDisposable disposable)
             {
                 disposable.Dispose();
             }
         }
 
-        // Obsługa zdarzenia Clicked przycisku edycji procedury
         private async void OnEditButtonClicked(object sender, EventArgs e)
         {
-            try
+            if (sender is Button button && button.BindingContext is RealizedProcedureOldSMK procedure)
             {
-                if (sender is Button button && button.BindingContext is RealizedProcedureOldSMK procedure)
+                var navigationParameter = new Dictionary<string, object>
                 {
-                    System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Edycja procedury ID={procedure.ProcedureId}");
+                    { "ProcedureId", procedure.ProcedureId.ToString() },
+                    { "IsEdit", "true" },
+                    { "Date", procedure.Date.ToString("o") },
+                    { "Year", procedure.Year.ToString() },
+                    { "Code", procedure.Code ?? string.Empty },
+                    { "PerformingPerson", procedure.PerformingPerson ?? string.Empty },
+                    { "Location", procedure.Location ?? string.Empty },
+                    { "PatientInitials", procedure.PatientInitials ?? string.Empty },
+                    { "PatientGender", procedure.PatientGender ?? string.Empty },
+                    { "AssistantData", procedure.AssistantData ?? string.Empty },
+                    { "ProcedureGroup", procedure.ProcedureGroup ?? string.Empty },
+                    { "InternshipId", procedure.InternshipId.ToString() },
+                    { "InternshipName", procedure.InternshipName ?? string.Empty }
+                };
 
-                    // Przekaż wszystkie potrzebne pola procedury jako parametry nawigacji
-                    var navigationParameter = new Dictionary<string, object>
-                    {
-                        { "ProcedureId", procedure.ProcedureId.ToString() },
-                        { "IsEdit", "true" },
-                        { "Date", procedure.Date.ToString("o") },
-                        { "Year", procedure.Year.ToString() },
-                        { "Code", procedure.Code ?? string.Empty },
-                        { "PerformingPerson", procedure.PerformingPerson ?? string.Empty },
-                        { "Location", procedure.Location ?? string.Empty },
-                        { "PatientInitials", procedure.PatientInitials ?? string.Empty },
-                        { "PatientGender", procedure.PatientGender ?? string.Empty },
-                        { "AssistantData", procedure.AssistantData ?? string.Empty },
-                        { "ProcedureGroup", procedure.ProcedureGroup ?? string.Empty },
-                        { "InternshipId", procedure.InternshipId.ToString() },
-                        { "InternshipName", procedure.InternshipName ?? string.Empty }
-                    };
-
-                    await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"OnEditButtonClicked: Ogólny błąd: {ex.Message}");
-                await this.DisplayAlert("Błąd", $"Wystąpił problem podczas edycji procedury: {ex.Message}", "OK");
+                await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
             }
         }
 
-        // Obsługa zdarzenia Clicked przycisku usunięcia procedury
         private async void OnDeleteButtonClicked(object sender, EventArgs e)
         {
-            try
+            if (sender is Button button && button.BindingContext is RealizedProcedureOldSMK procedure)
             {
-                if (sender is Button button && button.BindingContext is RealizedProcedureOldSMK procedure)
+                bool confirm = await DisplayAlert(
+                    "Potwierdzenie",
+                    "Czy na pewno chcesz usunąć tę procedurę?",
+                    "Tak",
+                    "Nie");
+
+                if (confirm)
                 {
-                    System.Diagnostics.Debug.WriteLine($"OnDeleteButtonClicked: Usuwanie procedury ID={procedure.ProcedureId}");
-
-                    // Pytamy użytkownika o potwierdzenie
-                    bool confirm = await DisplayAlert(
-                        "Potwierdzenie",
-                        "Czy na pewno chcesz usunąć tę procedurę?",
-                        "Tak",
-                        "Nie");
-
-                    if (confirm)
+                    if (button.Parent?.Parent?.BindingContext is RealizedProcedureOldSMK &&
+                        button.Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.BindingContext is ProcedureGroupViewModel groupViewModel)
                     {
-                        System.Diagnostics.Debug.WriteLine($"OnDeleteButtonClicked: Potwierdzono usunięcie procedury ID={procedure.ProcedureId}");
-
-                        // Znajdź ProcedureGroupViewModel, który zawiera tę procedurę
-                        if (button.Parent?.Parent?.BindingContext is RealizedProcedureOldSMK &&
-                            button.Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.Parent?.BindingContext is ProcedureGroupViewModel groupViewModel)
-                        {
-                            // Wywołaj metodę usuwania z ViewModel
-                            await groupViewModel.OnDeleteProcedure(procedure);
-                        }
-                        else
-                        {
-                            // Awaryjnie - użyj bezpośrednio serwisu procedur
-                            bool success = await this.procedureService.DeleteOldSMKProcedureAsync(procedure.ProcedureId);
-
-                            if (success)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"OnDeleteButtonClicked: Pomyślnie usunięto procedurę");
-
-                                // Odśwież dane
-                                this.viewModel.RefreshCommand.Execute(null);
-
-                                await DisplayAlert("Sukces", "Procedura została usunięta.", "OK");
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine($"OnDeleteButtonClicked: Nie udało się usunąć procedury");
-                                await DisplayAlert("Błąd", "Nie udało się usunąć procedury. Spróbuj ponownie.", "OK");
-                            }
-                        }
+                        await groupViewModel.OnDeleteProcedure(procedure);
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"OnDeleteButtonClicked: Anulowano usunięcie procedury");
+                        bool success = await this.procedureService.DeleteOldSMKProcedureAsync(procedure.ProcedureId);
+
+                        if (success)
+                        {
+                            this.viewModel.RefreshCommand.Execute(null);
+                            await DisplayAlert("Sukces", "Procedura została usunięta.", "OK");
+                        }
+                        else
+                        {
+                            await DisplayAlert("Błąd", "Nie udało się usunąć procedury. Spróbuj ponownie.", "OK");
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"OnDeleteButtonClicked: Błąd podczas usuwania procedury: {ex.Message}");
-                await DisplayAlert("Błąd", $"Wystąpił problem podczas usuwania procedury: {ex.Message}", "OK");
             }
         }
     }

@@ -594,13 +594,11 @@ namespace SledzSpecke.App.Services.Specialization
 
             if (shifts.Count > 0 || procedures.Count > 0)
             {
-                // Nie można usunąć stażu z powiązanymi elementami
                 return false;
             }
 
             int result = await this.databaseService.DeleteInternshipAsync(internship);
 
-            // Aktualizacja postępu modułu
             if (internship.ModuleId.HasValue)
             {
                 await this.UpdateModuleProgressAsync(internship.ModuleId.Value);

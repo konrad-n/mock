@@ -161,22 +161,15 @@ namespace SledzSpecke.App.Helpers
 
                 if (!string.IsNullOrEmpty(module.Structure))
                 {
-                    try
+                    var options = new JsonSerializerOptions
                     {
-                        var options = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true,
-                            AllowTrailingCommas = true,
-                            ReadCommentHandling = JsonCommentHandling.Skip,
-                            Converters = { new JsonStringEnumConverter() }
-                        };
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip,
+                        Converters = { new JsonStringEnumConverter() }
+                    };
 
-                        moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Błąd podczas deserializacji struktury modułu: {ex.Message}");
-                    }
+                    moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
                 }
 
                 var internships = await database.GetInternshipsAsync(moduleId: moduleId);

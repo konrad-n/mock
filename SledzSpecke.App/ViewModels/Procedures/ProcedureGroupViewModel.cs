@@ -42,8 +42,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.DeleteProcedureCommand = new AsyncRelayCommand<RealizedProcedureOldSMK>(this.OnDeleteProcedure);
             this.AddProcedureCommand = new AsyncRelayCommand(this.OnAddProcedure);
             this.SelectProcedureCommand = new RelayCommand<RealizedProcedureOldSMK>(this.OnSelectProcedure);
-
-            // Nasłuchuj zmian w kolekcji procedur
             this.procedures.CollectionChanged += this.Procedures_CollectionChanged;
         }
 
@@ -95,12 +93,10 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private void Procedures_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // Jeżeli dodano nowe procedury, a mamy już wybraną procedurę, sprawdźmy czy dalej istnieje
             if (e.Action == NotifyCollectionChangedAction.Add && this.procedures.Count > 0 && this.selectedProcedure == null)
             {
                 this.SelectedProcedure = this.procedures[0];
             }
-            // Jeżeli usunięto procedury, a wybrana procedura była jedną z nich, wybierz nową lub wyczyść
             else if (e.Action == NotifyCollectionChangedAction.Remove && this.selectedProcedure != null)
             {
                 if (!this.procedures.Contains(this.selectedProcedure))
@@ -108,7 +104,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     this.SelectedProcedure = this.procedures.Count > 0 ? this.procedures[0] : null;
                 }
             }
-            // Jeżeli zresetowano kolekcję, resetuj też wybór
             else if (e.Action == NotifyCollectionChangedAction.Reset)
             {
                 this.SelectedProcedure = this.procedures.Count > 0 ? this.procedures[0] : null;
@@ -120,47 +115,37 @@ namespace SledzSpecke.App.ViewModels.Procedures
             if (procedure != null)
             {
                 this.SelectedProcedure = procedure;
-                System.Diagnostics.Debug.WriteLine($"Wybrano procedurę: {procedure.ProcedureId}");
             }
         }
 
         private async Task OnToggleExpandAsync()
         {
-            // Nie rozwijaj, jeśli właśnie zwijamy
             if (this.isExpanded)
             {
                 this.IsExpanded = false;
                 return;
             }
 
-            // Leniwe ładowanie danych - ładuj tylko gdy rozwijamy i nie mamy jeszcze danych
             if (!this.hasLoadedData && !this.isLoading)
             {
                 this.isLoading = true;
-                this.IsExpanded = true;  // Rozwiń, żeby pokazać indykator ładowania
+                this.IsExpanded = true;
 
                 try
                 {
-                    // Wykonaj ładowanie w tle
                     await Task.Run(async () =>
                     {
-                        // Pobierz procedury powiązane z tym wymaganiem
                         var relatedProcedures = await this.procedureService.GetOldSMKProceduresAsync(
                             requirementId: this.requirement.Id);
 
-                        System.Diagnostics.Debug.WriteLine($"Znaleziono {relatedProcedures.Count} procedur dla wymagania {this.requirement.Name}");
-
-                        // Aktualizuj UI na głównym wątku
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
-                            // Zamiast używać nieistniejącej klasy, wykonujemy operacje bezpośrednio
                             this.Procedures.Clear();
                             foreach (var procedure in relatedProcedures)
                             {
                                 this.Procedures.Add(procedure);
                             }
 
-                            // Ustaw pierwszą procedurę jako wybraną, jeśli jest dostępna
                             if (this.Procedures.Count > 0 && this.SelectedProcedure == null)
                             {
                                 this.SelectedProcedure = this.Procedures[0];
@@ -176,7 +161,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     MainThread.BeginInvokeOnMainThread(async () =>
                     {
-                        System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania procedur: {ex.Message}");
                         await this.dialogService.DisplayAlertAsync(
                             "Błąd",
                             "Wystąpił problem podczas ładowania procedur.",
@@ -189,7 +173,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
             else
             {
-                // Jeśli już mamy dane, po prostu rozwiń sekcję
                 this.IsExpanded = !this.isExpanded;
             }
         }
@@ -201,26 +184,14 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            try
+            var navigationParameter = new Dictionary<string, object>
             {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "ProcedureId", procedure.ProcedureId.ToString() }
-                };
+                { "ProcedureId", procedure.ProcedureId.ToString() }
+            };
 
-                await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas przejścia do formularza edycji procedury.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
         }
 
-        // Zmiana metody na publiczną, aby była dostępna z OldSMKProceduresListPage
         public async Task OnDeleteProcedure(RealizedProcedureOldSMK procedure)
         {
             if (procedure == null)
@@ -236,59 +207,44 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             if (confirm)
             {
-                try
+
+                bool result = await this.procedureService.DeleteOldSMKProcedureAsync(procedure.ProcedureId);
+
+                if (result)
                 {
-                    bool result = await this.procedureService.DeleteOldSMKProcedureAsync(procedure.ProcedureId);
-
-                    if (result)
+                    if (this.SelectedProcedure == procedure)
                     {
-                        // Sprawdź, czy usuwana procedura jest aktualnie wybrana
-                        if (this.SelectedProcedure == procedure)
+                        int index = this.Procedures.IndexOf(procedure);
+                        if (index >= 0 && this.Procedures.Count > 1)
                         {
-                            // Ustaw nową wybraną procedurę (jeśli dostępna)
-                            int index = this.Procedures.IndexOf(procedure);
-                            if (index >= 0 && this.Procedures.Count > 1)
-                            {
-                                // Wybierz następną lub poprzednią procedurę
-                                int newIndex = Math.Min(index, this.Procedures.Count - 2);
-                                this.SelectedProcedure = this.Procedures[newIndex];
-                            }
-                            else
-                            {
-                                this.SelectedProcedure = null;
-                            }
+                            int newIndex = Math.Min(index, this.Procedures.Count - 2);
+                            this.SelectedProcedure = this.Procedures[newIndex];
                         }
-
-                        // Aktualizuj lokalne dane
-                        this.Procedures.Remove(procedure);
-
-                        // Aktualizuj statystyki
-                        if (procedure.Code == "A - operator")
+                        else
                         {
-                            this.statistics.CompletedCountA--;
+                            this.SelectedProcedure = null;
                         }
-                        else if (procedure.Code == "B - asysta")
-                        {
-                            this.statistics.CompletedCountB--;
-                        }
-
-                        this.OnPropertyChanged(nameof(this.StatsInfo));
-                        this.OnPropertyChanged(nameof(this.ApprovedInfo));
                     }
-                    else
+
+                    this.Procedures.Remove(procedure);
+
+                    if (procedure.Code == "A - operator")
                     {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się usunąć procedury.",
-                            "OK");
+                        this.statistics.CompletedCountA--;
                     }
+                    else if (procedure.Code == "B - asysta")
+                    {
+                        this.statistics.CompletedCountB--;
+                    }
+
+                    this.OnPropertyChanged(nameof(this.StatsInfo));
+                    this.OnPropertyChanged(nameof(this.ApprovedInfo));
                 }
-                catch (Exception ex)
+                else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania procedury: {ex.Message}");
                     await this.dialogService.DisplayAlertAsync(
                         "Błąd",
-                        "Wystąpił problem podczas usuwania procedury.",
+                        "Nie udało się usunąć procedury.",
                         "OK");
                 }
             }
@@ -296,23 +252,12 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnAddProcedure()
         {
-            try
+            var navigationParameter = new Dictionary<string, object>
             {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "RequirementId", this.requirement.Id.ToString() }
-                };
+                { "RequirementId", this.requirement.Id.ToString() }
+            };
 
-                await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas przejścia do formularza dodawania procedury.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
         }
     }
 }

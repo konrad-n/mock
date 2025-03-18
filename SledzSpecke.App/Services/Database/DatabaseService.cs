@@ -207,16 +207,8 @@ namespace SledzSpecke.App.Services.Database
 
         public async Task<int> DeleteModuleAsync(Module module)
         {
-            try
-            {
-                await this.InitializeAsync();
-                return await this.database.DeleteAsync(module);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania modułu: {ex.Message}");
-                return 0;
-            }
+            await this.InitializeAsync();
+            return await this.database.DeleteAsync(module);
         }
 
         public async Task<Internship> GetInternshipAsync(int id)
@@ -618,86 +610,72 @@ namespace SledzSpecke.App.Services.Database
 
         public async Task MigrateShiftDataForModulesAsync()
         {
+            await this.InitializeAsync();
+            bool columnExists = false;
+
             try
             {
-                await this.InitializeAsync();
-                bool columnExists = false;
+                var testQuery = "SELECT ModuleId FROM RealizedMedicalShiftNewSMK LIMIT 1";
+                await this.database.ExecuteScalarAsync<int>(testQuery);
+                columnExists = true;
+            }
+            catch
+            {
+                await this.database.ExecuteAsync("ALTER TABLE RealizedMedicalShiftNewSMK ADD COLUMN ModuleId INTEGER");
+            }
 
-                try
+            var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE ModuleId IS NULL OR ModuleId = 0";
+            var shiftsToUpdate = await this.QueryAsync<RealizedMedicalShiftNewSMK>(query);
+
+            if (shiftsToUpdate.Count == 0)
+            {
+                return;
+            }
+
+            var specializations = await this.GetAllSpecializationsAsync();
+
+            foreach (var specialization in specializations)
+            {
+                var modules = await this.GetModulesAsync(specialization.SpecializationId);
+                if (modules.Count == 0) continue;
+                var specializationShifts = shiftsToUpdate.Where(s => s.SpecializationId == specialization.SpecializationId).ToList();
+                if (specializationShifts.Count == 0) continue;
+
+                foreach (var shift in specializationShifts)
                 {
-                    var testQuery = "SELECT ModuleId FROM RealizedMedicalShiftNewSMK LIMIT 1";
-                    await this.database.ExecuteScalarAsync<int>(testQuery);
-                    columnExists = true;
-                }
-                catch
-                {
-                    await this.database.ExecuteAsync("ALTER TABLE RealizedMedicalShiftNewSMK ADD COLUMN ModuleId INTEGER");
-                }
 
-                var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE ModuleId IS NULL OR ModuleId = 0";
-                var shiftsToUpdate = await this.QueryAsync<RealizedMedicalShiftNewSMK>(query);
-
-                if (shiftsToUpdate.Count == 0)
-                {
-                    return;
-                }
-
-                var specializations = await this.GetAllSpecializationsAsync();
-
-                foreach (var specialization in specializations)
-                {
-                    var modules = await this.GetModulesAsync(specialization.SpecializationId);
-                    if (modules.Count == 0) continue;
-                    var specializationShifts = shiftsToUpdate.Where(s => s.SpecializationId == specialization.SpecializationId).ToList();
-                    if (specializationShifts.Count == 0) continue;
-
-                    foreach (var shift in specializationShifts)
+                    Module appropriateModule = null;
+                    foreach (var module in modules)
                     {
+                        if (string.IsNullOrEmpty(module.Structure)) continue;
 
-                        Module appropriateModule = null;
-                        foreach (var module in modules)
+                        var options = new System.Text.Json.JsonSerializerOptions
                         {
-                            if (string.IsNullOrEmpty(module.Structure)) continue;
+                            PropertyNameCaseInsensitive = true,
+                            AllowTrailingCommas = true,
+                            ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip
+                        };
 
-                            try
-                            {
-                                var options = new System.Text.Json.JsonSerializerOptions
-                                {
-                                    PropertyNameCaseInsensitive = true,
-                                    AllowTrailingCommas = true,
-                                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip
-                                };
-
-                                var moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
-                                if (moduleStructure?.Internships != null &&
-                                    moduleStructure.Internships.Any(i => i.Id == shift.InternshipRequirementId))
-                                {
-                                    appropriateModule = module;
-                                    break;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Błąd podczas deserializacji struktury modułu: {ex.Message}");
-                            }
-                        }
-
-                        if (appropriateModule == null && modules.Count > 0)
+                        var moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
+                        if (moduleStructure?.Internships != null &&
+                            moduleStructure.Internships.Any(i => i.Id == shift.InternshipRequirementId))
                         {
-                            appropriateModule = modules[0];
-                        }
-
-                        if (appropriateModule != null)
-                        {
-                            shift.ModuleId = appropriateModule.ModuleId;
-                            await this.UpdateAsync(shift);
+                            appropriateModule = module;
+                            break;
                         }
                     }
+
+                    if (appropriateModule == null && modules.Count > 0)
+                    {
+                        appropriateModule = modules[0];
+                    }
+
+                    if (appropriateModule != null)
+                    {
+                        shift.ModuleId = appropriateModule.ModuleId;
+                        await this.UpdateAsync(shift);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas migracji danych dyżurów: {ex.Message}");
             }
         }
 

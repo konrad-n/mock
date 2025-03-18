@@ -22,21 +22,13 @@ namespace SledzSpecke.App.Services.Dialog
 
         public async Task DisplayAlertAsync(string title, string message, string accept)
         {
-            try
+            if (Shell.Current != null)
             {
-                if (Shell.Current != null)
-                {
-                    await Shell.Current.DisplayAlert(title, message, accept);
-                }
-                else if (Application.Current?.MainPage != null)
-                {
-                    await Application.Current.MainPage.DisplayAlert(title, message, accept);
-                }
+                await Shell.Current.DisplayAlert(title, message, accept);
             }
-            catch (Exception ex)
+            else if (Application.Current?.MainPage != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas wyświetlania alertu: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                await Application.Current.MainPage.DisplayAlert(title, message, accept);
             }
         }
 

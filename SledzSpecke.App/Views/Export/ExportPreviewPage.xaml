@@ -4,7 +4,6 @@
              x:Class="SledzSpecke.App.Views.Export.ExportPreviewPage"
              Title="{Binding Title}">
     <Grid RowDefinitions="Auto, Auto, *, Auto">
-        <!-- Nagłówek -->
         <Frame Grid.Row="0" Style="{StaticResource CardFrame}" Margin="10">
             <VerticalStackLayout Spacing="5">
                 <Label Text="Podgląd danych do eksportu" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" />
@@ -21,8 +20,6 @@
                        FontSize="12"/>
             </VerticalStackLayout>
         </Frame>
-
-        <!-- Przyciski zakładek -->
         <Grid Grid.Row="1" ColumnDefinitions="*, *, *, *" Padding="5">
             <Button Grid.Column="0" 
                     Text="Kursy" 
@@ -31,7 +28,6 @@
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Kursy'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Kursy'}"
                     IsVisible="{Binding ShowCourses}"/>
-
             <Button Grid.Column="1" 
                     Text="Dyżury" 
                     Command="{Binding SelectTabCommand}" 
@@ -39,7 +35,6 @@
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Dyżury'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Dyżury'}"
                     IsVisible="{Binding ShowShifts}"/>
-
             <Button Grid.Column="2" 
                     Text="Procedury" 
                     Command="{Binding SelectTabCommand}" 
@@ -47,7 +42,6 @@
                     BackgroundColor="{Binding SelectedTab, Converter={StaticResource StringMatchToBgColorConverter}, ConverterParameter='Procedury'}"
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Procedury'}"
                     IsVisible="{Binding ShowProcedures}"/>
-
             <Button Grid.Column="3" 
                     Text="Staże" 
                     Command="{Binding SelectTabCommand}" 
@@ -56,21 +50,15 @@
                     TextColor="{Binding SelectedTab, Converter={StaticResource StringMatchToTextColorConverter}, ConverterParameter='Staże'}"
                     IsVisible="{Binding ShowInternships}"/>
         </Grid>
-
-        <!-- Zawartość zakładek -->
         <Grid Grid.Row="2">
-            <!-- Zawartość zakładki Kursy -->
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Kursy'}"
                   RowDefinitions="Auto, *">
-                <!-- Nagłówki kolumn -->
                 <Grid Grid.Row="0" ColumnDefinitions="4*, 3*, 2*, 2*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
                     <Label Grid.Column="0" Text="Nazwa kursu" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="1" Text="Instytucja" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="2" Text="Data" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="3" Text="Status" TextColor="White" FontAttributes="Bold" />
                 </Grid>
-
-                <!-- Lista kursów -->
                 <CollectionView Grid.Row="1" ItemsSource="{Binding CoursesPreviews}">
                     <CollectionView.EmptyView>
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
@@ -89,19 +77,14 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Grid>
-
-            <!-- Zawartość zakładki Dyżury -->
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Dyżury'}"
                   RowDefinitions="Auto, *">
-                <!-- Nagłówki kolumn -->
                 <Grid Grid.Row="0" ColumnDefinitions="2*, 3*, 2*, 2*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
                     <Label Grid.Column="0" Text="Data" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="1" Text="Miejsce" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="2" Text="Godziny" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="3" Text="Rok" TextColor="White" FontAttributes="Bold" />
                 </Grid>
-
-                <!-- Lista dyżurów -->
                 <CollectionView Grid.Row="1" ItemsSource="{Binding ShiftsPreviews}">
                     <CollectionView.EmptyView>
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
@@ -120,19 +103,14 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Grid>
-
-            <!-- Zawartość zakładki Procedury -->
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Procedury'}"
                   RowDefinitions="Auto, *">
-                <!-- Nagłówki kolumn -->
                 <Grid Grid.Row="0" ColumnDefinitions="2*, 2*, 2*, 3*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
                     <Label Grid.Column="0" Text="Data" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="1" Text="Kod" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="2" Text="Operator" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="3" Text="Miejsce" TextColor="White" FontAttributes="Bold" />
                 </Grid>
-
-                <!-- Lista procedur -->
                 <CollectionView Grid.Row="1" ItemsSource="{Binding ProceduresPreviews}">
                     <CollectionView.EmptyView>
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
@@ -151,19 +129,14 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Grid>
-
-            <!-- Zawartość zakładki Staże -->
             <Grid IsVisible="{Binding SelectedTab, Converter={StaticResource StringMatchConverter}, ConverterParameter='Staże'}"
                   RowDefinitions="Auto, *">
-                <!-- Nagłówki kolumn -->
                 <Grid Grid.Row="0" ColumnDefinitions="4*, 3*, 2*, 2*" BackgroundColor="{StaticResource Primary}" Padding="10,5">
                     <Label Grid.Column="0" Text="Nazwa stażu" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="1" Text="Instytucja" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="2" Text="Początek" TextColor="White" FontAttributes="Bold" />
                     <Label Grid.Column="3" Text="Koniec" TextColor="White" FontAttributes="Bold" />
                 </Grid>
-
-                <!-- Lista staży -->
                 <CollectionView Grid.Row="1" ItemsSource="{Binding InternshipsPreviews}">
                     <CollectionView.EmptyView>
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
@@ -183,8 +156,6 @@
                 </CollectionView>
             </Grid>
         </Grid>
-
-        <!-- Przyciski na dole -->
         <Grid Grid.Row="3" ColumnDefinitions="*, *" Padding="20" ColumnSpacing="20">
             <Button Grid.Column="0" Text="Wróć i zmień" Command="{Binding BackCommand}" Style="{StaticResource OutlineButton}" />
             <Button Grid.Column="1" Text="Kontynuuj eksport" Command="{Binding ContinueExportCommand}" Style="{StaticResource PrimaryButton}" />

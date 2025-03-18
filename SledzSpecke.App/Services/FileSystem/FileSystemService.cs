@@ -13,20 +13,12 @@
 
         public bool EnsureDirectoryExists(string path)
         {
-            try
+            if (!Directory.Exists(path))
             {
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
+                Directory.CreateDirectory(path);
+            }
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error creating directory: {ex.Message}");
-                return false;
-            }
+            return true;
         }
 
         public async Task<string> ReadAllTextAsync(string path)
@@ -68,21 +60,13 @@
 
         public bool DeleteFile(string path)
         {
-            try
+            if (this.FileExists(path))
             {
-                if (this.FileExists(path))
-                {
-                    File.Delete(path);
-                    return true;
-                }
+                File.Delete(path);
+                return true;
+            }
 
-                return false;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error deleting file: {ex.Message}");
-                return false;
-            }
+            return false;
         }
     }
 }

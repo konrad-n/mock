@@ -16,34 +16,22 @@ namespace SledzSpecke.App.Views.MedicalShifts
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+            var user = await this.authService.GetCurrentUserAsync();
 
-            try
+            if (user != null)
             {
-                // Pobierz aktualnego użytkownika
-                var user = await this.authService.GetCurrentUserAsync();
-
-                if (user != null)
+                if (user.SmkVersion == SmkVersion.Old)
                 {
-                    // Przekieruj w zależności od wersji SMK
-                    if (user.SmkVersion == SmkVersion.Old)
-                    {
-                        await Shell.Current.GoToAsync("OldSMKMedicalShifts");
-                    }
-                    else
-                    {
-                        await Shell.Current.GoToAsync("NewSMKMedicalShifts");
-                    }
+                    await Shell.Current.GoToAsync("OldSMKMedicalShifts");
                 }
                 else
                 {
-                    // Jeśli nie ma użytkownika, pozostań na tej stronie i pokaż komunikat
-                    await DisplayAlert("Błąd", "Nie można określić wersji SMK. Skontaktuj się z administratorem.", "OK");
+                    await Shell.Current.GoToAsync("NewSMKMedicalShifts");
                 }
             }
-            catch (System.Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas przekierowania: {ex.Message}");
-                await DisplayAlert("Błąd", "Wystąpił problem podczas ładowania danych. Spróbuj ponownie.", "OK");
+                await DisplayAlert("Błąd", "Nie można określić wersji SMK. Skontaktuj się z administratorem.", "OK");
             }
         }
     }

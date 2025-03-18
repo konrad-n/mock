@@ -4,18 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="SledzSpecke.App.Views.Authentication.RegisterPage"
     Title="Rejestracja">
-
     <ScrollView>
         <Grid RowDefinitions="Auto, *, Auto" Padding="20" VerticalOptions="FillAndExpand">
-            <!-- Nagłówek -->
             <VerticalStackLayout Grid.Row="0" Spacing="10" Margin="0,20,0,20">
                 <Image Source="app_logo.png" HeightRequest="80" WidthRequest="80" HorizontalOptions="Center"/>
                 <Label Text="Rejestracja" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center"/>
             </VerticalStackLayout>
-
-            <!-- Formularz rejestracji -->
             <VerticalStackLayout Grid.Row="1" Spacing="15" VerticalOptions="Center">
-                <!-- Informacje o użytkowniku -->
                 <Label Text="Informacje osobiste" FontSize="18" FontAttributes="Bold"/>
                 <Entry Placeholder="Nazwa użytkownika *" Text="{Binding Username}" BackgroundColor="Transparent"/>
                 <Entry Placeholder="Email *" Text="{Binding Email}" Keyboard="Email" BackgroundColor="Transparent"/>
@@ -23,8 +18,6 @@
                 <Entry Placeholder="Potwierdź hasło *" Text="{Binding ConfirmPassword}" IsPassword="True" BackgroundColor="Transparent"/>
                 <Label Text="Hasła nie pasują do siebie! *" IsVisible="{Binding PasswordsNotMatch}" TextColor="Red"/>
                 <Entry Placeholder="Imię i nazwisko (do wpisywania procedur) *" Text="{Binding Name}" BackgroundColor="Transparent"/>
-
-                <!-- Wybór wersji SMK -->
                 <Label Text="Wybierz wersję SMK" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
                 <HorizontalStackLayout Spacing="20">
                     <VerticalStackLayout Spacing="10">
@@ -36,21 +29,15 @@
                         <Label Text="Stary SMK (CMKP 2018)" VerticalOptions="Center" />
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
-
-                <!-- Wybór specjalizacji - ten element będzie odświeżany po zmianie wersji SMK -->
                 <Label Text="Wybierz specjalizację" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0"/>
                 <Picker ItemsSource="{Binding AvailableSpecializations}" 
                         SelectedItem="{Binding SelectedSpecialization}"
                         ItemDisplayBinding="{Binding Name}" 
                         Title="Wybierz specjalizację"
                         BackgroundColor="Transparent"/>
-
-                <!-- Przycisk rejestracji -->
                 <Button Text="Zarejestruj się" Command="{Binding RegisterCommand}" 
                         Style="{StaticResource PrimaryButton}" Margin="0,20,0,0"/>
             </VerticalStackLayout>
-
-            <!-- Stopka -->
             <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,20,0,0">
                 <Label Text="Masz już konto?" HorizontalOptions="Center"/>
                 <Button Text="Zaloguj się" Command="{Binding GoToLoginCommand}" 

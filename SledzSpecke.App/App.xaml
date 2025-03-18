@@ -11,7 +11,6 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/MaterialDesignStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
             <Color x:Key="PrimaryColor">#24C1DE</Color>
             <Color x:Key="SecondaryColor">#0D759C</Color>
             <Color x:Key="AccentColor">#30DDE8</Color>
@@ -21,8 +20,6 @@
             <Color x:Key="BackgroundColor">#E4F0F5</Color>
             <Color x:Key="TextColor">#082044</Color>
             <Color x:Key="TextMutedColor">#547E9E</Color>
-
-            <!-- Converters -->
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BoolToTextColorConverter x:Key="BoolToTextColorConverter" />
             <converters:CodeToColorConverter x:Key="CodeToColorConverter" />
@@ -38,8 +35,6 @@
             <converters:StringToIntConverter x:Key="StringToIntConverter" />
             <converters:BoolToTextConverter x:Key="BoolToTextConverter" />
             <converters:DateRangeConverter x:Key="DateRangeConverter" />
-
-            <!-- Button Styles -->
             <Style TargetType="Button" x:Key="PrimaryButton" BasedOn="{StaticResource MaterialButtonPrimary}">
                 <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
                 <Setter Property="TextColor" Value="White" />
@@ -47,7 +42,6 @@
                 <Setter Property="CornerRadius" Value="8" />
                 <Setter Property="Padding" Value="16,10" />
             </Style>
-
             <Style TargetType="Button" x:Key="SecondaryButton" BasedOn="{StaticResource MaterialButtonSecondary}">
                 <Setter Property="BackgroundColor" Value="{StaticResource SecondaryColor}" />
                 <Setter Property="TextColor" Value="White" />
@@ -55,7 +49,6 @@
                 <Setter Property="CornerRadius" Value="8" />
                 <Setter Property="Padding" Value="16,10" />
             </Style>
-
             <Style TargetType="Button" x:Key="OutlineButton" BasedOn="{StaticResource MaterialButtonOutlined}">
                 <Setter Property="BackgroundColor" Value="Transparent" />
                 <Setter Property="TextColor" Value="{StaticResource PrimaryColor}" />
@@ -64,7 +57,6 @@
                 <Setter Property="CornerRadius" Value="8" />
                 <Setter Property="Padding" Value="16,10" />
             </Style>
-
             <Style TargetType="Button" x:Key="DangerButton" BasedOn="{StaticResource MaterialButtonDanger}">
                 <Setter Property="BackgroundColor" Value="{StaticResource DangerColor}" />
                 <Setter Property="TextColor" Value="White" />
@@ -72,8 +64,6 @@
                 <Setter Property="CornerRadius" Value="8" />
                 <Setter Property="Padding" Value="16,10" />
             </Style>
-
-            <!-- Frame Styles -->
             <Style TargetType="Frame" x:Key="CardFrame" BasedOn="{StaticResource MaterialCard}">
                 <Setter Property="BackgroundColor" Value="White" />
                 <Setter Property="CornerRadius" Value="10" />
@@ -82,30 +72,23 @@
                 <Setter Property="HasShadow" Value="True" />
                 <Setter Property="Margin" Value="0,8" />
             </Style>
-
-            <!-- Label Styles -->
             <Style TargetType="Label" x:Key="HeaderLabel" BasedOn="{StaticResource MaterialLabelHeadline5}">
                 <Setter Property="FontSize" Value="24" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="{StaticResource TextColor}" />
                 <Setter Property="Margin" Value="0,16,0,8" />
             </Style>
-
             <Style TargetType="Label" x:Key="SubHeaderLabel" BasedOn="{StaticResource MaterialLabelHeadline6}">
                 <Setter Property="FontSize" Value="18" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="{StaticResource TextColor}" />
                 <Setter Property="Margin" Value="0,8,0,4" />
             </Style>
-
-            <!-- ProgressBar Styles -->
             <Style TargetType="ProgressBar" x:Key="CustomProgressBar">
                 <Setter Property="ProgressColor" Value="{StaticResource SuccessColor}" />
                 <Setter Property="HeightRequest" Value="10" />
                 <Setter Property="VerticalOptions" Value="Center" />
             </Style>
-
-            <!-- Additional Button Styles -->
             <Style TargetType="Button" x:Key="SMKReportButton" BasedOn="{StaticResource MaterialButtonPrimary}">
                 <Setter Property="BackgroundColor" Value="#082044" />
                 <Setter Property="TextColor" Value="White" />
@@ -113,7 +96,6 @@
                 <Setter Property="CornerRadius" Value="8" />
                 <Setter Property="Padding" Value="16,10" />
             </Style>
-
             <Style TargetType="Button" x:Key="SettingsButton" BasedOn="{StaticResource MaterialButtonSecondary}">
                 <Setter Property="BackgroundColor" Value="#547E9E" />
                 <Setter Property="TextColor" Value="White" />

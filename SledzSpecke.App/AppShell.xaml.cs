@@ -1,13 +1,7 @@
 ﻿using SledzSpecke.App.Services.Authentication;
-using SledzSpecke.App.Views.Absences;
-using SledzSpecke.App.Views.Courses;
 using SledzSpecke.App.Views.Export;
-using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
 using SledzSpecke.App.Views.Procedures;
-using SledzSpecke.App.Views.Publications;
-using SledzSpecke.App.Views.SelfEducation;
-using SledzSpecke.App.Views.Settings;
 
 namespace SledzSpecke.App
 {
@@ -25,12 +19,6 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
-            Routing.RegisterRoute("settings", typeof(SettingsPage));
-            Routing.RegisterRoute("internships", typeof(InternshipsListPage));
-            Routing.RegisterRoute("courses", typeof(CoursesListPage));
-            Routing.RegisterRoute("selfeducation", typeof(SelfEducationListPage));
-            Routing.RegisterRoute("publications", typeof(PublicationsListPage));
-            Routing.RegisterRoute("absences", typeof(AbsencesListPage));
             Routing.RegisterRoute("export", typeof(ExportPage));
             Routing.RegisterRoute("exportpreview", typeof(ExportPreviewPage));
             Routing.RegisterRoute("MedicalShiftsSelector", typeof(MedicalShiftsSelectorPage));
@@ -47,30 +35,23 @@ namespace SledzSpecke.App
 
         private async void InitializeUserInfoAsync()
         {
-            try
+            var user = await this.authService.GetCurrentUserAsync();
+            if (user != null)
             {
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user != null)
+                if (this.UserNameLabel != null)
                 {
-                    if (this.UserNameLabel != null)
-                    {
-                        this.UserNameLabel.Text = user.Username;
-                    }
+                    this.UserNameLabel.Text = user.Username;
+                }
 
-                    var specializationService = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.Services.Specialization.ISpecializationService>();
-                    if (specializationService != null)
+                var specializationService = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.Services.Specialization.ISpecializationService>();
+                if (specializationService != null)
+                {
+                    var specialization = await specializationService.GetCurrentSpecializationAsync();
+                    if (specialization != null && this.SpecializationLabel != null)
                     {
-                        var specialization = await specializationService.GetCurrentSpecializationAsync();
-                        if (specialization != null && this.SpecializationLabel != null)
-                        {
-                            this.SpecializationLabel.Text = specialization.Name;
-                        }
+                        this.SpecializationLabel.Text = specialization.Name;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas inicjalizacji informacji o użytkowniku: {ex.Message}");
             }
         }
 

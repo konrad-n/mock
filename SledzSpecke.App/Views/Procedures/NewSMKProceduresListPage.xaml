@@ -6,7 +6,6 @@
              x:DataType="vm:NewSMKProceduresListViewModel"
              x:Class="SledzSpecke.App.Views.Procedures.NewSMKProceduresListPage"
              Title="{Binding Title}">
-
     <ContentPage.Resources>
         <ResourceDictionary>
             <Style x:Key="HeaderText" TargetType="Label">
@@ -15,31 +14,25 @@
                 <Setter Property="TextColor" Value="{StaticResource Primary}" />
                 <Setter Property="Margin" Value="0,10,0,5" />
             </Style>
-
             <Style x:Key="RequirementTitle" TargetType="Label">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="LineBreakMode" Value="WordWrap" />
             </Style>
-
             <Style x:Key="TableHeader" TargetType="Label">
                 <Setter Property="FontSize" Value="12" />
                 <Setter Property="TextColor" Value="{StaticResource TextMutedColor}" />
                 <Setter Property="HorizontalTextAlignment" Value="Center" />
             </Style>
-
             <Style x:Key="TableCell" TargetType="Label">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="HorizontalTextAlignment" Value="Center" />
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
-
     <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="15">
-                <!-- Nagłówek i przełącznik modułów -->
                 <Label Text="{Binding ModuleTitle}" Style="{StaticResource HeaderText}" />
-
                 <StackLayout IsVisible="{Binding HasTwoModules}" 
                            Orientation="Horizontal" 
                            HorizontalOptions="Center" 
@@ -67,8 +60,6 @@
                         </Grid>
                     </Frame>
                 </StackLayout>
-
-                <!-- Lista wymagań -->
                 <CollectionView ItemsSource="{Binding ProcedureRequirements}"
                               RemainingItemsThreshold="2"
                               RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}">
@@ -81,14 +72,12 @@
                                    TextColor="{StaticResource TextMutedColor}" />
                         </StackLayout>
                     </CollectionView.EmptyView>
-
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="vm:ProcedureRequirementViewModel">
                             <Frame Style="{StaticResource CardFrame}" 
                                    Margin="0,5" 
                                    Padding="15">
                                 <VerticalStackLayout Spacing="10">
-                                    <!-- Nagłówek wymagania -->
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Text="{Binding Title}" 
                                                Style="{StaticResource RequirementTitle}" />
@@ -102,11 +91,8 @@
                                                 BackgroundColor="{StaticResource Primary}"
                                                 TextColor="White" />
                                     </Grid>
-
-                                    <!-- Rozwinięta sekcja -->
                                     <VerticalStackLayout IsVisible="{Binding IsExpanded}" 
                                                        Spacing="15">
-                                        <!-- Zabiegi/procedury wykonane samodzielnie -->
                                         <VerticalStackLayout>
                                             <Label Text="Zabiegi/procedury wykonane samodzielnie" 
                                                    FontAttributes="Bold" />
@@ -131,8 +117,6 @@
                                                 </VerticalStackLayout>
                                             </Grid>
                                         </VerticalStackLayout>
-
-                                        <!-- Zabiegi/procedury wykonane jako pierwsza asysta -->
                                         <VerticalStackLayout>
                                             <Label Text="Zabiegi/procedury wykonane jako pierwsza asysta" 
                                                    FontAttributes="Bold" />
@@ -157,15 +141,11 @@
                                                 </VerticalStackLayout>
                                             </Grid>
                                         </VerticalStackLayout>
-
-                                        <!-- Przycisk dodawania realizacji -->
                                         <Button Text="Dodaj realizację"
                                                 Command="{Binding ToggleAddRealizationCommand}"
                                                 IsVisible="{Binding IsAddingRealization, Converter={StaticResource InvertedBoolConverter}}"
                                                 Style="{StaticResource PrimaryButton}"
                                                 HorizontalOptions="Start" />
-
-                                        <!-- Lista realizacji -->
                                         <VerticalStackLayout IsVisible="{Binding IsExpanded}">
                                             <ActivityIndicator IsRunning="{Binding IsLoading}" 
                                                                IsVisible="{Binding IsLoading}" 
@@ -187,7 +167,6 @@
                                                        Style="{StaticResource TableHeader}" 
                                                        Grid.Column="2" />
                                             </Grid>
-
                                             <CollectionView ItemsSource="{Binding Realizations}"
                                                              IsVisible="{Binding HasRealizations}">
                                                 <CollectionView.ItemTemplate>

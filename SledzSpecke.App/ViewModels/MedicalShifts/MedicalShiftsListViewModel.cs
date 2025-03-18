@@ -43,19 +43,14 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.Shifts = new ObservableCollection<MedicalShift>();
             this.Internships = new List<Internship>();
             this.Summary = new MedicalShiftsSummary();
-
-            // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
             this.AddShiftCommand = new AsyncRelayCommand(this.AddShiftAsync);
             this.EditShiftCommand = new AsyncRelayCommand<MedicalShift>(this.EditShiftAsync);
             this.DeleteShiftCommand = new AsyncRelayCommand<MedicalShift>(this.DeleteShiftAsync);
             this.SelectInternshipCommand = new AsyncRelayCommand<Internship>(this.SelectInternshipAsync);
 
-            // Wczytanie danych
             this.LoadDataAsync().ConfigureAwait(false);
         }
-
-        #region Properties
 
         public ObservableCollection<MedicalShift> Shifts
         {
@@ -129,19 +124,11 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             set => this.SetProperty(ref this.moduleTitle, value);
         }
 
-        #endregion
-
-        #region Commands
-
         public ICommand RefreshCommand { get; }
         public ICommand AddShiftCommand { get; }
         public ICommand EditShiftCommand { get; }
         public ICommand DeleteShiftCommand { get; }
         public ICommand SelectInternshipCommand { get; }
-
-        #endregion
-
-        #region Methods
 
         public async Task LoadDataAsync()
         {
@@ -153,127 +140,96 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.IsBusy = true;
             this.IsRefreshing = true;
 
-            try
+            var user = await this.authService.GetCurrentUserAsync();
+
+            if (user != null)
             {
-                var user = await this.authService.GetCurrentUserAsync();
-
-                if (user != null)
+                if (user.SmkVersion == SmkVersion.Old)
                 {
-                    if (user.SmkVersion == SmkVersion.Old)
-                    {
-                        this.IsNewSmk = false;
-                    }
-                    else
-                    {
-                        this.IsNewSmk = true;
-                    }
-                }
-
-                // Pobierz bieżący moduł
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                if (currentModule != null)
-                {
-                    this.ModuleTitle = currentModule.Name;
-                }
-
-                // Pobierz statystyki wymaganych dyżurów
-                var stats = await this.specializationService.GetSpecializationStatisticsAsync(
-                    currentModule?.ModuleId);
-
-                this.TotalShiftHours = stats.CompletedShiftHours;
-                this.RequiredShiftHours = stats.RequiredShiftHours;
-
-                // Oblicz postęp
-                if (this.RequiredShiftHours > 0)
-                {
-                    this.ShiftProgress = Math.Min(1.0, (double)this.TotalShiftHours / this.RequiredShiftHours);
+                    this.IsNewSmk = false;
                 }
                 else
                 {
-                    this.ShiftProgress = 0;
-                }
-
-                // Pobierz wszystkie staże (tylko dla modułu jeśli nowy SMK)
-                if (this.IsNewSmk && currentModule != null)
-                {
-                    this.Internships = await this.specializationService.GetInternshipsAsync(currentModule.ModuleId);
-                }
-                else
-                {
-                    this.Internships = await this.specializationService.GetInternshipsAsync();
-                }
-
-                // Jeśli jeszcze nie mamy wybranego stażu, a są dostępne staże, wybierz pierwszy
-                if (this.SelectedInternship == null && this.Internships.Count > 0)
-                {
-                    await this.SelectInternshipAsync(this.Internships[0]);
-                }
-                else if (this.SelectedInternship != null)
-                {
-                    // Odśwież dane dla bieżącego stażu
-                    await this.LoadShiftsForInternshipAsync(this.SelectedInternship.InternshipId);
-                }
-                else
-                {
-                    // Nie ma żadnych staży, pobierz wszystkie dyżury
-                    var shifts = await this.specializationService.GetMedicalShiftsAsync();
-                    this.Shifts.Clear();
-                    foreach (var shift in shifts)
-                    {
-                        this.Shifts.Add(shift);
-                    }
-
-                    // Oblicz sumę dyżurów
-                    this.Summary = MedicalShiftsSummary.CalculateFromShifts(shifts);
-                    this.ShiftsDescription = "Wszystkie dyżury";
+                    this.IsNewSmk = true;
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania dyżurów: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas ładowania dyżurów. Spróbuj ponownie.",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-                this.IsRefreshing = false;
-            }
-        }
 
-        private async Task LoadShiftsForInternshipAsync(int internshipId)
-        {
-            try
+            var currentModule = await this.specializationService.GetCurrentModuleAsync();
+            if (currentModule != null)
             {
-                // Pobierz dyżury dla wybranego stażu
-                var shifts = await this.specializationService.GetMedicalShiftsAsync(internshipId);
+                this.ModuleTitle = currentModule.Name;
+            }
+
+            var stats = await this.specializationService.GetSpecializationStatisticsAsync(
+                currentModule?.ModuleId);
+
+            this.TotalShiftHours = stats.CompletedShiftHours;
+            this.RequiredShiftHours = stats.RequiredShiftHours;
+
+            if (this.RequiredShiftHours > 0)
+            {
+                this.ShiftProgress = Math.Min(1.0, (double)this.TotalShiftHours / this.RequiredShiftHours);
+            }
+            else
+            {
+                this.ShiftProgress = 0;
+            }
+
+            if (this.IsNewSmk && currentModule != null)
+            {
+                this.Internships = await this.specializationService.GetInternshipsAsync(currentModule.ModuleId);
+            }
+            else
+            {
+                this.Internships = await this.specializationService.GetInternshipsAsync();
+            }
+
+            if (this.SelectedInternship == null && this.Internships.Count > 0)
+            {
+                await this.SelectInternshipAsync(this.Internships[0]);
+            }
+            else if (this.SelectedInternship != null)
+            {
+                await this.LoadShiftsForInternshipAsync(this.SelectedInternship.InternshipId);
+            }
+            else
+            {
+                var shifts = await this.specializationService.GetMedicalShiftsAsync();
                 this.Shifts.Clear();
                 foreach (var shift in shifts)
                 {
                     this.Shifts.Add(shift);
                 }
 
-                // Oblicz sumę dyżurów
                 this.Summary = MedicalShiftsSummary.CalculateFromShifts(shifts);
-
-                // Zaktualizuj opis
-                if (this.SelectedInternship != null)
-                {
-                    if (this.IsNewSmk)
-                    {
-                        this.ShiftsDescription = $"Dyżury do stażu {this.SelectedInternship.InternshipName}";
-                    }
-                    else
-                    {
-                        this.ShiftsDescription = "Lista zrealizowanych dyżurów medycznych";
-                    }
-                }
+                this.ShiftsDescription = "Wszystkie dyżury";
             }
-            catch (Exception ex)
+
+            this.IsBusy = false;
+            this.IsRefreshing = false;
+        }
+
+        private async Task LoadShiftsForInternshipAsync(int internshipId)
+        {
+            var shifts = await this.specializationService.GetMedicalShiftsAsync(internshipId);
+            this.Shifts.Clear();
+            foreach (var shift in shifts)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania dyżurów dla stażu: {ex.Message}");
+                this.Shifts.Add(shift);
+            }
+
+            this.Summary = MedicalShiftsSummary.CalculateFromShifts(shifts);
+
+            if (this.SelectedInternship != null)
+            {
+                if (this.IsNewSmk)
+                {
+                    this.ShiftsDescription = $"Dyżury do stażu {this.SelectedInternship.InternshipName}";
+                }
+                else
+                {
+                    this.ShiftsDescription = "Lista zrealizowanych dyżurów medycznych";
+                }
             }
         }
 
@@ -292,7 +248,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         {
             if (this.SelectedInternship == null && this.Internships.Count > 0)
             {
-                // Jeśli nie wybrano stażu, a są dostępne, pytamy użytkownika o wybór
+
                 var result = await this.dialogService.DisplayActionSheetAsync(
                     "Wybierz staż",
                     "Anuluj",
@@ -323,24 +279,12 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         public async Task AddMedicalShiftAsync(int internshipId)
         {
-            try
+            var parameters = new Dictionary<string, object>
             {
-                var parameters = new Dictionary<string, object>
-                {
-                    { "internshipId", internshipId }
-                };
+                { "internshipId", internshipId }
+            };
 
-                await Shell.Current.GoToAsync("addeditmedicalshifts", parameters);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
-                // Wyświetl dialog z informacją o błędzie
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie można przejść do ekranu dodawania dyżuru. Spróbuj ponownie.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("addeditmedicalshifts", parameters);
         }
 
         private async Task EditShiftAsync(MedicalShift shift)
@@ -360,7 +304,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            // Sprawdź, czy można usunąć dyżur (tylko niezatwierdzone)
             if (!shift.CanBeDeleted)
             {
                 await this.dialogService.DisplayAlertAsync(
@@ -378,45 +321,26 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             if (confirm)
             {
-                try
+                bool success = await this.specializationService.DeleteMedicalShiftAsync(shift.ShiftId);
+                if (success)
                 {
-                    bool success = await this.specializationService.DeleteMedicalShiftAsync(shift.ShiftId);
-                    if (success)
+                    this.Shifts.Remove(shift);
+                    this.Summary = MedicalShiftsSummary.CalculateFromShifts(this.Shifts.ToList());
+                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                    if (currentModule != null)
                     {
-                        this.Shifts.Remove(shift);
-
-                        // Aktualizacja podsumowania
-                        this.Summary = MedicalShiftsSummary.CalculateFromShifts(this.Shifts.ToList());
-
-                        // Aktualizacja postępu modułu
-                        var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                        if (currentModule != null)
-                        {
-                            await this.specializationService.UpdateModuleProgressAsync(currentModule.ModuleId);
-                        }
-
-                        // Odśwież statystyki
-                        await this.LoadDataAsync();
+                        await this.specializationService.UpdateModuleProgressAsync(currentModule.ModuleId);
                     }
-                    else
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się usunąć dyżuru. Spróbuj ponownie.",
-                            "OK");
-                    }
+                    await this.LoadDataAsync();
                 }
-                catch (Exception ex)
+                else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania dyżuru: {ex.Message}");
                     await this.dialogService.DisplayAlertAsync(
                         "Błąd",
-                        "Wystąpił problem podczas usuwania dyżuru. Spróbuj ponownie.",
+                        "Nie udało się usunąć dyżuru. Spróbuj ponownie.",
                         "OK");
                 }
             }
         }
-
-        #endregion
     }
 }

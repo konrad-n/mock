@@ -79,18 +79,14 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             if (success)
             {
-                // Przejście do głównej części aplikacji używając kontenera DI
                 var appShell = IPlatformApplication.Current.Services.GetService<AppShell>();
                 if (appShell != null)
                 {
                     Application.Current.MainPage = appShell;
-                    System.Diagnostics.Debug.WriteLine("Zalogowano pomyślnie, utworzono AppShell z kontenera DI");
                 }
                 else
                 {
-                    // Jeśli z jakiegoś powodu nie możemy pobrać z DI, tworzymy bezpośrednio
                     Application.Current.MainPage = new AppShell(this.authService);
-                    System.Diagnostics.Debug.WriteLine("Zalogowano pomyślnie, utworzono AppShell bezpośrednio");
                 }
             }
             else

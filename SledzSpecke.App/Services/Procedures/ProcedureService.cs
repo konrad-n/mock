@@ -137,7 +137,6 @@ namespace SledzSpecke.App.Services.Procedures
                 return false;
             }
 
-            // Usuń procedurę
             var sql = "DELETE FROM RealizedProcedureOldSMK WHERE ProcedureId = ?";
             int result = await this.databaseService.ExecuteAsync(sql, procedureId);
 

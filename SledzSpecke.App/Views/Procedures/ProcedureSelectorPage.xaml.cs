@@ -16,8 +16,6 @@ namespace SledzSpecke.App.Views.Procedures
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-
-            // Inicjalizacja ViewModelu
             await this.viewModel.InitializeAsync();
         }
     }

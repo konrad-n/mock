@@ -175,13 +175,11 @@ namespace SledzSpecke.App.Helpers
                     }
                     catch
                     {
-                        // Handle JSON parsing error
                         col += 2;
                     }
                 }
             }
 
-            // Autofit columns
             worksheet.Columns[1, col - 1].AutoFit();
 
             return worksheet;
@@ -191,7 +189,6 @@ namespace SledzSpecke.App.Helpers
         {
             var worksheet = package.Workbook.Worksheets.Add("Zabiegi i procedury");
 
-            // Headers
             int col = 1;
             worksheet.Cells[1, col++].Value = "Data";
             worksheet.Cells[1, col++].Value = "Kod zabiegu";
@@ -206,12 +203,10 @@ namespace SledzSpecke.App.Helpers
 
             if (oldSmkFormat)
             {
-                // Add headers specific to old SMK
                 worksheet.Cells[1, col++].Value = "Osoba wykonująca";
                 worksheet.Cells[1, col++].Value = "Pole dodatkowe";
             }
 
-            // Format headers
             for (int i = 1; i <= col - 1; i++)
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
@@ -219,7 +214,6 @@ namespace SledzSpecke.App.Helpers
                 worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
             }
 
-            // Data
             for (int i = 0; i < procedures.Count; i++)
             {
                 int row = i + 2;
@@ -237,17 +231,10 @@ namespace SledzSpecke.App.Helpers
                 string internshipName = string.Empty;
                 if (!string.IsNullOrEmpty(procedure.AdditionalFields))
                 {
-                    try
+                    var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(procedure.AdditionalFields);
+                    if (additionalFields != null && additionalFields.TryGetValue("InternshipName", out object name))
                     {
-                        var additionalFields = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(procedure.AdditionalFields);
-                        if (additionalFields != null && additionalFields.TryGetValue("InternshipName", out object name))
-                        {
-                            internshipName = name?.ToString() ?? string.Empty;
-                        }
-                    }
-                    catch
-                    {
-                        // Ignoruj błędy deserializacji
+                        internshipName = name?.ToString() ?? string.Empty;
                     }
                 }
 

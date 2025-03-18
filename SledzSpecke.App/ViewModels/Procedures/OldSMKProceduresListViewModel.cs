@@ -44,12 +44,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.ProcedureGroups = new ObservableCollection<ProcedureGroupViewModel>();
             this.Summary = new ProcedureSummary();
 
-            // Inicjalizacja komend
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
             this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
             this.AddProcedureCommand = new AsyncRelayCommand(this.AddProcedureAsync);
-
-            // Zarejestruj na zdarzenie zmiany modułu
             this.specializationService.CurrentModuleChanged += this.OnModuleChanged;
         }
 
@@ -128,155 +125,103 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.IsBusy = true;
             this.IsRefreshing = true;
 
-            try
+            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                // Pobierz dane o specjalizacji i modułach - te operacje są szybkie i mogą być na głównym wątku
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
+                return;
+            }
+
+            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+            this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+
+            if (this.CurrentModuleId == 0 && specialization.CurrentModuleId.HasValue)
+            {
+                this.CurrentModuleId = specialization.CurrentModuleId.Value;
+            }
+
+            var currentModule = modules.FirstOrDefault(m => m.ModuleId == this.CurrentModuleId)
+                                    ?? modules.FirstOrDefault();
+
+            if (currentModule != null)
+            {
+                this.ModuleTitle = currentModule.Name;
+                this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
+                this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
+                this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
+
+                await Task.Run(async () =>
                 {
-                    return;
-                }
+                    var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
+                    var newGroups = new List<ProcedureGroupViewModel>();
 
-                // Sprawdź, czy specjalizacja ma dwa moduły
-                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
-
-                // Pobierz bieżący moduł jeśli nie jest wybrany
-                if (this.CurrentModuleId == 0 && specialization.CurrentModuleId.HasValue)
-                {
-                    this.CurrentModuleId = specialization.CurrentModuleId.Value;
-                }
-
-                var currentModule = modules.FirstOrDefault(m => m.ModuleId == this.CurrentModuleId)
-                                     ?? modules.FirstOrDefault();
-
-                if (currentModule != null)
-                {
-                    this.ModuleTitle = currentModule.Name;
-                    this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
-                    this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
-
-                    // Najpierw pokaż szybkie informacje podsumowujące, żeby UI było responsywne
-                    this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
-
-                    // Wykonaj pozostałe operacje w tle
-                    await Task.Run(async () =>
+                    foreach (var requirement in requirements)
                     {
-                        // Pobierz wymagania procedur dla bieżącego modułu
-                        var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
+                        var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
+                        var groupViewModel = new ProcedureGroupViewModel(
+                            requirement,
+                            new List<RealizedProcedureOldSMK>(),
+                            stats,
+                            this.procedureService,
+                            this.dialogService);
 
-                        // Utwórz nową kolekcję, żeby nie modyfikować tej, która jest wyświetlana
-                        var newGroups = new List<ProcedureGroupViewModel>();
+                        newGroups.Add(groupViewModel);
+                    }
 
-                        // Dodaj systematycznie grupy do kolekcji
-                        foreach (var requirement in requirements)
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        this.ProcedureGroups.Clear();
+
+                        foreach (var group in newGroups)
                         {
-                            // Pobierz statystyki dla tego wymagania
-                            var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
-
-                            // Tworzenie ViewModelu dla grupy procedur - ale bez ładowania procedur od razu
-                            var groupViewModel = new ProcedureGroupViewModel(
-                                requirement,
-                                new List<RealizedProcedureOldSMK>(), // Pusta lista - procedury załadowane zostaną później
-                                stats,
-                                this.procedureService,
-                                this.dialogService);
-
-                            newGroups.Add(groupViewModel);
+                            this.ProcedureGroups.Add(group);
                         }
-
-                        // Aktualizuj UI na głównym wątku
-                        MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            // Czyścimy całą listę naraz - jedna duża operacja zamiast wielu małych
-                            this.ProcedureGroups.Clear();
-
-                            // Dodajemy wszystkie grupy za jednym razem
-                            foreach (var group in newGroups)
-                            {
-                                this.ProcedureGroups.Add(group);
-                            }
-                        });
                     });
-                }
+                });
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas ładowania procedur.",
-                    "OK");
-            }
-            finally
-            {
-                this.isLoadingData = false;
-                this.IsBusy = false;
-                this.IsRefreshing = false;
-                this.isInitialLoad = false;
-            }
+
+            this.isLoadingData = false;
+            this.IsBusy = false;
+            this.IsRefreshing = false;
+            this.isInitialLoad = false;
         }
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            try
+            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
 
-                if (moduleType == "Basic")
+            if (moduleType == "Basic")
+            {
+                var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                if (basicModule != null)
                 {
-                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
-                    if (basicModule != null)
-                    {
-                        await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
-                        this.CurrentModuleId = basicModule.ModuleId;
-                    }
-                }
-                else if (moduleType == "Specialistic")
-                {
-                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
-                    if (specialisticModule != null)
-                    {
-                        await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
-                        this.CurrentModuleId = specialisticModule.ModuleId;
-                    }
+                    await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
+                    this.CurrentModuleId = basicModule.ModuleId;
                 }
             }
-            catch (Exception ex)
+            else if (moduleType == "Specialistic")
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas zmiany modułu: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas zmiany modułu.",
-                    "OK");
+                var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                if (specialisticModule != null)
+                {
+                    await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
+                    this.CurrentModuleId = specialisticModule.ModuleId;
+                }
             }
         }
 
         private async Task AddProcedureAsync()
         {
-            try
-            {
-                await Shell.Current.GoToAsync("AddEditOldSMKProcedure");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas nawigacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas przejścia do formularza dodawania procedury.",
-                    "OK");
-            }
+            await Shell.Current.GoToAsync("AddEditOldSMKProcedure");
         }
 
         public void Dispose()
         {
-            // Odłącz obserwator zdarzenia zmiany modułu
             this.specializationService.CurrentModuleChanged -= this.OnModuleChanged;
         }
     }

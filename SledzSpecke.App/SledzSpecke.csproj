@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net9.0-android35.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
-
     <OutputType>Exe</OutputType>
     <RootNamespace>SledzSpecke.App</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -15,7 +14,6 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
     <WindowsPackageType>None</WindowsPackageType>
-
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
@@ -25,7 +23,6 @@
     <MtouchLink>SdkOnly</MtouchLink>
     <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
   </PropertyGroup>
-
   <PropertyGroup>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -65,7 +62,6 @@
     <NoWarn>1701;1702;CS8601;CS8604;CS8767;CS8618;CS8602;CS8600;CS8625;XC0022</NoWarn>
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
-
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="559,559" />
     <MauiSplashScreen Include="Resources\AppIcon\appicon.png" Color="#0d759c" BaseSize="559,559" />
@@ -74,7 +70,6 @@
     <MauiFont Include="Resources\Fonts\*" />
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Remove="Resources\Icons\**" />
     <Compile Remove="Resources\Splash\**" />
@@ -87,30 +82,25 @@
     <None Remove="Resources\Icons\**" />
     <None Remove="Resources\Splash\**" />
   </ItemGroup>
-
   <ItemGroup>
     <MauiAsset Remove="Resources\Raw\SpecializationTemplates\cardiology_old.json" />
     <MauiAsset Remove="Resources\Raw\SpecializationTemplates\psychiatry_old.json" />
     <MauiAsset Remove="Resources\Raw\SpecializationTemplates\recommended_json_structure.json" />
   </ItemGroup>
-
   <ItemGroup>
     <MauiImage Remove="Resources\Images\appicon.png" />
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="SledzSpecke.net9.0-android35.0.v3.ncrunchproject" />
     <None Remove="SledzSpecke.net9.0-ios.v3.ncrunchproject" />
     <None Remove="SledzSpecke.net9.0-maccatalyst.v3.ncrunchproject" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_old.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry_old.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\cardiology_new.json" />
     <EmbeddedResource Include="Resources\Raw\SpecializationTemplates\psychiatry_new.json" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="EPPlus" Version="7.6.1" />
@@ -123,18 +113,8 @@
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
   </ItemGroup>
-
   <ItemGroup>
     <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Absences\AbsencesListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Courses\CoursesListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Internships\InternshipsListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Views\MedicalShifts\AddEditOldSMKMedicalShiftPage.xaml">
@@ -161,15 +141,6 @@
     <MauiXaml Update="Views\Procedures\ProcedureSelectorPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Publications\PublicationsListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\SelfEducation\SelfEducationListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Settings\SettingsPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Views\Specializations\InitializeSpecializationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -189,7 +160,6 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Services\Export\" />
     <Folder Include="ViewModels\Absences\" />
@@ -200,9 +170,14 @@
     <Folder Include="ViewModels\Recognitions\" />
     <Folder Include="ViewModels\SelfEducation\" />
     <Folder Include="ViewModels\Settings\" />
+    <Folder Include="Views\Absences\" />
+    <Folder Include="Views\Courses\" />
+    <Folder Include="Views\Internships\" />
+    <Folder Include="Views\Publications\" />
     <Folder Include="Views\Recognitions\" />
+    <Folder Include="Views\SelfEducation\" />
+    <Folder Include="Views\Settings\" />
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Views\Absences\AbsencesListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -229,5 +204,4 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
-
 </Project>
