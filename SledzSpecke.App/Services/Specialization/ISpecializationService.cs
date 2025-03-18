@@ -5,8 +5,6 @@ namespace SledzSpecke.App.Services.Specialization
 {
     public interface ISpecializationService
     {
-        Task<User> GetCurrentUserAsync();
-
         Task<Models.Specialization> GetCurrentSpecializationAsync(bool includeModules = true);
 
         Task<Module> GetCurrentModuleAsync();
@@ -44,76 +42,6 @@ namespace SledzSpecke.App.Services.Specialization
         Task<bool> DeleteMedicalShiftAsync(int shiftId);
 
         event EventHandler<int> CurrentModuleChanged;
-
-        Task<List<Procedure>> GetProceduresAsync(string searchText = null, int? internshipId = null);
-
-        Task<Procedure> GetProcedureAsync(int procedureId);
-
-        Task<bool> AddProcedureAsync(Procedure procedure);
-
-        Task<bool> UpdateProcedureAsync(Procedure procedure);
-
-        Task<bool> DeleteProcedureAsync(int procedureId);
-
-        Task<List<Course>> GetCoursesAsync(int? moduleId = null);
-
-        Task<Course> GetCourseAsync(int courseId);
-
-        Task<bool> AddCourseAsync(Course course);
-
-        Task<bool> UpdateCourseAsync(Course course);
-
-        Task<bool> DeleteCourseAsync(int courseId);
-
-        Task<List<SelfEducation>> GetSelfEducationItemsAsync(int? moduleId = null);
-
-        Task<SelfEducation> GetSelfEducationAsync(int selfEducationId);
-
-        Task<bool> AddSelfEducationAsync(SelfEducation selfEducation);
-
-        Task<bool> UpdateSelfEducationAsync(SelfEducation selfEducation);
-
-        Task<bool> DeleteSelfEducationAsync(int selfEducationId);
-
-        Task<List<Publication>> GetPublicationsAsync(int? moduleId = null);
-
-        Task<Publication> GetPublicationAsync(int publicationId);
-
-        Task<bool> AddPublicationAsync(Publication publication);
-
-        Task<bool> UpdatePublicationAsync(Publication publication);
-
-        Task<bool> DeletePublicationAsync(int publicationId);
-
-        Task<List<EducationalActivity>> GetEducationalActivitiesAsync(int? moduleId = null);
-
-        Task<EducationalActivity> GetEducationalActivityAsync(int activityId);
-
-        Task<bool> AddEducationalActivityAsync(EducationalActivity activity);
-
-        Task<bool> UpdateEducationalActivityAsync(EducationalActivity activity);
-
-        Task<bool> DeleteEducationalActivityAsync(int activityId);
-
-        Task<List<Absence>> GetAbsencesAsync();
-
-        Task<Absence> GetAbsenceAsync(int absenceId);
-
-        Task<bool> AddAbsenceAsync(Absence absence);
-
-        Task<bool> UpdateAbsenceAsync(Absence absence);
-
-        Task<bool> DeleteAbsenceAsync(int absenceId);
-
-        Task<List<Models.Recognition>> GetRecognitionsAsync();
-
-        Task<Models.Recognition> GetRecognitionAsync(int recognitionId);
-
-        Task<bool> AddRecognitionAsync(Models.Recognition recognition);
-
-        Task<bool> UpdateRecognitionAsync(Models.Recognition recognition);
-
-        Task<bool> DeleteRecognitionAsync(int recognitionId);
 
         Task<SpecializationStatistics> GetSpecializationStatisticsAsync(int? moduleId = null);
 

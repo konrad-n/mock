@@ -69,7 +69,7 @@ namespace SledzSpecke.App.Services.Specialization
 
         public async Task<Module> GetCurrentModuleAsync()
         {
-            var specialization = await GetCurrentSpecializationAsync(false); // Użyj false aby uniknąć pętli
+            var specialization = await GetCurrentSpecializationAsync(false);
             if (specialization?.CurrentModuleId == null)
             {
                 return null;
@@ -80,466 +80,287 @@ namespace SledzSpecke.App.Services.Specialization
 
         public async Task<int> GetInternshipCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var internships = await this.databaseService.GetInternshipsAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
-
-                int completedCount = internships.Count(i => i.IsCompleted);
-                System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Znaleziono {completedCount} ukończonych staży z {internships.Count}");
-                return completedCount;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetInternshipCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var internships = await this.databaseService.GetInternshipsAsync(
+                specializationId: specialization.SpecializationId,
+                moduleId: moduleId);
+
+            int completedCount = internships.Count(i => i.IsCompleted);
+            return completedCount;
         }
 
         public async Task<int> GetProcedureCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                int count = 0;
-
-                // Jeśli mamy moduł, pobierz tylko procedury z tego modułu
-                if (moduleId.HasValue)
-                {
-                    // Pobierz wszystkie staże w module
-                    var internships = await this.databaseService.GetInternshipsAsync(
-                        specializationId: specialization.SpecializationId,
-                        moduleId: moduleId);
-
-                    foreach (var internship in internships)
-                    {
-                        // Pobierz procedury dla każdego stażu
-                        var procedures = await this.databaseService.GetProceduresAsync(internshipId: internship.InternshipId);
-                        // Licz tylko procedury typu A (wykonywane samodzielnie)
-                        count += procedures.Count(p => p.OperatorCode == "A");
-                    }
-                }
-                else
-                {
-                    // Pobierz wszystkie staże
-                    var internships = await this.databaseService.GetInternshipsAsync(
-                        specializationId: specialization.SpecializationId);
-
-                    foreach (var internship in internships)
-                    {
-                        var procedures = await this.databaseService.GetProceduresAsync(internshipId: internship.InternshipId);
-                        count += procedures.Count(p => p.OperatorCode == "A");
-                    }
-                }
-
-                System.Diagnostics.Debug.WriteLine($"GetProcedureCountAsync: Znaleziono {count} procedur");
-                return count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetProcedureCountAsync: {ex.Message}");
                 return 0;
             }
+
+            int count = 0;
+
+            if (moduleId.HasValue)
+            {
+                var internships = await this.databaseService.GetInternshipsAsync(
+                    specializationId: specialization.SpecializationId,
+                    moduleId: moduleId);
+
+                foreach (var internship in internships)
+                {
+                    var procedures = await this.databaseService.GetProceduresAsync(internshipId: internship.InternshipId);
+                    count += procedures.Count(p => p.OperatorCode == "A");
+                }
+            }
+            else
+            {
+                var internships = await this.databaseService.GetInternshipsAsync(
+                    specializationId: specialization.SpecializationId);
+
+                foreach (var internship in internships)
+                {
+                    var procedures = await this.databaseService.GetProceduresAsync(internshipId: internship.InternshipId);
+                    count += procedures.Count(p => p.OperatorCode == "A");
+                }
+            }
+
+            return count;
         }
 
         public async Task<int> GetCourseCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var courses = await this.databaseService.GetCoursesAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
-
-                System.Diagnostics.Debug.WriteLine($"GetCourseCountAsync: Znaleziono {courses.Count} kursów");
-                return courses.Count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetCourseCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var courses = await this.databaseService.GetCoursesAsync(
+                specializationId: specialization.SpecializationId,
+                moduleId: moduleId);
+
+            return courses.Count;
         }
 
         public async Task<int> GetShiftCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Brak specjalizacji");
-                    return 0;
-                }
+                return 0;
+            }
 
-                // Jeśli nie podano ModuleId, używamy bieżącego
-                if (!moduleId.HasValue && specialization.CurrentModuleId.HasValue)
-                {
-                    moduleId = specialization.CurrentModuleId.Value;
-                }
+            if (!moduleId.HasValue && specialization.CurrentModuleId.HasValue)
+            {
+                moduleId = specialization.CurrentModuleId.Value;
+            }
 
-                // Jeśli nadal nie mamy ModuleId, znajdź pierwszy moduł
-                if (!moduleId.HasValue)
+            if (!moduleId.HasValue)
+            {
+                var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
+                if (modules.Count > 0)
+                {
+                    moduleId = modules[0].ModuleId;
+                }
+            }
+
+            if (!moduleId.HasValue)
+            {
+                return 0;
+            }
+
+            var module = await this.databaseService.GetModuleAsync(moduleId.Value);
+            if (module == null)
+            {
+                return 0;
+            }
+
+            var user = await this.authService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                return 0;
+            }
+
+            double totalHoursDouble = 0;
+
+            if (user.SmkVersion == SmkVersion.New)
+            {
+                var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND ModuleId = ?";
+                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, specialization.SpecializationId, moduleId.Value);
+
+                foreach (var shift in shifts)
+                {
+                    totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
+                }
+            }
+            else
+            {
+                int startYear = 1;
+                int endYear = 6;
+
+                if (module.Type == ModuleType.Basic)
+                {
+                    startYear = 1;
+                    endYear = 2;
+                }
+                else if (module.Type == ModuleType.Specialistic)
                 {
                     var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
-                    if (modules.Count > 0)
+                    bool hasBasicModule = modules.Any(m => m.Type == ModuleType.Basic);
+
+                    if (hasBasicModule)
                     {
-                        moduleId = modules[0].ModuleId;
+                        startYear = 3;
+                        endYear = 6;
+                    }
+                    else
+                    {
+                        startYear = 1;
+                        endYear = 6;
                     }
                 }
 
-                if (!moduleId.HasValue)
+                for (int year = startYear; year <= endYear; year++)
                 {
-                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Brak modułu");
-                    return 0;
-                }
+                    var yearQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ?";
+                    var yearShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(yearQuery, specialization.SpecializationId, year);
 
-                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Liczenie dyżurów dla modułu ID={moduleId.Value}");
-
-                // Pobierz moduł
-                var module = await this.databaseService.GetModuleAsync(moduleId.Value);
-                if (module == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Nie znaleziono modułu");
-                    return 0;
-                }
-
-                // Pobierz użytkownika aby określić wersję SMK
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetShiftCountAsync: Brak użytkownika");
-                    return 0;
-                }
-
-                double totalHoursDouble = 0;
-
-                if (user.SmkVersion == SmkVersion.New)
-                {
-                    // Dla nowego SMK - bezpośrednie zapytanie filtrujące po ModuleId
-                    var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND ModuleId = ?";
-                    var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, specialization.SpecializationId, moduleId.Value);
-
-                    System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Pobrano {shifts.Count} dyżurów nowego SMK dla modułu {moduleId.Value}");
-
-                    // Oblicz sumę godzin
-                    foreach (var shift in shifts)
+                    foreach (var shift in yearShifts)
                     {
                         totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
                     }
                 }
-                else // Stary SMK
-                {
-                    // Ustal lata odpowiadające modułowi
-                    int startYear = 1;
-                    int endYear = 6;
-
-                    if (module.Type == ModuleType.Basic)
-                    {
-                        // Dla modułu podstawowego - lata 1-2
-                        startYear = 1;
-                        endYear = 2;
-                    }
-                    else if (module.Type == ModuleType.Specialistic)
-                    {
-                        // Dla modułu specjalistycznego - lata 3-6 (lub 1-6 jeśli nie ma modułu podstawowego)
-                        var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
-                        bool hasBasicModule = modules.Any(m => m.Type == ModuleType.Basic);
-
-                        if (hasBasicModule)
-                        {
-                            startYear = 3;
-                            endYear = 6;
-                        }
-                        else
-                        {
-                            startYear = 1;
-                            endYear = 6;
-                        }
-                    }
-
-                    System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Lata dla modułu {module.Type}: {startYear}-{endYear}");
-
-                    // Pobierz dyżury dla odpowiednich lat
-                    for (int year = startYear; year <= endYear; year++)
-                    {
-                        var yearQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? AND Year = ?";
-                        var yearShifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(yearQuery, specialization.SpecializationId, year);
-
-                        System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Rok {year}: {yearShifts.Count} dyżurów");
-
-                        foreach (var shift in yearShifts)
-                        {
-                            totalHoursDouble += shift.Hours + ((double)shift.Minutes / 60.0);
-                        }
-                    }
-                }
-
-                // Zaokrągl do pełnych godzin
-                int totalHours = (int)Math.Round(totalHoursDouble);
-
-                System.Diagnostics.Debug.WriteLine($"GetShiftCountAsync: Łączna liczba godzin: {totalHours} (dokładnie: {totalHoursDouble})");
-
-                return totalHours;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetShiftCountAsync: {ex.Message}, StackTrace: {ex.StackTrace}");
-                return 0;
-            }
+
+            int totalHours = (int)Math.Round(totalHoursDouble);
+            return totalHours;
         }
 
         public async Task<int> GetSelfEducationCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var selfEducationItems = await this.databaseService.GetSelfEducationItemsAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
-
-                System.Diagnostics.Debug.WriteLine($"GetSelfEducationCountAsync: Znaleziono {selfEducationItems.Count} elementów samokształcenia");
-                return selfEducationItems.Count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetSelfEducationCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var selfEducationItems = await this.databaseService.GetSelfEducationItemsAsync(
+                specializationId: specialization.SpecializationId,
+                moduleId: moduleId);
+            return selfEducationItems.Count;
         }
 
         public async Task<int> GetPublicationCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var publications = await this.databaseService.GetPublicationsAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
-
-                System.Diagnostics.Debug.WriteLine($"GetPublicationCountAsync: Znaleziono {publications.Count} publikacji");
-                return publications.Count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetPublicationCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var publications = await this.databaseService.GetPublicationsAsync(
+                specializationId: specialization.SpecializationId,
+                moduleId: moduleId);
+
+            return publications.Count;
         }
 
         public async Task<int> GetEducationalActivityCountAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var activities = await this.databaseService.GetEducationalActivitiesAsync(
-                    specializationId: specialization.SpecializationId,
-                    moduleId: moduleId);
-
-                System.Diagnostics.Debug.WriteLine($"GetEducationalActivityCountAsync: Znaleziono {activities.Count} aktywności edukacyjnych");
-                return activities.Count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetEducationalActivityCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var activities = await this.databaseService.GetEducationalActivitiesAsync(
+                specializationId: specialization.SpecializationId,
+                moduleId: moduleId);
+
+            return activities.Count;
         }
 
         public async Task<int> GetAbsenceCountAsync()
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var absences = await this.databaseService.GetAbsencesAsync(specialization.SpecializationId);
-                System.Diagnostics.Debug.WriteLine($"GetAbsenceCountAsync: Znaleziono {absences.Count} nieobecności");
-                return absences.Count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetAbsenceCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var absences = await this.databaseService.GetAbsencesAsync(specialization.SpecializationId);
+            return absences.Count;
         }
 
         public async Task<int> GetRecognitionCountAsync()
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return 0;
-                }
-
-                var recognitions = await this.databaseService.GetRecognitionsAsync(specialization.SpecializationId);
-                System.Diagnostics.Debug.WriteLine($"GetRecognitionCountAsync: Znaleziono {recognitions.Count} uznań");
-                return recognitions.Count;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetRecognitionCountAsync: {ex.Message}");
                 return 0;
             }
+
+            var recognitions = await this.databaseService.GetRecognitionsAsync(specialization.SpecializationId);
+            return recognitions.Count;
         }
 
         public async Task<SpecializationStatistics> GetSpecializationStatisticsAsync(int? moduleId = null)
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetSpecializationStatisticsAsync: Nie znaleziono specjalizacji");
-                    return new SpecializationStatistics();
-                }
-
-                // Dodany parametr moduleId - teraz przekazujemy go do CalculateFullStatisticsAsync
-                var stats = await ProgressCalculator.CalculateFullStatisticsAsync(
-                    this.databaseService,
-                    specialization.SpecializationId,
-                    moduleId);
-
-                if (stats == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetSpecializationStatisticsAsync: Nie udało się obliczyć statystyk");
-                    return new SpecializationStatistics();
-                }
-
-                System.Diagnostics.Debug.WriteLine("GetSpecializationStatisticsAsync: Obliczono statystyki pomyślnie");
-                return stats;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetSpecializationStatisticsAsync: {ex.Message}");
                 return new SpecializationStatistics();
             }
+            var stats = await ProgressCalculator.CalculateFullStatisticsAsync(
+                this.databaseService,
+                specialization.SpecializationId,
+                moduleId);
+
+            if (stats == null)
+            {
+                return new SpecializationStatistics();
+            }
+            return stats;
         }
 
         public async Task UpdateSpecializationProgressAsync(int specializationId)
         {
-            try
-            {
-                await ProgressCalculator.UpdateSpecializationProgressAsync(this.databaseService, specializationId);
-                System.Diagnostics.Debug.WriteLine($"UpdateSpecializationProgressAsync: Zaktualizowano postęp specjalizacji {specializationId}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w UpdateSpecializationProgressAsync: {ex.Message}");
-            }
+            await ProgressCalculator.UpdateSpecializationProgressAsync(this.databaseService, specializationId);
         }
 
         public async Task UpdateModuleProgressAsync(int moduleId)
         {
-            try
-            {
-                await ProgressCalculator.UpdateModuleProgressAsync(this.databaseService, moduleId);
-                System.Diagnostics.Debug.WriteLine($"UpdateModuleProgressAsync: Zaktualizowano postęp modułu {moduleId}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w UpdateModuleProgressAsync: {ex.Message}");
-            }
+            await ProgressCalculator.UpdateModuleProgressAsync(this.databaseService, moduleId);
         }
 
         public async Task<DateTime> CalculateSpecializationEndDateAsync(int specializationId)
         {
-            try
-            {
                 var specialization = await this.databaseService.GetSpecializationAsync(specializationId);
-                if (specialization == null)
-                {
-                    return DateTime.Now.AddYears(5); // Domyślnie 5 lat
-                }
-
                 var absences = await this.databaseService.GetAbsencesAsync(specializationId);
 
                 return DateCalculator.CalculateSpecializationEndDate(
                     specialization.StartDate,
                     (specialization.PlannedEndDate - specialization.StartDate).Days + 1,
                     absences);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w CalculateSpecializationEndDateAsync: {ex.Message}");
-                return DateTime.Now.AddYears(5); // Domyślnie 5 lat
-            }
         }
 
         public async Task<List<Module>> GetModulesAsync(int specializationId)
         {
-            try
-            {
-                return await this.databaseService.GetModulesAsync(specializationId);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetModulesAsync: {ex.Message}");
-                return new List<Module>();
-            }
+            return await this.databaseService.GetModulesAsync(specializationId);
         }
 
         public async Task<List<SpecializationProgram>> GetAvailableSpecializationProgramsAsync()
         {
-            try
-            {
-                return await this.databaseService.GetAllSpecializationProgramsAsync();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetAvailableSpecializationProgramsAsync: {ex.Message}");
-                return new List<SpecializationProgram>();
-            }
+            return await this.databaseService.GetAllSpecializationProgramsAsync();
         }
 
         public async Task<SpecializationProgram> LoadSpecializationProgramAsync(string code, SmkVersion smkVersion)
         {
-            try
-            {
-                return await SpecializationLoader.LoadSpecializationProgramAsync(code, smkVersion);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w LoadSpecializationProgramAsync: {ex.Message}");
-                return null;
-            }
+            return await SpecializationLoader.LoadSpecializationProgramAsync(code, smkVersion);
         }
 
         public async Task<bool> InitializeSpecializationModulesAsync(int specializationId)
@@ -547,599 +368,268 @@ namespace SledzSpecke.App.Services.Specialization
             return await this.moduleInitializer.InitializeModulesIfNeededAsync(specializationId);
         }
 
-        // Metody obsługi dyżurów medycznych, które należy dodać do klasy SpecializationService
-
         public async Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null)
         {
-            try
-            {
-                return await this.databaseService.GetMedicalShiftsAsync(internshipId);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetMedicalShiftsAsync: {ex.Message}");
-                return new List<MedicalShift>();
-            }
+            return await this.databaseService.GetMedicalShiftsAsync(internshipId);
         }
 
         public async Task<MedicalShift> GetMedicalShiftAsync(int shiftId)
         {
-            try
-            {
-                return await this.databaseService.GetMedicalShiftAsync(shiftId);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetMedicalShiftAsync: {ex.Message}");
-                return null;
-            }
+            return await this.databaseService.GetMedicalShiftAsync(shiftId);
         }
 
         public async Task<bool> AddMedicalShiftAsync(MedicalShift shift)
         {
-            try
-            {
-                int result = await this.databaseService.SaveMedicalShiftAsync(shift);
+            int result = await this.databaseService.SaveMedicalShiftAsync(shift);
 
-                // Aktualizacja postępu modułu
-                var currentModule = await this.GetCurrentModuleAsync();
-                if (currentModule != null)
-                {
-                    await this.UpdateModuleProgressAsync(currentModule.ModuleId);
-                }
-
-                return result > 0;
-            }
-            catch (Exception ex)
+            var currentModule = await this.GetCurrentModuleAsync();
+            if (currentModule != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w AddMedicalShiftAsync: {ex.Message}");
-                return false;
+                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
             }
+
+            return result > 0;
         }
 
         public async Task<bool> UpdateMedicalShiftAsync(MedicalShift shift)
         {
-            try
+            int result = await this.databaseService.SaveMedicalShiftAsync(shift);
+            var currentModule = await this.GetCurrentModuleAsync();
+            if (currentModule != null)
             {
-                int result = await this.databaseService.SaveMedicalShiftAsync(shift);
-
-                // Aktualizacja postępu modułu
-                var currentModule = await this.GetCurrentModuleAsync();
-                if (currentModule != null)
-                {
-                    await this.UpdateModuleProgressAsync(currentModule.ModuleId);
-                }
-
-                return result > 0;
+                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w UpdateMedicalShiftAsync: {ex.Message}");
-                return false;
-            }
+
+            return result > 0;
         }
 
         public async Task<bool> DeleteMedicalShiftAsync(int shiftId)
         {
-            try
+            var shift = await this.databaseService.GetMedicalShiftAsync(shiftId);
+            if (shift == null)
             {
-                var shift = await this.databaseService.GetMedicalShiftAsync(shiftId);
-                if (shift == null)
-                {
-                    return false;
-                }
-
-                int result = await this.databaseService.DeleteMedicalShiftAsync(shift);
-
-                // Aktualizacja postępu modułu
-                var currentModule = await this.GetCurrentModuleAsync();
-                if (currentModule != null)
-                {
-                    await this.UpdateModuleProgressAsync(currentModule.ModuleId);
-                }
-
-                return result > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w DeleteMedicalShiftAsync: {ex.Message}");
                 return false;
             }
+
+            int result = await this.databaseService.DeleteMedicalShiftAsync(shift);
+            var currentModule = await this.GetCurrentModuleAsync();
+            if (currentModule != null)
+            {
+                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
+            }
+
+            return result > 0;
         }
 
         public async Task<Internship> GetInternshipAsync(int internshipId)
         {
-            try
-            {
-                return await this.databaseService.GetInternshipAsync(internshipId);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetInternshipAsync: {ex.Message}");
-                return null;
-            }
+            return await this.databaseService.GetInternshipAsync(internshipId);
         }
 
-        // Metoda zwracająca wszystkie staże z modułu (zdefiniowane w JSON)
         public async Task<List<Internship>> GetInternshipsAsync(int? moduleId = null)
         {
-            try
+            var results = new List<Internship>();
+            var currentSpecialization = await this.GetCurrentSpecializationAsync();
+
+            if (currentSpecialization == null)
             {
-                var results = new List<Internship>();
-                var currentSpecialization = await this.GetCurrentSpecializationAsync();
+                return results;
+            }
 
-                if (currentSpecialization == null)
+            if (!moduleId.HasValue && currentSpecialization.CurrentModuleId.HasValue)
+            {
+                moduleId = currentSpecialization.CurrentModuleId.Value;
+            }
+
+            Module module = null;
+            if (moduleId.HasValue)
+            {
+                module = await this.databaseService.GetModuleAsync(moduleId.Value);
+            }
+            else
+            {
+                var modules = await this.databaseService.GetModulesAsync(currentSpecialization.SpecializationId);
+                if (modules.Count > 0)
                 {
-                    return results;
+                    module = modules[0];
                 }
+            }
 
-                // Jeśli moduleId nie jest podane, użyj bieżącego modułu
-                if (!moduleId.HasValue && currentSpecialization.CurrentModuleId.HasValue)
-                {
-                    moduleId = currentSpecialization.CurrentModuleId.Value;
-                }
+            if (module == null || string.IsNullOrEmpty(module.Structure))
+            {
+                return results;
+            }
 
-                // Pobierz moduł
-                Module module = null;
-                if (moduleId.HasValue)
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true,
+                ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
+                Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+            };
+
+            ModuleStructure moduleStructure = null;
+
+            moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(
+                module.Structure, options);
+
+            if (moduleStructure?.Internships == null)
+            {
+                return results;
+            }
+
+            var userInternships = await this.databaseService.GetInternshipsAsync(
+                currentSpecialization.SpecializationId,
+                moduleId);
+
+            int id = 1;
+            foreach (var requirement in moduleStructure.Internships)
+            {
+                var existingInternship = userInternships.FirstOrDefault(
+                    i => i.InternshipName == requirement.Name);
+
+                if (existingInternship != null)
                 {
-                    module = await this.databaseService.GetModuleAsync(moduleId.Value);
+                    results.Add(existingInternship);
                 }
                 else
                 {
-                    var modules = await this.databaseService.GetModulesAsync(currentSpecialization.SpecializationId);
-                    if (modules.Count > 0)
+                    results.Add(new Internship
                     {
-                        module = modules[0];
-                    }
+                        InternshipId = -id,
+                        SpecializationId = currentSpecialization.SpecializationId,
+                        ModuleId = moduleId,
+                        InternshipName = requirement.Name,
+                        DaysCount = requirement.WorkingDays,
+                        StartDate = DateTime.Today,
+                        EndDate = DateTime.Today.AddDays(requirement.WorkingDays),
+                        Year = 1,
+                        IsCompleted = false,
+                        IsApproved = false
+                    });
+                    id++;
                 }
-
-                if (module == null || string.IsNullOrEmpty(module.Structure))
-                {
-                    return results;
-                }
-
-                var options = new System.Text.Json.JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    AllowTrailingCommas = true,
-                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
-                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-                };
-
-                // Deserializacja z poprawionymi opcjami
-                ModuleStructure moduleStructure = null;
-                try
-                {
-                    moduleStructure = System.Text.Json.JsonSerializer.Deserialize<ModuleStructure>(
-                        module.Structure, options);
-
-                    System.Diagnostics.Debug.WriteLine($"Module structure deserialized: {moduleStructure != null}");
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Deserializacja struktury modułu nie powiodła się: {ex.Message}");
-                    System.Diagnostics.Debug.WriteLine($"JSON struktury: {module.Structure.Substring(0, Math.Min(200, module.Structure.Length))}...");
-                }
-
-                if (moduleStructure?.Internships == null)
-                {
-                    return results;
-                }
-
-                // Pobierz również staże z bazy danych, które użytkownik już rozpoczął
-                var userInternships = await this.databaseService.GetInternshipsAsync(
-                    currentSpecialization.SpecializationId,
-                    moduleId);
-
-                // Konwertuj InternshipRequirement na Internship
-                int id = 1;
-                foreach (var requirement in moduleStructure.Internships)
-                {
-                    // Sprawdź, czy staż o tym kodzie już istnieje w bazie
-                    var existingInternship = userInternships.FirstOrDefault(
-                        i => i.InternshipName == requirement.Name);
-
-                    if (existingInternship != null)
-                    {
-                        // Użyj istniejącego stażu
-                        results.Add(existingInternship);
-                    }
-                    else
-                    {
-                        // Utwórz nowy obiekt stażu
-                        results.Add(new Internship
-                        {
-                            InternshipId = -id,  // Tymczasowe ID (ujemne, by nie kolidowało z ID z bazy)
-                            SpecializationId = currentSpecialization.SpecializationId,
-                            ModuleId = moduleId,
-                            InternshipName = requirement.Name,
-                            DaysCount = requirement.WorkingDays,
-                            StartDate = DateTime.Today,
-                            EndDate = DateTime.Today.AddDays(requirement.WorkingDays),
-                            Year = 1, // Domyślnie pierwszy rok
-                            IsCompleted = false,
-                            IsApproved = false
-                        });
-                        id++;
-                    }
-                }
-
-                return results;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetInternshipsAsync: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-                return new List<Internship>();
-            }
+
+            return results;
         }
 
-        // Dodatkowa metoda, która zwraca tylko staże dodane przez użytkownika
         public async Task<List<Internship>> GetUserInternshipsAsync(int? moduleId = null)
         {
-            try
+            var currentSpecialization = await this.GetCurrentSpecializationAsync();
+            if (currentSpecialization == null)
             {
-                var currentSpecialization = await this.GetCurrentSpecializationAsync();
-                if (currentSpecialization == null)
-                {
-                    return new List<Internship>();
-                }
-
-                // Pobierz staże dodane przez użytkownika z bazy danych
-                return await this.databaseService.GetInternshipsAsync(
-                    specializationId: currentSpecialization.SpecializationId,
-                    moduleId: moduleId);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetUserInternshipsAsync: {ex.Message}");
                 return new List<Internship>();
             }
+
+            return await this.databaseService.GetInternshipsAsync(
+                specializationId: currentSpecialization.SpecializationId,
+                moduleId: moduleId);
         }
 
         public async Task<Internship> GetCurrentInternshipAsync()
         {
-            try
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
             {
-                // Ta metoda powinna zwracać aktualnie wybrany staż
-                // Możemy to zrobić na podstawie ostatniego dodanego dyżuru lub staż, który jest obecnie w trakcie
-
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    return null;
-                }
-
-                var internships = await this.databaseService.GetInternshipsAsync(specialization.SpecializationId);
-
-                // Znajdź trwający staż (gdzie dzisiejsza data jest pomiędzy datą rozpoczęcia i zakończenia)
-                var today = DateTime.Today;
-                var currentInternship = internships.FirstOrDefault(i =>
-                    i.StartDate <= today && i.EndDate >= today);
-
-                // Jeśli nie ma trwającego, weź ostatni dodany
-                if (currentInternship == null && internships.Count > 0)
-                {
-                    currentInternship = internships.OrderByDescending(i => i.InternshipId).First();
-                }
-
-                return currentInternship;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetCurrentInternshipAsync: {ex.Message}");
                 return null;
             }
+
+            var internships = await this.databaseService.GetInternshipsAsync(specialization.SpecializationId);
+            var today = DateTime.Today;
+            var currentInternship = internships.FirstOrDefault(i =>
+                i.StartDate <= today && i.EndDate >= today);
+            if (currentInternship == null && internships.Count > 0)
+            {
+                currentInternship = internships.OrderByDescending(i => i.InternshipId).First();
+            }
+
+            return currentInternship;
         }
 
         public async Task<bool> AddInternshipAsync(Internship internship)
         {
-            try
-            {
-                // Upewnij się, że staż jest powiązany z bieżącą specjalizacją
-                if (internship.SpecializationId <= 0)
-                {
-                    var specialization = await this.GetCurrentSpecializationAsync();
-                    if (specialization == null)
-                    {
-                        return false;
-                    }
-
-                    internship.SpecializationId = specialization.SpecializationId;
-                }
-
-                int result = await this.databaseService.SaveInternshipAsync(internship);
-
-                // Aktualizacja postępu modułu
-                if (internship.ModuleId.HasValue)
-                {
-                    await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
-                }
-
-                return result > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w AddInternshipAsync: {ex.Message}");
-                return false;
-            }
-        }
-
-        public async Task<bool> UpdateInternshipAsync(Internship internship)
-        {
-            try
-            {
-                int result = await this.databaseService.SaveInternshipAsync(internship);
-
-                // Aktualizacja postępu modułu
-                if (internship.ModuleId.HasValue)
-                {
-                    await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
-                }
-
-                return result > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w UpdateInternshipAsync: {ex.Message}");
-                return false;
-            }
-        }
-
-        public async Task<bool> DeleteInternshipAsync(int internshipId)
-        {
-            try
-            {
-                var internship = await this.databaseService.GetInternshipAsync(internshipId);
-                if (internship == null)
-                {
-                    return false;
-                }
-
-                // Sprawdź, czy staż ma powiązane dyżury lub procedury
-                var shifts = await this.databaseService.GetMedicalShiftsAsync(internshipId);
-                var procedures = await this.databaseService.GetProceduresAsync(internshipId: internshipId);
-
-                if (shifts.Count > 0 || procedures.Count > 0)
-                {
-                    // Nie można usunąć stażu z powiązanymi elementami
-                    return false;
-                }
-
-                int result = await this.databaseService.DeleteInternshipAsync(internship);
-
-                // Aktualizacja postępu modułu
-                if (internship.ModuleId.HasValue)
-                {
-                    await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
-                }
-
-                return result > 0;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w DeleteInternshipAsync: {ex.Message}");
-                return false;
-            }
-        }
-
-        // Implementacja zdarzenia
-        public event EventHandler<int> CurrentModuleChanged;
-
-        // Modyfikacja istniejącej metody SetCurrentModuleAsync
-        public async Task SetCurrentModuleAsync(int moduleId)
-        {
-            try
+            if (internship.SpecializationId <= 0)
             {
                 var specialization = await this.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
-                    return;
+                    return false;
                 }
 
-                var module = await this.databaseService.GetModuleAsync(moduleId);
-                if (module == null || module.SpecializationId != specialization.SpecializationId)
-                {
-                    return;
-                }
-
-                // Aktualizuj bieżący moduł w specjalizacji
-                specialization.CurrentModuleId = moduleId;
-                await this.databaseService.UpdateSpecializationAsync(specialization);
-
-                // Zapisz też w ustawieniach aplikacji
-                await SettingsHelper.SetCurrentModuleIdAsync(moduleId);
-
-                System.Diagnostics.Debug.WriteLine($"SetCurrentModuleAsync: Ustawiono moduł {moduleId}");
-
-                // Wywołaj zdarzenie zmiany modułu
-                this.CurrentModuleChanged?.Invoke(this, moduleId);
+                internship.SpecializationId = specialization.SpecializationId;
             }
-            catch (Exception ex)
+
+            int result = await this.databaseService.SaveInternshipAsync(internship);
+            if (internship.ModuleId.HasValue)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w SetCurrentModuleAsync: {ex.Message}");
+                await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
             }
+
+            return result > 0;
         }
 
-        public Task<User> GetCurrentUserAsync()
+        public async Task<bool> UpdateInternshipAsync(Internship internship)
         {
-            throw new NotImplementedException();
+            int result = await this.databaseService.SaveInternshipAsync(internship);
+
+            if (internship.ModuleId.HasValue)
+            {
+                await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
+            }
+
+            return result > 0;
         }
 
-        public Task<List<Procedure>> GetProceduresAsync(string searchText = null, int? internshipId = null)
+        public async Task<bool> DeleteInternshipAsync(int internshipId)
         {
-            throw new NotImplementedException();
+            var internship = await this.databaseService.GetInternshipAsync(internshipId);
+            if (internship == null)
+            {
+                return false;
+            }
+
+            var shifts = await this.databaseService.GetMedicalShiftsAsync(internshipId);
+            var procedures = await this.databaseService.GetProceduresAsync(internshipId: internshipId);
+
+            if (shifts.Count > 0 || procedures.Count > 0)
+            {
+                // Nie można usunąć stażu z powiązanymi elementami
+                return false;
+            }
+
+            int result = await this.databaseService.DeleteInternshipAsync(internship);
+
+            // Aktualizacja postępu modułu
+            if (internship.ModuleId.HasValue)
+            {
+                await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
+            }
+
+            return result > 0;
         }
 
-        public Task<Procedure> GetProcedureAsync(int procedureId)
-        {
-            throw new NotImplementedException();
-        }
+        public event EventHandler<int> CurrentModuleChanged;
 
-        public Task<bool> AddProcedureAsync(Procedure procedure)
+        public async Task SetCurrentModuleAsync(int moduleId)
         {
-            throw new NotImplementedException();
-        }
+            var specialization = await this.GetCurrentSpecializationAsync();
+            if (specialization == null)
+            {
+                return;
+            }
 
-        public Task<bool> UpdateProcedureAsync(Procedure procedure)
-        {
-            throw new NotImplementedException();
-        }
+            var module = await this.databaseService.GetModuleAsync(moduleId);
+            if (module == null || module.SpecializationId != specialization.SpecializationId)
+            {
+                return;
+            }
 
-        public Task<bool> DeleteProcedureAsync(int procedureId)
-        {
-            throw new NotImplementedException();
-        }
+            specialization.CurrentModuleId = moduleId;
+            await this.databaseService.UpdateSpecializationAsync(specialization);
+            await SettingsHelper.SetCurrentModuleIdAsync(moduleId);
 
-        public Task<List<Course>> GetCoursesAsync(int? moduleId = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Course> GetCourseAsync(int courseId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> AddCourseAsync(Course course)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateCourseAsync(Course course)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeleteCourseAsync(int courseId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<SelfEducation>> GetSelfEducationItemsAsync(int? moduleId = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<SelfEducation> GetSelfEducationAsync(int selfEducationId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> AddSelfEducationAsync(SelfEducation selfEducation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateSelfEducationAsync(SelfEducation selfEducation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeleteSelfEducationAsync(int selfEducationId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Publication>> GetPublicationsAsync(int? moduleId = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Publication> GetPublicationAsync(int publicationId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> AddPublicationAsync(Publication publication)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdatePublicationAsync(Publication publication)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeletePublicationAsync(int publicationId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<EducationalActivity>> GetEducationalActivitiesAsync(int? moduleId = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<EducationalActivity> GetEducationalActivityAsync(int activityId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> AddEducationalActivityAsync(EducationalActivity activity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateEducationalActivityAsync(EducationalActivity activity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeleteEducationalActivityAsync(int activityId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Absence>> GetAbsencesAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Absence> GetAbsenceAsync(int absenceId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> AddAbsenceAsync(Absence absence)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateAbsenceAsync(Absence absence)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeleteAbsenceAsync(int absenceId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Models.Recognition>> GetRecognitionsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Models.Recognition> GetRecognitionAsync(int recognitionId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> AddRecognitionAsync(Models.Recognition recognition)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateRecognitionAsync(Models.Recognition recognition)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> DeleteRecognitionAsync(int recognitionId)
-        {
-            throw new NotImplementedException();
+            this.CurrentModuleChanged?.Invoke(this, moduleId);
         }
 
         public void ClearCache()
