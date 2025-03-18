@@ -663,7 +663,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     System.Diagnostics.Debug.WriteLine($"\nModuły dla specjalizacji {specializations[0].Name} ({modules.Count}):");
                     foreach (var module in modules)
                     {
-                        System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}, SpecializationId: {module.SpecializationId}");
+                        System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}, SpecializationId: {module.SpecializationId}, Wersja SMK: {module.SmkVersion}");
                     }
                 }
 
