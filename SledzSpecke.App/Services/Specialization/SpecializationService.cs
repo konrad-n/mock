@@ -33,8 +33,10 @@ namespace SledzSpecke.App.Services.Specialization
                     return null;
                 }
 
+                System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Użytkownik ID={user.UserId}, Username={user.Username}, SpecializationId={user.SpecializationId}");
+
                 var specialization = await this.databaseService.GetSpecializationAsync(user.SpecializationId);
-                System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Znaleziono specjalizację {specialization?.Name ?? "null"}");
+                System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Specjalizacja ID={specialization?.SpecializationId}, Nazwa={specialization?.Name}, Wersja={specialization?.SmkVersion}");
 
                 // Jeśli specjalizacja ma moduły, ale ich nie załadowaliśmy, spróbuj je zainicjalizować
                 if (specialization != null)

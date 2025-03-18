@@ -72,13 +72,21 @@ namespace SledzSpecke.App.Services.Database
         public async Task<int> SaveUserAsync(User user)
         {
             await this.InitializeAsync();
+            System.Diagnostics.Debug.WriteLine($"SaveUserAsync: Zapisuję użytkownika {user.Username} z SpecializationId={user.SpecializationId}");
+
             if (user.UserId != 0)
             {
-                return await this.database.UpdateAsync(user);
+                await this.database.UpdateAsync(user);
+                System.Diagnostics.Debug.WriteLine($"SaveUserAsync: Zaktualizowano użytkownika ID={user.UserId}");
+                return user.UserId;
             }
             else
             {
-                return await this.database.InsertAsync(user);
+                await this.database.InsertAsync(user);
+                var lastId = await this.database.ExecuteScalarAsync<int>("SELECT last_insert_rowid()");
+                System.Diagnostics.Debug.WriteLine($"SaveUserAsync: Wstawiono użytkownika. Nowe ID: {lastId}, SpecializationId={user.SpecializationId}");
+                user.UserId = lastId;
+                return lastId;
             }
         }
 
@@ -103,13 +111,21 @@ namespace SledzSpecke.App.Services.Database
         public async Task<int> SaveSpecializationAsync(Models.Specialization specialization)
         {
             await this.InitializeAsync();
+            int result;
+
             if (specialization.SpecializationId != 0)
             {
-                return await this.database.UpdateAsync(specialization);
+                result = await this.database.UpdateAsync(specialization);
+                System.Diagnostics.Debug.WriteLine($"Zaktualizowano specjalizację ID={specialization.SpecializationId}, wynik={result}");
+                return specialization.SpecializationId;
             }
             else
             {
-                return await this.database.InsertAsync(specialization);
+                await this.database.InsertAsync(specialization);
+                var lastId = await this.database.ExecuteScalarAsync<int>("SELECT last_insert_rowid()");
+                System.Diagnostics.Debug.WriteLine($"Wstawiono specjalizację. Ostatnie ID: {lastId}");
+                specialization.SpecializationId = lastId;
+                return lastId;
             }
         }
 

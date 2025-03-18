@@ -152,105 +152,38 @@ namespace SledzSpecke.App.Services.Authentication
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("=== ROZPOCZĘCIE REJESTRACJI ===");
-                System.Diagnostics.Debug.WriteLine($"Użytkownik: {user?.Username}, Email: {user?.Email}");
-                System.Diagnostics.Debug.WriteLine($"Specjalizacja: {specialization?.Name}, Wersja SMK: {user?.SmkVersion}");
-
-                // Walidacja wejścia
-                if (user == null || specialization == null || string.IsNullOrEmpty(password))
-                {
-                    System.Diagnostics.Debug.WriteLine("Błąd walidacji danych wejściowych!");
-                    return false;
-                }
-
                 // Sprawdzenie czy użytkownik już istnieje
                 var existingUser = await this.databaseService.GetUserByUsernameAsync(user.Username);
                 if (existingUser != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Użytkownik {user.Username} już istnieje!");
                     return false;
                 }
 
-                // Zapisz specjalizację
-                System.Diagnostics.Debug.WriteLine("Zapisywanie specjalizacji...");
-                specialization.SpecializationId = 0;
+                // WAŻNE: Najpierw zapisujemy specjalizację jako nowy rekord
+                specialization.SpecializationId = 0; // Wymuszamy utworzenie nowego rekordu
                 int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
-                if (specializationId <= 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania specjalizacji!");
-                    return false;
-                }
-                System.Diagnostics.Debug.WriteLine($"Specjalizacja zapisana z ID: {specializationId}");
 
-                // Przygotuj i zapisz użytkownika
-                user.PasswordHash = this.HashPassword(password);
+                // Przypisujemy nowe ID specjalizacji do użytkownika
                 user.SpecializationId = specializationId;
+                user.PasswordHash = this.HashPassword(password);
                 user.RegistrationDate = DateTime.Now;
 
+                // Zapisujemy użytkownika
                 int userId = await this.databaseService.SaveUserAsync(user);
-                if (userId <= 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Błąd podczas zapisywania użytkownika!");
-                    return false;
-                }
-                System.Diagnostics.Debug.WriteLine($"Użytkownik zapisany z ID: {userId}");
 
-                // Weryfikacja zapisanego użytkownika
-                var savedUser = await this.databaseService.GetUserAsync(userId);
-                if (savedUser.SpecializationId != specializationId)
+                // Inicjalizujemy moduły dla tej konkretnej specjalizacji
+                foreach (var module in specialization.Modules)
                 {
-                    System.Diagnostics.Debug.WriteLine($"BŁĄD: Niezgodność SpecializationId! User: {savedUser.SpecializationId}, Specialization: {specializationId}");
-                    savedUser.SpecializationId = specializationId;
-                    await this.databaseService.SaveUserAsync(savedUser);
+                    module.ModuleId = 0; // Wymuszamy utworzenie nowego rekordu
+                    module.SpecializationId = specializationId; // Przypisujemy do nowej specjalizacji
+                    await this.databaseService.SaveModuleAsync(module);
                 }
 
-                // Zapisz moduły
-                if (specialization.Modules?.Count > 0)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Zapisywanie {specialization.Modules.Count} modułów...");
-                    var savedModules = new List<Module>();
-
-                    foreach (var module in specialization.Modules)
-                    {
-                        module.ModuleId = 0;
-                        module.SpecializationId = specializationId;
-
-                        var moduleId = await this.databaseService.SaveModuleAsync(module);
-                        if (moduleId <= 0)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Błąd podczas zapisywania modułu {module.Name}!");
-                            continue;
-                        }
-
-                        module.ModuleId = moduleId;
-                        savedModules.Add(module);
-                        System.Diagnostics.Debug.WriteLine($"Zapisano moduł: {module.Name} (ID: {moduleId}) dla specjalizacji {specializationId}");
-                    }
-
-                    // Ustaw domyślny moduł
-                    if (savedModules.Count > 0)
-                    {
-                        specialization.CurrentModuleId = savedModules[0].ModuleId;
-                        await this.databaseService.UpdateSpecializationAsync(specialization);
-                        System.Diagnostics.Debug.WriteLine($"Ustawiono domyślny moduł: {savedModules[0].ModuleId}");
-                    }
-
-                    // Końcowa weryfikacja
-                    var verificationModules = await this.databaseService.GetModulesAsync(specializationId);
-                    System.Diagnostics.Debug.WriteLine($"Weryfikacja: Znaleziono {verificationModules.Count} modułów dla specjalizacji {specializationId}");
-                    foreach (var module in verificationModules)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Moduł: {module.Name}, ID: {module.ModuleId}, SpecializationId: {module.SpecializationId}");
-                    }
-                }
-
-                System.Diagnostics.Debug.WriteLine("=== REJESTRACJA ZAKOŃCZONA SUKCESEM ===");
                 return true;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas rejestracji: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 return false;
             }
         }
