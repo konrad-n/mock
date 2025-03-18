@@ -129,5 +129,7 @@ namespace SledzSpecke.App.Services.Database
         Task<int> SaveSpecializationProgramAsync(SpecializationProgram program);
 
         Task<int> UpdateSpecializationAsync(Models.Specialization specialization);
+
+        void ClearCache();
     }
 }

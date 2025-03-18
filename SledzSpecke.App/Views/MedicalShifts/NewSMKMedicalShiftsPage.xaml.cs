@@ -31,8 +31,11 @@ namespace SledzSpecke.App.Views.MedicalShifts
         {
             base.OnAppearing();
 
-            // Odśwież dane przy każdym pokazaniu strony
-            this.viewModel.RefreshCommand.Execute(null);
+            // Dodaj zabezpieczenie przed wielokrotnym wywołaniem
+            if (!this.viewModel.IsBusy)
+            {
+                this.viewModel.RefreshCommand.Execute(null);
+            }
         }
     }
 }

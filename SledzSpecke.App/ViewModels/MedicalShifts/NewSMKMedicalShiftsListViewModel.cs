@@ -151,13 +151,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             }
         }
 
+        private bool isLoading = false;
+
         public async Task LoadDataAsync()
         {
-            if (this.IsBusy)
+            if (this.IsBusy || isLoading)
             {
                 return;
             }
 
+            isLoading = true;
             this.IsBusy = true;
             this.IsRefreshing = true;
 
@@ -234,6 +237,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             {
                 this.IsBusy = false;
                 this.IsRefreshing = false;
+                isLoading = false;
             }
         }
     }

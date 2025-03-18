@@ -9,6 +9,8 @@ namespace SledzSpecke.App.Services.Database
     {
         private SQLiteAsyncConnection database;
         private bool isInitialized = false;
+        private Dictionary<int, Models.Specialization> _specializationCache = new();
+        private Dictionary<int, List<Module>> _moduleCache = new();
 
         public async Task InitializeAsync()
         {
@@ -93,10 +95,22 @@ namespace SledzSpecke.App.Services.Database
         // Specialization
         public async Task<Models.Specialization> GetSpecializationAsync(int id)
         {
-            await this.InitializeAsync();
-            return await this.database.Table<Models.Specialization>()
+            if (_specializationCache.TryGetValue(id, out var cachedSpecialization))
+            {
+                return cachedSpecialization;
+            }
+
+            var specialization = await database.Table<Models.Specialization>()
                 .FirstOrDefaultAsync(s => s.SpecializationId == id);
+
+            if (specialization != null)
+            {
+                _specializationCache[id] = specialization;
+            }
+
+            return specialization;
         }
+
 
         public async Task<Models.Specialization> GetSpecializationWithModulesAsync(int id)
         {
@@ -175,11 +189,23 @@ namespace SledzSpecke.App.Services.Database
 
         public async Task<List<Module>> GetModulesAsync(int specializationId)
         {
-            await this.InitializeAsync();
-            return await this.database.Table<Module>()
+            if (_moduleCache.TryGetValue(specializationId, out var cachedModules))
+            {
+                return cachedModules;
+            }
+
+            var modules = await database.Table<Module>()
                 .Where(m => m.SpecializationId == specializationId)
                 .ToListAsync();
+
+            if (modules != null)
+            {
+                _moduleCache[specializationId] = modules;
+            }
+
+            return modules;
         }
+
 
         public async Task<int> SaveModuleAsync(Module module)
         {
@@ -727,6 +753,12 @@ namespace SledzSpecke.App.Services.Database
             {
                 System.Diagnostics.Debug.WriteLine($"Błąd podczas migracji danych dyżurów: {ex.Message}");
             }
+        }
+
+        public void ClearCache()
+        {
+            _specializationCache.Clear();
+            _moduleCache.Clear();
         }
     }
 }

@@ -13,6 +13,8 @@ namespace SledzSpecke.App.Services.Specialization
         private readonly IAuthService authService;
         private readonly IDialogService dialogService;
         private readonly ModuleInitializer moduleInitializer;
+        private Models.Specialization _cachedSpecialization;
+        private List<Module> _cachedModules;
 
         public SpecializationService(IDatabaseService databaseService, IAuthService authService, IDialogService dialogService)
         {
@@ -22,65 +24,58 @@ namespace SledzSpecke.App.Services.Specialization
             this.moduleInitializer = new ModuleInitializer(databaseService);
         }
 
-        public async Task<Models.Specialization> GetCurrentSpecializationAsync()
+        public async Task<Models.Specialization> GetCurrentSpecializationAsync(bool includeModules = true)
         {
-            try
+            if (_cachedSpecialization != null)
             {
-                var user = await this.authService.GetCurrentUserAsync();
-                if (user == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetCurrentSpecializationAsync: Nie znaleziono użytkownika");
-                    return null;
-                }
-
-                System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Użytkownik ID={user.UserId}, Username={user.Username}, SpecializationId={user.SpecializationId}");
-
-                var specialization = await this.databaseService.GetSpecializationAsync(user.SpecializationId);
-                System.Diagnostics.Debug.WriteLine($"GetCurrentSpecializationAsync: Specjalizacja ID={specialization?.SpecializationId}, Nazwa={specialization?.Name}, Wersja={specialization?.SmkVersion}");
-
-                // Jeśli specjalizacja ma moduły, ale ich nie załadowaliśmy, spróbuj je zainicjalizować
-                if (specialization != null)
-                {
-                    var modules = await this.databaseService.GetModulesAsync(specialization.SpecializationId);
-                    if (modules == null || modules.Count == 0)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Specjalizacja ma moduły, ale nie są zainicjalizowane. Inicjalizuję...");
-                        await this.moduleInitializer.InitializeModulesIfNeededAsync(specialization.SpecializationId);
-
-                        // Pobierz specjalizację ponownie, aby zawierała zaktualizowane moduły
-                        specialization = await this.databaseService.GetSpecializationAsync(user.SpecializationId);
-                    }
-                }
-
-                return specialization;
+                return _cachedSpecialization;
             }
-            catch (Exception ex)
+
+            var user = await authService.GetCurrentUserAsync();
+            if (user == null)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetCurrentSpecializationAsync: {ex.Message}");
                 return null;
             }
+
+            var specialization = await databaseService.GetSpecializationAsync(user.SpecializationId);
+            if (specialization != null && includeModules)
+            {
+                specialization.Modules = await GetModulesAsync(specialization.SpecializationId, false);
+            }
+
+            _cachedSpecialization = specialization;
+            return specialization;
         }
+
+        public async Task<List<Module>> GetModulesAsync(int specializationId, bool initializeIfNeeded = true)
+        {
+            if (_cachedModules != null)
+            {
+                return _cachedModules;
+            }
+
+            var modules = await databaseService.GetModulesAsync(specializationId);
+
+            if (modules.Count == 0 && initializeIfNeeded)
+            {
+                await moduleInitializer.InitializeModulesIfNeededAsync(specializationId);
+                modules = await databaseService.GetModulesAsync(specializationId);
+            }
+
+            _cachedModules = modules;
+            return modules;
+        }
+
 
         public async Task<Module> GetCurrentModuleAsync()
         {
-            try
+            var specialization = await GetCurrentSpecializationAsync(false); // Użyj false aby uniknąć pętli
+            if (specialization?.CurrentModuleId == null)
             {
-                var specialization = await this.GetCurrentSpecializationAsync();
-                if (specialization == null || !specialization.CurrentModuleId.HasValue)
-                {
-                    System.Diagnostics.Debug.WriteLine("GetCurrentModuleAsync: Nie znaleziono modułu");
-                    return null;
-                }
-
-                var module = await this.databaseService.GetModuleAsync(specialization.CurrentModuleId.Value);
-                System.Diagnostics.Debug.WriteLine($"GetCurrentModuleAsync: Znaleziono moduł {module?.Name ?? "null"}");
-                return module;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w GetCurrentModuleAsync: {ex.Message}");
                 return null;
             }
+
+            return await databaseService.GetModuleAsync(specialization.CurrentModuleId.Value);
         }
 
         public async Task<int> GetInternshipCountAsync(int? moduleId = null)
@@ -1145,6 +1140,12 @@ namespace SledzSpecke.App.Services.Specialization
         public Task<bool> DeleteRecognitionAsync(int recognitionId)
         {
             throw new NotImplementedException();
+        }
+
+        public void ClearCache()
+        {
+            _cachedSpecialization = null;
+            _cachedModules = null;
         }
     }
 }

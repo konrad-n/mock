@@ -28,74 +28,29 @@ namespace SledzSpecke.App.Services.Specialization
         /// <returns>True, jeśli inicjalizacja się powiodła; w przeciwnym razie false.</returns>
         public async Task<bool> InitializeModulesIfNeededAsync(int specializationId)
         {
-            try
+            var specialization = await databaseService.GetSpecializationAsync(specializationId);
+            if (specialization == null)
             {
-                System.Diagnostics.Debug.WriteLine($"=== INICJALIZACJA MODUŁÓW DLA SPECJALIZACJI {specializationId} ===");
-
-                // Pobierz specjalizację
-                var specialization = await this.databaseService.GetSpecializationAsync(specializationId);
-                if (specialization == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("Nie znaleziono specjalizacji!");
-                    return false;
-                }
-
-                System.Diagnostics.Debug.WriteLine($"Znaleziono specjalizację: {specialization.Name}, Wersja SMK: {specialization.SmkVersion}");
-
-                // Sprawdź istniejące moduły
-                var existingModules = await this.databaseService.GetModulesAsync(specializationId);
-                System.Diagnostics.Debug.WriteLine($"Znaleziono {existingModules?.Count ?? 0} istniejących modułów");
-
-                if (existingModules?.Count > 0)
-                {
-                    // Sprawdź i napraw przypisania modułów
-                    var incorrectModules = existingModules.Where(m => m.SpecializationId != specializationId).ToList();
-                    if (incorrectModules.Any())
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Znaleziono {incorrectModules.Count} modułów z nieprawidłowym SpecializationId");
-                        foreach (var module in incorrectModules)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Naprawa modułu {module.Name}: zmiana SpecializationId z {module.SpecializationId} na {specializationId}");
-                            module.SpecializationId = specializationId;
-                            await this.databaseService.UpdateModuleAsync(module);
-                        }
-                    }
-
-                    System.Diagnostics.Debug.WriteLine("Moduły już istnieją i są poprawnie przypisane");
-                    return true;
-                }
-
-                // Tworzenie nowych modułów
-                System.Diagnostics.Debug.WriteLine("Tworzenie nowych modułów...");
-                var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
-                    specialization.ProgramCode,
-                    specialization.StartDate,
-                    specialization.SmkVersion,
-                    specializationId);
-
-                if (modules == null || modules.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Nie udało się utworzyć modułów!");
-                    return false;
-                }
-
-                // Zapisz moduły
-                foreach (var module in modules)
-                {
-                    module.SpecializationId = specializationId;
-                    int moduleId = await this.databaseService.SaveModuleAsync(module);
-                    System.Diagnostics.Debug.WriteLine($"Zapisano moduł: {module.Name} (ID: {moduleId})");
-                }
-
-                System.Diagnostics.Debug.WriteLine("=== INICJALIZACJA MODUŁÓW ZAKOŃCZONA SUKCESEM ===");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas inicjalizacji modułów: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
                 return false;
             }
+
+            var existingModules = await databaseService.GetModulesAsync(specializationId);
+            if (existingModules?.Count > 0)
+            {
+                return true;
+            }
+
+            // Tutaj tworzymy moduły
+            var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
+                specialization.ProgramCode,
+                specialization.StartDate,
+                specialization.SmkVersion,
+                specializationId);
+
+            // Po zapisaniu modułów, wyczyść cache
+            databaseService.ClearCache();
+
+            return true;
         }
 
         /// <summary>

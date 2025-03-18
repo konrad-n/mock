@@ -8,7 +8,7 @@ namespace SledzSpecke.App.Services.Specialization
         // User & Specialization
         Task<User> GetCurrentUserAsync();
 
-        Task<Models.Specialization> GetCurrentSpecializationAsync();
+        Task<Models.Specialization> GetCurrentSpecializationAsync(bool includeModules = true);
 
         Task<Module> GetCurrentModuleAsync();
 
