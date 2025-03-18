@@ -33,16 +33,12 @@ namespace SledzSpecke.App.ViewModels.Authentication
             this.authService = authService;
             this.dialogService = dialogService;
             this.specializationService = specializationService;
-
             this.Title = "Rejestracja";
             this.AvailableSpecializations = new ObservableCollection<SpecializationProgram>();
-
-            // Inicjalizacja komend
             this.RegisterCommand = new AsyncRelayCommand(this.OnRegisterAsync, this.CanRegister);
             this.GoToLoginCommand = new AsyncRelayCommand(this.OnGoToLoginAsync);
         }
 
-        // Metoda inicjalizacji, którą należy wywołać przed wyświetleniem widoku
         public async Task InitializeAsync()
         {
             if (this.IsBusy)
@@ -52,26 +48,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            try
-            {
-                // Załadowanie dostępnych specjalizacji dla domyślnie wybranej wersji (Nowej)
-                await this.LoadSpecializationsAsync();
+            await this.LoadSpecializationsAsync();
 
-            }
-            catch (Exception ex)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się załadować listy specjalizacji. Spróbuj ponownie.",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-            }
+            this.IsBusy = false;
         }
 
-        // Właściwości do bindowania
         public string Username
         {
             get => this.username;
@@ -160,8 +141,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (this.SetProperty(ref this.isNewSmkVersion, value) && value)
                 {
                     this.IsOldSmkVersion = false;
-
-                    // Przeładowanie specjalizacji dla nowej wersji SMK
                     this.LoadSpecializationsAsync().ConfigureAwait(false);
 
                     ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
@@ -177,8 +156,6 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 if (this.SetProperty(ref this.isOldSmkVersion, value) && value)
                 {
                     this.IsNewSmkVersion = false;
-
-                    // Przeładowanie specjalizacji dla starej wersji SMK
                     this.LoadSpecializationsAsync().ConfigureAwait(false);
 
                     ((AsyncRelayCommand)this.RegisterCommand).NotifyCanExecuteChanged();
@@ -192,55 +169,36 @@ namespace SledzSpecke.App.ViewModels.Authentication
             set => this.SetProperty(ref this.passwordsNotMatch, value);
         }
 
-        // Komendy
         public ICommand RegisterCommand { get; }
 
         public ICommand GoToLoginCommand { get; }
 
-        // Metody pomocnicze
         private async Task LoadSpecializationsAsync()
         {
-            try
+            this.IsBusy = true;
+
+            SmkVersion currentVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
+            var programs = await SpecializationLoader.LoadAllSpecializationProgramsForVersionAsync(currentVersion);
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                this.IsBusy = true;
-
-                // Wybierz aktualną wersję SMK na podstawie zaznaczenia checkbox'ów
-                SmkVersion currentVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
-
-                // Użyj ulepszonego SpecializationLoader do załadowania programów specjalizacji
-                var programs = await SpecializationLoader.LoadAllSpecializationProgramsForVersionAsync(currentVersion);
-
-                // Zaktualizuj kolekcję w bezpieczny sposób na głównym wątku UI
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                this.AvailableSpecializations.Clear();
+                foreach (var program in programs)
                 {
-                    this.AvailableSpecializations.Clear();
-                    foreach (var program in programs)
-                    {
-                        this.AvailableSpecializations.Add(program);
-                    }
+                    this.AvailableSpecializations.Add(program);
+                }
 
-                    // Wybierz pierwszą dostępną specjalizację jeśli istnieje
-                    if (this.AvailableSpecializations.Count > 0)
-                    {
-                        this.SelectedSpecialization = this.AvailableSpecializations[0];
-                    }
-                    else
-                    {
-                        this.SelectedSpecialization = null;
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się załadować listy specjalizacji. Spróbuj ponownie.",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-            }
+                if (this.AvailableSpecializations.Count > 0)
+                {
+                    this.SelectedSpecialization = this.AvailableSpecializations[0];
+                }
+                else
+                {
+                    this.SelectedSpecialization = null;
+                }
+            });
+
+            this.IsBusy = false;
         }
 
         private void ValidatePasswords()
@@ -281,172 +239,106 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            try
+            if (this.SelectedSpecialization == null)
             {
-                System.Diagnostics.Debug.WriteLine("Rozpoczynam proces rejestracji...");
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie wybrano specjalizacji. Wybierz specjalizację przed rejestracją.",
+                    "OK");
+                return;
+            }
 
-                // Weryfikacja wybranej specjalizacji
-                if (this.SelectedSpecialization == null)
+            var user = new User
+            {
+                Username = this.Username,
+                Name = this.Name,
+                Email = this.Email,
+                RegistrationDate = DateTime.Now,
+                SmkVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old,
+            };
+
+            if (string.IsNullOrEmpty(this.SelectedSpecialization.Structure))
+            {
+                var fullSpecialization = await SpecializationLoader.LoadSpecializationProgramAsync(
+                    this.SelectedSpecialization.Code,
+                    user.SmkVersion);
+
+                if (fullSpecialization != null && !string.IsNullOrEmpty(fullSpecialization.Structure))
                 {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie wybrano specjalizacji. Wybierz specjalizację przed rejestracją.",
-                        "OK");
-                    return;
-                }
-
-                // Utworzenie obiektu użytkownika
-                var user = new User
-                {
-                    Username = this.Username,
-                    Name = this.Name,
-                    Email = this.Email,
-                    RegistrationDate = DateTime.Now,
-                    SmkVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old,
-                };
-
-                // Sprawdzenie czy mamy strukturę specjalizacji
-                if (string.IsNullOrEmpty(this.SelectedSpecialization.Structure))
-                {
-                    System.Diagnostics.Debug.WriteLine("Struktura specjalizacji jest pusta, próbuję załadować...");
-
-                    // Ładowanie pełnej struktury specjalizacji
-                    var fullSpecialization = await SpecializationLoader.LoadSpecializationProgramAsync(
-                        this.SelectedSpecialization.Code,
-                        user.SmkVersion);
-
-                    if (fullSpecialization != null && !string.IsNullOrEmpty(fullSpecialization.Structure))
-                    {
-                        this.SelectedSpecialization.Structure = fullSpecialization.Structure;
-                    }
-                    else
-                    {
-                        this.SelectedSpecialization.Structure = $"{{ \"name\": \"{this.SelectedSpecialization.Name}\", \"code\": \"{this.SelectedSpecialization.Code}\" }}";
-                    }
-                }
-
-                // Utworzenie specjalizacji
-                var specialization = new Models.Specialization
-                {
-                    Name = this.SelectedSpecialization.Name,
-                    ProgramCode = this.SelectedSpecialization.Code,
-                    SmkVersion = user.SmkVersion,
-                    StartDate = DateTime.Now,
-                    PlannedEndDate = DateTime.Now.AddMonths(
-                        this.SelectedSpecialization.TotalDuration != null && this.SelectedSpecialization.TotalDuration.TotalMonths > 0
-                            ? this.SelectedSpecialization.TotalDuration.TotalMonths
-                            : 60), // Domyślnie 5 lat (60 miesięcy)
-                    ProgramStructure = this.SelectedSpecialization.Structure,
-                    DurationYears = this.SelectedSpecialization.DurationYears,
-                };
-
-                // Użycie ulepszonej metody async
-                var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
-                    specialization.ProgramCode,
-                    specialization.StartDate,
-                    user.SmkVersion,
-                    specialization.SpecializationId);
-
-                if (modules != null && modules.Count > 0)
-                {
-                    specialization.Modules = modules;
+                    this.SelectedSpecialization.Structure = fullSpecialization.Structure;
                 }
                 else
                 {
-                    // Ten przypadek nie powinien wystąpić, ale zostawiamy jako zabezpieczenie
-                    specialization.Modules = new List<Models.Module>();
-                }
-
-                // Obliczenie daty zakończenia
-                specialization.CalculatedEndDate = specialization.PlannedEndDate;
-
-                // Rejestracja użytkownika
-                bool success = await this.authService.RegisterAsync(user, this.Password, specialization);
-
-                if (success)
-                {
-                    try
-                    {
-                        // Inicjalizacja modułów po rejestracji
-                        await this.specializationService.InitializeSpecializationModulesAsync(specialization.SpecializationId);
-                    }
-                    catch (Exception initEx)
-                    {
-                        // Kontynuuj mimo błędu inicjalizacji
-                    }
-
-                    try
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Sukces",
-                            "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
-                            "OK");
-                    }
-                    catch (Exception alertEx)
-                    {
-                        // Kontynuuj mimo błędu alertu
-                    }
-
-                    // Bezpieczne przejście do ekranu logowania
-                    await this.OnGoToLoginAsync();
-                }
-                else
-                {
-                    try
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się zarejestrować. Sprawdź podane dane i spróbuj ponownie.",
-                            "OK");
-                    }
-                    catch (Exception alertEx)
-                    {
-                        // Kontynuuj mimo błędu alertu
-                    }
+                    this.SelectedSpecialization.Structure = $"{{ \"name\": \"{this.SelectedSpecialization.Name}\", \"code\": \"{this.SelectedSpecialization.Code}\" }}";
                 }
             }
-            catch (Exception ex)
+
+            var specialization = new Models.Specialization
             {
-                try
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        $"Wystąpił błąd podczas rejestracji: {ex.Message}",
-                        "OK");
-                }
-                catch
-                {
-                    // Ignoruj błędy alertów w przypadku wyjątku
-                }
-            }
-            finally
+                Name = this.SelectedSpecialization.Name,
+                ProgramCode = this.SelectedSpecialization.Code,
+                SmkVersion = user.SmkVersion,
+                StartDate = DateTime.Now,
+                PlannedEndDate = DateTime.Now.AddMonths(
+                    this.SelectedSpecialization.TotalDuration != null && this.SelectedSpecialization.TotalDuration.TotalMonths > 0
+                        ? this.SelectedSpecialization.TotalDuration.TotalMonths
+                        : 60),
+                ProgramStructure = this.SelectedSpecialization.Structure,
+                DurationYears = this.SelectedSpecialization.DurationYears,
+            };
+
+            var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
+                specialization.ProgramCode,
+                specialization.StartDate,
+                user.SmkVersion,
+                specialization.SpecializationId);
+
+            if (modules != null && modules.Count > 0)
             {
-                this.IsBusy = false;
+                specialization.Modules = modules;
             }
+            else
+            {
+                specialization.Modules = new List<Models.Module>();
+            }
+
+            specialization.CalculatedEndDate = specialization.PlannedEndDate;
+            bool success = await this.authService.RegisterAsync(user, this.Password, specialization);
+
+            if (success)
+            {
+                await this.specializationService.InitializeSpecializationModulesAsync(specialization.SpecializationId);
+                await this.dialogService.DisplayAlertAsync(
+                    "Sukces",
+                    "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
+                    "OK");
+
+                await this.OnGoToLoginAsync();
+            }
+            else
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie udało się zarejestrować. Sprawdź podane dane i spróbuj ponownie.",
+                    "OK");
+            }
+            this.IsBusy = false;
         }
 
         private async Task OnGoToLoginAsync()
         {
-            try
+            if (Application.Current?.MainPage is NavigationPage navigationPage)
             {
-                // Sprawdź, czy MainPage to NavigationPage
-                if (Application.Current?.MainPage is NavigationPage navigationPage)
-                {
-                    await navigationPage.PopAsync();
-                }
-                else
-                {
-                    // Jeśli nie jesteśmy w NavigationPage, spróbuj ustawić MainPage
-                    var loginViewModel = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.ViewModels.Authentication.LoginViewModel>();
-                    if (loginViewModel != null)
-                    {
-                        var loginPage = new SledzSpecke.App.Views.Authentication.LoginPage(loginViewModel);
-                        Application.Current.MainPage = new NavigationPage(loginPage);
-                    }
-                }
+                await navigationPage.PopAsync();
             }
-            catch (Exception ex)
+            else
             {
+                var loginViewModel = IPlatformApplication.Current.Services.GetService<SledzSpecke.App.ViewModels.Authentication.LoginViewModel>();
+                if (loginViewModel != null)
+                {
+                    var loginPage = new SledzSpecke.App.Views.Authentication.LoginPage(loginViewModel);
+                    Application.Current.MainPage = new NavigationPage(loginPage);
+                }
             }
         }
     }

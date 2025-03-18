@@ -18,40 +18,25 @@ namespace SledzSpecke.App
         {
             base.OnAppearing();
 
-            // Symulacja procesu inicjalizacji
-            await Task.Delay(2000);
+            bool isAuthenticated = await this.authService.IsAuthenticatedAsync();
 
-            try
+            Page mainPage;
+            if (isAuthenticated)
             {
-                // Sprawdzenie, czy użytkownik jest zalogowany
-                bool isAuthenticated = await this.authService.IsAuthenticatedAsync();
-
-                // Określenie, którą stronę pokazać
-                Page mainPage;
-                if (isAuthenticated)
-                {
-                    mainPage = new AppShell(this.authService);
-                }
-                else
-                {
-                    // Przygotowanie ViewModel dla ekranu logowania
-                    var viewModel = IPlatformApplication.Current.Services.GetService<LoginViewModel>();
-                    var loginPage = new LoginPage(viewModel);
-                    mainPage = new NavigationPage(loginPage);
-                }
-
-                // Ustawienie głównej strony
-                var windows = Application.Current?.Windows;
-                if (windows != null && windows.Count > 0)
-                {
-                    var window = windows[0];
-                    window.Page = mainPage;
-                }
+                mainPage = new AppShell(this.authService);
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas przechodzenia z ekranu startowego: {ex.Message}");
-                await this.DisplayAlert("Błąd", "Nie udało się zainicjalizować aplikacji. Spróbuj ponownie.", "OK");
+                var viewModel = IPlatformApplication.Current.Services.GetService<LoginViewModel>();
+                var loginPage = new LoginPage(viewModel);
+                mainPage = new NavigationPage(loginPage);
+            }
+
+            var windows = Application.Current?.Windows;
+            if (windows != null && windows.Count > 0)
+            {
+                var window = windows[0];
+                window.Page = mainPage;
             }
         }
     }

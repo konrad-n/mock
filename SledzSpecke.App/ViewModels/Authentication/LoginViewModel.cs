@@ -21,15 +21,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
         {
             this.authService = authService;
             this.dialogService = dialogService;
-
             this.Title = "Logowanie";
-
-            // Inicjalizacja komend
             this.LoginCommand = new AsyncRelayCommand(this.OnLoginAsync, this.CanLogin);
             this.GoToRegisterCommand = new AsyncRelayCommand(this.OnGoToRegisterAsync);
         }
 
-        // Właściwości do bindowania
         public string Username
         {
             get => this.username;
@@ -60,12 +56,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
             set => this.SetProperty(ref this.rememberMe, value);
         }
 
-        // Komendy
         public ICommand LoginCommand { get; }
 
         public ICommand GoToRegisterCommand { get; }
 
-        // Metody pomocnicze
         private bool CanLogin()
         {
             return !string.IsNullOrWhiteSpace(this.Username) &&
@@ -81,85 +75,50 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            try
-            {
-                bool success = await this.authService.LoginAsync(this.Username, this.Password);
+            bool success = await this.authService.LoginAsync(this.Username, this.Password);
 
-                if (success)
+            if (success)
+            {
+                // Przejście do głównej części aplikacji używając kontenera DI
+                var appShell = IPlatformApplication.Current.Services.GetService<AppShell>();
+                if (appShell != null)
                 {
-                    // Przejście do głównej części aplikacji używając kontenera DI
-                    var appShell = IPlatformApplication.Current.Services.GetService<AppShell>();
-                    if (appShell != null)
-                    {
-                        Application.Current.MainPage = appShell;
-                        System.Diagnostics.Debug.WriteLine("Zalogowano pomyślnie, utworzono AppShell z kontenera DI");
-                    }
-                    else
-                    {
-                        // Jeśli z jakiegoś powodu nie możemy pobrać z DI, tworzymy bezpośrednio
-                        Application.Current.MainPage = new AppShell(this.authService);
-                        System.Diagnostics.Debug.WriteLine("Zalogowano pomyślnie, utworzono AppShell bezpośrednio");
-                    }
+                    Application.Current.MainPage = appShell;
+                    System.Diagnostics.Debug.WriteLine("Zalogowano pomyślnie, utworzono AppShell z kontenera DI");
                 }
                 else
                 {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd logowania",
-                        "Nieprawidłowa nazwa użytkownika lub hasło.",
-                        "OK");
+                    // Jeśli z jakiegoś powodu nie możemy pobrać z DI, tworzymy bezpośrednio
+                    Application.Current.MainPage = new AppShell(this.authService);
+                    System.Diagnostics.Debug.WriteLine("Zalogowano pomyślnie, utworzono AppShell bezpośrednio");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas logowania: {ex.Message}");
                 await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił błąd podczas logowania. Spróbuj ponownie później.",
+                    "Błąd logowania",
+                    "Nieprawidłowa nazwa użytkownika lub hasło.",
                     "OK");
             }
-            finally
-            {
-                this.IsBusy = false;
-            }
+
+            this.IsBusy = false;
         }
 
         private async Task OnGoToRegisterAsync()
         {
-            try
+            if (this.IsBusy)
+                return;
+
+            this.IsBusy = true;
+
+            if (Application.Current.MainPage is NavigationPage navigationPage)
             {
-                if (this.IsBusy)
-                    return;
-
-                this.IsBusy = true;
-
-                // Przejście do strony rejestracji
-                if (Application.Current.MainPage is NavigationPage navigationPage)
-                {
-                    // Tworzenie ViewModel z DI zamiast bezpośrednio
-                    var registerViewModel = IPlatformApplication.Current.Services.GetRequiredService<RegisterViewModel>();
-
-                    // Tworzymy stronę i przechodzimy do niej
-                    var registerPage = new Views.Authentication.RegisterPage(registerViewModel);
-                    await navigationPage.PushAsync(registerPage);
-
-                    // Inicjalizacja MUSI zostać wykonana po przejściu do strony, nie tutaj
-                    // (RegisterPage wywoła InitializeAsync w OnAppearing)
-                }
+                var registerViewModel = IPlatformApplication.Current.Services.GetRequiredService<RegisterViewModel>();
+                var registerPage = new Views.Authentication.RegisterPage(registerViewModel);
+                await navigationPage.PushAsync(registerPage);
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Błąd w OnGoToRegisterAsync: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
 
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem z przejściem do strony rejestracji.",
-                    "OK");
-            }
-            finally
-            {
-                this.IsBusy = false;
-            }
+            this.IsBusy = false;
         }
     }
 }
