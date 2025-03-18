@@ -13,7 +13,6 @@ namespace SledzSpecke.App.Models
         [Indexed]
         public int SpecializationId { get; set; }
 
-        // Dodane pole dla modułu
         [Indexed]
         public int? ModuleId { get; set; }
 
@@ -34,25 +33,22 @@ namespace SledzSpecke.App.Models
 
         public int DaysCount { get; set; }
 
-        // Status tracking
         public bool IsCompleted { get; set; }
 
         public bool IsApproved { get; set; }
 
-        // Recognition fields
         public bool IsRecognition { get; set; }
 
         public string RecognitionReason { get; set; }
 
         public int RecognitionDaysReduction { get; set; }
 
-        // Pola specyficzne dla starego SMK
-        public bool IsPartialRealization { get; set; }  // Oznaczenie stażu jako "realizacja częściowa"
+        public bool IsPartialRealization { get; set; }
 
-        public string SupervisorName { get; set; }  // Kierownik stażu (odpowiednik OldSMKField1)
+        public string SupervisorName { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; }
     }
 }

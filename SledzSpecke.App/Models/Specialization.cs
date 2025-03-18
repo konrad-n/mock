@@ -23,14 +23,13 @@ namespace SledzSpecke.App.Models
 
         public DateTime CalculatedEndDate { get; set; }
 
-        public string ProgramStructure { get; set; } // JSON
+        public string ProgramStructure { get; set; }
 
         public int? CurrentModuleId { get; set; }
 
         [Ignore]
         public List<Module> Modules { get; set; } = new List<Module>();
 
-        // Progress tracking
         public int CompletedInternships { get; set; }
 
         public int TotalInternships { get; set; }

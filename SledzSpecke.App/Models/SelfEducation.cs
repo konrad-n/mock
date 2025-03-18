@@ -12,7 +12,6 @@ namespace SledzSpecke.App.Models
         [Indexed]
         public int SpecializationId { get; set; }
 
-        // Dodane pole dla modułu
         [Indexed]
         public int? ModuleId { get; set; }
 
@@ -29,6 +28,6 @@ namespace SledzSpecke.App.Models
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; }
     }
 }

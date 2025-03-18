@@ -19,7 +19,6 @@ namespace SledzSpecke.App.Services.Database
                 return;
             }
 
-            // Zapewnienie, że katalog bazy danych istnieje
             var databasePath = Constants.DatabasePath;
             var databaseDirectory = Path.GetDirectoryName(databasePath);
 
@@ -30,7 +29,6 @@ namespace SledzSpecke.App.Services.Database
 
             this.database = new SQLiteAsyncConnection(databasePath, Constants.Flags);
 
-            // Tworzenie tabel dla wszystkich modeli
             await this.database.CreateTableAsync<User>();
             await this.database.CreateTableAsync<Models.Specialization>();
             await this.database.CreateTableAsync<Module>();
@@ -51,8 +49,6 @@ namespace SledzSpecke.App.Services.Database
 
             this.isInitialized = true;
         }
-
-        // User
         public async Task<User> GetUserAsync(int id)
         {
             await this.InitializeAsync();
@@ -74,25 +70,21 @@ namespace SledzSpecke.App.Services.Database
         public async Task<int> SaveUserAsync(User user)
         {
             await this.InitializeAsync();
-            System.Diagnostics.Debug.WriteLine($"SaveUserAsync: Zapisuję użytkownika {user.Username} z SpecializationId={user.SpecializationId}");
 
             if (user.UserId != 0)
             {
                 await this.database.UpdateAsync(user);
-                System.Diagnostics.Debug.WriteLine($"SaveUserAsync: Zaktualizowano użytkownika ID={user.UserId}");
                 return user.UserId;
             }
             else
             {
                 await this.database.InsertAsync(user);
                 var lastId = await this.database.ExecuteScalarAsync<int>("SELECT last_insert_rowid()");
-                System.Diagnostics.Debug.WriteLine($"SaveUserAsync: Wstawiono użytkownika. Nowe ID: {lastId}, SpecializationId={user.SpecializationId}");
                 user.UserId = lastId;
                 return lastId;
             }
         }
 
-        // Specialization
         public async Task<Models.Specialization> GetSpecializationAsync(int id)
         {
             if (_specializationCache.TryGetValue(id, out var cachedSpecialization))
@@ -130,14 +122,12 @@ namespace SledzSpecke.App.Services.Database
             if (specialization.SpecializationId != 0)
             {
                 result = await this.database.UpdateAsync(specialization);
-                System.Diagnostics.Debug.WriteLine($"Zaktualizowano specjalizację ID={specialization.SpecializationId}, wynik={result}");
                 return specialization.SpecializationId;
             }
             else
             {
                 await this.database.InsertAsync(specialization);
                 var lastId = await this.database.ExecuteScalarAsync<int>("SELECT last_insert_rowid()");
-                System.Diagnostics.Debug.WriteLine($"Wstawiono specjalizację. Ostatnie ID: {lastId}");
                 specialization.SpecializationId = lastId;
                 return lastId;
             }
@@ -159,28 +149,18 @@ namespace SledzSpecke.App.Services.Database
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"=== CZYSZCZENIE DANYCH SPECJALIZACJI {specializationId} ===");
-
-                // Usuń moduły
                 var modules = await GetModulesAsync(specializationId);
                 foreach (var module in modules)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Usuwanie modułu: {module.Name} (ID: {module.ModuleId})");
                     await DeleteModuleAsync(module);
                 }
-
-                // Możesz dodać czyszczenie innych powiązanych danych
-
-                System.Diagnostics.Debug.WriteLine("=== CZYSZCZENIE ZAKOŃCZONE ===");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas czyszczenia danych: {ex.Message}");
                 throw;
             }
         }
 
-        // Module
         public async Task<Module> GetModuleAsync(int id)
         {
             await this.InitializeAsync();
@@ -205,7 +185,6 @@ namespace SledzSpecke.App.Services.Database
 
             return modules;
         }
-
 
         public async Task<int> SaveModuleAsync(Module module)
         {
@@ -240,7 +219,6 @@ namespace SledzSpecke.App.Services.Database
             }
         }
 
-        // Internship
         public async Task<Internship> GetInternshipAsync(int id)
         {
             await this.InitializeAsync();
@@ -284,7 +262,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(internship);
         }
 
-        // Medical Shifts
         public async Task<MedicalShift> GetMedicalShiftAsync(int id)
         {
             await this.InitializeAsync();
@@ -323,7 +300,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(shift);
         }
 
-        // Procedures
         public async Task<Procedure> GetProcedureAsync(int id)
         {
             await this.InitializeAsync();
@@ -342,7 +318,6 @@ namespace SledzSpecke.App.Services.Database
 
             var procedures = await query.ToListAsync();
 
-            // Filtrowanie po tekście wyszukiwania (SQLite nie obsługuje bezpośrednio LIKE dla StringComparison.OrdinalIgnoreCase)
             if (!string.IsNullOrEmpty(searchText))
             {
                 searchText = searchText.ToLowerInvariant();
@@ -376,7 +351,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(procedure);
         }
 
-        // Courses
         public async Task<Course> GetCourseAsync(int id)
         {
             await this.InitializeAsync();
@@ -420,7 +394,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(course);
         }
 
-        // Self Education
         public async Task<SelfEducation> GetSelfEducationAsync(int id)
         {
             await this.InitializeAsync();
@@ -464,7 +437,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(selfEducation);
         }
 
-        // Publications
         public async Task<Publication> GetPublicationAsync(int id)
         {
             await this.InitializeAsync();
@@ -508,7 +480,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(publication);
         }
 
-        // Educational Activities
         public async Task<EducationalActivity> GetEducationalActivityAsync(int id)
         {
             await this.InitializeAsync();
@@ -552,7 +523,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(activity);
         }
 
-        // Absences
         public async Task<Absence> GetAbsenceAsync(int id)
         {
             await this.InitializeAsync();
@@ -584,7 +554,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(absence);
         }
 
-        // Recognitions
         public async Task<Models.Recognition> GetRecognitionAsync(int id)
         {
             await this.InitializeAsync();
@@ -616,7 +585,6 @@ namespace SledzSpecke.App.Services.Database
             return await this.database.DeleteAsync(recognition);
         }
 
-        // Specialization Programs
         public async Task<SpecializationProgram> GetSpecializationProgramAsync(int id)
         {
             await this.InitializeAsync();
@@ -653,10 +621,8 @@ namespace SledzSpecke.App.Services.Database
             try
             {
                 await this.InitializeAsync();
-                System.Diagnostics.Debug.WriteLine("Rozpoczynanie migracji danych dyżurów...");
-
-                // Sprawdź, czy kolumna ModuleId istnieje
                 bool columnExists = false;
+
                 try
                 {
                     var testQuery = "SELECT ModuleId FROM RealizedMedicalShiftNewSMK LIMIT 1";
@@ -665,44 +631,30 @@ namespace SledzSpecke.App.Services.Database
                 }
                 catch
                 {
-                    // Kolumna nie istnieje, musimy ją dodać
-                    System.Diagnostics.Debug.WriteLine("Kolumna ModuleId nie istnieje, dodawanie...");
                     await this.database.ExecuteAsync("ALTER TABLE RealizedMedicalShiftNewSMK ADD COLUMN ModuleId INTEGER");
                 }
 
-                // Pobierz wszystkie dyżury bez przypisanego ModuleId
                 var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE ModuleId IS NULL OR ModuleId = 0";
                 var shiftsToUpdate = await this.QueryAsync<RealizedMedicalShiftNewSMK>(query);
-                System.Diagnostics.Debug.WriteLine($"Znaleziono {shiftsToUpdate.Count} dyżurów do zaktualizowania");
 
                 if (shiftsToUpdate.Count == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("Brak dyżurów do migracji");
                     return;
                 }
 
-                // Pobierz wszystkie specjalizacje
                 var specializations = await this.GetAllSpecializationsAsync();
 
                 foreach (var specialization in specializations)
                 {
-                    // Pobierz moduły dla tej specjalizacji
                     var modules = await this.GetModulesAsync(specialization.SpecializationId);
                     if (modules.Count == 0) continue;
-
-                    // Filtruj dyżury dla tej specjalizacji
                     var specializationShifts = shiftsToUpdate.Where(s => s.SpecializationId == specialization.SpecializationId).ToList();
                     if (specializationShifts.Count == 0) continue;
 
-                    System.Diagnostics.Debug.WriteLine($"Migracja {specializationShifts.Count} dyżurów dla specjalizacji {specialization.Name}");
-
                     foreach (var shift in specializationShifts)
                     {
-                        // Znajdź odpowiedni moduł dla dyżuru
-                        // Dla nowego SMK, każdy staż ma ściśle przypisany moduł
-                        // Sprawdzamy, czy moduł ma danego stażu wśród swoich wymagań
-                        Module appropriateModule = null;
 
+                        Module appropriateModule = null;
                         foreach (var module in modules)
                         {
                             if (string.IsNullOrEmpty(module.Structure)) continue;
@@ -730,24 +682,18 @@ namespace SledzSpecke.App.Services.Database
                             }
                         }
 
-                        // Jeśli nie znaleziono odpowiedniego modułu, użyj pierwszego
                         if (appropriateModule == null && modules.Count > 0)
                         {
                             appropriateModule = modules[0];
-                            System.Diagnostics.Debug.WriteLine("Nie znaleziono odpowiedniego modułu, używam pierwszego");
                         }
 
-                        // Aktualizuj dyżur o ID modułu
                         if (appropriateModule != null)
                         {
                             shift.ModuleId = appropriateModule.ModuleId;
                             await this.UpdateAsync(shift);
-                            System.Diagnostics.Debug.WriteLine($"Zaktualizowano dyżur ID={shift.ShiftId}, przypisano ModuleId={shift.ModuleId}");
                         }
                     }
                 }
-
-                System.Diagnostics.Debug.WriteLine("Migracja danych dyżurów zakończona");
             }
             catch (Exception ex)
             {

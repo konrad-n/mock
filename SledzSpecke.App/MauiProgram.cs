@@ -72,8 +72,6 @@ namespace SledzSpecke.App
             services.AddSingleton<ISecureStorageService, SecureStorageService>(); // TODO: PUSTA KLASA!!! WAŻNE: TRZEBA JĄ ZAIMPLEMENTOWAĆ!!!
             services.AddSingleton<IMedicalShiftsService, MedicalShiftsService>();
             services.AddSingleton<IProcedureService, ProcedureService>();
-
-            // Dodajemy ModuleInitializer jako usługę
             services.AddTransient<ModuleInitializer>();
         }
 
@@ -82,12 +80,10 @@ namespace SledzSpecke.App
             services.AddTransient<LoginViewModel>();
             services.AddTransient<RegisterViewModel>();
             services.AddTransient<DashboardViewModel>();
-
             services.AddTransient<MedicalShiftsSelectorViewModel>();
             services.AddTransient<OldSMKMedicalShiftsListViewModel>();
             services.AddTransient<NewSMKMedicalShiftsListViewModel>();
             services.AddTransient<AddEditOldSMKMedicalShiftViewModel>();
-
             services.AddTransient<AddEditOldSMKProcedureViewModel>();
             services.AddTransient<OldSMKProceduresListViewModel>();
             services.AddTransient<NewSMKProceduresListViewModel>();
@@ -102,29 +98,23 @@ namespace SledzSpecke.App
             services.AddTransient<LoginPage>();
             services.AddTransient<RegisterPage>();
             services.AddTransient<DashboardPage>();
-
             services.AddTransient<MedicalShiftsSelectorPage>();
             services.AddTransient(sp => new OldSMKMedicalShiftsPage(
                 sp.GetRequiredService<OldSMKMedicalShiftsListViewModel>(),
                 sp.GetRequiredService<IMedicalShiftsService>()));
             services.AddTransient<NewSMKMedicalShiftsPage>();
             services.AddTransient<AddEditOldSMKMedicalShiftPage>();
-
-            // Aktualizacja rejestracji OldSMKProceduresListPage, aby przekazać serwis procedur
             services.AddTransient(sp => new OldSMKProceduresListPage(
                 sp.GetRequiredService<OldSMKProceduresListViewModel>(),
                 sp.GetRequiredService<IProcedureService>()));
-
             services.AddTransient<AddEditOldSMKProcedurePage>();
             services.AddTransient<NewSMKProceduresListPage>();
             services.AddTransient<ProcedureSelectorPage>();
             services.AddTransient<AddEditNewSMKProcedurePage>();
-
             services.AddTransient<InternshipsListPage>();
             services.AddTransient<CoursesListPage>();
             services.AddTransient<SelfEducationListPage>();
             services.AddTransient<PublicationsListPage>();
-
             services.AddTransient<AbsencesListPage>();
             services.AddTransient<ExportPage>();
             services.AddTransient<ExportPreviewPage>();

@@ -20,7 +20,7 @@ namespace SledzSpecke.App.Models
 
         public DateTime EndDate { get; set; }
 
-        public int DaysReduction { get; set; } // O ile dni skraca specjalizację
+        public int DaysReduction { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
     }

@@ -2,14 +2,10 @@
 
 namespace SledzSpecke.App.Services.Dialog
 {
-    /// <summary>
-    /// Implementacja IDialogService, która uwzględnia przypadki, gdy Shell.Current może być niedostępny.
-    /// </summary>
     public class DialogService : IDialogService
     {
         public async Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel)
         {
-            // Sprawdzamy, czy Shell.Current jest dostępny, jeśli nie, używamy Application.Current.MainPage
             if (Shell.Current != null)
             {
                 return await Shell.Current.DisplayAlert(title, message, accept, cancel);
@@ -20,8 +16,6 @@ namespace SledzSpecke.App.Services.Dialog
             }
             else
             {
-                // Jeśli nie ma dostępnej strony do wyświetlenia alertu, zwróć domyślną wartość
-                System.Diagnostics.Debug.WriteLine($"Nie można wyświetlić alertu: {title} - {message}. Brak dostępnej strony.");
                 return false;
             }
         }
@@ -30,7 +24,6 @@ namespace SledzSpecke.App.Services.Dialog
         {
             try
             {
-                // Sprawdzamy, czy Shell.Current jest dostępny, jeśli nie, używamy Application.Current.MainPage
                 if (Shell.Current != null)
                 {
                     await Shell.Current.DisplayAlert(title, message, accept);
@@ -38,11 +31,6 @@ namespace SledzSpecke.App.Services.Dialog
                 else if (Application.Current?.MainPage != null)
                 {
                     await Application.Current.MainPage.DisplayAlert(title, message, accept);
-                }
-                else
-                {
-                    // Jeśli nie ma dostępnej strony do wyświetlenia alertu, zaloguj to
-                    System.Diagnostics.Debug.WriteLine($"Nie można wyświetlić alertu: {title} - {message}. Brak dostępnej strony.");
                 }
             }
             catch (Exception ex)
@@ -54,7 +42,6 @@ namespace SledzSpecke.App.Services.Dialog
 
         public async Task<string> DisplayActionSheetAsync(string title, string cancel, string destruction, params string[] buttons)
         {
-            // Sprawdzamy, czy Shell.Current jest dostępny, jeśli nie, używamy Application.Current.MainPage
             if (Shell.Current != null)
             {
                 return await Shell.Current.DisplayActionSheet(title, cancel, destruction, buttons);
@@ -65,15 +52,12 @@ namespace SledzSpecke.App.Services.Dialog
             }
             else
             {
-                // Jeśli nie ma dostępnej strony do wyświetlenia action sheet, zaloguj to i zwróć null
-                System.Diagnostics.Debug.WriteLine($"Nie można wyświetlić action sheet: {title}. Brak dostępnej strony.");
                 return null;
             }
         }
 
         public async Task<string> DisplayPromptAsync(string title, string message, string accept = "OK", string cancel = "Cancel", string placeholder = null, int maxLength = -1, Keyboard keyboard = null, string initialValue = "")
         {
-            // Sprawdzamy, czy Shell.Current jest dostępny, jeśli nie, używamy Application.Current.MainPage
             if (Shell.Current != null)
             {
                 return await Shell.Current.DisplayPromptAsync(title, message, accept, cancel, placeholder, maxLength, keyboard, initialValue);
@@ -84,8 +68,6 @@ namespace SledzSpecke.App.Services.Dialog
             }
             else
             {
-                // Jeśli nie ma dostępnej strony do wyświetlenia promptu, zaloguj to i zwróć null
-                System.Diagnostics.Debug.WriteLine($"Nie można wyświetlić promptu: {title} - {message}. Brak dostępnej strony.");
                 return null;
             }
         }

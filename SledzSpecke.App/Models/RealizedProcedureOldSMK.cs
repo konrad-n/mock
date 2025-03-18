@@ -5,34 +5,34 @@ namespace SledzSpecke.App.Models
 {
     public class RealizedProcedureOldSMK : RealizedProcedureBase
     {
-        public int Year { get; set; } // Rok specjalizacji
+        public int Year { get; set; }
 
         [MaxLength(20)]
-        public string Code { get; set; } // A - operator lub B - asysta
+        public string Code { get; set; }
 
         [MaxLength(100)]
-        public string PerformingPerson { get; set; } // Osoba wykonująca - wymagana w starym SMK
+        public string PerformingPerson { get; set; }
 
         [MaxLength(100)]
-        public string Location { get; set; } // Miejsce wykonania
+        public string Location { get; set; }
 
         [Indexed]
-        public int InternshipId { get; set; } // Powiązanie ze stażem
+        public int InternshipId { get; set; }
 
         [MaxLength(100)]
-        public string InternshipName { get; set; } // Nazwa stażu
+        public string InternshipName { get; set; }
 
         [MaxLength(10)]
-        public string PatientInitials { get; set; } // Inicjały pacjenta
+        public string PatientInitials { get; set; }
 
         [MaxLength(1)]
-        public string PatientGender { get; set; } // K lub M
+        public string PatientGender { get; set; }
 
-        public string AssistantData { get; set; } // Dane osoby wykonującej I i II asystę
+        public string AssistantData { get; set; }
 
-        public string ProcedureGroup { get; set; } // Procedura z grupy
+        public string ProcedureGroup { get; set; }
 
         [Indexed]
-        public int? ProcedureRequirementId { get; set; } // Powiązanie z wymaganiem procedury
+        public int? ProcedureRequirementId { get; set; }
     }
 }

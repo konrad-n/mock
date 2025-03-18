@@ -6,24 +6,16 @@ namespace SledzSpecke.App.Helpers
     {
         private static ISecureStorageService secureStorageService;
 
-        // Initialize with a default implementation
         static SettingsHelper()
         {
-            // This will be replaced with a proper implementation during app startup
-            // or with a test implementation during testing
             secureStorageService = new SecureStorageService();
         }
 
-        /// <summary>
-        /// Sets the secure storage service to use.
-        /// </summary>
-        /// <param name="service">The secure storage service implementation.</param>
         public static void SetSecureStorageService(ISecureStorageService service)
         {
             secureStorageService = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        // Current User
         public static async Task<int> GetCurrentUserIdAsync()
         {
             return await secureStorageService.GetAsync(Constants.CurrentUserIdKey) is string idStr &&
@@ -42,7 +34,6 @@ namespace SledzSpecke.App.Helpers
             }
         }
 
-        // Notifications
         public static async Task<bool> GetNotificationsEnabledAsync()
         {
             return await secureStorageService.GetAsync(Constants.NotificationsEnabledKey) is string enabled &&
@@ -54,7 +45,6 @@ namespace SledzSpecke.App.Helpers
             await secureStorageService.SetAsync(Constants.NotificationsEnabledKey, enabled.ToString());
         }
 
-        // Backup
         public static async Task<DateTime?> GetLastBackupDateAsync()
         {
             if (await secureStorageService.GetAsync(Constants.LastBackupDateKey) is string dateStr
@@ -71,7 +61,6 @@ namespace SledzSpecke.App.Helpers
             await secureStorageService.SetAsync(Constants.LastBackupDateKey, date.ToString("O"));
         }
 
-        // Export
         public static async Task<DateTime?> GetLastExportDateAsync()
         {
             if (await secureStorageService.GetAsync(Constants.LastExportDateKey) is string dateStr
@@ -88,7 +77,6 @@ namespace SledzSpecke.App.Helpers
             await secureStorageService.SetAsync(Constants.LastExportDateKey, date.ToString("O"));
         }
 
-        // Dark Mode
         public static async Task<bool> GetIsDarkModeAsync()
         {
             return await secureStorageService.GetAsync(Constants.IsDarkModeKey) is string darkMode &&
@@ -100,7 +88,6 @@ namespace SledzSpecke.App.Helpers
             await secureStorageService.SetAsync(Constants.IsDarkModeKey, isDarkMode.ToString());
         }
 
-        // Current Module
         public static async Task<int> GetCurrentModuleIdAsync()
         {
             return await secureStorageService.GetAsync(Constants.CurrentModuleIdKey) is string idStr &&
@@ -135,7 +122,6 @@ namespace SledzSpecke.App.Helpers
             await secureStorageService.SetAsync(Constants.ReminderDaysInAdvanceKey, days.ToString());
         }
 
-        // Clear All
         public static void ClearAll()
         {
             secureStorageService.RemoveAll();

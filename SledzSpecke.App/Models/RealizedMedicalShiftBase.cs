@@ -11,13 +11,10 @@ namespace SledzSpecke.App.Models
 
         [Indexed]
         public int SpecializationId { get; set; }
-
-        // Podstawowe informacje o dyżurze występujące w obu wersjach SMK
         public int Hours { get; set; }
         public int Minutes { get; set; }
         public SyncStatus SyncStatus { get; set; }
 
-        // Dodatkowe pole ignorowane w bazie
         [Ignore]
         public string FormattedTime => $"{this.Hours} godz. {this.Minutes} min.";
     }

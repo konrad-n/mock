@@ -5,7 +5,6 @@ namespace SledzSpecke.App.Services.Specialization
 {
     public interface ISpecializationService
     {
-        // User & Specialization
         Task<User> GetCurrentUserAsync();
 
         Task<Models.Specialization> GetCurrentSpecializationAsync(bool includeModules = true);
@@ -14,18 +13,14 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task SetCurrentModuleAsync(int moduleId);
 
-        // Specialization Program
         Task<SpecializationProgram> LoadSpecializationProgramAsync(string code, SmkVersion smkVersion);
 
         Task<List<SpecializationProgram>> GetAvailableSpecializationProgramsAsync();
 
-        // Modules
         Task<List<Module>> GetModulesAsync(int specializationId);
 
-        // Dodana nowa metoda
         Task<bool> InitializeSpecializationModulesAsync(int specializationId);
 
-        // Internships
         Task<List<Internship>> GetInternshipsAsync(int? moduleId = null);
 
         Task<Internship> GetInternshipAsync(int internshipId);
@@ -38,7 +33,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteInternshipAsync(int internshipId);
 
-        // Medical Shifts
         Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null);
 
         Task<MedicalShift> GetMedicalShiftAsync(int shiftId);
@@ -51,7 +45,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         event EventHandler<int> CurrentModuleChanged;
 
-        // Procedures
         Task<List<Procedure>> GetProceduresAsync(string searchText = null, int? internshipId = null);
 
         Task<Procedure> GetProcedureAsync(int procedureId);
@@ -62,7 +55,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteProcedureAsync(int procedureId);
 
-        // Courses
         Task<List<Course>> GetCoursesAsync(int? moduleId = null);
 
         Task<Course> GetCourseAsync(int courseId);
@@ -73,7 +65,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteCourseAsync(int courseId);
 
-        // Self Education
         Task<List<SelfEducation>> GetSelfEducationItemsAsync(int? moduleId = null);
 
         Task<SelfEducation> GetSelfEducationAsync(int selfEducationId);
@@ -84,7 +75,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteSelfEducationAsync(int selfEducationId);
 
-        // Publications
         Task<List<Publication>> GetPublicationsAsync(int? moduleId = null);
 
         Task<Publication> GetPublicationAsync(int publicationId);
@@ -95,7 +85,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeletePublicationAsync(int publicationId);
 
-        // Educational Activities
         Task<List<EducationalActivity>> GetEducationalActivitiesAsync(int? moduleId = null);
 
         Task<EducationalActivity> GetEducationalActivityAsync(int activityId);
@@ -106,7 +95,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteEducationalActivityAsync(int activityId);
 
-        // Absences
         Task<List<Absence>> GetAbsencesAsync();
 
         Task<Absence> GetAbsenceAsync(int absenceId);
@@ -117,7 +105,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteAbsenceAsync(int absenceId);
 
-        // Recognitions
         Task<List<Models.Recognition>> GetRecognitionsAsync();
 
         Task<Models.Recognition> GetRecognitionAsync(int recognitionId);
@@ -128,8 +115,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<bool> DeleteRecognitionAsync(int recognitionId);
 
-        // Statistics & Progress
-        // ZMIANA: Dodano parametr moduleId
         Task<SpecializationStatistics> GetSpecializationStatisticsAsync(int? moduleId = null);
 
         Task UpdateSpecializationProgressAsync(int specializationId);
@@ -138,7 +123,6 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<DateTime> CalculateSpecializationEndDateAsync(int specializationId);
 
-        // Counts for dashboard
         Task<int> GetShiftCountAsync(int? moduleId = null);
 
         Task<int> GetProcedureCountAsync(int? moduleId = null);

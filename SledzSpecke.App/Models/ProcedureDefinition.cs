@@ -6,12 +6,12 @@
 
         public string Name { get; set; }
 
-        public int RequiredCountA { get; set; } // Wymagana liczba procedur jako operator
+        public int RequiredCountA { get; set; }
 
-        public int RequiredCountB { get; set; } // Wymagana liczba procedur jako asysta
+        public int RequiredCountB { get; set; }
 
-        public string Group { get; set; } // Np. staż podstawowy, staż kierunkowy
+        public string Group { get; set; }
 
-        public int? InternshipTypeId { get; set; } // Powiązanie z typem stażu
+        public int? InternshipTypeId { get; set; }
     }
 }

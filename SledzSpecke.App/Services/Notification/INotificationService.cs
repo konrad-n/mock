@@ -3,11 +3,8 @@
     public interface INotificationService
     {
         Task Initialize();
-
-        // Change to match plugin method name
         Task<bool> RequestNotificationPermission(object permission = null);
 
-        // Change to match plugin method name
         Task<bool> AreNotificationsEnabled(object permission = null);
 
         Task ScheduleCourseReminderAsync(int courseId, DateTime date);

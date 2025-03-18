@@ -17,7 +17,7 @@ namespace SledzSpecke.App.Models
         [Indexed]
         public SmkVersion SmkVersion { get; set; }
 
-        public string Version { get; set; }         // np. "CMKP 2014" lub "CMKP 2023"
+        public string Version { get; set; } // np. "CMKP 2014" lub "CMKP 2023"
 
         [MaxLength(100)]
         public string Name { get; set; }
@@ -26,19 +26,16 @@ namespace SledzSpecke.App.Models
 
         public DateTime EndDate { get; set; }
 
-        public string Structure { get; set; } // JSON struktura modułu
+        public string Structure { get; set; }
 
-        // Statystyki postępu - staże
         public int CompletedInternships { get; set; }
 
         public int TotalInternships { get; set; }
 
-        // Statystyki postępu - kursy
         public int CompletedCourses { get; set; }
 
         public int TotalCourses { get; set; }
 
-        // Statystyki postępu - procedury
         public int CompletedProceduresA { get; set; }
 
         public int TotalProceduresA { get; set; }
@@ -47,14 +44,12 @@ namespace SledzSpecke.App.Models
 
         public int TotalProceduresB { get; set; }
 
-        // Statystyki postępu - dyżury medyczne (NOWE POLA)
         public int CompletedShiftHours { get; set; }
 
         public int RequiredShiftHours { get; set; }
 
         public double WeeklyShiftHours { get; set; }
 
-        // Statystyki postępu - samokształcenie (NOWE POLA)
         public int CompletedSelfEducationDays { get; set; }
 
         public int TotalSelfEducationDays { get; set; }

@@ -10,20 +10,20 @@ namespace SledzSpecke.App.Models
         public int ProcedureId { get; set; }
 
         [Indexed]
-        public int InternshipId { get; set; } // Powiązanie ze stażem
+        public int InternshipId { get; set; }
 
         public DateTime Date { get; set; }
 
-        public int Year { get; set; } // Rok szkolenia - wymagany w starym SMK
+        public int Year { get; set; }
 
         [MaxLength(20)]
         public string Code { get; set; }
 
         [MaxLength(10)]
-        public string OperatorCode { get; set; } // A lub B - zachowujemy dla wewnętrznej logiki
+        public string OperatorCode { get; set; }
 
         [MaxLength(100)]
-        public string PerformingPerson { get; set; } // Osoba wykonująca - wymagana w starym SMK
+        public string PerformingPerson { get; set; }
 
         [MaxLength(100)]
         public string Location { get; set; }
@@ -34,15 +34,15 @@ namespace SledzSpecke.App.Models
         [MaxLength(1)]
         public string PatientGender { get; set; }
 
-        public string AssistantData { get; set; } // Dane osoby wykonującej I i II asystę
+        public string AssistantData { get; set; }
 
-        public string ProcedureGroup { get; set; } // Procedura z grupy
+        public string ProcedureGroup { get; set; }
 
         [MaxLength(20)]
         public string Status { get; set; }
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; }
     }
 }

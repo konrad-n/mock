@@ -5,10 +5,10 @@ namespace SledzSpecke.App.Models
 {
     public class RealizedMedicalShiftOldSMK : RealizedMedicalShiftBase
     {
-        public int Year { get; set; } // Rok szkolenia
-        public DateTime StartDate { get; set; } // Data rozpoczęcia
+        public int Year { get; set; }
+        public DateTime StartDate { get; set; }
 
         [MaxLength(100)]
-        public string Location { get; set; } // Nazwa komórki organizacyjnej
+        public string Location { get; set; }
     }
 }

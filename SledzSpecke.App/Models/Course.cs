@@ -13,7 +13,6 @@ namespace SledzSpecke.App.Models
         [Indexed]
         public int SpecializationId { get; set; }
 
-        // Dodane pole dla modułu
         [Indexed]
         public int? ModuleId { get; set; }
 

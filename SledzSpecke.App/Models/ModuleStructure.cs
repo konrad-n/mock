@@ -22,7 +22,6 @@ namespace SledzSpecke.App.Models
         public ProcedureCodeDescription ProcedureCodeDescription { get; set; }
         public ExaminationInfo ExaminationInfo { get; set; }
 
-        // Pomocnicze pola dla aplikacji
         public int RequiredShiftHours { get; set; }
         public int SelfEducationDays { get; set; }
     }

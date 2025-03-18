@@ -15,9 +15,6 @@ namespace SledzSpecke.App.Services.MedicalShifts
 {
     public partial class MedicalShiftsService
     {
-        // Implementacja wspólnych metod
-        // Dodaj klasę YearResult na początku klasy MedicalShiftsService (po konstruktorze)
-        // Klasa pomocnicza do mapowania wyniku zapytania SELECT DISTINCT Year
         private class YearResult
         {
             public int Year { get; set; }

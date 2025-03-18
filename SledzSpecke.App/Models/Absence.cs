@@ -22,13 +22,11 @@ namespace SledzSpecke.App.Models
 
         public SyncStatus SyncStatus { get; set; }
 
-        public string AdditionalFields { get; set; } // JSON
+        public string AdditionalFields { get; set; }
 
-        // Liczba dni (automatycznie obliczana)
         [Ignore]
         public int DaysCount => (this.EndDate - this.StartDate).Days + 1;
 
-        // Czy wpływa na przedłużenie specjalizacji
         [Ignore]
         public bool ExtendsSpecialization =>
             this.Type == AbsenceType.Sick ||

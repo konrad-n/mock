@@ -24,10 +24,8 @@
 
         public bool IncludeRecognitions { get; set; }
 
-        // Format eksportu
         public bool FormatForOldSMK { get; set; }
 
-        // Filtrowanie według modułu (dla specjalizacji modułowych)
         public int? ModuleId { get; set; }
     }
 }

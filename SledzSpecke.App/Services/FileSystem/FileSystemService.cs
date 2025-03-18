@@ -1,8 +1,5 @@
 ﻿namespace SledzSpecke.App.Services.FileSystem
 {
-    /// <summary>
-    /// Implementation of IFileSystemService that uses the actual file system.
-    /// </summary>
     public class FileSystemService : IFileSystemService
     {
         public string AppDataDirectory => Microsoft.Maui.Storage.FileSystem.AppDataDirectory;

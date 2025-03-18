@@ -6,25 +6,23 @@ namespace SledzSpecke.App.Models
     public class RealizedProcedureNewSMK : RealizedProcedureBase
     {
         [Indexed]
-        public int ProcedureRequirementId { get; set; } // Powiązanie z wymaganiem procedury z JSON
+        public int ProcedureRequirementId { get; set; }
 
         [Indexed]
-        public int? ModuleId { get; set; } // Powiązanie z modułem
+        public int? ModuleId { get; set; }
 
-        public int CountA { get; set; } // Liczba wykonanych samodzielnie
-        public int CountB { get; set; } // Liczba wykonanych jako asysta
+        public int CountA { get; set; }
+        public int CountB { get; set; }
 
-        public DateTime StartDate { get; set; } // Data od
-        public DateTime EndDate { get; set; } // Data do
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
-        // Dodatkowe informacje o procedurze (nie przechowywane w bazie, ale ładowane z JSON)
         [Ignore]
         public string ProcedureName { get; set; }
 
         [Ignore]
         public string InternshipName { get; set; }
 
-        // Dodana nowa właściwość do formatowania zakresu dat
         [Ignore]
         public string DateRange => $"{this.StartDate:dd.MM.yyyy} - {this.EndDate:dd.MM.yyyy}";
     }
