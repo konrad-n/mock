@@ -8,41 +8,6 @@ namespace SledzSpecke.App.Helpers
 {
     public static class ModuleHelper
     {
-        public static bool HasBasicModule(string specializationCode)
-        {
-            if (string.IsNullOrEmpty(specializationCode))
-            {
-                return false;
-            }
-
-            var twoModulesSpecializations = new[]
-            {
-                "cardiology",
-                "psychiatry",
-            };
-
-            return twoModulesSpecializations.Contains(specializationCode.ToLowerInvariant());
-        }
-
-        public static string GetBasicModuleName(string specializationCode)
-        {
-            if (string.IsNullOrEmpty(specializationCode) || !HasBasicModule(specializationCode))
-            {
-                return null;
-            }
-
-            if (new[]
-                {
-                    "cardiology",
-                    "psychiatry",
-                }.Contains(specializationCode.ToLowerInvariant()))
-            {
-                return "internal_medicine";
-            }
-
-            return null;
-        }
-
         public static async Task<List<Module>> CreateModulesForSpecializationAsync(
             string specializationCode,
             DateTime startDate,
@@ -289,73 +254,6 @@ namespace SledzSpecke.App.Helpers
             }
 
             return new List<Module>();
-        }
-
-        public static async Task<bool> InitializeModulesAsync(
-            IDatabaseService databaseService,
-            int specializationId,
-            List<Module> modules)
-        {
-            if (databaseService == null || modules == null || modules.Count == 0)
-            {
-                return false;
-            }
-
-            var specialization = await databaseService.GetSpecializationAsync(specializationId);
-            if (specialization == null)
-            {
-                return false;
-            }
-
-            foreach (var module in modules)
-            {
-                module.SpecializationId = specializationId;
-                await databaseService.SaveModuleAsync(module);
-            }
-
-            return true;
-        }
-
-        public static DateTime CalculateModuleEndDate(Module module, List<Absence> absences)
-        {
-            if (module == null)
-            {
-                return DateTime.Now;
-            }
-
-            DateTime baseEndDate = module.EndDate;
-
-            var relevantAbsences = absences.Where(a =>
-                (a.StartDate >= module.StartDate && a.StartDate <= module.EndDate) ||
-                (a.EndDate >= module.StartDate && a.EndDate <= module.EndDate) ||
-                (a.StartDate <= module.StartDate && a.EndDate >= module.EndDate))
-                .ToList();
-
-            int extensionDays = 0;
-            foreach (var absence in relevantAbsences)
-            {
-                if (absence.Type == AbsenceType.Sick ||
-                    absence.Type == AbsenceType.Maternity ||
-                    absence.Type == AbsenceType.Paternity)
-                {
-                    DateTime absenceStart = absence.StartDate < module.StartDate
-                        ? module.StartDate
-                        : absence.StartDate;
-
-                    DateTime absenceEnd = absence.EndDate > module.EndDate
-                        ? module.EndDate
-                        : absence.EndDate;
-
-                    int daysInModule = (absenceEnd - absenceStart).Days + 1;
-                    extensionDays += daysInModule;
-                }
-            }
-
-            int reductionDays = relevantAbsences
-                .Where(a => a.Type == AbsenceType.Recognition)
-                .Sum(a => (a.EndDate - a.StartDate).Days + 1);
-
-            return baseEndDate.AddDays(extensionDays - reductionDays);
         }
     }
 }

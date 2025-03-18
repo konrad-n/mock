@@ -34,60 +34,6 @@ namespace SledzSpecke.App.Helpers
             }
         }
 
-        public static async Task<bool> GetNotificationsEnabledAsync()
-        {
-            return await secureStorageService.GetAsync(Constants.NotificationsEnabledKey) is string enabled &&
-                   bool.TryParse(enabled, out bool result) && result;
-        }
-
-        public static async Task SetNotificationsEnabledAsync(bool enabled)
-        {
-            await secureStorageService.SetAsync(Constants.NotificationsEnabledKey, enabled.ToString());
-        }
-
-        public static async Task<DateTime?> GetLastBackupDateAsync()
-        {
-            if (await secureStorageService.GetAsync(Constants.LastBackupDateKey) is string dateStr
-                && DateTime.TryParse(dateStr, out DateTime date))
-            {
-                return date;
-            }
-
-            return null;
-        }
-
-        public static async Task SetLastBackupDateAsync(DateTime date)
-        {
-            await secureStorageService.SetAsync(Constants.LastBackupDateKey, date.ToString("O"));
-        }
-
-        public static async Task<DateTime?> GetLastExportDateAsync()
-        {
-            if (await secureStorageService.GetAsync(Constants.LastExportDateKey) is string dateStr
-                && DateTime.TryParse(dateStr, out DateTime date))
-            {
-                return date;
-            }
-
-            return null;
-        }
-
-        public static async Task SetLastExportDateAsync(DateTime date)
-        {
-            await secureStorageService.SetAsync(Constants.LastExportDateKey, date.ToString("O"));
-        }
-
-        public static async Task<bool> GetIsDarkModeAsync()
-        {
-            return await secureStorageService.GetAsync(Constants.IsDarkModeKey) is string darkMode &&
-                   bool.TryParse(darkMode, out bool result) && result;
-        }
-
-        public static async Task SetIsDarkModeAsync(bool isDarkMode)
-        {
-            await secureStorageService.SetAsync(Constants.IsDarkModeKey, isDarkMode.ToString());
-        }
-
         public static async Task<int> GetCurrentModuleIdAsync()
         {
             return await secureStorageService.GetAsync(Constants.CurrentModuleIdKey) is string idStr &&
@@ -104,27 +50,6 @@ namespace SledzSpecke.App.Helpers
             {
                 secureStorageService.Remove(Constants.CurrentModuleIdKey);
             }
-        }
-
-        public static async Task<int?> GetReminderDaysInAdvanceAsync()
-        {
-            if (await secureStorageService.GetAsync(Constants.ReminderDaysInAdvanceKey) is string reminderDays
-                && int.TryParse(reminderDays, out int days))
-            {
-                return days;
-            }
-
-            return Constants.DefaultReminderDaysInAdvance;
-        }
-
-        public static async Task SetReminderDaysInAdvanceAsync(int days)
-        {
-            await secureStorageService.SetAsync(Constants.ReminderDaysInAdvanceKey, days.ToString());
-        }
-
-        public static void ClearAll()
-        {
-            secureStorageService.RemoveAll();
         }
     }
 }

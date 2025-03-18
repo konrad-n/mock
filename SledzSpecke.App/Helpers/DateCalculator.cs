@@ -30,24 +30,5 @@ namespace SledzSpecke.App.Helpers
 
             return plannedEndDate.AddDays(extensionDays - reductionDays);
         }
-
-        public static int CalculateWorkingDays(DateTime startDate, DateTime endDate)
-        {
-            int days = 0;
-            DateTime currentDate = startDate;
-
-            while (currentDate <= endDate)
-            {
-                if (currentDate.DayOfWeek != DayOfWeek.Saturday &&
-                    currentDate.DayOfWeek != DayOfWeek.Sunday)
-                {
-                    days++;
-                }
-
-                currentDate = currentDate.AddDays(1);
-            }
-
-            return days;
-        }
     }
 }

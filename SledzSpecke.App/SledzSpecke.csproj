@@ -161,7 +161,6 @@
     </MauiXaml>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\Export\" />
     <Folder Include="ViewModels\Absences\" />
     <Folder Include="ViewModels\Courses\" />
     <Folder Include="ViewModels\EducationalActivities\" />
