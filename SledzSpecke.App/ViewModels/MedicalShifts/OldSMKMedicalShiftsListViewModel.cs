@@ -11,6 +11,8 @@ using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Dispatching;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
@@ -64,8 +66,31 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         public int SelectedYear
         {
             get => this.selectedYear;
-            set => this.SetProperty(ref this.selectedYear, value);
+            set
+            {
+                if (this.SetProperty(ref this.selectedYear, value))
+                {
+                    System.Diagnostics.Debug.WriteLine($"SelectedYear zmieniony na: {value}, wywołuję LoadDataAsync");
+                    // Bezpośrednio wywołaj LoadDataAsync przy zmianie roku
+                    this.LoadDataAsyncForSelectedYear(value).ConfigureAwait(false);
+                }
+            }
         }
+
+        private async Task LoadDataAsyncForSelectedYear(int year)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadDataAsyncForSelectedYear: Rozpoczynam ładowanie danych dla roku {year}");
+                await this.LoadDataAsync();
+                System.Diagnostics.Debug.WriteLine($"LoadDataAsyncForSelectedYear: Zakończono ładowanie danych dla roku {year}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadDataAsyncForSelectedYear: Błąd: {ex.Message}");
+            }
+        }
+
 
         public ObservableCollection<RealizedMedicalShiftOldSMK> Shifts
         {
@@ -117,6 +142,7 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
                 // Pobierz dostępne lata
                 var years = await this.medicalShiftsService.GetAvailableYearsAsync();
+                System.Diagnostics.Debug.WriteLine($"LoadYearsAsync: Pobrano {years.Count} lat");
 
                 this.AvailableYears.Clear();
                 foreach (var year in years)
@@ -124,11 +150,76 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                     this.AvailableYears.Add(year);
                 }
 
-                // Jeśli są dostępne lata, wybierz pierwszy
-                if (this.AvailableYears.Count > 0)
+                // Upewnij się, że lista przycisków lat zostanie zaktualizowana
+                this.OnPropertyChanged(nameof(AvailableYears));
+
+                // KLUCZOWA ZMIANA: Zamiast polegać na LoadDataAsync, 
+                // bezpośrednio pobieramy dyżury dla roku 1
+                if (this.AvailableYears.Contains(1))
                 {
-                    this.SelectedYear = this.AvailableYears[0];
-                    await this.LoadDataAsync();
+                    System.Diagnostics.Debug.WriteLine("LoadYearsAsync: Bezpośrednio pobieram dyżury dla roku 1");
+
+                    // 1. Ustawiamy rok
+                    this.selectedYear = 1;
+                    this.OnPropertyChanged(nameof(SelectedYear));
+
+                    // 2. BEZPOŚREDNIO pobieramy dyżury z serwisu
+                    try
+                    {
+                        var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(1);
+                        System.Diagnostics.Debug.WriteLine($"LoadYearsAsync: Bezpośrednio pobrano {shifts.Count} dyżurów dla roku 1");
+
+                        // 3. Aktualizujemy UI
+                        MainThread.BeginInvokeOnMainThread(() => {
+                            this.Shifts.Clear();
+                            foreach (var shift in shifts)
+                            {
+                                this.Shifts.Add(shift);
+                            }
+
+                            // Usuwamy wywołanie CreateYearButtons, bo ta metoda jest w widoku
+                            // this.CreateYearButtons();
+                        });
+
+                        // 4. Pobieramy podsumowanie
+                        this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: 1);
+                        this.OnPropertyChanged(nameof(Summary));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadYearsAsync: Błąd podczas bezpośredniego pobierania dyżurów: {ex.Message}");
+                    }
+                }
+                else if (this.AvailableYears.Count > 0)
+                {
+                    // Podobna logika dla pierwszego roku z listy
+                    int firstYear = this.AvailableYears[0];
+                    this.selectedYear = firstYear;
+                    this.OnPropertyChanged(nameof(SelectedYear));
+
+                    try
+                    {
+                        var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(firstYear);
+                        System.Diagnostics.Debug.WriteLine($"LoadYearsAsync: Bezpośrednio pobrano {shifts.Count} dyżurów dla roku {firstYear}");
+
+                        MainThread.BeginInvokeOnMainThread(() => {
+                            this.Shifts.Clear();
+                            foreach (var shift in shifts)
+                            {
+                                this.Shifts.Add(shift);
+                            }
+
+                            // Usuwamy również stąd wywołanie CreateYearButtons
+                            // this.CreateYearButtons();
+                        });
+
+                        this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: firstYear);
+                        this.OnPropertyChanged(nameof(Summary));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadYearsAsync: Błąd podczas bezpośredniego pobierania dyżurów: {ex.Message}");
+                    }
                 }
             }
             catch (System.Exception ex)

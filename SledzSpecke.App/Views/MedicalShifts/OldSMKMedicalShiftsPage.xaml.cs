@@ -34,13 +34,53 @@ namespace SledzSpecke.App.Views.MedicalShifts
             });
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
+            System.Diagnostics.Debug.WriteLine("OldSMKMedicalShiftsPage.OnAppearing rozpoczęte");
 
-            // Odśwież dane przy każdym pokazaniu strony
-            this.viewModel.RefreshCommand.Execute(null);
+            // Zapobiegamy wielokrotnemu wywołaniu w tej samej sesji
+            if (!isFirstLoad)
+            {
+                System.Diagnostics.Debug.WriteLine("Pomijam ładowanie - to nie jest pierwsze ładowanie strony");
+                return;
+            }
+
+            isFirstLoad = false;
+
+            try
+            {
+                // Dajemy czas na załadowanie UI
+                await Task.Delay(100);
+
+                // Wywołujemy LoadYearsAsync bezpośrednio
+                var method = this.viewModel.GetType().GetMethod("LoadYearsAsync",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                if (method != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("OldSMKMedicalShiftsPage.OnAppearing: Bezpośrednio wywołuję LoadYearsAsync");
+                    await (Task)method.Invoke(this.viewModel, null);
+
+                    // Po zakończeniu ładowania, aktualizujemy przyciski lat
+                    System.Diagnostics.Debug.WriteLine("OldSMKMedicalShiftsPage.OnAppearing: Aktualizuję przyciski lat");
+                    this.CreateYearButtons();
+                }
+                else
+                {
+                    // Awaryjne wywołanie RefreshCommand
+                    System.Diagnostics.Debug.WriteLine("OldSMKMedicalShiftsPage.OnAppearing: Nie znaleziono metody LoadYearsAsync, używam RefreshCommand");
+                    this.viewModel.RefreshCommand.Execute(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"OldSMKMedicalShiftsPage.OnAppearing: Błąd: {ex.Message}");
+            }
         }
+
+        // Dodaj na górze klasy
+        private bool isFirstLoad = true;
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
