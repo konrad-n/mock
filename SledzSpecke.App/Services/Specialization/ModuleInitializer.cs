@@ -70,7 +70,8 @@ namespace SledzSpecke.App.Services.Specialization
                 var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
                     specialization.ProgramCode,
                     specialization.StartDate,
-                    specialization.SmkVersion);
+                    specialization.SmkVersion,
+                    specializationId);
 
                 if (modules == null || modules.Count == 0)
                 {

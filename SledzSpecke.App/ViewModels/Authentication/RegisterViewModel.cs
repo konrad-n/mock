@@ -344,7 +344,8 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
                     specialization.ProgramCode,
                     specialization.StartDate,
-                    user.SmkVersion);
+                    user.SmkVersion,
+                    specialization.SpecializationId);
 
                 if (modules != null && modules.Count > 0)
                 {

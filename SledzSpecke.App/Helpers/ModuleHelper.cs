@@ -66,7 +66,11 @@ namespace SledzSpecke.App.Helpers
         /// <param name="startDate">Data rozpoczęcia specjalizacji.</param>
         /// <param name="smkVersion">Wersja SMK.</param>
         /// <returns>Lista modułów specjalizacji.</returns>
-        public static async Task<List<Module>> CreateModulesForSpecializationAsync(string specializationCode, DateTime startDate, SmkVersion smkVersion)
+        public static async Task<List<Module>> CreateModulesForSpecializationAsync(
+            string specializationCode,
+            DateTime startDate,
+            SmkVersion smkVersion,
+            int specializationId)
         {
             System.Diagnostics.Debug.WriteLine($"Tworzenie modułów dla specjalizacji: {specializationCode}, wersja SMK: {smkVersion}");
 
@@ -307,8 +311,9 @@ namespace SledzSpecke.App.Helpers
                             StartDate = currentStartDate,
                             EndDate = endDate,
                             Structure = moduleElement.ToString(),
-                            SmkVersion = smkVersion,                // Dodane
+                            SmkVersion = smkVersion,
                             Version = moduleElement.GetProperty("version").GetString(),
+                            SpecializationId = specializationId,
 
                             // Podstawowe statystyki zliczone wcześniej
                             CompletedInternships = 0,
