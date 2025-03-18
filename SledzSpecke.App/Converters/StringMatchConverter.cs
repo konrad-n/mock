@@ -2,9 +2,6 @@
 
 namespace SledzSpecke.App.Converters
 {
-    /// <summary>
-    /// Konwerter sprawdzający czy wartość tekstowa jest równa podanemu parametrowi.
-    /// </summary>
     public class StringMatchConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

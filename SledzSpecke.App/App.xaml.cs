@@ -18,7 +18,6 @@ namespace SledzSpecke.App
         {
             base.OnStart();
 
-            // Wykonaj migrację danych dyżurów (w tle)
             Task.Run(async () =>
             {
                 try

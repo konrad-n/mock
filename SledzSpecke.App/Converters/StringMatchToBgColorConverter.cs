@@ -2,9 +2,6 @@
 
 namespace SledzSpecke.App.Converters
 {
-    /// <summary>
-    /// Konwerter do ustawiania koloru tła przycisku zakładki w zależności od tego czy jest wybrana.
-    /// </summary>
     public class StringMatchToBgColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

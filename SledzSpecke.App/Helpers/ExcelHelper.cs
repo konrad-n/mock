@@ -8,7 +8,6 @@ namespace SledzSpecke.App.Helpers
     {
         public static void Initialize()
         {
-            // Set EPPlus license context
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
@@ -16,12 +15,10 @@ namespace SledzSpecke.App.Helpers
         {
             var worksheet = package.Workbook.Worksheets.Add("Podsumowanie");
 
-            // Title
             worksheet.Cells[1, 1].Value = "PODSUMOWANIE DANYCH SPECJALIZACJI";
             worksheet.Cells[1, 1].Style.Font.Bold = true;
             worksheet.Cells[1, 1].Style.Font.Size = 16;
 
-            // Specialization Info
             worksheet.Cells[3, 1].Value = "Nazwa specjalizacji:";
             worksheet.Cells[3, 2].Value = specialization.Name;
 
@@ -37,7 +34,6 @@ namespace SledzSpecke.App.Helpers
             worksheet.Cells[6, 2].Value = specialization.CalculatedEndDate;
             worksheet.Cells[6, 2].Style.Numberformat.Format = "yyyy-MM-dd";
 
-            // Export Options
             worksheet.Cells[8, 1].Value = "Zakres eksportowanych danych:";
             worksheet.Cells[8, 1].Style.Font.Bold = true;
 
@@ -49,7 +45,6 @@ namespace SledzSpecke.App.Helpers
             worksheet.Cells[10, 2].Value = options.EndDate;
             worksheet.Cells[10, 2].Style.Numberformat.Format = "yyyy-MM-dd";
 
-            // Selected Categories
             worksheet.Cells[12, 1].Value = "Eksportowane kategorie:";
             worksheet.Cells[12, 1].Style.Font.Bold = true;
 
@@ -100,16 +95,13 @@ namespace SledzSpecke.App.Helpers
                 worksheet.Cells[row++, 1].Value = "- Uznania/skrócenia";
             }
 
-            // Export Info
             worksheet.Cells[row + 2, 1].Value = "Data wygenerowania:";
             worksheet.Cells[row + 2, 2].Value = DateTime.Now;
             worksheet.Cells[row + 2, 2].Style.Numberformat.Format = "yyyy-MM-dd HH:mm:ss";
 
-            // Format
             worksheet.Cells[row + 3, 1].Value = "Format:";
             worksheet.Cells[row + 3, 2].Value = options.FormatForOldSMK ? "Stara wersja SMK" : "Nowa wersja SMK";
 
-            // Autofit columns
             worksheet.Columns[1, 2].AutoFit();
 
             return worksheet;
@@ -119,7 +111,6 @@ namespace SledzSpecke.App.Helpers
         {
             var worksheet = package.Workbook.Worksheets.Add("Dyżury medyczne");
 
-            // Headers
             int col = 1;
             worksheet.Cells[1, col++].Value = "Data";
             worksheet.Cells[1, col++].Value = "Godziny";
@@ -129,12 +120,10 @@ namespace SledzSpecke.App.Helpers
 
             if (oldSmkFormat)
             {
-                // Add headers specific to old SMK
                 worksheet.Cells[1, col++].Value = "Pole dodatkowe 1";
                 worksheet.Cells[1, col++].Value = "Pole dodatkowe 2";
             }
 
-            // Format headers
             for (int i = 1; i <= col - 1; i++)
             {
                 worksheet.Cells[1, i].Style.Font.Bold = true;
@@ -142,7 +131,6 @@ namespace SledzSpecke.App.Helpers
                 worksheet.Cells[1, i].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
             }
 
-            // Data
             for (int i = 0; i < shifts.Count; i++)
             {
                 int row = i + 2;
@@ -246,7 +234,6 @@ namespace SledzSpecke.App.Helpers
                 worksheet.Cells[row, col++].Value = procedure.OperatorCode;
                 worksheet.Cells[row, col++].Value = procedure.Location;
 
-                // Zamiast bezpośredniego dostępu do procedury.InternshipName
                 string internshipName = string.Empty;
                 if (!string.IsNullOrEmpty(procedure.AdditionalFields))
                 {
@@ -292,7 +279,6 @@ namespace SledzSpecke.App.Helpers
                         }
                         catch
                         {
-                            // Handle JSON parsing error
                             col++;
                         }
                     }
@@ -303,12 +289,9 @@ namespace SledzSpecke.App.Helpers
                 }
             }
 
-            // Autofit columns
             worksheet.Columns[1, col - 1].AutoFit();
 
             return worksheet;
         }
-
-        // Podobne metody dla pozostałych typów danych (staże, kursy, itd.)
     }
 }

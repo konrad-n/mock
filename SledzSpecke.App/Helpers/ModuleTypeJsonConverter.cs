@@ -12,7 +12,7 @@ namespace SledzSpecke.App.Helpers
 
             if (string.IsNullOrEmpty(value))
             {
-                return ModuleType.Specialistic; // Wartość domyślna
+                return ModuleType.Specialistic;
             }
 
             return value.Equals("Basic", StringComparison.OrdinalIgnoreCase) ? ModuleType.Basic : ModuleType.Specialistic;

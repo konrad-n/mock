@@ -25,7 +25,6 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
-            // Zarejestruj wszystkie trasy nawigacyjne
             Routing.RegisterRoute("settings", typeof(SettingsPage));
             Routing.RegisterRoute("internships", typeof(InternshipsListPage));
             Routing.RegisterRoute("courses", typeof(CoursesListPage));
@@ -34,16 +33,11 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("absences", typeof(AbsencesListPage));
             Routing.RegisterRoute("export", typeof(ExportPage));
             Routing.RegisterRoute("exportpreview", typeof(ExportPreviewPage));
-
-            // Trasy dla dyżurów medycznych - dodane bardziej szczegółowe trasy
             Routing.RegisterRoute("MedicalShiftsSelector", typeof(MedicalShiftsSelectorPage));
             Routing.RegisterRoute("OldSMKMedicalShifts", typeof(OldSMKMedicalShiftsPage));
             Routing.RegisterRoute("NewSMKMedicalShifts", typeof(NewSMKMedicalShiftsPage));
             Routing.RegisterRoute("AddEditOldSMKMedicalShift", typeof(AddEditOldSMKMedicalShiftPage));
-
-            // Dodane aliasy dla zwiększenia elastyczności nawigacji
             Routing.RegisterRoute("medicalshifts/AddEditOldSMKMedicalShift", typeof(AddEditOldSMKMedicalShiftPage));
-
             Routing.RegisterRoute("ProcedureSelector", typeof(ProcedureSelectorPage));
             Routing.RegisterRoute("OldSMKProcedures", typeof(OldSMKProceduresListPage));
             Routing.RegisterRoute("NewSMKProcedures", typeof(NewSMKProceduresListPage));
@@ -102,7 +96,6 @@ namespace SledzSpecke.App
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas wylogowywania: {ex.Message}");
                 await this.DisplayAlert("Błąd", "Wystąpił błąd podczas wylogowywania.", "OK");
             }
         }

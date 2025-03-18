@@ -13,7 +13,6 @@ namespace SledzSpecke.App.Converters
 
             try
             {
-                // Porównaj wartość z parametrem - jeśli są równe, zwróć kolor główny
                 int selectedValue = (int)parameter;
                 int currentValue = (int)value;
 

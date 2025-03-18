@@ -2,9 +2,6 @@
 
 namespace SledzSpecke.App.Converters
 {
-    /// <summary>
-    /// Konwerter do ustawiania koloru tekstu przycisku zakładki w zależności od tego czy jest wybrana.
-    /// </summary>
     public class StringMatchToTextColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

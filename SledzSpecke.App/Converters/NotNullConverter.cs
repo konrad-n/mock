@@ -3,9 +3,6 @@ using System.Globalization;
 
 namespace SledzSpecke.App.Converters
 {
-    /// <summary>
-    /// Konwerter sprawdzający, czy obiekt nie jest null.
-    /// </summary>
     public class NotNullConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

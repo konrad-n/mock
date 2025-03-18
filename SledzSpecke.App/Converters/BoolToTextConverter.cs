@@ -2,11 +2,6 @@
 
 namespace SledzSpecke.App.Converters
 {
-    /// <summary>
-    /// Konwerter zmieniający wartość logiczną na tekst.
-    /// Pozwala wybrać różny tekst dla wartości true i false.
-    /// Parametr konwersji powinien mieć format "TextForTrue,TextForFalse".
-    /// </summary>
     public class BoolToTextConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

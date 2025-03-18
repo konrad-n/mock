@@ -10,9 +10,9 @@ namespace SledzSpecke.App.Converters
             {
                 return code switch
                 {
-                    "A" => Color.FromHex("#24C1DE"),  // Primary color for operator
-                    "B" => Color.FromHex("#F59E0B"),  // Warning color for assistant
-                    _ => Color.FromHex("#547E9E"),    // Default text-muted color
+                    "A" => Color.FromHex("#24C1DE"),
+                    "B" => Color.FromHex("#F59E0B"),
+                    _ => Color.FromHex("#547E9E"),
                 };
             }
 
