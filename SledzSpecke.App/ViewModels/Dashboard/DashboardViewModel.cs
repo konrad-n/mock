@@ -656,15 +656,12 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     System.Diagnostics.Debug.WriteLine($"ID: {spec.SpecializationId}, Nazwa: {spec.Name}, Start: {spec.StartDate:d}, Koniec: {spec.PlannedEndDate:d}, Wersja SMK: {spec.SmkVersion}");
                 }
 
-                // Moduły (dla pierwszej znalezionej specjalizacji)
-                if (specializations.Any())
+                // Moduły
+                var modules = await databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+                System.Diagnostics.Debug.WriteLine($"\nModuły dla obecnej specjalizacji {specializations[0].Name} ({modules.Count}):");
+                foreach (var module in modules)
                 {
-                    var modules = await databaseService.GetModulesAsync(specializations[0].SpecializationId);
-                    System.Diagnostics.Debug.WriteLine($"\nModuły dla specjalizacji {specializations[0].Name} ({modules.Count}):");
-                    foreach (var module in modules)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}, SpecializationId: {module.SpecializationId}, Wersja SMK: {module.SmkVersion}");
-                    }
+                    System.Diagnostics.Debug.WriteLine($"ID: {module.ModuleId}, Nazwa: {module.Name}, Typ: {module.Type}, SpecializationId: {module.SpecializationId}, Wersja SMK: {module.SmkVersion}");
                 }
 
                 // Staże (dla pierwszego znalezionego modułu)
