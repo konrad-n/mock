@@ -7,7 +7,7 @@
 
 ## Project Description
 
-ŚledzSpecke is a comprehensive mobile application that allows resident physicians to track their progress in medical specialization programs. The application supports both the old and new SMK (Education Monitoring System) formats, offering an intuitive interface to manage all aspects of medical specialty training.
+Comprehensive mobile application that allows resident physicians to track their progress in medical specialization programs. The application supports both the old and new SMK (Education Monitoring System) formats, offering an intuitive interface to manage all aspects of medical specialty training.
 
 ## Features
 
