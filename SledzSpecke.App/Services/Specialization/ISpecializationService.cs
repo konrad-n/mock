@@ -23,6 +23,8 @@ namespace SledzSpecke.App.Services.Specialization
 
         Task<Internship> GetInternshipAsync(int internshipId);
 
+        Task<List<Internship>> GetUserInternshipsAsync(int? moduleId = null);
+
         Task<Internship> GetCurrentInternshipAsync();
 
         Task<bool> AddInternshipAsync(Internship internship);

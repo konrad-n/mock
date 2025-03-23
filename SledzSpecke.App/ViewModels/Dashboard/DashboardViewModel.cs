@@ -449,7 +449,7 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         private async Task NavigateToInternshipsAsync()
         {
-            await Shell.Current.GoToAsync("internships");
+            await Shell.Current.GoToAsync("///internships");
         }
 
         private async Task NavigateToProceduresAsync()

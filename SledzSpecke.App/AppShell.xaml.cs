@@ -1,5 +1,6 @@
 ﻿using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Views.Export;
+using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
 using SledzSpecke.App.Views.Procedures;
 
@@ -31,6 +32,9 @@ namespace SledzSpecke.App
             Routing.RegisterRoute("NewSMKProcedures", typeof(NewSMKProceduresListPage));
             Routing.RegisterRoute("AddEditOldSMKProcedure", typeof(AddEditOldSMKProcedurePage));
             Routing.RegisterRoute("AddEditNewSMKProcedure", typeof(AddEditNewSMKProcedurePage));
+            Routing.RegisterRoute("internships", typeof(InternshipsSelectorPage));
+            Routing.RegisterRoute("NewSMKInternships", typeof(NewSMKInternshipsListPage));
+            Routing.RegisterRoute("AddEditInternship", typeof(AddEditInternshipPage));
         }
 
         private async void InitializeUserInfoAsync()

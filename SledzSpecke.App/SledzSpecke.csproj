@@ -117,6 +117,12 @@
     <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Views\Internships\InternshipsSelectorPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\Internships\NewSMKInternshipsListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\MedicalShifts\AddEditOldSMKMedicalShiftPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -163,7 +169,6 @@
   <ItemGroup>
     <Folder Include="Views\Absences\" />
     <Folder Include="Views\Courses\" />
-    <Folder Include="Views\Internships\" />
     <Folder Include="Views\Publications\" />
     <Folder Include="Views\Recognitions\" />
     <Folder Include="Views\SelfEducation\" />

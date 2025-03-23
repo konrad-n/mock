@@ -10,11 +10,13 @@ using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.Services.Storage;
 using SledzSpecke.App.ViewModels.Authentication;
 using SledzSpecke.App.ViewModels.Dashboard;
+using SledzSpecke.App.ViewModels.Internships;
 using SledzSpecke.App.ViewModels.MedicalShifts;
 using SledzSpecke.App.ViewModels.Procedures;
 using SledzSpecke.App.Views.Authentication;
 using SledzSpecke.App.Views.Dashboard;
 using SledzSpecke.App.Views.Export;
+using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
 using SledzSpecke.App.Views.Procedures;
 
@@ -79,6 +81,9 @@ namespace SledzSpecke.App
             services.AddTransient<ProcedureGroupViewModel>();
             services.AddTransient<ProcedureRequirementViewModel>();
             services.AddTransient<AddEditNewSMKProcedureViewModel>();
+            services.AddTransient<InternshipsSelectorViewModel>();
+            services.AddTransient<NewSMKInternshipsListViewModel>();
+            services.AddTransient<AddEditInternshipViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
@@ -101,6 +106,9 @@ namespace SledzSpecke.App
             services.AddTransient<AddEditNewSMKProcedurePage>();
             services.AddTransient<ExportPage>();
             services.AddTransient<ExportPreviewPage>();
+            services.AddTransient<InternshipsSelectorPage>();
+            services.AddTransient<NewSMKInternshipsListPage>();
+            services.AddTransient<AddEditInternshipPage>();
         }
     }
 }
