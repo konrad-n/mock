@@ -8,8 +8,6 @@ namespace SledzSpecke.App.Services.Authentication
 
         Task<bool> RegisterAsync(User user, string password, Models.Specialization specialization);
 
-        Task<bool> ChangePasswordAsync(string currentPassword, string newPassword);
-
         Task LogoutAsync();
 
         Task<User> GetCurrentUserAsync();

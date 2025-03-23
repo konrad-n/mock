@@ -16,26 +16,6 @@ namespace SledzSpecke.App.Services.Authentication
             this.databaseService = databaseService;
         }
 
-        public async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
-        {
-            var user = await this.GetCurrentUserAsync();
-            if (user == null)
-            {
-                return false;
-            }
-
-            if (!this.VerifyPassword(currentPassword, user.PasswordHash))
-            {
-                return false;
-            }
-
-            user.PasswordHash = this.HashPassword(newPassword);
-
-            await this.databaseService.SaveUserAsync(user);
-
-            return true;
-    }
-
         public async Task<User> GetCurrentUserAsync()
         {
             if (this.currentUser != null)
