@@ -22,11 +22,11 @@ namespace SledzSpecke.App.Views.Internships
             {
                 if (user.SmkVersion == SmkVersion.Old)
                 {
-                    await Shell.Current.GoToAsync("OldSMKInternships");
+                    await Shell.Current.GoToAsync("/OldSMKInternships");
                 }
                 else
                 {
-                    await Shell.Current.GoToAsync("NewSMKInternships");
+                    await Shell.Current.GoToAsync("/NewSMKInternships");
                 }
             }
             else

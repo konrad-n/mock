@@ -142,7 +142,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                 { "moduleId", currentModuleId ?? 0 }
             };
 
-            await Shell.Current.GoToAsync("AddEditInternship", navigationParameter);
+            await Shell.Current.GoToAsync("//AddEditInternship", navigationParameter);
         }
 
         private async Task SaveInternshipAsync()
