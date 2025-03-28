@@ -32,8 +32,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.specializationService = specializationService;
             this.dialogService = dialogService;
             this.currentModuleId = currentModuleId;
-
-            // Initialize with default values if user internship doesn't exist
             this.currentInternship = userInternship != null ?
                 new Internship
                 {
@@ -138,7 +136,6 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             IsEditing = true;
 
-            // Navigate to AddEditInternshipPage
             var navigationParameter = new Dictionary<string, object>
             {
                 { "internshipRequirementId", requirement.InternshipId },
