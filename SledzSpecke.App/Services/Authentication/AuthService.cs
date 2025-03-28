@@ -78,7 +78,7 @@ namespace SledzSpecke.App.Services.Authentication
             user.SpecializationId = specializationId;
             user.PasswordHash = this.HashPassword(password);
             user.RegistrationDate = DateTime.Now;
-            this.databaseService.SaveUserAsync(user);
+            await this.databaseService.SaveUserAsync(user);
 
             foreach (var module in specialization.Modules)
             {

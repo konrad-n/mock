@@ -393,14 +393,7 @@ namespace SledzSpecke.App.Services.Specialization
 
         public async Task<bool> UpdateMedicalShiftAsync(MedicalShift shift)
         {
-            int result = await this.databaseService.SaveMedicalShiftAsync(shift);
-            var currentModule = await this.GetCurrentModuleAsync();
-            if (currentModule != null)
-            {
-                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
-            }
-
-            return result > 0;
+            return await AddMedicalShiftAsync(shift);
         }
 
         public async Task<bool> DeleteMedicalShiftAsync(int shiftId)

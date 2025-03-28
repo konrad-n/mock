@@ -117,7 +117,6 @@ namespace SledzSpecke.App.Services.Database
         public async Task<int> SaveSpecializationAsync(Models.Specialization specialization)
         {
             await this.InitializeAsync();
-            int result;
 
             if (specialization.SpecializationId != 0)
             {
