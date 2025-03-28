@@ -100,7 +100,7 @@ namespace SledzSpecke.App.Services.Database
                 _specializationCache[id] = specialization;
             }
 
-            return specialization;
+            return specialization ?? new Models.Specialization();
         }
 
 
@@ -121,7 +121,7 @@ namespace SledzSpecke.App.Services.Database
 
             if (specialization.SpecializationId != 0)
             {
-                result = await this.database.UpdateAsync(specialization);
+                await this.database.UpdateAsync(specialization);
                 return specialization.SpecializationId;
             }
             else
@@ -147,17 +147,10 @@ namespace SledzSpecke.App.Services.Database
 
         public async Task CleanupSpecializationDataAsync(int specializationId)
         {
-            try
+            var modules = await GetModulesAsync(specializationId);
+            foreach (var module in modules)
             {
-                var modules = await GetModulesAsync(specializationId);
-                foreach (var module in modules)
-                {
-                    await DeleteModuleAsync(module);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
+                await DeleteModuleAsync(module);
             }
         }
 
@@ -183,7 +176,7 @@ namespace SledzSpecke.App.Services.Database
                 _moduleCache[specializationId] = modules;
             }
 
-            return modules;
+            return modules ?? new List<Module>();
         }
 
         public async Task<int> SaveModuleAsync(Module module)
@@ -634,11 +627,11 @@ namespace SledzSpecke.App.Services.Database
 
             var specializations = await this.GetAllSpecializationsAsync();
 
-            foreach (var specialization in specializations)
+            foreach (var specializationId in specializations.Select(x => x.SpecializationId))
             {
-                var modules = await this.GetModulesAsync(specialization.SpecializationId);
+                var modules = await this.GetModulesAsync(specializationId);
                 if (modules.Count == 0) continue;
-                var specializationShifts = shiftsToUpdate.Where(s => s.SpecializationId == specialization.SpecializationId).ToList();
+                var specializationShifts = shiftsToUpdate.Where(s => s.SpecializationId == specializationId).ToList();
                 if (specializationShifts.Count == 0) continue;
 
                 foreach (var shift in specializationShifts)

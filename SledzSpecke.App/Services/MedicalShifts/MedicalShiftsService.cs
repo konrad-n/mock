@@ -62,7 +62,7 @@ namespace SledzSpecke.App.Services.MedicalShifts
             else
             {
                 var checkQuery = "SELECT COUNT(*) FROM RealizedMedicalShiftOldSMK WHERE ShiftId = ?";
-                var count = await this.databaseService.QueryAsync<CountResult>(checkQuery, shiftId);
+                await this.databaseService.QueryAsync<CountResult>(checkQuery, shiftId);
 
                 return null;
             }
@@ -253,7 +253,6 @@ namespace SledzSpecke.App.Services.MedicalShifts
 
         public async Task<List<int>> GetAvailableYearsAsync()
         {
-            var user = await this.authService.GetCurrentUserAsync();
             var specialization = await this.specializationService.GetCurrentSpecializationAsync();
 
             var options = new JsonSerializerOptions

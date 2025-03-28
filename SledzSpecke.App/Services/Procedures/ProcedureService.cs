@@ -13,16 +13,13 @@ namespace SledzSpecke.App.Services.Procedures
     {
         private readonly IDatabaseService databaseService;
         private readonly IAuthService authService;
-        private readonly ISpecializationService specializationService;
 
         public ProcedureService(
             IDatabaseService databaseService,
-            IAuthService authService,
-            ISpecializationService specializationService)
+            IAuthService authService)
         {
             this.databaseService = databaseService;
             this.authService = authService;
-            this.specializationService = specializationService;
         }
 
         public async Task<List<ProcedureRequirement>> GetAvailableProcedureRequirementsAsync(int? moduleId = null)
