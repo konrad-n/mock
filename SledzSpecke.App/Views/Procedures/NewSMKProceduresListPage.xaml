@@ -204,7 +204,7 @@
                                                 </CollectionView.ItemTemplate>
                                                 <CollectionView.EmptyView>
                                                     <Label Text="Brak realizacji" 
-                                                           Style="{StaticResource TextMutedColor}"
+                                                           TextColor="{StaticResource TextMutedColor}"
                                                            HorizontalOptions="Center" />
                                                 </CollectionView.EmptyView>
                                             </CollectionView>
