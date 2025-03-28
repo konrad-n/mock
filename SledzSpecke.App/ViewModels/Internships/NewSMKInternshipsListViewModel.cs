@@ -13,7 +13,6 @@ namespace SledzSpecke.App.ViewModels.Internships
     public class NewSMKInternshipsListViewModel : BaseViewModel
     {
         private readonly ISpecializationService specializationService;
-        private readonly IAuthService authService;
         private readonly IDialogService dialogService;
 
         private ObservableCollection<InternshipStageViewModel> internshipRequirements;
@@ -25,11 +24,9 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         public NewSMKInternshipsListViewModel(
             ISpecializationService specializationService,
-            IAuthService authService,
             IDialogService dialogService)
         {
             this.specializationService = specializationService;
-            this.authService = authService;
             this.dialogService = dialogService;
 
             this.Title = "Staże (Nowy SMK)";

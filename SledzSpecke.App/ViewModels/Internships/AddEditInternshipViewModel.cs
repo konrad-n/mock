@@ -65,7 +65,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                 if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int id) && id > 0)
                 {
                     this.internshipRequirementId = id;
-                    this.LoadInternshipRequirementAsync(id).ConfigureAwait(false);
+                    this.LoadInternshipRequirementAsync(this.internshipRequirementId).ConfigureAwait(false);
                 }
             }
         }

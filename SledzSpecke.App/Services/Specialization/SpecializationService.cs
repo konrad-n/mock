@@ -47,7 +47,7 @@ namespace SledzSpecke.App.Services.Specialization
             return specialization;
         }
 
-        public async Task<List<Module>> GetModulesAsync(int specializationId, bool initializeIfNeeded = true)
+        public async Task<List<Module>> GetModulesAsync(int specializationId, bool initializeIfNeeded)
         {
             if (_cachedModules != null)
             {
