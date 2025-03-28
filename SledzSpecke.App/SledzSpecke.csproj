@@ -123,6 +123,9 @@
     <MauiXaml Update="Views\Internships\NewSMKInternshipsListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Views\Internships\OldSMKInternshipsListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\MedicalShifts\AddEditOldSMKMedicalShiftPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
