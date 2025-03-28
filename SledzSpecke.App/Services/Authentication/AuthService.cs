@@ -60,12 +60,6 @@ namespace SledzSpecke.App.Services.Authentication
 
         public async Task LogoutAsync()
         {
-            int userId = 0;
-            if (this.currentUser != null)
-            {
-                userId = this.currentUser.UserId;
-            }
-
             await SettingsHelper.SetCurrentUserIdAsync(0);
             this.currentUser = null;
             await SettingsHelper.SetCurrentModuleIdAsync(0);
@@ -84,7 +78,7 @@ namespace SledzSpecke.App.Services.Authentication
             user.SpecializationId = specializationId;
             user.PasswordHash = this.HashPassword(password);
             user.RegistrationDate = DateTime.Now;
-            int userId = await this.databaseService.SaveUserAsync(user);
+            this.databaseService.SaveUserAsync(user);
 
             foreach (var module in specialization.Modules)
             {

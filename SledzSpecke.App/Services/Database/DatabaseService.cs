@@ -9,8 +9,8 @@ namespace SledzSpecke.App.Services.Database
     {
         private SQLiteAsyncConnection database;
         private bool isInitialized = false;
-        private Dictionary<int, Models.Specialization> _specializationCache = new();
-        private Dictionary<int, List<Module>> _moduleCache = new();
+        private readonly Dictionary<int, Models.Specialization> _specializationCache = new();
+        private readonly Dictionary<int, List<Module>> _moduleCache = new();
 
         public async Task InitializeAsync()
         {

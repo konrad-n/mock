@@ -31,3 +31,5 @@ dotnet_diagnostic.SA0001.severity = none
 
 # Disable CS8618
 dotnet_diagnostic.CS8618.severity = none
+
+dotnet_diagnostic.IDE0028.severity = none

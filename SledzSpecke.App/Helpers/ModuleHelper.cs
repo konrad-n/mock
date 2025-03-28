@@ -59,11 +59,6 @@ namespace SledzSpecke.App.Helpers
                     moduleName = nameElement.GetString();
                 }
 
-                if (moduleElement.TryGetProperty("code", out var codeElement))
-                {
-                    moduleCode = codeElement.GetString();
-                }
-
                 if (moduleElement.TryGetProperty("moduleType", out var typeElement))
                 {
                     string typeString = typeElement.GetString();
@@ -118,11 +113,6 @@ namespace SledzSpecke.App.Helpers
                     {
                         durationMonths = 36;
                     }
-                }
-
-                if (moduleElement.TryGetProperty("workingDays", out var workingDaysElement))
-                {
-                    workingDays = workingDaysElement.GetInt32();
                 }
 
                 DateTime endDate = currentStartDate.AddMonths(durationMonths);
