@@ -76,7 +76,7 @@ namespace SledzSpecke.App.Services.Authentication
             specialization.SpecializationId = 0;
             int specializationId = await this.databaseService.SaveSpecializationAsync(specialization);
             user.SpecializationId = specializationId;
-            user.PasswordHash = this.HashPassword(password);
+            user.PasswordHash = HashPassword(password);
             user.RegistrationDate = DateTime.Now;
             await this.databaseService.SaveUserAsync(user);
 
@@ -90,7 +90,7 @@ namespace SledzSpecke.App.Services.Authentication
             return true;
         }
 
-        private string HashPassword(string password)
+        private static string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
             {
@@ -101,7 +101,7 @@ namespace SledzSpecke.App.Services.Authentication
 
         private bool VerifyPassword(string password, string hash)
         {
-            return this.HashPassword(password) == hash;
+            return HashPassword(password) == hash;
         }
     }
 }

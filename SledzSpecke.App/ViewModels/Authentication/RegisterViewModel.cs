@@ -36,7 +36,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
             this.Title = "Rejestracja";
             this.AvailableSpecializations = new ObservableCollection<SpecializationProgram>();
             this.RegisterCommand = new AsyncRelayCommand(this.OnRegisterAsync, this.CanRegister);
-            this.GoToLoginCommand = new AsyncRelayCommand(this.OnGoToLoginAsync);
+            this.GoToLoginCommand = new AsyncRelayCommand(OnGoToLoginAsync);
         }
 
         public async Task InitializeAsync()
@@ -309,7 +309,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
                     "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
                     "OK");
 
-                await this.OnGoToLoginAsync();
+                await OnGoToLoginAsync();
             }
             else
             {
@@ -321,7 +321,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
             this.IsBusy = false;
         }
 
-        private async Task OnGoToLoginAsync()
+        private static async Task OnGoToLoginAsync()
         {
             if (Application.Current?.MainPage is NavigationPage navigationPage)
             {

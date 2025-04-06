@@ -56,16 +56,16 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
             this.RefreshCommand = new AsyncRelayCommand(this.LoadDataAsync);
             this.SelectModuleCommand = new AsyncRelayCommand<string>(this.OnSelectModuleAsync);
-            this.NavigateToInternshipsCommand = new AsyncRelayCommand(this.NavigateToInternshipsAsync);
-            this.NavigateToProceduresCommand = new AsyncRelayCommand(this.NavigateToProceduresAsync);
-            this.NavigateToShiftsCommand = new AsyncRelayCommand(this.NavigateToShiftsAsync);
-            this.NavigateToCoursesCommand = new AsyncRelayCommand(this.NavigateToCoursesAsync);
-            this.NavigateToSelfEducationCommand = new AsyncRelayCommand(this.NavigateToSelfEducationAsync);
-            this.NavigateToPublicationsCommand = new AsyncRelayCommand(this.NavigateToPublicationsAsync);
-            this.NavigateToAbsencesCommand = new AsyncRelayCommand(this.NavigateToAbsencesAsync);
-            this.NavigateToStatisticsCommand = new AsyncRelayCommand(this.NavigateToStatisticsAsync);
-            this.NavigateToExportCommand = new AsyncRelayCommand(this.NavigateToExportAsync);
-            this.NavigateToRecognitionsCommand = new AsyncRelayCommand(this.NavigateToRecognitionsAsync);
+            this.NavigateToInternshipsCommand = new AsyncRelayCommand(NavigateToInternshipsAsync);
+            this.NavigateToProceduresCommand = new AsyncRelayCommand(NavigateToProceduresAsync);
+            this.NavigateToShiftsCommand = new AsyncRelayCommand(NavigateToShiftsAsync);
+            this.NavigateToCoursesCommand = new AsyncRelayCommand(NavigateToCoursesAsync);
+            this.NavigateToSelfEducationCommand = new AsyncRelayCommand(NavigateToSelfEducationAsync);
+            this.NavigateToPublicationsCommand = new AsyncRelayCommand(NavigateToPublicationsAsync);
+            this.NavigateToAbsencesCommand = new AsyncRelayCommand(NavigateToAbsencesAsync);
+            this.NavigateToStatisticsCommand = new AsyncRelayCommand(NavigateToStatisticsAsync);
+            this.NavigateToExportCommand = new AsyncRelayCommand(NavigateToExportAsync);
+            this.NavigateToRecognitionsCommand = new AsyncRelayCommand(NavigateToRecognitionsAsync);
 
             this.specializationService.CurrentModuleChanged += this.OnModuleChanged;
 
@@ -447,47 +447,47 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             await this.LoadDataAsync();
         }
 
-        private async Task NavigateToInternshipsAsync()
+        private static async Task NavigateToInternshipsAsync()
         {
             await Shell.Current.GoToAsync("/internships");
         }
 
-        private async Task NavigateToProceduresAsync()
+        private static async Task NavigateToProceduresAsync()
         {
             await Shell.Current.GoToAsync("/ProcedureSelector");
         }
 
-        private async Task NavigateToShiftsAsync()
+        private static async Task NavigateToShiftsAsync()
         {
             await Shell.Current.GoToAsync("///medicalshifts");
         }
 
-        private async Task NavigateToCoursesAsync()
+        private static async Task NavigateToCoursesAsync()
         {
             await Shell.Current.GoToAsync("courses");
         }
 
-        private async Task NavigateToSelfEducationAsync()
+        private static async Task NavigateToSelfEducationAsync()
         {
             await Shell.Current.GoToAsync("selfeducation");
         }
 
-        private async Task NavigateToPublicationsAsync()
+        private static async Task NavigateToPublicationsAsync()
         {
             await Shell.Current.GoToAsync("publications");
         }
 
-        private async Task NavigateToAbsencesAsync()
+        private static async Task NavigateToAbsencesAsync()
         {
             await Shell.Current.GoToAsync("absences");
         }
 
-        private async Task NavigateToStatisticsAsync()
+        private static async Task NavigateToStatisticsAsync()
         {
             await Shell.Current.GoToAsync("statistics");
         }
 
-        private async Task NavigateToExportAsync()
+        private static async Task NavigateToExportAsync()
         {
             await Shell.Current.GoToAsync("export");
         }
