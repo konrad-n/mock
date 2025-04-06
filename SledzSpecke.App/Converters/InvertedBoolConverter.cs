@@ -16,12 +16,7 @@ namespace SledzSpecke.App.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolValue)
-            {
-                return !boolValue;
-            }
-
-            return value;
+            return Convert(value, targetType, parameter, culture);
         }
     }
 }
