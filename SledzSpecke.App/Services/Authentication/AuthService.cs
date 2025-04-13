@@ -53,6 +53,7 @@ namespace SledzSpecke.App.Services.Authentication
             }
 
             await SettingsHelper.SetCurrentUserIdAsync(user.UserId);
+            await SettingsHelper.SetCurrentUsernameAsync(user.Username);
             this.currentUser = user;
 
             return true;
