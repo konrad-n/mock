@@ -35,26 +35,26 @@
         <ShellContent ContentTemplate="{DataTemplate internships:InternshipsSelectorPage}" Route="internships" />
     </FlyoutItem>
     <FlyoutItem Title="Kursy" Icon="course.png" Route="courses">
-        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="internships" />
         <!-- to be implemented -->
     </FlyoutItem>
     <FlyoutItem Title="Samokształcenie" Icon="education.png" Route="selfeducation">
-        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="selfeducation" />
         <!-- to be implemented -->
     </FlyoutItem>
     <FlyoutItem Title="Publikacje" Icon="publication.png" Route="publications">
-        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="publications" />
         <!-- to be implemented -->
     </FlyoutItem>
     <FlyoutItem Title="Nieobecności" Icon="absence.png" Route="absences">
-        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="absences" />
         <!-- to be implemented -->
     </FlyoutItem>
     <FlyoutItem Title="Eksport" Icon="export.png" Route="export">
         <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="export" />
     </FlyoutItem>
     <FlyoutItem Title="Ustawienia" Icon="settings.png" Route="settings">
-        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="dashboard" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="settings" />
         <!-- to be implemented -->
     </FlyoutItem>
     <Shell.FlyoutFooter>
