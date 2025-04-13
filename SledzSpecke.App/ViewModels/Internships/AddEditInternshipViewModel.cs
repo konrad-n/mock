@@ -236,7 +236,8 @@ namespace SledzSpecke.App.ViewModels.Internships
                     "Sukces",
                     this.IsEdit ? "Staż został zaktualizowany." : "Staż został dodany.",
                     "OK");
-                await Shell.Current.GoToAsync("..");
+
+                await Shell.Current.GoToAsync("/OldSMKInternships");
             }
             else
             {
