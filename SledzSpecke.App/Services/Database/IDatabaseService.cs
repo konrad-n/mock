@@ -39,6 +39,22 @@ namespace SledzSpecke.App.Services.Database
 
         Task<int> DeleteInternshipAsync(Internship internship);
 
+        Task<RealizedInternshipNewSMK> GetRealizedInternshipNewSMKAsync(int id);
+
+        Task<List<RealizedInternshipNewSMK>> GetRealizedInternshipsNewSMKAsync(int? specializationId = null, int? moduleId = null, int? internshipRequirementId = null);
+
+        Task<int> SaveRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK realizedInternship);
+
+        Task<int> DeleteRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK realizedInternship);
+
+        Task<RealizedInternshipOldSMK> GetRealizedInternshipOldSMKAsync(int id);
+
+        Task<List<RealizedInternshipOldSMK>> GetRealizedInternshipsOldSMKAsync(int? specializationId = null, int year = 0, string internshipName = null);
+
+        Task<int> SaveRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK realizedInternship);
+
+        Task<int> DeleteRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK realizedInternship);
+
         Task<MedicalShift> GetMedicalShiftAsync(int id);
 
         Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null);

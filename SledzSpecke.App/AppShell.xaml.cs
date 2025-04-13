@@ -36,7 +36,9 @@ namespace SledzSpecke.App
 
             Routing.RegisterRoute("/OldSMKInternships", typeof(OldSMKInternshipsListPage));
             Routing.RegisterRoute("/NewSMKInternships", typeof(NewSMKInternshipsListPage));
-            Routing.RegisterRoute("//AddEditInternship", typeof(AddEditInternshipPage));
+
+            Routing.RegisterRoute("//AddEditNewSMKInternship", typeof(AddEditNewSMKInternshipPage));
+            Routing.RegisterRoute("//AddEditOldSMKInternship", typeof(AddEditOldSMKInternshipPage));
         }
 
         private async void InitializeUserInfoAsync()

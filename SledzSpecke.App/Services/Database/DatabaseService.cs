@@ -46,6 +46,8 @@ namespace SledzSpecke.App.Services.Database
             await this.database.CreateTableAsync<RealizedMedicalShiftNewSMK>();
             await this.database.CreateTableAsync<RealizedProcedureNewSMK>();
             await this.database.CreateTableAsync<RealizedProcedureOldSMK>();
+            await this.database.CreateTableAsync<RealizedInternshipOldSMK>();
+            await this.database.CreateTableAsync<RealizedInternshipNewSMK>();
 
             this.isInitialized = true;
         }
@@ -244,6 +246,106 @@ namespace SledzSpecke.App.Services.Database
         {
             await this.InitializeAsync();
             return await this.database.DeleteAsync(internship);
+        }
+
+        public async Task<RealizedInternshipNewSMK> GetRealizedInternshipNewSMKAsync(int id)
+        {
+            await this.InitializeAsync();
+            return await this.database.Table<RealizedInternshipNewSMK>().FirstOrDefaultAsync(r => r.RealizedInternshipId == id);
+        }
+
+        public async Task<List<RealizedInternshipNewSMK>> GetRealizedInternshipsNewSMKAsync(int? specializationId = null, int? moduleId = null, int? internshipRequirementId = null)
+        {
+            await this.InitializeAsync();
+            var query = this.database.Table<RealizedInternshipNewSMK>();
+
+            if (specializationId.HasValue)
+            {
+                query = query.Where(r => r.SpecializationId == specializationId);
+            }
+
+            if (moduleId.HasValue)
+            {
+                query = query.Where(r => r.ModuleId == moduleId);
+            }
+
+            if (internshipRequirementId.HasValue)
+            {
+                query = query.Where(r => r.InternshipRequirementId == internshipRequirementId);
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<int> SaveRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK realizedInternship)
+        {
+            await this.InitializeAsync();
+            if (realizedInternship.RealizedInternshipId != 0)
+            {
+                return await this.database.UpdateAsync(realizedInternship);
+            }
+            else
+            {
+                return await this.database.InsertAsync(realizedInternship);
+            }
+        }
+
+        public async Task<int> DeleteRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK realizedInternship)
+        {
+            await this.InitializeAsync();
+            return await this.database.DeleteAsync(realizedInternship);
+        }
+
+        public async Task<RealizedInternshipOldSMK> GetRealizedInternshipOldSMKAsync(int id)
+        {
+            await this.InitializeAsync();
+            return await this.database.Table<RealizedInternshipOldSMK>().FirstOrDefaultAsync(r => r.RealizedInternshipId == id);
+        }
+
+        public async Task<List<RealizedInternshipOldSMK>> GetRealizedInternshipsOldSMKAsync(int? specializationId = null, int year = 0, string internshipName = null)
+        {
+            await this.InitializeAsync();
+            var query = this.database.Table<RealizedInternshipOldSMK>();
+
+            if (specializationId.HasValue)
+            {
+                query = query.Where(r => r.SpecializationId == specializationId);
+            }
+
+            if (year > 0)
+            {
+                query = query.Where(r => r.Year == year);
+            }
+
+            var results = await query.ToListAsync();
+
+            if (!string.IsNullOrEmpty(internshipName))
+            {
+                results = results.Where(r => r.InternshipName != null &&
+                                             r.InternshipName.Contains(internshipName, StringComparison.OrdinalIgnoreCase))
+                                 .ToList();
+            }
+
+            return results;
+        }
+
+        public async Task<int> SaveRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK realizedInternship)
+        {
+            await this.InitializeAsync();
+            if (realizedInternship.RealizedInternshipId != 0)
+            {
+                return await this.database.UpdateAsync(realizedInternship);
+            }
+            else
+            {
+                return await this.database.InsertAsync(realizedInternship);
+            }
+        }
+
+        public async Task<int> DeleteRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK realizedInternship)
+        {
+            await this.InitializeAsync();
+            return await this.database.DeleteAsync(realizedInternship);
         }
 
         public async Task<MedicalShift> GetMedicalShiftAsync(int id)

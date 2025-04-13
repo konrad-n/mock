@@ -5,6 +5,7 @@ using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Internships;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -15,6 +16,7 @@ namespace SledzSpecke.App.ViewModels.Internships
         private readonly ISpecializationService specializationService;
         private readonly IDialogService dialogService;
         private readonly IAuthService authService;
+        private readonly IInternshipService internshipService;
 
         private ObservableCollection<InternshipStageViewModel> internshipRequirements;
         private bool isRefreshing;
@@ -26,11 +28,13 @@ namespace SledzSpecke.App.ViewModels.Internships
         public OldSMKInternshipsListViewModel(
             ISpecializationService specializationService,
             IDialogService dialogService,
-            IAuthService authService)
+            IAuthService authService,
+            IInternshipService internshipService)
         {
             this.specializationService = specializationService;
             this.dialogService = dialogService;
             this.authService = authService;
+            this.internshipService = internshipService;
 
             this.Title = "Staże (Stary SMK)";
             this.InternshipRequirements = new ObservableCollection<InternshipStageViewModel>();
@@ -149,18 +153,29 @@ namespace SledzSpecke.App.ViewModels.Internships
                 }
 
                 var internships = await this.specializationService.GetInternshipsAsync(currentModule?.ModuleId);
-                var userInternships = await this.specializationService.GetUserInternshipsAsync(currentModule?.ModuleId);
+
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    return;
+                }
 
                 var viewModels = new List<InternshipStageViewModel>();
 
                 foreach (var internship in internships)
                 {
-                    var userInternship = userInternships.FirstOrDefault(i => i.InternshipName == internship.InternshipName);
+                    // Pobieramy podsumowanie stażu
+                    var summary = await this.internshipService.GetInternshipSummaryAsync(
+                        internship.InternshipId,
+                        currentModule?.ModuleId);
+
                     var viewModel = new InternshipStageViewModel(
                         internship,
-                        userInternship,
+                        summary,
                         this.specializationService,
                         this.dialogService,
+                        this.internshipService,
+                        false, // isNewSMK = false dla starego SMK
                         currentModule?.ModuleId);
 
                     viewModels.Add(viewModel);
