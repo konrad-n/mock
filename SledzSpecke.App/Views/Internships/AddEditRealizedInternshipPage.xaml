@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SledzSpecke.App.ViewModels.Internships"
+             x:DataType="vm:AddEditRealizedInternshipViewModel"
+             x:Class="SledzSpecke.App.Views.Internships.AddEditRealizedInternshipPage"
+             Title="{Binding Title}">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Grid IsVisible="{Binding IsNewSMK}">
+                <VerticalStackLayout>
+                    <Label Text="{Binding NewSMKInternship.InternshipName}" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center" />
+
+                    <Label Text="Placówka realizująca szkolenie" FontAttributes="Bold" />
+                    <Entry Text="{Binding NewSMKInternship.InstitutionName}" Placeholder="Np. Katedra i Klinika Psychiatryczna" />
+
+                    <Label Text="Nazwa komórki organizacyjnej (miejsce odbywania stażu)" FontAttributes="Bold" />
+                    <Entry Text="{Binding NewSMKInternship.DepartmentName}" Placeholder="Np. Oddział psychiatryczny" />
+
+                    <Label Text="Liczba dni" FontAttributes="Bold" />
+                    <Entry Text="{Binding NewSMKInternship.DaysCount}" Keyboard="Numeric" />
+
+                    <Label Text="Daty realizacji" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Od:" />
+                            <DatePicker Date="{Binding NewSMKInternship.StartDate}" Format="dd.MM.yyyy" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Do:" />
+                            <DatePicker Date="{Binding NewSMKInternship.EndDate}" Format="dd.MM.yyyy" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Dane kierownika stażu" FontAttributes="Bold" />
+                    <Entry Text="{Binding NewSMKInternship.SupervisorName}" Placeholder="Imię i nazwisko kierownika stażu" />
+
+                    <Label Text="Status realizacji" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Ukończony:" />
+                            <CheckBox IsChecked="{Binding NewSMKInternship.IsCompleted}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Zatwierdzony:" />
+                            <CheckBox IsChecked="{Binding NewSMKInternship.IsApproved}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Uznanie stażu" FontAttributes="Bold" />
+                    <CheckBox IsChecked="{Binding NewSMKInternship.IsRecognition}" />
+                    <VerticalStackLayout IsVisible="{Binding NewSMKInternship.IsRecognition}">
+                        <Label Text="Powód uznania" />
+                        <Editor Text="{Binding NewSMKInternship.RecognitionReason}" HeightRequest="100" />
+
+                        <Label Text="Liczba dni uznanych" />
+                        <Entry Text="{Binding NewSMKInternship.RecognitionDaysReduction}" Keyboard="Numeric" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Grid IsVisible="{Binding IsNewSMK, Converter={StaticResource InvertedBoolConverter}}">
+                <VerticalStackLayout>
+                    <Label Text="{Binding OldSMKInternship.InternshipName}" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center" />
+
+                    <Label Text="Placówka realizująca szkolenie" FontAttributes="Bold" />
+                    <Entry Text="{Binding OldSMKInternship.InstitutionName}" Placeholder="Np. Katedra i Klinika Psychiatryczna" />
+
+                    <Label Text="Nazwa komórki organizacyjnej (miejsce odbywania stażu)" FontAttributes="Bold" />
+                    <Entry Text="{Binding OldSMKInternship.DepartmentName}" Placeholder="Np. Oddział psychiatryczny" />
+
+                    <Label Text="Liczba dni" FontAttributes="Bold" />
+                    <Entry Text="{Binding OldSMKInternship.DaysCount}" Keyboard="Numeric" />
+
+                    <Label Text="Rok specjalizacji" FontAttributes="Bold" />
+                    <Entry Text="{Binding OldSMKInternship.Year}" Keyboard="Numeric" />
+
+                    <Label Text="Daty realizacji" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Od:" />
+                            <DatePicker Date="{Binding OldSMKInternship.StartDate}" Format="dd.MM.yyyy" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Do:" />
+                            <DatePicker Date="{Binding OldSMKInternship.EndDate}" Format="dd.MM.yyyy" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Dane kierownika stażu" FontAttributes="Bold" />
+                    <Entry Text="{Binding OldSMKInternship.SupervisorName}" Placeholder="Imię i nazwisko kierownika stażu" />
+
+                    <Label Text="Status realizacji" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Ukończony:" />
+                            <CheckBox IsChecked="{Binding OldSMKInternship.IsCompleted}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Zatwierdzony:" />
+                            <CheckBox IsChecked="{Binding OldSMKInternship.IsApproved}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Wymaga zatwierdzenia:" />
+                    <CheckBox IsChecked="{Binding OldSMKInternship.RequiresApproval}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,15,0,0">
+                <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Zapisz" Command="{Binding SaveCommand}" 
+                        BackgroundColor="{StaticResource Primary}" TextColor="White" />
+            </Grid>
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" 
+                             HorizontalOptions="Center" Margin="0,20,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

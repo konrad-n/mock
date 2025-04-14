@@ -70,5 +70,25 @@ namespace SledzSpecke.App.Services.Specialization
         Task<int> GetAbsenceCountAsync();
 
         Task<int> GetRecognitionCountAsync();
+
+        Task<List<RealizedInternshipNewSMK>> GetRealizedInternshipsNewSMKAsync(int? moduleId = null, int? internshipRequirementId = null);
+
+        Task<List<RealizedInternshipOldSMK>> GetRealizedInternshipsOldSMKAsync(int? year = null);
+
+        Task<RealizedInternshipNewSMK> GetRealizedInternshipNewSMKAsync(int id);
+
+        Task<RealizedInternshipOldSMK> GetRealizedInternshipOldSMKAsync(int id);
+
+        Task<bool> AddRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship);
+
+        Task<bool> AddRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship);
+
+        Task<bool> UpdateRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship);
+
+        Task<bool> UpdateRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship);
+
+        Task<bool> DeleteRealizedInternshipNewSMKAsync(int id);
+
+        Task<bool> DeleteRealizedInternshipOldSMKAsync(int id);
     }
 }

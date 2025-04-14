@@ -118,6 +118,9 @@
     <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Views\Internships\AddEditRealizedInternshipPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\Internships\InternshipsSelectorPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

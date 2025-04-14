@@ -148,19 +148,81 @@ namespace SledzSpecke.App.ViewModels.Internships
                     this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
                 }
 
+                // Pobierz wymagania stażowe dla aktualnego modułu
                 var internships = await this.specializationService.GetInternshipsAsync(currentModule?.ModuleId);
-                var userInternships = await this.specializationService.GetUserInternshipsAsync(currentModule?.ModuleId);
+
+                // Dodaj debugowanie
+                System.Diagnostics.Debug.WriteLine($"Pobrano {internships.Count} wymagań stażowych");
+
+                // Określenie zakresu lat dla starego SMK na podstawie typu modułu
+                int startYear = 1;
+                int endYear = 2;
+
+                if (currentModule != null && currentModule.Type == ModuleType.Specialistic)
+                {
+                    startYear = 3;
+                    endYear = 6; // Typowy zakres lat dla modułu specjalistycznego
+                }
+
+                // Pobierz wszystkie realizacje staży dla lat odpowiadających aktualnemu modułowi
+                var allRealizedInternships = new List<RealizedInternshipOldSMK>();
+                for (int year = startYear; year <= endYear; year++)
+                {
+                    var yearRealizations = await this.specializationService.GetRealizedInternshipsOldSMKAsync(year);
+                    allRealizedInternships.AddRange(yearRealizations);
+                }
 
                 var viewModels = new List<InternshipStageViewModel>();
-
                 foreach (var internship in internships)
                 {
-                    var userInternship = userInternships.FirstOrDefault(i => i.InternshipName == internship.InternshipName);
+                    System.Diagnostics.Debug.WriteLine($"Wymaganie stażowe: {internship.InternshipName}");
+
+                    // Wypisz wszystkie dostępne realizacje dla debugowania
+                    foreach (var r in allRealizedInternships)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Dostępna realizacja: {r.InternshipName}, Dni: {r.DaysCount}, Rok: {r.Year}");
+                    }
+
+                    // Filtruj realizacje dla tego konkretnego stażu po nazwie
+                    var realizationsForThisInternship = allRealizedInternships
+                        .Where(r => {
+                            // Jeśli nazwa jest pusta lub "Staż bez nazwy", próbujemy dopasować ją z innymi danymi
+                            if (string.IsNullOrEmpty(r.InternshipName) || r.InternshipName == "Staż bez nazwy")
+                            {
+                                // Logujemy potencjalne dopasowanie
+                                System.Diagnostics.Debug.WriteLine($"Próba dopasowania realizacji bez nazwy do: {internship.InternshipName}");
+
+                                // Przypisujemy wszystkie realizacje bez nazwy do pierwszego stażu
+                                // To rozwiązanie tymczasowe, aby pokazać dane
+                                if (internships.IndexOf(internship) == 0)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Dopasowano realizację bez nazwy do pierwszego stażu: {internship.InternshipName}");
+                                    return true;
+                                }
+                                return false;
+                            }
+
+                            // Standardowe porównanie nazw
+                            return r.InternshipName != null &&
+                                   (r.InternshipName.Equals(internship.InternshipName, StringComparison.OrdinalIgnoreCase) ||
+                                    r.InternshipName.Contains(internship.InternshipName) ||
+                                    internship.InternshipName.Contains(r.InternshipName));
+                        })
+                        .ToList();
+
+                    System.Diagnostics.Debug.WriteLine($"Znaleziono {realizationsForThisInternship.Count} realizacji dla stażu {internship.InternshipName}");
+                    foreach (var realization in realizationsForThisInternship)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Realizacja: {realization.InternshipName}, Dni: {realization.DaysCount}, Rok: {realization.Year}");
+                    }
+
                     var viewModel = new InternshipStageViewModel(
                         internship,
-                        userInternship,
+                        null, // Puste dla starego SMK
+                        realizationsForThisInternship,
                         this.specializationService,
                         this.dialogService,
+                        this.authService,
                         currentModule?.ModuleId);
 
                     viewModels.Add(viewModel);

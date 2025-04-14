@@ -85,6 +85,7 @@ namespace SledzSpecke.App
             services.AddTransient<NewSMKInternshipsListViewModel>();
             services.AddTransient<AddEditInternshipViewModel>();
             services.AddTransient<OldSMKInternshipsListViewModel>();
+            services.AddTransient<AddEditRealizedInternshipViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
@@ -111,6 +112,7 @@ namespace SledzSpecke.App
             services.AddTransient<NewSMKInternshipsListPage>();
             services.AddTransient<AddEditInternshipPage>();
             services.AddTransient<OldSMKInternshipsListPage>();
+            services.AddTransient<AddEditRealizedInternshipPage>();
         }
     }
 }

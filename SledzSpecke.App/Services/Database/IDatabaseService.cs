@@ -39,6 +39,24 @@ namespace SledzSpecke.App.Services.Database
 
         Task<int> DeleteInternshipAsync(Internship internship);
 
+        Task<RealizedInternshipNewSMK> GetRealizedInternshipNewSMKAsync(int id);
+
+        Task<List<RealizedInternshipNewSMK>> GetRealizedInternshipsNewSMKAsync(int? specializationId = null, int? moduleId = null, int? internshipRequirementId = null);
+
+        Task<int> SaveRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship);
+
+        Task<int> DeleteRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship);
+
+        Task<RealizedInternshipOldSMK> GetRealizedInternshipOldSMKAsync(int id);
+
+        Task<List<RealizedInternshipOldSMK>> GetRealizedInternshipsOldSMKAsync(int? specializationId = null, int? year = null);
+
+        Task<int> SaveRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship);
+
+        Task<int> DeleteRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship);
+
+        Task MigrateInternshipDataAsync();
+
         Task<MedicalShift> GetMedicalShiftAsync(int id);
 
         Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null);
@@ -114,6 +132,16 @@ namespace SledzSpecke.App.Services.Database
         Task<int> SaveSpecializationProgramAsync(SpecializationProgram program);
 
         Task<int> UpdateSpecializationAsync(Models.Specialization specialization);
+
+        Task<bool> TableExists(string tableName);
+
+        Task<List<string>> ListTables();
+
+        Task DropTableIfExists(string tableName);
+
+        Task<int> GetTableRowCount(string tableName);
+
+        Task FixRealizedInternshipNames();
 
         void ClearCache();
     }

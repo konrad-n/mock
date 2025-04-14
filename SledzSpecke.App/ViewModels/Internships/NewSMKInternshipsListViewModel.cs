@@ -14,6 +14,7 @@ namespace SledzSpecke.App.ViewModels.Internships
     {
         private readonly ISpecializationService specializationService;
         private readonly IDialogService dialogService;
+        private readonly IAuthService authService;
 
         private ObservableCollection<InternshipStageViewModel> internshipRequirements;
         private bool isRefreshing;
@@ -24,10 +25,12 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         public NewSMKInternshipsListViewModel(
             ISpecializationService specializationService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IAuthService authService)
         {
             this.specializationService = specializationService;
             this.dialogService = dialogService;
+            this.authService = authService;
 
             this.Title = "Staże (Nowy SMK)";
             this.InternshipRequirements = new ObservableCollection<InternshipStageViewModel>();
@@ -144,18 +147,23 @@ namespace SledzSpecke.App.ViewModels.Internships
             }
 
             var internships = await this.specializationService.GetInternshipsAsync(currentModule?.ModuleId);
-            var userInternships = await this.specializationService.GetUserInternshipsAsync(currentModule?.ModuleId);
 
             var viewModels = new List<InternshipStageViewModel>();
 
             foreach (var internship in internships)
             {
-                var userInternship = userInternships.FirstOrDefault(i => i.InternshipName == internship.InternshipName);
+                // Dla nowego SMK
+                var realizedInternships = await this.specializationService.GetRealizedInternshipsNewSMKAsync(
+                    moduleId: currentModule?.ModuleId,
+                    internshipRequirementId: internship.InternshipId);
+
                 var viewModel = new InternshipStageViewModel(
                     internship,
-                    userInternship,
+                    realizedInternships,
+                    null, // Puste dla nowego SMK
                     this.specializationService,
                     this.dialogService,
+                    this.authService,
                     currentModule?.ModuleId);
 
                 viewModels.Add(viewModel);

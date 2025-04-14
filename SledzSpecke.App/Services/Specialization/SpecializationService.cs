@@ -623,6 +623,226 @@ namespace SledzSpecke.App.Services.Specialization
             this.CurrentModuleChanged?.Invoke(this, moduleId);
         }
 
+        public async Task<List<RealizedInternshipNewSMK>> GetRealizedInternshipsNewSMKAsync(int? moduleId = null, int? internshipRequirementId = null)
+        {
+            var currentSpecialization = await this.GetCurrentSpecializationAsync();
+            if (currentSpecialization == null)
+            {
+                return new List<RealizedInternshipNewSMK>();
+            }
+
+            return await this.databaseService.GetRealizedInternshipsNewSMKAsync(
+                currentSpecialization.SpecializationId,
+                moduleId,
+                internshipRequirementId);
+        }
+
+        public async Task<List<RealizedInternshipOldSMK>> GetRealizedInternshipsOldSMKAsync(int? year = null)
+        {
+            var currentSpecialization = await this.GetCurrentSpecializationAsync();
+            if (currentSpecialization == null)
+            {
+                return new List<RealizedInternshipOldSMK>();
+            }
+
+            string query = "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ?";
+
+            if (year.HasValue)
+            {
+                query += " AND Year = ?";
+                return await this.databaseService.QueryAsync<RealizedInternshipOldSMK>(
+                    query, currentSpecialization.SpecializationId, year.Value);
+            }
+            else
+            {
+                return await this.databaseService.QueryAsync<RealizedInternshipOldSMK>(
+                    query, currentSpecialization.SpecializationId);
+            }
+        }
+
+        public async Task<RealizedInternshipNewSMK> GetRealizedInternshipNewSMKAsync(int id)
+        {
+            return await this.databaseService.GetRealizedInternshipNewSMKAsync(id);
+        }
+
+        public async Task<RealizedInternshipOldSMK> GetRealizedInternshipOldSMKAsync(int id)
+        {
+            return await this.databaseService.GetRealizedInternshipOldSMKAsync(id);
+        }
+
+        public async Task<bool> AddRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship)
+        {
+            if (internship.SpecializationId <= 0)
+            {
+                var currentSpecialization = await this.GetCurrentSpecializationAsync();
+                if (currentSpecialization == null)
+                {
+                    return false;
+                }
+
+                internship.SpecializationId = currentSpecialization.SpecializationId;
+            }
+
+            int result = await this.databaseService.SaveRealizedInternshipNewSMKAsync(internship);
+
+            if (internship.ModuleId.HasValue)
+            {
+                await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
+            }
+
+            return result > 0;
+        }
+
+        public async Task<bool> AddRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship)
+        {
+            if (internship.SpecializationId <= 0)
+            {
+                var currentSpecialization = await this.GetCurrentSpecializationAsync();
+                if (currentSpecialization == null)
+                {
+                    return false;
+                }
+
+                internship.SpecializationId = currentSpecialization.SpecializationId;
+            }
+
+            int result = await this.databaseService.SaveRealizedInternshipOldSMKAsync(internship);
+
+            // Aktualizacja postępu modułu na podstawie roku stażu
+            var currentModule = await this.GetCurrentModuleAsync();
+            if (currentModule != null)
+            {
+                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
+            }
+
+            return result > 0;
+        }
+
+        public async Task<bool> UpdateRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship)
+        {
+            int result = await this.databaseService.SaveRealizedInternshipNewSMKAsync(internship);
+
+            if (internship.ModuleId.HasValue)
+            {
+                await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
+            }
+
+            return result > 0;
+        }
+
+        public async Task<bool> UpdateRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship)
+        {
+            int result = await this.databaseService.SaveRealizedInternshipOldSMKAsync(internship);
+
+            // Aktualizacja postępu modułu na podstawie roku stażu
+            var currentModule = await this.GetCurrentModuleAsync();
+            if (currentModule != null)
+            {
+                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
+            }
+
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteRealizedInternshipNewSMKAsync(int id)
+        {
+            var internship = await this.databaseService.GetRealizedInternshipNewSMKAsync(id);
+            if (internship == null)
+            {
+                return false;
+            }
+
+            int result = await this.databaseService.DeleteRealizedInternshipNewSMKAsync(internship);
+
+            if (internship.ModuleId.HasValue)
+            {
+                await this.UpdateModuleProgressAsync(internship.ModuleId.Value);
+            }
+
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteRealizedInternshipOldSMKAsync(int id)
+        {
+            var internship = await this.databaseService.GetRealizedInternshipOldSMKAsync(id);
+            if (internship == null)
+            {
+                return false;
+            }
+
+            int result = await this.databaseService.DeleteRealizedInternshipOldSMKAsync(internship);
+
+            // Aktualizacja postępu modułu na podstawie roku stażu
+            var currentModule = await this.GetCurrentModuleAsync();
+            if (currentModule != null)
+            {
+                await this.UpdateModuleProgressAsync(currentModule.ModuleId);
+            }
+
+            return result > 0;
+        }
+
+        public async Task<int?> GetModuleIdForYearAsync(int year)
+        {
+            var currentSpecialization = await this.GetCurrentSpecializationAsync();
+            if (currentSpecialization == null)
+            {
+                return null;
+            }
+
+            var modules = await this.databaseService.GetModulesAsync(currentSpecialization.SpecializationId);
+
+            // W starym SMK: lata 1-2 to moduł podstawowy, 3+ to moduł specjalistyczny
+            var moduleType = (year <= 2) ? ModuleType.Basic : ModuleType.Specialistic;
+
+            var module = modules.FirstOrDefault(m => m.Type == moduleType);
+            return module?.ModuleId;
+        }
+
+        public async Task<List<RealizedInternshipOldSMK>> GetFilteredRealizedInternshipsOldSMKAsync(int? moduleId)
+        {
+            var currentSpecialization = await this.GetCurrentSpecializationAsync();
+            if (currentSpecialization == null)
+            {
+                return new List<RealizedInternshipOldSMK>();
+            }
+
+            // Jeśli podano moduł, określamy odpowiedni zakres lat
+            int startYear = 1;
+            int endYear = 6;
+
+            if (moduleId.HasValue)
+            {
+                var module = await this.databaseService.GetModuleAsync(moduleId.Value);
+                if (module != null)
+                {
+                    if (module.Type == ModuleType.Basic)
+                    {
+                        startYear = 1;
+                        endYear = 2;
+                    }
+                    else
+                    {
+                        startYear = 3;
+                        endYear = 6;
+                    }
+                }
+            }
+
+            // Pobieramy wszystkie realizacje dla lat w zakresie
+            List<RealizedInternshipOldSMK> allRealizations = new List<RealizedInternshipOldSMK>();
+
+            for (int year = startYear; year <= endYear; year++)
+            {
+                var yearRealizations = await this.databaseService.GetRealizedInternshipsOldSMKAsync(
+                    currentSpecialization.SpecializationId, year);
+
+                allRealizations.AddRange(yearRealizations);
+            }
+
+            return allRealizations;
+        }
+
         public void ClearCache()
         {
             _cachedSpecialization = null;

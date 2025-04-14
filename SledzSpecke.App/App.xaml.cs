@@ -22,6 +22,7 @@ namespace SledzSpecke.App
             {
                 var dbService = IPlatformApplication.Current.Services.GetRequiredService<IDatabaseService>();
                 await dbService.MigrateShiftDataForModulesAsync();
+                await dbService.MigrateInternshipDataAsync();
             });
         }
 
