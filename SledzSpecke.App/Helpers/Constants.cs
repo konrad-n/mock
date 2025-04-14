@@ -18,7 +18,6 @@ namespace SledzSpecke.App.Helpers
         }
 
         public const string CurrentUserIdKey = "CurrentUserId";
-        public const string CurrentUsernameKey = "CurrentUsername";
         public const string CurrentModuleIdKey = "CurrentModuleId";
         public const string DatabaseFilename = "sledzspecke.db3";
         public const SQLite.SQLiteOpenFlags Flags =

@@ -63,10 +63,5 @@ namespace SledzSpecke.App.Services.Dialog
                 return null;
             }
         }
-
-        public async Task<bool> DisplayConfirmationAsync(string title, string message, string accept, string cancel)
-        {
-            return await this.DisplayAlertAsync(title, message, accept, cancel);
-        }
     }
 }
