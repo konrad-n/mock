@@ -1,11 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Dialog;
-using SledzSpecke.App.Services.Internships;
 using SledzSpecke.App.Services.Specialization;
 
 namespace SledzSpecke.App.ViewModels.Internships
@@ -14,219 +12,173 @@ namespace SledzSpecke.App.ViewModels.Internships
     {
         private readonly ISpecializationService specializationService;
         private readonly IDialogService dialogService;
-        private readonly IInternshipService internshipService;
 
         private Internship requirement;
-        private InternshipSummary summary;
-        private ObservableCollection<RealizedInternshipNewSMK> realizationsNewSMK;
-        private ObservableCollection<RealizedInternshipOldSMK> realizationsOldSMK;
+        private Internship userInternship;
         private bool isExpanded;
-        private bool isNewSMK;
+        private bool isEditing;
+        private Internship currentInternship;
         private int? currentModuleId;
 
         public InternshipStageViewModel(
             Internship requirement,
-            InternshipSummary summary,
+            Internship userInternship,
             ISpecializationService specializationService,
             IDialogService dialogService,
-            IInternshipService internshipService,
-            bool isNewSMK,
             int? currentModuleId)
         {
             this.requirement = requirement;
-            this.summary = summary;
+            this.userInternship = userInternship;
             this.specializationService = specializationService;
             this.dialogService = dialogService;
-            this.internshipService = internshipService;
-            this.isNewSMK = isNewSMK;
             this.currentModuleId = currentModuleId;
-
-            this.realizationsNewSMK = new ObservableCollection<RealizedInternshipNewSMK>();
-            this.realizationsOldSMK = new ObservableCollection<RealizedInternshipOldSMK>();
+            this.currentInternship = userInternship != null ?
+                new Internship
+                {
+                    InternshipId = userInternship.InternshipId,
+                    SpecializationId = userInternship.SpecializationId,
+                    ModuleId = userInternship.ModuleId,
+                    InstitutionName = userInternship.InstitutionName,
+                    DepartmentName = userInternship.DepartmentName,
+                    InternshipName = userInternship.InternshipName,
+                    Year = userInternship.Year,
+                    StartDate = userInternship.StartDate,
+                    EndDate = userInternship.EndDate,
+                    DaysCount = userInternship.DaysCount,
+                    IsCompleted = userInternship.IsCompleted,
+                    IsApproved = userInternship.IsApproved,
+                    IsRecognition = userInternship.IsRecognition,
+                    RecognitionReason = userInternship.RecognitionReason,
+                    RecognitionDaysReduction = userInternship.RecognitionDaysReduction,
+                    IsPartialRealization = userInternship.IsPartialRealization,
+                    SupervisorName = userInternship.SupervisorName,
+                    SyncStatus = userInternship.SyncStatus,
+                    AdditionalFields = userInternship.AdditionalFields
+                } :
+                new Internship
+                {
+                    InternshipId = 0,
+                    SpecializationId = requirement.SpecializationId,
+                    ModuleId = currentModuleId,
+                    InternshipName = requirement.InternshipName,
+                    InstitutionName = string.Empty,
+                    DepartmentName = string.Empty,
+                    Year = 1,
+                    StartDate = DateTime.Today,
+                    EndDate = DateTime.Today.AddDays(requirement.DaysCount),
+                    DaysCount = requirement.DaysCount,
+                    IsCompleted = false,
+                    IsApproved = false,
+                    IsRecognition = false,
+                    RecognitionDaysReduction = 0,
+                    IsPartialRealization = false,
+                    SyncStatus = SyncStatus.NotSynced
+                };
 
             this.ToggleExpandCommand = new RelayCommand(this.ToggleExpand);
             this.AddRealizationCommand = new AsyncRelayCommand(this.AddRealizationAsync);
-            this.DeleteRealizationCommand = new AsyncRelayCommand<object>(this.DeleteRealizationAsync);
-            this.EditRealizationCommand = new AsyncRelayCommand<object>(this.EditRealizationAsync);
-
-            this.LoadRealizationsAsync().ConfigureAwait(false);
+            this.SaveCommand = new AsyncRelayCommand(this.SaveInternshipAsync);
+            this.CancelCommand = new RelayCommand(this.CancelEdit);
         }
 
-        public string Name => this.requirement.InternshipName;
-        public int Id => this.requirement.InternshipId;
-        public string FormattedStatistics =>
-            $"Zrealizowano {this.summary.CompletedDays} z {this.summary.RequiredDays} dni";
-        public int RequiredDays => this.summary.RequiredDays;
-        public int IntroducedDays => this.summary.CompletedDays;
-        public int RecognizedDays => this.summary.RecognizedDays;
-        public int SelfEducationDays => this.summary.SelfEducationDays;
-        public int RemainingDays => this.summary.RemainingDays;
-        public bool IsComplete => this.summary.IsCompleted;
-        public double CompletionPercentage => this.summary.CompletionPercentage;
+        public string Name => requirement.InternshipName;
+        public int Id => requirement.InternshipId;
+        public int DaysCount => requirement.DaysCount;
+        public string FormattedStatistics => GetFormattedStatistics();
+        public string Title => $"Staż: {Name}";
+        public int RequiredDays => requirement.DaysCount;
+        public int IntroducedDays => userInternship?.DaysCount ?? 0;
+        public int RecognizedDays => (userInternship?.IsRecognition ?? false) ? userInternship.RecognitionDaysReduction : 0;
+        public int SelfEducationDays => 0; // Placeholder, to be implemented if needed
+        public int RemainingDays => RequiredDays - IntroducedDays - RecognizedDays;
 
-        public bool IsExpanded
+        private string GetFormattedStatistics()
         {
-            get => this.isExpanded;
-            set => this.SetProperty(ref this.isExpanded, value);
-        }
-
-        public ObservableCollection<RealizedInternshipNewSMK> RealizationsNewSMK
-        {
-            get => this.realizationsNewSMK;
-            set => this.SetProperty(ref this.realizationsNewSMK, value);
-        }
-
-        public ObservableCollection<RealizedInternshipOldSMK> RealizationsOldSMK
-        {
-            get => this.realizationsOldSMK;
-            set => this.SetProperty(ref this.realizationsOldSMK, value);
-        }
-
-        public bool IsNewSMK => this.isNewSMK;
-
-        public ICommand ToggleExpandCommand { get; }
-        public ICommand AddRealizationCommand { get; }
-        public ICommand DeleteRealizationCommand { get; }
-        public ICommand EditRealizationCommand { get; }
-
-        private void ToggleExpand()
-        {
-            this.IsExpanded = !this.IsExpanded;
-        }
-
-        private async Task LoadRealizationsAsync()
-        {
-            if (this.isNewSMK)
+            if (userInternship != null)
             {
-                var realizations = await this.internshipService.GetRealizedInternshipsNewSMKAsync(
-                    this.currentModuleId,
-                    this.requirement.InternshipId);
-
-                this.RealizationsNewSMK.Clear();
-                foreach (var realization in realizations)
-                {
-                    this.RealizationsNewSMK.Add(realization);
-                }
+                return $"Zrealizowano {userInternship.DaysCount} z {requirement.DaysCount} dni";
             }
             else
             {
-                var realizations = await this.internshipService.GetRealizedInternshipsOldSMKAsync(
-                    0, // wszystkie lata
-                    this.requirement.InternshipName);
-
-                this.RealizationsOldSMK.Clear();
-                foreach (var realization in realizations)
-                {
-                    this.RealizationsOldSMK.Add(realization);
-                }
+                return $"Dni do zrealizowania: {requirement.DaysCount}";
             }
+        }
+
+        public bool IsExpanded
+        {
+            get => isExpanded;
+            set => SetProperty(ref isExpanded, value);
+        }
+
+        public bool IsEditing
+        {
+            get => isEditing;
+            set => SetProperty(ref isEditing, value);
+        }
+
+        public Internship CurrentInternship
+        {
+            get => currentInternship;
+            set => SetProperty(ref currentInternship, value);
+        }
+
+        public ICommand ToggleExpandCommand { get; }
+        public ICommand AddRealizationCommand { get; }
+        public ICommand SaveCommand { get; }
+        public ICommand CancelCommand { get; }
+
+        private void ToggleExpand()
+        {
+            IsExpanded = !IsExpanded;
         }
 
         private async Task AddRealizationAsync()
         {
+            IsEditing = true;
+
             var navigationParameter = new Dictionary<string, object>
             {
-                { "internshipRequirementId", this.requirement.InternshipId },
-                { "moduleId", this.currentModuleId ?? 0 },
-                { "isNewSMK", this.isNewSMK }
+                { "internshipRequirementId", requirement.InternshipId },
+                { "moduleId", currentModuleId ?? 0 }
             };
 
-            if (this.isNewSMK)
+            await Shell.Current.GoToAsync("//AddEditInternship", navigationParameter);
+        }
+
+        private async Task SaveInternshipAsync()
+        {
+            bool success;
+
+            if (CurrentInternship.InternshipId == 0)
             {
-                await Shell.Current.GoToAsync("//AddEditNewSMKInternship", navigationParameter);
+                success = await specializationService.AddInternshipAsync(CurrentInternship);
             }
             else
             {
-                await Shell.Current.GoToAsync("//AddEditOldSMKInternship", navigationParameter);
-            }
-        }
-
-        private async Task DeleteRealizationAsync(object parameter)
-        {
-            bool confirm = await this.dialogService.DisplayConfirmationAsync(
-                "Potwierdzenie",
-                "Czy na pewno chcesz usunąć tę realizację stażu?",
-                "Tak",
-                "Nie");
-
-            if (!confirm)
-            {
-                return;
-            }
-
-            bool success = false;
-
-            if (this.isNewSMK && parameter is RealizedInternshipNewSMK newSMKRealization)
-            {
-                success = await this.internshipService.DeleteRealizedInternshipNewSMKAsync(newSMKRealization.RealizedInternshipId);
-            }
-            else if (!this.isNewSMK && parameter is RealizedInternshipOldSMK oldSMKRealization)
-            {
-                success = await this.internshipService.DeleteRealizedInternshipOldSMKAsync(oldSMKRealization.RealizedInternshipId);
+                success = await specializationService.UpdateInternshipAsync(CurrentInternship);
             }
 
             if (success)
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    "Realizacja stażu została usunięta.",
-                    "OK");
-
-                // Odświeżamy listę realizacji i podsumowanie
-                await this.RefreshDataAsync();
+                userInternship = CurrentInternship;
+                IsEditing = false;
+                OnPropertyChanged(nameof(FormattedStatistics));
+                OnPropertyChanged(nameof(IntroducedDays));
+                OnPropertyChanged(nameof(RecognizedDays));
+                OnPropertyChanged(nameof(RemainingDays));
             }
             else
             {
-                await this.dialogService.DisplayAlertAsync(
+                await dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Nie udało się usunąć realizacji stażu.",
+                    "Nie udało się zapisać stażu.",
                     "OK");
             }
         }
 
-        private async Task EditRealizationAsync(object parameter)
+        private void CancelEdit()
         {
-            if (this.isNewSMK && parameter is RealizedInternshipNewSMK newSMKRealization)
-            {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "realizedInternshipNewSMKId", newSMKRealization.RealizedInternshipId.ToString() },
-                    { "internshipRequirementId", this.requirement.InternshipId },
-                    { "moduleId", this.currentModuleId ?? 0 }
-                };
-
-                await Shell.Current.GoToAsync("//AddEditNewSMKInternship", navigationParameter);
-            }
-            else if (!this.isNewSMK && parameter is RealizedInternshipOldSMK oldSMKRealization)
-            {
-                var navigationParameter = new Dictionary<string, object>
-                {
-                    { "realizedInternshipOldSMKId", oldSMKRealization.RealizedInternshipId.ToString() },
-                    { "internshipName", this.requirement.InternshipName }
-                };
-
-                await Shell.Current.GoToAsync("//AddEditOldSMKInternship", navigationParameter);
-            }
-        }
-
-        public async Task RefreshDataAsync()
-        {
-            // Odświeżamy podsumowanie
-            this.summary = await this.internshipService.GetInternshipSummaryAsync(
-                this.requirement.InternshipId,
-                this.currentModuleId);
-
-            // Aktualizujemy właściwości
-            this.OnPropertyChanged(nameof(this.FormattedStatistics));
-            this.OnPropertyChanged(nameof(this.IntroducedDays));
-            this.OnPropertyChanged(nameof(this.RecognizedDays));
-            this.OnPropertyChanged(nameof(this.SelfEducationDays));
-            this.OnPropertyChanged(nameof(this.RemainingDays));
-            this.OnPropertyChanged(nameof(this.IsComplete));
-            this.OnPropertyChanged(nameof(this.CompletionPercentage));
-
-            // Odświeżamy listę realizacji
-            await this.LoadRealizationsAsync();
+            IsEditing = false;
         }
     }
 }

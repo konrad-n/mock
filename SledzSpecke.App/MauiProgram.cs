@@ -4,7 +4,6 @@ using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.FileSystem;
-using SledzSpecke.App.Services.Internships;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
@@ -63,7 +62,6 @@ namespace SledzSpecke.App
             services.AddSingleton<ISecureStorageService, SecureStorageService>();
             services.AddSingleton<IMedicalShiftsService, MedicalShiftsService>();
             services.AddSingleton<IProcedureService, ProcedureService>();
-            services.AddSingleton<IInternshipService, InternshipService>();
             services.AddTransient<ModuleInitializer>();
         }
 
@@ -87,8 +85,6 @@ namespace SledzSpecke.App
             services.AddTransient<NewSMKInternshipsListViewModel>();
             services.AddTransient<AddEditInternshipViewModel>();
             services.AddTransient<OldSMKInternshipsListViewModel>();
-            services.AddTransient<AddEditNewSMKInternshipViewModel>();
-            services.AddTransient<AddEditOldSMKInternshipViewModel>();
         }
 
         private static void RegisterViews(IServiceCollection services)
@@ -115,8 +111,6 @@ namespace SledzSpecke.App
             services.AddTransient<NewSMKInternshipsListPage>();
             services.AddTransient<AddEditInternshipPage>();
             services.AddTransient<OldSMKInternshipsListPage>();
-            services.AddTransient<AddEditNewSMKInternshipPage>();
-            services.AddTransient<AddEditOldSMKInternshipPage>();
         }
     }
 }

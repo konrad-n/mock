@@ -118,12 +118,6 @@
     <MauiXaml Update="Resources\Styles\MaterialDesignStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Internships\AddEditNewSMKInternshipPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\Internships\AddEditOldSMKInternshipPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Views\Internships\InternshipsSelectorPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

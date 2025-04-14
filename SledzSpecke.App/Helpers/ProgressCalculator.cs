@@ -122,336 +122,181 @@ namespace SledzSpecke.App.Helpers
         }
 
         public static async Task<SpecializationStatistics> CalculateFullStatisticsAsync(
-    IDatabaseService databaseService,
-    int specializationId,
-    int? moduleId = null)
+            IDatabaseService database,
+            int specializationId,
+            int? moduleId = null)
         {
-            var statistics = new SpecializationStatistics();
-
-            var specialization = await databaseService.GetSpecializationAsync(specializationId);
+            var specialization = await database.GetSpecializationAsync(specializationId);
             if (specialization == null)
             {
-                return statistics;
+                return new SpecializationStatistics();
             }
 
-            var user = await databaseService.GetUserByUsernameAsync(SettingsHelper.GetCurrentUsername());
-            if (user == null)
+            var stats = new SpecializationStatistics();
+            SpecializationStructure structure = null;
+
+            if (!string.IsNullOrEmpty(specialization.ProgramStructure))
             {
-                return statistics;
+                structure = JsonSerializer.Deserialize<SpecializationStructure>(specialization.ProgramStructure);
             }
 
-            // Pobieramy moduły specjalizacji
-            var modules = await databaseService.GetModulesAsync(specializationId);
-            if (modules.Count == 0)
-            {
-                return statistics;
-            }
-
-            // Jeśli nie podano konkretnego modułu, bierzemy aktualny moduł
-            if (!moduleId.HasValue && specialization.CurrentModuleId.HasValue)
-            {
-                moduleId = specialization.CurrentModuleId.Value;
-            }
-
-            // Obliczanie statystyk staży
-            if (user.SmkVersion == SmkVersion.New)
-            {
-                // Pobieramy zrealizowane staże dla modułu
-                var realizedInternships = await databaseService.GetRealizedInternshipsNewSMKAsync(
-                    specializationId,
-                    moduleId);
-
-                statistics.CompletedInternshipDays = realizedInternships.Sum(r => r.DaysCount);
-
-                // Obliczamy liczbę ukończonych staży
-                var internshipRequirements = await databaseService.GetInternshipsAsync(
-                    specializationId,
-                    moduleId);
-
-                foreach (var requirement in internshipRequirements)
-                {
-                    var requirementRealizations = realizedInternships
-                        .Where(r => r.InternshipRequirementId == requirement.InternshipId)
-                        .ToList();
-
-                    int totalDays = requirementRealizations.Sum(r => r.DaysCount);
-                    if (totalDays >= requirement.DaysCount)
-                    {
-                        statistics.CompletedInternships++;
-                    }
-                }
-
-                statistics.RequiredInternships = internshipRequirements.Count;
-                statistics.RequiredInternshipWorkingDays = internshipRequirements.Sum(i => i.DaysCount);
-            }
-            else
-            {
-                // Dla starego SMK
-                var realizedInternships = await databaseService.GetRealizedInternshipsOldSMKAsync(specializationId);
-                statistics.CompletedInternshipDays = realizedInternships.Sum(r => r.DaysCount);
-
-                // Grupujemy po nazwie stażu
-                var internshipGroups = realizedInternships
-                    .GroupBy(r => r.InternshipName)
-                    .ToDictionary(g => g.Key, g => g.Sum(r => r.DaysCount));
-
-                // Pobieramy staże wymagane
-                var internshipRequirements = await databaseService.GetInternshipsAsync(
-                    specializationId,
-                    moduleId);
-
-                foreach (var requirement in internshipRequirements)
-                {
-                    if (internshipGroups.TryGetValue(requirement.InternshipName, out int totalDays))
-                    {
-                        if (totalDays >= requirement.DaysCount)
-                        {
-                            statistics.CompletedInternships++;
-                        }
-                    }
-                }
-
-                statistics.RequiredInternships = internshipRequirements.Count;
-                statistics.RequiredInternshipWorkingDays = internshipRequirements.Sum(i => i.DaysCount);
-            }
-
-            // Obliczanie statystyk kursów
-            var courses = await databaseService.GetCoursesAsync(specializationId, moduleId);
-            statistics.CompletedCourses = courses.Count;
-
-            Module currentModule = null;
             if (moduleId.HasValue)
             {
-                currentModule = modules.FirstOrDefault(m => m.ModuleId == moduleId.Value);
-            }
-            else if (modules.Count > 0)
-            {
-                currentModule = modules[0];
-            }
+                var module = await database.GetModuleAsync(moduleId.Value);
 
-            if (currentModule != null)
-            {
-                statistics.RequiredCourses = currentModule.TotalCourses;
-                statistics.RequiredProceduresA = currentModule.TotalProceduresA;
-                statistics.RequiredProceduresB = currentModule.TotalProceduresB;
-                statistics.RequiredShiftHours = currentModule.RequiredShiftHours;
-                statistics.SelfEducationDaysTotal = currentModule.TotalSelfEducationDays;
-            }
-
-            // Obliczanie statystyk dyżurów
-            if (user.SmkVersion == SmkVersion.New)
-            {
-                if (moduleId.HasValue)
+                if (module == null)
                 {
-                    var newShifts = await databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(
-                        "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ? AND ModuleId = ?",
-                        specializationId, moduleId.Value);
-
-                    double totalHours = 0;
-
-                    foreach (var shift in newShifts)
-                    {
-                        totalHours += shift.Hours + (shift.Minutes / 60.0);
-                    }
-
-                    statistics.CompletedShiftHours = (int)Math.Round(totalHours);
+                    return stats;
                 }
-                else
+
+                stats.CompletedInternships = module.CompletedInternships;
+                stats.RequiredInternships = module.TotalInternships;
+                stats.CompletedCourses = module.CompletedCourses;
+                stats.RequiredCourses = module.TotalCourses;
+                stats.CompletedProceduresA = module.CompletedProceduresA;
+                stats.RequiredProceduresA = module.TotalProceduresA;
+                stats.CompletedProceduresB = module.CompletedProceduresB;
+                stats.RequiredProceduresB = module.TotalProceduresB;
+                ModuleStructure moduleStructure = null;
+
+                if (!string.IsNullOrEmpty(module.Structure))
                 {
-                    var newShifts = await databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(
-                        "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ?",
-                        specializationId);
-
-                    double totalHours = 0;
-
-                    foreach (var shift in newShifts)
+                    var options = new JsonSerializerOptions
                     {
-                        totalHours += shift.Hours + (shift.Minutes / 60.0);
-                    }
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip,
+                        Converters = { new JsonStringEnumConverter() }
+                    };
 
-                    statistics.CompletedShiftHours = (int)Math.Round(totalHours);
+                    moduleStructure = JsonSerializer.Deserialize<ModuleStructure>(module.Structure, options);
                 }
+
+                var internships = await database.GetInternshipsAsync(moduleId: moduleId);
+                var completedInternships = internships.Where(i => i.IsCompleted).ToList();
+
+                stats.CompletedInternshipDays = completedInternships.Sum(i => i.DaysCount);
+                stats.RequiredInternshipWorkingDays = moduleStructure?.Internships?.Sum(i => i.WorkingDays) ?? 0;
+
+                var oldSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ?";
+                var oldSmkShifts = await database.QueryAsync<RealizedMedicalShiftOldSMK>(oldSmkShiftsQuery, specialization.SpecializationId);
+
+                var newSmkShiftsQuery = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE SpecializationId = ?";
+                var newSmkShifts = await database.QueryAsync<RealizedMedicalShiftNewSMK>(newSmkShiftsQuery, specialization.SpecializationId);
+
+                double totalShiftHours = 0;
+
+                foreach (var shift in oldSmkShifts)
+                {
+                    totalShiftHours += shift.Hours + ((double)shift.Minutes / 60.0);
+                }
+
+                foreach (var shift in newSmkShifts)
+                {
+                    totalShiftHours += shift.Hours + ((double)shift.Minutes / 60.0);
+                }
+
+                stats.CompletedShiftHours = (int)Math.Round(totalShiftHours);
+                stats.RequiredShiftHours = module.RequiredShiftHours;
+
+                if (stats.RequiredShiftHours == 0)
+                {
+                    if (moduleStructure != null && moduleStructure.RequiredShiftHours > 0)
+                    {
+                        stats.RequiredShiftHours = moduleStructure.RequiredShiftHours;
+                        module.RequiredShiftHours = stats.RequiredShiftHours;
+                        await database.UpdateModuleAsync(module);
+                    }
+                    else
+                    {
+                        double weeklyHours = module.WeeklyShiftHours;
+
+                        if (weeklyHours <= 0)
+                        {
+                            if (moduleStructure?.MedicalShifts != null && moduleStructure.MedicalShifts.HoursPerWeek > 0)
+                            {
+                                weeklyHours = moduleStructure.MedicalShifts.HoursPerWeek;
+                                module.WeeklyShiftHours = weeklyHours;
+                            }
+                            else
+                            {
+                                weeklyHours = 10.083;
+                                module.WeeklyShiftHours = weeklyHours;
+                            }
+                        }
+
+                        TimeSpan moduleDuration = module.EndDate - module.StartDate;
+                        int weeks = Math.Max(1, (int)(moduleDuration.TotalDays / 7));
+                        stats.RequiredShiftHours = (int)Math.Round(weeklyHours * weeks);
+                        module.RequiredShiftHours = stats.RequiredShiftHours;
+                        await database.UpdateModuleAsync(module);
+                    }
+                }
+
+                var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
+                stats.SelfEducationDaysUsed = selfEducationItems.Count;
+                stats.SelfEducationDaysTotal = moduleStructure?.SelfEducationDays ?? 0;
+
+                var educationalActivities = await database.GetEducationalActivitiesAsync(moduleId: moduleId);
+                stats.EducationalActivitiesCompleted = educationalActivities.Count;
+
+                var publications = await database.GetPublicationsAsync(moduleId: moduleId);
+                stats.PublicationsCompleted = publications.Count;
+
+                return stats;
             }
             else
             {
-                var oldShifts = await databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(
-                    "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ?",
-                    specializationId);
+                var modules = await database.GetModulesAsync(specializationId);
 
-                double totalHours = 0;
+                stats.CompletedInternships = modules.Sum(m => m.CompletedInternships);
+                stats.RequiredInternships = modules.Sum(m => m.TotalInternships);
+                stats.CompletedCourses = modules.Sum(m => m.CompletedCourses);
+                stats.RequiredCourses = modules.Sum(m => m.TotalCourses);
+                stats.CompletedProceduresA = modules.Sum(m => m.CompletedProceduresA);
+                stats.RequiredProceduresA = modules.Sum(m => m.TotalProceduresA);
+                stats.CompletedProceduresB = modules.Sum(m => m.CompletedProceduresB);
+                stats.RequiredProceduresB = modules.Sum(m => m.TotalProceduresB);
 
-                foreach (var shift in oldShifts)
+                var internships = new List<Internship>();
+                foreach (var module in modules)
                 {
-                    totalHours += shift.Hours + (shift.Minutes / 60.0);
+                    var moduleInternships = await database.GetInternshipsAsync(moduleId: module.ModuleId);
+                    internships.AddRange(moduleInternships.Where(i => i.IsCompleted));
                 }
 
-                // Filtrowanie dla modułu podstawowego (lata 1-2) i specjalistycznego (lata 3+)
-                if (moduleId.HasValue)
-                {
-                    var module = modules.FirstOrDefault(m => m.ModuleId == moduleId.Value);
-                    if (module != null)
-                    {
-                        if (module.Type == ModuleType.Basic)
-                        {
-                            oldShifts = oldShifts.Where(s => s.Year <= 2).ToList();
-                        }
-                        else
-                        {
-                            oldShifts = oldShifts.Where(s => s.Year >= 3).ToList();
-                        }
+                stats.CompletedInternshipDays = internships.Sum(i => i.DaysCount);
+                stats.RequiredInternshipWorkingDays = structure?.TotalWorkingDays ?? 0;
 
-                        totalHours = 0;
-                        foreach (var shift in oldShifts)
-                        {
-                            totalHours += shift.Hours + (shift.Minutes / 60.0);
-                        }
-                    }
+                var allShifts = new List<MedicalShift>();
+                foreach (var internship in internships)
+                {
+                    var shifts = await database.GetMedicalShiftsAsync(internship.InternshipId);
+                    allShifts.AddRange(shifts);
                 }
 
-                statistics.CompletedShiftHours = (int)Math.Round(totalHours);
+                stats.CompletedShiftHours = (int)Math.Round(allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0)));
+                stats.RequiredShiftHours = (int)Math.Round(
+                    CalculateRequiredShiftHours(structure, specialization.PlannedEndDate - specialization.StartDate));
+
+                var selfEducationItems = await database.GetSelfEducationItemsAsync(specializationId: specializationId);
+                stats.SelfEducationDaysUsed = selfEducationItems.Count;
+                stats.SelfEducationDaysTotal = structure?.SelfEducation?.TotalDays ?? 0;
+
+                var educationalActivities = await database.GetEducationalActivitiesAsync(specializationId: specializationId);
+                stats.EducationalActivitiesCompleted = educationalActivities.Count;
+
+                var publications = await database.GetPublicationsAsync(specializationId: specializationId);
+                stats.PublicationsCompleted = publications.Count;
+
+                var absences = await database.GetAbsencesAsync(specializationId);
+                stats.AbsenceDays = absences.Sum(a => a.DaysCount);
+                stats.AbsenceDaysExtendingSpecialization = absences
+                    .Where(a => a.ExtendsSpecialization)
+                    .Sum(a => a.DaysCount);
             }
 
-            // Obliczanie statystyk procedur
-            if (user.SmkVersion == SmkVersion.New)
-            {
-                if (moduleId.HasValue)
-                {
-                    var newProcedures = await databaseService.QueryAsync<RealizedProcedureNewSMK>(
-                        "SELECT * FROM RealizedProcedureNewSMK WHERE SpecializationId = ? AND ModuleId = ?",
-                        specializationId, moduleId.Value);
-
-                    statistics.CompletedProceduresA = newProcedures.Sum(p => p.CountA);
-                    statistics.CompletedProceduresB = newProcedures.Sum(p => p.CountB);
-                }
-                else
-                {
-                    var newProcedures = await databaseService.QueryAsync<RealizedProcedureNewSMK>(
-                        "SELECT * FROM RealizedProcedureNewSMK WHERE SpecializationId = ?",
-                        specializationId);
-
-                    statistics.CompletedProceduresA = newProcedures.Sum(p => p.CountA);
-                    statistics.CompletedProceduresB = newProcedures.Sum(p => p.CountB);
-                }
-            }
-            else
-            {
-                var oldProcedures = await databaseService.QueryAsync<RealizedProcedureOldSMK>(
-                    "SELECT * FROM RealizedProcedureOldSMK WHERE SpecializationId = ?",
-                    specializationId);
-
-                // W starym SMK tylko operator jest używany
-                int countA = 0;
-                int countB = 0;
-
-                foreach (var procedure in oldProcedures)
-                {
-                    if (!string.IsNullOrEmpty(procedure.Code))
-                    {
-                        if (procedure.Code.ToUpperInvariant().Contains("A"))
-                        {
-                            countA++;
-                        }
-                        else if (procedure.Code.ToUpperInvariant().Contains("B"))
-                        {
-                            countB++;
-                        }
-                    }
-                }
-
-                statistics.CompletedProceduresA = countA;
-                statistics.CompletedProceduresB = countB;
-
-                // Filtrowanie dla modułu
-                if (moduleId.HasValue)
-                {
-                    var module = modules.FirstOrDefault(m => m.ModuleId == moduleId.Value);
-                    if (module != null)
-                    {
-                        if (module.Type == ModuleType.Basic)
-                        {
-                            var filteredProcedures = oldProcedures.Where(p => p.Year <= 2).ToList();
-
-                            countA = 0;
-                            countB = 0;
-
-                            foreach (var procedure in filteredProcedures)
-                            {
-                                if (!string.IsNullOrEmpty(procedure.Code))
-                                {
-                                    if (procedure.Code.ToUpperInvariant().Contains("A"))
-                                    {
-                                        countA++;
-                                    }
-                                    else if (procedure.Code.ToUpperInvariant().Contains("B"))
-                                    {
-                                        countB++;
-                                    }
-                                }
-                            }
-
-                            statistics.CompletedProceduresA = countA;
-                            statistics.CompletedProceduresB = countB;
-                        }
-                        else
-                        {
-                            var filteredProcedures = oldProcedures.Where(p => p.Year >= 3).ToList();
-
-                            countA = 0;
-                            countB = 0;
-
-                            foreach (var procedure in filteredProcedures)
-                            {
-                                if (!string.IsNullOrEmpty(procedure.Code))
-                                {
-                                    if (procedure.Code.ToUpperInvariant().Contains("A"))
-                                    {
-                                        countA++;
-                                    }
-                                    else if (procedure.Code.ToUpperInvariant().Contains("B"))
-                                    {
-                                        countB++;
-                                    }
-                                }
-                            }
-
-                            statistics.CompletedProceduresA = countA;
-                            statistics.CompletedProceduresB = countB;
-                        }
-                    }
-                }
-            }
-
-            // Obliczanie statystyk samokształcenia
-            var selfEducation = await databaseService.GetSelfEducationItemsAsync(
-                specializationId,
-                moduleId);
-
-            statistics.SelfEducationDaysUsed = selfEducation.Count;
-
-            // Obliczanie statystyk działań edukacyjnych
-            var educationalActivities = await databaseService.GetEducationalActivitiesAsync(
-                specializationId,
-                moduleId);
-
-            statistics.EducationalActivitiesCompleted = educationalActivities.Count;
-
-            // Obliczanie statystyk publikacji
-            var publications = await databaseService.GetPublicationsAsync(
-                specializationId,
-                moduleId);
-
-            statistics.PublicationsCompleted = publications.Count;
-
-            // Obliczanie statystyk nieobecności
-            var absences = await databaseService.GetAbsencesAsync(specializationId);
-
-            statistics.AbsenceDays = absences.Sum(a => (a.EndDate - a.StartDate).Days + 1);
-
-            statistics.AbsenceDaysExtendingSpecialization = absences
-                .Where(a => a.ExtendsSpecialization)
-                .Sum(a => (a.EndDate - a.StartDate).Days + 1);
-
-            return statistics;
+            return stats;
         }
 
         private static double CalculateRequiredShiftHours(SpecializationStructure structure, TimeSpan duration)
