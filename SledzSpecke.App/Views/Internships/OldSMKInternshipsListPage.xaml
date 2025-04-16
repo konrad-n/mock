@@ -103,28 +103,20 @@
                                                                 <Label Grid.Column="1" Text="{Binding IsCompleted, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Ukończony'}" 
                                                                        TextColor="{StaticResource SuccessColor}" VerticalOptions="Center"
                                                                        IsVisible="{Binding IsCompleted}" />
-                                                                <!-- Przycisk edycji -->
                                                                 <Button Grid.Column="2" 
                                                                         Text="✏️" 
-                                                                        BackgroundColor="Transparent"
-                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InternshipStageViewModel}}, Path=EditRealizationCommand}"
-                                                                        CommandParameter="{Binding RealizedInternshipId}"
-                                                                        VerticalOptions="Center"
-                                                                        Margin="5,0,0,0"
-                                                                        WidthRequest="40"
-                                                                        HeightRequest="40"
-                                                                        Padding="0" />
-                                                                <!-- Przycisk usuwania -->
+                                                                        Clicked="OnEditButtonClicked"
+                                                                        BackgroundColor="LightGoldenrodYellow"
+                                                                        TextColor="White"
+                                                                        BorderColor="Orange"
+                                                                        BorderWidth="1"
+                                                                        Style="{StaticResource LightIconButton}" />
                                                                 <Button Grid.Column="3" 
                                                                         Text="❌" 
-                                                                        BackgroundColor="Transparent"
-                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InternshipStageViewModel}}, Path=DeleteRealizationCommand}"
-                                                                        CommandParameter="{Binding RealizedInternshipId}"
-                                                                        VerticalOptions="Center"
-                                                                        Margin="0,0,0,0"
-                                                                        WidthRequest="40"
-                                                                        HeightRequest="40" 
-                                                                        Padding="0" />
+                                                                        Clicked="OnDeleteButtonClicked"
+                                                                        BackgroundColor="LightPink"
+                                                                        TextColor="LightPink"
+                                                                        Style="{StaticResource LightIconButton}" />
                                                             </Grid>
                                                         </Frame>
                                                     </DataTemplate>
