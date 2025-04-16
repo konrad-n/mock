@@ -23,6 +23,9 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool isNewSMK;
         private int? currentModuleId;
 
+        public ICommand EditRealizationCommand { get; }
+        public ICommand DeleteRealizationCommand { get; }
+
         public InternshipStageViewModel(
             Internship requirement,
             List<RealizedInternshipNewSMK> newSMKRealizations,
@@ -43,7 +46,9 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.ToggleExpandCommand = new RelayCommand(this.ToggleExpand);
             this.AddRealizationCommand = new AsyncRelayCommand(this.AddRealizationAsync);
 
-            // Sprawdzenie wersji SMK
+            this.EditRealizationCommand = new AsyncRelayCommand<int>(this.EditRealizationAsync);
+            this.DeleteRealizationCommand = new AsyncRelayCommand<int>(this.DeleteRealizationAsync);
+
             this.CheckSMKVersionAsync().ConfigureAwait(false);
         }
 
@@ -51,6 +56,127 @@ namespace SledzSpecke.App.ViewModels.Internships
         {
             var user = await this.authService.GetCurrentUserAsync();
             this.isNewSMK = user?.SmkVersion == SmkVersion.New;
+        }
+
+        private async Task EditRealizationAsync(int realizationId)
+        {
+            if (realizationId <= 0)
+            {
+                return;
+            }
+
+            // Logika nawigacji do strony edycji
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "RealizedInternshipId", realizationId.ToString() },
+                { "InternshipRequirementId", this.requirement.InternshipId.ToString() }
+            };
+
+            if (!this.isNewSMK)
+            {
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule != null)
+                {
+                    int year = 1;
+                    if (currentModule.Type == ModuleType.Basic)
+                    {
+                        year = 1; // Pierwszy rok dla modułu podstawowego
+                    }
+                    else
+                    {
+                        year = 3; // Trzeci rok dla modułu specjalistycznego 
+                    }
+                    navigationParameter.Add("Year", year.ToString());
+                }
+            }
+            else if (this.currentModuleId.HasValue)
+            {
+                navigationParameter.Add("ModuleId", this.currentModuleId.Value.ToString());
+            }
+
+            await Shell.Current.GoToAsync("//AddEditRealizedInternship", navigationParameter);
+        }
+
+        private async Task DeleteRealizationAsync(int realizationId)
+        {
+            if (realizationId <= 0)
+            {
+                return;
+            }
+
+            bool confirmed = await this.dialogService.DisplayAlertAsync(
+                "Potwierdzenie",
+                "Czy na pewno chcesz usunąć tę realizację stażu?",
+                "Tak",
+                "Nie");
+
+            if (!confirmed)
+            {
+                return;
+            }
+
+            bool success = false;
+
+            if (this.isNewSMK)
+            {
+                success = await this.specializationService.DeleteRealizedInternshipNewSMKAsync(realizationId);
+            }
+            else
+            {
+                success = await this.specializationService.DeleteRealizedInternshipOldSMKAsync(realizationId);
+            }
+
+            if (success)
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Sukces",
+                    "Realizacja stażu została usunięta.",
+                    "OK");
+
+                if (this.isNewSMK)
+                {
+                    this.newSMKRealizations = await this.specializationService.GetRealizedInternshipsNewSMKAsync(
+                        moduleId: this.currentModuleId,
+                        internshipRequirementId: this.requirement.InternshipId);
+                }
+                else
+                {
+                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                    int startYear = 1;
+                    int endYear = 2;
+
+                    if (currentModule != null && currentModule.Type == ModuleType.Specialistic)
+                    {
+                        startYear = 3;
+                        endYear = 6;
+                    }
+
+                    List<RealizedInternshipOldSMK> allRealizations = new List<RealizedInternshipOldSMK>();
+                    for (int year = startYear; year <= endYear; year++)
+                    {
+                        var yearRealizations = await this.specializationService.GetRealizedInternshipsOldSMKAsync(year);
+                        allRealizations.AddRange(yearRealizations);
+                    }
+
+                    this.oldSMKRealizations = allRealizations
+                        .Where(r => r.InternshipName != null &&
+                               r.InternshipName.Equals(this.requirement.InternshipName, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                this.OnPropertyChanged(nameof(NewSMKRealizationsCollection));
+                this.OnPropertyChanged(nameof(OldSMKRealizationsCollection));
+                this.OnPropertyChanged(nameof(IntroducedDays));
+                this.OnPropertyChanged(nameof(RemainingDays));
+                this.OnPropertyChanged(nameof(FormattedStatistics));
+            }
+            else
+            {
+                await this.dialogService.DisplayAlertAsync(
+                    "Błąd",
+                    "Nie udało się usunąć realizacji stażu.",
+                    "OK");
+            }
         }
 
         public string Name => requirement.InternshipName;

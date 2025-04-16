@@ -94,7 +94,7 @@
                                                     <!-- Zmiana x:DataType na właściwy typ dla elementów kolekcji -->
                                                     <DataTemplate x:DataType="models:RealizedInternshipOldSMK">
                                                         <Frame Margin="2" Padding="10" BorderColor="LightGray" CornerRadius="5">
-                                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                                                                 <VerticalStackLayout Grid.Column="0">
                                                                     <Label Text="{Binding InstitutionName}" FontAttributes="Bold" />
                                                                     <Label Text="{Binding DateRange}" FontSize="12" />
@@ -103,6 +103,28 @@
                                                                 <Label Grid.Column="1" Text="{Binding IsCompleted, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Ukończony'}" 
                                                                        TextColor="{StaticResource SuccessColor}" VerticalOptions="Center"
                                                                        IsVisible="{Binding IsCompleted}" />
+                                                                <!-- Przycisk edycji -->
+                                                                <Button Grid.Column="2" 
+                                                                        Text="✏️" 
+                                                                        BackgroundColor="Transparent"
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InternshipStageViewModel}}, Path=EditRealizationCommand}"
+                                                                        CommandParameter="{Binding RealizedInternshipId}"
+                                                                        VerticalOptions="Center"
+                                                                        Margin="5,0,0,0"
+                                                                        WidthRequest="40"
+                                                                        HeightRequest="40"
+                                                                        Padding="0" />
+                                                                <!-- Przycisk usuwania -->
+                                                                <Button Grid.Column="3" 
+                                                                        Text="❌" 
+                                                                        BackgroundColor="Transparent"
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InternshipStageViewModel}}, Path=DeleteRealizationCommand}"
+                                                                        CommandParameter="{Binding RealizedInternshipId}"
+                                                                        VerticalOptions="Center"
+                                                                        Margin="0,0,0,0"
+                                                                        WidthRequest="40"
+                                                                        HeightRequest="40" 
+                                                                        Padding="0" />
                                                             </Grid>
                                                         </Frame>
                                                     </DataTemplate>
