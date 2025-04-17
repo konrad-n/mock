@@ -22,6 +22,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool isExpanded;
         private bool isNewSMK;
         private int? currentModuleId;
+        private bool isLoading;
+        private bool hasLoadedData;
 
         public ICommand EditRealizationCommand { get; }
         public ICommand DeleteRealizationCommand { get; }
@@ -42,8 +44,10 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.dialogService = dialogService;
             this.authService = authService;
             this.currentModuleId = currentModuleId;
+            this.isLoading = false;
+            this.hasLoadedData = false;
 
-            this.ToggleExpandCommand = new RelayCommand(this.ToggleExpand);
+            this.ToggleExpandCommand = new AsyncRelayCommand(this.OnToggleExpandAsync);
             this.AddRealizationCommand = new AsyncRelayCommand(this.AddRealizationAsync);
 
             this.EditRealizationCommand = new AsyncRelayCommand<int>(this.EditRealizationAsync);
@@ -217,12 +221,60 @@ namespace SledzSpecke.App.ViewModels.Internships
             set => SetProperty(ref isExpanded, value);
         }
 
+        public bool IsLoading
+        {
+            get => this.isLoading;
+            set => this.SetProperty(ref this.isLoading, value);
+        }
+
         public ICommand ToggleExpandCommand { get; }
         public ICommand AddRealizationCommand { get; }
 
-        private void ToggleExpand()
+        // Nowa implementacja metody OnToggleExpandAsync, identyczna jak w ProcedureRequirementViewModel
+        private async Task OnToggleExpandAsync()
         {
-            IsExpanded = !IsExpanded;
+            if (this.isExpanded)
+            {
+                this.IsExpanded = false;
+                return;
+            }
+
+            if (!this.hasLoadedData && !this.isLoading)
+            {
+                this.isLoading = true;
+                this.IsExpanded = true;
+
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            this.hasLoadedData = true;
+                            this.isLoading = false;
+                            this.OnPropertyChanged(nameof(this.IsLoading));
+                        });
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych stażu: {ex.Message}");
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Błąd",
+                            "Wystąpił problem podczas ładowania danych stażu.",
+                            "OK");
+
+                        this.isLoading = false;
+                        this.OnPropertyChanged(nameof(this.IsLoading));
+                    });
+                }
+            }
+            else
+            {
+                this.IsExpanded = !this.isExpanded;
+            }
         }
 
         private async Task AddRealizationAsync()
