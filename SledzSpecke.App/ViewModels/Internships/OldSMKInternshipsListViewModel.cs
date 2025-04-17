@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
+using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -116,17 +117,19 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         public async Task LoadDataAsync()
         {
-            if (this.IsBusy || isLoading)
+            if (this.IsBusy || this.isLoading)
             {
                 return;
             }
 
-            isLoading = true;
+            this.isLoading = true;
             this.IsBusy = true;
             this.IsRefreshing = true;
 
             try
             {
+                System.Diagnostics.Debug.WriteLine("===== ROZPOCZYNAM ŁADOWANIE DANYCH STAŻÓW OLD SMK =====");
+
                 var specialization = await this.specializationService.GetCurrentSpecializationAsync();
                 if (specialization == null)
                 {
@@ -137,6 +140,8 @@ namespace SledzSpecke.App.ViewModels.Internships
                     return;
                 }
 
+                System.Diagnostics.Debug.WriteLine($"Aktualna specjalizacja: {specialization.Name}, ID: {specialization.SpecializationId}");
+
                 var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
                 this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
                 var currentModule = await this.specializationService.GetCurrentModuleAsync();
@@ -146,6 +151,7 @@ namespace SledzSpecke.App.ViewModels.Internships
                     this.ModuleTitle = currentModule.Name;
                     this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
                     this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
+                    System.Diagnostics.Debug.WriteLine($"Aktualny moduł: {currentModule.Name}, ID: {currentModule.ModuleId}, Typ: {currentModule.Type}");
                 }
 
                 // Pobierz wymagania stażowe dla aktualnego modułu
@@ -153,6 +159,10 @@ namespace SledzSpecke.App.ViewModels.Internships
 
                 // Dodaj debugowanie
                 System.Diagnostics.Debug.WriteLine($"Pobrano {internships.Count} wymagań stażowych");
+                foreach (var i in internships)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  Wymaganie: ID={i.InternshipId}, Nazwa={i.InternshipName}, Dni={i.DaysCount}");
+                }
 
                 // Określenie zakresu lat dla starego SMK na podstawie typu modułu
                 int startYear = 1;
@@ -164,56 +174,124 @@ namespace SledzSpecke.App.ViewModels.Internships
                     endYear = 6; // Typowy zakres lat dla modułu specjalistycznego
                 }
 
-                // Pobierz wszystkie realizacje staży dla lat odpowiadających aktualnemu modułowi
+                System.Diagnostics.Debug.WriteLine($"Zakres lat dla modułu: {startYear}-{endYear}");
+
+                // NOWOŚĆ: Pobierz wszystkie realizacje bezpośrednio z bazy danych, również te z Year=0
+                var dbService = IPlatformApplication.Current.Services.GetRequiredService<SledzSpecke.App.Services.Database.IDatabaseService>();
+                var allDbRealizations = await dbService.QueryAsync<RealizedInternshipOldSMK>(
+                    "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ?", specialization.SpecializationId);
+
+                System.Diagnostics.Debug.WriteLine($"WSZYSTKIE REALIZACJE W BAZIE DANYCH: {allDbRealizations.Count}");
+                foreach (var r in allDbRealizations)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  DB: ID={r.RealizedInternshipId}, Nazwa={r.InternshipName}, " +
+                        $"Dni={r.DaysCount}, Rok={r.Year}, SpecID={r.SpecializationId}");
+                }
+
+                // Pobierz wszystkie realizacje staży dla lat odpowiadających aktualnemu modułowi + realizacje z Year=0
                 var allRealizedInternships = new List<RealizedInternshipOldSMK>();
+
+                // Najpierw dodaj realizacje z Year=0, które nie są przypisane do konkretnego roku
+                var yearZeroRealizations = await dbService.QueryAsync<RealizedInternshipOldSMK>(
+                    "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ? AND Year = 0",
+                    specialization.SpecializationId);
+
+                System.Diagnostics.Debug.WriteLine($"Rok 0 (nieprzypisane): znaleziono {yearZeroRealizations.Count} realizacji");
+                foreach (var r in yearZeroRealizations)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  Rok 0 - Realizacja: ID={r.RealizedInternshipId}, " +
+                        $"Nazwa={r.InternshipName}, Rok={r.Year}, Dni={r.DaysCount}");
+
+                    // Dodaj realizacje z Year=0 do listy, bo mogą należeć do aktualnego modułu
+                    // Będą widoczne dla wszystkich modułów
+                    allRealizedInternships.Add(r);
+                }
+
+                // Następnie dodaj realizacje z odpowiednimi latami dla aktualnego modułu
                 for (int year = startYear; year <= endYear; year++)
                 {
                     var yearRealizations = await this.specializationService.GetRealizedInternshipsOldSMKAsync(year);
-                    allRealizedInternships.AddRange(yearRealizations);
+                    System.Diagnostics.Debug.WriteLine($"Rok {year}: znaleziono {yearRealizations.Count} realizacji");
+
+                    foreach (var r in yearRealizations.Where(r => r.Year == year)) // Filtruj dokładnie po roku (bez Year=0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Rok {year} - Realizacja: ID={r.RealizedInternshipId}, " +
+                            $"Nazwa={r.InternshipName}, Rok={r.Year}, Dni={r.DaysCount}");
+                    }
+
+                    allRealizedInternships.AddRange(yearRealizations.Where(r => r.Year == year));
+                }
+
+                // Sprawdź wszystkie realizacje przed filtrowaniem
+                System.Diagnostics.Debug.WriteLine($"WSZYSTKIE REALIZACJE (Przed filtrowaniem): {allRealizedInternships.Count}");
+                foreach (var r in allRealizedInternships)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  Realizacja: ID={r.RealizedInternshipId}, Nazwa={r.InternshipName}, " +
+                        $"Dni={r.DaysCount}, Rok={r.Year}, SpecID={r.SpecializationId}");
                 }
 
                 var viewModels = new List<InternshipStageViewModel>();
                 foreach (var internship in internships)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Wymaganie stażowe: {internship.InternshipName}");
+                    System.Diagnostics.Debug.WriteLine($"Przetwarzanie wymagania stażowego: {internship.InternshipName}");
 
-                    // Wypisz wszystkie dostępne realizacje dla debugowania
-                    foreach (var r in allRealizedInternships)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Dostępna realizacja: {r.InternshipName}, Dni: {r.DaysCount}, Rok: {r.Year}");
-                    }
-
-                    // Filtruj realizacje dla tego konkretnego stażu po nazwie
+                    // Filtruj realizacje dla tego konkretnego stażu po nazwie - z rozszerzonym logowaniem
                     var realizationsForThisInternship = allRealizedInternships
                         .Where(r => {
+                            // Przygotuj nazwy do lepszego logowania
+                            string realizationName = r.InternshipName ?? "null";
+                            string requirementName = internship.InternshipName ?? "null";
+
                             // Jeśli nazwa jest pusta lub "Staż bez nazwy", próbujemy dopasować ją z innymi danymi
                             if (string.IsNullOrEmpty(r.InternshipName) || r.InternshipName == "Staż bez nazwy")
                             {
                                 // Logujemy potencjalne dopasowanie
-                                System.Diagnostics.Debug.WriteLine($"Próba dopasowania realizacji bez nazwy do: {internship.InternshipName}");
+                                System.Diagnostics.Debug.WriteLine($"  Próba dopasowania realizacji bez nazwy do: {requirementName}");
 
                                 // Przypisujemy wszystkie realizacje bez nazwy do pierwszego stażu
                                 // To rozwiązanie tymczasowe, aby pokazać dane
                                 if (internships.IndexOf(internship) == 0)
                                 {
-                                    System.Diagnostics.Debug.WriteLine($"Dopasowano realizację bez nazwy do pierwszego stażu: {internship.InternshipName}");
+                                    System.Diagnostics.Debug.WriteLine($"  Dopasowano realizację bez nazwy do pierwszego stażu: {requirementName}");
                                     return true;
                                 }
                                 return false;
                             }
 
-                            // Standardowe porównanie nazw
-                            return r.InternshipName != null &&
-                                   (r.InternshipName.Equals(internship.InternshipName, StringComparison.OrdinalIgnoreCase) ||
-                                    r.InternshipName.Contains(internship.InternshipName) ||
-                                    internship.InternshipName.Contains(r.InternshipName));
+                            // Standardowe porównanie nazw z logowaniem każdej próby
+                            bool exactMatch = r.InternshipName != null &&
+                                r.InternshipName.Equals(internship.InternshipName, StringComparison.OrdinalIgnoreCase);
+                            bool realizationContainsRequirement = r.InternshipName != null &&
+                                r.InternshipName.Contains(internship.InternshipName, StringComparison.OrdinalIgnoreCase);
+                            bool requirementContainsRealization = internship.InternshipName != null &&
+                                internship.InternshipName.Contains(r.InternshipName, StringComparison.OrdinalIgnoreCase);
+
+                            // Dodatkowe porównanie: usuń spacje i znaki specjalne
+                            string cleanRealizationName = realizationName
+                                .Replace(" ", "").Replace("-", "").Replace("_", "").ToLowerInvariant();
+                            string cleanRequirementName = requirementName
+                                .Replace(" ", "").Replace("-", "").Replace("_", "").ToLowerInvariant();
+                            bool fuzzyMatch = cleanRealizationName.Contains(cleanRequirementName) ||
+                                             cleanRequirementName.Contains(cleanRealizationName);
+
+                            bool matches = exactMatch || realizationContainsRequirement || requirementContainsRealization || fuzzyMatch;
+
+                            System.Diagnostics.Debug.WriteLine($"  Porównanie: '{realizationName}' do '{requirementName}'");
+                            System.Diagnostics.Debug.WriteLine($"    Dokładne dopasowanie: {exactMatch}");
+                            System.Diagnostics.Debug.WriteLine($"    Realizacja zawiera wymaganie: {realizationContainsRequirement}");
+                            System.Diagnostics.Debug.WriteLine($"    Wymaganie zawiera realizację: {requirementContainsRealization}");
+                            System.Diagnostics.Debug.WriteLine($"    Rozmyte dopasowanie: {fuzzyMatch}");
+                            System.Diagnostics.Debug.WriteLine($"    OSTATECZNY WYNIK: {matches}");
+
+                            return matches;
                         })
                         .ToList();
 
                     System.Diagnostics.Debug.WriteLine($"Znaleziono {realizationsForThisInternship.Count} realizacji dla stażu {internship.InternshipName}");
                     foreach (var realization in realizationsForThisInternship)
                     {
-                        System.Diagnostics.Debug.WriteLine($"  Realizacja: {realization.InternshipName}, Dni: {realization.DaysCount}, Rok: {realization.Year}");
+                        System.Diagnostics.Debug.WriteLine($"  Dopasowana realizacja: {realization.InternshipName}, Dni: {realization.DaysCount}, " +
+                            $"Rok: {realization.Year}, ID: {realization.RealizedInternshipId}");
                     }
 
                     var viewModel = new InternshipStageViewModel(
@@ -233,10 +311,13 @@ namespace SledzSpecke.App.ViewModels.Internships
                 {
                     this.InternshipRequirements.Add(viewModel);
                 }
+
+                System.Diagnostics.Debug.WriteLine("===== ZAKOŃCZONO ŁADOWANIE DANYCH STAŻÓW OLD SMK =====");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania danych: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"BŁĄD podczas ładowania danych: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
                     "Wystąpił błąd podczas ładowania danych. Spróbuj ponownie.",
@@ -246,7 +327,7 @@ namespace SledzSpecke.App.ViewModels.Internships
             {
                 this.IsBusy = false;
                 this.IsRefreshing = false;
-                isLoading = false;
+                this.isLoading = false;
             }
         }
     }

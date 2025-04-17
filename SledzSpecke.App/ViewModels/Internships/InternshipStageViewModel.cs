@@ -207,7 +207,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         private string GetFormattedStatistics()
         {
             int introduced = IntroducedDays;
-            return $"Zrealizowano {introduced} z {RequiredDays} dni";
+            string competionMark = introduced >= RequiredDays ? "✔️" : "";
+            return $"Zrealizowano {introduced} z {RequiredDays} dni {competionMark}";
         }
 
         public bool IsExpanded

@@ -292,23 +292,51 @@ namespace SledzSpecke.App.ViewModels.Internships
                 TimeSpan duration = this.OldSMKInternship.EndDate - this.OldSMKInternship.StartDate;
                 this.OldSMKInternship.DaysCount = duration.Days + 1;
 
+                // Upewnij się, że rok jest ustawiony poprawnie
+                if (this.OldSMKInternship.Year == 0)
+                {
+                    // Pobierz aktualny moduł
+                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                    if (currentModule != null)
+                    {
+                        // Ustaw domyślny rok na 1 dla modułu podstawowego lub 3 dla specjalistycznego
+                        this.OldSMKInternship.Year = currentModule.Type == ModuleType.Basic ? 1 : 3;
+
+                        // Zapisz informację diagnostyczną
+                        System.Diagnostics.Debug.WriteLine($"Ustawiono rok na {this.OldSMKInternship.Year} dla modułu typu {currentModule.Type}");
+                    }
+                    else
+                    {
+                        // Domyślny rok 1, jeśli nie można określić modułu
+                        this.OldSMKInternship.Year = 1;
+                        System.Diagnostics.Debug.WriteLine("Nie można określić modułu, ustawiono domyślny rok = 1");
+                    }
+                }
+
                 if (this.IsEdit)
                 {
                     success = await this.specializationService.UpdateRealizedInternshipOldSMKAsync(this.OldSMKInternship);
                 }
                 else
                 {
-                    this.OldSMKInternship.Year = this.year;
+                    // Użyj wartości year, która została już ustawiona (powyżej lub w konstruktorze)
                     success = await this.specializationService.AddRealizedInternshipOldSMKAsync(this.OldSMKInternship);
                 }
             }
 
             if (success)
             {
+                System.Diagnostics.Debug.WriteLine($"===== ZAPISANO STAŻ =====");
+                System.Diagnostics.Debug.WriteLine($"ID: {this.OldSMKInternship.RealizedInternshipId}");
+                System.Diagnostics.Debug.WriteLine($"Nazwa: {this.OldSMKInternship.InternshipName}");
+                System.Diagnostics.Debug.WriteLine($"Rok: {this.OldSMKInternship.Year}");
+                System.Diagnostics.Debug.WriteLine($"SpecID: {this.OldSMKInternship.SpecializationId}");
+                System.Diagnostics.Debug.WriteLine($"========================");
+
                 await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    this.IsEdit ? "Realizacja stażu została zaktualizowana." : "Realizacja stażu została dodana.",
-                    "OK");
+                "Sukces",
+                this.IsEdit ? "Realizacja stażu została zaktualizowana." : "Realizacja stażu została dodana.",
+                "OK");
 
                 if (this.IsNewSMK)
                 {

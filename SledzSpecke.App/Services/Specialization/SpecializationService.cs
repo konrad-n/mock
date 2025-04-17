@@ -649,7 +649,8 @@ namespace SledzSpecke.App.Services.Specialization
 
             if (year.HasValue)
             {
-                query += " AND Year = ?";
+                // Uwzględnij również realizacje z Year=0 (nieprzypisane do konkretnego roku)
+                query += " AND (Year = ? OR Year = 0)";
                 return await this.databaseService.QueryAsync<RealizedInternshipOldSMK>(
                     query, currentSpecialization.SpecializationId, year.Value);
             }
