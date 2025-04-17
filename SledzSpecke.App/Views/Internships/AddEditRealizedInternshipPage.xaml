@@ -75,8 +75,8 @@
                     <Label Text="Nazwa komórki organizacyjnej (miejsce odbywania stażu)" FontAttributes="Bold" />
                     <Entry Text="{Binding OldSMKInternship.DepartmentName}" Placeholder="Np. Oddział psychiatryczny" />
 
-                    <Label Text="Liczba dni" FontAttributes="Bold" />
-                    <Entry Text="{Binding OldSMKInternship.DaysCount}" Keyboard="Numeric" />
+                    <Label Text="Liczba dni (wyliczane na podstawie dat)" FontAttributes="Bold" IsVisible="False" />
+                    <Entry Text="{Binding OldSMKInternship.DaysCount}" Keyboard="Numeric" IsReadOnly="True" TextColor="Grey" IsVisible="False" />
 
                     <Label Text="Rok specjalizacji" FontAttributes="Bold" />
                     <Entry Text="{Binding OldSMKInternship.Year}" Keyboard="Numeric" />

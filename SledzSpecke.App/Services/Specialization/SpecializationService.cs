@@ -86,11 +86,165 @@ namespace SledzSpecke.App.Services.Specialization
                 return 0;
             }
 
-            var internships = await this.databaseService.GetInternshipsAsync(
-                specializationId: specialization.SpecializationId,
-                moduleId: moduleId);
+            var user = await this.authService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                return 0;
+            }
 
-            int completedCount = internships.Count(i => i.IsCompleted);
+            // Pobierz aktualny moduł
+            Module currentModule = null;
+            if (moduleId.HasValue)
+            {
+                currentModule = await this.databaseService.GetModuleAsync(moduleId.Value);
+            }
+            else
+            {
+                currentModule = await this.GetCurrentModuleAsync();
+            }
+
+            if (currentModule == null)
+            {
+                return 0;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Module={currentModule.Name}, ID={currentModule.ModuleId}, Type={currentModule.Type}");
+
+            // Pobierz wymagania stażowe dla danego modułu
+            var internshipRequirements = await this.GetInternshipsAsync(currentModule.ModuleId);
+            if (internshipRequirements == null || internshipRequirements.Count == 0)
+            {
+                return 0;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Znaleziono {internshipRequirements.Count} wymagań stażowych");
+
+            int completedCount = 0;
+
+            // Dla każdego wymagania stażowego
+            for (int i = 0; i < internshipRequirements.Count; i++)
+            {
+                var requirement = internshipRequirements[i];
+                int requiredDays = requirement.DaysCount;
+
+                System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Przetwarzanie wymagania {i + 1}/{internshipRequirements.Count}: {requirement.InternshipName}, WymaganeDni={requiredDays}");
+
+                int introducedDays = 0;
+
+                if (user.SmkVersion == SmkVersion.New)
+                {
+                    // Dla nowego SMK, pobierz realizacje po ID wymagania
+                    var realizations = await this.GetRealizedInternshipsNewSMKAsync(
+                        moduleId: currentModule.ModuleId,
+                        internshipRequirementId: requirement.InternshipId);
+
+                    System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Znaleziono {realizations.Count} realizacji dla nowego SMK");
+
+                    introducedDays = realizations.Sum(r => r.DaysCount);
+                }
+                else
+                {
+                    // Dla starego SMK, pobierz wszystkie realizacje dla lat odpowiadających modułowi
+                    int startYear = 1;
+                    int endYear = 2;
+
+                    if (currentModule.Type == ModuleType.Specialistic)
+                    {
+                        startYear = 3;
+                        endYear = 6;
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Zakres lat dla modułu: {startYear}-{endYear}");
+
+                    // Pobierz realizacje dla tych lat
+                    List<RealizedInternshipOldSMK> allRealizations = new List<RealizedInternshipOldSMK>();
+                    for (int year = startYear; year <= endYear; year++)
+                    {
+                        var yearRealizations = await this.GetRealizedInternshipsOldSMKAsync(year);
+                        System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Rok {year}: znaleziono {yearRealizations.Count} realizacji");
+                        allRealizations.AddRange(yearRealizations);
+                    }
+
+                    // Dodaj również realizacje z year=0 (nieprzypisane do konkretnego roku)
+                    var yearZeroRealizations = await this.databaseService.QueryAsync<RealizedInternshipOldSMK>(
+                        "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ? AND Year = 0",
+                        specialization.SpecializationId);
+
+                    System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Rok 0 (nieprzypisane): znaleziono {yearZeroRealizations.Count} realizacji");
+
+                    allRealizations.AddRange(yearZeroRealizations);
+
+                    // Filtruj realizacje dla tego konkretnego stażu po nazwie
+                    var realizationsForThisRequirement = allRealizations
+                        .Where(r => {
+                            // Przygotuj nazwy do lepszego porównania
+                            string realizationName = r.InternshipName ?? "null";
+                            string requirementName = requirement.InternshipName ?? "null";
+
+                            // Jeśli nazwa jest pusta lub "Staż bez nazwy", próbujemy dopasować ją z innymi danymi
+                            if (string.IsNullOrEmpty(r.InternshipName)
+                                || r.InternshipName == "Staż bez nazwy")
+                            {
+                                bool isFirstRequirement = i == 0;
+
+                                System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Pusta nazwa realizacji, przypisana do pierwszego wymagania: {isFirstRequirement}");
+
+                                return isFirstRequirement;
+                            }
+
+                            // Standardowe porównanie nazw
+                            bool exactMatch = r.InternshipName != null
+                                && r.InternshipName.Equals(requirement.InternshipName, StringComparison.OrdinalIgnoreCase);
+                            bool realizationContainsRequirement = r.InternshipName != null
+                                && r.InternshipName.Contains(requirement.InternshipName, StringComparison.OrdinalIgnoreCase);
+                            bool requirementContainsRealization = requirement.InternshipName != null
+                                && requirement.InternshipName.Contains(r.InternshipName, StringComparison.OrdinalIgnoreCase);
+
+                            // Dodatkowe porównanie: usuń spacje i znaki specjalne
+                            string cleanRealizationName = realizationName
+                                .Replace(" ", string.Empty)
+                                .Replace("-", string.Empty)
+                                .Replace("_", string.Empty)
+                                .ToLowerInvariant();
+                            string cleanRequirementName = requirementName
+                                .Replace(" ", string.Empty)
+                                .Replace("-", string.Empty)
+                                .Replace("_", string.Empty)
+                                .ToLowerInvariant();
+                            bool fuzzyMatch = cleanRealizationName.Contains(cleanRequirementName)
+                                || cleanRequirementName.Contains(cleanRealizationName);
+
+                            bool result = exactMatch
+                                || realizationContainsRequirement
+                                || requirementContainsRealization
+                                || fuzzyMatch;
+
+                            System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Porównanie '{realizationName}' do '{requirementName}': ExactMatch={exactMatch}, RealizationContainsRequirement={realizationContainsRequirement}, RequirementContainsRealization={requirementContainsRealization}, FuzzyMatch={fuzzyMatch}, Wynik={result}");
+
+                            return result;
+                        }).ToList();
+
+                    System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Znaleziono {realizationsForThisRequirement.Count} realizacji dla tego wymagania");
+
+                    foreach (var realization in realizationsForThisRequirement)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Realizacja: {realization.InternshipName}, Dni={realization.DaysCount}");
+                    }
+
+                    introducedDays = realizationsForThisRequirement.Sum(r => r.DaysCount);
+                }
+
+                System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: WprowadzoneDni={introducedDays}, WymaganeDni={requiredDays}, CzyUkończone={introducedDays >= requiredDays}");
+
+                // Jeśli liczba wprowadzonych dni >= wymagana liczba dni, zwiększ licznik ukończonych
+                if (introducedDays >= requiredDays)
+                {
+                    completedCount++;
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"GetInternshipCountAsync: Końcowy wynik completedCount={completedCount}");
+
             return completedCount;
         }
 
