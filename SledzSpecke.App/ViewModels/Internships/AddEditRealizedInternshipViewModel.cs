@@ -11,7 +11,8 @@ using SledzSpecke.App.ViewModels.Base;
 namespace SledzSpecke.App.ViewModels.Internships
 {
     [QueryProperty(nameof(RealizedInternshipId), nameof(RealizedInternshipId))]
-    [QueryProperty(nameof(InternshipRequirementId), nameof(InternshipRequirementId))]
+    [QueryProperty(nameof(InternshipName), nameof(InternshipName))]
+    [QueryProperty(nameof(DaysCount), nameof(DaysCount))]
     [QueryProperty(nameof(ModuleId), nameof(ModuleId))]
     [QueryProperty(nameof(Year), nameof(Year))]
     public class AddEditRealizedInternshipViewModel : BaseViewModel
@@ -25,6 +26,8 @@ namespace SledzSpecke.App.ViewModels.Internships
         private RealizedInternshipNewSMK newSMKInternship;
         private RealizedInternshipOldSMK oldSMKInternship;
         private int internshipRequirementId;
+        private string internshipName;
+        private int daysCount;
         private int moduleId;
         private int year;
 
@@ -77,14 +80,42 @@ namespace SledzSpecke.App.ViewModels.Internships
             }
         }
 
-        public string InternshipRequirementId
+        public string InternshipName
         {
             set
             {
-                if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int id) && id > 0)
+                this.internshipName = value;
+                if (!string.IsNullOrEmpty(value))
                 {
-                    this.internshipRequirementId = id;
-                    this.LoadInternshipRequirementAsync(this.internshipRequirementId).ConfigureAwait(false);
+                    if (this.IsNewSMK)
+                    {
+                        this.NewSMKInternship.InternshipName = value;
+                    }
+                    else
+                    {
+                        this.OldSMKInternship.InternshipName = value;
+                    }
+                }
+            }
+        }
+
+        public string DaysCount
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int days))
+                {
+                    this.daysCount = days;
+                    if (this.IsNewSMK)
+                    {
+                        this.NewSMKInternship.DaysCount = days;
+                        this.NewSMKInternship.EndDate = this.NewSMKInternship.StartDate.AddDays(days - 1);
+                    }
+                    else
+                    {
+                        this.OldSMKInternship.DaysCount = days;
+                        this.OldSMKInternship.EndDate = this.OldSMKInternship.StartDate.AddDays(days - 1);
+                    }
                 }
             }
         }
@@ -211,42 +242,6 @@ namespace SledzSpecke.App.ViewModels.Internships
             this.IsBusy = false;
         }
 
-        private async Task LoadInternshipRequirementAsync(int requirementId)
-        {
-            if (this.IsBusy)
-            {
-                return;
-            }
-
-            this.IsBusy = true;
-
-            var currentModule = await this.specializationService.GetCurrentModuleAsync();
-            if (currentModule != null)
-            {
-                var internships = await this.specializationService.GetInternshipsAsync(currentModule.ModuleId);
-                var requirement = internships.FirstOrDefault(i => i.InternshipId == requirementId);
-
-                if (requirement != null)
-                {
-                    if (this.IsNewSMK)
-                    {
-                        this.NewSMKInternship.InternshipName = requirement.InternshipName;
-                        this.NewSMKInternship.DaysCount = requirement.DaysCount;
-                        this.NewSMKInternship.EndDate = this.NewSMKInternship.StartDate.AddDays(requirement.DaysCount - 1);
-                        this.NewSMKInternship.InternshipRequirementId = requirementId;
-                    }
-                    else
-                    {
-                        this.OldSMKInternship.InternshipName = requirement.InternshipName;
-                        this.OldSMKInternship.DaysCount = requirement.DaysCount;
-                        this.OldSMKInternship.EndDate = this.OldSMKInternship.StartDate.AddDays(requirement.DaysCount - 1);
-                    }
-                }
-            }
-
-            this.IsBusy = false;
-        }
-
         private async Task SaveAsync()
         {
             if (this.IsBusy)
@@ -273,51 +268,6 @@ namespace SledzSpecke.App.ViewModels.Internships
                 return;
             }
 
-            // Upewnij się, że nazwy są dokładnie takie same
-            if (this.IsNewSMK)
-            {
-                // Pobierz dokładną nazwę z wymagania
-                var internshipRequirements = await this.specializationService.GetInternshipsAsync(this.moduleId);
-                var requirement = internshipRequirements.FirstOrDefault(i => i.InternshipId == this.internshipRequirementId);
-                if (requirement != null && !string.IsNullOrEmpty(requirement.InternshipName))
-                {
-                    this.NewSMKInternship.InternshipName = requirement.InternshipName;
-                    System.Diagnostics.Debug.WriteLine($"Ustawiono nazwę stażu: {this.NewSMKInternship.InternshipName}");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("UWAGA: Nie znaleziono wymagania stażu lub nazwa jest pusta!");
-                    // Ustaw domyślną nazwę, aby uniknąć null
-                    this.NewSMKInternship.InternshipName = "Staż bez nazwy";
-                }
-            }
-            // W metodzie SaveAsync, zastąp warunek dla starego SMK
-            else
-            {
-                // Pobierz dokładną nazwę z wymagania - bardzo ważne, aby użyć dokładnie tej samej nazwy
-                var internshipRequirements = await this.specializationService.GetInternshipsAsync(null);
-
-                // Wypisz wszystkie dostępne wymagania
-                foreach (var req in internshipRequirements)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Dostępne wymaganie: ID={req.InternshipId}, Nazwa={req.InternshipName}");
-                }
-
-                var requirement = internshipRequirements.FirstOrDefault(i => i.InternshipId == this.internshipRequirementId);
-                if (requirement != null && !string.IsNullOrEmpty(requirement.InternshipName))
-                {
-                    // Ustaw dokładnie taką samą nazwę - bez żadnych zmian
-                    this.OldSMKInternship.InternshipName = requirement.InternshipName;
-                    System.Diagnostics.Debug.WriteLine($"Ustawiono dokładną nazwę stażu: '{this.OldSMKInternship.InternshipName}'");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"UWAGA: Nie znaleziono wymagania stażu ID={this.internshipRequirementId} lub nazwa jest pusta!");
-                    // Ustaw domyślną nazwę, aby uniknąć null
-                    this.OldSMKInternship.InternshipName = "Staż bez nazwy";
-                }
-            }
-
             bool success;
 
             if (this.IsNewSMK)
@@ -333,7 +283,6 @@ namespace SledzSpecke.App.ViewModels.Internships
                 else
                 {
                     this.NewSMKInternship.ModuleId = this.moduleId;
-                    this.NewSMKInternship.InternshipRequirementId = this.internshipRequirementId;
                     success = await this.specializationService.AddRealizedInternshipNewSMKAsync(this.NewSMKInternship);
                 }
             }

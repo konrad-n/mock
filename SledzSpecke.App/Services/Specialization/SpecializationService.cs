@@ -489,7 +489,7 @@ namespace SledzSpecke.App.Services.Specialization
                 {
                     results.Add(new Internship
                     {
-                        InternshipId = -id,
+                        InternshipId = id,
                         SpecializationId = currentSpecialization.SpecializationId,
                         ModuleId = moduleId,
                         InternshipName = requirement.Name,

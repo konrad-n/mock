@@ -226,36 +226,19 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         private async Task AddRealizationAsync()
         {
-            // Zapisz ID wymagania do parametrów nawigacji
+            // Pobieramy nazwę stażu, zamiast polegać na ID
             var navigationParameter = new Dictionary<string, object>
             {
-                { "InternshipRequirementId", requirement.InternshipId.ToString() } // Tu musi być poprawne ID
+                { "InternshipName", this.requirement.InternshipName },
+                { "DaysCount", this.requirement.DaysCount.ToString() }
             };
 
             // Wypisz dla debugowania
-            System.Diagnostics.Debug.WriteLine($"Przekazuję ID wymagania stażu: {requirement.InternshipId}");
+            System.Diagnostics.Debug.WriteLine($"Przekazuję dane stażu: Nazwa: {this.requirement.InternshipName}, Dni: {this.requirement.DaysCount}");
 
-            if (this.isNewSMK && this.currentModuleId.HasValue)
+            if (this.currentModuleId.HasValue)
             {
                 navigationParameter.Add("ModuleId", this.currentModuleId.Value.ToString());
-            }
-            else if (!this.isNewSMK)
-            {
-                // Dla starego SMK potrzebujemy roku zamiast ID modułu
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
-                if (currentModule != null)
-                {
-                    int year = 1;
-                    if (currentModule.Type == ModuleType.Basic)
-                    {
-                        year = 1; // Pierwszy rok dla modułu podstawowego
-                    }
-                    else
-                    {
-                        year = 3; // Trzeci rok dla modułu specjalistycznego 
-                    }
-                    navigationParameter.Add("Year", year.ToString());
-                }
             }
 
             await Shell.Current.GoToAsync("//AddEditRealizedInternship", navigationParameter);

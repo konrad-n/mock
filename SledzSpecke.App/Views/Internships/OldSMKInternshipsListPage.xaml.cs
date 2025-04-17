@@ -169,10 +169,10 @@ namespace SledzSpecke.App.Views.Internships
             if (sender is Button button && button.BindingContext is RealizedInternshipOldSMK realization)
             {
                 var navigationParameter = new Dictionary<string, object>
-        {
-            { "RealizedInternshipId", realization.RealizedInternshipId.ToString() },
-            { "Year", realization.Year.ToString() }
-        };
+                {
+                    { "RealizedInternshipId", realization.RealizedInternshipId.ToString() },
+                    { "Year", realization.Year.ToString() }
+                };
 
                 // Znajdź wymaganie stażowe o tej samej nazwie
                 var specializationService = IPlatformApplication.Current.Services.GetRequiredService<SledzSpecke.App.Services.Specialization.ISpecializationService>();
