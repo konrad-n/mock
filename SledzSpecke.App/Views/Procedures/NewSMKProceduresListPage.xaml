@@ -186,7 +186,7 @@
                                                                         Orientation="Horizontal"
                                                                         Margin="10,0,0,0">
                                                                 <Button Text="✏️" 
-                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProcedureRequirementViewModel}}, Path=EditRealizationCommand}"
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditItemCommand}"
                                                                         CommandParameter="{Binding .}"
                                                                         BackgroundColor="LightGoldenrodYellow"
                                                                         TextColor="White"

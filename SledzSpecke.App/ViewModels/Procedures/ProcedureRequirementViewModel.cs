@@ -131,8 +131,58 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            this.IsExpanded = true;
-            await this.LoadRealizationsAsync();
+            if (!this.hasLoadedData && !this.isLoading)
+            {
+                this.isLoading = true;
+                this.IsExpanded = true;
+
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                            this.moduleId,
+                            this.requirement.Id);
+
+                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        {
+                            this.Realizations.Clear();
+                            foreach (var realization in realizations)
+                            {
+                                this.Realizations.Add(realization);
+                            }
+
+                            this.OnPropertyChanged(nameof(this.Realizations));
+                            this.OnPropertyChanged(nameof(this.HasRealizations));
+                            this.OnPropertyChanged(nameof(this.Statistics));
+
+                            this.hasLoadedData = true;
+                            this.isLoading = false;
+                            this.OnPropertyChanged(nameof(this.IsLoading));
+                        });
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Błąd",
+                            "Wystąpił problem podczas ładowania realizacji procedur.",
+                            "OK");
+
+                        this.isLoading = false;
+                        this.IsExpanded = false;
+                        this.OnPropertyChanged(nameof(this.IsLoading));
+                        this.OnPropertyChanged(nameof(this.IsExpanded));
+                    });
+                }
+            }
+            else
+            {
+                this.IsExpanded = !this.isExpanded;
+            }
         }
 
         private async Task OnToggleAddRealizationAsync()
