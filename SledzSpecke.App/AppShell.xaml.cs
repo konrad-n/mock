@@ -1,5 +1,4 @@
 ﻿using SledzSpecke.App.Services.Authentication;
-using SledzSpecke.App.Views.Export;
 using SledzSpecke.App.Views.Internships;
 using SledzSpecke.App.Views.MedicalShifts;
 using SledzSpecke.App.Views.Procedures;
@@ -20,8 +19,6 @@ namespace SledzSpecke.App
 
         private void RegisterRoutes()
         {
-            Routing.RegisterRoute("export", typeof(ExportPage));
-            Routing.RegisterRoute("exportpreview", typeof(ExportPreviewPage));
             Routing.RegisterRoute("MedicalShiftsSelector", typeof(MedicalShiftsSelectorPage));
             Routing.RegisterRoute("OldSMKMedicalShifts", typeof(OldSMKMedicalShiftsPage));
             Routing.RegisterRoute("NewSMKMedicalShifts", typeof(NewSMKMedicalShiftsPage));

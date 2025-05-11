@@ -167,9 +167,6 @@
     <MauiXaml Update="Views\Dashboard\DashboardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Export\ExportPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\Internships\InternshipsListPage.xaml">

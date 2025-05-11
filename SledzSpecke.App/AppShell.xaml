@@ -7,7 +7,6 @@
     xmlns:dashboard="clr-namespace:SledzSpecke.App.Views.Dashboard"
     xmlns:procedures="clr-namespace:SledzSpecke.App.Views.Procedures"
     xmlns:medicalShifts="clr-namespace:SledzSpecke.App.Views.MedicalShifts"
-    xmlns:export="clr-namespace:SledzSpecke.App.Views.Export"
     xmlns:internships="clr-namespace:SledzSpecke.App.Views.Internships"
     Shell.FlyoutBehavior="Flyout"
     FlyoutHeaderBehavior="Fixed"
@@ -51,7 +50,9 @@
         <!-- to be implemented -->
     </FlyoutItem>
     <FlyoutItem Title="Eksport" Icon="export.png" Route="export">
-        <ShellContent ContentTemplate="{DataTemplate export:ExportPage}" Route="export" />
+        <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="export" />
+        <!-- to be implemented -->
+    </FlyoutItem>
     </FlyoutItem>
     <FlyoutItem Title="Ustawienia" Icon="settings.png" Route="settings">
         <ShellContent ContentTemplate="{DataTemplate dashboard:DashboardPage}" Route="settings" />
