@@ -170,9 +170,6 @@
     <MauiXaml Update="Views\Export\ExportPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Views\Internships\AddEditInternshipPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Absences\" />

@@ -87,7 +87,6 @@ namespace SledzSpecke.App
             services.AddTransient<AddEditNewSMKProcedureViewModel>();
             services.AddTransient<InternshipsSelectorViewModel>();
             services.AddTransient<NewSMKInternshipsListViewModel>();
-            services.AddTransient<AddEditInternshipViewModel>();
             services.AddTransient<OldSMKInternshipsListViewModel>();
             services.AddTransient<AddEditRealizedInternshipViewModel>();
         }
@@ -114,7 +113,6 @@ namespace SledzSpecke.App
             services.AddTransient<ExportPreviewPage>();
             services.AddTransient<InternshipsSelectorPage>();
             services.AddTransient<NewSMKInternshipsListPage>();
-            services.AddTransient<AddEditInternshipPage>();
             services.AddTransient<OldSMKInternshipsListPage>();
             services.AddTransient<AddEditRealizedInternshipPage>();
         }
