@@ -1,11 +1,17 @@
 ﻿using Microsoft.Maui.Controls.PlatformConfiguration;
+using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.FileSystem;
+using SledzSpecke.App.Services.Logging;
 
 namespace SledzSpecke.App.Helpers
 {
     public static class Constants
     {
         private static IFileSystemService fileSystemService;
+        private static IExceptionHandlerService exceptionHandlerService;
+        private static IDialogService dialogService;
+        private static ILoggingService loggingService;
 
         static Constants()
         {

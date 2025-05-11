@@ -28,7 +28,7 @@ namespace SledzSpecke.App.ViewModels.Base
         }
 
         /// <summary>
-        /// Safely executes an operation with automatic error handling
+        /// Bezpiecznie wykonuje operację z automatyczną obsługą błędów
         /// </summary>
         protected async Task SafeExecuteAsync(Func<Task> operation, string userFriendlyMessage = null)
         {
@@ -50,7 +50,7 @@ namespace SledzSpecke.App.ViewModels.Base
         }
 
         /// <summary>
-        /// Safely executes an operation that returns a value with automatic error handling
+        /// Bezpiecznie wykonuje operację zwracającą wartość z automatyczną obsługą błędów
         /// </summary>
         protected async Task<T> SafeExecuteAsync<T>(Func<Task<T>> operation, string userFriendlyMessage = null)
         {
@@ -67,6 +67,55 @@ namespace SledzSpecke.App.ViewModels.Base
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Exception in {nameof(SafeExecuteAsync)}: {ex.Message}");
+                    return default;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Bezpiecznie wykonuje operację z ponawianiem i automatyczną obsługą błędów
+        /// </summary>
+        protected async Task SafeExecuteWithRetryAsync(Func<Task> operation, string userFriendlyMessage = null,
+                                                    int retryCount = 3, int delayMilliseconds = 500)
+        {
+            if (ExceptionHandler != null)
+            {
+                await ExceptionHandler.ExecuteWithRetryAsync(operation, null, userFriendlyMessage,
+                                                           retryCount, delayMilliseconds);
+            }
+            else
+            {
+                try
+                {
+                    await operation();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Exception in {nameof(SafeExecuteWithRetryAsync)}: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Bezpiecznie wykonuje operację zwracającą wartość z ponawianiem i automatyczną obsługą błędów
+        /// </summary>
+        protected async Task<T> SafeExecuteWithRetryAsync<T>(Func<Task<T>> operation, string userFriendlyMessage = null,
+                                                          int retryCount = 3, int delayMilliseconds = 500)
+        {
+            if (ExceptionHandler != null)
+            {
+                return await ExceptionHandler.ExecuteWithRetryAsync(operation, null, userFriendlyMessage,
+                                                                  retryCount, delayMilliseconds);
+            }
+            else
+            {
+                try
+                {
+                    return await operation();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Exception in {nameof(SafeExecuteWithRetryAsync)}: {ex.Message}");
                     return default;
                 }
             }

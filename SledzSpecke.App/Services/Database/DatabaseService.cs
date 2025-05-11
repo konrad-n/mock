@@ -3,6 +3,7 @@ using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Exceptions;
+using SledzSpecke.App.Services.Logging;
 using SQLite;
 using System.Diagnostics;
 
@@ -15,60 +16,12 @@ namespace SledzSpecke.App.Services.Database
         private readonly Dictionary<int, Models.Specialization> _specializationCache = new();
         private readonly Dictionary<int, List<Module>> _moduleCache = new();
         private readonly IExceptionHandlerService _exceptionHandler;
+        private readonly ILoggingService _loggingService;
 
-        public DatabaseService(IExceptionHandlerService exceptionHandler = null)
+        public DatabaseService(IExceptionHandlerService exceptionHandler, ILoggingService loggingService)
         {
-            _exceptionHandler = exceptionHandler;
-        }
-
-        private async Task<T> SafeExecuteAsync<T>(Func<Task<T>> operation, string errorMessage)
-        {
-            if (_exceptionHandler != null)
-            {
-                return await _exceptionHandler.ExecuteAsync(operation, null, errorMessage);
-            }
-            else
-            {
-                try
-                {
-                    return await operation();
-                }
-                catch (SQLiteException ex)
-                {
-                    Debug.WriteLine($"SQLite Exception: {ex.Message}");
-                    throw new DatabaseException(ex.Message, errorMessage, ex);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Database Exception: {ex.Message}");
-                    throw new DatabaseException(ex.Message, errorMessage, ex);
-                }
-            }
-        }
-
-        private async Task SafeExecuteAsync(Func<Task> operation, string errorMessage)
-        {
-            if (_exceptionHandler != null)
-            {
-                await _exceptionHandler.ExecuteAsync(operation, null, errorMessage);
-            }
-            else
-            {
-                try
-                {
-                    await operation();
-                }
-                catch (SQLiteException ex)
-                {
-                    Debug.WriteLine($"SQLite Exception: {ex.Message}");
-                    throw new DatabaseException(ex.Message, errorMessage, ex);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Database Exception: {ex.Message}");
-                    throw new DatabaseException(ex.Message, errorMessage, ex);
-                }
-            }
+            _exceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
+            _loggingService = loggingService ?? throw new ArgumentNullException(nameof(loggingService));
         }
 
         public async Task InitializeAsync()
@@ -78,7 +31,7 @@ namespace SledzSpecke.App.Services.Database
                 return;
             }
 
-            await SafeExecuteAsync(async () =>
+            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var databasePath = Constants.DatabasePath;
                 var databaseDirectory = Path.GetDirectoryName(databasePath);
@@ -111,29 +64,35 @@ namespace SledzSpecke.App.Services.Database
                 await this.database.CreateTableAsync<RealizedInternshipOldSMK>();
 
                 this.isInitialized = true;
-            }, "Nie udało się zainicjalizować bazy danych.");
+            }, null, "Nie udało się zainicjalizować bazy danych.", 3, 1000);
         }
 
         public async Task<User> GetUserAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var user = await this.database.Table<User>().FirstOrDefaultAsync(u => u.UserId == id);
                 if (user == null)
                 {
                     throw new ResourceNotFoundException(
                         $"User with ID {id} not found",
-                        $"Nie znaleziono użytkownika o ID {id}");
+                        $"Nie znaleziono użytkownika o ID {id}",
+                        null,
+                        new Dictionary<string, object> { { "UserId", id } });
                 }
                 return user;
-            }, $"Nie udało się pobrać użytkownika o ID {id}");
+            },
+            new Dictionary<string, object> { { "UserId", id } },
+            $"Nie udało się pobrać użytkownika o ID {id}",
+            3, 800);
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(username))
                 {
@@ -143,22 +102,24 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.Table<User>().FirstOrDefaultAsync(u => u.Username == username);
-            }, $"Nie udało się pobrać użytkownika o nazwie {username}");
+            },
+            new Dictionary<string, object> { { "Username", username } },
+            $"Nie udało się pobrać użytkownika o nazwie {username}");
         }
 
         public async Task<List<User>> GetAllUsersAsync()
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 return await this.database.Table<User>().ToListAsync();
-            }, "Nie udało się pobrać listy użytkowników");
+            }, null, "Nie udało się pobrać listy użytkowników");
         }
 
         public async Task<int> SaveUserAsync(User user)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (user == null)
                 {
@@ -179,13 +140,15 @@ namespace SledzSpecke.App.Services.Database
                     user.UserId = lastId;
                     return lastId;
                 }
-            }, "Nie udało się zapisać danych użytkownika");
+            },
+            new Dictionary<string, object> { { "User", user?.UserId } },
+            "Nie udało się zapisać danych użytkownika");
         }
 
         public async Task<Models.Specialization> GetSpecializationAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (_specializationCache.TryGetValue(id, out var cachedSpecialization))
                 {
@@ -201,13 +164,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return specialization ?? new Models.Specialization();
-            }, $"Nie udało się pobrać specjalizacji o ID {id}");
+            },
+            new Dictionary<string, object> { { "SpecializationId", id } },
+            $"Nie udało się pobrać specjalizacji o ID {id}");
         }
 
         public async Task<Models.Specialization> GetSpecializationWithModulesAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var specialization = await GetSpecializationAsync(id);
                 if (specialization != null)
@@ -215,13 +180,15 @@ namespace SledzSpecke.App.Services.Database
                     specialization.Modules = await GetModulesAsync(specialization.SpecializationId);
                 }
                 return specialization;
-            }, $"Nie udało się pobrać specjalizacji z modułami o ID {id}");
+            },
+            new Dictionary<string, object> { { "SpecializationId", id } },
+            $"Nie udało się pobrać specjalizacji z modułami o ID {id}");
         }
 
         public async Task<int> SaveSpecializationAsync(Models.Specialization specialization)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (specialization == null)
                 {
@@ -249,22 +216,24 @@ namespace SledzSpecke.App.Services.Database
                     specialization.SpecializationId = lastId;
                     return lastId;
                 }
-            }, "Nie udało się zapisać danych specjalizacji");
+            },
+            new Dictionary<string, object> { { "Specialization", specialization?.SpecializationId } },
+            "Nie udało się zapisać danych specjalizacji");
         }
 
         public async Task<List<Models.Specialization>> GetAllSpecializationsAsync()
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 return await this.database.Table<Models.Specialization>().ToListAsync();
-            }, "Nie udało się pobrać listy specjalizacji");
+            }, null, "Nie udało się pobrać listy specjalizacji");
         }
 
         public async Task<int> UpdateSpecializationAsync(Models.Specialization specialization)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (specialization == null)
                 {
@@ -282,13 +251,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return result;
-            }, "Nie udało się zaktualizować danych specjalizacji");
+            },
+            new Dictionary<string, object> { { "Specialization", specialization?.SpecializationId } },
+            "Nie udało się zaktualizować danych specjalizacji");
         }
 
         public async Task CleanupSpecializationDataAsync(int specializationId)
         {
             await this.InitializeAsync();
-            await SafeExecuteAsync(async () =>
+            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var modules = await GetModulesAsync(specializationId);
                 foreach (var module in modules)
@@ -306,13 +277,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     _moduleCache.Remove(specializationId);
                 }
-            }, $"Nie udało się wyczyścić danych specjalizacji o ID {specializationId}");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId } },
+            $"Nie udało się wyczyścić danych specjalizacji o ID {specializationId}");
         }
 
         public async Task<Module> GetModuleAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var module = await this.database.Table<Module>().FirstOrDefaultAsync(m => m.ModuleId == id);
                 if (module == null)
@@ -322,13 +295,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono modułu o ID {id}");
                 }
                 return module;
-            }, $"Nie udało się pobrać modułu o ID {id}");
+            },
+            new Dictionary<string, object> { { "ModuleId", id } },
+            $"Nie udało się pobrać modułu o ID {id}");
         }
 
         public async Task<List<Module>> GetModulesAsync(int specializationId)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (_moduleCache.TryGetValue(specializationId, out var cachedModules))
                 {
@@ -345,13 +320,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return modules ?? new List<Module>();
-            }, $"Nie udało się pobrać listy modułów dla specjalizacji o ID {specializationId}");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId } },
+            $"Nie udało się pobrać listy modułów dla specjalizacji o ID {specializationId}");
         }
 
         public async Task<int> SaveModuleAsync(Module module)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (module == null)
                 {
@@ -368,13 +345,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(module);
                 }
-            }, "Nie udało się zapisać danych modułu");
+            },
+            new Dictionary<string, object> { { "Module", module?.ModuleId }, { "SpecializationId", module?.SpecializationId } },
+            "Nie udało się zapisać danych modułu");
         }
 
         public async Task<int> UpdateModuleAsync(Module module)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (module == null)
                 {
@@ -390,13 +369,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.UpdateAsync(module);
-            }, "Nie udało się zaktualizować danych modułu");
+            },
+            new Dictionary<string, object> { { "Module", module?.ModuleId }, { "SpecializationId", module?.SpecializationId } },
+            "Nie udało się zaktualizować danych modułu");
         }
 
         public async Task<int> DeleteModuleAsync(Module module)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (module == null)
                 {
@@ -412,13 +393,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(module);
-            }, "Nie udało się usunąć modułu");
+            },
+            new Dictionary<string, object> { { "Module", module?.ModuleId }, { "SpecializationId", module?.SpecializationId } },
+            "Nie udało się usunąć modułu");
         }
 
         public async Task<Internship> GetInternshipAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var internship = await this.database.Table<Internship>().FirstOrDefaultAsync(i => i.InternshipId == id);
                 if (internship == null)
@@ -428,13 +411,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono stażu o ID {id}");
                 }
                 return internship;
-            }, $"Nie udało się pobrać stażu o ID {id}");
+            },
+            new Dictionary<string, object> { { "InternshipId", id } },
+            $"Nie udało się pobrać stażu o ID {id}");
         }
 
         public async Task<List<Internship>> GetInternshipsAsync(int? specializationId = null, int? moduleId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<Internship>();
 
@@ -449,13 +434,18 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy staży");
+            },
+            new Dictionary<string, object> {
+                { "SpecializationId", specializationId },
+                { "ModuleId", moduleId }
+            },
+            "Nie udało się pobrać listy staży");
         }
 
         public async Task<int> SaveInternshipAsync(Internship internship)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (internship == null)
                 {
@@ -472,13 +462,19 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(internship);
                 }
-            }, "Nie udało się zapisać danych stażu");
+            },
+            new Dictionary<string, object> {
+                { "Internship", internship?.InternshipId },
+                { "SpecializationId", internship?.SpecializationId },
+                { "ModuleId", internship?.ModuleId }
+            },
+            "Nie udało się zapisać danych stażu");
         }
 
         public async Task<int> DeleteInternshipAsync(Internship internship)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (internship == null)
                 {
@@ -488,13 +484,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(internship);
-            }, "Nie udało się usunąć stażu");
+            },
+            new Dictionary<string, object> { { "Internship", internship?.InternshipId } },
+            "Nie udało się usunąć stażu");
         }
 
         public async Task<MedicalShift> GetMedicalShiftAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var shift = await this.database.Table<MedicalShift>().FirstOrDefaultAsync(s => s.ShiftId == id);
                 if (shift == null)
@@ -504,13 +502,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono dyżuru o ID {id}");
                 }
                 return shift;
-            }, $"Nie udało się pobrać dyżuru o ID {id}");
+            },
+            new Dictionary<string, object> { { "ShiftId", id } },
+            $"Nie udało się pobrać dyżuru o ID {id}");
         }
 
         public async Task<List<MedicalShift>> GetMedicalShiftsAsync(int? internshipId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<MedicalShift>();
 
@@ -520,13 +520,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy dyżurów");
+            },
+            new Dictionary<string, object> { { "InternshipId", internshipId } },
+            "Nie udało się pobrać listy dyżurów");
         }
 
         public async Task<int> SaveMedicalShiftAsync(MedicalShift shift)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (shift == null)
                 {
@@ -543,13 +545,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(shift);
                 }
-            }, "Nie udało się zapisać danych dyżuru");
+            },
+            new Dictionary<string, object> { { "Shift", shift?.ShiftId }, { "InternshipId", shift?.InternshipId } },
+            "Nie udało się zapisać danych dyżuru");
         }
 
         public async Task<int> DeleteMedicalShiftAsync(MedicalShift shift)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (shift == null)
                 {
@@ -559,13 +563,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(shift);
-            }, "Nie udało się usunąć dyżuru");
+            },
+            new Dictionary<string, object> { { "Shift", shift?.ShiftId } },
+            "Nie udało się usunąć dyżuru");
         }
 
         public async Task<Procedure> GetProcedureAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var procedure = await this.database.Table<Procedure>().FirstOrDefaultAsync(p => p.ProcedureId == id);
                 if (procedure == null)
@@ -575,13 +581,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono procedury o ID {id}");
                 }
                 return procedure;
-            }, $"Nie udało się pobrać procedury o ID {id}");
+            },
+            new Dictionary<string, object> { { "ProcedureId", id } },
+            $"Nie udało się pobrać procedury o ID {id}");
         }
 
         public async Task<List<Procedure>> GetProceduresAsync(int? internshipId = null, string searchText = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<Procedure>();
 
@@ -604,13 +612,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return procedures;
-            }, "Nie udało się pobrać listy procedur");
+            },
+            new Dictionary<string, object> { { "InternshipId", internshipId }, { "SearchText", searchText } },
+            "Nie udało się pobrać listy procedur");
         }
 
         public async Task<int> SaveProcedureAsync(Procedure procedure)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (procedure == null)
                 {
@@ -627,13 +637,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(procedure);
                 }
-            }, "Nie udało się zapisać danych procedury");
+            },
+            new Dictionary<string, object> { { "Procedure", procedure?.ProcedureId }, { "InternshipId", procedure?.InternshipId } },
+            "Nie udało się zapisać danych procedury");
         }
 
         public async Task<int> DeleteProcedureAsync(Procedure procedure)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (procedure == null)
                 {
@@ -643,13 +655,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(procedure);
-            }, "Nie udało się usunąć procedury");
+            },
+            new Dictionary<string, object> { { "Procedure", procedure?.ProcedureId } },
+            "Nie udało się usunąć procedury");
         }
 
         public async Task<Course> GetCourseAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var course = await this.database.Table<Course>().FirstOrDefaultAsync(c => c.CourseId == id);
                 if (course == null)
@@ -659,13 +673,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono kursu o ID {id}");
                 }
                 return course;
-            }, $"Nie udało się pobrać kursu o ID {id}");
+            },
+            new Dictionary<string, object> { { "CourseId", id } },
+            $"Nie udało się pobrać kursu o ID {id}");
         }
 
         public async Task<List<Course>> GetCoursesAsync(int? specializationId = null, int? moduleId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<Course>();
 
@@ -680,13 +696,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy kursów");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId }, { "ModuleId", moduleId } },
+            "Nie udało się pobrać listy kursów");
         }
 
         public async Task<int> SaveCourseAsync(Course course)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (course == null)
                 {
@@ -703,13 +721,19 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(course);
                 }
-            }, "Nie udało się zapisać danych kursu");
+            },
+            new Dictionary<string, object> {
+                { "Course", course?.CourseId },
+                { "SpecializationId", course?.SpecializationId },
+                { "ModuleId", course?.ModuleId }
+            },
+            "Nie udało się zapisać danych kursu");
         }
 
         public async Task<int> DeleteCourseAsync(Course course)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (course == null)
                 {
@@ -719,13 +743,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(course);
-            }, "Nie udało się usunąć kursu");
+            },
+            new Dictionary<string, object> { { "Course", course?.CourseId } },
+            "Nie udało się usunąć kursu");
         }
 
         public async Task<SelfEducation> GetSelfEducationAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var selfEducation = await this.database.Table<SelfEducation>().FirstOrDefaultAsync(s => s.SelfEducationId == id);
                 if (selfEducation == null)
@@ -735,13 +761,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono samokształcenia o ID {id}");
                 }
                 return selfEducation;
-            }, $"Nie udało się pobrać samokształcenia o ID {id}");
+            },
+            new Dictionary<string, object> { { "SelfEducationId", id } },
+            $"Nie udało się pobrać samokształcenia o ID {id}");
         }
 
         public async Task<List<SelfEducation>> GetSelfEducationItemsAsync(int? specializationId = null, int? moduleId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<SelfEducation>();
 
@@ -756,13 +784,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy samokształceń");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId }, { "ModuleId", moduleId } },
+            "Nie udało się pobrać listy samokształceń");
         }
 
         public async Task<int> SaveSelfEducationAsync(SelfEducation selfEducation)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (selfEducation == null)
                 {
@@ -779,13 +809,19 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(selfEducation);
                 }
-            }, "Nie udało się zapisać danych samokształcenia");
+            },
+            new Dictionary<string, object> {
+                { "SelfEducation", selfEducation?.SelfEducationId },
+                { "SpecializationId", selfEducation?.SpecializationId },
+                { "ModuleId", selfEducation?.ModuleId }
+            },
+            "Nie udało się zapisać danych samokształcenia");
         }
 
         public async Task<int> DeleteSelfEducationAsync(SelfEducation selfEducation)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (selfEducation == null)
                 {
@@ -795,13 +831,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(selfEducation);
-            }, "Nie udało się usunąć samokształcenia");
+            },
+            new Dictionary<string, object> { { "SelfEducation", selfEducation?.SelfEducationId } },
+            "Nie udało się usunąć samokształcenia");
         }
 
         public async Task<Publication> GetPublicationAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var publication = await this.database.Table<Publication>().FirstOrDefaultAsync(p => p.PublicationId == id);
                 if (publication == null)
@@ -811,13 +849,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono publikacji o ID {id}");
                 }
                 return publication;
-            }, $"Nie udało się pobrać publikacji o ID {id}");
+            },
+            new Dictionary<string, object> { { "PublicationId", id } },
+            $"Nie udało się pobrać publikacji o ID {id}");
         }
 
         public async Task<List<Publication>> GetPublicationsAsync(int? specializationId = null, int? moduleId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<Publication>();
 
@@ -832,13 +872,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy publikacji");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId }, { "ModuleId", moduleId } },
+            "Nie udało się pobrać listy publikacji");
         }
 
         public async Task<int> SavePublicationAsync(Publication publication)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (publication == null)
                 {
@@ -855,13 +897,19 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(publication);
                 }
-            }, "Nie udało się zapisać danych publikacji");
+            },
+            new Dictionary<string, object> {
+                { "Publication", publication?.PublicationId },
+                { "SpecializationId", publication?.SpecializationId },
+                { "ModuleId", publication?.ModuleId }
+            },
+            "Nie udało się zapisać danych publikacji");
         }
 
         public async Task<int> DeletePublicationAsync(Publication publication)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (publication == null)
                 {
@@ -871,13 +919,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(publication);
-            }, "Nie udało się usunąć publikacji");
+            },
+            new Dictionary<string, object> { { "Publication", publication?.PublicationId } },
+            "Nie udało się usunąć publikacji");
         }
 
         public async Task<EducationalActivity> GetEducationalActivityAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var activity = await this.database.Table<EducationalActivity>().FirstOrDefaultAsync(a => a.ActivityId == id);
                 if (activity == null)
@@ -887,13 +937,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono aktywności edukacyjnej o ID {id}");
                 }
                 return activity;
-            }, $"Nie udało się pobrać aktywności edukacyjnej o ID {id}");
+            },
+            new Dictionary<string, object> { { "ActivityId", id } },
+            $"Nie udało się pobrać aktywności edukacyjnej o ID {id}");
         }
 
         public async Task<List<EducationalActivity>> GetEducationalActivitiesAsync(int? specializationId = null, int? moduleId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<EducationalActivity>();
 
@@ -908,13 +960,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy aktywności edukacyjnych");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId }, { "ModuleId", moduleId } },
+            "Nie udało się pobrać listy aktywności edukacyjnych");
         }
 
         public async Task<int> SaveEducationalActivityAsync(EducationalActivity activity)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (activity == null)
                 {
@@ -931,13 +985,19 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(activity);
                 }
-            }, "Nie udało się zapisać danych aktywności edukacyjnej");
+            },
+            new Dictionary<string, object> {
+                { "Activity", activity?.ActivityId },
+                { "SpecializationId", activity?.SpecializationId },
+                { "ModuleId", activity?.ModuleId }
+            },
+            "Nie udało się zapisać danych aktywności edukacyjnej");
         }
 
         public async Task<int> DeleteEducationalActivityAsync(EducationalActivity activity)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (activity == null)
                 {
@@ -947,13 +1007,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(activity);
-            }, "Nie udało się usunąć aktywności edukacyjnej");
+            },
+            new Dictionary<string, object> { { "Activity", activity?.ActivityId } },
+            "Nie udało się usunąć aktywności edukacyjnej");
         }
 
         public async Task<Absence> GetAbsenceAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var absence = await this.database.Table<Absence>().FirstOrDefaultAsync(a => a.AbsenceId == id);
                 if (absence == null)
@@ -963,22 +1025,26 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono nieobecności o ID {id}");
                 }
                 return absence;
-            }, $"Nie udało się pobrać nieobecności o ID {id}");
+            },
+            new Dictionary<string, object> { { "AbsenceId", id } },
+            $"Nie udało się pobrać nieobecności o ID {id}");
         }
 
         public async Task<List<Absence>> GetAbsencesAsync(int specializationId)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 return await this.database.Table<Absence>().Where(a => a.SpecializationId == specializationId).ToListAsync();
-            }, $"Nie udało się pobrać listy nieobecności dla specjalizacji o ID {specializationId}");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId } },
+            $"Nie udało się pobrać listy nieobecności dla specjalizacji o ID {specializationId}");
         }
 
         public async Task<int> SaveAbsenceAsync(Absence absence)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (absence == null)
                 {
@@ -995,13 +1061,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(absence);
                 }
-            }, "Nie udało się zapisać danych nieobecności");
+            },
+            new Dictionary<string, object> { { "Absence", absence?.AbsenceId }, { "SpecializationId", absence?.SpecializationId } },
+            "Nie udało się zapisać danych nieobecności");
         }
 
         public async Task<int> DeleteAbsenceAsync(Absence absence)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (absence == null)
                 {
@@ -1011,13 +1079,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(absence);
-            }, "Nie udało się usunąć nieobecności");
+            },
+            new Dictionary<string, object> { { "Absence", absence?.AbsenceId } },
+            "Nie udało się usunąć nieobecności");
         }
 
         public async Task<Models.Recognition> GetRecognitionAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var recognition = await this.database.Table<Models.Recognition>().FirstOrDefaultAsync(r => r.RecognitionId == id);
                 if (recognition == null)
@@ -1027,22 +1097,26 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono uznania o ID {id}");
                 }
                 return recognition;
-            }, $"Nie udało się pobrać uznania o ID {id}");
+            },
+            new Dictionary<string, object> { { "RecognitionId", id } },
+            $"Nie udało się pobrać uznania o ID {id}");
         }
 
         public async Task<List<Models.Recognition>> GetRecognitionsAsync(int specializationId)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 return await this.database.Table<Models.Recognition>().Where(r => r.SpecializationId == specializationId).ToListAsync();
-            }, $"Nie udało się pobrać listy uznań dla specjalizacji o ID {specializationId}");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId } },
+            $"Nie udało się pobrać listy uznań dla specjalizacji o ID {specializationId}");
         }
 
         public async Task<int> SaveRecognitionAsync(Models.Recognition recognition)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (recognition == null)
                 {
@@ -1059,13 +1133,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(recognition);
                 }
-            }, "Nie udało się zapisać danych uznania");
+            },
+            new Dictionary<string, object> { { "Recognition", recognition?.RecognitionId }, { "SpecializationId", recognition?.SpecializationId } },
+            "Nie udało się zapisać danych uznania");
         }
 
         public async Task<int> DeleteRecognitionAsync(Models.Recognition recognition)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (recognition == null)
                 {
@@ -1075,13 +1151,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(recognition);
-            }, "Nie udało się usunąć uznania");
+            },
+            new Dictionary<string, object> { { "Recognition", recognition?.RecognitionId } },
+            "Nie udało się usunąć uznania");
         }
 
         public async Task<SpecializationProgram> GetSpecializationProgramAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var program = await this.database.Table<SpecializationProgram>().FirstOrDefaultAsync(p => p.ProgramId == id);
                 if (program == null)
@@ -1091,13 +1169,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono programu specjalizacji o ID {id}");
                 }
                 return program;
-            }, $"Nie udało się pobrać programu specjalizacji o ID {id}");
+            },
+            new Dictionary<string, object> { { "ProgramId", id } },
+            $"Nie udało się pobrać programu specjalizacji o ID {id}");
         }
 
         public async Task<SpecializationProgram> GetSpecializationProgramByCodeAsync(string code, SmkVersion smkVersion)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(code))
                 {
@@ -1108,22 +1188,24 @@ namespace SledzSpecke.App.Services.Database
 
                 return await this.database.Table<SpecializationProgram>()
                     .FirstOrDefaultAsync(p => p.Code == code && p.SmkVersion == smkVersion);
-            }, $"Nie udało się pobrać programu specjalizacji o kodzie {code}");
+            },
+            new Dictionary<string, object> { { "Code", code }, { "SmkVersion", smkVersion } },
+            $"Nie udało się pobrać programu specjalizacji o kodzie {code}");
         }
 
         public async Task<List<SpecializationProgram>> GetAllSpecializationProgramsAsync()
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 return await this.database.Table<SpecializationProgram>().ToListAsync();
-            }, "Nie udało się pobrać listy programów specjalizacji");
+            }, null, "Nie udało się pobrać listy programów specjalizacji");
         }
 
         public async Task<int> SaveSpecializationProgramAsync(SpecializationProgram program)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (program == null)
                 {
@@ -1140,13 +1222,15 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(program);
                 }
-            }, "Nie udało się zapisać danych programu specjalizacji");
+            },
+            new Dictionary<string, object> { { "Program", program?.ProgramId } },
+            "Nie udało się zapisać danych programu specjalizacji");
         }
 
         public async Task MigrateShiftDataForModulesAsync()
         {
             await this.InitializeAsync();
-            await SafeExecuteAsync(async () =>
+            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 bool columnExists = false;
 
@@ -1213,13 +1297,14 @@ namespace SledzSpecke.App.Services.Database
                         }
                     }
                 }
-            }, "Nie udało się zmigrować danych dyżurów do modułów");
+            },
+            null, "Nie udało się zmigrować danych dyżurów do modułów", 2, 2000);
         }
 
         public async Task<RealizedInternshipNewSMK> GetRealizedInternshipNewSMKAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var internship = await this.database.Table<RealizedInternshipNewSMK>().FirstOrDefaultAsync(i => i.RealizedInternshipId == id);
                 if (internship == null)
@@ -1229,13 +1314,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono zrealizowanego stażu w nowym SMK o ID {id}");
                 }
                 return internship;
-            }, $"Nie udało się pobrać zrealizowanego stażu w nowym SMK o ID {id}");
+            },
+            new Dictionary<string, object> { { "RealizedInternshipId", id } },
+            $"Nie udało się pobrać zrealizowanego stażu w nowym SMK o ID {id}");
         }
 
         public async Task<List<RealizedInternshipNewSMK>> GetRealizedInternshipsNewSMKAsync(int? specializationId = null, int? moduleId = null, int? internshipRequirementId = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<RealizedInternshipNewSMK>();
 
@@ -1255,13 +1342,19 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy zrealizowanych staży w nowym SMK");
+            },
+            new Dictionary<string, object> {
+                { "SpecializationId", specializationId },
+                { "ModuleId", moduleId },
+                { "InternshipRequirementId", internshipRequirementId }
+            },
+            "Nie udało się pobrać listy zrealizowanych staży w nowym SMK");
         }
 
         public async Task<int> SaveRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (internship == null)
                 {
@@ -1278,13 +1371,20 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(internship);
                 }
-            }, "Nie udało się zapisać danych zrealizowanego stażu w nowym SMK");
+            },
+            new Dictionary<string, object> {
+                { "RealizedInternship", internship?.RealizedInternshipId },
+                { "SpecializationId", internship?.SpecializationId },
+                { "ModuleId", internship?.ModuleId },
+                { "InternshipRequirementId", internship?.InternshipRequirementId }
+            },
+            "Nie udało się zapisać danych zrealizowanego stażu w nowym SMK");
         }
 
         public async Task<int> DeleteRealizedInternshipNewSMKAsync(RealizedInternshipNewSMK internship)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (internship == null)
                 {
@@ -1294,13 +1394,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(internship);
-            }, "Nie udało się usunąć zrealizowanego stażu w nowym SMK");
+            },
+            new Dictionary<string, object> { { "RealizedInternship", internship?.RealizedInternshipId } },
+            "Nie udało się usunąć zrealizowanego stażu w nowym SMK");
         }
 
         public async Task<RealizedInternshipOldSMK> GetRealizedInternshipOldSMKAsync(int id)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var internship = await this.database.Table<RealizedInternshipOldSMK>().FirstOrDefaultAsync(i => i.RealizedInternshipId == id);
                 if (internship == null)
@@ -1310,13 +1412,15 @@ namespace SledzSpecke.App.Services.Database
                         $"Nie znaleziono zrealizowanego stażu w starym SMK o ID {id}");
                 }
                 return internship;
-            }, $"Nie udało się pobrać zrealizowanego stażu w starym SMK o ID {id}");
+            },
+            new Dictionary<string, object> { { "RealizedInternshipId", id } },
+            $"Nie udało się pobrać zrealizowanego stażu w starym SMK o ID {id}");
         }
 
         public async Task<List<RealizedInternshipOldSMK>> GetRealizedInternshipsOldSMKAsync(int? specializationId = null, int? year = null)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var query = this.database.Table<RealizedInternshipOldSMK>();
 
@@ -1331,13 +1435,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await query.ToListAsync();
-            }, "Nie udało się pobrać listy zrealizowanych staży w starym SMK");
+            },
+            new Dictionary<string, object> { { "SpecializationId", specializationId }, { "Year", year } },
+            "Nie udało się pobrać listy zrealizowanych staży w starym SMK");
         }
 
         public async Task<int> SaveRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (internship == null)
                 {
@@ -1354,13 +1460,19 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return await this.database.InsertAsync(internship);
                 }
-            }, "Nie udało się zapisać danych zrealizowanego stażu w starym SMK");
+            },
+            new Dictionary<string, object> {
+                { "RealizedInternship", internship?.RealizedInternshipId },
+                { "SpecializationId", internship?.SpecializationId },
+                { "Year", internship?.Year }
+            },
+            "Nie udało się zapisać danych zrealizowanego stażu w starym SMK");
         }
 
         public async Task<int> DeleteRealizedInternshipOldSMKAsync(RealizedInternshipOldSMK internship)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (internship == null)
                 {
@@ -1370,139 +1482,141 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.DeleteAsync(internship);
-            }, "Nie udało się usunąć zrealizowanego stażu w starym SMK");
+            },
+            new Dictionary<string, object> { { "RealizedInternship", internship?.RealizedInternshipId } },
+            "Nie udało się usunąć zrealizowanego stażu w starym SMK");
         }
 
         public async Task MigrateInternshipDataAsync()
         {
             await this.InitializeAsync();
-            await SafeExecuteAsync(async () =>
+            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
-                // Sprawdzenie istnienia kolumny w tabeli
-                bool internshipRequirementIdExists = false;
-                bool moduleIdExists = false;
+            // Sprawdzenie istnienia kolumny w tabeli
+            bool internshipRequirementIdExists = false;
+            bool moduleIdExists = false;
 
-                try
-                {
-                    var testQuery = "SELECT InternshipRequirementId FROM RealizedInternshipNewSMK LIMIT 1";
-                    await this.database.ExecuteScalarAsync<int>(testQuery);
-                    internshipRequirementIdExists = true;
-                }
-                catch
-                {
-                    await this.database.ExecuteAsync("ALTER TABLE RealizedInternshipNewSMK ADD COLUMN InternshipRequirementId INTEGER");
-                }
+            try
+            {
+                var testQuery = "SELECT InternshipRequirementId FROM RealizedInternshipNewSMK LIMIT 1";
+                await this.database.ExecuteScalarAsync<int>(testQuery);
+                internshipRequirementIdExists = true;
+            }
+            catch
+            {
+                await this.database.ExecuteAsync("ALTER TABLE RealizedInternshipNewSMK ADD COLUMN InternshipRequirementId INTEGER");
+            }
 
-                try
-                {
-                    var testQuery = "SELECT ModuleId FROM RealizedInternshipNewSMK LIMIT 1";
-                    await this.database.ExecuteScalarAsync<int>(testQuery);
-                    moduleIdExists = true;
-                }
-                catch
-                {
-                    await this.database.ExecuteAsync("ALTER TABLE RealizedInternshipNewSMK ADD COLUMN ModuleId INTEGER");
-                }
+            try
+            {
+                var testQuery = "SELECT ModuleId FROM RealizedInternshipNewSMK LIMIT 1";
+                await this.database.ExecuteScalarAsync<int>(testQuery);
+                moduleIdExists = true;
+            }
+            catch
+            {
+                await this.database.ExecuteAsync("ALTER TABLE RealizedInternshipNewSMK ADD COLUMN ModuleId INTEGER");
+            }
 
-                // Sprawdź i napraw istniejące realizacje z null InternshipName
-                try
-                {
-                    var realizationsWithNullNames = await this.database.Table<RealizedInternshipOldSMK>()
-                        .Where(r => r.InternshipName == null)
-                        .ToListAsync();
+            // Sprawdź i napraw istniejące realizacje z null InternshipName
+            try
+            {
+                var realizationsWithNullNames = await this.database.Table<RealizedInternshipOldSMK>()
+                    .Where(r => r.InternshipName == null)
+                    .ToListAsync();
 
-                    foreach (var realization in realizationsWithNullNames)
+                foreach (var realization in realizationsWithNullNames)
+                {
+                    _loggingService.LogInformation($"Znaleziono realizację z pustą nazwą stażu, ID: {realization.RealizedInternshipId}");
+                    // Próba naprawy - szukamy w oryginalnych stażach
+                    var originalInternship = await this.database.Table<Internship>()
+                        .FirstOrDefaultAsync(i => i.SpecializationId == realization.SpecializationId &&
+                                                  i.DaysCount == realization.DaysCount);
+
+                    if (originalInternship != null && !string.IsNullOrEmpty(originalInternship.InternshipName))
                     {
-                        Debug.WriteLine($"Znaleziono realizację z pustą nazwą stażu, ID: {realization.RealizedInternshipId}");
-                        // Próba naprawy - szukamy w oryginalnych stażach
-                        var originalInternship = await this.database.Table<Internship>()
-                            .FirstOrDefaultAsync(i => i.SpecializationId == realization.SpecializationId &&
-                                                      i.DaysCount == realization.DaysCount);
-
-                        if (originalInternship != null && !string.IsNullOrEmpty(originalInternship.InternshipName))
-                        {
-                            realization.InternshipName = originalInternship.InternshipName;
-                            await this.database.UpdateAsync(realization);
-                            Debug.WriteLine($"Naprawiono nazwę stażu: {realization.InternshipName}");
-                        }
-                        else
-                        {
-                            // Jeśli nie udało się znaleźć odpowiedniego stażu, użyj wartości domyślnej
-                            realization.InternshipName = "Staż bez nazwy";
-                            await this.database.UpdateAsync(realization);
-                            Debug.WriteLine($"Ustawiono domyślną nazwę stażu dla ID: {realization.RealizedInternshipId}");
-                        }
+                        realization.InternshipName = originalInternship.InternshipName;
+                        await this.database.UpdateAsync(realization);
+                        _loggingService.LogInformation($"Naprawiono nazwę stażu: {realization.InternshipName}");
+                    }
+                    else
+                    {
+                        // Jeśli nie udało się znaleźć odpowiedniego stażu, użyj wartości domyślnej
+                        realization.InternshipName = "Staż bez nazwy";
+                        await this.database.UpdateAsync(realization);
+                        _loggingService.LogInformation($"Ustawiono domyślną nazwę stażu dla ID: {realization.RealizedInternshipId}");
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                _loggingService.LogError(ex, $"Błąd podczas naprawy realizacji: {ex.Message}", new Dictionary<string, object> { { "ExceptionDetails", ex } });
+            }
+
+            // Pobierz aktualną wersję SMK użytkownika
+            var userId = await Helpers.SettingsHelper.GetCurrentUserIdAsync();
+            var user = await this.GetUserAsync(userId);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            // Pobranie wszystkich istniejących staży
+            var internships = await this.database.Table<Internship>().Where(i => i.InternshipId > 0).ToListAsync();
+
+            // Sprawdź, czy już istnieją realizacje dla tych staży
+            var existingNewSMK = await this.database.Table<RealizedInternshipNewSMK>().ToListAsync();
+            var existingOldSMK = await this.database.Table<RealizedInternshipOldSMK>().ToListAsync();
+
+            // Jeśli realizacje już istnieją, pomijamy migrację
+            if ((user.SmkVersion == SmkVersion.New && existingNewSMK.Count > 0) ||
+                (user.SmkVersion == SmkVersion.Old && existingOldSMK.Count > 0))
+            {
+                return;
+            }
+
+            // Migracja danych
+            foreach (var internship in internships)
+            {
+                if (user.SmkVersion == SmkVersion.New)
                 {
-                    Debug.WriteLine($"Błąd podczas naprawy realizacji: {ex.Message}");
-                }
-
-                // Pobierz aktualną wersję SMK użytkownika
-                var userId = await Helpers.SettingsHelper.GetCurrentUserIdAsync();
-                var user = await this.GetUserAsync(userId);
-
-                if (user == null)
-                {
-                    return;
-                }
-
-                // Pobranie wszystkich istniejących staży
-                var internships = await this.database.Table<Internship>().Where(i => i.InternshipId > 0).ToListAsync();
-
-                // Sprawdź, czy już istnieją realizacje dla tych staży
-                var existingNewSMK = await this.database.Table<RealizedInternshipNewSMK>().ToListAsync();
-                var existingOldSMK = await this.database.Table<RealizedInternshipOldSMK>().ToListAsync();
-
-                // Jeśli realizacje już istnieją, pomijamy migrację
-                if ((user.SmkVersion == SmkVersion.New && existingNewSMK.Count > 0) ||
-                    (user.SmkVersion == SmkVersion.Old && existingOldSMK.Count > 0))
-                {
-                    return;
-                }
-
-                // Migracja danych
-                foreach (var internship in internships)
-                {
-                    if (user.SmkVersion == SmkVersion.New)
+                    // Ignorujemy staże z ID < 0 (to są wymagania stażowe, nie realizacje)
+                    if (internship.InternshipId < 0)
                     {
-                        // Ignorujemy staże z ID < 0 (to są wymagania stażowe, nie realizacje)
-                        if (internship.InternshipId < 0)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        var existingInternship = existingNewSMK
-                            .FirstOrDefault(i => i.SpecializationId == internship.SpecializationId &&
-                                               i.InternshipName == internship.InternshipName);
+                    var existingInternship = existingNewSMK
+                        .FirstOrDefault(i => i.SpecializationId == internship.SpecializationId &&
+                                           i.InternshipName == internship.InternshipName);
 
-                        if (existingInternship != null)
-                        {
-                            continue;
-                        }
+                    if (existingInternship != null)
+                    {
+                        continue;
+                    }
 
-                        var realizedInternship = new RealizedInternshipNewSMK
-                        {
-                            SpecializationId = internship.SpecializationId,
-                            ModuleId = internship.ModuleId,
-                            InternshipRequirementId = internship.InternshipId, // Ustawienie ID wymagania
-                            InternshipName = internship.InternshipName ?? "Staż bez nazwy", // Upewniamy się, że nazwa nie jest null
-                            InstitutionName = internship.InstitutionName,
-                            DepartmentName = internship.DepartmentName,
-                            StartDate = internship.StartDate,
-                            EndDate = internship.EndDate,
-                            DaysCount = internship.DaysCount,
-                            IsCompleted = internship.IsCompleted,
-                            IsApproved = internship.IsApproved,
-                            IsRecognition = internship.IsRecognition,
-                            RecognitionReason = internship.RecognitionReason,
-                            RecognitionDaysReduction = internship.RecognitionDaysReduction,
-                            IsPartialRealization = internship.IsPartialRealization,
-                            SupervisorName = internship.SupervisorName,
-                            SyncStatus = internship.SyncStatus,
-                            AdditionalFields = internship.AdditionalFields
-                        };
+                    var realizedInternship = new RealizedInternshipNewSMK
+                    {
+                        SpecializationId = internship.SpecializationId,
+                        ModuleId = internship.ModuleId,
+                        InternshipRequirementId = internship.InternshipId, // Ustawienie ID wymagania
+                        InternshipName = internship.InternshipName ?? "Staż bez nazwy", // Upewniamy się, że nazwa nie jest null
+                        InstitutionName = internship.InstitutionName,
+                        DepartmentName = internship.DepartmentName,
+                        StartDate = internship.StartDate,
+                        EndDate = internship.EndDate,
+                        DaysCount = internship.DaysCount,
+                        IsCompleted = internship.IsCompleted,
+                        IsApproved = internship.IsApproved,
+                        IsRecognition = internship.IsRecognition,
+                        RecognitionReason = internship.RecognitionReason,
+                        RecognitionDaysReduction = internship.RecognitionDaysReduction,
+                        IsPartialRealization = internship.IsPartialRealization,
+                        SupervisorName = internship.SupervisorName,
+                        SyncStatus = internship.SyncStatus,
+                        AdditionalFields = internship.AdditionalFields
+                    };
 
                         await this.database.InsertAsync(realizedInternship);
                     }
@@ -1545,13 +1659,14 @@ namespace SledzSpecke.App.Services.Database
                         await this.database.InsertAsync(realizedInternship);
                     }
                 }
-            }, "Nie udało się zmigrować danych stażowych");
+            },
+            null, "Nie udało się zmigrować danych stażowych", 2, 2000);
         }
 
         public async Task<bool> TableExists(string tableName)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(tableName))
                 {
@@ -1563,24 +1678,27 @@ namespace SledzSpecke.App.Services.Database
                 var result = await this.database.ExecuteScalarAsync<int>(
                     "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", tableName);
                 return result > 0;
-            }, $"Nie udało się sprawdzić istnienia tabeli {tableName}");
+            },
+            new Dictionary<string, object> { { "TableName", tableName } },
+            $"Nie udało się sprawdzić istnienia tabeli {tableName}");
         }
 
         public async Task<List<string>> ListTables()
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 var tableInfos = await this.database.QueryAsync<TableInfo>(
                     "SELECT name FROM sqlite_master WHERE type='table'");
                 return tableInfos.Select(t => t.name).ToList();
-            }, "Nie udało się pobrać listy tabel");
+            },
+            null, "Nie udało się pobrać listy tabel");
         }
 
         public async Task DropTableIfExists(string tableName)
         {
             await this.InitializeAsync();
-            await SafeExecuteAsync(async () =>
+            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(tableName))
                 {
@@ -1590,13 +1708,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 await this.database.ExecuteAsync($"DROP TABLE IF EXISTS {tableName}");
-            }, $"Nie udało się usunąć tabeli {tableName}");
+            },
+            new Dictionary<string, object> { { "TableName", tableName } },
+            $"Nie udało się usunąć tabeli {tableName}");
         }
 
         public async Task<int> GetTableRowCount(string tableName)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(tableName))
                 {
@@ -1614,20 +1734,22 @@ namespace SledzSpecke.App.Services.Database
                 {
                     return -1; // Tabela nie istnieje lub inny błąd
                 }
-            }, $"Nie udało się pobrać liczby wierszy w tabeli {tableName}");
+            },
+            new Dictionary<string, object> { { "TableName", tableName } },
+            $"Nie udało się pobrać liczby wierszy w tabeli {tableName}");
         }
 
         public async Task FixRealizedInternshipNames()
         {
             await this.InitializeAsync();
-            await SafeExecuteAsync(async () =>
+            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 // Pobierz wszystkie realizacje bez poprawnej nazwy
                 var realizationsToFix = await this.database.Table<RealizedInternshipOldSMK>()
                     .Where(r => r.InternshipName == "Staż bez nazwy" || r.InternshipName == null)
                     .ToListAsync();
 
-                Debug.WriteLine($"Znaleziono {realizationsToFix.Count} realizacji do naprawy");
+                _loggingService.LogInformation($"Znaleziono {realizationsToFix.Count} realizacji do naprawy");
 
                 if (realizationsToFix.Count == 0)
                 {
@@ -1641,7 +1763,7 @@ namespace SledzSpecke.App.Services.Database
 
                 if (internships.Count == 0)
                 {
-                    Debug.WriteLine("Nie znaleziono wymagań stażowych do naprawy nazw");
+                    _loggingService.LogWarning("Nie znaleziono wymagań stażowych do naprawy nazw");
                     return;
                 }
 
@@ -1656,15 +1778,16 @@ namespace SledzSpecke.App.Services.Database
                         await this.database.UpdateAsync(realization);
                     }
 
-                    Debug.WriteLine($"Naprawiono nazwy realizacji, przypisując '{firstInternship.InternshipName}'");
+                    _loggingService.LogInformation($"Naprawiono nazwy realizacji, przypisując '{firstInternship.InternshipName}'");
                 }
-            }, "Nie udało się naprawić nazw zrealizowanych staży");
+            },
+            null, "Nie udało się naprawić nazw zrealizowanych staży", 2, 1500);
         }
 
         public async Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : new()
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(query))
                 {
@@ -1674,13 +1797,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.QueryAsync<T>(query, args);
-            }, "Nie udało się wykonać zapytania do bazy danych");
+            },
+            new Dictionary<string, object> { { "Query", query } },
+            "Nie udało się wykonać zapytania do bazy danych");
         }
 
         public async Task<int> ExecuteAsync(string query, params object[] args)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (string.IsNullOrEmpty(query))
                 {
@@ -1690,13 +1815,15 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.ExecuteAsync(query, args);
-            }, "Nie udało się wykonać polecenia w bazie danych");
+            },
+            new Dictionary<string, object> { { "Query", query } },
+            "Nie udało się wykonać polecenia w bazie danych");
         }
 
         public async Task<int> UpdateAsync<T>(T item)
         {
             await this.InitializeAsync();
-            return await SafeExecuteAsync(async () =>
+            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
             {
                 if (item == null)
                 {
@@ -1706,13 +1833,16 @@ namespace SledzSpecke.App.Services.Database
                 }
 
                 return await this.database.UpdateAsync(item);
-            }, "Nie udało się zaktualizować danych w bazie");
+            },
+            new Dictionary<string, object> { { "ItemType", typeof(T).Name } },
+            "Nie udało się zaktualizować danych w bazie");
         }
 
         public void ClearCache()
         {
             _specializationCache.Clear();
             _moduleCache.Clear();
+            _loggingService.LogInformation("Cache wyczyszczony");
         }
 
         private class TableInfo

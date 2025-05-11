@@ -82,7 +82,7 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             try
             {
-                // Validation before attempting login
+                // Walidacja danych wejściowych
                 if (string.IsNullOrWhiteSpace(Username))
                 {
                     throw new InvalidInputException(
@@ -97,8 +97,9 @@ namespace SledzSpecke.App.ViewModels.Authentication
                         "Hasło jest wymagane.");
                 }
 
-                // Use SafeExecute from BaseViewModel
-                bool success = await SafeExecuteAsync(
+                // Próba logowania z ponawianiem - używamy nowej metody z ponawianiem
+                // dla operacji sieciowych lub bazodanowych
+                bool success = await SafeExecuteWithRetryAsync(
                     async () => await this.authService.LoginAsync(this.Username, this.Password),
                     "Próba logowania zakończyła się niepowodzeniem. Sprawdź dane logowania i spróbuj ponownie."
                 );
@@ -117,28 +118,13 @@ namespace SledzSpecke.App.ViewModels.Authentication
                 }
                 else
                 {
-                    // This will be handled by the ExceptionHandler if login fails with an exception,
-                    // but we handle the false result explicitly
+                    // To będzie obsłużone przez ExceptionHandler, jeśli logowanie nie powiedzie się z wyjątkiem,
+                    // ale obsługujemy wynik false jawnie
                     await this.dialogService.DisplayAlertAsync(
                         "Błąd logowania",
                         "Nieprawidłowa nazwa użytkownika lub hasło.",
                         "OK");
                 }
-            }
-            catch (InvalidInputException)
-            {
-                // This will be caught and handled by the SafeExecute method
-                // No need to handle here unless you want custom behavior
-                throw;
-            }
-            catch (Exception ex)
-            {
-                // Fallback in case ExceptionHandler fails
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd logowania",
-                    "Wystąpił nieoczekiwany błąd podczas logowania.",
-                    "OK");
-                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
             }
             finally
             {
