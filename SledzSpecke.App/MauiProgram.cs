@@ -3,7 +3,9 @@ using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.FileSystem;
+using SledzSpecke.App.Services.Logging;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
@@ -48,6 +50,8 @@ namespace SledzSpecke.App
 
         private static void RegisterServices(IServiceCollection services)
         {
+            services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<IExceptionHandlerService, ExceptionHandlerService>();
             services.AddSingleton<IFileAccessHelper, FileAccessHelper>();
             services.AddSingleton<App>();
             services.AddSingleton<NavigationPage>();

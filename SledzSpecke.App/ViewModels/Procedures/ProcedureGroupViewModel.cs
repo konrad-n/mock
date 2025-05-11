@@ -3,8 +3,11 @@ using System.Collections.Specialized;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.ApplicationModel;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 
 namespace SledzSpecke.App.ViewModels.Procedures
@@ -13,6 +16,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
     {
         private readonly IProcedureService procedureService;
         private readonly IDialogService dialogService;
+        private readonly IExceptionHandlerService exceptionHandler;
 
         private ProcedureRequirement requirement;
         private ProcedureSummary statistics;
@@ -27,13 +31,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
             List<RealizedProcedureOldSMK> procedures,
             ProcedureSummary statistics,
             IProcedureService procedureService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IExceptionHandlerService exceptionHandler = null)
         {
             this.requirement = requirement;
             this.statistics = statistics;
             this.procedures = new ObservableCollection<RealizedProcedureOldSMK>(procedures);
             this.procedureService = procedureService;
             this.dialogService = dialogService;
+            this.exceptionHandler = exceptionHandler;
             this.hasLoadedData = false;
             this.isLoading = false;
 
@@ -131,45 +137,29 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.isLoading = true;
                 this.IsExpanded = true;
 
-                try
+                await SafeExecuteAsync(async () =>
                 {
-                    await Task.Run(async () =>
-                    {
-                        var relatedProcedures = await this.procedureService.GetOldSMKProceduresAsync(
-                            requirementId: this.requirement.Id);
+                    var relatedProcedures = await this.procedureService.GetOldSMKProceduresAsync(
+                        requirementId: this.requirement.Id);
 
-                        MainThread.BeginInvokeOnMainThread(() =>
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        this.Procedures.Clear();
+                        foreach (var procedure in relatedProcedures)
                         {
-                            this.Procedures.Clear();
-                            foreach (var procedure in relatedProcedures)
-                            {
-                                this.Procedures.Add(procedure);
-                            }
+                            this.Procedures.Add(procedure);
+                        }
 
-                            if (this.Procedures.Count > 0 && this.SelectedProcedure == null)
-                            {
-                                this.SelectedProcedure = this.Procedures[0];
-                            }
+                        if (this.Procedures.Count > 0 && this.SelectedProcedure == null)
+                        {
+                            this.SelectedProcedure = this.Procedures[0];
+                        }
 
-                            this.hasLoadedData = true;
-                            this.isLoading = false;
-                            this.OnPropertyChanged(nameof(this.IsLoading));
-                        });
-                    });
-                }
-                catch (Exception ex)
-                {
-                    MainThread.BeginInvokeOnMainThread(async () =>
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Wystąpił problem podczas ładowania procedur.",
-                            "OK");
-
+                        this.hasLoadedData = true;
                         this.isLoading = false;
                         this.OnPropertyChanged(nameof(this.IsLoading));
                     });
-                }
+                }, "Wystąpił problem podczas ładowania procedur.");
             }
             else
             {
@@ -184,12 +174,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            var navigationParameter = new Dictionary<string, object>
+            await SafeExecuteAsync(async () =>
             {
-                { "ProcedureId", procedure.ProcedureId.ToString() }
-            };
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "ProcedureId", procedure.ProcedureId.ToString() }
+                };
 
-            await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
+                await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
+            }, "Wystąpił problem podczas przejścia do edycji procedury.");
         }
 
         public async Task OnDeleteProcedure(RealizedProcedureOldSMK procedure)
@@ -199,65 +192,90 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            bool confirm = await this.dialogService.DisplayAlertAsync(
-                "Potwierdzenie",
-                "Czy na pewno chcesz usunąć tę procedurę?",
-                "Tak",
-                "Nie");
-
-            if (confirm)
+            await SafeExecuteAsync(async () =>
             {
+                bool confirm = await this.dialogService.DisplayAlertAsync(
+                    "Potwierdzenie",
+                    "Czy na pewno chcesz usunąć tę procedurę?",
+                    "Tak",
+                    "Nie");
 
-                bool result = await this.procedureService.DeleteOldSMKProcedureAsync(procedure.ProcedureId);
-
-                if (result)
+                if (confirm)
                 {
-                    if (this.SelectedProcedure == procedure)
+                    bool result = await this.procedureService.DeleteOldSMKProcedureAsync(procedure.ProcedureId);
+
+                    if (result)
                     {
-                        int index = this.Procedures.IndexOf(procedure);
-                        if (index >= 0 && this.Procedures.Count > 1)
+                        if (this.SelectedProcedure == procedure)
                         {
-                            int newIndex = Math.Min(index, this.Procedures.Count - 2);
-                            this.SelectedProcedure = this.Procedures[newIndex];
+                            int index = this.Procedures.IndexOf(procedure);
+                            if (index >= 0 && this.Procedures.Count > 1)
+                            {
+                                int newIndex = Math.Min(index, this.Procedures.Count - 2);
+                                this.SelectedProcedure = this.Procedures[newIndex];
+                            }
+                            else
+                            {
+                                this.SelectedProcedure = null;
+                            }
                         }
-                        else
+
+                        this.Procedures.Remove(procedure);
+
+                        if (procedure.Code == "A - operator")
                         {
-                            this.SelectedProcedure = null;
+                            this.statistics.CompletedCountA--;
                         }
+                        else if (procedure.Code == "B - asysta")
+                        {
+                            this.statistics.CompletedCountB--;
+                        }
+
+                        this.OnPropertyChanged(nameof(this.StatsInfo));
+                        this.OnPropertyChanged(nameof(this.ApprovedInfo));
                     }
-
-                    this.Procedures.Remove(procedure);
-
-                    if (procedure.Code == "A - operator")
+                    else
                     {
-                        this.statistics.CompletedCountA--;
+                        throw new DomainLogicException(
+                            "Failed to delete procedure",
+                            "Nie udało się usunąć procedury.");
                     }
-                    else if (procedure.Code == "B - asysta")
-                    {
-                        this.statistics.CompletedCountB--;
-                    }
-
-                    this.OnPropertyChanged(nameof(this.StatsInfo));
-                    this.OnPropertyChanged(nameof(this.ApprovedInfo));
                 }
-                else
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się usunąć procedury.",
-                        "OK");
-                }
-            }
+            }, "Wystąpił problem podczas usuwania procedury.");
         }
 
         private async Task OnAddProcedure()
         {
-            var navigationParameter = new Dictionary<string, object>
+            await SafeExecuteAsync(async () =>
             {
-                { "RequirementId", this.requirement.Id.ToString() }
-            };
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "RequirementId", this.requirement.Id.ToString() }
+                };
 
-            await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
+                await Shell.Current.GoToAsync("AddEditOldSMKProcedure", navigationParameter);
+            }, "Wystąpił problem podczas przejścia do dodawania procedury.");
+        }
+
+        // Helper method for error handling
+        private async Task SafeExecuteAsync(Func<Task> operation, string errorMessage)
+        {
+            if (this.exceptionHandler != null)
+            {
+                await this.exceptionHandler.ExecuteAsync(operation, null, errorMessage);
+            }
+            else
+            {
+                try
+                {
+                    await operation();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                    await this.dialogService.DisplayAlertAsync("Błąd", errorMessage, "OK");
+                }
+            }
         }
     }
 }

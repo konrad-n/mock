@@ -1,8 +1,10 @@
 ﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -30,7 +32,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
         public AddEditNewSMKProcedureViewModel(
             IProcedureService procedureService,
             IDialogService dialogService,
-            ISpecializationService specializationService)
+            ISpecializationService specializationService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.procedureService = procedureService;
             this.dialogService = dialogService;
@@ -129,21 +132,31 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            if (int.TryParse(this.procedureId, out int id))
+            await SafeExecuteAsync(async () =>
             {
-                this.procedure = await this.procedureService.GetNewSMKProcedureAsync(id);
-                if (this.procedure != null)
+                if (int.TryParse(this.procedureId, out int id))
                 {
-                    this.isEdit = true;
-                    this.Title = "Edytuj realizację procedury";
+                    this.procedure = await this.procedureService.GetNewSMKProcedureAsync(id);
+                    if (this.procedure != null)
+                    {
+                        this.isEdit = true;
+                        this.Title = "Edytuj realizację procedury";
 
-                    this.CountA = this.procedure.CountA;
-                    this.CountB = this.procedure.CountB;
-                    this.StartDate = this.procedure.StartDate;
-                    this.EndDate = this.procedure.EndDate;
-                    this.ProcedureName = this.procedure.ProcedureName;
+                        this.CountA = this.procedure.CountA;
+                        this.CountB = this.procedure.CountB;
+                        this.StartDate = this.procedure.StartDate;
+                        this.EndDate = this.procedure.EndDate;
+                        this.ProcedureName = this.procedure.ProcedureName;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            $"Procedure with ID {id} not found",
+                            "Nie znaleziono realizacji procedury o podanym identyfikatorze.");
+                    }
                 }
-            }
+            }, "Wystąpił problem podczas ładowania danych realizacji procedury.");
+
             this.IsBusy = false;
         }
 
@@ -156,15 +169,25 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            if (int.TryParse(this.requirementId, out int id))
+            await SafeExecuteAsync(async () =>
             {
-                var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync();
-                var requirement = requirements.FirstOrDefault(r => r.Id == id);
-                if (requirement != null)
+                if (int.TryParse(this.requirementId, out int id))
                 {
-                    this.ProcedureName = requirement.Name;
+                    var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync();
+                    var requirement = requirements.FirstOrDefault(r => r.Id == id);
+
+                    if (requirement != null)
+                    {
+                        this.ProcedureName = requirement.Name;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            $"Requirement with ID {id} not found",
+                            "Nie znaleziono wymagania procedurowego o podanym identyfikatorze.");
+                    }
                 }
-            }
+            }, "Wystąpił problem podczas ładowania danych wymagania procedury.");
 
             this.IsBusy = false;
         }
@@ -173,6 +196,30 @@ namespace SledzSpecke.App.ViewModels.Procedures
         {
             return (this.CountA > 0 || this.CountB > 0) &&
                    this.StartDate <= this.EndDate;
+        }
+
+        private async Task<bool> ValidateInputsAsync()
+        {
+            if (string.IsNullOrWhiteSpace(this.ProcedureName))
+            {
+                throw new InvalidInputException("Procedure name is required", "Nazwa procedury jest wymagana.");
+            }
+
+            if (this.CountA <= 0 && this.CountB <= 0)
+            {
+                throw new InvalidInputException(
+                    "At least one procedure count must be greater than zero",
+                    "Przynajmniej jedna z liczb wykonanych procedur musi być większa od zera.");
+            }
+
+            if (this.StartDate > this.EndDate)
+            {
+                throw new InvalidInputException(
+                    "Start date must be before or equal to end date",
+                    "Data rozpoczęcia musi być wcześniejsza lub równa dacie zakończenia.");
+            }
+
+            return true;
         }
 
         private async Task OnSaveAsync()
@@ -184,54 +231,70 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            var procedureToSave = this.procedure ?? new RealizedProcedureNewSMK();
-            var currentModule = await this.specializationService.GetCurrentModuleAsync();
-
-            if (currentModule == null)
+            try
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie można określić bieżącego modułu.",
-                    "OK");
-                return;
+                await SafeExecuteAsync(async () =>
+                {
+                    await ValidateInputsAsync();
+
+                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                    if (currentModule == null)
+                    {
+                        throw new ResourceNotFoundException(
+                            "Current module not found",
+                            "Nie można określić bieżącego modułu.");
+                    }
+
+                    var procedureToSave = this.procedure ?? new RealizedProcedureNewSMK();
+
+                    procedureToSave.CountA = this.CountA;
+                    procedureToSave.CountB = this.CountB;
+                    procedureToSave.StartDate = this.StartDate;
+                    procedureToSave.EndDate = this.EndDate;
+                    procedureToSave.ProcedureName = this.ProcedureName;
+                    procedureToSave.ModuleId = currentModule.ModuleId;
+
+                    if (!this.isEdit && !string.IsNullOrEmpty(this.requirementId) &&
+                        int.TryParse(this.requirementId, out int reqId))
+                    {
+                        procedureToSave.ProcedureRequirementId = reqId;
+                    }
+
+                    bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedureToSave);
+
+                    if (success)
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Sukces",
+                            this.isEdit ? "Realizacja procedury została zaktualizowana." : "Realizacja procedury została dodana.",
+                            "OK");
+
+                        await Shell.Current.GoToAsync("..");
+                    }
+                    else
+                    {
+                        throw new DomainLogicException(
+                            "Failed to save procedure realization",
+                            "Nie udało się zapisać realizacji procedury.");
+                    }
+                }, "Wystąpił problem podczas zapisywania realizacji procedury.");
             }
-
-            procedureToSave.CountA = this.CountA;
-            procedureToSave.CountB = this.CountB;
-            procedureToSave.StartDate = this.StartDate;
-            procedureToSave.EndDate = this.EndDate;
-            procedureToSave.ProcedureName = this.ProcedureName;
-            procedureToSave.ModuleId = currentModule.ModuleId;
-
-            if (!this.isEdit && !string.IsNullOrEmpty(this.requirementId))
+            catch (InvalidInputException ex)
             {
-                procedureToSave.ProcedureRequirementId = int.Parse(this.requirementId);
+                await this.dialogService.DisplayAlertAsync("Błąd walidacji", ex.UserFriendlyMessage, "OK");
             }
-
-            bool success = await this.procedureService.SaveNewSMKProcedureAsync(procedureToSave);
-
-            if (success)
+            finally
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    this.isEdit ? "Realizacja procedury została zaktualizowana." : "Realizacja procedury została dodana.",
-                    "OK");
-
-                await Shell.Current.GoToAsync("..");
+                this.IsBusy = false;
             }
-            else
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się zapisać realizacji procedury.",
-                    "OK");
-            }
-            this.IsBusy = false;
         }
 
         private async Task OnCancelAsync()
         {
-            await Shell.Current.GoToAsync("..");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("..");
+            }, "Wystąpił problem podczas anulowania edycji.");
         }
     }
 }

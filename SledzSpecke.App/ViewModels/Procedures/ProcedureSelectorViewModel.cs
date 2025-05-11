@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Procedures
@@ -10,7 +11,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
     {
         private readonly IAuthService authService;
 
-        public ProcedureSelectorViewModel(IAuthService authService)
+        public ProcedureSelectorViewModel(
+            IAuthService authService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.authService = authService;
             this.Title = "Procedury";
@@ -24,29 +27,38 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         public async Task InitializeAsync()
         {
-            var user = await this.authService.GetCurrentUserAsync();
-
-            if (user != null)
+            await SafeExecuteAsync(async () =>
             {
-                if (user.SmkVersion == SmkVersion.Old)
+                var user = await this.authService.GetCurrentUserAsync();
+
+                if (user != null)
                 {
-                    await Shell.Current.GoToAsync("OldSMKProcedures");
+                    if (user.SmkVersion == SmkVersion.Old)
+                    {
+                        await Shell.Current.GoToAsync("OldSMKProcedures");
+                    }
+                    else
+                    {
+                        await Shell.Current.GoToAsync("NewSMKProcedures");
+                    }
                 }
-                else
-                {
-                    await Shell.Current.GoToAsync("NewSMKProcedures");
-                }
-            }
+            }, "Wystąpił problem podczas inicjalizacji widoku procedur.");
         }
 
         private async Task NavigateToOldSMKAsync()
         {
-            await Shell.Current.GoToAsync("OldSMKProcedures");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("OldSMKProcedures");
+            }, "Wystąpił problem podczas nawigacji do widoku procedur (Stary SMK).");
         }
 
         private async Task NavigateToNewSMKAsync()
         {
-            await Shell.Current.GoToAsync("NewSMKProcedures");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("NewSMKProcedures");
+            }, "Wystąpił problem podczas nawigacji do widoku procedur (Nowy SMK).");
         }
     }
 }

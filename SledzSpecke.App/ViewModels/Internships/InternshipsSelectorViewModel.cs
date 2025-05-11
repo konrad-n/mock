@@ -1,12 +1,13 @@
 ﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Internships
 {
     public class InternshipsSelectorViewModel : BaseViewModel
     {
-        public InternshipsSelectorViewModel()
+        public InternshipsSelectorViewModel(IExceptionHandlerService exceptionHandler = null) : base(exceptionHandler)
         {
             this.Title = "Staże";
 
@@ -19,12 +20,18 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         private async Task NavigateToOldSMKAsync()
         {
-            await Shell.Current.GoToAsync("OldSMKInternships");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("OldSMKInternships");
+            }, "Nie udało się przejść do okna staży (Stary SMK).");
         }
 
         private async Task NavigateToNewSMKAsync()
         {
-            await Shell.Current.GoToAsync("NewSMKInternships");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("NewSMKInternships");
+            }, "Nie udało się przejść do okna staży (Nowy SMK).");
         }
     }
 }

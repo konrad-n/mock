@@ -1,10 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.ApplicationModel;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -35,7 +38,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             IProcedureService procedureService,
             IAuthService authService,
             IDialogService dialogService,
-            ISpecializationService specializationService)
+            ISpecializationService specializationService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.procedureService = procedureService;
             this.authService = authService;
@@ -135,44 +139,52 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-            if (specialization == null)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    throw new ResourceNotFoundException(
+                        "Active specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
+                }
 
-            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-            this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
-            var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
 
-            if (currentModule == null)
-            {
-                return;
-            }
+                if (currentModule == null)
+                {
+                    throw new ResourceNotFoundException(
+                        "Current module not found",
+                        "Nie znaleziono aktualnego modułu.");
+                }
 
-            this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
-            this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
-            this.ModuleTitle = currentModule.Name;
+                this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
+                this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
+                this.ModuleTitle = currentModule.Name;
 
-            var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
-            this.ProcedureRequirements.Clear();
+                var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
+                this.ProcedureRequirements.Clear();
 
-            for (int i = 0; i < requirements.Count; i++)
-            {
-                var requirement = requirements[i];
-                var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
+                for (int i = 0; i < requirements.Count; i++)
+                {
+                    var requirement = requirements[i];
+                    var stats = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId, requirement.Id);
 
-                var viewModel = new ProcedureRequirementViewModel(
-                    requirement,
-                    stats,
-                    new List<RealizedProcedureNewSMK>(),
-                    i + 1,
-                    currentModule.ModuleId,
-                    this.procedureService,
-                    this.dialogService);
+                    var viewModel = new ProcedureRequirementViewModel(
+                        requirement,
+                        stats,
+                        new List<RealizedProcedureNewSMK>(),
+                        i + 1,
+                        currentModule.ModuleId,
+                        this.procedureService,
+                        this.dialogService,
+                        this.ExceptionHandler);
 
-                this.ProcedureRequirements.Add(viewModel);
-            }
+                    this.ProcedureRequirements.Add(viewModel);
+                }
+            }, "Wystąpił problem podczas ładowania danych procedur.");
 
             this.IsBusy = false;
         }
@@ -184,71 +196,93 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            this.isLoadingData = true;
-
-            int currentCount = this.ProcedureRequirements.Count;
-
-            if (currentCount >= this.allRequirements.Count)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
+                this.isLoadingData = true;
 
-            int itemsToLoad = Math.Min(this.batchSize, this.allRequirements.Count - currentCount);
-            var requirementsToLoad = this.allRequirements.Skip(currentCount).Take(itemsToLoad).ToList();
+                int currentCount = this.ProcedureRequirements.Count;
 
-            for (int i = 0; i < requirementsToLoad.Count; i++)
-            {
-                var requirement = requirementsToLoad[i];
-                var stats = await this.procedureService.GetProcedureSummaryAsync(
-                    this.CurrentModuleId, requirement.Id);
-
-                var viewModel = new ProcedureRequirementViewModel(
-                    requirement,
-                    stats,
-                    new List<RealizedProcedureNewSMK>(),
-                    currentCount + i + 1,
-                    this.CurrentModuleId,
-                    this.procedureService,
-                    this.dialogService);
-
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                if (currentCount >= this.allRequirements.Count)
                 {
-                    this.ProcedureRequirements.Add(viewModel);
-                });
+                    return;
+                }
 
-                await Task.Delay(50);
-            }
+                int itemsToLoad = Math.Min(this.batchSize, this.allRequirements.Count - currentCount);
+                var requirementsToLoad = this.allRequirements.Skip(currentCount).Take(itemsToLoad).ToList();
+
+                for (int i = 0; i < requirementsToLoad.Count; i++)
+                {
+                    var requirement = requirementsToLoad[i];
+                    var stats = await this.procedureService.GetProcedureSummaryAsync(
+                        this.CurrentModuleId, requirement.Id);
+
+                    var viewModel = new ProcedureRequirementViewModel(
+                        requirement,
+                        stats,
+                        new List<RealizedProcedureNewSMK>(),
+                        currentCount + i + 1,
+                        this.CurrentModuleId,
+                        this.procedureService,
+                        this.dialogService,
+                        this.ExceptionHandler);
+
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        this.ProcedureRequirements.Add(viewModel);
+                    });
+
+                    await Task.Delay(50);
+                }
+            }, "Wystąpił problem podczas ładowania dodatkowych procedur.");
+
             this.isLoadingData = false;
         }
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-            if (specialization == null)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
-
-            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-
-            if (moduleType == "Basic")
-            {
-                var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
-                if (basicModule != null)
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
-                    await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
-                    this.CurrentModuleId = basicModule.ModuleId;
+                    throw new ResourceNotFoundException(
+                        "Active specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
                 }
-            }
-            else if (moduleType == "Specialistic")
-            {
-                var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
-                if (specialisticModule != null)
+
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+
+                if (moduleType == "Basic")
                 {
-                    await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
-                    this.CurrentModuleId = specialisticModule.ModuleId;
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                    if (basicModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
+                        this.CurrentModuleId = basicModule.ModuleId;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Basic module not found",
+                            "Nie znaleziono modułu podstawowego.");
+                    }
                 }
-            }
+                else if (moduleType == "Specialistic")
+                {
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                    if (specialisticModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
+                        this.CurrentModuleId = specialisticModule.ModuleId;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Specialistic module not found",
+                            "Nie znaleziono modułu specjalistycznego.");
+                    }
+                }
+            }, $"Wystąpił problem podczas przełączania modułu na {moduleType}.");
         }
 
         public void Dispose()

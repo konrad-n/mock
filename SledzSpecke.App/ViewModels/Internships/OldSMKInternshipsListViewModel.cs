@@ -1,11 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -23,11 +25,13 @@ namespace SledzSpecke.App.ViewModels.Internships
         private bool basicModuleSelected;
         private bool specialisticModuleSelected;
         private bool hasTwoModules;
+        private bool isLoading = false;
 
         public OldSMKInternshipsListViewModel(
             ISpecializationService specializationService,
             IDialogService dialogService,
-            IAuthService authService)
+            IAuthService authService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.specializationService = specializationService;
             this.dialogService = dialogService;
@@ -82,175 +86,193 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-            if (specialization == null)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
-
-            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-
-            if (moduleType == "Basic")
-            {
-                var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
-                if (basicModule != null)
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
-                    await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
-                    this.BasicModuleSelected = true;
-                    this.SpecialisticModuleSelected = false;
+                    throw new ResourceNotFoundException(
+                        "Specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
                 }
-            }
-            else if (moduleType == "Specialistic")
-            {
-                var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
-                if (specialisticModule != null)
+
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+
+                if (moduleType == "Basic")
                 {
-                    await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
-                    this.BasicModuleSelected = false;
-                    this.SpecialisticModuleSelected = true;
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                    if (basicModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
+                        this.BasicModuleSelected = true;
+                        this.SpecialisticModuleSelected = false;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Basic module not found",
+                            "Nie znaleziono modułu podstawowego.");
+                    }
                 }
-            }
-            await this.LoadDataAsync();
+                else if (moduleType == "Specialistic")
+                {
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                    if (specialisticModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
+                        this.BasicModuleSelected = false;
+                        this.SpecialisticModuleSelected = true;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Specialistic module not found",
+                            "Nie znaleziono modułu specjalistycznego.");
+                    }
+                }
+
+                await this.LoadDataAsync();
+            }, $"Nie udało się przełączyć na moduł {moduleType}.");
         }
-
-        private bool isLoading = false;
 
         public async Task LoadDataAsync()
         {
-            if (this.IsBusy || this.isLoading)
+            if (this.IsBusy || isLoading)
             {
                 return;
             }
 
-            this.isLoading = true;
+            isLoading = true;
             this.IsBusy = true;
             this.IsRefreshing = true;
 
             try
             {
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
+                await SafeExecuteAsync(async () =>
                 {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie znaleziono aktywnej specjalizacji.",
-                        "OK");
-                    return;
-                }
+                    var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                    if (specialization == null)
+                    {
+                        throw new ResourceNotFoundException(
+                            "Specialization not found",
+                            "Nie znaleziono aktywnej specjalizacji.");
+                    }
 
-                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
-                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                    var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+                    this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+                    var currentModule = await this.specializationService.GetCurrentModuleAsync();
 
-                if (currentModule != null)
-                {
-                    this.ModuleTitle = currentModule.Name;
-                    this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
-                    this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
-                }
+                    if (currentModule != null)
+                    {
+                        this.ModuleTitle = currentModule.Name;
+                        this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
+                        this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Current module not found",
+                            "Nie znaleziono aktualnego modułu.");
+                    }
 
-                var internships = await this.specializationService.GetInternshipsAsync(currentModule?.ModuleId);
+                    var internships = await this.specializationService.GetInternshipsAsync(currentModule?.ModuleId);
 
-                int startYear = 1;
-                int endYear = 2;
+                    int startYear = 1;
+                    int endYear = 2;
 
-                if (currentModule != null && currentModule.Type == ModuleType.Specialistic)
-                {
-                    startYear = 3;
-                    endYear = 6; 
-                }
+                    if (currentModule != null && currentModule.Type == ModuleType.Specialistic)
+                    {
+                        startYear = 3;
+                        endYear = 6;
+                    }
 
-                var dbService = IPlatformApplication.Current.Services.GetRequiredService<SledzSpecke.App.Services.Database.IDatabaseService>();
-                var allDbRealizations = await dbService.QueryAsync<RealizedInternshipOldSMK>(
-                    "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ?", specialization.SpecializationId);
-                var allRealizedInternships = new List<RealizedInternshipOldSMK>();
+                    var dbService = IPlatformApplication.Current.Services.GetRequiredService<SledzSpecke.App.Services.Database.IDatabaseService>();
+                    var allDbRealizations = await dbService.QueryAsync<RealizedInternshipOldSMK>(
+                        "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ?", specialization.SpecializationId);
+                    var allRealizedInternships = new List<RealizedInternshipOldSMK>();
 
-                // Najpierw dodaj realizacje z Year=0, które nie są przypisane do konkretnego roku
-                var yearZeroRealizations = await dbService.QueryAsync<RealizedInternshipOldSMK>(
-                    "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ? AND Year = 0",
-                    specialization.SpecializationId);
+                    // Get realizations from Year=0 first (not assigned to a specific year)
+                    var yearZeroRealizations = await dbService.QueryAsync<RealizedInternshipOldSMK>(
+                        "SELECT * FROM RealizedInternshipOldSMK WHERE SpecializationId = ? AND Year = 0",
+                        specialization.SpecializationId);
 
-                foreach (var r in yearZeroRealizations)
-                {
-                    allRealizedInternships.Add(r);
-                }
+                    foreach (var r in yearZeroRealizations)
+                    {
+                        allRealizedInternships.Add(r);
+                    }
 
-                for (int year = startYear; year <= endYear; year++)
-                {
-                    var yearRealizations = await this.specializationService.GetRealizedInternshipsOldSMKAsync(year);
+                    for (int year = startYear; year <= endYear; year++)
+                    {
+                        var yearRealizations = await this.specializationService.GetRealizedInternshipsOldSMKAsync(year);
+                        allRealizedInternships.AddRange(yearRealizations.Where(r => r.Year == year));
+                    }
 
-                    allRealizedInternships.AddRange(yearRealizations.Where(r => r.Year == year));
-                }
+                    var viewModels = new List<InternshipStageViewModel>();
 
-                var viewModels = new List<InternshipStageViewModel>();
-                foreach (var internship in internships)
-                {
-                    var realizationsForThisInternship = allRealizedInternships
-                        .Where(r => {
-                            string realizationName = r.InternshipName ?? "null";
-                            string requirementName = internship.InternshipName ?? "null";
+                    // Get the exception handler to pass to the InternshipStageViewModel
+                    var exceptionHandler = IPlatformApplication.Current.Services.GetService<IExceptionHandlerService>();
 
-                            if (string.IsNullOrEmpty(r.InternshipName) || r.InternshipName == "Staż bez nazwy")
-                            {
-                                if (internships.IndexOf(internship) == 0)
+                    foreach (var internship in internships)
+                    {
+                        var realizationsForThisInternship = allRealizedInternships
+                            .Where(r => {
+                                string realizationName = r.InternshipName ?? "null";
+                                string requirementName = internship.InternshipName ?? "null";
+
+                                if (string.IsNullOrEmpty(r.InternshipName) || r.InternshipName == "Staż bez nazwy")
                                 {
-                                    return true;
+                                    if (internships.IndexOf(internship) == 0)
+                                    {
+                                        return true;
+                                    }
+                                    return false;
                                 }
-                                return false;
-                            }
 
-                            bool exactMatch = r.InternshipName != null &&
-                                r.InternshipName.Equals(internship.InternshipName, StringComparison.OrdinalIgnoreCase);
-                            bool realizationContainsRequirement = r.InternshipName != null &&
-                                r.InternshipName.Contains(internship.InternshipName, StringComparison.OrdinalIgnoreCase);
-                            bool requirementContainsRealization = internship.InternshipName != null &&
-                                internship.InternshipName.Contains(r.InternshipName, StringComparison.OrdinalIgnoreCase);
+                                bool exactMatch = r.InternshipName != null &&
+                                    r.InternshipName.Equals(internship.InternshipName, StringComparison.OrdinalIgnoreCase);
+                                bool realizationContainsRequirement = r.InternshipName != null &&
+                                    r.InternshipName.Contains(internship.InternshipName, StringComparison.OrdinalIgnoreCase);
+                                bool requirementContainsRealization = internship.InternshipName != null &&
+                                    internship.InternshipName.Contains(r.InternshipName, StringComparison.OrdinalIgnoreCase);
 
-                            string cleanRealizationName = realizationName
-                                .Replace(" ", "").Replace("-", "").Replace("_", "").ToLowerInvariant();
-                            string cleanRequirementName = requirementName
-                                .Replace(" ", "").Replace("-", "").Replace("_", "").ToLowerInvariant();
-                            bool fuzzyMatch = cleanRealizationName.Contains(cleanRequirementName) ||
-                                             cleanRequirementName.Contains(cleanRealizationName);
+                                string cleanRealizationName = realizationName
+                                    .Replace(" ", "").Replace("-", "").Replace("_", "").ToLowerInvariant();
+                                string cleanRequirementName = requirementName
+                                    .Replace(" ", "").Replace("-", "").Replace("_", "").ToLowerInvariant();
+                                bool fuzzyMatch = cleanRealizationName.Contains(cleanRequirementName) ||
+                                                cleanRequirementName.Contains(cleanRealizationName);
 
-                            bool matches = exactMatch || realizationContainsRequirement || requirementContainsRealization || fuzzyMatch;
+                                bool matches = exactMatch || realizationContainsRequirement || requirementContainsRealization || fuzzyMatch;
 
-                            return matches;
-                        })
-                        .ToList();
+                                return matches;
+                            })
+                            .ToList();
 
-                    var viewModel = new InternshipStageViewModel(
-                        internship,
-                        null, // Puste dla starego SMK
-                        realizationsForThisInternship,
-                        this.specializationService,
-                        this.dialogService,
-                        this.authService,
-                        currentModule?.ModuleId);
+                        var viewModel = new InternshipStageViewModel(
+                            internship,
+                            null, // Empty for old SMK
+                            realizationsForThisInternship,
+                            this.specializationService,
+                            this.dialogService,
+                            this.authService,
+                            exceptionHandler,
+                            currentModule?.ModuleId);
 
-                    viewModels.Add(viewModel);
-                }
+                        viewModels.Add(viewModel);
+                    }
 
-                this.InternshipRequirements.Clear();
-                foreach (var viewModel in viewModels)
-                {
-                    this.InternshipRequirements.Add(viewModel);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"BŁĄD podczas ładowania danych: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił błąd podczas ładowania danych. Spróbuj ponownie.",
-                    "OK");
+                    this.InternshipRequirements.Clear();
+                    foreach (var viewModel in viewModels)
+                    {
+                        this.InternshipRequirements.Add(viewModel);
+                    }
+                }, "Wystąpił błąd podczas ładowania danych. Spróbuj ponownie.");
             }
             finally
             {
                 this.IsBusy = false;
                 this.IsRefreshing = false;
-                this.isLoading = false;
+                isLoading = false;
             }
         }
     }

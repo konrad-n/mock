@@ -1,9 +1,11 @@
 ﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -24,7 +26,8 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         public AddEditInternshipViewModel(
             ISpecializationService specializationService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.specializationService = specializationService;
             this.dialogService = dialogService;
@@ -106,7 +109,10 @@ namespace SledzSpecke.App.ViewModels.Internships
 
             this.IsBusy = true;
 
-            // Dodatkowy kod inicjalizujący, jeśli potrzebny
+            await SafeExecuteAsync(async () =>
+            {
+                // Dodatkowy kod inicjalizujący, jeśli potrzebny
+            }, "Nie udało się zainicjalizować ekranu.");
 
             this.IsBusy = false;
         }
@@ -120,22 +126,24 @@ namespace SledzSpecke.App.ViewModels.Internships
 
             this.IsBusy = true;
 
-            var loadedInternship = await this.specializationService.GetInternshipAsync(internshipId);
-            if (loadedInternship != null)
+            await SafeExecuteAsync(async () =>
             {
-                this.IsEdit = true;
-                this.Title = "Edytuj staż";
-                this.Internship = loadedInternship;
-            }
-            else
-            {
-                this.IsEdit = false;
-                this.Title = "Dodaj staż";
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie znaleziono stażu o podanym identyfikatorze.",
-                    "OK");
-            }
+                var loadedInternship = await this.specializationService.GetInternshipAsync(internshipId);
+                if (loadedInternship != null)
+                {
+                    this.IsEdit = true;
+                    this.Title = "Edytuj staż";
+                    this.Internship = loadedInternship;
+                }
+                else
+                {
+                    this.IsEdit = false;
+                    this.Title = "Dodaj staż";
+                    throw new ResourceNotFoundException(
+                        $"Internship with ID {internshipId} not found",
+                        "Nie znaleziono stażu o podanym identyfikatorze.");
+                }
+            }, "Nie udało się załadować stażu.");
 
             this.IsBusy = false;
         }
@@ -149,19 +157,34 @@ namespace SledzSpecke.App.ViewModels.Internships
 
             this.IsBusy = true;
 
-            var currentModule = await this.specializationService.GetCurrentModuleAsync();
-            if (currentModule != null)
+            await SafeExecuteAsync(async () =>
             {
-                var internships = await this.specializationService.GetInternshipsAsync(currentModule.ModuleId);
-                var requirement = internships.FirstOrDefault(i => i.InternshipId == requirementId);
-
-                if (requirement != null)
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule != null)
                 {
-                    this.Internship.InternshipName = requirement.InternshipName;
-                    this.Internship.DaysCount = requirement.DaysCount;
-                    this.Internship.EndDate = this.Internship.StartDate.AddDays(requirement.DaysCount - 1);
+                    var internships = await this.specializationService.GetInternshipsAsync(currentModule.ModuleId);
+                    var requirement = internships.FirstOrDefault(i => i.InternshipId == requirementId);
+
+                    if (requirement != null)
+                    {
+                        this.Internship.InternshipName = requirement.InternshipName;
+                        this.Internship.DaysCount = requirement.DaysCount;
+                        this.Internship.EndDate = this.Internship.StartDate.AddDays(requirement.DaysCount - 1);
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            $"Internship requirement with ID {requirementId} not found",
+                            "Nie znaleziono wymagania stażowego o podanym identyfikatorze.");
+                    }
                 }
-            }
+                else
+                {
+                    throw new ResourceNotFoundException(
+                        "Current module not found",
+                        "Nie znaleziono aktualnego modułu.");
+                }
+            }, "Nie udało się załadować wymagania stażowego.");
 
             this.IsBusy = false;
         }
@@ -175,84 +198,83 @@ namespace SledzSpecke.App.ViewModels.Internships
 
             this.IsBusy = true;
 
-            if (string.IsNullOrWhiteSpace(this.Internship.InstitutionName))
+            try
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nazwa placówki realizującej szkolenie jest wymagana.",
-                    "OK");
+                await SafeExecuteAsync(async () =>
+                {
+                    // Validate input data
+                    if (string.IsNullOrWhiteSpace(this.Internship.InstitutionName))
+                    {
+                        throw new InvalidInputException(
+                            "Institution name is required",
+                            "Nazwa placówki realizującej szkolenie jest wymagana.");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(this.Internship.DepartmentName))
+                    {
+                        throw new InvalidInputException(
+                            "Department name is required",
+                            "Nazwa komórki organizacyjnej jest wymagana.");
+                    }
+
+                    if (this.Internship.DaysCount <= 0)
+                    {
+                        throw new InvalidInputException(
+                            "Days count must be greater than zero",
+                            "Liczba dni musi być większa od zera.");
+                    }
+
+                    if (this.Internship.EndDate < this.Internship.StartDate)
+                    {
+                        throw new InvalidInputException(
+                            "End date cannot be earlier than start date",
+                            "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.");
+                    }
+
+                    // Calculate days
+                    TimeSpan duration = this.Internship.EndDate - this.Internship.StartDate;
+                    this.Internship.DaysCount = duration.Days + 1;
+
+                    bool success;
+                    if (this.IsEdit)
+                    {
+                        success = await this.specializationService.UpdateInternshipAsync(this.Internship);
+                    }
+                    else
+                    {
+                        this.Internship.ModuleId = this.moduleId;
+                        success = await this.specializationService.AddInternshipAsync(this.Internship);
+                    }
+
+                    if (success)
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Sukces",
+                            this.IsEdit ? "Staż został zaktualizowany." : "Staż został dodany.",
+                            "OK");
+
+                        await Shell.Current.GoToAsync("/OldSMKInternships");
+                    }
+                    else
+                    {
+                        throw new DomainLogicException(
+                            "Failed to save internship",
+                            "Nie udało się zapisać stażu. Sprawdź poprawność danych.");
+                    }
+                }, "Wystąpił problem podczas zapisywania stażu.");
+            }
+            finally
+            {
                 this.IsBusy = false;
-                return;
             }
-
-            if (string.IsNullOrWhiteSpace(this.Internship.DepartmentName))
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nazwa komórki organizacyjnej jest wymagana.",
-                    "OK");
-                this.IsBusy = false;
-                return;
-            }
-
-            if (this.Internship.DaysCount <= 0)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Liczba dni musi być większa od zera.",
-                    "OK");
-                this.IsBusy = false;
-                return;
-            }
-
-            if (this.Internship.EndDate < this.Internship.StartDate)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.",
-                    "OK");
-                this.IsBusy = false;
-                return;
-            }
-
-            // Obliczanie liczby dni między datami
-            TimeSpan duration = this.Internship.EndDate - this.Internship.StartDate;
-            this.Internship.DaysCount = duration.Days + 1;
-
-            bool success;
-            if (this.IsEdit)
-            {
-                success = await this.specializationService.UpdateInternshipAsync(this.Internship);
-            }
-            else
-            {
-                this.Internship.ModuleId = this.moduleId;
-                success = await this.specializationService.AddInternshipAsync(this.Internship);
-            }
-
-            if (success)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    this.IsEdit ? "Staż został zaktualizowany." : "Staż został dodany.",
-                    "OK");
-
-                await Shell.Current.GoToAsync("/OldSMKInternships");
-            }
-            else
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się zapisać stażu. Sprawdź poprawność danych.",
-                    "OK");
-            }
-
-            this.IsBusy = false;
         }
 
         private async Task CancelAsync()
         {
-            await Shell.Current.GoToAsync("..");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("..");
+            }, "Nie udało się wykonać operacji anulowania.");
         }
     }
 }

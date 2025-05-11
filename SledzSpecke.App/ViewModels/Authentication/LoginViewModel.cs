@@ -2,8 +2,10 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.Authentication
@@ -17,7 +19,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private string password;
         private bool rememberMe;
 
-        public LoginViewModel(IAuthService authService, IDialogService dialogService)
+        public LoginViewModel(
+            IAuthService authService,
+            IDialogService dialogService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.authService = authService;
             this.dialogService = dialogService;
@@ -75,29 +80,70 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            bool success = await this.authService.LoginAsync(this.Username, this.Password);
-
-            if (success)
+            try
             {
-                var appShell = IPlatformApplication.Current.Services.GetService<AppShell>();
-                if (appShell != null)
+                // Validation before attempting login
+                if (string.IsNullOrWhiteSpace(Username))
                 {
-                    Application.Current.MainPage = appShell;
+                    throw new InvalidInputException(
+                        "Username is required",
+                        "Nazwa użytkownika jest wymagana.");
+                }
+
+                if (string.IsNullOrWhiteSpace(Password))
+                {
+                    throw new InvalidInputException(
+                        "Password is required",
+                        "Hasło jest wymagane.");
+                }
+
+                // Use SafeExecute from BaseViewModel
+                bool success = await SafeExecuteAsync(
+                    async () => await this.authService.LoginAsync(this.Username, this.Password),
+                    "Próba logowania zakończyła się niepowodzeniem. Sprawdź dane logowania i spróbuj ponownie."
+                );
+
+                if (success)
+                {
+                    var appShell = IPlatformApplication.Current.Services.GetService<AppShell>();
+                    if (appShell != null)
+                    {
+                        Application.Current.MainPage = appShell;
+                    }
+                    else
+                    {
+                        Application.Current.MainPage = new AppShell(this.authService);
+                    }
                 }
                 else
                 {
-                    Application.Current.MainPage = new AppShell(this.authService);
+                    // This will be handled by the ExceptionHandler if login fails with an exception,
+                    // but we handle the false result explicitly
+                    await this.dialogService.DisplayAlertAsync(
+                        "Błąd logowania",
+                        "Nieprawidłowa nazwa użytkownika lub hasło.",
+                        "OK");
                 }
             }
-            else
+            catch (InvalidInputException)
             {
+                // This will be caught and handled by the SafeExecute method
+                // No need to handle here unless you want custom behavior
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Fallback in case ExceptionHandler fails
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd logowania",
-                    "Nieprawidłowa nazwa użytkownika lub hasło.",
+                    "Wystąpił nieoczekiwany błąd podczas logowania.",
                     "OK");
+                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
             }
-
-            this.IsBusy = false;
+            finally
+            {
+                this.IsBusy = false;
+            }
         }
 
         private async Task OnGoToRegisterAsync()
@@ -107,12 +153,15 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            if (Application.Current.MainPage is NavigationPage navigationPage)
+            await SafeExecuteAsync(async () =>
             {
-                var registerViewModel = IPlatformApplication.Current.Services.GetRequiredService<RegisterViewModel>();
-                var registerPage = new Views.Authentication.RegisterPage(registerViewModel);
-                await navigationPage.PushAsync(registerPage);
-            }
+                if (Application.Current.MainPage is NavigationPage navigationPage)
+                {
+                    var registerViewModel = IPlatformApplication.Current.Services.GetRequiredService<RegisterViewModel>();
+                    var registerPage = new Views.Authentication.RegisterPage(registerViewModel);
+                    await navigationPage.PushAsync(registerPage);
+                }
+            }, "Nie można przejść do ekranu rejestracji.");
 
             this.IsBusy = false;
         }

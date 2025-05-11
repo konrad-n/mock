@@ -5,14 +5,16 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Dispatching;
+using Microsoft.Maui.ApplicationModel;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
@@ -34,7 +36,8 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             IMedicalShiftsService medicalShiftsService,
             IAuthService authService,
             IDialogService dialogService,
-            ISpecializationService specializationService)
+            ISpecializationService specializationService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.medicalShiftsService = medicalShiftsService;
             this.authService = authService;
@@ -78,7 +81,6 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             await this.LoadDataAsync();
         }
 
-
         public ObservableCollection<RealizedMedicalShiftOldSMK> Shifts
         {
             get => this.shifts;
@@ -118,57 +120,78 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             this.IsBusy = true;
 
-            var module = await this.specializationService.GetCurrentModuleAsync();
-            if (module != null)
+            await SafeExecuteAsync(async () =>
             {
-                this.ModuleTitle = module.Name;
-            }
+                var module = await this.specializationService.GetCurrentModuleAsync();
+                if (module != null)
+                {
+                    this.ModuleTitle = module.Name;
+                }
+                else
+                {
+                    throw new ResourceNotFoundException(
+                        "Current module not found",
+                        "Nie znaleziono aktualnego modułu.");
+                }
 
-            var years = await this.medicalShiftsService.GetAvailableYearsAsync();
-            this.AvailableYears.Clear();
+                var years = await this.medicalShiftsService.GetAvailableYearsAsync();
+                this.AvailableYears.Clear();
 
-            foreach (var year in years)
-            {
-                this.AvailableYears.Add(year);
-            }
+                foreach (var year in years)
+                {
+                    this.AvailableYears.Add(year);
+                }
 
-            this.OnPropertyChanged(nameof(AvailableYears));
+                this.OnPropertyChanged(nameof(AvailableYears));
 
-            if (this.AvailableYears.Contains(1))
-            {
-                this.selectedYear = 1;
-                this.OnPropertyChanged(nameof(SelectedYear));
+                if (this.AvailableYears.Contains(1))
+                {
+                    this.selectedYear = 1;
+                    this.OnPropertyChanged(nameof(SelectedYear));
 
-                var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(1);
-                MainThread.BeginInvokeOnMainThread(() => {
+                    var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(1);
+
+                    await MainThread.InvokeOnMainThreadAsync(() => {
+                        this.Shifts.Clear();
+                        foreach (var shift in shifts)
+                        {
+                            this.Shifts.Add(shift);
+                        }
+                    });
+
+                    this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: 1);
+                    this.OnPropertyChanged(nameof(Summary));
+                }
+                else if (this.AvailableYears.Count > 0)
+                {
+                    int firstYear = this.AvailableYears[0];
+                    this.selectedYear = firstYear;
+                    this.OnPropertyChanged(nameof(SelectedYear));
+
+                    var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(firstYear);
+
+                    await MainThread.InvokeOnMainThreadAsync(() => {
+                        this.Shifts.Clear();
+                        foreach (var shift in shifts)
+                        {
+                            this.Shifts.Add(shift);
+                        }
+                    });
+
+                    this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: firstYear);
+                    this.OnPropertyChanged(nameof(Summary));
+                }
+                else
+                {
+                    // No years available, probably first time
+                    this.AvailableYears.Add(1); // Add default year 1
+                    this.selectedYear = 1;
+                    this.OnPropertyChanged(nameof(SelectedYear));
                     this.Shifts.Clear();
-                    foreach (var shift in shifts)
-                    {
-                        this.Shifts.Add(shift);
-                    }
-                });
-                this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: 1);
-                this.OnPropertyChanged(nameof(Summary));
-            }
-            else if (this.AvailableYears.Count > 0)
-            {
-                int firstYear = this.AvailableYears[0];
-                this.selectedYear = firstYear;
-                this.OnPropertyChanged(nameof(SelectedYear));
-
-                var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(firstYear);
-
-                MainThread.BeginInvokeOnMainThread(() => {
-                    this.Shifts.Clear();
-                    foreach (var shift in shifts)
-                    {
-                        this.Shifts.Add(shift);
-                    }
-                });
-
-                this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: firstYear);
-                this.OnPropertyChanged(nameof(Summary));
-            }
+                    this.Summary = new MedicalShiftsSummary();
+                    this.OnPropertyChanged(nameof(Summary));
+                }
+            }, "Wystąpił problem podczas ładowania dostępnych lat specjalizacji.");
 
             this.IsBusy = false;
         }
@@ -183,15 +206,18 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
             this.IsBusy = true;
             this.IsRefreshing = true;
 
-            var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(this.SelectedYear);
-
-            this.Shifts.Clear();
-            foreach (var shift in shifts)
+            await SafeExecuteAsync(async () =>
             {
-                this.Shifts.Add(shift);
-            }
+                var shifts = await this.medicalShiftsService.GetOldSMKShiftsAsync(this.SelectedYear);
 
-            this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: this.SelectedYear);
+                this.Shifts.Clear();
+                foreach (var shift in shifts)
+                {
+                    this.Shifts.Add(shift);
+                }
+
+                this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: this.SelectedYear);
+            }, $"Wystąpił problem podczas ładowania dyżurów dla roku {this.SelectedYear}.");
 
             this.IsBusy = false;
             this.IsRefreshing = false;
@@ -204,24 +230,30 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            this.SelectedYear = year;
-            await this.LoadDataAsync();
+            await SafeExecuteAsync(async () =>
+            {
+                this.SelectedYear = year;
+                await this.LoadDataAsync();
+            }, $"Wystąpił problem podczas wybierania roku {year}.");
         }
 
         private async Task AddShiftAsync()
         {
-            if (this.SelectedYear <= 0 && this.AvailableYears.Count > 0)
+            await SafeExecuteAsync(async () =>
             {
-                this.SelectedYear = this.AvailableYears[0];
-            }
+                if (this.SelectedYear <= 0 && this.AvailableYears.Count > 0)
+                {
+                    this.SelectedYear = this.AvailableYears[0];
+                }
 
-            var navigationParameter = new Dictionary<string, object>
-            {
-                { "ShiftId", "-1" },
-                { "YearParam", this.SelectedYear.ToString() }
-            };
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "ShiftId", "-1" },
+                    { "YearParam", this.SelectedYear.ToString() }
+                };
 
-            await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", navigationParameter);
+                await Shell.Current.GoToAsync("AddEditOldSMKMedicalShift", navigationParameter);
+            }, "Wystąpił problem podczas nawigacji do formularza dodawania dyżuru.");
         }
 
         private async Task EditShiftAsync(RealizedMedicalShiftOldSMK shift)
@@ -231,13 +263,16 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            var navigationParameter = new Dictionary<string, object>
+            await SafeExecuteAsync(async () =>
             {
-                { "ShiftId", shift.ShiftId.ToString() },
-                { "YearParam", shift.Year.ToString() }
-            };
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "ShiftId", shift.ShiftId.ToString() },
+                    { "YearParam", shift.Year.ToString() }
+                };
 
-            await Shell.Current.GoToAsync("//medicalshifts/AddEditOldSMKMedicalShift", navigationParameter);
+                await Shell.Current.GoToAsync("//medicalshifts/AddEditOldSMKMedicalShift", navigationParameter);
+            }, "Wystąpił problem podczas nawigacji do formularza edycji dyżuru.");
         }
 
         private async Task DeleteShiftAsync(RealizedMedicalShiftOldSMK shift)
@@ -247,28 +282,30 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
                 return;
             }
 
-            bool confirm = await this.dialogService.DisplayAlertAsync(
-                "Potwierdzenie",
-                "Czy na pewno chcesz usunąć ten dyżur?",
-                "Tak",
-                "Nie");
-
-            if (confirm)
+            await SafeExecuteAsync(async () =>
             {
-                bool success = await this.medicalShiftsService.DeleteOldSMKShiftAsync(shift.ShiftId);
-                if (success)
+                bool confirm = await this.dialogService.DisplayAlertAsync(
+                    "Potwierdzenie",
+                    "Czy na pewno chcesz usunąć ten dyżur?",
+                    "Tak",
+                    "Nie");
+
+                if (confirm)
                 {
-                    this.Shifts.Remove(shift);
-                    this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: this.SelectedYear);
+                    bool success = await this.medicalShiftsService.DeleteOldSMKShiftAsync(shift.ShiftId);
+                    if (success)
+                    {
+                        this.Shifts.Remove(shift);
+                        this.Summary = await this.medicalShiftsService.GetShiftsSummaryAsync(year: this.SelectedYear);
+                    }
+                    else
+                    {
+                        throw new DomainLogicException(
+                            "Failed to delete medical shift",
+                            "Nie udało się usunąć dyżuru.");
+                    }
                 }
-                else
-                {
-                    await this.dialogService.DisplayAlertAsync(
-                        "Błąd",
-                        "Nie udało się usunąć dyżuru.",
-                        "OK");
-                }
-            }
+            }, "Wystąpił problem podczas usuwania dyżuru.");
         }
     }
 }

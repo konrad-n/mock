@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -45,7 +47,8 @@ namespace SledzSpecke.App.ViewModels.Dashboard
             ISpecializationService specializationService,
             IDatabaseService databaseService,
             IDialogService dialogService,
-            IProcedureService procedureService)
+            IProcedureService procedureService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
@@ -226,8 +229,12 @@ namespace SledzSpecke.App.ViewModels.Dashboard
         private async void OnModuleChanged(object sender, int moduleId)
         {
             this.CurrentModuleId = moduleId;
-            var module = await this.databaseService.GetModuleAsync(moduleId);
-            await this.LoadDataAsync();
+
+            await SafeExecuteAsync(async () =>
+            {
+                var module = await this.databaseService.GetModuleAsync(moduleId);
+                await this.LoadDataAsync();
+            }, "Wystąpił problem podczas zmiany modułu.");
         }
 
         public void Dispose()
@@ -244,142 +251,146 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
             this.IsBusy = true;
 
-            this.CurrentSpecialization = await this.specializationService.GetCurrentSpecializationAsync();
-
-            if (this.CurrentSpecialization == null)
+            await SafeExecuteAsync(async () =>
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie znaleziono aktywnej specjalizacji. Proszę skontaktować się z administratorem.",
-                    "OK");
-                return;
-            }
+                this.CurrentSpecialization = await this.specializationService.GetCurrentSpecializationAsync();
 
-            this.HasTwoModules = this.CurrentSpecialization.Modules.Any(x => x.Type == ModuleType.Basic);
-            await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
-            var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
-            this.AvailableModules.Clear();
-
-            foreach (var module in modules)
-            {
-                this.AvailableModules.Add(new ModuleInfo
+                if (this.CurrentSpecialization == null)
                 {
-                    Id = module.ModuleId,
-                    Name = module.Name,
-                });
-            }
-
-            if (this.CurrentModuleId == 0)
-            {
-                if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
-                {
-                    this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
+                    throw new ResourceNotFoundException(
+                        "Active specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji. Proszę skontaktować się z administratorem.");
                 }
-                else
+
+                this.HasTwoModules = this.CurrentSpecialization.Modules.Any(x => x.Type == ModuleType.Basic);
+                await this.specializationService.InitializeSpecializationModulesAsync(this.CurrentSpecialization.SpecializationId);
+                var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+                this.AvailableModules.Clear();
+
+                foreach (var module in modules)
                 {
-                    int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
-                    if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
+                    this.AvailableModules.Add(new ModuleInfo
                     {
-                        this.CurrentModuleId = savedModuleId;
-                    }
-                    else if (modules.Count > 0)
-                    {
-                        this.CurrentModuleId = modules[0].ModuleId;
-                    }
+                        Id = module.ModuleId,
+                        Name = module.Name,
+                    });
                 }
-            }
 
-            if (this.CurrentModuleId > 0)
-            {
-                await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
-                this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
-
-                if (this.CurrentModule != null)
+                if (this.CurrentModuleId == 0)
                 {
-                    this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
-                    this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
+                    if (this.CurrentSpecialization.CurrentModuleId.HasValue && this.CurrentSpecialization.CurrentModuleId.Value > 0)
+                    {
+                        this.CurrentModuleId = this.CurrentSpecialization.CurrentModuleId.Value;
+                    }
+                    else
+                    {
+                        int savedModuleId = await Helpers.SettingsHelper.GetCurrentModuleIdAsync();
+                        if (savedModuleId > 0 && modules.Any(m => m.ModuleId == savedModuleId))
+                        {
+                            this.CurrentModuleId = savedModuleId;
+                        }
+                        else if (modules.Count > 0)
+                        {
+                            this.CurrentModuleId = modules[0].ModuleId;
+                        }
+                    }
                 }
-            }
 
-            await this.LoadStatisticsAsync();
-            this.UpdateUIText();
+                if (this.CurrentModuleId > 0)
+                {
+                    await this.specializationService.SetCurrentModuleAsync(this.CurrentModuleId);
+                    this.CurrentModule = await this.specializationService.GetCurrentModuleAsync();
+
+                    if (this.CurrentModule != null)
+                    {
+                        this.BasicModuleSelected = this.CurrentModule.Type == ModuleType.Basic;
+                        this.SpecialisticModuleSelected = this.CurrentModule.Type == ModuleType.Specialistic;
+                    }
+                }
+
+                await this.LoadStatisticsAsync();
+                this.UpdateUIText();
+            }, "Wystąpił problem podczas ładowania danych. Spróbuj ponownie.");
 
             this.IsBusy = false;
         }
 
         private async Task LoadStatisticsAsync()
         {
-            int? moduleId = this.CurrentModuleId;
-            this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
-                this.databaseService,
-                this.CurrentSpecialization.SpecializationId,
-                moduleId);
-            int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
-            int totalInternships = 0;
-
-            if (this.CurrentModule != null)
+            await SafeExecuteAsync(async () =>
             {
-                totalInternships = this.CurrentModule.TotalInternships;
-            }
+                int? moduleId = this.CurrentModuleId;
+                this.OverallProgress = await Helpers.ProgressCalculator.GetOverallProgressAsync(
+                    this.databaseService,
+                    this.CurrentSpecialization.SpecializationId,
+                    moduleId);
+                int completedInternships = await this.specializationService.GetInternshipCountAsync(moduleId);
+                int totalInternships = 0;
 
-            this.InternshipCount = $"{completedInternships}/{totalInternships}";
-            this.InternshipProgress = totalInternships > 0
-                ? (double)completedInternships / totalInternships
-                : 0;
-            var procedureStats = await this.procedureService.GetProcedureStatisticsForModuleAsync(this.CurrentModuleId);
-            int completedProcedures = procedureStats.completed;
-            int totalProcedures = procedureStats.total;
+                if (this.CurrentModule != null)
+                {
+                    totalInternships = this.CurrentModule.TotalInternships;
+                }
 
-            this.ProcedureCount = $"{completedProcedures}/{totalProcedures}";
-            this.ProcedureProgress = totalProcedures > 0
-                ? (double)completedProcedures / totalProcedures
-                : 0;
+                this.InternshipCount = $"{completedInternships}/{totalInternships}";
+                this.InternshipProgress = totalInternships > 0
+                    ? (double)completedInternships / totalInternships
+                    : 0;
+                var procedureStats = await this.procedureService.GetProcedureStatisticsForModuleAsync(this.CurrentModuleId);
+                int completedProcedures = procedureStats.completed;
+                int totalProcedures = procedureStats.total;
 
-            int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
-            int totalCourses = 0;
+                this.ProcedureCount = $"{completedProcedures}/{totalProcedures}";
+                this.ProcedureProgress = totalProcedures > 0
+                    ? (double)completedProcedures / totalProcedures
+                    : 0;
 
-            if (this.CurrentModule != null)
-            {
-                totalCourses = this.CurrentModule.TotalCourses;
-            }
+                int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
+                int totalCourses = 0;
 
-            this.CourseCount = $"{completedCourses}/{totalCourses}";
-            this.CourseProgress = totalCourses > 0
-                ? (double)completedCourses / totalCourses
-                : 0;
+                if (this.CurrentModule != null)
+                {
+                    totalCourses = this.CurrentModule.TotalCourses;
+                }
 
-            int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
-            SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
+                this.CourseCount = $"{completedCourses}/{totalCourses}";
+                this.CourseProgress = totalCourses > 0
+                    ? (double)completedCourses / totalCourses
+                    : 0;
 
-            if (stats.RequiredShiftHours > 0)
-            {
-                this.ShiftStats = $"{completedShiftHours}/{stats.RequiredShiftHours}h";
-                this.ShiftProgress = Math.Min(1.0, (double)completedShiftHours / stats.RequiredShiftHours);
-            }
-            else
-            {
-                this.ShiftStats = $"{completedShiftHours}h";
-                this.ShiftProgress = 0;
-            }
+                int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
+                SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
 
-            this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
-            this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
+                if (stats.RequiredShiftHours > 0)
+                {
+                    this.ShiftStats = $"{completedShiftHours}/{stats.RequiredShiftHours}h";
+                    this.ShiftProgress = Math.Min(1.0, (double)completedShiftHours / stats.RequiredShiftHours);
+                }
+                else
+                {
+                    this.ShiftStats = $"{completedShiftHours}h";
+                    this.ShiftProgress = 0;
+                }
 
-            if (this.CurrentModule != null)
-            {
-                double internshipWeight = 0.35;
-                double courseWeight = 0.25;
-                double procedureWeight = 0.30;
-                double otherWeight = 0.10;
+                this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
+                this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
 
-                this.OverallProgress =
-                    (this.InternshipProgress * internshipWeight) +
-                    (this.CourseProgress * courseWeight) +
-                    (this.ProcedureProgress * procedureWeight) +
-                    (this.ShiftProgress * otherWeight);
+                if (this.CurrentModule != null)
+                {
+                    double internshipWeight = 0.35;
+                    double courseWeight = 0.25;
+                    double procedureWeight = 0.30;
+                    double otherWeight = 0.10;
 
-                this.OverallProgress = Math.Min(1.0, this.OverallProgress);
-            }
+                    this.OverallProgress =
+                        (this.InternshipProgress * internshipWeight) +
+                        (this.CourseProgress * courseWeight) +
+                        (this.ProcedureProgress * procedureWeight) +
+                        (this.ShiftProgress * otherWeight);
+
+                    this.OverallProgress = Math.Min(1.0, this.OverallProgress);
+                }
+            }, "Wystąpił problem podczas obliczania statystyk.");
         }
 
         private void UpdateUIText()
@@ -413,38 +424,41 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                 return;
             }
 
-            var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
-
-            if (moduleType == "Basic")
+            await SafeExecuteAsync(async () =>
             {
-                var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
-                if (basicModule != null)
+                var modules = await this.databaseService.GetModulesAsync(this.CurrentSpecialization.SpecializationId);
+
+                if (moduleType == "Basic")
                 {
-                    this.CurrentModuleId = basicModule.ModuleId;
-                    this.BasicModuleSelected = true;
-                    this.SpecialisticModuleSelected = false;
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                    if (basicModule != null)
+                    {
+                        this.CurrentModuleId = basicModule.ModuleId;
+                        this.BasicModuleSelected = true;
+                        this.SpecialisticModuleSelected = false;
+                    }
                 }
-            }
-            else if (moduleType == "Specialistic")
-            {
-                var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
-                if (specialisticModule != null)
+                else if (moduleType == "Specialistic")
                 {
-                    this.CurrentModuleId = specialisticModule.ModuleId;
-                    this.BasicModuleSelected = false;
-                    this.SpecialisticModuleSelected = true;
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                    if (specialisticModule != null)
+                    {
+                        this.CurrentModuleId = specialisticModule.ModuleId;
+                        this.BasicModuleSelected = false;
+                        this.SpecialisticModuleSelected = true;
+                    }
                 }
-            }
 
-            await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.CurrentModuleId);
+                await Helpers.SettingsHelper.SetCurrentModuleIdAsync(this.CurrentModuleId);
 
-            if (this.CurrentSpecialization.CurrentModuleId != this.CurrentModuleId)
-            {
-                this.CurrentSpecialization.CurrentModuleId = this.CurrentModuleId;
-                await this.databaseService.UpdateSpecializationAsync(this.CurrentSpecialization);
-            }
+                if (this.CurrentSpecialization.CurrentModuleId != this.CurrentModuleId)
+                {
+                    this.CurrentSpecialization.CurrentModuleId = this.CurrentModuleId;
+                    await this.databaseService.UpdateSpecializationAsync(this.CurrentSpecialization);
+                }
 
-            await this.LoadDataAsync();
+                await this.LoadDataAsync();
+            }, "Nie udało się przełączyć modułu. Spróbuj ponownie.");
         }
 
         private static async Task NavigateToInternshipsAsync()
@@ -494,16 +508,17 @@ namespace SledzSpecke.App.ViewModels.Dashboard
 
         private async Task NavigateToRecognitionsAsync()
         {
-            if (!this.SpecialisticModuleSelected)
+            await SafeExecuteAsync(async () =>
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Informacja",
-                    "Uznania i skrócenia są dostępne tylko dla modułu specjalistycznego. Przełącz się na moduł specjalistyczny, aby uzyskać dostęp do tej funkcji.",
-                    "OK");
-                return;
-            }
+                if (!this.SpecialisticModuleSelected)
+                {
+                    throw new BusinessRuleViolationException(
+                        "Recognitions only available in specialist module",
+                        "Uznania i skrócenia są dostępne tylko dla modułu specjalistycznego. Przełącz się na moduł specjalistyczny, aby uzyskać dostęp do tej funkcji.");
+                }
 
-            await Shell.Current.GoToAsync("Recognitions");
+                await Shell.Current.GoToAsync("Recognitions");
+            }, "Wystąpił problem podczas przechodzenia do uznań i skróceń.");
         }
     }
 }

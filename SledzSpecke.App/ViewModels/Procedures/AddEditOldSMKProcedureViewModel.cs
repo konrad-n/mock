@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -59,12 +61,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
         private string patientInitials;
         private string assistantData;
         private string procedureGroup;
+        private bool isInternshipSelectionEnabled;
+        private string internshipSelectionHint;
 
         public AddEditOldSMKProcedureViewModel(
             IProcedureService procedureService,
             IAuthService authService,
             IDialogService dialogService,
-            ISpecializationService specializationService)
+            ISpecializationService specializationService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.procedureService = procedureService;
             this.authService = authService;
@@ -96,6 +101,9 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.isInitialized = false;
         }
 
+        #region Query Property Setters
+
+        // Query property setters remain unchanged
         public string IsEditString
         {
             set
@@ -181,6 +189,44 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
+        #endregion
+
+        #region Properties
+
+        public string ProcedureId
+        {
+            set
+            {
+                this.procedureId = value;
+            }
+        }
+
+        public string RequirementId
+        {
+            set
+            {
+                this.requirementId = value;
+            }
+        }
+
+        public bool IsEdit
+        {
+            get => this.isEdit;
+            set => this.SetProperty(ref this.isEdit, value);
+        }
+
+        public RealizedProcedureOldSMK Procedure
+        {
+            get => this.procedure;
+            set
+            {
+                if (this.SetProperty(ref this.procedure, value))
+                {
+                    this.SyncPropertiesFromProcedure();
+                }
+            }
+        }
+
         public string PerformingPerson
         {
             get => this.performingPerson;
@@ -238,52 +284,6 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 {
                     this.Procedure.ProcedureGroup = value;
                 }
-            }
-        }
-
-        public string ProcedureId
-        {
-            set
-            {
-                this.procedureId = value;
-            }
-        }
-
-        public string RequirementId
-        {
-            set
-            {
-                this.requirementId = value;
-            }
-        }
-
-        public bool IsEdit
-        {
-            get => this.isEdit;
-            set => this.SetProperty(ref this.isEdit, value);
-        }
-
-        public RealizedProcedureOldSMK Procedure
-        {
-            get => this.procedure;
-            set
-            {
-                if (this.SetProperty(ref this.procedure, value))
-                {
-                    this.SyncPropertiesFromProcedure();
-                }
-            }
-        }
-
-        private void SyncPropertiesFromProcedure()
-        {
-            if (this.procedure != null)
-            {
-                this.PerformingPerson = this.procedure.PerformingPerson ?? string.Empty;
-                this.Location = this.procedure.Location ?? string.Empty;
-                this.PatientInitials = this.procedure.PatientInitials ?? string.Empty;
-                this.AssistantData = this.procedure.AssistantData ?? string.Empty;
-                this.ProcedureGroup = this.procedure.ProcedureGroup ?? string.Empty;
             }
         }
 
@@ -379,8 +379,34 @@ namespace SledzSpecke.App.ViewModels.Procedures
             set => this.SetProperty(ref this.currentUser, value);
         }
 
+        public bool IsInternshipSelectionEnabled
+        {
+            get => this.isInternshipSelectionEnabled;
+            set => this.SetProperty(ref this.isInternshipSelectionEnabled, value);
+        }
+
+        public string InternshipSelectionHint
+        {
+            get => this.internshipSelectionHint;
+            set => this.SetProperty(ref this.internshipSelectionHint, value);
+        }
+
+        #endregion
+
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
+
+        private void SyncPropertiesFromProcedure()
+        {
+            if (this.procedure != null)
+            {
+                this.PerformingPerson = this.procedure.PerformingPerson ?? string.Empty;
+                this.Location = this.procedure.Location ?? string.Empty;
+                this.PatientInitials = this.procedure.PatientInitials ?? string.Empty;
+                this.AssistantData = this.procedure.AssistantData ?? string.Empty;
+                this.ProcedureGroup = this.procedure.ProcedureGroup ?? string.Empty;
+            }
+        }
 
         public async Task InitializeAsync()
         {
@@ -391,45 +417,78 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsBusy = true;
 
-            this.CurrentUser = await this.authService.GetCurrentUserAsync();
-
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-
-            if (this.IsEdit && this.Procedure.ProcedureId == 0)
+            await SafeExecuteAsync(async () =>
             {
-                int procId = 0;
-                if (!string.IsNullOrEmpty(this.procedureId) && int.TryParse(this.procedureId, out procId) && procId > 0)
+                this.CurrentUser = await this.authService.GetCurrentUserAsync();
+                if (this.CurrentUser == null)
                 {
-                    await this.LoadProcedureAsync(procId);
+                    throw new ResourceNotFoundException(
+                        "User not found",
+                        "Nie znaleziono aktywnego użytkownika.");
                 }
-            }
-            else if (!this.IsEdit)
-            {
-                if (this.CurrentUser != null && string.IsNullOrEmpty(this.Procedure.PerformingPerson))
+
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
-                    this.Procedure.PerformingPerson = this.CurrentUser.Name;
-                    this.PerformingPerson = this.CurrentUser.Name;
+                    throw new ResourceNotFoundException(
+                        "Active specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
                 }
-            }
 
-            this.LoadDropdownOptions(specialization?.DurationYears ?? 6);
-            await this.LoadInternshipsAsync();
-            this.SynchronizePickersWithProcedure();
+                if (this.IsEdit && this.Procedure.ProcedureId == 0)
+                {
+                    int procId = 0;
+                    if (!string.IsNullOrEmpty(this.procedureId) && int.TryParse(this.procedureId, out procId) && procId > 0)
+                    {
+                        await this.LoadProcedureAsync(procId);
+                    }
+                }
+                else if (!this.IsEdit)
+                {
+                    if (this.CurrentUser != null && string.IsNullOrEmpty(this.Procedure.PerformingPerson))
+                    {
+                        this.Procedure.PerformingPerson = this.CurrentUser.Name;
+                        this.PerformingPerson = this.CurrentUser.Name;
+                    }
+                }
 
-            if (!this.IsEdit && !string.IsNullOrEmpty(this.requirementId) && int.TryParse(this.requirementId, out int reqId))
-            {
-                await this.LoadRequirementDataAsync(reqId);
-            }
+                this.LoadDropdownOptions(specialization?.DurationYears ?? 6);
+                await this.LoadInternshipsAsync();
+                this.SynchronizePickersWithProcedure();
 
-            if (!this.IsEdit && string.IsNullOrEmpty(this.Procedure.Location))
-            {
-                await this.LoadLastLocationAsync();
-            }
+                if (!this.IsEdit && !string.IsNullOrEmpty(this.requirementId) && int.TryParse(this.requirementId, out int reqId))
+                {
+                    await this.LoadRequirementDataAsync(reqId);
+                }
 
-            this.SyncPropertiesFromProcedure();
-            ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
-            this.isInitialized = true;
+                if (!this.IsEdit && string.IsNullOrEmpty(this.Procedure.Location))
+                {
+                    await this.LoadLastLocationAsync();
+                }
+
+                this.SyncPropertiesFromProcedure();
+                ((AsyncRelayCommand)this.SaveCommand).NotifyCanExecuteChanged();
+                this.isInitialized = true;
+            }, "Wystąpił problem podczas inicjalizacji formularza procedury.");
+
             this.IsBusy = false;
+        }
+
+        private void LoadDropdownOptions(int yearsFromSpecialization)
+        {
+            this.CodeOptions.Clear();
+            this.CodeOptions.Add(new KeyValuePair<string, string>("A - operator", "A - operator"));
+            this.CodeOptions.Add(new KeyValuePair<string, string>("B - asysta", "B - asysta"));
+
+            this.GenderOptions.Clear();
+            this.GenderOptions.Add(new KeyValuePair<string, string>("K", "K"));
+            this.GenderOptions.Add(new KeyValuePair<string, string>("M", "M"));
+
+            this.YearOptions.Clear();
+            for (int i = 1; i <= yearsFromSpecialization; i++)
+            {
+                this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
+            }
         }
 
         private void SynchronizePickersWithProcedure()
@@ -482,183 +541,196 @@ namespace SledzSpecke.App.ViewModels.Procedures
             }
         }
 
-        private void LoadDropdownOptions(int yearsFromSpecialization)
+        private async Task LoadInternshipsAsync()
         {
-            this.CodeOptions.Clear();
-            this.CodeOptions.Add(new KeyValuePair<string, string>("A - operator", "A - operator"));
-            this.CodeOptions.Add(new KeyValuePair<string, string>("B - asysta", "B - asysta"));
-
-            this.GenderOptions.Clear();
-            this.GenderOptions.Add(new KeyValuePair<string, string>("K", "K"));
-            this.GenderOptions.Add(new KeyValuePair<string, string>("M", "M"));
-
-            this.YearOptions.Clear();
-            for (int i = 1; i <= yearsFromSpecialization; i++)
+            await SafeExecuteAsync(async () =>
             {
-                this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
-            }
-        }
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                if (currentModule == null)
+                {
+                    throw new ResourceNotFoundException(
+                        "Current module not found",
+                        "Nie znaleziono aktualnego modułu specjalizacji.");
+                }
 
-        private bool isInternshipSelectionEnabled;
+                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
 
-        public bool IsInternshipSelectionEnabled
-        {
-            get => this.isInternshipSelectionEnabled;
-            set => this.SetProperty(ref this.isInternshipSelectionEnabled, value);
-        }
+                if (this.CurrentUser.SmkVersion == SmkVersion.Old)
+                {
+                    bool isBasicModule = currentModule?.Type == ModuleType.Basic;
+                    internships = internships.Where(i =>
+                        (isBasicModule && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
+                        (!isBasicModule && !i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)))
+                        .ToList();
+                }
 
-        private string internshipSelectionHint;
+                this.AvailableInternships.Clear();
+                foreach (var internship in internships)
+                {
+                    this.AvailableInternships.Add(internship);
+                }
 
-        public string InternshipSelectionHint
-        {
-            get => this.internshipSelectionHint;
-            set => this.SetProperty(ref this.internshipSelectionHint, value);
+                if (this.AvailableInternships.Count == 0)
+                {
+                    throw new BusinessRuleViolationException(
+                        "No internships available",
+                        "Nie znaleziono dostępnych staży. Dodaj staż przed dodaniem procedury.");
+                }
+            }, "Wystąpił problem podczas wczytywania dostępnych staży.");
         }
 
         private async Task LoadRequirementDataAsync(int reqId)
         {
-            var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync();
-            var requirement = requirements.FirstOrDefault(r => r.Id == reqId);
-
-            if (requirement != null)
+            await SafeExecuteAsync(async () =>
             {
-                if (this.CurrentUser.SmkVersion == SmkVersion.New)
-                {
-                    if (requirement.InternshipId.HasValue)
-                    {
-                        var internship = this.AvailableInternships.FirstOrDefault(i =>
-                            i.InternshipId == requirement.InternshipId.Value);
-                        if (internship != null)
-                        {
-                            this.SelectedInternship = internship;
-                            this.IsInternshipSelectionEnabled = false;
-                        }
-                    }
-                }
-                else
-                {
-                    bool isBasicInternship = requirement.Type.Contains("podstawowy", StringComparison.OrdinalIgnoreCase);
-                    var matchingInternship = this.AvailableInternships.FirstOrDefault(i =>
-                        (isBasicInternship && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
-                        (!isBasicInternship && i.InternshipName.Contains(requirement.Type, StringComparison.OrdinalIgnoreCase)));
+                var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync();
+                var requirement = requirements.FirstOrDefault(r => r.Id == reqId);
 
-                    if (matchingInternship != null)
+                if (requirement != null)
+                {
+                    if (this.CurrentUser.SmkVersion == SmkVersion.New)
                     {
-                        this.SelectedInternship = matchingInternship;
-                        this.IsInternshipSelectionEnabled = false;
+                        if (requirement.InternshipId.HasValue)
+                        {
+                            var internship = this.AvailableInternships.FirstOrDefault(i =>
+                                i.InternshipId == requirement.InternshipId.Value);
+                            if (internship != null)
+                            {
+                                this.SelectedInternship = internship;
+                                this.IsInternshipSelectionEnabled = false;
+                            }
+                        }
                     }
                     else
                     {
-                        var filteredInternships = this.AvailableInternships.Where(i =>
+                        bool isBasicInternship = requirement.Type.Contains("podstawowy", StringComparison.OrdinalIgnoreCase);
+                        var matchingInternship = this.AvailableInternships.FirstOrDefault(i =>
                             (isBasicInternship && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
-                            (!isBasicInternship && !i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)))
-                            .ToList();
+                            (!isBasicInternship && i.InternshipName.Contains(requirement.Type, StringComparison.OrdinalIgnoreCase)));
 
-                        this.AvailableInternships.Clear();
-                        foreach (var internship in filteredInternships)
+                        if (matchingInternship != null)
                         {
-                            this.AvailableInternships.Add(internship);
+                            this.SelectedInternship = matchingInternship;
+                            this.IsInternshipSelectionEnabled = false;
                         }
+                        else
+                        {
+                            var filteredInternships = this.AvailableInternships.Where(i =>
+                                (isBasicInternship && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
+                                (!isBasicInternship && !i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
 
-                        this.IsInternshipSelectionEnabled = true;
+                            this.AvailableInternships.Clear();
+                            foreach (var internship in filteredInternships)
+                            {
+                                this.AvailableInternships.Add(internship);
+                            }
+
+                            this.IsInternshipSelectionEnabled = true;
+                        }
                     }
+
+                    this.InternshipSelectionHint = this.IsInternshipSelectionEnabled
+                        ? "Wybierz staż z listy"
+                        : "Staż jest przypisany automatycznie do tej procedury";
                 }
-
-                this.InternshipSelectionHint = this.IsInternshipSelectionEnabled
-                    ? "Wybierz staż z listy"
-                    : "Staż jest przypisany automatycznie do tej procedury";
-            }
-        }
-
-        private async Task LoadInternshipsAsync()
-        {
-            var currentModule = await this.specializationService.GetCurrentModuleAsync();
-            var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
-
-            if (this.CurrentUser.SmkVersion == SmkVersion.Old)
-            {
-                bool isBasicModule = currentModule?.Type == ModuleType.Basic;
-                internships = internships.Where(i =>
-                    (isBasicModule && i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)) ||
-                    (!isBasicModule && !i.InternshipName.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-            }
-
-            this.AvailableInternships.Clear();
-            foreach (var internship in internships)
-            {
-                this.AvailableInternships.Add(internship);
-            }
+                else
+                {
+                    throw new ResourceNotFoundException(
+                        $"Requirement with ID {reqId} not found",
+                        "Nie znaleziono wymagania procedurowego o podanym identyfikatorze.");
+                }
+            }, "Wystąpił problem podczas wczytywania danych wymagania procedurowego.");
         }
 
         private async Task LoadProcedureAsync(int procedureId)
         {
-            if (this.IsBusy)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
-
-            this.IsBusy = true;
-
-            var loadedProcedure = await this.procedureService.GetOldSMKProcedureAsync(procedureId);
-            if (loadedProcedure != null)
-            {
-                this.IsEdit = true;
-                this.Title = "Edytuj procedurę";
-                this.Procedure = loadedProcedure;
-                this.PerformingPerson = loadedProcedure.PerformingPerson ?? string.Empty;
-                this.Location = loadedProcedure.Location ?? string.Empty;
-                this.PatientInitials = loadedProcedure.PatientInitials ?? string.Empty;
-                this.AssistantData = loadedProcedure.AssistantData ?? string.Empty;
-                this.ProcedureGroup = loadedProcedure.ProcedureGroup ?? string.Empty;
-            }
-            else
-            {
-                this.IsEdit = false;
-                this.Title = "Dodaj procedurę";
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie znaleziono procedury o podanym identyfikatorze.",
-                    "OK");
-            }
-            this.IsBusy = false;
+                var loadedProcedure = await this.procedureService.GetOldSMKProcedureAsync(procedureId);
+                if (loadedProcedure != null)
+                {
+                    this.IsEdit = true;
+                    this.Title = "Edytuj procedurę";
+                    this.Procedure = loadedProcedure;
+                    this.PerformingPerson = loadedProcedure.PerformingPerson ?? string.Empty;
+                    this.Location = loadedProcedure.Location ?? string.Empty;
+                    this.PatientInitials = loadedProcedure.PatientInitials ?? string.Empty;
+                    this.AssistantData = loadedProcedure.AssistantData ?? string.Empty;
+                    this.ProcedureGroup = loadedProcedure.ProcedureGroup ?? string.Empty;
+                }
+                else
+                {
+                    this.IsEdit = false;
+                    this.Title = "Dodaj procedurę";
+                    throw new ResourceNotFoundException(
+                        $"Procedure with ID {procedureId} not found",
+                        "Nie znaleziono procedury o podanym identyfikatorze.");
+                }
+            }, "Wystąpił problem podczas wczytywania procedury.");
         }
 
         private async Task LoadLastLocationAsync()
         {
-            var user = await this.authService.GetCurrentUserAsync();
-            if (user == null)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
+                var user = await this.authService.GetCurrentUserAsync();
+                if (user == null)
+                {
+                    throw new ResourceNotFoundException(
+                        "User not found",
+                        "Nie znaleziono danych użytkownika.");
+                }
 
-            var lastProcedures = await this.procedureService.GetOldSMKProceduresAsync();
+                var lastProcedures = await this.procedureService.GetOldSMKProceduresAsync();
 
-            if (lastProcedures.Count > 0)
-            {
-                this.Procedure.Location = lastProcedures[0].Location;
-                this.Location = lastProcedures[0].Location;
-            }
+                if (lastProcedures.Count > 0)
+                {
+                    this.Procedure.Location = lastProcedures[0].Location;
+                    this.Location = lastProcedures[0].Location;
+                }
+            }, "Wystąpił problem podczas wczytywania danych ostatniej lokalizacji.");
         }
 
-        private bool ValidateInputs()
+        private async Task<bool> ValidateInputsAsync()
         {
             if (this.Procedure == null)
             {
                 return false;
             }
 
-            bool isProcedureValid = this.Procedure != null;
-            bool isCodeValid = !string.IsNullOrWhiteSpace(this.Procedure.Code);
-            bool isLocationValid = !string.IsNullOrWhiteSpace(this.Location);
-            bool isPersonValid = !string.IsNullOrWhiteSpace(this.PerformingPerson);
-            bool isInitialsValid = !string.IsNullOrWhiteSpace(this.PatientInitials);
-            bool isGenderValid = !string.IsNullOrWhiteSpace(this.Procedure.PatientGender);
-            bool isInternshipValid = this.SelectedInternship != null;
-            bool result = isProcedureValid && isCodeValid && isLocationValid &&
-                   isPersonValid && isInitialsValid && isGenderValid && isInternshipValid;
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(this.Procedure.Code))
+            {
+                throw new InvalidInputException("Code is required", "Kod procedury jest wymagany.");
+            }
 
-            return result;
+            if (string.IsNullOrWhiteSpace(this.Location))
+            {
+                throw new InvalidInputException("Location is required", "Lokalizacja jest wymagana.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.PerformingPerson))
+            {
+                throw new InvalidInputException("Performing person is required", "Osoba wykonująca jest wymagana.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.PatientInitials))
+            {
+                throw new InvalidInputException("Patient initials are required", "Inicjały pacjenta są wymagane.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.Procedure.PatientGender))
+            {
+                throw new InvalidInputException("Patient gender is required", "Płeć pacjenta jest wymagana.");
+            }
+
+            if (this.SelectedInternship == null)
+            {
+                throw new InvalidInputException("Internship is required", "Wybór stażu jest wymagany.");
+            }
+
+            return true;
         }
 
         public async Task OnSaveAsync()
@@ -667,60 +739,69 @@ namespace SledzSpecke.App.ViewModels.Procedures
             {
                 return;
             }
-            if (!this.ValidateInputs())
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd walidacji",
-                    "Proszę wypełnić wszystkie wymagane pola przed zapisaniem procedury.",
-                    "OK");
-                return;
-            }
 
             this.IsBusy = true;
 
-            this.Procedure.PerformingPerson = this.PerformingPerson;
-            this.Procedure.Location = this.Location;
-            this.Procedure.PatientInitials = this.PatientInitials;
-            this.Procedure.AssistantData = this.AssistantData;
-            this.Procedure.ProcedureGroup = this.ProcedureGroup;
-
-            if (this.Procedure.SpecializationId <= 0 && this.CurrentUser != null)
+            try
             {
-                this.Procedure.SpecializationId = this.CurrentUser.SpecializationId;
+                await SafeExecuteAsync(async () =>
+                {
+                    await ValidateInputsAsync();
+
+                    this.Procedure.PerformingPerson = this.PerformingPerson;
+                    this.Procedure.Location = this.Location;
+                    this.Procedure.PatientInitials = this.PatientInitials;
+                    this.Procedure.AssistantData = this.AssistantData;
+                    this.Procedure.ProcedureGroup = this.ProcedureGroup;
+
+                    if (this.Procedure.SpecializationId <= 0 && this.CurrentUser != null)
+                    {
+                        this.Procedure.SpecializationId = this.CurrentUser.SpecializationId;
+                    }
+
+                    this.Procedure.InternshipId = this.SelectedInternship.InternshipId;
+                    this.Procedure.InternshipName = this.SelectedInternship.InternshipName;
+
+                    if (!string.IsNullOrEmpty(this.requirementId) && int.TryParse(this.requirementId, out int reqId))
+                    {
+                        this.Procedure.ProcedureRequirementId = reqId;
+                    }
+
+                    bool success = await this.procedureService.SaveOldSMKProcedureAsync(this.Procedure);
+
+                    if (success)
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Sukces",
+                            this.IsEdit ? "Procedura została zaktualizowana." : "Procedura została dodana.",
+                            "OK");
+
+                        await Shell.Current.GoToAsync("..");
+                    }
+                    else
+                    {
+                        throw new DomainLogicException(
+                            "Failed to save procedure",
+                            "Nie udało się zapisać procedury. Sprawdź poprawność danych.");
+                    }
+                }, "Wystąpił problem podczas zapisywania procedury.");
             }
-
-            this.Procedure.InternshipId = this.SelectedInternship.InternshipId;
-            this.Procedure.InternshipName = this.SelectedInternship.InternshipName;
-
-            if (!string.IsNullOrEmpty(this.requirementId) && int.TryParse(this.requirementId, out int reqId))
+            catch (InvalidInputException ex)
             {
-                this.Procedure.ProcedureRequirementId = reqId;
+                await this.dialogService.DisplayAlertAsync("Błąd walidacji", ex.UserFriendlyMessage, "OK");
             }
-
-            bool success = await this.procedureService.SaveOldSMKProcedureAsync(this.Procedure);
-
-            if (success)
+            finally
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    this.IsEdit ? "Procedura została zaktualizowana." : "Procedura została dodana.",
-                    "OK");
-
-                await Shell.Current.GoToAsync("..");
+                this.IsBusy = false;
             }
-            else
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się zapisać procedury. Sprawdź poprawność danych.",
-                    "OK");
-            }
-            this.IsBusy = false;
         }
 
         private async Task OnCancelAsync()
         {
-            await Shell.Current.GoToAsync("..");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("..");
+            }, "Wystąpił problem podczas anulowania edycji procedury.");
         }
     }
 }

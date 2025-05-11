@@ -5,9 +5,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SledzSpecke;
 using SledzSpecke.App;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.MedicalShifts;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels;
@@ -21,6 +23,7 @@ namespace SledzSpecke.App.ViewModels.Internships
     {
         private readonly IMedicalShiftsService medicalShiftsService;
         private readonly IDialogService dialogService;
+        private readonly IExceptionHandlerService exceptionHandler;
 
         private InternshipRequirement requirement;
         private MedicalShiftsSummary summary;
@@ -35,12 +38,14 @@ namespace SledzSpecke.App.ViewModels.Internships
             List<RealizedMedicalShiftNewSMK> shifts,
             IMedicalShiftsService medicalShiftsService,
             IDialogService dialogService,
+            IExceptionHandlerService exceptionHandler,
             int? currentModuleId)
         {
             this.requirement = requirement;
             this.summary = summary;
             this.medicalShiftsService = medicalShiftsService;
             this.dialogService = dialogService;
+            this.exceptionHandler = exceptionHandler;
 
             Shifts = new ObservableCollection<RealizedMedicalShiftNewSMK>(shifts);
             currentShift = new RealizedMedicalShiftNewSMK
@@ -99,29 +104,100 @@ namespace SledzSpecke.App.ViewModels.Internships
 
         private async Task SaveShiftAsync()
         {
-            bool success = await medicalShiftsService.SaveNewSMKShiftAsync(CurrentShift);
-
-            if (success)
+            try
             {
-                var shifts = await medicalShiftsService.GetNewSMKShiftsAsync(Id);
-                Shifts.Clear();
-                foreach (var shift in shifts)
+                // Validate shift data
+                if (CurrentShift.Hours < 0 || CurrentShift.Minutes < 0 || CurrentShift.Minutes >= 60)
                 {
-                    Shifts.Add(shift);
+                    throw new InvalidInputException(
+                        "Invalid shift time",
+                        "Niepoprawny czas dyżuru. Godziny muszą być nieujemne, a minuty w zakresie 0-59.");
                 }
 
-                summary = await medicalShiftsService.GetShiftsSummaryAsync(internshipRequirementId: Id);
-                OnPropertyChanged(nameof(FormattedTime));
-                OnPropertyChanged(nameof(Summary));
-                IsEditing = false;
-                IsExpanded = false;
+                if (CurrentShift.EndDate < CurrentShift.StartDate)
+                {
+                    throw new InvalidInputException(
+                        "End date before start date",
+                        "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.");
+                }
+
+                // Use exception handler to safely execute the save operation
+                bool success = exceptionHandler != null
+                    ? await exceptionHandler.ExecuteAsync(
+                        async () => await medicalShiftsService.SaveNewSMKShiftAsync(CurrentShift),
+                        new Dictionary<string, object> { { "InternshipRequirementId", Id } },
+                        "Nie udało się zapisać dyżuru. Sprawdź poprawność danych.")
+                    : await medicalShiftsService.SaveNewSMKShiftAsync(CurrentShift);
+
+                if (success)
+                {
+                    // Safely retrieve updated shifts using the exception handler
+                    var updatedShifts = exceptionHandler != null
+                        ? await exceptionHandler.ExecuteAsync(
+                            async () => await medicalShiftsService.GetNewSMKShiftsAsync(Id),
+                            null,
+                            "Nie udało się pobrać zaktualizowanych danych.")
+                        : await medicalShiftsService.GetNewSMKShiftsAsync(Id);
+
+                    Shifts.Clear();
+                    foreach (var shift in updatedShifts)
+                    {
+                        Shifts.Add(shift);
+                    }
+
+                    // Safely update summary
+                    var updatedSummary = exceptionHandler != null
+                        ? await exceptionHandler.ExecuteAsync(
+                            async () => await medicalShiftsService.GetShiftsSummaryAsync(internshipRequirementId: Id),
+                            null,
+                            "Nie udało się zaktualizować podsumowania.")
+                        : await medicalShiftsService.GetShiftsSummaryAsync(internshipRequirementId: Id);
+
+                    if (updatedSummary != null)
+                    {
+                        summary = updatedSummary;
+                        OnPropertyChanged(nameof(FormattedTime));
+                        OnPropertyChanged(nameof(Summary));
+                    }
+
+                    IsEditing = false;
+                    IsExpanded = false;
+                }
+                else
+                {
+                    await dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Nie udało się zapisać dyżuru.",
+                        "OK");
+                }
             }
-            else
+            catch (InvalidInputException ex)
             {
-                await dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się zapisać dyżuru.",
-                    "OK");
+                // These will be caught and handled by the exception handler if available
+                if (exceptionHandler != null)
+                {
+                    throw;
+                }
+                else
+                {
+                    await dialogService.DisplayAlertAsync("Błąd", ex.UserFriendlyMessage, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fallback error handling if exceptionHandler not available
+                if (exceptionHandler == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error saving shift: {ex.Message}");
+                    await dialogService.DisplayAlertAsync(
+                        "Błąd",
+                        "Wystąpił nieoczekiwany błąd podczas zapisywania dyżuru.",
+                        "OK");
+                }
+                else
+                {
+                    throw; // Let the exceptionHandler handle it
+                }
             }
         }
 

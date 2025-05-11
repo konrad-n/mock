@@ -1,12 +1,13 @@
 ﻿using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.ViewModels.Base;
 
 namespace SledzSpecke.App.ViewModels.MedicalShifts
 {
     public class MedicalShiftsSelectorViewModel : BaseViewModel
     {
-        public MedicalShiftsSelectorViewModel()
+        public MedicalShiftsSelectorViewModel(IExceptionHandlerService exceptionHandler = null) : base(exceptionHandler)
         {
             this.Title = "Dyżury medyczne";
 
@@ -19,12 +20,18 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
         private async Task NavigateToOldSMKAsync()
         {
-            await Shell.Current.GoToAsync("OldSMKMedicalShifts");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("OldSMKMedicalShifts");
+            }, "Wystąpił problem podczas nawigacji do dyżurów (Stary SMK).");
         }
 
         private async Task NavigateToNewSMKAsync()
         {
-            await Shell.Current.GoToAsync("NewSMKMedicalShifts");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("NewSMKMedicalShifts");
+            }, "Wystąpił problem podczas nawigacji do dyżurów (Nowy SMK).");
         }
     }
 }

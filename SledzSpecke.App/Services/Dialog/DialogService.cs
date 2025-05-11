@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.ApplicationModel;
 
 namespace SledzSpecke.App.Services.Dialog
 {
@@ -6,62 +8,73 @@ namespace SledzSpecke.App.Services.Dialog
     {
         public async Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel)
         {
-            if (Shell.Current != null)
-            {
-                return await Shell.Current.DisplayAlert(title, message, accept, cancel);
-            }
-            else if (Application.Current?.MainPage != null)
-            {
-                return await Application.Current.MainPage.DisplayAlert(title, message, accept, cancel);
-            }
-            else
-            {
-                return false;
-            }
+            var tcs = new TaskCompletionSource<bool>();
+
+            await MainThread.InvokeOnMainThreadAsync(async () => {
+                var page = Shell.Current ?? Application.Current?.MainPage;
+                if (page != null)
+                {
+                    var result = await page.DisplayAlert(title, message, accept, cancel);
+                    tcs.SetResult(result);
+                }
+                else
+                {
+                    tcs.SetResult(false);
+                }
+            });
+
+            return await tcs.Task;
         }
 
         public async Task DisplayAlertAsync(string title, string message, string accept)
         {
-            if (Shell.Current != null)
-            {
-                await Shell.Current.DisplayAlert(title, message, accept);
-            }
-            else if (Application.Current?.MainPage != null)
-            {
-                await Application.Current.MainPage.DisplayAlert(title, message, accept);
-            }
+            await MainThread.InvokeOnMainThreadAsync(async () => {
+                var page = Shell.Current ?? Application.Current?.MainPage;
+                if (page != null)
+                {
+                    await page.DisplayAlert(title, message, accept);
+                }
+            });
         }
 
         public async Task<string> DisplayActionSheetAsync(string title, string cancel, string destruction, params string[] buttons)
         {
-            if (Shell.Current != null)
-            {
-                return await Shell.Current.DisplayActionSheet(title, cancel, destruction, buttons);
-            }
-            else if (Application.Current?.MainPage != null)
-            {
-                return await Application.Current.MainPage.DisplayActionSheet(title, cancel, destruction, buttons);
-            }
-            else
-            {
-                return null;
-            }
+            var tcs = new TaskCompletionSource<string>();
+
+            await MainThread.InvokeOnMainThreadAsync(async () => {
+                var page = Shell.Current ?? Application.Current?.MainPage;
+                if (page != null)
+                {
+                    var result = await page.DisplayActionSheet(title, cancel, destruction, buttons);
+                    tcs.SetResult(result);
+                }
+                else
+                {
+                    tcs.SetResult(null);
+                }
+            });
+
+            return await tcs.Task;
         }
 
         public async Task<string> DisplayPromptAsync(string title, string message, string accept = "OK", string cancel = "Cancel", string placeholder = null, int maxLength = -1, Keyboard keyboard = null, string initialValue = "")
         {
-            if (Shell.Current != null)
-            {
-                return await Shell.Current.DisplayPromptAsync(title, message, accept, cancel, placeholder, maxLength, keyboard, initialValue);
-            }
-            else if (Application.Current?.MainPage != null)
-            {
-                return await Application.Current.MainPage.DisplayPromptAsync(title, message, accept, cancel, placeholder, maxLength, keyboard, initialValue);
-            }
-            else
-            {
-                return null;
-            }
+            var tcs = new TaskCompletionSource<string>();
+
+            await MainThread.InvokeOnMainThreadAsync(async () => {
+                var page = Shell.Current ?? Application.Current?.MainPage;
+                if (page != null)
+                {
+                    var result = await page.DisplayPromptAsync(title, message, accept, cancel, placeholder, maxLength, keyboard, initialValue);
+                    tcs.SetResult(result);
+                }
+                else
+                {
+                    tcs.SetResult(null);
+                }
+            });
+
+            return await tcs.Task;
         }
     }
 }

@@ -1,11 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Helpers;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -28,7 +30,11 @@ namespace SledzSpecke.App.ViewModels.Authentication
         private bool isNewSmkVersion = true;
         private bool passwordsNotMatch;
 
-        public RegisterViewModel(IAuthService authService, IDialogService dialogService, ISpecializationService specializationService)
+        public RegisterViewModel(
+            IAuthService authService,
+            IDialogService dialogService,
+            ISpecializationService specializationService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.authService = authService;
             this.dialogService = dialogService;
@@ -48,7 +54,10 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            await this.LoadSpecializationsAsync();
+            await SafeExecuteAsync(async () =>
+            {
+                await this.LoadSpecializationsAsync();
+            }, "Nie udało się załadować dostępnych specjalizacji.");
 
             this.IsBusy = false;
         }
@@ -177,26 +186,29 @@ namespace SledzSpecke.App.ViewModels.Authentication
         {
             this.IsBusy = true;
 
-            SmkVersion currentVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
-            var programs = await SpecializationLoader.LoadAllSpecializationProgramsForVersionAsync(currentVersion);
-
-            await MainThread.InvokeOnMainThreadAsync(() =>
+            await SafeExecuteAsync(async () =>
             {
-                this.AvailableSpecializations.Clear();
-                foreach (var program in programs)
-                {
-                    this.AvailableSpecializations.Add(program);
-                }
+                SmkVersion currentVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old;
+                var programs = await SpecializationLoader.LoadAllSpecializationProgramsForVersionAsync(currentVersion);
 
-                if (this.AvailableSpecializations.Count > 0)
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    this.SelectedSpecialization = this.AvailableSpecializations[0];
-                }
-                else
-                {
-                    this.SelectedSpecialization = null;
-                }
-            });
+                    this.AvailableSpecializations.Clear();
+                    foreach (var program in programs)
+                    {
+                        this.AvailableSpecializations.Add(program);
+                    }
+
+                    if (this.AvailableSpecializations.Count > 0)
+                    {
+                        this.SelectedSpecialization = this.AvailableSpecializations[0];
+                    }
+                    else
+                    {
+                        this.SelectedSpecialization = null;
+                    }
+                });
+            }, "Nie udało się załadować dostępnych specjalizacji.");
 
             this.IsBusy = false;
         }
@@ -235,90 +247,145 @@ namespace SledzSpecke.App.ViewModels.Authentication
 
             this.IsBusy = true;
 
-            if (this.SelectedSpecialization == null)
+            try
+            {
+                // Input validation with domain exceptions
+                if (string.IsNullOrWhiteSpace(this.Username))
+                {
+                    throw new InvalidInputException(
+                        "Username is required",
+                        "Nazwa użytkownika jest wymagana.");
+                }
+
+                if (string.IsNullOrWhiteSpace(this.Name))
+                {
+                    throw new InvalidInputException(
+                        "Name is required",
+                        "Imię i nazwisko jest wymagane.");
+                }
+
+                if (string.IsNullOrWhiteSpace(this.Password))
+                {
+                    throw new InvalidInputException(
+                        "Password is required",
+                        "Hasło jest wymagane.");
+                }
+
+                if (string.IsNullOrWhiteSpace(this.Email))
+                {
+                    throw new InvalidInputException(
+                        "Email is required",
+                        "Adres email jest wymagany.");
+                }
+
+                if (this.PasswordsNotMatch)
+                {
+                    throw new InvalidInputException(
+                        "Passwords do not match",
+                        "Hasła nie są identyczne.");
+                }
+
+                if (this.SelectedSpecialization == null)
+                {
+                    throw new InvalidInputException(
+                        "No specialization selected",
+                        "Nie wybrano specjalizacji. Wybierz specjalizację przed rejestracją.");
+                }
+
+                await SafeExecuteAsync(async () =>
+                {
+                    var user = new User
+                    {
+                        Username = this.Username,
+                        Name = this.Name,
+                        Email = this.Email,
+                        RegistrationDate = DateTime.Now,
+                        SmkVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old,
+                    };
+
+                    if (string.IsNullOrEmpty(this.SelectedSpecialization.Structure))
+                    {
+                        var fullSpecialization = await SpecializationLoader.LoadSpecializationProgramAsync(
+                            this.SelectedSpecialization.Code,
+                            user.SmkVersion);
+
+                        if (fullSpecialization != null && !string.IsNullOrEmpty(fullSpecialization.Structure))
+                        {
+                            this.SelectedSpecialization.Structure = fullSpecialization.Structure;
+                        }
+                        else
+                        {
+                            this.SelectedSpecialization.Structure = $"{{ \"name\": \"{this.SelectedSpecialization.Name}\", \"code\": \"{this.SelectedSpecialization.Code}\" }}";
+                        }
+                    }
+
+                    var specialization = new Models.Specialization
+                    {
+                        Name = this.SelectedSpecialization.Name,
+                        ProgramCode = this.SelectedSpecialization.Code,
+                        SmkVersion = user.SmkVersion,
+                        StartDate = DateTime.Now,
+                        PlannedEndDate = DateTime.Now.AddMonths(
+                            this.SelectedSpecialization.TotalDuration != null && this.SelectedSpecialization.TotalDuration.TotalMonths > 0
+                                ? this.SelectedSpecialization.TotalDuration.TotalMonths
+                                : 60),
+                        ProgramStructure = this.SelectedSpecialization.Structure,
+                        DurationYears = this.SelectedSpecialization.DurationYears,
+                    };
+
+                    var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
+                        specialization.ProgramCode,
+                        specialization.StartDate,
+                        user.SmkVersion,
+                        specialization.SpecializationId);
+
+                    if (modules != null && modules.Count > 0)
+                    {
+                        specialization.Modules = modules;
+                    }
+                    else
+                    {
+                        specialization.Modules = new List<Models.Module>();
+                    }
+
+                    specialization.CalculatedEndDate = specialization.PlannedEndDate;
+                    bool success = await this.authService.RegisterAsync(user, this.Password, specialization);
+
+                    if (success)
+                    {
+                        await this.specializationService.InitializeSpecializationModulesAsync(specialization.SpecializationId);
+                        await this.dialogService.DisplayAlertAsync(
+                            "Sukces",
+                            "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
+                            "OK");
+
+                        await OnGoToLoginAsync();
+                    }
+                    else
+                    {
+                        throw new DomainLogicException(
+                            "Registration failed",
+                            "Nie udało się zarejestrować. Sprawdź podane dane i spróbuj ponownie.");
+                    }
+                }, "Wystąpił problem podczas rejestracji. Sprawdź podane dane i spróbuj ponownie.");
+            }
+            catch (InvalidInputException)
+            {
+                // These will be handled by the SafeExecuteAsync method
+                throw;
+            }
+            catch (Exception ex)
             {
                 await this.dialogService.DisplayAlertAsync(
                     "Błąd",
-                    "Nie wybrano specjalizacji. Wybierz specjalizację przed rejestracją.",
+                    "Wystąpił nieoczekiwany błąd podczas rejestracji.",
                     "OK");
-                return;
+                System.Diagnostics.Debug.WriteLine($"Register error: {ex.Message}");
             }
-
-            var user = new User
+            finally
             {
-                Username = this.Username,
-                Name = this.Name,
-                Email = this.Email,
-                RegistrationDate = DateTime.Now,
-                SmkVersion = this.IsNewSmkVersion ? SmkVersion.New : SmkVersion.Old,
-            };
-
-            if (string.IsNullOrEmpty(this.SelectedSpecialization.Structure))
-            {
-                var fullSpecialization = await SpecializationLoader.LoadSpecializationProgramAsync(
-                    this.SelectedSpecialization.Code,
-                    user.SmkVersion);
-
-                if (fullSpecialization != null && !string.IsNullOrEmpty(fullSpecialization.Structure))
-                {
-                    this.SelectedSpecialization.Structure = fullSpecialization.Structure;
-                }
-                else
-                {
-                    this.SelectedSpecialization.Structure = $"{{ \"name\": \"{this.SelectedSpecialization.Name}\", \"code\": \"{this.SelectedSpecialization.Code}\" }}";
-                }
+                this.IsBusy = false;
             }
-
-            var specialization = new Models.Specialization
-            {
-                Name = this.SelectedSpecialization.Name,
-                ProgramCode = this.SelectedSpecialization.Code,
-                SmkVersion = user.SmkVersion,
-                StartDate = DateTime.Now,
-                PlannedEndDate = DateTime.Now.AddMonths(
-                    this.SelectedSpecialization.TotalDuration != null && this.SelectedSpecialization.TotalDuration.TotalMonths > 0
-                        ? this.SelectedSpecialization.TotalDuration.TotalMonths
-                        : 60),
-                ProgramStructure = this.SelectedSpecialization.Structure,
-                DurationYears = this.SelectedSpecialization.DurationYears,
-            };
-
-            var modules = await ModuleHelper.CreateModulesForSpecializationAsync(
-                specialization.ProgramCode,
-                specialization.StartDate,
-                user.SmkVersion,
-                specialization.SpecializationId);
-
-            if (modules != null && modules.Count > 0)
-            {
-                specialization.Modules = modules;
-            }
-            else
-            {
-                specialization.Modules = new List<Models.Module>();
-            }
-
-            specialization.CalculatedEndDate = specialization.PlannedEndDate;
-            bool success = await this.authService.RegisterAsync(user, this.Password, specialization);
-
-            if (success)
-            {
-                await this.specializationService.InitializeSpecializationModulesAsync(specialization.SpecializationId);
-                await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    "Rejestracja zakończona pomyślnie. Zaloguj się, aby rozpocząć korzystanie z aplikacji.",
-                    "OK");
-
-                await OnGoToLoginAsync();
-            }
-            else
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się zarejestrować. Sprawdź podane dane i spróbuj ponownie.",
-                    "OK");
-            }
-            this.IsBusy = false;
         }
 
         private static async Task OnGoToLoginAsync()

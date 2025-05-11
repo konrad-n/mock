@@ -1,10 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.ApplicationModel;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Authentication;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
@@ -33,7 +36,8 @@ namespace SledzSpecke.App.ViewModels.Procedures
             IProcedureService procedureService,
             IAuthService authService,
             IDialogService dialogService,
-            ISpecializationService specializationService)
+            ISpecializationService specializationService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.procedureService = procedureService;
             this.authService = authService;
@@ -125,32 +129,34 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.IsBusy = true;
             this.IsRefreshing = true;
 
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-            if (specialization == null)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
-
-            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-            this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
-
-            if (this.CurrentModuleId == 0 && specialization.CurrentModuleId.HasValue)
-            {
-                this.CurrentModuleId = specialization.CurrentModuleId.Value;
-            }
-
-            var currentModule = modules.FirstOrDefault(m => m.ModuleId == this.CurrentModuleId)
-                                    ?? modules.FirstOrDefault();
-
-            if (currentModule != null)
-            {
-                this.ModuleTitle = currentModule.Name;
-                this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
-                this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
-                this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
-
-                await Task.Run(async () =>
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
+                    throw new ResourceNotFoundException(
+                        "Active specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
+                }
+
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+                this.HasTwoModules = modules.Any(m => m.Type == ModuleType.Basic);
+
+                if (this.CurrentModuleId == 0 && specialization.CurrentModuleId.HasValue)
+                {
+                    this.CurrentModuleId = specialization.CurrentModuleId.Value;
+                }
+
+                var currentModule = modules.FirstOrDefault(m => m.ModuleId == this.CurrentModuleId)
+                                        ?? modules.FirstOrDefault();
+
+                if (currentModule != null)
+                {
+                    this.ModuleTitle = currentModule.Name;
+                    this.BasicModuleSelected = currentModule.Type == ModuleType.Basic;
+                    this.SpecialisticModuleSelected = currentModule.Type == ModuleType.Specialistic;
+                    this.Summary = await this.procedureService.GetProcedureSummaryAsync(currentModule.ModuleId);
+
                     var requirements = await this.procedureService.GetAvailableProcedureRequirementsAsync(currentModule.ModuleId);
                     var newGroups = new List<ProcedureGroupViewModel>();
 
@@ -162,12 +168,13 @@ namespace SledzSpecke.App.ViewModels.Procedures
                             new List<RealizedProcedureOldSMK>(),
                             stats,
                             this.procedureService,
-                            this.dialogService);
+                            this.dialogService,
+                            ExceptionHandler);
 
                         newGroups.Add(groupViewModel);
                     }
 
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    await MainThread.InvokeOnMainThreadAsync(() =>
                     {
                         this.ProcedureGroups.Clear();
 
@@ -176,8 +183,14 @@ namespace SledzSpecke.App.ViewModels.Procedures
                             this.ProcedureGroups.Add(group);
                         }
                     });
-                });
-            }
+                }
+                else
+                {
+                    throw new ResourceNotFoundException(
+                        "Current module not found",
+                        "Nie znaleziono aktualnego modułu specjalizacji.");
+                }
+            }, "Wystąpił problem podczas ładowania danych procedur.");
 
             this.isLoadingData = false;
             this.IsBusy = false;
@@ -187,37 +200,57 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnSelectModuleAsync(string moduleType)
         {
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-            if (specialization == null)
+            await SafeExecuteAsync(async () =>
             {
-                return;
-            }
-
-            var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
-
-            if (moduleType == "Basic")
-            {
-                var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
-                if (basicModule != null)
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
                 {
-                    await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
-                    this.CurrentModuleId = basicModule.ModuleId;
+                    throw new ResourceNotFoundException(
+                        "Active specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
                 }
-            }
-            else if (moduleType == "Specialistic")
-            {
-                var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
-                if (specialisticModule != null)
+
+                var modules = await this.specializationService.GetModulesAsync(specialization.SpecializationId);
+
+                if (moduleType == "Basic")
                 {
-                    await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
-                    this.CurrentModuleId = specialisticModule.ModuleId;
+                    var basicModule = modules.FirstOrDefault(m => m.Type == ModuleType.Basic);
+                    if (basicModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(basicModule.ModuleId);
+                        this.CurrentModuleId = basicModule.ModuleId;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Basic module not found",
+                            "Nie znaleziono modułu podstawowego.");
+                    }
                 }
-            }
+                else if (moduleType == "Specialistic")
+                {
+                    var specialisticModule = modules.FirstOrDefault(m => m.Type == ModuleType.Specialistic);
+                    if (specialisticModule != null)
+                    {
+                        await this.specializationService.SetCurrentModuleAsync(specialisticModule.ModuleId);
+                        this.CurrentModuleId = specialisticModule.ModuleId;
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            "Specialistic module not found",
+                            "Nie znaleziono modułu specjalistycznego.");
+                    }
+                }
+            }, $"Wystąpił problem podczas przełączania modułu na {moduleType}.");
         }
 
         private async Task AddProcedureAsync()
         {
-            await Shell.Current.GoToAsync("AddEditOldSMKProcedure");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("AddEditOldSMKProcedure");
+            }, "Wystąpił problem podczas przejścia do dodawania procedury.");
         }
 
         public void Dispose()

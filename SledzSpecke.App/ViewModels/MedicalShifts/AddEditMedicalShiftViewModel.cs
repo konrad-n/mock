@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Database;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Specialization;
 using SledzSpecke.App.ViewModels.Base;
 
@@ -29,7 +31,8 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
         public AddEditMedicalShiftViewModel(
             ISpecializationService specializationService,
             IDatabaseService databaseService,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IExceptionHandlerService exceptionHandler) : base(exceptionHandler)
         {
             this.specializationService = specializationService;
             this.databaseService = databaseService;
@@ -112,53 +115,84 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             this.IsBusy = true;
 
-            this.IsEdit = shiftId.HasValue && shiftId.Value > 0;
-            this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj nowy dyżur";
-
-            await this.LoadYearOptionsAsync();
-            await this.LoadInternshipsAsync();
-
-            if (this.IsEdit && shiftId.HasValue)
+            await SafeExecuteAsync(async () =>
             {
-                var existingShift = await this.databaseService.GetMedicalShiftAsync(shiftId.Value);
-                if (existingShift != null)
+                this.IsEdit = shiftId.HasValue && shiftId.Value > 0;
+                this.Title = this.IsEdit ? "Edytuj dyżur" : "Dodaj nowy dyżur";
+
+                await this.LoadYearOptionsAsync();
+                await this.LoadInternshipsAsync();
+
+                if (this.IsEdit && shiftId.HasValue)
                 {
-                    this.Shift = existingShift;
-                    this.SelectedInternship = this.AvailableInternships.FirstOrDefault(i => i.InternshipId == existingShift.InternshipId);
-                    this.SelectedYear = existingShift.Year.ToString();
+                    var existingShift = await this.databaseService.GetMedicalShiftAsync(shiftId.Value);
+                    if (existingShift != null)
+                    {
+                        this.Shift = existingShift;
+                        this.SelectedInternship = this.AvailableInternships.FirstOrDefault(i => i.InternshipId == existingShift.InternshipId);
+                        this.SelectedYear = existingShift.Year.ToString();
+                    }
+                    else
+                    {
+                        throw new ResourceNotFoundException(
+                            $"Medical shift with ID {shiftId.Value} not found",
+                            "Nie znaleziono dyżuru o podanym identyfikatorze.");
+                    }
                 }
-            }
-            else
-            {
-                if (this.AvailableInternships.Count > 0)
+                else
                 {
-                    this.SelectedInternship = this.AvailableInternships[0];
+                    if (this.AvailableInternships.Count > 0)
+                    {
+                        this.SelectedInternship = this.AvailableInternships[0];
+                    }
+                    this.SelectedYear = "1";
                 }
-                this.SelectedYear = "1";
-            }
+            }, "Wystąpił problem podczas inicjalizacji formularza dyżuru.");
+
             this.IsBusy = false;
         }
 
         private async Task LoadYearOptionsAsync()
         {
-            var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-
-            for (int i = 1; i <= specialization.DurationYears; i++)
+            await SafeExecuteAsync(async () =>
             {
-                this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
-            }
+                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
+                if (specialization == null)
+                {
+                    throw new ResourceNotFoundException(
+                        "Current specialization not found",
+                        "Nie znaleziono aktywnej specjalizacji.");
+                }
+
+                this.YearOptions.Clear();
+                for (int i = 1; i <= specialization.DurationYears; i++)
+                {
+                    this.YearOptions.Add(new KeyValuePair<string, string>(i.ToString(), $"Rok {i}"));
+                }
+            }, "Wystąpił problem podczas ładowania opcji lat specjalizacji.");
         }
 
         private async Task LoadInternshipsAsync()
         {
-            var currentModule = await this.specializationService.GetCurrentModuleAsync();
-            var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
-            var userInternships = internships.Where(i => i.InternshipId > 0).ToList();
-            this.AvailableInternships.Clear();
-            foreach (var internship in userInternships)
+            await SafeExecuteAsync(async () =>
             {
-                this.AvailableInternships.Add(internship);
-            }
+                var currentModule = await this.specializationService.GetCurrentModuleAsync();
+                var internships = await this.specializationService.GetInternshipsAsync(moduleId: currentModule?.ModuleId);
+                var userInternships = internships.Where(i => i.InternshipId > 0).ToList();
+
+                this.AvailableInternships.Clear();
+                foreach (var internship in userInternships)
+                {
+                    this.AvailableInternships.Add(internship);
+                }
+
+                if (this.AvailableInternships.Count == 0)
+                {
+                    throw new BusinessRuleViolationException(
+                        "No internships available",
+                        "Brak dostępnych staży. Należy najpierw dodać staż, aby móc dodać dyżur.");
+                }
+            }, "Wystąpił problem podczas ładowania listy dostępnych staży.");
         }
 
         private bool CanSave()
@@ -177,41 +211,65 @@ namespace SledzSpecke.App.ViewModels.MedicalShifts
 
             this.IsBusy = true;
 
-            this.Shift.InternshipId = this.SelectedInternship.InternshipId;
-
-            bool success;
-            if (this.IsEdit)
+            try
             {
-                success = await this.specializationService.UpdateMedicalShiftAsync(this.Shift);
-            }
-            else
-            {
-                success = await this.specializationService.AddMedicalShiftAsync(this.Shift);
-            }
+                await SafeExecuteAsync(async () =>
+                {
+                    if (this.SelectedInternship == null)
+                    {
+                        throw new InvalidInputException(
+                            "No internship selected",
+                            "Nie wybrano stażu. Wybierz staż, aby dodać dyżur.");
+                    }
 
-            if (success)
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Sukces",
-                    this.IsEdit ? "Dyżur został zaktualizowany." : "Dyżur został dodany.",
-                    "OK");
+                    if (this.Shift.Hours <= 0 && this.Shift.Minutes <= 0)
+                    {
+                        throw new InvalidInputException(
+                            "Invalid shift duration",
+                            "Czas dyżuru musi być większy od zera.");
+                    }
 
-                await Shell.Current.GoToAsync("..");
-            }
-            else
-            {
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Nie udało się zapisać dyżuru. Sprawdź poprawność danych.",
-                    "OK");
-            }
+                    this.Shift.InternshipId = this.SelectedInternship.InternshipId;
 
-            this.IsBusy = false;
+                    bool success;
+                    if (this.IsEdit)
+                    {
+                        success = await this.specializationService.UpdateMedicalShiftAsync(this.Shift);
+                    }
+                    else
+                    {
+                        success = await this.specializationService.AddMedicalShiftAsync(this.Shift);
+                    }
+
+                    if (success)
+                    {
+                        await this.dialogService.DisplayAlertAsync(
+                            "Sukces",
+                            this.IsEdit ? "Dyżur został zaktualizowany." : "Dyżur został dodany.",
+                            "OK");
+
+                        await Shell.Current.GoToAsync("..");
+                    }
+                    else
+                    {
+                        throw new DomainLogicException(
+                            "Failed to save medical shift",
+                            "Nie udało się zapisać dyżuru. Sprawdź poprawność danych.");
+                    }
+                }, "Wystąpił problem podczas zapisywania dyżuru.");
+            }
+            finally
+            {
+                this.IsBusy = false;
+            }
         }
 
         private async Task OnCancelAsync()
         {
-            await Shell.Current.GoToAsync("..");
+            await SafeExecuteAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("..");
+            }, "Wystąpił problem podczas anulowania edycji.");
         }
     }
 }

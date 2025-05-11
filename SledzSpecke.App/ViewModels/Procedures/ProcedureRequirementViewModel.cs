@@ -2,9 +2,12 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.ApplicationModel;
+using SledzSpecke.App.Exceptions;
 using SledzSpecke.App.Models;
 using SledzSpecke.App.Models.Enums;
 using SledzSpecke.App.Services.Dialog;
+using SledzSpecke.App.Services.Exceptions;
 using SledzSpecke.App.Services.Procedures;
 
 namespace SledzSpecke.App.ViewModels.Procedures
@@ -13,6 +16,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
     {
         private readonly IProcedureService procedureService;
         private readonly IDialogService dialogService;
+        private readonly IExceptionHandlerService exceptionHandler;
 
         private ProcedureRequirement requirement;
         private ProcedureSummary statistics;
@@ -33,6 +37,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             int? moduleId,
             IProcedureService procedureService,
             IDialogService dialogService,
+            IExceptionHandlerService exceptionHandler = null,
             string internshipName = "")
         {
             this.requirement = requirement;
@@ -42,6 +47,7 @@ namespace SledzSpecke.App.ViewModels.Procedures
             this.moduleId = moduleId;
             this.procedureService = procedureService;
             this.dialogService = dialogService;
+            this.exceptionHandler = exceptionHandler;
             this.internshipName = internshipName;
             this.isLoading = false;
             this.hasLoadedData = false;
@@ -102,23 +108,26 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
             this.IsLoading = true;
 
-            var realizations = await this.procedureService.GetNewSMKProceduresAsync(
-                this.moduleId,
-                this.requirement.Id);
-
-            await MainThread.InvokeOnMainThreadAsync(() =>
+            await SafeExecuteAsync(async () =>
             {
-                this.Realizations.Clear();
-                foreach (var realization in realizations)
-                {
-                    this.Realizations.Add(realization);
-                }
-                this.hasLoadedData = true;
-            });
+                var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                    this.moduleId,
+                    this.requirement.Id);
 
-            this.OnPropertyChanged(nameof(this.Realizations));
-            this.OnPropertyChanged(nameof(this.HasRealizations));
-            this.OnPropertyChanged(nameof(this.Statistics));
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    this.Realizations.Clear();
+                    foreach (var realization in realizations)
+                    {
+                        this.Realizations.Add(realization);
+                    }
+                    this.hasLoadedData = true;
+                });
+
+                this.OnPropertyChanged(nameof(this.Realizations));
+                this.OnPropertyChanged(nameof(this.HasRealizations));
+                this.OnPropertyChanged(nameof(this.Statistics));
+            }, "Wystąpił problem podczas ładowania realizacji procedury.");
 
             this.IsLoading = false;
         }
@@ -136,48 +145,29 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 this.isLoading = true;
                 this.IsExpanded = true;
 
-                try
+                await SafeExecuteAsync(async () =>
                 {
-                    await Task.Run(async () =>
-                    {
-                        var realizations = await this.procedureService.GetNewSMKProceduresAsync(
-                            this.moduleId,
-                            this.requirement.Id);
+                    var realizations = await this.procedureService.GetNewSMKProceduresAsync(
+                        this.moduleId,
+                        this.requirement.Id);
 
-                        await MainThread.InvokeOnMainThreadAsync(() =>
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        this.Realizations.Clear();
+                        foreach (var realization in realizations)
                         {
-                            this.Realizations.Clear();
-                            foreach (var realization in realizations)
-                            {
-                                this.Realizations.Add(realization);
-                            }
+                            this.Realizations.Add(realization);
+                        }
 
-                            this.OnPropertyChanged(nameof(this.Realizations));
-                            this.OnPropertyChanged(nameof(this.HasRealizations));
-                            this.OnPropertyChanged(nameof(this.Statistics));
+                        this.OnPropertyChanged(nameof(this.Realizations));
+                        this.OnPropertyChanged(nameof(this.HasRealizations));
+                        this.OnPropertyChanged(nameof(this.Statistics));
 
-                            this.hasLoadedData = true;
-                            this.isLoading = false;
-                            this.OnPropertyChanged(nameof(this.IsLoading));
-                        });
-                    });
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Błąd podczas ładowania realizacji: {ex.Message}");
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
-                    {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Wystąpił problem podczas ładowania realizacji procedur.",
-                            "OK");
-
+                        this.hasLoadedData = true;
                         this.isLoading = false;
-                        this.IsExpanded = false;
                         this.OnPropertyChanged(nameof(this.IsLoading));
-                        this.OnPropertyChanged(nameof(this.IsExpanded));
                     });
-                }
+                }, "Wystąpił problem podczas ładowania realizacji procedury.");
             }
             else
             {
@@ -187,12 +177,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
 
         private async Task OnToggleAddRealizationAsync()
         {
-            var navigationParameter = new Dictionary<string, object>
+            await SafeExecuteAsync(async () =>
             {
-                { "RequirementId", this.requirement.Id.ToString() }
-            };
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "RequirementId", this.requirement.Id.ToString() }
+                };
 
-            await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
+                await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
+            }, "Wystąpił problem podczas nawigacji do formularza dodawania procedury.");
         }
 
         private async Task OnEditRealization(RealizedProcedureNewSMK realization)
@@ -202,22 +195,23 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            if (realization.SyncStatus == SyncStatus.Synced)
+            await SafeExecuteAsync(async () =>
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Informacja",
-                    "Nie można edytować zsynchronizowanej realizacji.",
-                    "OK");
-                return;
-            }
+                if (realization.SyncStatus == SyncStatus.Synced)
+                {
+                    throw new BusinessRuleViolationException(
+                        "Cannot edit synced realization",
+                        "Nie można edytować zsynchronizowanej realizacji.");
+                }
 
-            var navigationParameter = new Dictionary<string, object>
-            {
-                { "ProcedureId", realization.ProcedureId.ToString() },
-                { "RequirementId", this.requirement.Id.ToString() }
-            };
+                var navigationParameter = new Dictionary<string, object>
+                {
+                    { "ProcedureId", realization.ProcedureId.ToString() },
+                    { "RequirementId", this.requirement.Id.ToString() }
+                };
 
-            await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
+                await Shell.Current.GoToAsync("AddEditNewSMKProcedure", navigationParameter);
+            }, "Wystąpił problem podczas edycji realizacji procedury.");
         }
 
         private async Task OnDeleteRealization(RealizedProcedureNewSMK realization)
@@ -227,17 +221,15 @@ namespace SledzSpecke.App.ViewModels.Procedures
                 return;
             }
 
-            if (realization.SyncStatus == SyncStatus.Synced)
+            await SafeExecuteAsync(async () =>
             {
-                await this.dialogService.DisplayAlertAsync(
-                    "Informacja",
-                    "Nie można usunąć zsynchronizowanej realizacji.",
-                    "OK");
-                return;
-            }
+                if (realization.SyncStatus == SyncStatus.Synced)
+                {
+                    throw new BusinessRuleViolationException(
+                        "Cannot delete synced realization",
+                        "Nie można usunąć zsynchronizowanej realizacji.");
+                }
 
-            try
-            {
                 bool confirm = await this.dialogService.DisplayAlertAsync(
                     "Potwierdzenie",
                     "Czy na pewno chcesz usunąć tę realizację?",
@@ -257,20 +249,32 @@ namespace SledzSpecke.App.ViewModels.Procedures
                     }
                     else
                     {
-                        await this.dialogService.DisplayAlertAsync(
-                            "Błąd",
-                            "Nie udało się usunąć realizacji.",
-                            "OK");
+                        throw new DomainLogicException(
+                            "Failed to delete realization",
+                            "Nie udało się usunąć realizacji.");
                     }
                 }
-            }
-            catch (Exception ex)
+            }, "Wystąpił problem podczas usuwania realizacji procedury.");
+        }
+
+        // Helper method for error handling
+        private async Task SafeExecuteAsync(Func<Task> operation, string errorMessage)
+        {
+            if (this.exceptionHandler != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Błąd podczas usuwania realizacji: {ex.Message}");
-                await this.dialogService.DisplayAlertAsync(
-                    "Błąd",
-                    "Wystąpił problem podczas usuwania realizacji.",
-                    "OK");
+                await this.exceptionHandler.ExecuteAsync(operation, null, errorMessage);
+            }
+            else
+            {
+                try
+                {
+                    await operation();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                    await this.dialogService.DisplayAlertAsync("Błąd", errorMessage, "OK");
+                }
             }
         }
     }
