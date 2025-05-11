@@ -24,6 +24,15 @@
                 <Setter Property="TextColor" Value="{StaticResource TextMutedColor}" />
                 <Setter Property="Margin" Value="0,5,0,0" />
             </Style>
+            <Style x:Key="LightIconButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderColor" Value="Transparent" />
+                <Setter Property="HeightRequest" Value="30" />
+                <Setter Property="WidthRequest" Value="30" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="15" />
+                <Setter Property="BorderWidth" Value="0" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
     <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
@@ -62,9 +71,9 @@
                                         <Label Grid.Column="1" Text="{Binding FormattedStatistics}" Style="{StaticResource RequirementSummaryStyle}" />
                                     </Grid>
                                     <Button Text="Szczegóły" 
-                    Command="{Binding ToggleExpandCommand}" 
-                    Style="{StaticResource OutlineButton}" 
-                    Margin="0,10,0,0" />
+                                            Command="{Binding ToggleExpandCommand}" 
+                                            Style="{StaticResource OutlineButton}" 
+                                            Margin="0,10,0,0" />
                                     <VerticalStackLayout IsVisible="{Binding IsExpanded}" Margin="0,15,0,0" Spacing="10">
                                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="10">
                                             <Label Grid.Row="0" Grid.Column="0" Text="Dni wymagane" FontAttributes="Bold" />
@@ -82,12 +91,10 @@
                                             <Label Grid.Row="4" Grid.Column="0" Text="Pozostało do zrealizowania" FontAttributes="Bold" />
                                             <Label Grid.Row="4" Grid.Column="1" Text="{Binding RemainingDays}" />
                                         </Grid>
-
-                                        <!-- Lista realizacji stażów dla nowego SMK -->
                                         <StackLayout IsVisible="{Binding NewSMKRealizationsCollection.Count, Converter={StaticResource NotNullConverter}}">
                                             <Label Text="Realizacje stażu" FontAttributes="Bold" Margin="0,10,0,5" />
                                             <CollectionView ItemsSource="{Binding NewSMKRealizationsCollection}"
-                                   HeightRequest="{Binding NewSMKRealizationsCollection.Count, Converter={StaticResource ItemCountToHeightConverter}, ConverterParameter='80'}">
+                                                            HeightRequest="{Binding NewSMKRealizationsCollection.Count, Converter={StaticResource ItemCountToHeightConverter}, ConverterParameter='80'}">
                                                 <CollectionView.ItemTemplate>
                                                     <DataTemplate>
                                                         <Frame Margin="2" Padding="10" BorderColor="LightGray" CornerRadius="5">
@@ -98,20 +105,19 @@
                                                                     <Label Text="{Binding DaysCount, StringFormat='{0} dni'}" FontSize="12" />
                                                                 </VerticalStackLayout>
                                                                 <Label Grid.Column="1" Text="{Binding IsCompleted, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Ukończony'}" 
-                                               TextColor="{StaticResource SuccessColor}" VerticalOptions="Center"
-                                               IsVisible="{Binding IsCompleted}" />
+                                                                       TextColor="{StaticResource SuccessColor}" VerticalOptions="Center"
+                                                                       IsVisible="{Binding IsCompleted}" />
                                                             </Grid>
                                                         </Frame>
                                                     </DataTemplate>
                                                 </CollectionView.ItemTemplate>
                                             </CollectionView>
                                         </StackLayout>
-
                                         <Button Text="Dodaj realizację" 
-                        Command="{Binding AddRealizationCommand}" 
-                        BackgroundColor="{StaticResource Primary}" 
-                        TextColor="White" 
-                        Margin="0,10,0,0" />
+                                                Command="{Binding AddRealizationCommand}" 
+                                                BackgroundColor="{StaticResource Primary}" 
+                                                TextColor="White" 
+                                                Margin="0,10,0,0" />
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </Frame>

@@ -25,6 +25,15 @@
                 <Setter Property="TextColor" Value="{StaticResource TextMutedColor}" />
                 <Setter Property="Margin" Value="0,5,0,0" />
             </Style>
+            <Style x:Key="LightIconButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderColor" Value="Transparent" />
+                <Setter Property="HeightRequest" Value="30" />
+                <Setter Property="WidthRequest" Value="30" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="15" />
+                <Setter Property="BorderWidth" Value="0" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
     <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
@@ -83,15 +92,11 @@
                                             <Label Grid.Row="4" Grid.Column="0" Text="Pozostało do zrealizowania" FontAttributes="Bold" />
                                             <Label Grid.Row="4" Grid.Column="1" Text="{Binding RemainingDays}" />
                                         </Grid>
-
-                                        <!-- Lista realizacji stażów dla starego SMK -->
-                                        <!-- W sekcji CollectionView, wewnątrz VerticalStackLayout dla realizacji stażu -->
                                         <StackLayout IsVisible="{Binding OldSMKRealizationsCollection.Count, Converter={StaticResource NotNullConverter}}">
                                             <Label Text="Realizacje stażu" FontAttributes="Bold" Margin="0,10,0,5" />
                                             <CollectionView ItemsSource="{Binding OldSMKRealizationsCollection}"
                                                             HeightRequest="{Binding OldSMKRealizationsCollection.Count, Converter={StaticResource ItemCountToHeightConverter}, ConverterParameter='80'}">
                                                 <CollectionView.ItemTemplate>
-                                                    <!-- Zmiana x:DataType na właściwy typ dla elementów kolekcji -->
                                                     <DataTemplate x:DataType="models:RealizedInternshipOldSMK">
                                                         <Frame Margin="2" Padding="10" BorderColor="LightGray" CornerRadius="5">
                                                             <Grid ColumnDefinitions="*,Auto,Auto,Auto">
@@ -123,7 +128,6 @@
                                                 </CollectionView.ItemTemplate>
                                             </CollectionView>
                                         </StackLayout>
-
                                         <Button Text="Dodaj realizację" 
                                                 Command="{Binding AddRealizationCommand}" 
                                                 BackgroundColor="{StaticResource Primary}" 
