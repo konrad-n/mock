@@ -52,7 +52,6 @@ namespace SledzSpecke.App
         {
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IExceptionHandlerService, ExceptionHandlerService>();
-            services.AddSingleton<IFileAccessHelper, FileAccessHelper>();
             services.AddSingleton<App>();
             services.AddSingleton<NavigationPage>();
             services.AddSingleton<AppShell>();
