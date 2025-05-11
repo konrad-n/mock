@@ -345,18 +345,12 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     ? (double)completedProcedures / totalProcedures
                     : 0;
 
-                int completedCourses = await this.specializationService.GetCourseCountAsync(moduleId);
                 int totalCourses = 0;
 
                 if (this.CurrentModule != null)
                 {
                     totalCourses = this.CurrentModule.TotalCourses;
                 }
-
-                this.CourseCount = $"{completedCourses}/{totalCourses}";
-                this.CourseProgress = totalCourses > 0
-                    ? (double)completedCourses / totalCourses
-                    : 0;
 
                 int completedShiftHours = await this.specializationService.GetShiftCountAsync(moduleId);
                 SpecializationStatistics stats = await this.specializationService.GetSpecializationStatisticsAsync(moduleId);
@@ -371,9 +365,6 @@ namespace SledzSpecke.App.ViewModels.Dashboard
                     this.ShiftStats = $"{completedShiftHours}h";
                     this.ShiftProgress = 0;
                 }
-
-                this.SelfEducationCount = await this.specializationService.GetSelfEducationCountAsync(moduleId);
-                this.PublicationCount = await this.specializationService.GetPublicationCountAsync(moduleId);
 
                 if (this.CurrentModule != null)
                 {

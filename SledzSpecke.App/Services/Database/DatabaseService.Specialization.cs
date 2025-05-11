@@ -115,31 +115,5 @@ namespace SledzSpecke.App.Services.Database
             new Dictionary<string, object> { { "Specialization", specialization?.SpecializationId } },
             "Nie udało się zaktualizować danych specjalizacji");
         }
-
-        public async Task CleanupSpecializationDataAsync(int specializationId)
-        {
-            await this.InitializeAsync();
-            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
-            {
-                var modules = await GetModulesAsync(specializationId);
-                foreach (var module in modules)
-                {
-                    await DeleteModuleAsync(module);
-                }
-
-                // Clear caches
-                if (_specializationCache.ContainsKey(specializationId))
-                {
-                    _specializationCache.Remove(specializationId);
-                }
-
-                if (_moduleCache.ContainsKey(specializationId))
-                {
-                    _moduleCache.Remove(specializationId);
-                }
-            },
-            new Dictionary<string, object> { { "SpecializationId", specializationId } },
-            $"Nie udało się wyczyścić danych specjalizacji o ID {specializationId}");
-        }
     }
 }

@@ -250,50 +250,6 @@ namespace SledzSpecke.App.Services.MedicalShifts
             withRetry: true);
         }
 
-        public async Task<RealizedMedicalShiftNewSMK> GetNewSMKShiftAsync(int shiftId)
-        {
-            return await SafeExecuteAsync(async () =>
-            {
-                await this.databaseService.InitializeAsync();
-
-                // Pobierz dyżur o danym ID
-                var query = "SELECT * FROM RealizedMedicalShiftNewSMK WHERE ShiftId = ?";
-                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftNewSMK>(query, shiftId);
-                var shift = shifts.FirstOrDefault();
-
-                if (shift == null)
-                {
-                    Logger.LogWarning($"Nie znaleziono dyżuru o ID {shiftId}",
-                        new Dictionary<string, object> { { "ShiftId", shiftId } });
-
-                    return null;
-                }
-
-                // Uzupełnij nazwę stażu
-                try
-                {
-                    var internshipRequirements = await this.GetAvailableInternshipRequirementsAsync();
-                    var requirement = internshipRequirements.FirstOrDefault(r => r.Id == shift.InternshipRequirementId);
-                    shift.InternshipName = requirement?.Name ?? string.Empty;
-
-                    Logger.LogInformation($"Pobrano dyżur o ID {shiftId}",
-                        new Dictionary<string, object> { { "ShiftId", shiftId } });
-                }
-                catch (Exception ex)
-                {
-                    // W przypadku błędu podczas uzyskiwania nazwy stażu, kontynuuj bez nazwy
-                    Logger.LogWarning($"Nie udało się uzyskać nazwy stażu dla dyżuru o ID {shiftId}: {ex.Message}",
-                        new Dictionary<string, object> { { "ShiftId", shiftId }, { "Error", ex.Message } });
-
-                    shift.InternshipName = string.Empty;
-                }
-
-                return shift;
-            },
-            $"Wystąpił błąd podczas pobierania dyżuru o ID {shiftId}",
-            new Dictionary<string, object> { { "ShiftId", shiftId } });
-        }
-
         public async Task<bool> SaveNewSMKShiftAsync(RealizedMedicalShiftNewSMK shift)
         {
             return await SafeExecuteAsync(async () =>
@@ -344,41 +300,6 @@ namespace SledzSpecke.App.Services.MedicalShifts
                 { "ShiftId", shift?.ShiftId ?? 0 },
                 { "InternshipRequirementId", shift?.InternshipRequirementId ?? 0 }
             });
-        }
-
-        public async Task<bool> DeleteNewSMKShiftAsync(int shiftId)
-        {
-            return await SafeExecuteAsync(async () =>
-            {
-                await this.databaseService.InitializeAsync();
-                var shift = await this.GetNewSMKShiftAsync(shiftId);
-
-                if (shift == null)
-                {
-                    Logger.LogWarning($"Próba usunięcia nieistniejącego dyżuru o ID {shiftId}",
-                        new Dictionary<string, object> { { "ShiftId", shiftId } });
-
-                    return false;
-                }
-
-                if (shift.SyncStatus == SyncStatus.Synced)
-                {
-                    Logger.LogWarning($"Próba usunięcia zsynchronizowanego dyżuru o ID {shiftId}",
-                        new Dictionary<string, object> { { "ShiftId", shiftId } });
-
-                    throw new BusinessRuleViolationException(
-                        "Cannot delete synced shift",
-                        "Nie można usunąć zsynchronizowanego dyżuru.");
-                }
-
-                Logger.LogInformation($"Usuwanie dyżuru o ID {shiftId}",
-                    new Dictionary<string, object> { { "ShiftId", shiftId } });
-
-                await this.databaseService.DeleteAsync(shift);
-                return true;
-            },
-            $"Wystąpił błąd podczas usuwania dyżuru o ID {shiftId}",
-            new Dictionary<string, object> { { "ShiftId", shiftId } });
         }
 
         public async Task<MedicalShiftsSummary> GetShiftsSummaryAsync(int? year = null, int? internshipRequirementId = null)
@@ -573,39 +494,6 @@ namespace SledzSpecke.App.Services.MedicalShifts
                 return requirements;
             },
             "Wystąpił błąd podczas pobierania wymagań stażowych",
-            new Dictionary<string, object>());
-        }
-
-        public async Task<string> GetLastShiftLocationAsync()
-        {
-            return await SafeExecuteAsync(async () =>
-            {
-                await this.databaseService.InitializeAsync();
-
-                var specialization = await this.specializationService.GetCurrentSpecializationAsync();
-                if (specialization == null)
-                {
-                    Logger.LogWarning("Próba pobrania ostatniej lokalizacji dyżuru bez aktywnej specjalizacji");
-                    return string.Empty;
-                }
-
-                var query = "SELECT * FROM RealizedMedicalShiftOldSMK WHERE SpecializationId = ? ORDER BY ShiftId DESC LIMIT 1";
-                var shifts = await this.databaseService.QueryAsync<RealizedMedicalShiftOldSMK>(query, specialization.SpecializationId);
-                var lastShift = shifts.FirstOrDefault();
-
-                if (lastShift != null)
-                {
-                    Logger.LogInformation($"Pobrano ostatnią lokalizację dyżuru: {lastShift.Location ?? string.Empty}",
-                        new Dictionary<string, object> { { "ShiftId", lastShift.ShiftId }, { "Location", lastShift.Location } });
-                }
-                else
-                {
-                    Logger.LogInformation("Nie znaleziono żadnych poprzednich dyżurów");
-                }
-
-                return lastShift?.Location ?? string.Empty;
-            },
-            "Wystąpił błąd podczas pobierania ostatniej lokalizacji dyżuru",
             new Dictionary<string, object>());
         }
 

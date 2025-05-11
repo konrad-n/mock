@@ -24,7 +24,6 @@ namespace SledzSpecke.App.Helpers
 
             var internships = await database.GetInternshipsAsync(moduleId: moduleId);
             var completedInternships = internships.Count(i => i.IsCompleted);
-            var courses = await database.GetCoursesAsync(moduleId: moduleId);
             var procedures = new List<Procedure>();
 
             foreach (var internship in internships)
@@ -45,8 +44,6 @@ namespace SledzSpecke.App.Helpers
 
             double totalShiftHours = shifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0));
             int completedShiftHours = (int)Math.Round(totalShiftHours);
-            var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
-            int completedSelfEducationDays = selfEducationItems.Count;
             ModuleStructure moduleStructure = null;
 
             if (!string.IsNullOrEmpty(module.Structure))
@@ -63,14 +60,12 @@ namespace SledzSpecke.App.Helpers
 
             module.CompletedInternships = completedInternships;
             module.TotalInternships = moduleStructure?.Internships?.Count ?? 0;
-            module.CompletedCourses = courses.Count;
             module.TotalCourses = moduleStructure?.Courses?.Count ?? 0;
             module.CompletedProceduresA = proceduresA;
             module.TotalProceduresA = moduleStructure?.Procedures?.Sum(p => p.RequiredCountA) ?? 0;
             module.CompletedProceduresB = proceduresB;
             module.TotalProceduresB = moduleStructure?.Procedures?.Sum(p => p.RequiredCountB) ?? 0;
             module.CompletedShiftHours = completedShiftHours;
-            module.CompletedSelfEducationDays = completedSelfEducationDays;
 
             if (module.RequiredShiftHours <= 0)
             {
@@ -233,16 +228,6 @@ namespace SledzSpecke.App.Helpers
                     }
                 }
 
-                var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
-                stats.SelfEducationDaysUsed = selfEducationItems.Count;
-                stats.SelfEducationDaysTotal = moduleStructure?.SelfEducationDays ?? 0;
-
-                var educationalActivities = await database.GetEducationalActivitiesAsync(moduleId: moduleId);
-                stats.EducationalActivitiesCompleted = educationalActivities.Count;
-
-                var publications = await database.GetPublicationsAsync(moduleId: moduleId);
-                stats.PublicationsCompleted = publications.Count;
-
                 return stats;
             }
             else
@@ -278,22 +263,6 @@ namespace SledzSpecke.App.Helpers
                 stats.CompletedShiftHours = (int)Math.Round(allShifts.Sum(s => s.Hours + ((double)s.Minutes / 60.0)));
                 stats.RequiredShiftHours = (int)Math.Round(
                     CalculateRequiredShiftHours(structure, specialization.PlannedEndDate - specialization.StartDate));
-
-                var selfEducationItems = await database.GetSelfEducationItemsAsync(specializationId: specializationId);
-                stats.SelfEducationDaysUsed = selfEducationItems.Count;
-                stats.SelfEducationDaysTotal = structure?.SelfEducation?.TotalDays ?? 0;
-
-                var educationalActivities = await database.GetEducationalActivitiesAsync(specializationId: specializationId);
-                stats.EducationalActivitiesCompleted = educationalActivities.Count;
-
-                var publications = await database.GetPublicationsAsync(specializationId: specializationId);
-                stats.PublicationsCompleted = publications.Count;
-
-                var absences = await database.GetAbsencesAsync(specializationId);
-                stats.AbsenceDays = absences.Sum(a => a.DaysCount);
-                stats.AbsenceDaysExtendingSpecialization = absences
-                    .Where(a => a.ExtendsSpecialization)
-                    .Sum(a => a.DaysCount);
             }
 
             return stats;
@@ -372,21 +341,9 @@ namespace SledzSpecke.App.Helpers
                     procedureProgress = 0;
                 }
 
-                var selfEducationItems = await database.GetSelfEducationItemsAsync(moduleId: moduleId);
-                var publications = await database.GetPublicationsAsync(moduleId: moduleId);
-                var educationalActivities = await database.GetEducationalActivitiesAsync(moduleId: moduleId);
-                double otherActivitiesProgress = 0;
-                int totalOtherItems = selfEducationItems.Count + publications.Count + educationalActivities.Count;
-
-                if (totalOtherItems > 0)
-                {
-                    otherActivitiesProgress = Math.Min(1.0, totalOtherItems / 10.0);
-                }
-
                 double overallProgress = (internshipProgress * internshipWeight) +
                                          (courseProgress * courseWeight) +
-                                         (procedureProgress * procedureWeight) +
-                                         (otherActivitiesProgress * otherWeight);
+                                         (procedureProgress * procedureWeight);
 
                 return Math.Min(1.0, overallProgress);
             }

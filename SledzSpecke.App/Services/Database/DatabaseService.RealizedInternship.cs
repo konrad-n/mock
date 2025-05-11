@@ -193,51 +193,6 @@ namespace SledzSpecke.App.Services.Database
             "Nie udało się usunąć zrealizowanego stażu w starym SMK");
         }
 
-        public async Task FixRealizedInternshipNames()
-        {
-            await this.InitializeAsync();
-            await _exceptionHandler.ExecuteWithRetryAsync(async () =>
-            {
-                // Pobierz wszystkie realizacje bez poprawnej nazwy
-                var realizationsToFix = await this.database.Table<RealizedInternshipOldSMK>()
-                    .Where(r => r.InternshipName == "Staż bez nazwy" || r.InternshipName == null)
-                    .ToListAsync();
-
-                _loggingService.LogInformation($"Znaleziono {realizationsToFix.Count} realizacji do naprawy");
-
-                if (realizationsToFix.Count == 0)
-                {
-                    return;
-                }
-
-                // Pobierz wszystkie staże
-                var internships = await this.database.Table<Internship>()
-                    .Where(i => i.InternshipId < 0) // Tylko wymagania stażowe mają ID < 0
-                    .ToListAsync();
-
-                if (internships.Count == 0)
-                {
-                    _loggingService.LogWarning("Nie znaleziono wymagań stażowych do naprawy nazw");
-                    return;
-                }
-
-                // Przypisz pierwszy staż do wszystkich realizacji bez nazwy
-                // To rozwiązanie tymczasowe, aby pokazać dane
-                var firstInternship = internships.FirstOrDefault();
-                if (firstInternship != null)
-                {
-                    foreach (var realization in realizationsToFix)
-                    {
-                        realization.InternshipName = firstInternship.InternshipName;
-                        await this.database.UpdateAsync(realization);
-                    }
-
-                    _loggingService.LogInformation($"Naprawiono nazwy realizacji, przypisując '{firstInternship.InternshipName}'");
-                }
-            },
-            null, "Nie udało się naprawić nazw zrealizowanych staży", 2, 1500);
-        }
-
         public async Task MigrateInternshipDataAsync()
         {
             await this.InitializeAsync();

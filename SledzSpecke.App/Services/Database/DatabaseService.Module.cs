@@ -96,29 +96,5 @@ namespace SledzSpecke.App.Services.Database
             new Dictionary<string, object> { { "Module", module?.ModuleId }, { "SpecializationId", module?.SpecializationId } },
             "Nie udało się zaktualizować danych modułu");
         }
-
-        public async Task<int> DeleteModuleAsync(Module module)
-        {
-            await this.InitializeAsync();
-            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
-            {
-                if (module == null)
-                {
-                    throw new InvalidInputException(
-                        "Module cannot be null",
-                        "Moduł nie może być pusty");
-                }
-
-                // Clear cache after delete
-                if (_moduleCache.TryGetValue(module.SpecializationId, out _))
-                {
-                    _moduleCache.Remove(module.SpecializationId);
-                }
-
-                return await this.database.DeleteAsync(module);
-            },
-            new Dictionary<string, object> { { "Module", module?.ModuleId }, { "SpecializationId", module?.SpecializationId } },
-            "Nie udało się usunąć modułu");
-        }
     }
 }

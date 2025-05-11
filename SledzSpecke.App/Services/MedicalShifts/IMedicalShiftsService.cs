@@ -12,9 +12,6 @@ namespace SledzSpecke.App.Services.MedicalShifts
         Task<bool> DeleteOldSMKShiftAsync(int shiftId);
         Task<List<InternshipRequirement>> GetAvailableInternshipRequirementsAsync();
         Task<List<RealizedMedicalShiftNewSMK>> GetNewSMKShiftsAsync(int internshipRequirementId);
-        Task<RealizedMedicalShiftNewSMK> GetNewSMKShiftAsync(int shiftId);
         Task<bool> SaveNewSMKShiftAsync(RealizedMedicalShiftNewSMK shift);
-        Task<bool> DeleteNewSMKShiftAsync(int shiftId);
-        Task<string> GetLastShiftLocationAsync();
     }
 }

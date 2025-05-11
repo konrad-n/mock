@@ -5,24 +5,6 @@ namespace SledzSpecke.App.Services.Database
 {
     public partial class DatabaseService
     {
-        public async Task<Procedure> GetProcedureAsync(int id)
-        {
-            await this.InitializeAsync();
-            return await _exceptionHandler.ExecuteWithRetryAsync(async () =>
-            {
-                var procedure = await this.database.Table<Procedure>().FirstOrDefaultAsync(p => p.ProcedureId == id);
-                if (procedure == null)
-                {
-                    throw new ResourceNotFoundException(
-                        $"Procedure with ID {id} not found",
-                        $"Nie znaleziono procedury o ID {id}");
-                }
-                return procedure;
-            },
-            new Dictionary<string, object> { { "ProcedureId", id } },
-            $"Nie udało się pobrać procedury o ID {id}");
-        }
-
         public async Task<List<Procedure>> GetProceduresAsync(int? internshipId = null, string searchText = null)
         {
             await this.InitializeAsync();
