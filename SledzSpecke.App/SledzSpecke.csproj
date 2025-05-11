@@ -172,20 +172,6 @@
     </MauiXaml>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\Absences\" />
-    <Folder Include="Views\Courses\" />
-    <Folder Include="Views\Publications\" />
-    <Folder Include="Views\Recognitions\" />
-    <Folder Include="Views\SelfEducation\" />
-    <Folder Include="Views\Settings\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Views\Absences\AbsencesListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Views\Courses\CoursesListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
     <None Update="Views\Internships\InternshipsListPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
@@ -193,15 +179,6 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Views\Procedures\ProceduresListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Views\Publications\PublicationsListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Views\SelfEducation\SelfEducationListPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Views\Settings\SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
