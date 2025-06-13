@@ -63,6 +63,12 @@ public class Internship
         EnsureCanModify();
         ModuleId = moduleId;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void SetSupervisor(string supervisorName)
@@ -73,6 +79,12 @@ public class Internship
         
         SupervisorName = supervisorName;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void MarkAsCompleted()
@@ -80,6 +92,12 @@ public class Internship
         EnsureCanModify();
         IsCompleted = true;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void Approve(string approverName)
@@ -109,6 +127,12 @@ public class Internship
         
         _medicalShifts.Add(medicalShift);
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void AddProcedure(Procedure procedure)
@@ -119,6 +143,12 @@ public class Internship
         
         _procedures.Add(procedure);
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void UpdateSyncStatus(SyncStatus syncStatus)
@@ -142,10 +172,22 @@ public class Internship
         return _procedures.Count(p => p.Status == ProcedureStatus.Approved);
     }
 
+    /// <summary>
+    /// Ensures the internship can be modified.
+    /// Only approved internships cannot be modified (they are locked).
+    /// Synced internships CAN be modified - they will automatically transition to Modified status.
+    /// This is a key change from the original design where synced items were read-only.
+    /// </summary>
     private void EnsureCanModify()
     {
-        if (SyncStatus == SyncStatus.Synced)
-            throw new CannotModifySyncedDataException();
+        if (IsApproved)
+            throw new InvalidOperationException("Cannot modify approved internship.");
+        
+        // IMPORTANT: Design Decision
+        // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
+        // Now, synced items CAN be modified - they automatically transition to Modified status.
+        // This allows users to correct/update synced data while maintaining the audit trail.
+        // Only APPROVED items are truly read-only.
     }
 
     private static int CalculateDaysCount(DateTime startDate, DateTime endDate)

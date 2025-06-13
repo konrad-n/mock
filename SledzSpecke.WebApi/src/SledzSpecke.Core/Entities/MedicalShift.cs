@@ -52,6 +52,14 @@ public class MedicalShift
         return new MedicalShift(id, internshipId, date, hours, minutes, location, year);
     }
 
+    /// <summary>
+    /// Updates the medical shift details. If the shift is currently synced with SMK,
+    /// it will automatically transition to Modified status to track the change.
+    /// This allows synced data to be edited while maintaining audit trail.
+    /// </summary>
+    /// <param name="hours">Hours worked (0-23)</param>
+    /// <param name="minutes">Minutes worked (0-59)</param>
+    /// <param name="location">Location where the shift was performed</param>
     public void UpdateShiftDetails(int hours, int minutes, string location)
     {
         EnsureCanModify();
@@ -60,6 +68,15 @@ public class MedicalShift
         Minutes = Math.Max(0, Math.Min(59, minutes));
         Location = location ?? throw new ArgumentNullException(nameof(location));
         UpdatedAt = DateTime.UtcNow;
+        
+        // IMPORTANT: Sync Status Management
+        // When a synced item is modified, we automatically transition it to Modified status.
+        // This allows users to edit synced data while maintaining traceability.
+        // The item remains linked to SMK but is marked as having local changes.
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void SetSyncStatus(SyncStatus status)
@@ -87,12 +104,21 @@ public class MedicalShift
         UpdatedAt = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Ensures the medical shift can be modified. 
+    /// Only approved shifts cannot be modified (they are locked).
+    /// Synced shifts CAN be modified - they will automatically transition to Modified status.
+    /// This is a key change from the original design where synced items were read-only.
+    /// </summary>
     private void EnsureCanModify()
     {
         if (IsApproved)
             throw new InvalidOperationException("Cannot modify approved medical shift.");
         
-        if (SyncStatus == SyncStatus.Synced)
-            throw new CannotModifySyncedDataException();
+        // IMPORTANT: Design Decision
+        // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
+        // Now, synced items CAN be modified - they automatically transition to Modified status.
+        // This allows users to correct/update synced data while maintaining the audit trail.
+        // Only APPROVED items are truly read-only.
     }
 }
