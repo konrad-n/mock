@@ -69,6 +69,10 @@ public class MedicalShift
         Location = location ?? throw new ArgumentNullException(nameof(location));
         UpdatedAt = DateTime.UtcNow;
         
+        // AI HINT: This is a KEY CHANGE from original MAUI implementation!
+        // Original: Synced items were read-only (CanBeModified => SyncStatus != SyncStatus.Synced)
+        // New: Synced items CAN be modified and auto-transition to Modified status
+        // This change was specifically requested to allow editing of previously synced data
         // IMPORTANT: Sync Status Management
         // When a synced item is modified, we automatically transition it to Modified status.
         // This allows users to edit synced data while maintaining traceability.

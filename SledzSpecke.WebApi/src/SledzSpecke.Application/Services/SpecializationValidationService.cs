@@ -108,28 +108,16 @@ public class SpecializationValidationService : ISpecializationValidationService
             var currentModule = template.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId?.Value);
             if (currentModule != null && currentModule.MedicalShifts != null)
             {
-                // Validate shift duration
+                // MAUI implementation does not enforce maximum shift duration limits
+                // Only validate that duration is greater than zero
                 var totalHours = medicalShift.Hours + (medicalShift.Minutes / 60.0);
                 
-                // Check maximum shift duration based on SMK version
-                if (specialization.SmkVersion == SmkVersion.Old)
+                if (totalHours == 0)
                 {
-                    // Old SMK might not have strict limits
-                    if (totalHours > 24)
-                    {
-                        result.AddWarning("Medical shift duration exceeds 24 hours");
-                    }
-                }
-                else
-                {
-                    // New SMK has stricter requirements
-                    if (totalHours > 12)
-                    {
-                        result.AddError("Medical shift duration cannot exceed 12 hours for New SMK");
-                    }
+                    result.AddError("Medical shift duration must be greater than zero");
                 }
                 
-                // Validate weekly hours don't exceed limits
+                // Validate weekly hours don't exceed limits (warning only)
                 if (currentModule.MedicalShifts.HoursPerWeek > 0)
                 {
                     // This would require checking other shifts in the same week

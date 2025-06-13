@@ -16,8 +16,11 @@ internal sealed class SqlSpecializationRepository : ISpecializationRepository
 
     public async Task<Specialization?> GetByIdAsync(SpecializationId id)
     {
+        // IMPORTANT: Do NOT use .Include(s => s.Modules) here!
+        // The Modules property is explicitly ignored in SpecializationConfiguration
+        // Using Include will cause: "The expression 's.Modules' is invalid inside an 'Include' operation"
+        // The Modules collection is handled differently in the domain model
         return await _context.Specializations
-            .Include(s => s.Modules)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
@@ -28,7 +31,6 @@ internal sealed class SqlSpecializationRepository : ISpecializationRepository
             return Enumerable.Empty<Specialization>();
 
         return await _context.Specializations
-            .Include(s => s.Modules)
             .Where(s => s.Id == user.SpecializationId)
             .ToListAsync();
     }
@@ -36,7 +38,6 @@ internal sealed class SqlSpecializationRepository : ISpecializationRepository
     public async Task<IEnumerable<Specialization>> GetAllAsync()
     {
         return await _context.Specializations
-            .Include(s => s.Modules)
             .ToListAsync();
     }
 

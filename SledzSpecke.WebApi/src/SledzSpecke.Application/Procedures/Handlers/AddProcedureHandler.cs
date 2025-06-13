@@ -13,17 +13,20 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
     private readonly ISpecializationValidationService _validationService;
+    private readonly IYearCalculationService _yearCalculationService;
 
     public AddProcedureHandler(
         IProcedureRepository procedureRepository,
         IInternshipRepository internshipRepository,
         ISpecializationRepository specializationRepository,
-        ISpecializationValidationService validationService)
+        ISpecializationValidationService validationService,
+        IYearCalculationService yearCalculationService)
     {
         _procedureRepository = procedureRepository;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
         _validationService = validationService;
+        _yearCalculationService = yearCalculationService;
     }
 
     public async Task<int> HandleAsync(AddProcedure command)
@@ -74,6 +77,31 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         // Create procedure based on SMK version
         var procedureId = ProcedureId.New();
         
+        // Validate year based on specialization
+        int procedureYear = command.Year;
+        if (specialization.SmkVersion == SmkVersion.Old)
+        {
+            // For Old SMK, validate the year is within available years
+            var availableYears = _yearCalculationService.GetAvailableYears(specialization);
+            
+            // AI HINT: Year 0 is special - it means "unassigned" in MAUI
+            // This is different from the procedure date's calendar year!
+            // The Year field represents the medical education year (1-6), not 2024/2025
+            if (procedureYear != 0 && !availableYears.Contains(procedureYear))
+            {
+                throw new ArgumentException($"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
+            }
+        }
+        else
+        {
+            // For New SMK, year should typically be 0 (not used)
+            if (procedureYear != 0)
+            {
+                // Log warning but allow it for backward compatibility
+                // In production, you might want to log this
+            }
+        }
+        
         // Create the procedure using the generic Procedure class
         var procedure = Procedure.Create(
             procedureId,
@@ -81,6 +109,7 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             command.Date,
             command.Code,
             command.Location,
+            procedureYear,
             specialization.SmkVersion);
 
         // Set additional fields

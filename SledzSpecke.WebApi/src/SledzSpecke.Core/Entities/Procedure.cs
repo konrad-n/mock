@@ -12,7 +12,7 @@ public class Procedure : ProcedureBase
     }
 
     public static Procedure Create(ProcedureId id, InternshipId internshipId, DateTime date, 
-        string code, string location, SmkVersion smkVersion = SmkVersion.New)
+        string code, string location, int year, SmkVersion smkVersion = SmkVersion.New)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new InvalidProcedureCodeException(code ?? string.Empty);
@@ -23,7 +23,7 @@ public class Procedure : ProcedureBase
         if (date > DateTime.UtcNow.Date)
             throw new ArgumentException("Procedure date cannot be in the future.", nameof(date));
 
-        return new Procedure(id, internshipId, date, date.Year, code, location, ProcedureStatus.Pending, smkVersion);
+        return new Procedure(id, internshipId, date, year, code, location, ProcedureStatus.Pending, smkVersion);
     }
 
     public override bool IsValidForSmkVersion()

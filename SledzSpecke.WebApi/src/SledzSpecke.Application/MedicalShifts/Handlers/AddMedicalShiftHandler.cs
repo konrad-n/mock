@@ -14,17 +14,20 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
     private readonly ISpecializationValidationService _validationService;
+    private readonly IYearCalculationService _yearCalculationService;
 
     public AddMedicalShiftHandler(
         IMedicalShiftRepository medicalShiftRepository,
         IInternshipRepository internshipRepository,
         ISpecializationRepository specializationRepository,
-        ISpecializationValidationService validationService)
+        ISpecializationValidationService validationService,
+        IYearCalculationService yearCalculationService)
     {
         _medicalShiftRepository = medicalShiftRepository;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
         _validationService = validationService;
+        _yearCalculationService = yearCalculationService;
     }
 
     public async Task<int> HandleAsync(AddMedicalShift command)
@@ -43,8 +46,8 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
             throw new SpecializationNotFoundException(internship.SpecializationId.Value);
         }
 
-        // Validate shift based on SMK version
-        ValidateShiftForSmkVersion(command, specialization.SmkVersion);
+        // Validate shift based on SMK version and year calculation
+        ValidateShiftForSmkVersion(command, specialization);
 
         // Create medical shift
         var medicalShiftId = new MedicalShiftId(0); // Will be assigned by repository
@@ -82,18 +85,19 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         return shiftId;
     }
 
-    private static void ValidateShiftForSmkVersion(AddMedicalShift command, SmkVersion smkVersion)
+    private void ValidateShiftForSmkVersion(AddMedicalShift command, Specialization specialization)
     {
-        // Common validations
+        // Common validations - align with MAUI implementation
+        // Only check that duration is greater than zero (hours + minutes > 0)
         if (command.Hours < 0 || command.Minutes < 0)
         {
             throw new ArgumentException("Shift duration cannot be negative.");
         }
-
-        if (command.Minutes > 59)
-        {
-            throw new ArgumentException("Minutes must be between 0 and 59.");
-        }
+        
+        // AI HINT: MAUI allows minutes > 59 (e.g., 90 minutes is valid)
+        // DO NOT add validation like "if (command.Minutes > 59)" - this is intentional!
+        // Normalization happens at display/summary level via TimeNormalizationHelper
+        // Previous implementations incorrectly restricted this
 
         if (string.IsNullOrWhiteSpace(command.Location))
         {
@@ -101,35 +105,33 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         }
 
         // SMK version-specific validations
-        switch (smkVersion)
+        switch (specialization.SmkVersion)
         {
             case SmkVersion.Old:
-                ValidateOldSmkShift(command);
+                ValidateOldSmkShift(command, specialization);
                 break;
             case SmkVersion.New:
-                ValidateNewSmkShift(command);
+                ValidateNewSmkShift(command, specialization);
                 break;
             default:
-                throw new InvalidOperationException($"Unknown SMK version: {smkVersion}");
+                throw new InvalidOperationException($"Unknown SMK version: {specialization.SmkVersion}");
         }
     }
 
-    private static void ValidateOldSmkShift(AddMedicalShift command)
+    private void ValidateOldSmkShift(AddMedicalShift command, Specialization specialization)
     {
         // Old SMK specific validations
-        if (command.Year < 1 || command.Year > 5)
+        var availableYears = _yearCalculationService.GetAvailableYears(specialization);
+        
+        // Allow year 0 for unassigned shifts
+        if (command.Year != 0 && !availableYears.Contains(command.Year))
         {
-            throw new ArgumentException("Year must be between 1 and 5 for Old SMK.");
+            throw new ArgumentException($"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
         }
 
-        // Old SMK typically allows longer shifts (up to 24 hours)
-        var totalHours = command.Hours + (command.Minutes / 60.0);
-        if (totalHours > 24)
-        {
-            throw new ArgumentException("Shift duration cannot exceed 24 hours for Old SMK.");
-        }
-
-        if (totalHours == 0)
+        // MAUI implementation does not enforce maximum shift duration for Old SMK
+        // Only check that total duration is greater than zero
+        if (command.Hours == 0 && command.Minutes == 0)
         {
             throw new ArgumentException("Shift duration must be greater than zero.");
         }
@@ -141,7 +143,7 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         }
     }
 
-    private static void ValidateNewSmkShift(AddMedicalShift command)
+    private void ValidateNewSmkShift(AddMedicalShift command, Specialization specialization)
     {
         // New SMK specific validations
         // New SMK doesn't use year field in the same way, but we still validate it's provided
@@ -150,16 +152,11 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
             throw new ArgumentException("Year must be provided for New SMK.");
         }
 
-        // New SMK has stricter shift duration limits (typically max 16 hours)
-        var totalHours = command.Hours + (command.Minutes / 60.0);
-        if (totalHours > 16)
+        // MAUI implementation does not enforce maximum shift duration for New SMK
+        // Only check that total duration is greater than zero
+        if (command.Hours == 0 && command.Minutes == 0)
         {
-            throw new ArgumentException("Shift duration cannot exceed 16 hours for New SMK.");
-        }
-
-        if (totalHours < 4)
-        {
-            throw new ArgumentException("Shift duration must be at least 4 hours for New SMK.");
+            throw new ArgumentException("Shift duration must be greater than zero.");
         }
 
         // Location validation for New SMK - should match internship requirements

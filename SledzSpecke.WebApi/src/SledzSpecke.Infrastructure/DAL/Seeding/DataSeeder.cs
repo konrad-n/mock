@@ -62,9 +62,14 @@ internal sealed class DataSeeder : IDataSeeder
             new Password("VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U="), // SHA256 hash of "Test123!"
             new FullName("Test User"),
             SmkVersion.Old,
-            new SpecializationId(1), // Cardiology Old SMK
+            new SpecializationId(1), // WARNING: This assumes specialization ID 1 exists!
             DateTime.UtcNow
         );
+        
+        // AI HINT: If you get "Specialization with ID 1 not found" errors:
+        // 1. Check that specializations are seeded BEFORE users
+        // 2. Verify the migration includes specialization data
+        // 3. The user references SpecializationId(1) which must exist
 
         _context.Users.Add(testUser);
         await _context.SaveChangesAsync();

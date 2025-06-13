@@ -86,6 +86,46 @@ public class Internship
             SyncStatus = SyncStatus.Modified;
         }
     }
+    
+    public void UpdateInstitution(string institutionName, string departmentName)
+    {
+        EnsureCanModify();
+        
+        if (string.IsNullOrWhiteSpace(institutionName))
+            throw new ArgumentException("Institution name cannot be empty.", nameof(institutionName));
+            
+        if (string.IsNullOrWhiteSpace(departmentName))
+            throw new ArgumentException("Department name cannot be empty.", nameof(departmentName));
+        
+        InstitutionName = institutionName;
+        DepartmentName = departmentName;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void UpdateDates(DateTime startDate, DateTime endDate)
+    {
+        EnsureCanModify();
+        
+        if (endDate <= startDate)
+            throw new InvalidDateRangeException();
+            
+        StartDate = startDate;
+        EndDate = endDate;
+        DaysCount = CalculateDaysCount(startDate, endDate);
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
 
     public void MarkAsCompleted()
     {

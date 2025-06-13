@@ -19,7 +19,9 @@ public static class Extensions
         services.AddScoped<ICommandHandler<Commands.SignUp>, SignUpHandler>();
         services.AddScoped<ICommandHandler<Commands.SignIn, DTO.JwtDto>, SignInHandler>();
         services.AddScoped<ICommandHandler<Commands.CreateInternship, int>, CreateInternshipHandler>();
+        services.AddScoped<ICommandHandler<Commands.UpdateInternship>, UpdateInternshipHandler>();
         services.AddScoped<ICommandHandler<Commands.ApproveInternship>, ApproveInternshipHandler>();
+        services.AddScoped<ICommandHandler<Commands.MarkInternshipAsCompleted>, MarkInternshipAsCompletedHandler>();
         services.AddScoped<ICommandHandler<Commands.CreateAbsence>, CreateAbsenceHandler>();
         services.AddScoped<ICommandHandler<Commands.CreateRecognition>, CreateRecognitionHandler>();
         services.AddScoped<ICommandHandler<Commands.CreatePublication>, CreatePublicationHandler>();
@@ -46,6 +48,7 @@ public static class Extensions
 
         // Register validation services
         services.AddScoped<ISpecializationValidationService, SpecializationValidationService>();
+        services.AddScoped<IYearCalculationService, YearCalculationService>();
 
         return services;
     }
