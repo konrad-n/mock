@@ -1,0 +1,370 @@
+{
+  "name": "Psychiatria",
+  "code": "psychiatry",
+  "version": "CMKP 2023",
+  "totalDuration": {
+    "years": 5,
+    "months": 0,
+    "days": 0
+  },
+  "totalWorkingDays": 1305,
+  "basicInfo": {
+    "targetGroup": "Lekarze nieposiadający specjalizacji I lub II stopnia lub tytułu specjalisty w odpowiedniej dziedzinie medycyny",
+    "qualificationProcedure": "wiosna 2023"
+  },
+  "modules": [
+    {
+      "moduleId": 1,
+      "name": "Moduł specjalistyczny w zakresie psychiatrii",
+      "code": "psychiatry_specialistic",
+      "moduleType": "Specialistic",
+      "version": "CMKP 2023",
+      "duration": {
+        "years": 5,
+        "months": 0,
+        "days": 0
+      },
+      "workingDays": 1104,
+      "courses": [
+        {
+          "id": 1,
+          "name": "Kurs wprowadzający: \"Wprowadzenie do specjalizacji w dziedzinie psychiatrii\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 2,
+          "name": "Kurs: \"Psychiatria sądowa i opiniowanie sądowo-psychiatryczne\"",
+          "weeks": 2,
+          "workingDays": 10,
+          "required": true
+        },
+        {
+          "id": 3,
+          "name": "Kurs: \"Psychiatria środowiskowa i rehabilitacja psychiatryczna\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 4,
+          "name": "Kurs: \"Wybrane zagadnienia z zakresu psychiatrii klinicznej\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 5,
+          "name": "Kurs: \"Wprowadzenie do psychoterapii\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        },
+        {
+          "id": 6,
+          "name": "Kurs: \"Orzecznictwo lekarskie\"",
+          "weeks": 0.6,
+          "workingDays": 3,
+          "required": true
+        },
+        {
+          "id": 7,
+          "name": "Kurs: \"Profilaktyka i promocja zdrowia\"",
+          "weeks": 0.4,
+          "workingDays": 2,
+          "required": true
+        },
+        {
+          "id": 8,
+          "name": "Kurs atestacyjny (podsumowujący): \"Psychiatria\"",
+          "weeks": 1,
+          "workingDays": 5,
+          "required": true
+        }
+      ],
+      "internships": [
+        {
+          "id": 1,
+          "name": "Staż podstawowy w zakresie psychiatrii",
+          "weeks": 148,
+          "workingDays": 740,
+          "isBasic": true,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii – oddział ogólnopsychiatryczny, poradnia zdrowia psychicznego (PZP), zespół leczenia środowiskowego (ZLŚ), oddział dzienny lub centrum zdrowia psychicznego (CZP)"
+        },
+        {
+          "id": 2,
+          "name": "Staż kierunkowy w zakresie chorób wewnętrznych",
+          "weeks": 6,
+          "workingDays": 30,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie chorób wewnętrznych lub ww. stażu – oddział chorób wewnętrznych – zalecany I rok szkolenia"
+        },
+        {
+          "id": 3,
+          "name": "Staż kierunkowy w zakresie neurologii",
+          "weeks": 4,
+          "workingDays": 20,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie neurologii lub ww. stażu – oddział neurologiczny – zalecany I-II rok szkolenia"
+        },
+        {
+          "id": 4,
+          "name": "Staż kierunkowy w zakresie psychiatrii dzieci i młodzieży",
+          "weeks": 8,
+          "workingDays": 40,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii dzieci i młodzieży lub ww. stażu – II lub III poziom referencyjności (poradnia dla dzieci i młodzieży - czynna we wszystkie dni robocze w tygodniu lub oddział dzienny dla dzieci i młodzieży lub oddział całodobowy dla dzieci i młodzieży)"
+        },
+        {
+          "id": 5,
+          "name": "Staż kierunkowy w zakresie zaburzeń nerwicowych i psychoterapii",
+          "weeks": 12,
+          "workingDays": 60,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – oddział całodobowy lub oddział dzienny leczenia nerwic lub poradnia leczenia zaburzeń nerwicowych – zalecany II – V rok szkolenia"
+        },
+        {
+          "id": 6,
+          "name": "Staż kierunkowy w Centrum Zdrowia Psychicznego",
+          "weeks": 12,
+          "workingDays": 60,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii posiadająca Centrum Zdrowia Psychicznego lub ww. stażu"
+        },
+        {
+          "id": 7,
+          "name": "Staż kierunkowy w zakresie leczenia uzależnień",
+          "weeks": 8,
+          "workingDays": 40,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – oddział terapii uzależnień, oddział detoksykacyjny, poradnia leczenia uzależnień"
+        },
+        {
+          "id": 8,
+          "name": "Staż kierunkowy w zakresie psychiatrii konsultacyjnej",
+          "weeks": 6,
+          "workingDays": 30,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii lub ww. stażu – oddział psychiatryczny w szpitalu wielospecjalistycznym – zalecany III – V rok szkolenia"
+        },
+        {
+          "id": 9,
+          "name": "Staż kierunkowy w zakresie psychiatrii sądowej",
+          "weeks": 8,
+          "workingDays": 40,
+          "isBasic": false,
+          "location": "jednostka posiadająca akredytację do prowadzenia szkolenia specjalizacyjnego w dziedzinie psychiatrii posiadająca oddział o podstawowym lub wzmocnionym lub maksymalnym stopniu zabezpieczenia – po II roku szkolenia specjalizacyjnego"
+        }
+      ],
+      "procedures": [
+        {
+          "id": 1,
+          "name": "ocena stanu psychicznego za pomocą standaryzowanych skal klinicznych",
+          "type": "Staż podstawowy",
+          "requiredCountA": 20,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 2,
+          "name": "kwalifikacja i przygotowanie pacjentów oraz przeprowadzenie zabiegów elektrowstrząsowych",
+          "type": "Staż podstawowy",
+          "requiredCountA": 5,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 3,
+          "name": "przygotowanie opinii w sprawie zasadności przyjęcia bez zgody do szpitala psychiatrycznego",
+          "type": "Staż podstawowy",
+          "requiredCountA": 20,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 4,
+          "name": "przygotowanie opinii sądowo-psychiatrycznych w sprawach karnych",
+          "type": "Staż podstawowy",
+          "requiredCountA": 5,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 5,
+          "name": "przygotowanie opinii sądowo-psychiatrycznych w sprawach cywilnych",
+          "type": "Staż podstawowy",
+          "requiredCountA": 3,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 6,
+          "name": "przeprowadzenie konsultacji psychiatrycznych dla innych lekarzy",
+          "type": "Staż podstawowy",
+          "requiredCountA": 20,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 7,
+          "name": "prowadzenie pacjentów leczonych klozapiną",
+          "type": "Staż podstawowy",
+          "requiredCountA": 5,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 8,
+          "name": "prowadzenie pacjentów leczonych litem",
+          "type": "Staż podstawowy",
+          "requiredCountA": 5,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 9,
+          "name": "zastosowanie środków przymusu bezpośredniego zgodnie z UoOZP",
+          "type": "Staż podstawowy",
+          "requiredCountA": 10,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 10,
+          "name": "prowadzenie pacjentów przyjętych bez zgody do szpitala psychiatrycznego",
+          "type": "Staż podstawowy",
+          "requiredCountA": 5,
+          "requiredCountB": 0,
+          "internshipId": 1
+        },
+        {
+          "id": 11,
+          "name": "przeprowadzenie ogólnego badania internistycznego",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 5,
+          "requiredCountB": 10,
+          "internshipId": 2
+        },
+        {
+          "id": 12,
+          "name": "przeprowadzenie ogólnego badania neurologicznego",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 5,
+          "requiredCountB": 10,
+          "internshipId": 3
+        },
+        {
+          "id": 13,
+          "name": "badanie psychiatryczne osób poniżej 18 roku życia",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 5,
+          "requiredCountB": 10,
+          "internshipId": 4
+        },
+        {
+          "id": 14,
+          "name": "prowadzenie pacjentów z powikłanymi zespołami abstynencyjnymi",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 5,
+          "requiredCountB": 5,
+          "internshipId": 7
+        },
+        {
+          "id": 15,
+          "name": "tworzenie planu terapii zdrowienia",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 5,
+          "requiredCountB": 10,
+          "internshipId": 6
+        },
+        {
+          "id": 16,
+          "name": "udzielanie świadczeń za pomocą narzędzi teleinformatycznych",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 10,
+          "requiredCountB": 5,
+          "internshipId": 6
+        },
+        {
+          "id": 17,
+          "name": "ocena wskazań do farmakoterapii lub psychoterapii oraz dobór technik psychoterapeutycznych",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 5,
+          "requiredCountB": 10,
+          "internshipId": 5
+        },
+        {
+          "id": 18,
+          "name": "współudział w konsultacjach psychiatrycznych dla lekarzy innych specjalizacji",
+          "type": "Staże kierunkowe",
+          "requiredCountA": 0,
+          "requiredCountB": 20,
+          "internshipId": 8
+        }
+      ],
+      "selfEducation": {
+        "daysPerYear": 6,
+        "totalDays": 30,
+        "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+      },
+      "holidays": {
+        "vacationDays": 130,
+        "nationalHolidays": 65,
+        "examPreparationDays": 6
+      },
+      "medicalShifts": {
+        "hoursPerWeek": 10.08,
+        "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
+      },
+      "procedureCodeDescription": {
+        "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
+        "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
+      },
+      "examinationInfo": {
+        "examType": "Państwowy Egzamin Specjalizacyjny",
+        "components": [
+          {
+            "name": "egzamin testowy",
+            "description": "zbiór pytań z zakresu wymaganej wiedzy określonej w programie specjalizacji"
+          },
+          {
+            "name": "egzamin ustny",
+            "description": "pytania problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
+          }
+        ]
+      }
+    }
+  ],
+  "selfEducation": {
+    "daysPerYear": 6,
+    "totalDays": 30,
+    "description": "Dodatkowe dni na samokształcenie przeznaczone na udział w konferencjach, kursach naukowych i doskonalących i innych szkoleniach w danej dziedzinie specjalizacji do wyboru lekarza"
+  },
+  "holidays": {
+    "vacationDays": 130,
+    "nationalHolidays": 65,
+    "examPreparationDays": 6
+  },
+  "medicalShifts": {
+    "hoursPerWeek": 10.08,
+    "description": "Lekarz pełni dyżury medyczne w wymiarze przeciętnie 10 godzin 5 minut na tydzień lub wykonuje pracę w systemie zmianowym lub równoważnym czasie pracy, w maksymalnym czasie pracy dopuszczonym w przepisach o działalności leczniczej, tj. w wymiarze przeciętnie 48 godzin na tydzień, w tym dyżur medyczny, w przyjętym okresie rozliczeniowym. Wymagane jest pełnienie dyżurów w oddziałach psychiatrycznych."
+  },
+  "procedureCodeDescription": {
+    "codeA": "Wykonywanie samodzielnie z asystą lub pod nadzorem kierownika specjalizacji albo lekarza specjalisty przez niego wyznaczonego (liczba)",
+    "codeB": "W których lekarz uczestniczy jako pierwsza asysta (liczba)"
+  },
+  "examinationInfo": {
+    "examType": "Państwowy Egzamin Specjalizacyjny",
+    "components": [
+      {
+        "name": "egzamin testowy",
+        "description": "zbiór pytań z zakresu wymaganej wiedzy określonej w programie specjalizacji"
+      },
+      {
+        "name": "egzamin ustny",
+        "description": "pytania problemowe, dotyczące wymaganej wiedzy określonej w programie specjalizacji"
+      }
+    ]
+  }
+}

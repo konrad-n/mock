@@ -1,0 +1,921 @@
+### SledzSpecke Web API - Enhanced Comprehensive Test Suite
+### Medical Specialization Tracking System API Tests
+### Base URL: https://localhost:7093 or http://localhost:5000
+### Author: Senior .NET Developer & Architect
+### Version: 2.0 - Phase 2 Complete Implementation
+
+@baseUrl = http://localhost:5000
+@accessToken = {{auth_response.response.body.accessToken}}
+@userId = 1001
+@specializationId = 1
+@internshipId = 1
+@courseId = 1
+
+### ===============================================
+### ENVIRONMENT SETUP & INITIALIZATION
+### ===============================================
+
+### Health Check - Verify API is running
+GET {{baseUrl}}/api/health
+Accept: application/json
+
+### ===============================================
+### 1. AUTHENTICATION & USER MANAGEMENT
+### ===============================================
+
+### 1.1 Sign Up - Create primary test user (Cardiologist)
+POST {{baseUrl}}/api/auth/sign-up
+Content-Type: application/json
+
+{
+  "userId": {{userId}},
+  "email": "dr.kowalski@hospital.com",
+  "username": "dr.kowalski",
+  "password": "SecurePass123!@#",
+  "fullName": "Dr. Jan Kowalski",
+  "smkVersion": "New",
+  "specializationId": {{specializationId}}
+}
+
+### 1.2 Sign In - Authenticate and get JWT token
+# @name auth_response
+POST {{baseUrl}}/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "username": "dr.kowalski",
+  "password": "SecurePass123!@#"
+}
+
+### 1.3 Sign Up - Create secondary test user (Psychiatrist)
+POST {{baseUrl}}/api/auth/sign-up
+Content-Type: application/json
+
+{
+  "userId": 1002,
+  "email": "dr.nowak@hospital.com",
+  "username": "dr.nowak",
+  "password": "SecurePass123!@#",
+  "fullName": "Dr. Anna Nowak",
+  "smkVersion": "Old",
+  "specializationId": 2
+}
+
+### 1.4 Get current user profile
+GET {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{accessToken}}
+
+### 1.5 Update user profile
+PUT {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Dr. Jan Kowalski, PhD",
+  "email": "dr.kowalski.phd@hospital.com"
+}
+
+### ===============================================
+### 2. SPECIALIZATION MANAGEMENT
+### ===============================================
+
+### 2.1 Get all available specializations
+GET {{baseUrl}}/api/specializations
+Authorization: Bearer {{accessToken}}
+
+### 2.2 Get specific specialization details (Cardiology)
+GET {{baseUrl}}/api/specializations/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### 2.3 Get specialization modules
+GET {{baseUrl}}/api/specializations/{{specializationId}}/modules
+Authorization: Bearer {{accessToken}}
+
+### 2.4 Get specialization statistics (comprehensive)
+GET {{baseUrl}}/api/specializations/{{specializationId}}/statistics
+Authorization: Bearer {{accessToken}}
+
+### 2.5 Get user's specialization progress
+GET {{baseUrl}}/api/specializations/{{specializationId}}/progress?userId={{userId}}
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 3. INTERNSHIP MANAGEMENT (Phase 1)
+### ===============================================
+
+### 3.1 Create internship - Module 1
+# @name internship_response_1
+POST {{baseUrl}}/api/internships
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "id": {{internshipId}},
+  "specializationId": {{specializationId}},
+  "institutionName": "Szpital Uniwersytecki w Krakowie",
+  "departmentName": "Oddział Kardiologii Interwencyjnej",
+  "startDate": "2024-01-15T00:00:00Z",
+  "endDate": "2024-06-30T23:59:59Z",
+  "supervisorName": "Prof. dr hab. Marek Kowalczyk",
+  "moduleId": 1
+}
+
+### 3.2 Create internship - Module 2
+POST {{baseUrl}}/api/internships
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "id": 2,
+  "specializationId": {{specializationId}},
+  "institutionName": "Instytut Kardiologii w Warszawie",
+  "departmentName": "Pracownia Elektrofizjologii",
+  "startDate": "2024-07-01T00:00:00Z",
+  "endDate": "2024-08-31T23:59:59Z",
+  "supervisorName": "Dr hab. Tomasz Nowicki",
+  "moduleId": 2
+}
+
+### 3.3 Get all internships for specialization
+GET {{baseUrl}}/api/internships?specializationId={{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### 3.4 Get internships for specific module
+GET {{baseUrl}}/api/internships?specializationId={{specializationId}}&moduleId=1
+Authorization: Bearer {{accessToken}}
+
+### 3.5 Update internship details
+PUT {{baseUrl}}/api/internships/{{internshipId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "institutionName": "Szpital Uniwersytecki w Krakowie",
+  "departmentName": "Oddział Kardiologii Interwencyjnej i Pracownia Hemodynamiki",
+  "supervisorName": "Prof. dr hab. Marek Kowalczyk",
+  "endDate": "2024-07-15T23:59:59Z"
+}
+
+### 3.6 Approve internship
+POST {{baseUrl}}/api/internships/{{internshipId}}/approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "approverName": "Prof. dr hab. Piotr Jankowski",
+  "approverRole": "Kierownik Specjalizacji"
+}
+
+### 3.7 Complete internship
+POST {{baseUrl}}/api/internships/{{internshipId}}/complete
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 4. MEDICAL PROCEDURES & SHIFTS
+### ===============================================
+
+### 4.1 Add medical procedure to internship
+POST {{baseUrl}}/api/internships/{{internshipId}}/procedures
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "code": "89.52",
+  "name": "Koronarografia",
+  "date": "2024-02-15T14:30:00Z",
+  "location": "Pracownia Hemodynamiki",
+  "operatorCode": "A",
+  "performingPerson": "Dr. Jan Kowalski",
+  "patientInitials": "JN",
+  "patientGender": "M"
+}
+
+### 4.2 Add medical shift to internship
+POST {{baseUrl}}/api/internships/{{internshipId}}/shifts
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "date": "2024-02-15T00:00:00Z",
+  "hours": 12,
+  "minutes": 0,
+  "location": "Oddział Kardiologii",
+  "shiftType": "Dyżur medyczny"
+}
+
+### 4.3 Get procedures for internship
+GET {{baseUrl}}/api/internships/{{internshipId}}/procedures
+Authorization: Bearer {{accessToken}}
+
+### 4.4 Get medical shifts for internship
+GET {{baseUrl}}/api/internships/{{internshipId}}/shifts
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 5. COURSE MANAGEMENT (Phase 1)
+### ===============================================
+
+### 5.1 Create mandatory course
+# @name course_response_1
+POST {{baseUrl}}/api/courses
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "id": {{courseId}},
+  "specializationId": {{specializationId}},
+  "courseType": "Mandatory",
+  "courseName": "Diagnostyka obrazowa w kardiologii",
+  "institutionName": "Centrum Medyczne Kształcenia Podyplomowego",
+  "completionDate": "2024-03-15T00:00:00Z",
+  "courseNumber": "CMKP-DG-2024-001",
+  "certificateNumber": "CERT-DG-2024-001",
+  "moduleId": 1,
+  "hasCertificate": true
+}
+
+### 5.2 Create optional course
+POST {{baseUrl}}/api/courses
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "id": 2,
+  "specializationId": {{specializationId}},
+  "courseType": "Optional",
+  "courseName": "Echokardiografia zaawansowana",
+  "institutionName": "Polskie Towarzystwo Kardiologiczne",
+  "completionDate": "2024-04-20T00:00:00Z",
+  "courseNumber": "PTK-ECHO-2024-002",
+  "certificateNumber": "CERT-ECHO-2024-002",
+  "moduleId": 2,
+  "hasCertificate": true
+}
+
+### 5.3 Create attestation course
+POST {{baseUrl}}/api/courses
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "id": 3,
+  "specializationId": {{specializationId}},
+  "courseType": "Attestation",
+  "courseName": "Kurs atestacyjny - Kardiologia",
+  "institutionName": "Centrum Medyczne Kształcenia Podyplomowego",
+  "completionDate": "2024-12-15T00:00:00Z",
+  "courseNumber": "CMKP-ATEST-KARD-2024",
+  "certificateNumber": "CERT-ATEST-KARD-2024",
+  "moduleId": null,
+  "hasCertificate": true
+}
+
+### 5.4 Get courses by type
+GET {{baseUrl}}/api/courses?specializationId={{specializationId}}&courseType=Mandatory
+Authorization: Bearer {{accessToken}}
+
+### 5.5 Approve course
+POST {{baseUrl}}/api/courses/{{courseId}}/approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "approverName": "Prof. dr hab. Piotr Jankowski",
+  "approverRole": "Kierownik Specjalizacji"
+}
+
+### ===============================================
+### 6. PUBLICATION MANAGEMENT (Phase 2)
+### ===============================================
+
+### 6.1 Create peer-reviewed publication (first author)
+POST {{baseUrl}}/api/publications
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "JournalArticle",
+  "title": "Novel Approaches in Interventional Cardiology: A Systematic Review",
+  "authors": "Kowalski J, Nowicki T, Smith A, Johnson B",
+  "journal": "European Heart Journal",
+  "publisher": "Oxford University Press",
+  "publicationDate": "2024-02-28T00:00:00Z",
+  "volume": "45",
+  "issue": "8",
+  "pages": "1234-1245",
+  "doi": "10.1093/eurheartj/ehae123",
+  "pmid": "38456789",
+  "url": "https://academic.oup.com/eurheartj/article/45/8/1234",
+  "abstract": "Background: This systematic review examines novel approaches...",
+  "keywords": "interventional cardiology, systematic review, percutaneous coronary intervention",
+  "isFirstAuthor": true,
+  "isCorrespondingAuthor": true,
+  "isPeerReviewed": true
+}
+
+### 6.2 Create book chapter publication
+POST {{baseUrl}}/api/publications
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "BookChapter",
+  "title": "Cardiac Catheterization Techniques",
+  "authors": "Nowicki T, Kowalski J",
+  "publisher": "Springer Medical Publishing",
+  "publicationDate": "2024-03-15T00:00:00Z",
+  "isbn": "978-3-030-12345-6",
+  "pages": "Chapter 15, pp. 234-256",
+  "url": "https://link.springer.com/chapter/10.1007/978-3-030-12345-6_15",
+  "isFirstAuthor": false,
+  "isPeerReviewed": true
+}
+
+### 6.3 Create conference abstract
+POST {{baseUrl}}/api/publications
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "ConferenceAbstract",
+  "title": "Long-term Outcomes of Drug-Eluting Stents in Complex Coronary Lesions",
+  "authors": "Kowalski J, Wiśniewska A, Nowicki T",
+  "journal": "Journal of the American College of Cardiology",
+  "publicationDate": "2024-09-15T00:00:00Z",
+  "volume": "84",
+  "issue": "Suppl",
+  "pages": "B123",
+  "abstract": "Introduction: Drug-eluting stents have revolutionized...",
+  "isFirstAuthor": true,
+  "isPeerReviewed": false
+}
+
+### 6.4 Get all publications for user
+GET {{baseUrl}}/api/publications/user/{{userId}}/specialization/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### 6.5 Get peer-reviewed publications
+GET {{baseUrl}}/api/publications/user/{{userId}}/peer-reviewed
+Authorization: Bearer {{accessToken}}
+
+### 6.6 Get first-author publications
+GET {{baseUrl}}/api/publications/user/{{userId}}/first-author
+Authorization: Bearer {{accessToken}}
+
+### 6.7 Calculate impact score
+GET {{baseUrl}}/api/publications/user/{{userId}}/specialization/{{specializationId}}/impact-score
+Authorization: Bearer {{accessToken}}
+
+### 6.8 Update publication
+PUT {{baseUrl}}/api/publications/{{publication_id}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "pmid": "38456789",
+  "url": "https://academic.oup.com/eurheartj/article/45/8/1234/7654321"
+}
+
+### ===============================================
+### 7. ABSENCE MANAGEMENT (Phase 2)
+### ===============================================
+
+### 7.1 Create medical leave absence
+POST {{baseUrl}}/api/absences
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "MedicalLeave",
+  "startDate": "2024-05-01T00:00:00Z",
+  "endDate": "2024-05-15T23:59:59Z",
+  "description": "Zwolnienie lekarskie - zabieg chirurgiczny",
+  "documentPath": "/documents/absences/ZL-2024-001.pdf"
+}
+
+### 7.2 Create maternity leave absence
+POST {{baseUrl}}/api/absences
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": 1002,
+  "type": "MaternityLeave",
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T23:59:59Z",
+  "description": "Urlop macierzyński",
+  "documentPath": "/documents/absences/UM-2024-001.pdf"
+}
+
+### 7.3 Create conference absence
+POST {{baseUrl}}/api/absences
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "Conference",
+  "startDate": "2024-09-15T00:00:00Z",
+  "endDate": "2024-09-18T23:59:59Z",
+  "description": "ESC Congress 2024 - Barcelona",
+  "documentPath": "/documents/absences/CONF-2024-001.pdf"
+}
+
+### 7.4 Get absences for user
+GET {{baseUrl}}/api/absences/user/{{userId}}/specialization/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### 7.5 Approve absence
+PUT {{baseUrl}}/api/absences/{{absence_id}}/approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "approvedBy": {{userId}},
+  "approverRole": "Kierownik Specjalizacji"
+}
+
+### ===============================================
+### 8. RECOGNITION MANAGEMENT (Phase 2)
+### ===============================================
+
+### 8.1 Create experience recognition
+POST {{baseUrl}}/api/recognitions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "PreviousExperience",
+  "title": "Uznanie doświadczenia zawodowego",
+  "description": "2 lata pracy w Oddziale Kardiologii Inwazyjnej, Szpital Wojewódzki",
+  "institution": "Wojewódzka Rada Lekarska",
+  "startDate": "2022-01-01T00:00:00Z",
+  "endDate": "2023-12-31T23:59:59Z",
+  "daysReduction": 180,
+  "documentPath": "/documents/recognitions/EXP-2024-001.pdf"
+}
+
+### 8.2 Create education recognition
+POST {{baseUrl}}/api/recognitions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "PreviousEducation",
+  "title": "Uznanie studiów doktoranckich",
+  "description": "Doktorat z zakresu kardiologii interwencyjnej",
+  "institution": "Uniwersytet Medyczny w Krakowie",
+  "startDate": "2020-10-01T00:00:00Z",
+  "endDate": "2023-09-30T23:59:59Z",
+  "daysReduction": 90,
+  "documentPath": "/documents/recognitions/PHD-2024-001.pdf"
+}
+
+### 8.3 Create foreign training recognition
+POST {{baseUrl}}/api/recognitions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "ForeignTraining",
+  "title": "Fellowship in Interventional Cardiology",
+  "description": "Cleveland Clinic Fellowship Program",
+  "institution": "Cleveland Clinic, USA",
+  "startDate": "2023-01-01T00:00:00Z",
+  "endDate": "2023-12-31T23:59:59Z",
+  "daysReduction": 365,
+  "documentPath": "/documents/recognitions/FELLOW-2024-001.pdf"
+}
+
+### 8.4 Get recognitions for user
+GET {{baseUrl}}/api/recognitions/user/{{userId}}/specialization/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### 8.5 Approve recognition
+PUT {{baseUrl}}/api/recognitions/{{recognition_id}}/approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "approvedBy": {{userId}},
+  "approverRole": "Przewodniczący Komisji Specjalizacyjnej"
+}
+
+### 8.6 Get total reduction days
+GET {{baseUrl}}/api/recognitions/user/{{userId}}/specialization/{{specializationId}}/total-reduction
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 9. SELF-EDUCATION MANAGEMENT (Phase 2)
+### ===============================================
+
+### 9.1 Create conference attendance
+POST {{baseUrl}}/api/selfeducation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "Conference",
+  "year": 2024,
+  "title": "European Society of Cardiology Congress 2024",
+  "description": "Active participation with poster presentation",
+  "provider": "European Society of Cardiology",
+  "startDate": "2024-09-15T00:00:00Z",
+  "endDate": "2024-09-18T23:59:59Z",
+  "durationHours": 32,
+  "creditHours": 20,
+  "certificatePath": "/documents/selfeducation/ESC-2024-001.pdf",
+  "url": "https://www.escardio.org/congress2024"
+}
+
+### 9.2 Create online course
+POST {{baseUrl}}/api/selfeducation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "OnlineCourse",
+  "year": 2024,
+  "title": "Advanced Cardiac Imaging Techniques",
+  "description": "Comprehensive online course on cardiac MRI and CT",
+  "provider": "American College of Cardiology",
+  "startDate": "2024-01-15T00:00:00Z",
+  "endDate": "2024-03-15T23:59:59Z",
+  "durationHours": 40,
+  "creditHours": 30,
+  "certificatePath": "/documents/selfeducation/ACC-ONLINE-2024-001.pdf",
+  "url": "https://education.acc.org/cardiac-imaging"
+}
+
+### 9.3 Create workshop participation
+POST {{baseUrl}}/api/selfeducation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "Workshop",
+  "year": 2024,
+  "title": "Hands-on Workshop: Complex PCI Techniques",
+  "description": "Practical workshop on chronic total occlusion interventions",
+  "provider": "Polskie Towarzystwo Kardiologiczne",
+  "startDate": "2024-05-10T00:00:00Z",
+  "endDate": "2024-05-11T23:59:59Z",
+  "durationHours": 16,
+  "creditHours": 12,
+  "certificatePath": "/documents/selfeducation/PTK-WS-2024-001.pdf"
+}
+
+### 9.4 Create literature study
+POST {{baseUrl}}/api/selfeducation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "userId": {{userId}},
+  "type": "LiteratureStudy",
+  "year": 2024,
+  "title": "ESC Guidelines on Acute Coronary Syndromes 2023",
+  "description": "Comprehensive study of new ESC guidelines",
+  "publisher": "European Heart Journal",
+  "doi": "10.1093/eurheartj/ehad191",
+  "url": "https://academic.oup.com/eurheartj/article/44/38/3720",
+  "durationHours": 8,
+  "creditHours": 4
+}
+
+### 9.5 Get self-education activities
+GET {{baseUrl}}/api/selfeducation/user/{{userId}}/specialization/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### 9.6 Get self-education by year
+GET {{baseUrl}}/api/selfeducation/user/{{userId}}/year/2024
+Authorization: Bearer {{accessToken}}
+
+### 9.7 Get completed activities
+GET {{baseUrl}}/api/selfeducation/user/{{userId}}/specialization/{{specializationId}}/completed
+Authorization: Bearer {{accessToken}}
+
+### 9.8 Get total credit hours
+GET {{baseUrl}}/api/selfeducation/user/{{userId}}/specialization/{{specializationId}}/credit-hours
+Authorization: Bearer {{accessToken}}
+
+### 9.9 Get quality score
+GET {{baseUrl}}/api/selfeducation/user/{{userId}}/specialization/{{specializationId}}/quality-score
+Authorization: Bearer {{accessToken}}
+
+### 9.10 Complete self-education activity
+PUT {{baseUrl}}/api/selfeducation/{{selfeducation_id}}/complete
+Authorization: Bearer {{accessToken}}
+
+### 9.11 Update self-education activity
+PUT {{baseUrl}}/api/selfeducation/{{selfeducation_id}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "creditHours": 25,
+  "certificatePath": "/documents/selfeducation/ESC-2024-001-updated.pdf"
+}
+
+### ===============================================
+### 10. ADVANCED STATISTICS & REPORTING
+### ===============================================
+
+### 10.1 Get comprehensive specialization statistics
+GET {{baseUrl}}/api/specializations/{{specializationId}}/statistics/comprehensive
+Authorization: Bearer {{accessToken}}
+
+### 10.2 Get weighted progress calculation
+GET {{baseUrl}}/api/specializations/{{specializationId}}/progress/weighted?userId={{userId}}
+Authorization: Bearer {{accessToken}}
+
+### 10.3 Generate specialization report
+POST {{baseUrl}}/api/specializations/{{specializationId}}/reports/generate
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "userId": {{userId}},
+  "reportType": "FullProgress",
+  "includeDetails": true,
+  "format": "PDF"
+}
+
+### 10.4 Get module-specific statistics
+GET {{baseUrl}}/api/specializations/{{specializationId}}/modules/1/statistics
+Authorization: Bearer {{accessToken}}
+
+### 10.5 Get timeline with all activities
+GET {{baseUrl}}/api/specializations/{{specializationId}}/timeline?userId={{userId}}
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 11. DATA SYNCHRONIZATION & VALIDATION
+### ===============================================
+
+### 11.1 Sync internship data
+POST {{baseUrl}}/api/sync/internships/{{internshipId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "syncStatus": "Synced",
+  "syncedAt": "2024-06-01T10:00:00Z",
+  "syncSource": "CentralRegistry"
+}
+
+### 11.2 Validate specialization data integrity
+POST {{baseUrl}}/api/specializations/{{specializationId}}/validate
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "userId": {{userId}},
+  "validateAll": true
+}
+
+### 11.3 Check for data conflicts
+GET {{baseUrl}}/api/sync/conflicts?specializationId={{specializationId}}&userId={{userId}}
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 12. BULK OPERATIONS & BATCH PROCESSING
+### ===============================================
+
+### 12.1 Bulk create procedures
+POST {{baseUrl}}/api/procedures/bulk
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "internshipId": {{internshipId}},
+  "procedures": [
+    {
+      "code": "89.52",
+      "name": "Koronarografia",
+      "date": "2024-02-15T14:30:00Z",
+      "location": "Pracownia Hemodynamiki",
+      "operatorCode": "A"
+    },
+    {
+      "code": "00.66",
+      "name": "Angioplastyka wieńcowa",
+      "date": "2024-02-15T15:30:00Z",
+      "location": "Pracownia Hemodynamiki",
+      "operatorCode": "A"
+    },
+    {
+      "code": "37.23",
+      "name": "Implantacja stentu wieńcowego",
+      "date": "2024-02-15T16:00:00Z",
+      "location": "Pracownia Hemodynamiki",
+      "operatorCode": "B"
+    }
+  ]
+}
+
+### 12.2 Batch approve courses
+POST {{baseUrl}}/api/courses/batch-approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "courseIds": [1, 2, 3],
+  "approverName": "Prof. dr hab. Piotr Jankowski",
+  "approverRole": "Kierownik Specjalizacji",
+  "approvalDate": "2024-06-01T00:00:00Z"
+}
+
+### ===============================================
+### 13. ERROR HANDLING & EDGE CASES
+### ===============================================
+
+### 13.1 Test unauthorized access (no token)
+GET {{baseUrl}}/api/specializations/{{specializationId}}/statistics
+
+### 13.2 Test invalid token
+GET {{baseUrl}}/api/specializations/{{specializationId}}/statistics
+Authorization: Bearer invalid_token_12345
+
+### 13.3 Test expired token
+GET {{baseUrl}}/api/specializations/{{specializationId}}/statistics
+Authorization: Bearer {{expired_token}}
+
+### 13.4 Test non-existent resource
+GET {{baseUrl}}/api/specializations/999999
+Authorization: Bearer {{accessToken}}
+
+### 13.5 Test invalid data format
+POST {{baseUrl}}/api/internships
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": "not_a_number",
+  "institutionName": "",
+  "departmentName": null,
+  "startDate": "invalid_date",
+  "endDate": "2024-01-01T00:00:00Z"
+}
+
+### 13.6 Test business rule violation (end date before start date)
+POST {{baseUrl}}/api/internships
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "specializationId": {{specializationId}},
+  "institutionName": "Test Hospital",
+  "departmentName": "Test Department",
+  "startDate": "2024-12-31T00:00:00Z",
+  "endDate": "2024-01-01T00:00:00Z",
+  "supervisorName": "Dr. Test"
+}
+
+### 13.7 Test duplicate creation attempt
+POST {{baseUrl}}/api/courses
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "id": {{courseId}},
+  "specializationId": {{specializationId}},
+  "courseType": "Mandatory",
+  "courseName": "Duplicate Course Test",
+  "institutionName": "Test Institution",
+  "completionDate": "2024-03-15T00:00:00Z"
+}
+
+### 13.8 Test concurrent modification
+PUT {{baseUrl}}/api/internships/{{internshipId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+If-Match: "outdated_etag"
+
+{
+  "supervisorName": "Dr. Concurrent Update Test"
+}
+
+### ===============================================
+### 14. PERFORMANCE & STRESS TESTING
+### ===============================================
+
+### 14.1 Large dataset query
+GET {{baseUrl}}/api/procedures?internshipId={{internshipId}}&pageSize=1000
+Authorization: Bearer {{accessToken}}
+
+### 14.2 Complex aggregation query
+GET {{baseUrl}}/api/statistics/complex?userId={{userId}}&includeAll=true&detailed=true
+Authorization: Bearer {{accessToken}}
+
+### 14.3 Rapid sequential requests (rate limiting test)
+###
+GET {{baseUrl}}/api/specializations/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+###
+GET {{baseUrl}}/api/specializations/{{specializationId}}/statistics
+Authorization: Bearer {{accessToken}}
+###
+GET {{baseUrl}}/api/internships?specializationId={{specializationId}}
+Authorization: Bearer {{accessToken}}
+###
+GET {{baseUrl}}/api/courses?specializationId={{specializationId}}
+Authorization: Bearer {{accessToken}}
+###
+GET {{baseUrl}}/api/publications/user/{{userId}}/specialization/{{specializationId}}
+Authorization: Bearer {{accessToken}}
+
+### ===============================================
+### 15. CLEANUP & MAINTENANCE
+### ===============================================
+
+### 15.1 Delete test data (soft delete)
+DELETE {{baseUrl}}/api/test-data/cleanup
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "userId": {{userId}},
+  "cleanupType": "soft",
+  "includeRelated": true
+}
+
+### 15.2 Archive old data
+POST {{baseUrl}}/api/maintenance/archive
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "archiveBefore": "2023-01-01T00:00:00Z",
+  "entityTypes": ["procedures", "shifts", "publications"]
+}
+
+### ===============================================
+### NOTES & BEST PRACTICES:
+### 
+### 1. Authentication Flow:
+###    - Always run Sign In request first to get access token
+###    - Token expires after 24 hours by default
+###    - Store token in variable for reuse
+###
+### 2. Testing Order:
+###    - Start with authentication
+###    - Create base entities (users, specializations)
+###    - Add related data (internships, courses)
+###    - Test complex scenarios and edge cases
+###
+### 3. Data Dependencies:
+###    - Many entities require valid specializationId
+###    - Some operations require approval workflows
+###    - Sync status affects modifiability
+###
+### 4. Expected HTTP Status Codes:
+###    - 200 OK: Successful GET/PUT
+###    - 201 Created: Successful POST
+###    - 204 No Content: Successful DELETE
+###    - 400 Bad Request: Validation errors
+###    - 401 Unauthorized: Auth issues
+###    - 403 Forbidden: Permission denied
+###    - 404 Not Found: Resource missing
+###    - 409 Conflict: Business rule violation
+###    - 422 Unprocessable Entity: Invalid data
+###    - 500 Internal Server Error: Server issues
+###
+### 5. Performance Considerations:
+###    - Use pagination for large datasets
+###    - Implement caching for frequently accessed data
+###    - Monitor response times for complex queries
+###
+### 6. Security Best Practices:
+###    - Never expose sensitive data in logs
+###    - Use HTTPS in production
+###    - Implement rate limiting
+###    - Validate all inputs
+###
+### Version: 2.0
+### Last Updated: 2024-06-13
+### Author: Senior .NET Developer & Architect
+### ===============================================
