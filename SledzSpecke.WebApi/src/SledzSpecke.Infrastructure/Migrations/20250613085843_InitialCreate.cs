@@ -1,111 +1,16 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace SledzSpecke.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Phase2EntitiesWithSafeConversion : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // First, add a temporary column for the conversion
-            migrationBuilder.AddColumn<int>(
-                name: "StatusTemp",
-                table: "Procedures",
-                type: "integer",
-                nullable: true);
-
-            // Convert string values to integers
-            migrationBuilder.Sql(@"
-                UPDATE ""Procedures""
-                SET ""StatusTemp"" = 
-                    CASE 
-                        WHEN ""Status"" = 'Completed' THEN 1
-                        WHEN ""Status"" = 'PartiallyCompleted' THEN 2
-                        WHEN ""Status"" = 'Approved' THEN 3
-                        WHEN ""Status"" = 'NotApproved' THEN 4
-                        WHEN ""Status"" = 'Pending' THEN 5
-                        ELSE 5 -- Default to Pending
-                    END
-            ");
-
-            // Drop the old column
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "Procedures");
-
-            // Rename temporary column
-            migrationBuilder.RenameColumn(
-                name: "StatusTemp",
-                table: "Procedures",
-                newName: "Status");
-
-            // Make it non-nullable with default value
-            migrationBuilder.AlterColumn<int>(
-                name: "Status",
-                table: "Procedures",
-                type: "integer",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: 5);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Procedures",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "Procedures",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<int>(
-                name: "SmkVersion",
-                table: "Procedures",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "UpdatedAt",
-                table: "Procedures",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "MedicalShifts",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CreatedAt",
-                table: "MedicalShifts",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "UpdatedAt",
-                table: "MedicalShifts",
-                type: "timestamp with time zone",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
             migrationBuilder.CreateTable(
                 name: "Absences",
                 columns: table => new
@@ -281,6 +186,146 @@ namespace SledzSpecke.Infrastructure.Migrations
                     table.PrimaryKey("PK_SelfEducations", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Specializations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ProgramCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    SmkVersion = table.Column<int>(type: "integer", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PlannedEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CalculatedEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ProgramStructure = table.Column<string>(type: "text", nullable: false),
+                    CurrentModuleId = table.Column<int>(type: "integer", nullable: true),
+                    DurationYears = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Specializations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    SmkVersion = table.Column<int>(type: "integer", nullable: false),
+                    SpecializationId = table.Column<int>(type: "integer", nullable: false),
+                    RegistrationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MedicalShifts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    InternshipId = table.Column<int>(type: "integer", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Hours = table.Column<int>(type: "integer", nullable: false),
+                    Minutes = table.Column<int>(type: "integer", nullable: false),
+                    Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    SyncStatus = table.Column<int>(type: "integer", nullable: false),
+                    AdditionalFields = table.Column<string>(type: "text", nullable: true),
+                    ApprovalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ApproverName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    ApproverRole = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MedicalShifts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MedicalShifts_Internships_InternshipId",
+                        column: x => x.InternshipId,
+                        principalTable: "Internships",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Procedures",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    InternshipId = table.Column<int>(type: "integer", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    OperatorCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    PerformingPerson = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    PatientInitials = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    PatientGender = table.Column<char>(type: "character(1)", maxLength: 1, nullable: true),
+                    AssistantData = table.Column<string>(type: "text", nullable: true),
+                    ProcedureGroup = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", maxLength: 20, nullable: false),
+                    SyncStatus = table.Column<int>(type: "integer", nullable: false),
+                    AdditionalFields = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SmkVersion = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Procedures", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Procedures_Internships_InternshipId",
+                        column: x => x.InternshipId,
+                        principalTable: "Internships",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Modules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    SpecializationId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    SmkVersion = table.Column<int>(type: "integer", nullable: false),
+                    Version = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Structure = table.Column<string>(type: "text", nullable: false),
+                    CompletedInternships = table.Column<int>(type: "integer", nullable: false),
+                    TotalInternships = table.Column<int>(type: "integer", nullable: false),
+                    CompletedCourses = table.Column<int>(type: "integer", nullable: false),
+                    TotalCourses = table.Column<int>(type: "integer", nullable: false),
+                    CompletedProceduresA = table.Column<int>(type: "integer", nullable: false),
+                    TotalProceduresA = table.Column<int>(type: "integer", nullable: false),
+                    CompletedProceduresB = table.Column<int>(type: "integer", nullable: false),
+                    TotalProceduresB = table.Column<int>(type: "integer", nullable: false),
+                    CompletedShiftHours = table.Column<int>(type: "integer", nullable: false),
+                    RequiredShiftHours = table.Column<int>(type: "integer", nullable: false),
+                    WeeklyShiftHours = table.Column<double>(type: "double precision", nullable: false),
+                    CompletedSelfEducationDays = table.Column<int>(type: "integer", nullable: false),
+                    TotalSelfEducationDays = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Modules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Modules_Specializations_SpecializationId",
+                        column: x => x.SpecializationId,
+                        principalTable: "Specializations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Absences_SpecializationId",
                 table: "Absences",
@@ -335,6 +380,36 @@ namespace SledzSpecke.Infrastructure.Migrations
                 name: "IX_Internships_StartDate_EndDate",
                 table: "Internships",
                 columns: new[] { "StartDate", "EndDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicalShifts_Date",
+                table: "MedicalShifts",
+                column: "Date");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicalShifts_InternshipId",
+                table: "MedicalShifts",
+                column: "InternshipId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Modules_SpecializationId",
+                table: "Modules",
+                column: "SpecializationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Procedures_Code",
+                table: "Procedures",
+                column: "Code");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Procedures_Date",
+                table: "Procedures",
+                column: "Date");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Procedures_InternshipId",
+                table: "Procedures",
+                column: "InternshipId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Publications_IsFirstAuthor",
@@ -426,34 +501,22 @@ namespace SledzSpecke.Infrastructure.Migrations
                 table: "SelfEducations",
                 column: "Year");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_MedicalShifts_Internships_InternshipId",
-                table: "MedicalShifts",
-                column: "InternshipId",
-                principalTable: "Internships",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Procedures_Internships_InternshipId",
-                table: "Procedures",
-                column: "InternshipId",
-                principalTable: "Internships",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_MedicalShifts_Internships_InternshipId",
-                table: "MedicalShifts");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Procedures_Internships_InternshipId",
-                table: "Procedures");
-
             migrationBuilder.DropTable(
                 name: "Absences");
 
@@ -461,7 +524,13 @@ namespace SledzSpecke.Infrastructure.Migrations
                 name: "Courses");
 
             migrationBuilder.DropTable(
-                name: "Internships");
+                name: "MedicalShifts");
+
+            migrationBuilder.DropTable(
+                name: "Modules");
+
+            migrationBuilder.DropTable(
+                name: "Procedures");
 
             migrationBuilder.DropTable(
                 name: "Publications");
@@ -472,84 +541,14 @@ namespace SledzSpecke.Infrastructure.Migrations
             migrationBuilder.DropTable(
                 name: "SelfEducations");
 
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "Procedures");
+            migrationBuilder.DropTable(
+                name: "Users");
 
-            migrationBuilder.DropColumn(
-                name: "SmkVersion",
-                table: "Procedures");
+            migrationBuilder.DropTable(
+                name: "Specializations");
 
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "Procedures");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "MedicalShifts");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "MedicalShifts");
-
-            // Add temporary column for the reverse conversion
-            migrationBuilder.AddColumn<string>(
-                name: "StatusTemp",
-                table: "Procedures",
-                type: "character varying(20)",
-                nullable: true);
-
-            // Convert integer values back to strings
-            migrationBuilder.Sql(@"
-                UPDATE ""Procedures""
-                SET ""StatusTemp"" = 
-                    CASE 
-                        WHEN ""Status"" = 1 THEN 'Completed'
-                        WHEN ""Status"" = 2 THEN 'PartiallyCompleted'
-                        WHEN ""Status"" = 3 THEN 'Approved'
-                        WHEN ""Status"" = 4 THEN 'NotApproved'
-                        WHEN ""Status"" = 5 THEN 'Pending'
-                        ELSE 'Pending' -- Default to Pending
-                    END
-            ");
-
-            // Drop the old column
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "Procedures");
-
-            // Rename temporary column
-            migrationBuilder.RenameColumn(
-                name: "StatusTemp",
-                table: "Procedures",
-                newName: "Status");
-
-            // Make it non-nullable
-            migrationBuilder.AlterColumn<string>(
-                name: "Status",
-                table: "Procedures",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "Pending");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "Procedures",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "MedicalShifts",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+            migrationBuilder.DropTable(
+                name: "Internships");
         }
     }
 }

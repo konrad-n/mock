@@ -13,6 +13,7 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

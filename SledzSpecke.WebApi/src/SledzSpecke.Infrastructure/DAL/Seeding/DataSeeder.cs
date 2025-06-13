@@ -54,7 +54,21 @@ internal sealed class DataSeeder : IDataSeeder
 
         _logger.LogInformation("Starting basic data seeding...");
 
-        // This method can be extended to seed test users, basic lookup data, etc.
+        // Seed a test user
+        var testUser = new User(
+            new UserId(1),
+            new Email("test@example.com"),
+            new Username("testuser"),
+            new Password("75K3eLr+dx6JJFuJ7LwIpEpOFmwGZZkRiB84PURz6U8="), // SHA256 hash of "password123"
+            new FullName("Test User"),
+            SmkVersion.Old,
+            new SpecializationId(1), // Cardiology Old SMK
+            DateTime.UtcNow
+        );
+
+        _context.Users.Add(testUser);
+        await _context.SaveChangesAsync();
+        
         _logger.LogInformation("Basic data seeding completed.");
     }
 
@@ -124,9 +138,10 @@ internal sealed class DataSeeder : IDataSeeder
 
     private async Task<Specialization> CreateSpecializationFromTemplateAsync(SpecializationTemplate template, SmkVersion smkVersion)
     {
-        // Generate unique specialization ID based on code and SMK version
-        var idSeed = $"{template.Code}_{smkVersion}".GetHashCode();
-        var specializationId = new SpecializationId(Math.Abs(idSeed));
+        // Use hardcoded IDs for now (1-4 for the 4 specializations)
+        var specializationId = smkVersion == SmkVersion.Old
+            ? (template.Code == "cardiology" ? 1 : 2)
+            : (template.Code == "cardiology" ? 3 : 4);
         
         var startDate = DateTime.UtcNow.Date;
         var plannedEndDate = startDate.AddYears(template.TotalDuration.Years)
@@ -134,7 +149,7 @@ internal sealed class DataSeeder : IDataSeeder
             .AddDays(template.TotalDuration.Days);
 
         var specialization = new Specialization(
-            specializationId,
+            new SpecializationId(specializationId),
             template.Name,
             template.Code,
             smkVersion,
@@ -155,7 +170,7 @@ internal sealed class DataSeeder : IDataSeeder
 
             var module = new Module(
                 moduleId,
-                specializationId,
+                new SpecializationId(specializationId),
                 moduleType,
                 smkVersion,
                 moduleTemplate.Version,

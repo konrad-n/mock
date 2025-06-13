@@ -28,6 +28,22 @@ internal sealed class SqlUserRepository : IUserRepository
 
     public async Task<UserId> AddAsync(User user)
     {
+        // Generate a new ID if not provided
+        if (user.Id == null || user.Id.Value == 0)
+        {
+            // Get the next available ID
+            var maxId = await _context.Users.MaxAsync(u => (int?)u.Id.Value) ?? 0;
+            var newId = new UserId(maxId + 1);
+            
+            // Create a new user with the generated ID
+            var newUser = new User(newId, user.Email, user.Username, user.Password, 
+                user.FullName, user.SmkVersion, user.SpecializationId, user.RegistrationDate);
+            
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+            return newUser.Id;
+        }
+        
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return user.Id;

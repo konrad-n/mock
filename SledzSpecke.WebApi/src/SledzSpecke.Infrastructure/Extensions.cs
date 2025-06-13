@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Security;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
@@ -11,6 +12,7 @@ using SledzSpecke.Infrastructure.DAL;
 using SledzSpecke.Infrastructure.DAL.Repositories;
 using SledzSpecke.Infrastructure.DAL.Seeding;
 using SledzSpecke.Infrastructure.Security;
+using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Infrastructure.Time;
 using System.Text;
 
@@ -23,6 +25,10 @@ public static class Extensions
         services.AddSingleton<IClock, Clock>();
         services.AddSingleton<IPasswordManager, PasswordManager>();
         services.AddSingleton<IAuthenticator, Authenticator>();
+        services.AddScoped<IUserContextService, UserContextService>();
+        
+        // Template services
+        services.AddSingleton<ISpecializationTemplateService, SpecializationTemplateService>();
 
         services.AddScoped<IUserRepository, SqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();

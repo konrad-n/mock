@@ -12,15 +12,18 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
     private readonly IProcedureRepository _procedureRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
+    private readonly ISpecializationValidationService _validationService;
 
     public AddProcedureHandler(
         IProcedureRepository procedureRepository,
         IInternshipRepository internshipRepository,
-        ISpecializationRepository specializationRepository)
+        ISpecializationRepository specializationRepository,
+        ISpecializationValidationService validationService)
     {
         _procedureRepository = procedureRepository;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
+        _validationService = validationService;
     }
 
     public async Task<int> HandleAsync(AddProcedure command)
@@ -134,6 +137,20 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             {
                 throw new InvalidOperationException($"Cannot add completed procedure: {ex.Message}", ex);
             }
+        }
+
+        // Validate using template service before saving
+        var validationResult = await _validationService.ValidateProcedureAsync(procedure, specialization.Id.Value);
+        if (!validationResult.IsValid)
+        {
+            throw new InvalidOperationException($"Procedure validation failed: {string.Join(", ", validationResult.Errors)}");
+        }
+
+        // Log warnings if any
+        if (validationResult.Warnings.Any())
+        {
+            // In a real app, you might want to log these warnings
+            // For now, we'll just continue
         }
 
         // Save the procedure

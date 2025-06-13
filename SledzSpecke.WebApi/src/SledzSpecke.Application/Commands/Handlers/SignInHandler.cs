@@ -30,7 +30,7 @@ internal sealed class SignInHandler : ICommandHandler<SignIn, JwtDto>
             throw new InvalidCredentialsException();
         }
 
-        if (!_passwordManager.Verify(command.Password, user.Password))
+        if (!_passwordManager.Verify(command.Password, user.Password.Value))
         {
             throw new InvalidCredentialsException();
         }

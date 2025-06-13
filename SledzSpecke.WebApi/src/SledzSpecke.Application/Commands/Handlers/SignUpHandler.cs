@@ -23,7 +23,6 @@ internal sealed class SignUpHandler : ICommandHandler<SignUp>
 
     public async Task HandleAsync(SignUp command)
     {
-        var userId = new UserId(command.UserId);
         var email = new Email(command.Email);
         var username = new Username(command.Username);
         var password = new Password(command.Password);
@@ -41,7 +40,7 @@ internal sealed class SignUpHandler : ICommandHandler<SignUp>
         }
 
         var securedPassword = _passwordManager.Secure(password);
-        var user = new User(userId, email, username, securedPassword, fullName, 
+        var user = new User(email, username, securedPassword, fullName, 
             command.SmkVersion, specializationId, _clock.Current());
 
         await _userRepository.AddAsync(user);

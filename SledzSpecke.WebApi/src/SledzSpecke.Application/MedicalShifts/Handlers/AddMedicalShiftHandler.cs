@@ -13,15 +13,18 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
     private readonly IMedicalShiftRepository _medicalShiftRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
+    private readonly ISpecializationValidationService _validationService;
 
     public AddMedicalShiftHandler(
         IMedicalShiftRepository medicalShiftRepository,
         IInternshipRepository internshipRepository,
-        ISpecializationRepository specializationRepository)
+        ISpecializationRepository specializationRepository,
+        ISpecializationValidationService validationService)
     {
         _medicalShiftRepository = medicalShiftRepository;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
+        _validationService = validationService;
     }
 
     public async Task<int> HandleAsync(AddMedicalShift command)
@@ -64,6 +67,13 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
                 throw new InvalidDateRangeException(
                     "Medical shift date must be within the internship period for New SMK.");
             }
+        }
+
+        // Validate using template service before saving
+        var validationResult = await _validationService.ValidateMedicalShiftAsync(medicalShift, specialization.Id.Value);
+        if (!validationResult.IsValid)
+        {
+            throw new InvalidOperationException($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}");
         }
 
         // Save the medical shift
