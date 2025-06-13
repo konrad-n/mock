@@ -59,7 +59,7 @@ internal sealed class DataSeeder : IDataSeeder
             new UserId(1),
             new Email("test@example.com"),
             new Username("testuser"),
-            new Password("75K3eLr+dx6JJFuJ7LwIpEpOFmwGZZkRiB84PURz6U8="), // SHA256 hash of "password123"
+            new Password("VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U="), // SHA256 hash of "Test123!"
             new FullName("Test User"),
             SmkVersion.Old,
             new SpecializationId(1), // Cardiology Old SMK

@@ -76,4 +76,23 @@ Authorization: Bearer <your-jwt-token>
 - **Decorator Pattern**: Cross-cutting concerns (logging, transactions)
 - **Strategy Pattern**: Different policies for business rules
 
+## Sync Status Management
+
+The API implements automatic sync status management for entities synchronized with the SMK system:
+
+- **Automatic Transitions**: When a synced entity is modified, it automatically transitions to `Modified` status
+- **Flexible Updates**: Unlike the original MAUI app, synced items CAN be modified (maintaining audit trail)
+- **Approval Protection**: Only approved items are truly read-only
+
+See `/docs/SYNC_STATUS_MANAGEMENT.md` for detailed documentation.
+
+## Testing
+
+Run the automated test suite:
+```bash
+python3 test_api.py
+```
+
+The test script includes comprehensive troubleshooting guides. Check the script header for common issues and solutions.
+
 This implementation demonstrates enterprise-grade .NET development practices following the excellent architectural patterns established in the MySpot reference project.

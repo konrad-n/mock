@@ -56,6 +56,12 @@ public class Course
         EnsureCanModify();
         ModuleId = moduleId;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void SetCourseNumber(string courseNumber)
@@ -63,6 +69,12 @@ public class Course
         EnsureCanModify();
         CourseNumber = courseNumber;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void SetCertificate(string certificateNumber)
@@ -74,6 +86,12 @@ public class Course
         HasCertificate = true;
         CertificateNumber = certificateNumber;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void RemoveCertificate()
@@ -82,6 +100,12 @@ public class Course
         HasCertificate = false;
         CertificateNumber = null;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void Approve(string approverName)
@@ -119,9 +143,21 @@ public class Course
         return CourseType == CourseType.Mandatory || CourseType == CourseType.Attestation;
     }
 
+    /// <summary>
+    /// Ensures the course can be modified.
+    /// Only approved courses cannot be modified (they are locked).
+    /// Synced courses CAN be modified - they will automatically transition to Modified status.
+    /// This is a key change from the original design where synced items were read-only.
+    /// </summary>
     private void EnsureCanModify()
     {
-        if (SyncStatus == SyncStatus.Synced)
-            throw new CannotModifySyncedDataException();
+        if (IsApproved)
+            throw new InvalidOperationException("Cannot modify approved course.");
+        
+        // IMPORTANT: Design Decision
+        // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
+        // Now, synced items CAN be modified - they automatically transition to Modified status.
+        // This allows users to correct/update synced data while maintaining the audit trail.
+        // Only APPROVED items are truly read-only.
     }
 }

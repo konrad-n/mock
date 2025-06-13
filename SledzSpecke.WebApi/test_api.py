@@ -9,6 +9,44 @@ This script tests all endpoints including:
 - Internships
 
 Run with: python test_api.py
+
+TROUBLESHOOTING GUIDE:
+======================
+
+1. Authentication Failures:
+   - If "Sign In" fails with "Invalid credentials", check:
+     a) The test user password in database matches TEST_PASSWORD
+     b) Run: sudo -u postgres psql -d sledzspecke_db -c "SELECT \"Username\", \"Password\" FROM \"Users\" WHERE \"Username\" = 'testuser';"
+     c) Password should be: VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U= (SHA256 hash of "Test123!")
+     d) To update: sudo -u postgres psql -d sledzspecke_db -c "UPDATE \"Users\" SET \"Password\" = 'VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U=' WHERE \"Username\" = 'testuser';"
+
+2. Database Connection Issues:
+   - The API uses PostgreSQL, not SQLite
+   - Check PostgreSQL is running: systemctl status postgresql
+   - Check database exists: sudo -u postgres psql -c "SELECT 1 FROM pg_database WHERE datname='sledzspecke_db';"
+   - Connection string is in appsettings.json/appsettings.Development.json
+
+3. API Won't Start:
+   - Check for build errors: dotnet build
+   - Common issues:
+     a) Missing NuGet packages - run: dotnet restore
+     b) Port 5000 already in use - check: lsof -i :5000
+     c) Missing logging package - ensure Microsoft.Extensions.Logging.Abstractions is referenced
+
+4. Sync Status Related Issues:
+   - Synced items CAN now be modified (they auto-transition to Modified status)
+   - Only APPROVED items are truly read-only
+   - Check entity's SyncStatus and IsApproved properties
+
+5. JSON Template Loading Errors:
+   - Templates are in src/SledzSpecke.Infrastructure/Data/Templates/
+   - Check for null values in JSON files (e.g., internshipId)
+   - Templates are cached - restart API if you modify them
+
+6. Reset Everything:
+   - Stop API: pkill -f "dotnet.*SledzSpecke.Api"
+   - Reset database: sudo -u postgres psql -c "DROP DATABASE IF EXISTS sledzspecke_db; CREATE DATABASE sledzspecke_db;"
+   - Rebuild and run: dotnet build && dotnet run --project src/SledzSpecke.Api/SledzSpecke.Api.csproj
 """
 
 import requests
@@ -524,6 +562,11 @@ def main():
                 api_process = start_api()
             except Exception as e:
                 print(f"{Colors.FAIL}Failed to start API: {e}{Colors.ENDC}")
+                print(f"{Colors.WARNING}Troubleshooting tips:{Colors.ENDC}")
+                print("  - Check the TROUBLESHOOTING GUIDE at the top of this script")
+                print("  - Run 'dotnet build' to check for compilation errors")
+                print("  - Check if port 5000 is already in use: lsof -i :5000")
+                print("  - Check PostgreSQL is running: systemctl status postgresql")
                 sys.exit(1)
     else:
         print(f"{Colors.OKGREEN}API is already running!{Colors.ENDC}")

@@ -26,7 +26,7 @@ public abstract class ProcedureBase
 
     public bool IsCompleted => Status == ProcedureStatus.Completed;
     public bool IsApproved => Status == ProcedureStatus.Approved;
-    public bool CanBeModified => SyncStatus != SyncStatus.Synced;
+    public bool CanBeModified => SyncStatus != SyncStatus.Synced || !IsApproved;
     public bool IsTypeA => !string.IsNullOrEmpty(OperatorCode);
     public bool IsTypeB => string.IsNullOrEmpty(OperatorCode);
 
@@ -46,6 +46,11 @@ public abstract class ProcedureBase
         SmkVersion = smkVersion;
     }
 
+    /// <summary>
+    /// Updates procedure details. If the procedure is currently synced with SMK,
+    /// it will automatically transition to Modified status to track the change.
+    /// This allows synced data to be edited while maintaining audit trail.
+    /// </summary>
     public virtual void UpdateProcedureDetails(string? operatorCode, string? performingPerson,
         string? patientInitials, char? patientGender)
     {
@@ -56,6 +61,15 @@ public abstract class ProcedureBase
         PatientInitials = patientInitials;
         PatientGender = patientGender;
         UpdatedAt = DateTime.UtcNow;
+        
+        // IMPORTANT: Sync Status Management
+        // When a synced item is modified, we automatically transition it to Modified status.
+        // This allows users to edit synced data while maintaining traceability.
+        // The item remains linked to SMK but is marked as having local changes.
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public virtual void SetAssistantData(string? assistantData)
@@ -63,6 +77,12 @@ public abstract class ProcedureBase
         EnsureCanModify();
         AssistantData = assistantData;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public virtual void SetProcedureGroup(string? procedureGroup)
@@ -70,6 +90,12 @@ public abstract class ProcedureBase
         EnsureCanModify();
         ProcedureGroup = procedureGroup;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public virtual void ChangeStatus(ProcedureStatus newStatus)
@@ -77,6 +103,12 @@ public abstract class ProcedureBase
         EnsureCanModify();
         Status = newStatus;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public virtual void Complete()
@@ -84,6 +116,12 @@ public abstract class ProcedureBase
         EnsureCanModify();
         Status = ProcedureStatus.Completed;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public virtual void Approve()
@@ -112,12 +150,30 @@ public abstract class ProcedureBase
         EnsureCanModify();
         AdditionalFields = additionalFields;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
+    /// <summary>
+    /// Ensures the procedure can be modified.
+    /// Only approved procedures cannot be modified (they are locked).
+    /// Synced procedures CAN be modified - they will automatically transition to Modified status.
+    /// This is a key change from the original design where synced items were read-only.
+    /// </summary>
     protected void EnsureCanModify()
     {
-        if (SyncStatus == SyncStatus.Synced)
-            throw new CannotModifySyncedDataException();
+        if (IsApproved)
+            throw new InvalidOperationException("Cannot modify approved procedure.");
+        
+        // IMPORTANT: Design Decision
+        // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
+        // Now, synced items CAN be modified - they automatically transition to Modified status.
+        // This allows users to correct/update synced data while maintaining the audit trail.
+        // Only APPROVED items are truly read-only.
     }
 
     public abstract bool IsValidForSmkVersion();

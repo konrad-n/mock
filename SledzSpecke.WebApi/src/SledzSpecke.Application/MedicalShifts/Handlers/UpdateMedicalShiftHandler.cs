@@ -58,11 +58,6 @@ public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
             throw new BusinessRuleException("Cannot update an approved medical shift.");
         }
 
-        if (shift.SyncStatus == SyncStatus.Synced)
-        {
-            throw new BusinessRuleException("Cannot update a synced medical shift.");
-        }
-
         // Prepare update values
         var hours = command.Hours ?? shift.Hours;
         var minutes = command.Minutes ?? shift.Minutes;
