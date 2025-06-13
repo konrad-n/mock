@@ -4,6 +4,7 @@ using SledzSpecke.Application.Commands.Handlers;
 using SledzSpecke.Application.Queries.Handlers;
 using SledzSpecke.Application.Procedures.Handlers;
 using SledzSpecke.Application.MedicalShifts.Handlers;
+using SledzSpecke.Application.Services;
 using System.Reflection;
 
 namespace SledzSpecke.Application;
@@ -42,6 +43,9 @@ public static class Extensions
         services.AddScoped<IQueryHandler<Queries.GetProcedureById, DTO.ProcedureDto>, GetProcedureByIdHandler>();
         services.AddScoped<IQueryHandler<Queries.GetUserMedicalShifts, IEnumerable<DTO.MedicalShiftDto>>, GetUserMedicalShiftsHandler>();
         services.AddScoped<IQueryHandler<Queries.GetMedicalShiftById, DTO.MedicalShiftDto>, GetMedicalShiftByIdHandler>();
+
+        // Register validation services
+        services.AddScoped<ISpecializationValidationService, SpecializationValidationService>();
 
         return services;
     }

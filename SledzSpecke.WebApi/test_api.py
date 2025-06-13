@@ -157,7 +157,8 @@ def create_test_user(token: Optional[str] = None) -> bool:
             "password": TEST_PASSWORD,
             "fullName": "Test User",
             "email": "test@example.com",
-            "role": "user"
+            "smkVersion": 1,  # OldSMK
+            "specializationId": 1  # Cardiology Old SMK
         }
         
         response = requests.post(
@@ -168,9 +169,13 @@ def create_test_user(token: Optional[str] = None) -> bool:
         if response.status_code == 200:
             print(f"Test user created: {TEST_USERNAME}")
             return True
-        elif response.status_code == 400:
-            # User might already exist
-            return True
+        elif response.status_code == 400 or response.status_code == 500:
+            # User might already exist - check if we can sign in
+            if "already in use" in response.text.lower():
+                return True
+            else:
+                print(f"Failed to create test user: {response.status_code} - {response.text}")
+                return False
         else:
             print(f"Failed to create test user: {response.status_code} - {response.text}")
             return False
@@ -189,6 +194,8 @@ def get_auth_token() -> Optional[str]:
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD
         }
+        
+        print(f"Signing in with: {signin_data}")
         
         response = requests.post(
             f"{API_BASE_URL}/auth/sign-in",

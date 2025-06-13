@@ -4,7 +4,6 @@ using SledzSpecke.Core.ValueObjects;
 namespace SledzSpecke.Application.Commands;
 
 public record SignUp(
-    int UserId,
     string Email,
     string Username,
     string Password,

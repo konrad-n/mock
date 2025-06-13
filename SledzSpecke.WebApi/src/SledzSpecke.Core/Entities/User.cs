@@ -13,10 +13,24 @@ public class User
     public SpecializationId SpecializationId { get; private set; }
     public DateTime RegistrationDate { get; private set; }
 
+    private User() { }
+
     public User(UserId id, Email email, Username username, Password password, FullName fullName, 
         SmkVersion smkVersion, SpecializationId specializationId, DateTime registrationDate)
     {
         Id = id;
+        Email = email;
+        Username = username;
+        Password = password;
+        FullName = fullName;
+        SmkVersion = smkVersion;
+        SpecializationId = specializationId;
+        RegistrationDate = registrationDate;
+    }
+
+    public User(Email email, Username username, Password password, FullName fullName, 
+        SmkVersion smkVersion, SpecializationId specializationId, DateTime registrationDate)
+    {
         Email = email;
         Username = username;
         Password = password;

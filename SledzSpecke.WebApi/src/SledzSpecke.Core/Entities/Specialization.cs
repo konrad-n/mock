@@ -19,10 +19,25 @@ public class Specialization
     private readonly List<Module> _modules = new();
     public IReadOnlyList<Module> Modules => _modules.AsReadOnly();
 
+    private Specialization() { }
+
     public Specialization(SpecializationId id, string name, string programCode, SmkVersion smkVersion,
         DateTime startDate, DateTime plannedEndDate, string programStructure, int durationYears)
     {
         Id = id;
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        ProgramCode = programCode ?? throw new ArgumentNullException(nameof(programCode));
+        SmkVersion = smkVersion;
+        StartDate = startDate;
+        PlannedEndDate = plannedEndDate;
+        ProgramStructure = programStructure ?? throw new ArgumentNullException(nameof(programStructure));
+        DurationYears = durationYears;
+        CalculatedEndDate = startDate.AddYears(durationYears);
+    }
+
+    public Specialization(string name, string programCode, SmkVersion smkVersion,
+        DateTime startDate, DateTime plannedEndDate, string programStructure, int durationYears)
+    {
         Name = name ?? throw new ArgumentNullException(nameof(name));
         ProgramCode = programCode ?? throw new ArgumentNullException(nameof(programCode));
         SmkVersion = smkVersion;

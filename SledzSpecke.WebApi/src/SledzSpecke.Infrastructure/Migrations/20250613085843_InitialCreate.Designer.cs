@@ -12,8 +12,8 @@ using SledzSpecke.Infrastructure.DAL;
 namespace SledzSpecke.Infrastructure.Migrations
 {
     [DbContext(typeof(SledzSpeckeDbContext))]
-    [Migration("20250613041214_Phase2EntitiesWithSafeConversion")]
-    partial class Phase2EntitiesWithSafeConversion
+    [Migration("20250613085843_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
