@@ -238,9 +238,10 @@ jobs:
           sudo cp -r /tmp/sledzspecke-api-new/* /var/www/sledzspecke-api/
           sudo chown -R www-data:www-data /var/www/sledzspecke-api
           
-          # Run migrations
-          cd /var/www/sledzspecke-api
-          sudo -u www-data dotnet SledzSpecke.Api.dll --migrate || true
+          # Skip migrations for now - they hang the deployment
+          # TODO: Fix migration script to run non-interactively
+          # cd /var/www/sledzspecke-api
+          # sudo -u www-data dotnet SledzSpecke.Api.dll --migrate || true
           
           # Start service
           sudo systemctl start sledzspecke-api
