@@ -1834,3 +1834,11 @@ Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+# git-commit-guidelines
+When creating git commits or suggesting commit messages:
+- NEVER include "Co-Authored-By: Claude" or any reference to Claude/Anthropic in commit messages
+- NEVER add Claude as a contributor or co-author
+- Keep commit messages focused on the actual changes made
+- Use conventional commit format when appropriate (feat:, fix:, docs:, etc.)
+- Avoid mentioning AI assistance in commits
