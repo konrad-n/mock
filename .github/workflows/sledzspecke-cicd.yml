@@ -107,7 +107,14 @@ jobs:
       working-directory: ${{ env.FRONTEND_PATH }}
     
     - name: Build
-      run: npm run build
+      run: |
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        echo "Current directory: $(pwd)"
+        echo "Package.json scripts:"
+        cat package.json | grep -A5 '"scripts"'
+        echo "Running build..."
+        npm run build --verbose
       working-directory: ${{ env.FRONTEND_PATH }}
       env:
         VITE_API_URL: https://api.sledzspecke.pl
