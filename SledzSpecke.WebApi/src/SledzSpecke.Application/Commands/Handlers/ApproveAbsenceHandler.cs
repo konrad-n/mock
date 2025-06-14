@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class ApproveAbsenceHandler : ICommandHandler<ApproveAbsence>
+public sealed class ApproveAbsenceHandler : ICommandHandler<ApproveAbsence>
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IUnitOfWork _unitOfWork;

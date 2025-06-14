@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetUserRecognitionsHandler : IQueryHandler<GetUserRecognitions, IEnumerable<RecognitionDto>>
+public sealed class GetUserRecognitionsHandler : IQueryHandler<GetUserRecognitions, IEnumerable<RecognitionDto>>
 {
     private readonly IRecognitionRepository _recognitionRepository;
 

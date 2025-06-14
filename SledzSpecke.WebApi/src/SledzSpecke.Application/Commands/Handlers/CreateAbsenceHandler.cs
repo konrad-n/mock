@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class CreateAbsenceHandler : ICommandHandler<CreateAbsence>
+public sealed class CreateAbsenceHandler : ICommandHandler<CreateAbsence>
 {
     private readonly IAbsenceRepository _absenceRepository;
 

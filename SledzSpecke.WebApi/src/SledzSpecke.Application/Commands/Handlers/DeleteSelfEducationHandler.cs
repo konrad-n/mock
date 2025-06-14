@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class DeleteSelfEducationHandler : ICommandHandler<DeleteSelfEducation>
+public sealed class DeleteSelfEducationHandler : ICommandHandler<DeleteSelfEducation>
 {
     private readonly ISelfEducationRepository _selfEducationRepository;
     private readonly IUnitOfWork _unitOfWork;

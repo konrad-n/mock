@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class DeleteCourseHandler : IResultCommandHandler<DeleteCourse>
+public sealed class DeleteCourseHandler : IResultCommandHandler<DeleteCourse>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IUserContextService _userContextService;

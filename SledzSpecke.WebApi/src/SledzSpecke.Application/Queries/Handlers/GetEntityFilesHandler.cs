@@ -5,7 +5,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetEntityFilesHandler : IQueryHandler<GetEntityFiles, IEnumerable<FileMetadataDto>>
+public sealed class GetEntityFilesHandler : IQueryHandler<GetEntityFiles, IEnumerable<FileMetadataDto>>
 {
     private readonly IFileMetadataRepository _fileMetadataRepository;
     private readonly IUserContext _userContext;

@@ -8,7 +8,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Procedures.Handlers;
 
-internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures, IEnumerable<ProcedureDto>>
+public sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures, IEnumerable<ProcedureDto>>
 {
     private readonly IProcedureRepository _procedureRepository;
     private readonly IInternshipRepository _internshipRepository;

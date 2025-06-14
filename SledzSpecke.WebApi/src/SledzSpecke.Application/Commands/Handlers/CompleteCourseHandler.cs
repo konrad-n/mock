@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class CompleteCourseHandler : ICommandHandler<CompleteCourse>
+public sealed class CompleteCourseHandler : ICommandHandler<CompleteCourse>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IUserContextService _userContextService;

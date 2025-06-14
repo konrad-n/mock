@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class DeleteRecognitionHandler : ICommandHandler<DeleteRecognition>
+public sealed class DeleteRecognitionHandler : ICommandHandler<DeleteRecognition>
 {
     private readonly IRecognitionRepository _recognitionRepository;
     private readonly IUnitOfWork _unitOfWork;

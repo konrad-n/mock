@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class UpdateRecognitionHandler : ICommandHandler<UpdateRecognition>
+public sealed class UpdateRecognitionHandler : ICommandHandler<UpdateRecognition>
 {
     private readonly IRecognitionRepository _recognitionRepository;
     private readonly IUnitOfWork _unitOfWork;

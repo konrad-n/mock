@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetFirstAuthorPublicationsHandler : IQueryHandler<GetFirstAuthorPublications, IEnumerable<PublicationDto>>
+public sealed class GetFirstAuthorPublicationsHandler : IQueryHandler<GetFirstAuthorPublications, IEnumerable<PublicationDto>>
 {
     private readonly IPublicationRepository _publicationRepository;
     private readonly IUserContextService _userContextService;

@@ -2,7 +2,7 @@ using SledzSpecke.Application.Abstractions;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class CalculateInternshipDaysHandler : IQueryHandler<CalculateInternshipDays, int>
+public sealed class CalculateInternshipDaysHandler : IQueryHandler<CalculateInternshipDays, int>
 {
     public Task<int> HandleAsync(CalculateInternshipDays query)
     {

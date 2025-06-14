@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetEducationalActivitiesByTypeHandler : IQueryHandler<GetEducationalActivitiesByType, IEnumerable<EducationalActivityDto>>
+public sealed class GetEducationalActivitiesByTypeHandler : IQueryHandler<GetEducationalActivitiesByType, IEnumerable<EducationalActivityDto>>
 {
     private readonly IEducationalActivityRepository _repository;
 

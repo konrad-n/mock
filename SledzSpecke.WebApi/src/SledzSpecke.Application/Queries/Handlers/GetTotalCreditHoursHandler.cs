@@ -4,7 +4,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetTotalCreditHoursHandler : IQueryHandler<GetTotalCreditHours, int>
+public sealed class GetTotalCreditHoursHandler : IQueryHandler<GetTotalCreditHours, int>
 {
     private readonly ISelfEducationRepository _selfEducationRepository;
     private readonly IUserContextService _userContextService;

@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class DeleteAbsenceHandler : ICommandHandler<DeleteAbsence>
+public sealed class DeleteAbsenceHandler : ICommandHandler<DeleteAbsence>
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IUnitOfWork _unitOfWork;

@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetUserHandler : IQueryHandler<GetUser, UserDto>
+public sealed class GetUserHandler : IQueryHandler<GetUser, UserDto>
 {
     private readonly IUserRepository _userRepository;
 

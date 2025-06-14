@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetUserAbsencesHandler : IQueryHandler<GetUserAbsences, IEnumerable<AbsenceDto>>
+public sealed class GetUserAbsencesHandler : IQueryHandler<GetUserAbsences, IEnumerable<AbsenceDto>>
 {
     private readonly IAbsenceRepository _absenceRepository;
 

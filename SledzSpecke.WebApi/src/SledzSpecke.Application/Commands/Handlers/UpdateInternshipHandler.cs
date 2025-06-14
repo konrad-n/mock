@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-public sealed class UpdateInternshipHandler : IResultCommandHandler<UpdateInternship>
+public sealed class UpdateInternshipHandlerRefactored : IResultCommandHandler<UpdateInternship>
 {
     private readonly IInternshipRepository _internshipRepository;
     private readonly IUserContextService _userContextService;
@@ -15,7 +15,7 @@ public sealed class UpdateInternshipHandler : IResultCommandHandler<UpdateIntern
     private readonly ISpecializationRepository _specializationRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateInternshipHandler(
+    public UpdateInternshipHandlerRefactored(
         IInternshipRepository internshipRepository,
         IUserContextService userContextService,
         IUserRepository userRepository,

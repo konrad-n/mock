@@ -4,7 +4,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class ApproveCourseHandler : ICommandHandler<ApproveCourse>
+public sealed class ApproveCourseHandler : ICommandHandler<ApproveCourse>
 {
     private readonly ICourseRepository _courseRepository;
 

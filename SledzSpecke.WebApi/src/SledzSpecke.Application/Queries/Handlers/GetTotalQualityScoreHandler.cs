@@ -4,7 +4,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetTotalQualityScoreHandler : IQueryHandler<GetTotalQualityScore, decimal>
+public sealed class GetTotalQualityScoreHandler : IQueryHandler<GetTotalQualityScore, decimal>
 {
     private readonly ISelfEducationRepository _selfEducationRepository;
     private readonly IUserContextService _userContextService;

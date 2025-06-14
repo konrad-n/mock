@@ -4,7 +4,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetPublicationImpactScoreHandler : IQueryHandler<GetPublicationImpactScore, decimal>
+public sealed class GetPublicationImpactScoreHandler : IQueryHandler<GetPublicationImpactScore, decimal>
 {
     private readonly IPublicationRepository _publicationRepository;
     private readonly IUserContextService _userContextService;

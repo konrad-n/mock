@@ -7,7 +7,7 @@ using SledzSpecke.Application.Security;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword>
+public sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;

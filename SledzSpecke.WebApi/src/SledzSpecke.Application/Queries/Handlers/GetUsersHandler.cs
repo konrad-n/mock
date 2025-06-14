@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetUsersHandler : IQueryHandler<GetUsers, IEnumerable<UserDto>>
+public sealed class GetUsersHandler : IQueryHandler<GetUsers, IEnumerable<UserDto>>
 {
     private readonly IUserRepository _userRepository;
 

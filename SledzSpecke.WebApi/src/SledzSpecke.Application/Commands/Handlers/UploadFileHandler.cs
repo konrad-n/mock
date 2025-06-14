@@ -8,7 +8,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class UploadFileHandler : IResultCommandHandler<UploadFile, FileMetadataDto>
+public sealed class UploadFileHandler : IResultCommandHandler<UploadFile, FileMetadataDto>
 {
     private readonly IFileStorageService _fileStorageService;
     private readonly IFileMetadataRepository _fileMetadataRepository;

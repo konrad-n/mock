@@ -6,7 +6,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class DownloadFileHandler : IQueryHandler<DownloadFile, FileDownloadResult>
+public sealed class DownloadFileHandler : IQueryHandler<DownloadFile, FileDownloadResult>
 {
     private readonly IFileMetadataRepository _fileMetadataRepository;
     private readonly IFileStorageService _fileStorageService;

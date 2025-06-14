@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class UpdateCourseHandler : IResultCommandHandler<UpdateCourse>
+public sealed class UpdateCourseHandler : IResultCommandHandler<UpdateCourse>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IUserContextService _userContextService;

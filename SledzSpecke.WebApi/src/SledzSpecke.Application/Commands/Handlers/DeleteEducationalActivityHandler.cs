@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class DeleteEducationalActivityHandler : IResultCommandHandler<DeleteEducationalActivity>
+public sealed class DeleteEducationalActivityHandler : IResultCommandHandler<DeleteEducationalActivity>
 {
     private readonly IEducationalActivityRepository _repository;
     private readonly IUnitOfWork _unitOfWork;

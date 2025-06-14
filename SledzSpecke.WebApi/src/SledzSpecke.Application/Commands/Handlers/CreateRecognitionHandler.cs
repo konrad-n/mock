@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class CreateRecognitionHandler : ICommandHandler<CreateRecognition>
+public sealed class CreateRecognitionHandler : ICommandHandler<CreateRecognition>
 {
     private readonly IRecognitionRepository _recognitionRepository;
 

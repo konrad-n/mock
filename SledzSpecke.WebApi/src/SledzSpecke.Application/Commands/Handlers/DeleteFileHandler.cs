@@ -5,7 +5,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class DeleteFileHandler : IResultCommandHandler<DeleteFile>
+public sealed class DeleteFileHandler : IResultCommandHandler<DeleteFile>
 {
     private readonly IFileMetadataRepository _fileMetadataRepository;
     private readonly IFileStorageService _fileStorageService;

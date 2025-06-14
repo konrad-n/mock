@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetInternshipByIdHandler : IQueryHandler<GetInternshipById, InternshipDto>
+public sealed class GetInternshipByIdHandler : IQueryHandler<GetInternshipById, InternshipDto>
 {
     private readonly IInternshipRepository _internshipRepository;
     private readonly IUserRepository _userRepository;

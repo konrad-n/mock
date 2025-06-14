@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class SwitchModuleHandler : ICommandHandler<SwitchModule>
+public sealed class SwitchModuleHandler : ICommandHandler<SwitchModule>
 {
     private readonly ISpecializationRepository _specializationRepository;
     private readonly IModuleRepository _moduleRepository;

@@ -7,7 +7,7 @@ using SledzSpecke.Core.Entities;
 
 namespace SledzSpecke.Application.MedicalShifts.Handlers;
 
-internal sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>>
+public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>>
 {
     private readonly IMedicalShiftRepository _medicalShiftRepository;
     private readonly IInternshipRepository _internshipRepository;

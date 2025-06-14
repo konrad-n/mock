@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class UpdateUserProfileHandler : IResultCommandHandler<UpdateUserProfile>
+public sealed class UpdateUserProfileHandler : IResultCommandHandler<UpdateUserProfile>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;

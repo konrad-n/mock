@@ -12,7 +12,7 @@ namespace SledzSpecke.Application.Commands.Handlers;
 /// <summary>
 /// Enhanced version of SignUpHandler using Result pattern and Value Objects
 /// </summary>
-internal sealed class SignUpHandlerEnhanced : ICommandHandler<SignUp>
+public sealed class SignUpHandlerEnhanced : ICommandHandler<SignUp>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordManager _passwordManager;

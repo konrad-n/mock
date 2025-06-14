@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class CreateEducationalActivityHandler : IResultCommandHandler<CreateEducationalActivity, int>
+public sealed class CreateEducationalActivityHandler : IResultCommandHandler<CreateEducationalActivity, int>
 {
     private readonly IEducationalActivityRepository _repository;
     private readonly ISpecializationRepository _specializationRepository;

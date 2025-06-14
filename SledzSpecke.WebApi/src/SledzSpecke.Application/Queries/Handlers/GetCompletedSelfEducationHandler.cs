@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetCompletedSelfEducationHandler : IQueryHandler<GetCompletedSelfEducation, IEnumerable<SelfEducationDto>>
+public sealed class GetCompletedSelfEducationHandler : IQueryHandler<GetCompletedSelfEducation, IEnumerable<SelfEducationDto>>
 {
     private readonly ISelfEducationRepository _selfEducationRepository;
     private readonly IUserContextService _userContextService;

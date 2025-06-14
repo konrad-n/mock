@@ -4,7 +4,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetTotalReductionDaysHandler : IQueryHandler<GetTotalReductionDays, int>
+public sealed class GetTotalReductionDaysHandler : IQueryHandler<GetTotalReductionDays, int>
 {
     private readonly IRecognitionRepository _recognitionRepository;
     private readonly IUserContextService _userContextService;

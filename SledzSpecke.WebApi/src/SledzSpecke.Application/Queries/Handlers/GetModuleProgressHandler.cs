@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetModuleProgressHandler : IQueryHandler<GetModuleProgress, SpecializationStatisticsDto>
+public sealed class GetModuleProgressHandler : IQueryHandler<GetModuleProgress, SpecializationStatisticsDto>
 {
     private readonly IProgressCalculationService _progressCalculationService;
     private readonly IUserContextService _userContextService;

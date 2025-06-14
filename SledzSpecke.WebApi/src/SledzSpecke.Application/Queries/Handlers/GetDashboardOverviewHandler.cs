@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetDashboardOverviewHandler : IQueryHandler<GetDashboardOverview, DashboardOverviewDto>
+public sealed class GetDashboardOverviewHandler : IQueryHandler<GetDashboardOverview, DashboardOverviewDto>
 {
     private readonly IUserRepository _userRepository;
     private readonly ISpecializationRepository _specializationRepository;

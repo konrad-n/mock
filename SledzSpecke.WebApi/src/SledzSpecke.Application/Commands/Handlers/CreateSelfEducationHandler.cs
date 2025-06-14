@@ -5,7 +5,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class CreateSelfEducationHandler : ICommandHandler<CreateSelfEducation>
+public sealed class CreateSelfEducationHandler : ICommandHandler<CreateSelfEducation>
 {
     private readonly ISelfEducationRepository _selfEducationRepository;
 

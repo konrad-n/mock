@@ -4,7 +4,7 @@ using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetInternshipsHandler : IQueryHandler<GetInternships, IEnumerable<InternshipDto>>
+public sealed class GetInternshipsHandler : IQueryHandler<GetInternships, IEnumerable<InternshipDto>>
 {
     private readonly IInternshipRepository _internshipRepository;
 

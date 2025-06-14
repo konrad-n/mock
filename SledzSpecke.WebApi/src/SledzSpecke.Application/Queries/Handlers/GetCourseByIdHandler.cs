@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
-internal sealed class GetCourseByIdHandler : IQueryHandler<GetCourseById, CourseDto>
+public sealed class GetCourseByIdHandler : IQueryHandler<GetCourseById, CourseDto>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IUserContextService _userContextService;
