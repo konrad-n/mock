@@ -1842,3 +1842,104 @@ When creating git commits or suggesting commit messages:
 - Keep commit messages focused on the actual changes made
 - Use conventional commit format when appropriate (feat:, fix:, docs:, etc.)
 - Avoid mentioning AI assistance in commits
+
+---
+
+## GitHub Actions Build Monitoring on VPS
+
+### Overview
+This VPS is configured to automatically collect and store GitHub Actions build logs. After pushing changes to GitHub, you can monitor build status directly from the VPS without needing to access GitHub's web interface.
+
+### How It Works
+1. **Automatic Log Collection**: Every GitHub Actions workflow run saves its results to `/var/log/github-actions/builds/`
+2. **JSON Format**: Each build creates a JSON file with run ID, status, commit info, and job results
+3. **Save-logs Job**: A dedicated workflow job runs after all other jobs to collect results
+
+### Checking Build Status
+
+#### Using the check-builds.sh Script
+```bash
+# Check the latest build result
+./check-builds.sh latest
+
+# List all recorded builds
+./check-builds.sh list
+
+# Show only failed builds
+./check-builds.sh failed
+```
+
+#### Manual Inspection
+```bash
+# View all build logs
+ls -la /var/log/github-actions/builds/
+
+# Read a specific build log
+cat /var/log/github-actions/builds/build-*.json | python3 -m json.tool
+
+# Check the most recent build
+ls -t /var/log/github-actions/builds/*.json | head -1 | xargs cat | python3 -m json.tool
+```
+
+### Typical Workflow for Claude
+When making changes and pushing to GitHub:
+
+1. **Make changes and commit**:
+   ```bash
+   git add .
+   git commit -m "feat: Add new feature"
+   git push origin master
+   ```
+
+2. **Wait 30-60 seconds** for the workflow to start
+
+3. **Check build status**:
+   ```bash
+   ./check-builds.sh latest
+   ```
+
+4. **If build fails**, check details:
+   ```bash
+   # See which job failed
+   ./check-builds.sh latest | grep -A5 "jobs"
+   
+   # Check GitHub Actions directly for detailed logs
+   echo "Check: https://github.com/konrad-n/mock/actions"
+   ```
+
+### Build Log Structure
+Each build log contains:
+- `run_id`: Unique identifier for the workflow run
+- `run_number`: Sequential build number
+- `repository`: Repository name
+- `branch`: Branch that triggered the build
+- `commit`: Git commit SHA
+- `actor`: Who triggered the build
+- `event`: Event type (push, pull_request, etc.)
+- `timestamp`: When the build completed
+- `jobs`: Status of each job (backend, frontend, security, deploy)
+- `workflow_url`: Direct link to GitHub Actions run
+
+### Important Directories
+- `/var/log/github-actions/builds/` - Build result logs
+- `/home/ubuntu/check-builds.sh` - Script to check builds
+- `/home/ubuntu/github-webhook.py` - Webhook receiver (future use)
+
+### Troubleshooting
+
+#### No logs appearing
+1. Check if save-logs job is running in GitHub Actions
+2. Verify SSH connection works: `ssh -i ~/.ssh/github_actions ubuntu@51.77.59.184`
+3. Check directory permissions: `ls -la /var/log/github-actions/`
+
+#### Old logs cleanup
+Logs are kept indefinitely. To clean old logs:
+```bash
+# Delete logs older than 7 days
+find /var/log/github-actions/builds/ -name "*.json" -mtime +7 -delete
+```
+
+### Future Enhancements
+- Webhook receiver is set up on port 8888 for real-time notifications
+- Can be extended to send alerts on build failures
+- Potential for build statistics and trends analysis
