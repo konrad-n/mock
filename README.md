@@ -1,3 +1,5 @@
+# THIS IS OLD README FILE WITH MAUI - WE NEED TO UPDATE IT LATER
+
 # Medical Specialization Tracking App
 
 ![Build Status](https://github.com/konrad-n/mock/actions/workflows/dotnet.yml/badge.svg)
