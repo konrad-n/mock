@@ -145,8 +145,16 @@ jobs:
         echo -e "\n=== Checking npm workspaces ==="
         npm config get workspaces || echo "No workspaces config"
         
+        echo -e "\n=== Checking if packages exist after npm ci ==="
+        if [ -d "packages" ]; then
+          echo "Packages directory exists!"
+          ls -la packages/
+        else
+          echo "ERROR: Packages directory still missing after npm ci"
+        fi
+        
         echo -e "\n=== Running build ==="
-        npm run build
+        npm run build --verbose
       working-directory: ${{ env.FRONTEND_PATH }}
       env:
         VITE_API_URL: https://api.sledzspecke.pl
@@ -204,9 +212,15 @@ jobs:
             sudo cp -r /var/www/sledzspecke-api /var/www/sledzspecke-api-backup-$(date +%Y%m%d-%H%M%S)
           fi
           
-          # Pull latest code
-          cd /home/ubuntu/sledzspecke
-          git pull origin main
+          # Clone or pull latest code
+          if [ ! -d "/home/ubuntu/sledzspecke" ]; then
+            cd /home/ubuntu
+            git clone https://github.com/${{ github.repository }}.git sledzspecke
+            cd sledzspecke
+          else
+            cd /home/ubuntu/sledzspecke
+            git pull origin master
+          fi
           
           # Build and deploy API
           cd SledzSpecke.WebApi
@@ -243,6 +257,12 @@ jobs:
           # Backup current version
           if [ -d "/var/www/sledzspecke-web/dist" ]; then
             sudo cp -r /var/www/sledzspecke-web /var/www/sledzspecke-web-backup-$(date +%Y%m%d-%H%M%S)
+          fi
+          
+          # Ensure repo is cloned
+          if [ ! -d "/home/ubuntu/sledzspecke" ]; then
+            cd /home/ubuntu
+            git clone https://github.com/${{ github.repository }}.git sledzspecke
           fi
           
           # Build frontend
