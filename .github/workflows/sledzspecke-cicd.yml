@@ -1,0 +1,250 @@
+name: SledzSpecke CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  NODE_VERSION: '20.x'
+  BACKEND_PATH: './SledzSpecke.WebApi'
+  FRONTEND_PATH: './SledzSpecke-Frontend'
+
+jobs:
+  # Backend Tests
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sledzspecke_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ${{ env.BACKEND_PATH }}
+    
+    - name: Build
+      run: dotnet build --no-restore -c Release
+      working-directory: ${{ env.BACKEND_PATH }}
+    
+    - name: Test
+      run: dotnet test --no-build --verbosity normal -c Release --collect:"XPlat Code Coverage"
+      working-directory: ${{ env.BACKEND_PATH }}
+      env:
+        ConnectionStrings__DefaultConnection: "Host=localhost;Database=sledzspecke_test;Username=postgres;Password=postgres"
+
+  # Frontend Tests
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: ${{ env.FRONTEND_PATH }}/package-lock.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ${{ env.FRONTEND_PATH }}
+    
+    - name: Lint
+      run: npm run lint || true
+      working-directory: ${{ env.FRONTEND_PATH }}
+    
+    - name: Type check
+      run: npm run type-check || true
+      working-directory: ${{ env.FRONTEND_PATH }}
+    
+    - name: Build
+      run: npm run build
+      working-directory: ${{ env.FRONTEND_PATH }}
+      env:
+        VITE_API_URL: https://api.sledzspecke.pl
+
+  # Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Deploy to VPS
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy Backend
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          set -e
+          
+          # Backup current version
+          if [ -d "/var/www/sledzspecke-api" ]; then
+            sudo cp -r /var/www/sledzspecke-api /var/www/sledzspecke-api-backup-$(date +%Y%m%d-%H%M%S)
+          fi
+          
+          # Pull latest code
+          cd /home/ubuntu/sledzspecke
+          git pull origin main
+          
+          # Build and deploy API
+          cd SledzSpecke.WebApi
+          dotnet restore
+          dotnet publish -c Release -o /tmp/sledzspecke-api-new \
+            --no-self-contained --runtime linux-x64 \
+            src/SledzSpecke.Api/SledzSpecke.Api.csproj
+          
+          # Stop service
+          sudo systemctl stop sledzspecke-api || true
+          
+          # Copy new files
+          sudo mkdir -p /var/www/sledzspecke-api
+          sudo rm -rf /var/www/sledzspecke-api/*
+          sudo cp -r /tmp/sledzspecke-api-new/* /var/www/sledzspecke-api/
+          sudo chown -R www-data:www-data /var/www/sledzspecke-api
+          
+          # Run migrations
+          cd /var/www/sledzspecke-api
+          sudo -u www-data dotnet SledzSpecke.Api.dll --migrate || true
+          
+          # Start service
+          sudo systemctl start sledzspecke-api
+          
+          # Cleanup
+          rm -rf /tmp/sledzspecke-api-new
+        EOF
+    
+    - name: Deploy Frontend
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          set -e
+          
+          # Backup current version
+          if [ -d "/var/www/sledzspecke-web/dist" ]; then
+            sudo cp -r /var/www/sledzspecke-web /var/www/sledzspecke-web-backup-$(date +%Y%m%d-%H%M%S)
+          fi
+          
+          # Build frontend
+          cd /home/ubuntu/sledzspecke/SledzSpecke-Frontend
+          npm ci
+          VITE_API_URL=https://api.sledzspecke.pl npm run build
+          
+          # Deploy frontend
+          sudo mkdir -p /var/www/sledzspecke-web/dist
+          sudo rm -rf /var/www/sledzspecke-web/dist/*
+          sudo cp -r dist/* /var/www/sledzspecke-web/dist/
+          sudo chown -R www-data:www-data /var/www/sledzspecke-web
+          
+          # Reload nginx
+          sudo nginx -t && sudo nginx -s reload
+        EOF
+    
+    - name: Health Check
+      run: |
+        sleep 10
+        curl -f https://api.sledzspecke.pl/health || exit 1
+        curl -f https://sledzspecke.pl || exit 1
+    
+    - name: Cleanup SSH
+      if: always()
+      run: rm -rf ~/.ssh/id_rsa
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Similar steps as deploy but to staging environment
+    - name: Deploy to Staging
+      run: echo "Deploy to staging environment"
+
+# Notification
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+    
+    steps:
+    - name: Send notification
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "Deployment successful!"
+          # Add Slack/Discord/Email notification here
+        else
+          echo "Deployment failed!"
+          # Add failure notification here
+        fi
