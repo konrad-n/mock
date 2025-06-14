@@ -19,5 +19,18 @@ public record ProcedureDto(
     SyncStatus SyncStatus,
     string? AdditionalFields,
     bool IsCompleted,
-    bool CanBeModified
+    bool CanBeModified,
+    string SmkVersion,
+    // Old SMK specific fields
+    int? ProcedureRequirementId,
+    string? InternshipName,
+    string? OldSmkCategory,
+    // New SMK specific fields
+    int? ModuleId,
+    string? ProcedureName,
+    int? CountA,
+    int? CountB,
+    string? Supervisor,
+    string? Institution,
+    string? Comments
 );

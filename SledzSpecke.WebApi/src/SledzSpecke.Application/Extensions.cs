@@ -19,7 +19,9 @@ public static class Extensions
         services.AddScoped<ICommandHandler<Commands.SignUp>, SignUpHandler>();
         services.AddScoped<ICommandHandler<Commands.SignIn, DTO.JwtDto>, SignInHandler>();
         services.AddScoped<ICommandHandler<Commands.CreateInternship, int>, CreateInternshipHandler>();
+        services.AddScoped<ICommandHandler<Commands.UpdateInternship>, UpdateInternshipHandler>();
         services.AddScoped<ICommandHandler<Commands.ApproveInternship>, ApproveInternshipHandler>();
+        services.AddScoped<ICommandHandler<Commands.MarkInternshipAsCompleted>, MarkInternshipAsCompletedHandler>();
         services.AddScoped<ICommandHandler<Commands.CreateAbsence>, CreateAbsenceHandler>();
         services.AddScoped<ICommandHandler<Commands.CreateRecognition>, CreateRecognitionHandler>();
         services.AddScoped<ICommandHandler<Commands.CreatePublication>, CreatePublicationHandler>();
@@ -43,9 +45,12 @@ public static class Extensions
         services.AddScoped<IQueryHandler<Queries.GetProcedureById, DTO.ProcedureDto>, GetProcedureByIdHandler>();
         services.AddScoped<IQueryHandler<Queries.GetUserMedicalShifts, IEnumerable<DTO.MedicalShiftDto>>, GetUserMedicalShiftsHandler>();
         services.AddScoped<IQueryHandler<Queries.GetMedicalShiftById, DTO.MedicalShiftDto>, GetMedicalShiftByIdHandler>();
+        services.AddScoped<IQueryHandler<Queries.GetProcedureStatistics, DTO.ProcedureSummaryDto>, GetProcedureStatisticsHandler>();
+        services.AddScoped<IQueryHandler<Queries.GetMedicalShiftStatistics, DTO.MedicalShiftSummaryDto>, GetMedicalShiftStatisticsHandler>();
 
         // Register validation services
         services.AddScoped<ISpecializationValidationService, SpecializationValidationService>();
+        services.AddScoped<IYearCalculationService, YearCalculationService>();
 
         return services;
     }

@@ -11,5 +11,16 @@ public record UpdateProcedure(
     string? OperatorCode = null,
     string? PerformingPerson = null,
     string? PatientInitials = null,
-    char? PatientGender = null
+    char? PatientGender = null,
+    // Old SMK specific fields
+    int? ProcedureRequirementId = null,
+    string? ProcedureGroup = null,
+    string? AssistantData = null,
+    string? InternshipName = null,
+    // New SMK specific fields
+    int? CountA = null,
+    int? CountB = null,
+    string? Supervisor = null,
+    string? Institution = null,
+    string? Comments = null
 ) : ICommand;

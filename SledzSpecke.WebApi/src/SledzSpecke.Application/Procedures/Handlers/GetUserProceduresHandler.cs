@@ -1,6 +1,8 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.DTO;
+using SledzSpecke.Application.Procedures.Extensions;
 using SledzSpecke.Application.Queries;
+using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
@@ -65,7 +67,7 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
         if (userSpecializations.Any())
         {
             var proceduresList = procedures.ToList();
-            var filteredProcedures = new List<Core.Entities.Procedure>();
+            var filteredProcedures = new List<ProcedureBase>();
 
             // Get all unique internship IDs from procedures
             var internshipIds = proceduresList.Select(p => p.InternshipId).Distinct().ToList();
@@ -106,24 +108,6 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
         var orderedProcedures = procedures.OrderByDescending(p => p.Date);
 
         // Map to DTOs
-        return orderedProcedures.Select(p => new ProcedureDto(
-            Id: p.Id.Value,
-            InternshipId: p.InternshipId.Value,
-            Date: p.Date,
-            Year: p.Year,
-            Code: p.Code,
-            OperatorCode: p.OperatorCode,
-            PerformingPerson: p.PerformingPerson,
-            Location: p.Location,
-            PatientInitials: p.PatientInitials,
-            PatientGender: p.PatientGender,
-            AssistantData: p.AssistantData,
-            ProcedureGroup: p.ProcedureGroup,
-            Status: p.Status.ToString(),
-            SyncStatus: p.SyncStatus,
-            AdditionalFields: p.AdditionalFields,
-            IsCompleted: p.IsCompleted,
-            CanBeModified: p.CanBeModified
-        )).ToList();
+        return orderedProcedures.Select(p => p.ToDto()).ToList();
     }
 }

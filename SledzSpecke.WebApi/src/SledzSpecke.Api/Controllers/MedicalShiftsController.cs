@@ -15,6 +15,7 @@ public class MedicalShiftsController : BaseController
     private readonly ICommandHandler<DeleteMedicalShift> _deleteMedicalShiftHandler;
     private readonly IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> _getUserMedicalShiftsHandler;
     private readonly IQueryHandler<GetMedicalShiftById, MedicalShiftDto> _getMedicalShiftByIdHandler;
+    private readonly IQueryHandler<GetMedicalShiftStatistics, MedicalShiftSummaryDto> _getMedicalShiftStatisticsHandler;
     private readonly IUserContextService _userContextService;
 
     public MedicalShiftsController(
@@ -23,6 +24,7 @@ public class MedicalShiftsController : BaseController
         ICommandHandler<DeleteMedicalShift> deleteMedicalShiftHandler,
         IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> getUserMedicalShiftsHandler,
         IQueryHandler<GetMedicalShiftById, MedicalShiftDto> getMedicalShiftByIdHandler,
+        IQueryHandler<GetMedicalShiftStatistics, MedicalShiftSummaryDto> getMedicalShiftStatisticsHandler,
         IUserContextService userContextService)
     {
         _addMedicalShiftHandler = addMedicalShiftHandler;
@@ -30,6 +32,7 @@ public class MedicalShiftsController : BaseController
         _deleteMedicalShiftHandler = deleteMedicalShiftHandler;
         _getUserMedicalShiftsHandler = getUserMedicalShiftsHandler;
         _getMedicalShiftByIdHandler = getMedicalShiftByIdHandler;
+        _getMedicalShiftStatisticsHandler = getMedicalShiftStatisticsHandler;
         _userContextService = userContextService;
     }
 
@@ -84,6 +87,15 @@ public class MedicalShiftsController : BaseController
     {
         var command = new DeleteMedicalShift(shiftId);
         return await HandleAsync(command, _deleteMedicalShiftHandler);
+    }
+
+    [HttpGet("statistics")]
+    public async Task<ActionResult<MedicalShiftSummaryDto>> GetMedicalShiftStatistics(
+        [FromQuery] int? year = null,
+        [FromQuery] int? internshipRequirementId = null)
+    {
+        var query = new GetMedicalShiftStatistics(year, internshipRequirementId);
+        return await HandleAsync(query, _getMedicalShiftStatisticsHandler);
     }
 }
 

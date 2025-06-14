@@ -3,6 +3,7 @@ using SledzSpecke.Core;
 using SledzSpecke.Infrastructure;
 using SledzSpecke.Infrastructure.DAL;
 using SledzSpecke.Infrastructure.DAL.Seeding;
+using SledzSpecke.Api.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -14,9 +15,17 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register the exception handling middleware
+builder.Services.AddSingleton<ExceptionHandlingMiddleware>();
 
 builder.Host.UseSerilog((context, loggerConfiguration) =>
 {
@@ -34,6 +43,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Add exception handling middleware early in the pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

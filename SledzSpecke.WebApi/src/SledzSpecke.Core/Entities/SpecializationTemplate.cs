@@ -74,7 +74,7 @@ public class ProcedureTemplate
     public string Type { get; set; } = string.Empty;
     public int RequiredCountA { get; set; }
     public int RequiredCountB { get; set; }
-    public int InternshipId { get; set; }
+    public int? InternshipId { get; set; }
 }
 
 public class SelfEducationInfo

@@ -63,15 +63,16 @@ public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
         var minutes = command.Minutes ?? shift.Minutes;
         var location = !string.IsNullOrWhiteSpace(command.Location) ? command.Location : shift.Location;
         
-        // Validate values before update
-        if (command.Hours.HasValue && (command.Hours.Value < 0 || command.Hours.Value > 23))
+        // Validate values before update - align with MAUI implementation
+        if (command.Hours.HasValue && command.Hours.Value < 0)
         {
-            throw new ValidationException("Hours must be between 0 and 23.");
+            throw new ValidationException("Hours cannot be negative.");
         }
         
-        if (command.Minutes.HasValue && (command.Minutes.Value < 0 || command.Minutes.Value > 59))
+        // MAUI allows minutes > 59, normalization happens at summary level
+        if (command.Minutes.HasValue && command.Minutes.Value < 0)
         {
-            throw new ValidationException("Minutes must be between 0 and 59.");
+            throw new ValidationException("Minutes cannot be negative.");
         }
         
         // Note: Date changes are not supported through the UpdateShiftDetails method
@@ -91,18 +92,12 @@ public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
             throw new NotFoundException($"Specialization not found for internship {shift.InternshipId}.");
         }
         
-        // For New SMK, validate total duration doesn't exceed 16 hours
-        if (specialization.SmkVersion == SmkVersion.New)
+        // MAUI implementation only validates that duration is greater than zero
+        // No maximum duration limits are enforced
+        var totalMinutes = shift.TotalMinutes;
+        if (totalMinutes == 0)
         {
-            var totalMinutes = shift.TotalMinutes;
-            if (totalMinutes > 960) // 16 hours in minutes
-            {
-                throw new ValidationException("Medical shift duration cannot exceed 16 hours for New SMK.");
-            }
-            if (totalMinutes < 240) // 4 hours in minutes
-            {
-                throw new ValidationException("Medical shift duration must be at least 4 hours for New SMK.");
-            }
+            throw new ValidationException("Medical shift duration must be greater than zero.");
         }
 
         await _medicalShiftRepository.UpdateAsync(shift);

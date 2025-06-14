@@ -1,56 +1,100 @@
+using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Core.Entities;
 
+/// <summary>
+/// Represents a procedure in the Old SMK system.
+/// Old SMK tracks individual procedure instances with specific patient data and year-based progression.
+/// </summary>
 public class ProcedureOldSmk : ProcedureBase
 {
-    public string? LegacyFields { get; private set; }
-    public bool IsLegacyFormat { get; private set; }
-    public string? OldSmkCategory { get; private set; }
+    /// <summary>
+    /// Reference to procedure requirement from template (optional)
+    /// </summary>
+    public int? ProcedureRequirementId { get; private set; }
+    
+    // Note: ProcedureGroup and AssistantData are inherited from ProcedureBase
+    
+    /// <summary>
+    /// Name of the internship during which procedure was performed
+    /// </summary>
+    public string? InternshipName { get; private set; }
 
     private ProcedureOldSmk(ProcedureId id, InternshipId internshipId, DateTime date, int year,
         string code, string location, ProcedureStatus status)
         : base(id, internshipId, date, year, code, location, status, SmkVersion.Old)
     {
-        IsLegacyFormat = true;
-        OldSmkCategory = DetermineOldSmkCategory(code);
     }
 
     public static ProcedureOldSmk Create(ProcedureId id, InternshipId internshipId, DateTime date,
-        string code, string location)
+        int year, string code, string location)
     {
-        ValidateInput(code, location, date);
-        return new ProcedureOldSmk(id, internshipId, date, date.Year, code, location, ProcedureStatus.Pending);
+        ValidateInput(code, location, date, year);
+        return new ProcedureOldSmk(id, internshipId, date, year, code, location, ProcedureStatus.Pending);
     }
 
-    public void SetLegacyFields(string? legacyFields)
+    public void SetProcedureRequirement(int requirementId)
     {
         EnsureCanModify();
-        LegacyFields = legacyFields;
+        ProcedureRequirementId = requirementId;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
-    public void SetOldSmkCategory(string? category)
+    // Note: SetProcedureGroup and SetAssistantData are inherited from ProcedureBase
+    
+    public void SetInternshipName(string internshipName)
     {
         EnsureCanModify();
-        OldSmkCategory = category;
+        InternshipName = internshipName;
         UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public override bool IsValidForSmkVersion()
     {
-        return !string.IsNullOrEmpty(Code) && 
-               !string.IsNullOrEmpty(Location) && 
-               !string.IsNullOrEmpty(OldSmkCategory);
+        // Old SMK requires operator code to be A or B
+        return SmkVersion == SmkVersion.Old &&
+               !string.IsNullOrEmpty(Code) && 
+               !string.IsNullOrEmpty(Location) &&
+               (string.IsNullOrEmpty(OperatorCode) || OperatorCode == "A" || OperatorCode == "B") &&
+               Year >= 0 && Year <= 6;
     }
 
     public override void ValidateSmkSpecificRules()
     {
-        if (string.IsNullOrEmpty(OldSmkCategory))
-            throw new InvalidOperationException("Old SMK category is required for Old SMK procedures.");
+        // Validate operator code for Old SMK
+        if (!string.IsNullOrEmpty(OperatorCode) && OperatorCode != "A" && OperatorCode != "B")
+            throw new InvalidOperationException("Operator code must be 'A' or 'B' for Old SMK procedures.");
+        
+        // Validate year range
+        if (Year < 0 || Year > 6)
+            throw new InvalidOperationException("Year must be between 0 (unassigned) and 6 for Old SMK procedures.");
 
+        // For completed procedures in Old SMK, performing person is required
         if (Status == ProcedureStatus.Completed && string.IsNullOrEmpty(PerformingPerson))
             throw new InvalidOperationException("Performing person is required for completed procedures in Old SMK.");
+        
+        // For completed procedures, patient data should be complete
+        if (Status == ProcedureStatus.Completed)
+        {
+            if (string.IsNullOrEmpty(PatientInitials))
+                throw new InvalidOperationException("Patient initials are required for completed procedures.");
+            
+            if (!PatientGender.HasValue)
+                throw new InvalidOperationException("Patient gender is required for completed procedures.");
+        }
     }
 
     public override void Complete()
@@ -64,33 +108,21 @@ public class ProcedureOldSmk : ProcedureBase
     {
         base.UpdateProcedureDetails(operatorCode, performingPerson, patientInitials, patientGender);
         
-        if (!string.IsNullOrEmpty(performingPerson))
-        {
-            OldSmkCategory ??= DetermineOldSmkCategory(Code);
-        }
+        // Additional Old SMK specific logic could go here if needed
     }
 
-    private static string DetermineOldSmkCategory(string code)
-    {
-        if (code.StartsWith("1") || code.StartsWith("2"))
-            return "Basic";
-        if (code.StartsWith("3") || code.StartsWith("4"))
-            return "Intermediate";
-        if (code.StartsWith("5") || code.StartsWith("6"))
-            return "Advanced";
-        
-        return "General";
-    }
-
-    private static void ValidateInput(string code, string location, DateTime date)
+    private static void ValidateInput(string code, string location, DateTime date, int year)
     {
         if (string.IsNullOrWhiteSpace(code))
-            throw new ArgumentException("Procedure code cannot be empty.", nameof(code));
+            throw new InvalidProcedureCodeException(code ?? string.Empty);
 
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));
 
-        if (date > DateTime.UtcNow.Date)
-            throw new ArgumentException("Procedure date cannot be in the future.", nameof(date));
+        // No future date validation - MAUI app allows future dates
+        
+        // Validate year for Old SMK (0-6)
+        if (year < 0 || year > 6)
+            throw new ArgumentException("Year must be between 0 (unassigned) and 6 for Old SMK.", nameof(year));
     }
 }

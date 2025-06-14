@@ -35,8 +35,8 @@ public class Internship
         SpecializationId = specializationId;
         InstitutionName = institutionName;
         DepartmentName = departmentName;
-        StartDate = startDate;
-        EndDate = endDate;
+        StartDate = EnsureUtc(startDate);
+        EndDate = EnsureUtc(endDate);
         DaysCount = CalculateDaysCount(startDate, endDate);
         SyncStatus = SyncStatus.NotSynced;
         CreatedAt = DateTime.UtcNow;
@@ -78,6 +78,46 @@ public class Internship
             throw new ArgumentException("Supervisor name cannot be empty.", nameof(supervisorName));
         
         SupervisorName = supervisorName;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void UpdateInstitution(string institutionName, string departmentName)
+    {
+        EnsureCanModify();
+        
+        if (string.IsNullOrWhiteSpace(institutionName))
+            throw new ArgumentException("Institution name cannot be empty.", nameof(institutionName));
+            
+        if (string.IsNullOrWhiteSpace(departmentName))
+            throw new ArgumentException("Department name cannot be empty.", nameof(departmentName));
+        
+        InstitutionName = institutionName;
+        DepartmentName = departmentName;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void UpdateDates(DateTime startDate, DateTime endDate)
+    {
+        EnsureCanModify();
+        
+        if (endDate <= startDate)
+            throw new InvalidDateRangeException();
+            
+        StartDate = startDate.ToUniversalTime();
+        EndDate = endDate.ToUniversalTime();
+        DaysCount = CalculateDaysCount(startDate, endDate);
         UpdatedAt = DateTime.UtcNow;
         
         // Automatically transition from Synced to Modified
@@ -193,5 +233,16 @@ public class Internship
     private static int CalculateDaysCount(DateTime startDate, DateTime endDate)
     {
         return (endDate - startDate).Days + 1;
+    }
+
+    private static DateTime EnsureUtc(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => dateTime,
+            DateTimeKind.Local => dateTime.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
+            _ => dateTime
+        };
     }
 }

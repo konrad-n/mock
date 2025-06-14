@@ -35,7 +35,7 @@ public abstract class ProcedureBase
     {
         Id = id;
         InternshipId = internshipId;
-        Date = date;
+        Date = EnsureUtc(date);
         Year = year;
         Code = code;
         Location = location;
@@ -178,4 +178,15 @@ public abstract class ProcedureBase
 
     public abstract bool IsValidForSmkVersion();
     public abstract void ValidateSmkSpecificRules();
+
+    private static DateTime EnsureUtc(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => dateTime,
+            DateTimeKind.Local => dateTime.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
+            _ => dateTime
+        };
+    }
 }

@@ -15,6 +15,7 @@ public class ProceduresController : BaseController
     private readonly ICommandHandler<DeleteProcedure> _deleteProcedureHandler;
     private readonly IQueryHandler<GetUserProcedures, IEnumerable<ProcedureDto>> _getUserProceduresHandler;
     private readonly IQueryHandler<GetProcedureById, ProcedureDto> _getProcedureByIdHandler;
+    private readonly IQueryHandler<GetProcedureStatistics, ProcedureSummaryDto> _getProcedureStatisticsHandler;
     private readonly IUserContextService _userContextService;
 
     public ProceduresController(
@@ -23,6 +24,7 @@ public class ProceduresController : BaseController
         ICommandHandler<DeleteProcedure> deleteProcedureHandler,
         IQueryHandler<GetUserProcedures, IEnumerable<ProcedureDto>> getUserProceduresHandler,
         IQueryHandler<GetProcedureById, ProcedureDto> getProcedureByIdHandler,
+        IQueryHandler<GetProcedureStatistics, ProcedureSummaryDto> getProcedureStatisticsHandler,
         IUserContextService userContextService)
     {
         _addProcedureHandler = addProcedureHandler;
@@ -30,6 +32,7 @@ public class ProceduresController : BaseController
         _deleteProcedureHandler = deleteProcedureHandler;
         _getUserProceduresHandler = getUserProceduresHandler;
         _getProcedureByIdHandler = getProcedureByIdHandler;
+        _getProcedureStatisticsHandler = getProcedureStatisticsHandler;
         _userContextService = userContextService;
     }
 
@@ -55,20 +58,46 @@ public class ProceduresController : BaseController
     [HttpPost]
     public async Task<ActionResult<int>> AddProcedure([FromBody] AddProcedureRequest request)
     {
-        var command = new AddProcedure(
-            request.InternshipId,
-            request.Date,
-            request.Year,
-            request.Code,
-            request.Location,
-            request.Status,
-            request.OperatorCode,
-            request.PerformingPerson,
-            request.PatientInitials,
-            request.PatientGender);
+        try
+        {
+            // Log the incoming request for debugging
+            Console.WriteLine($"[DEBUG] AddProcedure request: InternshipId={request.InternshipId}, Code={request.Code}, Status={request.Status}");
+            
+            var command = new AddProcedure(
+                request.InternshipId,
+                request.Date,
+                request.Year,
+                request.Code,
+                request.Location,
+                request.Status,
+                request.OperatorCode,
+                request.PerformingPerson,
+                request.PatientInitials,
+                request.PatientGender,
+                // Old SMK specific fields
+                request.ProcedureRequirementId,
+                request.ProcedureGroup,
+                request.AssistantData,
+                request.InternshipName,
+                // New SMK specific fields
+                request.ModuleId,
+                request.ProcedureName,
+            request.CountA,
+            request.CountB,
+            request.Supervisor,
+            request.Institution,
+            request.Comments);
 
-        var procedureId = await _addProcedureHandler.HandleAsync(command);
-        return CreatedAtAction(nameof(GetProcedureById), new { procedureId }, procedureId);
+            var procedureId = await _addProcedureHandler.HandleAsync(command);
+            Console.WriteLine($"[DEBUG] Procedure created successfully with ID: {procedureId}");
+            return CreatedAtAction(nameof(GetProcedureById), new { procedureId }, procedureId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] AddProcedure failed: {ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+            throw; // Re-throw to let the framework handle it
+        }
     }
 
     [HttpPut("{procedureId:int}")]
@@ -83,7 +112,18 @@ public class ProceduresController : BaseController
             request.OperatorCode,
             request.PerformingPerson,
             request.PatientInitials,
-            request.PatientGender);
+            request.PatientGender,
+            // Old SMK specific fields
+            request.ProcedureRequirementId,
+            request.ProcedureGroup,
+            request.AssistantData,
+            request.InternshipName,
+            // New SMK specific fields
+            request.CountA,
+            request.CountB,
+            request.Supervisor,
+            request.Institution,
+            request.Comments);
         
         return await HandleAsync(command, _updateProcedureHandler);
     }
@@ -93,6 +133,15 @@ public class ProceduresController : BaseController
     {
         var command = new DeleteProcedure(procedureId);
         return await HandleAsync(command, _deleteProcedureHandler);
+    }
+
+    [HttpGet("statistics")]
+    public async Task<ActionResult<ProcedureSummaryDto>> GetProcedureStatistics(
+        [FromQuery] int? moduleId = null,
+        [FromQuery] int? procedureRequirementId = null)
+    {
+        var query = new GetProcedureStatistics(moduleId, procedureRequirementId);
+        return await HandleAsync(query, _getProcedureStatisticsHandler);
     }
 }
 
@@ -108,6 +157,21 @@ public class AddProcedureRequest
     public string? PerformingPerson { get; set; }
     public string? PatientInitials { get; set; }
     public char? PatientGender { get; set; }
+    
+    // Old SMK specific fields
+    public int? ProcedureRequirementId { get; set; }
+    public string? ProcedureGroup { get; set; }
+    public string? AssistantData { get; set; }
+    public string? InternshipName { get; set; }
+    
+    // New SMK specific fields
+    public int? ModuleId { get; set; }
+    public string? ProcedureName { get; set; }
+    public int? CountA { get; set; }
+    public int? CountB { get; set; }
+    public string? Supervisor { get; set; }
+    public string? Institution { get; set; }
+    public string? Comments { get; set; }
 }
 
 public class UpdateProcedureRequest
@@ -120,4 +184,17 @@ public class UpdateProcedureRequest
     public string? PerformingPerson { get; set; }
     public string? PatientInitials { get; set; }
     public char? PatientGender { get; set; }
+    
+    // Old SMK specific fields
+    public int? ProcedureRequirementId { get; set; }
+    public string? ProcedureGroup { get; set; }
+    public string? AssistantData { get; set; }
+    public string? InternshipName { get; set; }
+    
+    // New SMK specific fields
+    public int? CountA { get; set; }
+    public int? CountB { get; set; }
+    public string? Supervisor { get; set; }
+    public string? Institution { get; set; }
+    public string? Comments { get; set; }
 }

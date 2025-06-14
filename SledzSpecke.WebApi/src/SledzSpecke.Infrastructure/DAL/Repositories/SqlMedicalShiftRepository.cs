@@ -100,6 +100,26 @@ internal sealed class SqlMedicalShiftRepository : IMedicalShiftRepository
 
     public async Task<int> AddAsync(MedicalShift shift)
     {
+        // Generate new ID if it's 0
+        if (shift.Id.Value == 0)
+        {
+            // Query raw database to get max ID
+            var connection = _context.Database.GetDbConnection();
+            await connection.OpenAsync();
+            
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"MedicalShifts\"";
+            var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
+            
+            var newId = new MedicalShiftId(maxId + 1);
+            
+            // Use reflection to set the ID since it's private
+            var idProperty = shift.GetType().GetProperty("Id");
+            idProperty?.SetValue(shift, newId);
+            
+            await connection.CloseAsync();
+        }
+        
         await _context.MedicalShifts.AddAsync(shift);
         await _context.SaveChangesAsync();
         return shift.Id.Value;
