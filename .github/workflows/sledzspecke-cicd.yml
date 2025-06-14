@@ -95,9 +95,7 @@ jobs:
         cache-dependency-path: ${{ env.FRONTEND_PATH }}/package-lock.json
     
     - name: Install dependencies
-      run: |
-        npm ci
-        npm ci --workspaces
+      run: npm ci
       working-directory: ${{ env.FRONTEND_PATH }}
     
     - name: Lint
@@ -109,9 +107,7 @@ jobs:
       working-directory: ${{ env.FRONTEND_PATH }}
     
     - name: Build
-      run: |
-        cd packages/shared && npm run build && cd ../..
-        cd packages/web && npm run build
+      run: npm run build
       working-directory: ${{ env.FRONTEND_PATH }}
       env:
         VITE_API_URL: https://api.sledzspecke.pl
@@ -213,9 +209,7 @@ jobs:
           # Build frontend
           cd /home/ubuntu/sledzspecke/SledzSpecke-Frontend
           npm ci
-          npm ci --workspaces
-          cd packages/shared && npm run build && cd ../..
-          cd packages/web && VITE_API_URL=https://api.sledzspecke.pl npm run build && cd ../..
+          VITE_API_URL=https://api.sledzspecke.pl npm run build
           
           # Deploy frontend
           sudo mkdir -p /var/www/sledzspecke-web/dist
