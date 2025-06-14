@@ -32,6 +32,9 @@ public static class ValidationExtensions
         services.AddScoped<IValidator<AddProcedure>, AddProcedureValidator>();
         services.AddScoped<IValidator<UpdateProcedure>, UpdateProcedureValidator>();
         services.AddScoped<IValidator<DeleteProcedure>, DeleteProcedureValidator>();
+        services.AddScoped<IValidator<CreatePublication>, CreatePublicationValidator>();
+        services.AddScoped<IValidator<UpdatePublication>, UpdatePublicationValidator>();
+        services.AddScoped<IValidator<DeletePublication>, DeletePublicationValidator>();
         
         // TODO: Add more validators as they are created
         // services.AddScoped<IValidator<UpdateCourse>, UpdateCourseValidator>();

@@ -1,11 +1,13 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.Exceptions;
+using SledzSpecke.Application.Commands;
 using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
+using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class UpdatePublicationHandler : ICommandHandler<UpdatePublication>
+public sealed class UpdatePublicationHandler : IResultCommandHandler<UpdatePublication>
 {
     private readonly IPublicationRepository _publicationRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -21,32 +23,58 @@ internal sealed class UpdatePublicationHandler : ICommandHandler<UpdatePublicati
         _userContextService = userContextService;
     }
 
-    public async Task HandleAsync(UpdatePublication command)
+    public async Task<Result> HandleAsync(UpdatePublication command)
     {
-        var publication = await _publicationRepository.GetByIdAsync(command.PublicationId);
-        if (publication is null)
+        try
         {
-            throw new PublicationNotFoundException(command.PublicationId.Value);
-        }
+            var publication = await _publicationRepository.GetByIdAsync(command.PublicationId);
+            if (publication is null)
+            {
+                return Result.Failure($"Publication with ID {command.PublicationId.Value} not found.");
+            }
 
-        var currentUserId = _userContextService.GetUserId();
-        if (publication.UserId.Value != (int)currentUserId)
+            var currentUserId = _userContextService.GetUserId();
+            if (publication.UserId.Value != (int)currentUserId)
+            {
+                return Result.Failure("You can only update your own publications.");
+            }
+
+            // Check if publication can be modified
+            if (!publication.CanBeModified)
+            {
+                return Result.Failure("This publication cannot be modified. It may be synced.");
+            }
+
+            // Validate title is not empty
+            if (string.IsNullOrWhiteSpace(command.Title))
+            {
+                return Result.Failure("Publication title cannot be empty.");
+            }
+
+            // Update the publication details
+            publication.UpdateDetails(
+                command.Title,
+                command.Authors,
+                command.Journal,
+                command.Publisher,
+                command.Abstract,
+                command.Keywords,
+                command.IsFirstAuthor,
+                command.IsCorrespondingAuthor,
+                command.IsPeerReviewed);
+
+            await _publicationRepository.UpdateAsync(publication);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Result.Success();
+        }
+        catch (Exception ex) when (ex is CustomException)
         {
-            throw new UnauthorizedAccessException("You can only update your own publications.");
+            return Result.Failure(ex.Message);
         }
-
-        publication.UpdateDetails(
-            command.Title,
-            command.Authors,
-            command.Journal,
-            command.Publisher,
-            command.Abstract,
-            command.Keywords,
-            command.IsFirstAuthor,
-            command.IsCorrespondingAuthor,
-            command.IsPeerReviewed);
-
-        await _publicationRepository.UpdateAsync(publication);
-        await _unitOfWork.SaveChangesAsync();
+        catch (Exception)
+        {
+            return Result.Failure("An error occurred while updating the publication.");
+        }
     }
 }
