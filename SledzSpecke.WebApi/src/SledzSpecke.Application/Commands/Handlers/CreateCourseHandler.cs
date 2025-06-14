@@ -1,11 +1,12 @@
 using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-internal sealed class CreateCourseHandler : ICommandHandler<CreateCourse, int>
+internal sealed class CreateCourseHandler : IResultCommandHandler<CreateCourse, int>
 {
     private readonly ICourseRepository _courseRepository;
     private readonly ISpecializationRepository _specializationRepository;
@@ -21,12 +22,12 @@ internal sealed class CreateCourseHandler : ICommandHandler<CreateCourse, int>
         _moduleRepository = moduleRepository;
     }
 
-    public async Task<int> HandleAsync(CreateCourse command)
+    public async Task<Result<int>> HandleAsync(CreateCourse command)
     {
         var specialization = await _specializationRepository.GetByIdAsync(command.SpecializationId);
         if (specialization is null)
         {
-            throw new InvalidOperationException($"Specialization with ID {command.SpecializationId} not found.");
+            return Result.Failure<int>($"Specialization with ID {command.SpecializationId} not found.");
         }
 
         if (command.ModuleId.HasValue)
@@ -34,40 +35,47 @@ internal sealed class CreateCourseHandler : ICommandHandler<CreateCourse, int>
             var module = await _moduleRepository.GetByIdAsync(command.ModuleId.Value);
             if (module is null)
             {
-                throw new InvalidOperationException($"Module with ID {command.ModuleId.Value} not found.");
+                return Result.Failure<int>($"Module with ID {command.ModuleId.Value} not found.");
             }
         }
 
         if (!Enum.TryParse<CourseType>(command.CourseType, out var courseType))
         {
-            throw new ArgumentException($"Invalid course type: {command.CourseType}");
+            return Result.Failure<int>($"Invalid course type: {command.CourseType}");
         }
 
-        var courseId = CourseId.New();
-        var course = Course.Create(
-            courseId,
-            command.SpecializationId,
-            courseType,
-            command.CourseName,
-            command.InstitutionName,
-            command.CompletionDate);
-
-        if (!string.IsNullOrWhiteSpace(command.CourseNumber))
+        try
         {
-            course.SetCourseNumber(command.CourseNumber);
-        }
+            var courseId = CourseId.New();
+            var course = Course.Create(
+                courseId,
+                command.SpecializationId,
+                courseType,
+                command.CourseName,
+                command.InstitutionName,
+                command.CompletionDate);
 
-        if (!string.IsNullOrWhiteSpace(command.CertificateNumber))
+            if (!string.IsNullOrWhiteSpace(command.CourseNumber))
+            {
+                course.SetCourseNumber(command.CourseNumber);
+            }
+
+            if (!string.IsNullOrWhiteSpace(command.CertificateNumber))
+            {
+                course.SetCertificate(command.CertificateNumber);
+            }
+
+            if (command.ModuleId.HasValue)
+            {
+                course.AssignToModule(command.ModuleId.Value);
+            }
+
+            await _courseRepository.AddAsync(course);
+            return Result.Success((int)course.Id);
+        }
+        catch (Exception ex)
         {
-            course.SetCertificate(command.CertificateNumber);
+            return Result.Failure<int>($"Failed to create course: {ex.Message}");
         }
-
-        if (command.ModuleId.HasValue)
-        {
-            course.AssignToModule(command.ModuleId.Value);
-        }
-
-        await _courseRepository.AddAsync(course);
-        return course.Id;
     }
 }

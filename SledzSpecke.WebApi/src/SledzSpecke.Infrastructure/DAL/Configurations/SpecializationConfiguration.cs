@@ -22,7 +22,7 @@ internal sealed class SpecializationConfiguration : IEntityTypeConfiguration<Spe
             .IsRequired();
 
         builder.Property(x => x.SmkVersion)
-            .HasConversion<int>();
+            .HasConversion(x => x.Value, x => new SmkVersion(x));
 
         builder.Property(x => x.CurrentModuleId)
             .HasConversion(x => x!.Value, x => new ModuleId(x))

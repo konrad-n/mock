@@ -19,6 +19,8 @@ public sealed class SledzSpeckeDbContext : DbContext
     public DbSet<Recognition> Recognitions => Set<Recognition>();
     public DbSet<Publication> Publications => Set<Publication>();
     public DbSet<SelfEducation> SelfEducations => Set<SelfEducation>();
+    public DbSet<EducationalActivity> EducationalActivities => Set<EducationalActivity>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
 
     public SledzSpeckeDbContext(DbContextOptions<SledzSpeckeDbContext> options) : base(options)
     {
@@ -39,5 +41,7 @@ public sealed class SledzSpeckeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new RecognitionConfiguration());
         modelBuilder.ApplyConfiguration(new PublicationConfiguration());
         modelBuilder.ApplyConfiguration(new SelfEducationConfiguration());
+        modelBuilder.ApplyConfiguration(new EducationalActivityConfiguration());
+        modelBuilder.ApplyConfiguration(new FileMetadataConfiguration());
     }
 }

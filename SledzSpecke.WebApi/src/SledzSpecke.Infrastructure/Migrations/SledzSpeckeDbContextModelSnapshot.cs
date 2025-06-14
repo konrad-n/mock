@@ -164,6 +164,128 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("SledzSpecke.Core.Entities.EducationalActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ModuleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SpecializationId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SyncStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleId");
+
+                    b.HasIndex("SpecializationId");
+
+                    b.HasIndex("Type");
+
+                    b.HasIndex("StartDate", "EndDate");
+
+                    b.ToTable("EducationalActivities");
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.FileMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UploadedByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FilePath")
+                        .IsUnique();
+
+                    b.HasIndex("UploadedByUserId")
+                        .HasFilter("\"IsDeleted\" = false");
+
+                    b.HasIndex("EntityType", "EntityId")
+                        .HasFilter("\"IsDeleted\" = false");
+
+                    b.ToTable("FileMetadata");
+                });
+
             modelBuilder.Entity("SledzSpecke.Core.Entities.Internship", b =>
                 {
                     b.Property<int>("Id")
@@ -322,8 +444,9 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Property<int>("RequiredShiftHours")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SmkVersion")
-                        .HasColumnType("integer");
+                    b.Property<string>("SmkVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("SpecializationId")
                         .HasColumnType("integer");
@@ -488,6 +611,9 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Property<string>("ISBN")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<decimal?>("ImpactFactor")
+                        .HasColumnType("numeric");
 
                     b.Property<bool>("IsCorrespondingAuthor")
                         .ValueGeneratedOnAdd()
@@ -718,6 +844,9 @@ namespace SledzSpecke.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<decimal?>("QualityScore")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("SpecializationId")
                         .HasColumnType("integer");
 
@@ -800,8 +929,9 @@ namespace SledzSpecke.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("SmkVersion")
-                        .HasColumnType("integer");
+                    b.Property<string>("SmkVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -816,25 +946,56 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Bio")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("EmailNotificationsEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("NotificationsEnabled")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Password")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PreferredLanguage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PreferredTheme")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProfilePicturePath")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("SmkVersion")
-                        .HasColumnType("integer");
+                    b.Property<string>("SmkVersion")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("SpecializationId")
                         .HasColumnType("integer");

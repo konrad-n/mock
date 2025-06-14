@@ -33,7 +33,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(x => x.SmkVersion)
-            .HasConversion<int>();
+            .HasConversion(x => x.Value, x => new SmkVersion(x));
 
         builder.Property(x => x.SpecializationId)
             .HasConversion(x => x.Value, x => new SpecializationId(x));

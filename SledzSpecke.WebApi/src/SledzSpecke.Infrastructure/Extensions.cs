@@ -19,6 +19,7 @@ using SledzSpecke.Infrastructure.Security;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Infrastructure.Time;
 using SledzSpecke.Infrastructure.Exceptions;
+using SledzSpecke.Infrastructure.Options;
 using System.Text;
 
 namespace SledzSpecke.Infrastructure;
@@ -55,6 +56,7 @@ public static class Extensions
         services.AddSingleton<IPasswordManager, PasswordManager>();
         services.AddSingleton<IAuthenticator, Authenticator>();
         services.AddScoped<IUserContextService, UserContextService>();
+        services.AddScoped<IUserContext, UserContext>();
 
         // Template services
         services.AddSingleton<ISpecializationTemplateService, SpecializationTemplateService>();
@@ -73,7 +75,16 @@ public static class Extensions
         services.AddScoped<IRecognitionRepository, SqlRecognitionRepository>();
         services.AddScoped<IPublicationRepository, SqlPublicationRepository>();
         services.AddScoped<ISelfEducationRepository, SqlSelfEducationRepository>();
+        services.AddScoped<IEducationalActivityRepository, EducationalActivityRepository>();
+        services.AddScoped<IFileMetadataRepository, FileMetadataRepository>();
+        services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IDataSeeder, DataSeeder>();
+        
+        // Configure file storage options
+        services.Configure<FileStorageOptions>(configuration.GetSection("FileStorage"));
+        
+        // Register background services
+        services.AddHostedService<FileCleanupService>();
 
         services.AddDbContext<SledzSpeckeDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));

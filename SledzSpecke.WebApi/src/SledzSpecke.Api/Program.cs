@@ -1,6 +1,7 @@
 using SledzSpecke.Application;
 using SledzSpecke.Core;
 using SledzSpecke.Infrastructure;
+using SledzSpecke.Api.Extensions;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddCore()
     .AddApplication()
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure(builder.Configuration)
+    .AddApiServices();
 
 builder.Host.UseSerilog((context, loggerConfiguration) =>
 {
@@ -19,8 +21,8 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
 
 var app = builder.Build();
 
-// Use centralized infrastructure setup
-app.UseInfrastructure();
+// Use enhanced API middleware setup
+app.UseApiMiddleware();
 
 // Initialize database and seed data
 try
