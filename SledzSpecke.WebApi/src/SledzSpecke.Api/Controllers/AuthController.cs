@@ -6,13 +6,15 @@ using SledzSpecke.Application.DTO;
 namespace SledzSpecke.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+[Route("api/auth")]
+public class AuthController : BaseResultController
 {
-    private readonly ICommandHandler<SignIn, JwtDto> _signInHandler;
-    private readonly ICommandHandler<SignUp> _signUpHandler;
+    private readonly IResultCommandHandler<SignIn, JwtDto> _signInHandler;
+    private readonly IResultCommandHandler<SignUp> _signUpHandler;
 
-    public AuthController(ICommandHandler<SignIn, JwtDto> signInHandler, ICommandHandler<SignUp> signUpHandler)
+    public AuthController(
+        IResultCommandHandler<SignIn, JwtDto> signInHandler, 
+        IResultCommandHandler<SignUp> signUpHandler)
     {
         _signInHandler = signInHandler;
         _signUpHandler = signUpHandler;
@@ -20,12 +22,15 @@ public class AuthController : ControllerBase
 
     [HttpPost("sign-in")]
     public async Task<ActionResult<JwtDto>> SignIn(SignIn command)
-        => Ok(await _signInHandler.HandleAsync(command));
+    {
+        var result = await _signInHandler.HandleAsync(command);
+        return HandleResult(result);
+    }
 
     [HttpPost("sign-up")]
     public async Task<ActionResult> SignUp(SignUp command)
     {
-        await _signUpHandler.HandleAsync(command);
-        return Ok();
+        var result = await _signUpHandler.HandleAsync(command);
+        return HandleResult(result);
     }
 }

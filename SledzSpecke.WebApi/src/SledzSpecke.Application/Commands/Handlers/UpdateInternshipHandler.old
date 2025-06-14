@@ -6,7 +6,7 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-public sealed class UpdateInternshipHandler : IResultCommandHandler<UpdateInternship>
+public sealed class UpdateInternshipHandlerRefactored : IResultCommandHandler<UpdateInternship>
 {
     private readonly IInternshipRepository _internshipRepository;
     private readonly IUserContextService _userContextService;
@@ -15,7 +15,7 @@ public sealed class UpdateInternshipHandler : IResultCommandHandler<UpdateIntern
     private readonly ISpecializationRepository _specializationRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateInternshipHandler(
+    public UpdateInternshipHandlerRefactored(
         IInternshipRepository internshipRepository,
         IUserContextService userContextService,
         IUserRepository userRepository,
@@ -57,14 +57,14 @@ public sealed class UpdateInternshipHandler : IResultCommandHandler<UpdateIntern
             }
 
             // Update institution name if provided
-            if (!string.IsNullOrWhiteSpace(command.InstitutionName) && command.InstitutionName != internship.InstitutionName)
+            if (!string.IsNullOrWhiteSpace(command.InstitutionName) && command.InstitutionName != internship.InstitutionName.Value)
             {
                 var institutionName = new InstitutionName(command.InstitutionName);
                 internship.UpdateInstitution(institutionName, internship.DepartmentName);
             }
 
             // Update department name if provided
-            if (!string.IsNullOrWhiteSpace(command.DepartmentName) && command.DepartmentName != internship.DepartmentName)
+            if (!string.IsNullOrWhiteSpace(command.DepartmentName) && command.DepartmentName != internship.DepartmentName.Value)
             {
                 var departmentName = new DepartmentName(command.DepartmentName);
                 internship.UpdateInstitution(internship.InstitutionName, departmentName);

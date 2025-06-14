@@ -25,12 +25,14 @@ public static class Extensions
 
         // Auto-register all Result-based command handlers
         services.Scan(s => s.FromAssemblies(applicationAssembly)
-            .AddClasses(c => c.AssignableTo(typeof(IResultCommandHandler<>)))
+            .AddClasses(c => c.AssignableTo(typeof(IResultCommandHandler<>))
+                .Where(t => !t.Name.Contains("Decorator")))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
         services.Scan(s => s.FromAssemblies(applicationAssembly)
-            .AddClasses(c => c.AssignableTo(typeof(IResultCommandHandler<,>)))
+            .AddClasses(c => c.AssignableTo(typeof(IResultCommandHandler<,>))
+                .Where(t => !t.Name.Contains("Decorator")))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
@@ -49,10 +51,11 @@ public static class Extensions
         services.AddValidation();
 
         // Override specific handlers if needed (enhanced versions)
-        services.AddScoped<ICommandHandler<Commands.SignUp>, Commands.Handlers.SignUpHandlerEnhanced>();
-        services.AddScoped<ICommandHandler<Commands.AddMedicalShift, int>, MedicalShifts.Handlers.AddMedicalShiftHandlerEnhanced>();
-        services.AddScoped<ICommandHandler<Commands.UpdateMedicalShift>, MedicalShifts.Handlers.UpdateMedicalShiftHandlerEnhanced>();
-        services.AddScoped<ICommandHandler<Commands.DeleteMedicalShift>, MedicalShifts.Handlers.DeleteMedicalShiftHandlerEnhanced>();
+        // Commented out - using Result-based handlers now
+        // services.AddScoped<ICommandHandler<Commands.SignUp>, Commands.Handlers.SignUpHandlerEnhanced>();
+        // services.AddScoped<ICommandHandler<Commands.AddMedicalShift, int>, MedicalShifts.Handlers.AddMedicalShiftHandlerEnhanced>();
+        // services.AddScoped<ICommandHandler<Commands.UpdateMedicalShift>, MedicalShifts.Handlers.UpdateMedicalShiftHandlerEnhanced>();
+        // services.AddScoped<ICommandHandler<Commands.DeleteMedicalShift>, MedicalShifts.Handlers.DeleteMedicalShiftHandlerEnhanced>();
         
         // Register Result-based handlers (temporary override until all handlers are migrated)
         services.AddScoped<IResultCommandHandler<Commands.CreateCourse, int>, Commands.Handlers.CreateCourseHandler>();

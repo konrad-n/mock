@@ -1,6 +1,6 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Commands;
-using SledzSpecke.Application.Exceptions;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
@@ -8,166 +8,113 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.MedicalShifts.Handlers;
 
-public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
+public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShift, int>
 {
     private readonly IMedicalShiftRepository _medicalShiftRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
     private readonly ISpecializationValidationService _validationService;
     private readonly IYearCalculationService _yearCalculationService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AddMedicalShiftHandler(
         IMedicalShiftRepository medicalShiftRepository,
         IInternshipRepository internshipRepository,
         ISpecializationRepository specializationRepository,
         ISpecializationValidationService validationService,
-        IYearCalculationService yearCalculationService)
+        IYearCalculationService yearCalculationService,
+        IUnitOfWork unitOfWork)
     {
         _medicalShiftRepository = medicalShiftRepository;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
         _validationService = validationService;
         _yearCalculationService = yearCalculationService;
+        _unitOfWork = unitOfWork;
     }
 
-    public async Task<int> HandleAsync(AddMedicalShift command)
+    public async Task<Result<int>> HandleAsync(AddMedicalShift command)
     {
-        // Validate internship exists
-        var internship = await _internshipRepository.GetByIdAsync(new InternshipId(command.InternshipId));
-        if (internship is null)
+        try
         {
-            throw new InternshipNotFoundException(command.InternshipId);
-        }
-
-        // Get specialization to determine SMK version
-        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
-        if (specialization is null)
-        {
-            throw new SpecializationNotFoundException(internship.SpecializationId.Value);
-        }
-
-        // Validate shift based on SMK version and year calculation
-        ValidateShiftForSmkVersion(command, specialization);
-
-        // Create medical shift
-        var medicalShiftId = new MedicalShiftId(0); // Will be assigned by repository
-        var medicalShift = MedicalShift.Create(
-            medicalShiftId,
-            internship.Id,
-            command.Date,
-            command.Hours,
-            command.Minutes,
-            command.Location,
-            command.Year
-        );
-
-        // Additional validation for date range based on internship
-        if (specialization.SmkVersion == SmkVersion.New)
-        {
-            // For New SMK, medical shifts should be within internship date range
-            if (command.Date < internship.StartDate || command.Date > internship.EndDate)
+            // Validate internship exists
+            var internshipId = new InternshipId(command.InternshipId);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            if (internship is null)
             {
-                throw new InvalidDateRangeException(
-                    "Medical shift date must be within the internship period for New SMK.");
+                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.");
             }
-        }
 
-        // Validate using template service before saving
-        var validationResult = await _validationService.ValidateMedicalShiftAsync(medicalShift, specialization.Id.Value);
-        if (!validationResult.IsValid)
+            // Validate specialization exists
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization is null)
+            {
+                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.");
+            }
+
+            // Validate date range for New SMK
+            if (specialization.SmkVersion == SmkVersion.New)
+            {
+                if (command.Date < internship.StartDate || command.Date > internship.EndDate)
+                {
+                    return Result.Failure<int>("Medical shift date must be within the internship period for New SMK.");
+                }
+            }
+
+            // Validate year
+            if (specialization.SmkVersion.IsOld)
+            {
+                var availableYears = _yearCalculationService.GetAvailableYears(specialization);
+                // Allow year 0 for unassigned shifts
+                if (command.Year != 0 && !availableYears.Contains(command.Year))
+                {
+                    return Result.Failure<int>(
+                        $"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
+                }
+            }
+            else if (specialization.SmkVersion.IsNew)
+            {
+                if (command.Year <= 0)
+                {
+                    return Result.Failure<int>("Year must be provided for New SMK.");
+                }
+            }
+
+            // Create medical shift
+            var medicalShiftId = new MedicalShiftId(0); // Will be assigned by repository
+            var medicalShift = MedicalShift.Create(
+                medicalShiftId,
+                internshipId,
+                command.Date,
+                command.Hours,
+                command.Minutes,
+                command.Location,
+                command.Year
+            );
+
+            // Validate using template service
+            var validationResult = await _validationService.ValidateMedicalShiftAsync(
+                medicalShift,
+                specialization.Id.Value);
+
+            if (!validationResult.IsValid)
+            {
+                return Result.Failure<int>($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}");
+            }
+
+            // Save the medical shift
+            var shiftId = await _medicalShiftRepository.AddAsync(medicalShift);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Result.Success(shiftId);
+        }
+        catch (Exception ex) when (ex is CustomException)
         {
-            throw new InvalidOperationException($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}");
+            return Result.Failure<int>(ex.Message);
         }
-
-        // Save the medical shift
-        var shiftId = await _medicalShiftRepository.AddAsync(medicalShift);
-
-        return shiftId;
-    }
-
-    private void ValidateShiftForSmkVersion(AddMedicalShift command, Specialization specialization)
-    {
-        // Common validations - align with MAUI implementation
-        // Only check that duration is greater than zero (hours + minutes > 0)
-        if (command.Hours < 0 || command.Minutes < 0)
+        catch (Exception)
         {
-            throw new ArgumentException("Shift duration cannot be negative.");
+            return Result.Failure<int>("An error occurred while adding the medical shift.");
         }
-
-        // AI HINT: MAUI allows minutes > 59 (e.g., 90 minutes is valid)
-        // DO NOT add validation like "if (command.Minutes > 59)" - this is intentional!
-        // Normalization happens at display/summary level via TimeNormalizationHelper
-        // Previous implementations incorrectly restricted this
-
-        if (string.IsNullOrWhiteSpace(command.Location))
-        {
-            throw new ArgumentException("Location is required.");
-        }
-
-        // SMK version-specific validations
-        if (specialization.SmkVersion.IsOld)
-        {
-            ValidateOldSmkShift(command, specialization);
-        }
-        else if (specialization.SmkVersion.IsNew)
-        {
-            ValidateNewSmkShift(command, specialization);
-        }
-        else
-        {
-            throw new InvalidOperationException($"Unknown SMK version: {specialization.SmkVersion}");
-        }
-    }
-
-    private void ValidateOldSmkShift(AddMedicalShift command, Specialization specialization)
-    {
-        // Old SMK specific validations
-        var availableYears = _yearCalculationService.GetAvailableYears(specialization);
-
-        // Allow year 0 for unassigned shifts
-        if (command.Year != 0 && !availableYears.Contains(command.Year))
-        {
-            throw new ArgumentException($"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
-        }
-
-        // MAUI implementation does not enforce maximum shift duration for Old SMK
-        // Only check that total duration is greater than zero
-        if (command.Hours == 0 && command.Minutes == 0)
-        {
-            throw new ArgumentException("Shift duration must be greater than zero.");
-        }
-
-        // Location validation for Old SMK - should be a department/unit name
-        if (command.Location.Length > 100)
-        {
-            throw new ArgumentException("Location name cannot exceed 100 characters.");
-        }
-    }
-
-    private void ValidateNewSmkShift(AddMedicalShift command, Specialization specialization)
-    {
-        // New SMK specific validations
-        // New SMK doesn't use year field in the same way, but we still validate it's provided
-        if (command.Year <= 0)
-        {
-            throw new ArgumentException("Year must be provided for New SMK.");
-        }
-
-        // MAUI implementation does not enforce maximum shift duration for New SMK
-        // Only check that total duration is greater than zero
-        if (command.Hours == 0 && command.Minutes == 0)
-        {
-            throw new ArgumentException("Shift duration must be greater than zero.");
-        }
-
-        // Location validation for New SMK - should match internship requirements
-        if (command.Location.Length > 100)
-        {
-            throw new ArgumentException("Location name cannot exceed 100 characters.");
-        }
-
-        // For New SMK, we should validate that the shift is within an active internship period
-        // This is done by ensuring the InternshipId is valid and the date is within internship dates
-        // The actual internship validation is done when fetching the internship
     }
 }

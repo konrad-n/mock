@@ -1,105 +1,101 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Commands;
-using SledzSpecke.Application.Exceptions;
+using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.MedicalShifts.Handlers;
 
-public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
+public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedicalShift>
 {
     private readonly IMedicalShiftRepository _medicalShiftRepository;
     private readonly IUserContextService _userContextService;
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdateMedicalShiftHandler(
         IMedicalShiftRepository medicalShiftRepository,
         IUserContextService userContextService,
         IInternshipRepository internshipRepository,
         ISpecializationRepository specializationRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork)
     {
         _medicalShiftRepository = medicalShiftRepository;
         _userContextService = userContextService;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public async Task HandleAsync(UpdateMedicalShift command)
+    public async Task<Result> HandleAsync(UpdateMedicalShift command)
     {
-        var userId = _userContextService.GetUserId();
-        var shift = await _medicalShiftRepository.GetByIdAsync(command.ShiftId);
-
-        if (shift == null)
+        try
         {
-            throw new NotFoundException($"Medical shift with ID {command.ShiftId} not found.");
-        }
+            var userId = _userContextService.GetUserId();
+            var medicalShiftId = new MedicalShiftId(command.ShiftId);
+            var shift = await _medicalShiftRepository.GetByIdAsync(medicalShiftId);
 
-        // Get internship to check ownership
-        var internship = await _internshipRepository.GetByIdAsync(shift.InternshipId);
-        if (internship == null)
+            if (shift == null)
+            {
+                return Result.Failure($"Medical shift with ID {command.ShiftId} not found.");
+            }
+
+            // Get internship to check ownership
+            var internship = await _internshipRepository.GetByIdAsync(shift.InternshipId);
+            if (internship == null)
+            {
+                return Result.Failure($"Internship with ID {shift.InternshipId.Value} not found.");
+            }
+
+            // Get user to verify ownership through specialization
+            var user = await _userRepository.GetByIdAsync(new UserId(userId));
+            if (user == null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            {
+                return Result.Failure("You are not authorized to update this medical shift.");
+            }
+
+            // Check if the shift can be modified
+            if (shift.IsApproved)
+            {
+                return Result.Failure("Cannot update an approved medical shift.");
+            }
+
+            // Check date change rule
+            if (command.Date.HasValue && command.Date.Value != shift.Date)
+            {
+                return Result.Failure("Cannot change the date of a medical shift. Please delete and create a new shift instead.");
+            }
+
+            // Update the shift details
+            var hours = command.Hours ?? shift.Hours;
+            var minutes = command.Minutes ?? shift.Minutes;
+            var location = !string.IsNullOrWhiteSpace(command.Location) ? command.Location : shift.Location;
+
+            shift.UpdateShiftDetails(hours, minutes, location);
+
+            // Validate final state
+            if (shift.TotalMinutes == 0)
+            {
+                return Result.Failure("Medical shift duration must be greater than zero.");
+            }
+
+            await _medicalShiftRepository.UpdateAsync(shift);
+            await _unitOfWork.SaveChangesAsync();
+            
+            return Result.Success();
+        }
+        catch (Exception ex) when (ex is CustomException)
         {
-            throw new NotFoundException($"Internship with ID {shift.InternshipId} not found.");
+            return Result.Failure(ex.Message);
         }
-
-        // Get user to verify ownership through specialization
-        var user = await _userRepository.GetByIdAsync(new UserId(userId));
-        if (user == null || user.SpecializationId != internship.SpecializationId)
+        catch (Exception)
         {
-            throw new UnauthorizedException("You are not authorized to update this medical shift.");
+            return Result.Failure("An error occurred while updating the medical shift.");
         }
-
-        // Check if the shift can be modified
-        if (shift.IsApproved)
-        {
-            throw new BusinessRuleException("Cannot update an approved medical shift.");
-        }
-
-        // Prepare update values
-        var hours = command.Hours ?? shift.Hours;
-        var minutes = command.Minutes ?? shift.Minutes;
-        var location = !string.IsNullOrWhiteSpace(command.Location) ? command.Location : shift.Location;
-
-        // Validate values before update - align with MAUI implementation
-        if (command.Hours.HasValue && command.Hours.Value < 0)
-        {
-            throw new ValidationException("Hours cannot be negative.");
-        }
-
-        // MAUI allows minutes > 59, normalization happens at summary level
-        if (command.Minutes.HasValue && command.Minutes.Value < 0)
-        {
-            throw new ValidationException("Minutes cannot be negative.");
-        }
-
-        // Note: Date changes are not supported through the UpdateShiftDetails method
-        // If date update is needed, we'd need a separate method in MedicalShift entity
-        if (command.Date.HasValue && command.Date.Value != shift.Date)
-        {
-            throw new BusinessRuleException("Cannot change the date of a medical shift. Please delete and create a new shift instead.");
-        }
-
-        // Update the shift using the proper method
-        shift.UpdateShiftDetails(hours, minutes, location);
-
-        // Get specialization to check SMK version specific rules
-        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
-        if (specialization == null)
-        {
-            throw new NotFoundException($"Specialization not found for internship {shift.InternshipId}.");
-        }
-
-        // MAUI implementation only validates that duration is greater than zero
-        // No maximum duration limits are enforced
-        var totalMinutes = shift.TotalMinutes;
-        if (totalMinutes == 0)
-        {
-            throw new ValidationException("Medical shift duration must be greater than zero.");
-        }
-
-        await _medicalShiftRepository.UpdateAsync(shift);
     }
 }

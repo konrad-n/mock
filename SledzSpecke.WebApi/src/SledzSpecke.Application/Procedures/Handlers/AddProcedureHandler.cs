@@ -1,5 +1,6 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Commands;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
@@ -7,248 +8,191 @@ using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Procedures.Handlers;
 
-internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
+public sealed class AddProcedureHandler : IResultCommandHandler<AddProcedure, int>
 {
     private readonly IProcedureRepository _procedureRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly ISpecializationRepository _specializationRepository;
     private readonly ISpecializationValidationService _validationService;
     private readonly IYearCalculationService _yearCalculationService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AddProcedureHandler(
         IProcedureRepository procedureRepository,
         IInternshipRepository internshipRepository,
         ISpecializationRepository specializationRepository,
         ISpecializationValidationService validationService,
-        IYearCalculationService yearCalculationService)
+        IYearCalculationService yearCalculationService,
+        IUnitOfWork unitOfWork)
     {
         _procedureRepository = procedureRepository;
         _internshipRepository = internshipRepository;
         _specializationRepository = specializationRepository;
         _validationService = validationService;
         _yearCalculationService = yearCalculationService;
+        _unitOfWork = unitOfWork;
     }
 
-    public async Task<int> HandleAsync(AddProcedure command)
+    public async Task<Result<int>> HandleAsync(AddProcedure command)
     {
-        Console.WriteLine($"[DEBUG] AddProcedureHandler: Processing procedure for internship {command.InternshipId}");
-
-        // Validate internship exists
-        var internship = await _internshipRepository.GetByIdAsync(command.InternshipId);
-        if (internship is null)
-        {
-            Console.WriteLine($"[ERROR] Internship with ID {command.InternshipId} not found");
-            throw new InvalidOperationException($"Internship with ID {command.InternshipId} not found.");
-        }
-        Console.WriteLine($"[DEBUG] Found internship: {internship.Id.Value}, Specialization: {internship.SpecializationId.Value}");
-
-        // Get specialization to determine SMK version
-        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
-        if (specialization is null)
-        {
-            Console.WriteLine($"[ERROR] Specialization with ID {internship.SpecializationId} not found");
-            throw new InvalidOperationException($"Specialization with ID {internship.SpecializationId} not found.");
-        }
-        Console.WriteLine($"[DEBUG] Specialization: {specialization.ProgramCode}, SMK Version: {specialization.SmkVersion}");
-
-        // Validate procedure code
-        if (string.IsNullOrWhiteSpace(command.Code))
-        {
-            throw new InvalidProcedureCodeException(command.Code ?? string.Empty);
-        }
-
-        // Validate location
-        if (string.IsNullOrWhiteSpace(command.Location))
-        {
-            throw new ArgumentException("Location cannot be empty.", nameof(command.Location));
-        }
-
-        // No future date validation - MAUI app allows future dates
-
-        if (command.Date < internship.StartDate || command.Date > internship.EndDate)
-        {
-            throw new ArgumentException("Procedure date must be within the internship period.", nameof(command.Date));
-        }
-
-        // Validate status
-        if (!Enum.TryParse<ProcedureStatus>(command.Status, out var procedureStatus))
-        {
-            throw new ArgumentException($"Invalid procedure status: {command.Status}", nameof(command.Status));
-        }
-
-        // Create procedure based on SMK version
-        var procedureId = ProcedureId.New();
-
-        // Validate year based on specialization
-        int procedureYear = command.Year;
-        if (specialization.SmkVersion == SmkVersion.Old)
-        {
-            // For Old SMK, validate the year is within available years
-            var availableYears = _yearCalculationService.GetAvailableYears(specialization);
-
-            // AI HINT: Year 0 is special - it means "unassigned" in MAUI
-            // This is different from the procedure date's calendar year!
-            // The Year field represents the medical education year (1-6), not 2024/2025
-            if (procedureYear != 0 && !availableYears.Contains(procedureYear))
-            {
-                throw new ArgumentException($"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
-            }
-        }
-        else
-        {
-            // For New SMK, year should typically be 0 (not used)
-            if (procedureYear != 0)
-            {
-                // Log warning but allow it for backward compatibility
-                // In production, you might want to log this
-            }
-        }
-
-        // Create the appropriate procedure type based on SMK version
-        Console.WriteLine($"[DEBUG] Creating procedure: SMK={specialization.SmkVersion}, Year={procedureYear}, Code={command.Code}");
-
-        ProcedureBase procedure;
         try
         {
+            // Validate internship exists
+            var internshipId = new InternshipId(command.InternshipId);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            if (internship is null)
+            {
+                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.");
+            }
+
+            // Get specialization to determine SMK version
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization is null)
+            {
+                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.");
+            }
+
+            // Validate procedure date is within internship period
+            if (command.Date < internship.StartDate || command.Date > internship.EndDate)
+            {
+                return Result.Failure<int>("Procedure date must be within the internship period.");
+            }
+
+            // Validate status
+            if (!Enum.TryParse<ProcedureStatus>(command.Status, out var procedureStatus))
+            {
+                return Result.Failure<int>($"Invalid procedure status: {command.Status}");
+            }
+
+            // Validate year based on SMK version
+            int procedureYear = command.Year;
             if (specialization.SmkVersion == SmkVersion.Old)
             {
-                Console.WriteLine($"[DEBUG] Creating ProcedureOldSmk");
+                var availableYears = _yearCalculationService.GetAvailableYears(specialization);
+                // Year 0 means "unassigned" in MAUI
+                if (procedureYear != 0 && !availableYears.Contains(procedureYear))
+                {
+                    return Result.Failure<int>($"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
+                }
+            }
+
+            // Validate required fields for completed procedures
+            if (procedureStatus == ProcedureStatus.Completed)
+            {
+                if (specialization.SmkVersion == SmkVersion.Old)
+                {
+                    if (string.IsNullOrWhiteSpace(command.PerformingPerson))
+                    {
+                        return Result.Failure<int>("Performing person is required for completed procedures in Old SMK.");
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(command.Supervisor))
+                    {
+                        return Result.Failure<int>("Supervisor is required for completed procedures in New SMK.");
+                    }
+                }
+            }
+
+            // Create the appropriate procedure type based on SMK version
+            var procedureId = ProcedureId.New();
+            ProcedureBase procedure;
+
+            if (specialization.SmkVersion == SmkVersion.Old)
+            {
                 procedure = ProcedureOldSmk.Create(
                     procedureId,
-                    internship.Id,
+                    internshipId,
                     command.Date,
                     procedureYear,
                     command.Code,
                     command.Location);
+
+                var oldSmkProcedure = (ProcedureOldSmk)procedure;
+
+                if (!string.IsNullOrWhiteSpace(command.ProcedureGroup))
+                {
+                    oldSmkProcedure.SetProcedureGroup(command.ProcedureGroup);
+                }
+
+                if (!string.IsNullOrWhiteSpace(command.AssistantData))
+                {
+                    oldSmkProcedure.SetAssistantData(command.AssistantData);
+                }
+
+                if (command.ProcedureRequirementId.HasValue)
+                {
+                    oldSmkProcedure.SetProcedureRequirement(command.ProcedureRequirementId.Value);
+                }
             }
             else
             {
-                Console.WriteLine($"[DEBUG] Creating ProcedureNewSmk");
-                // For New SMK, we need moduleId, procedureRequirementId and procedureName
-                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ??
-                    throw new InvalidOperationException("Module ID is required for New SMK procedures");
-                var procedureRequirementId = command.ProcedureRequirementId ?? 0; // Will be validated later
-                var procedureName = command.ProcedureName ?? command.Code; // Use code as fallback
+                var moduleId = command.ModuleId ?? internship.ModuleId?.Value;
+                if (!moduleId.HasValue)
+                {
+                    return Result.Failure<int>("Module ID is required for New SMK procedures");
+                }
+
+                var procedureRequirementId = command.ProcedureRequirementId ?? 0;
+                var procedureName = command.ProcedureName ?? command.Code;
 
                 procedure = ProcedureNewSmk.Create(
                     procedureId,
-                    internship.Id,
+                    internshipId,
                     command.Date,
                     command.Code,
                     command.Location,
-                    new ModuleId(moduleId),
+                    new ModuleId(moduleId.Value),
                     procedureRequirementId,
                     procedureName);
-            }
-            Console.WriteLine($"[DEBUG] Procedure entity created successfully");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERROR] Failed to create procedure entity: {ex.GetType().Name}: {ex.Message}");
-            throw;
-        }
 
-        // Set additional fields
-        if (!string.IsNullOrWhiteSpace(command.OperatorCode) ||
-            !string.IsNullOrWhiteSpace(command.PerformingPerson) ||
-            !string.IsNullOrWhiteSpace(command.PatientInitials))
-        {
-            procedure.UpdateProcedureDetails(
-                command.OperatorCode,
-                command.PerformingPerson,
-                command.PatientInitials,
-                command.PatientGender);
-        }
+                var newSmkProcedure = (ProcedureNewSmk)procedure;
 
-        // Set SMK-specific fields
-        if (specialization.SmkVersion == SmkVersion.Old)
-        {
-            var oldSmkProcedure = (ProcedureOldSmk)procedure;
-
-            if (!string.IsNullOrWhiteSpace(command.ProcedureGroup))
-            {
-                oldSmkProcedure.SetProcedureGroup(command.ProcedureGroup);
-            }
-
-            if (!string.IsNullOrWhiteSpace(command.AssistantData))
-            {
-                oldSmkProcedure.SetAssistantData(command.AssistantData);
-            }
-
-            if (command.ProcedureRequirementId.HasValue)
-            {
-                oldSmkProcedure.SetProcedureRequirement(command.ProcedureRequirementId.Value);
-            }
-        }
-        else
-        {
-            var newSmkProcedure = (ProcedureNewSmk)procedure;
-
-            if (!string.IsNullOrWhiteSpace(command.Supervisor))
-            {
-                newSmkProcedure.SetSupervisor(command.Supervisor);
-            }
-
-            // Module ID is already set during creation, so we don't need to set it again
-        }
-
-        // SMK version-specific validation for completed procedures
-        if (procedureStatus == ProcedureStatus.Completed)
-        {
-            if (specialization.SmkVersion == SmkVersion.Old)
-            {
-                // For Old SMK, performing person is required for completed procedures
-                if (string.IsNullOrWhiteSpace(command.PerformingPerson))
+                if (!string.IsNullOrWhiteSpace(command.Supervisor))
                 {
-                    throw new InvalidOperationException("Performing person is required for completed procedures in Old SMK.");
+                    newSmkProcedure.SetSupervisor(command.Supervisor);
                 }
             }
-            else // New SMK
+
+            // Set additional details
+            if (!string.IsNullOrWhiteSpace(command.OperatorCode) ||
+                !string.IsNullOrWhiteSpace(command.PerformingPerson) ||
+                !string.IsNullOrWhiteSpace(command.PatientInitials))
             {
-                // For New SMK, supervisor is required for completed procedures
-                if (string.IsNullOrWhiteSpace(command.Supervisor))
-                {
-                    throw new InvalidOperationException("Supervisor is required for completed procedures in New SMK.");
-                }
+                procedure.UpdateProcedureDetails(
+                    command.OperatorCode,
+                    command.PerformingPerson,
+                    command.PatientInitials,
+                    command.PatientGender);
             }
-        }
 
-        // Set procedure status
-        if (procedureStatus != ProcedureStatus.Pending)
-        {
-            procedure.ChangeStatus(procedureStatus);
-        }
-
-        // Additional validation based on status
-        if (procedureStatus == ProcedureStatus.Completed)
-        {
-            try
+            // Set procedure status
+            if (procedureStatus != ProcedureStatus.Pending)
             {
-                procedure.ValidateSmkSpecificRules();
+                procedure.ChangeStatus(procedureStatus);
             }
-            catch (InvalidOperationException ex)
+
+            // Validate using template service before saving
+            var validationResult = await _validationService.ValidateProcedureAsync(procedure, specialization.Id.Value);
+            if (!validationResult.IsValid)
             {
-                throw new InvalidOperationException($"Cannot add completed procedure: {ex.Message}", ex);
+                return Result.Failure<int>($"Procedure validation failed: {string.Join(", ", validationResult.Errors)}");
             }
-        }
 
-        // Validate using template service before saving
-        var validationResult = await _validationService.ValidateProcedureAsync(procedure, specialization.Id.Value);
-        if (!validationResult.IsValid)
+            // Save the procedure
+            var procedureIdValue = await _procedureRepository.AddAsync(procedure);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Result.Success(procedureIdValue);
+        }
+        catch (Exception ex) when (ex is CustomException)
         {
-            throw new InvalidOperationException($"Procedure validation failed: {string.Join(", ", validationResult.Errors)}");
+            return Result.Failure<int>(ex.Message);
         }
-
-        // Log warnings if any
-        if (validationResult.Warnings.Any())
+        catch (Exception)
         {
-            // In a real app, you might want to log these warnings
-            // For now, we'll just continue
+            return Result.Failure<int>("An error occurred while adding the procedure.");
         }
-
-        // Save the procedure
-        var procedureIdValue = await _procedureRepository.AddAsync(procedure);
-
-        return procedureIdValue;
     }
 }
