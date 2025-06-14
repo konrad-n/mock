@@ -10,7 +10,7 @@ internal sealed class RecognitionConfiguration : IEntityTypeConfiguration<Recogn
     public void Configure(EntityTypeBuilder<Recognition> builder)
     {
         builder.HasKey(r => r.Id);
-        
+
         builder.Property(r => r.Id)
             .HasConversion(id => id.Value, value => new RecognitionId(value));
 
@@ -48,7 +48,7 @@ internal sealed class RecognitionConfiguration : IEntityTypeConfiguration<Recogn
         builder.Property(r => r.ApprovedAt);
 
         builder.Property(r => r.ApprovedBy)
-            .HasConversion(id => id != null ? (int?)id.Value : null, 
+            .HasConversion(id => id != null ? (int?)id.Value : null,
                           value => value.HasValue ? new UserId(value.Value) : null);
 
         builder.Property(r => r.DocumentPath)

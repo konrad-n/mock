@@ -13,13 +13,25 @@ public class RecognitionsController : BaseController
 {
     private readonly ICommandHandler<CreateRecognition> _createRecognitionHandler;
     private readonly IQueryHandler<GetUserRecognitions, IEnumerable<RecognitionDto>> _getUserRecognitionsHandler;
+    private readonly ICommandHandler<ApproveRecognition> _approveRecognitionHandler;
+    private readonly IQueryHandler<GetTotalReductionDays, int> _getTotalReductionDaysHandler;
+    private readonly ICommandHandler<UpdateRecognition> _updateRecognitionHandler;
+    private readonly ICommandHandler<DeleteRecognition> _deleteRecognitionHandler;
 
     public RecognitionsController(
         ICommandHandler<CreateRecognition> createRecognitionHandler,
-        IQueryHandler<GetUserRecognitions, IEnumerable<RecognitionDto>> getUserRecognitionsHandler) : base()
+        IQueryHandler<GetUserRecognitions, IEnumerable<RecognitionDto>> getUserRecognitionsHandler,
+        ICommandHandler<ApproveRecognition> approveRecognitionHandler,
+        IQueryHandler<GetTotalReductionDays, int> getTotalReductionDaysHandler,
+        ICommandHandler<UpdateRecognition> updateRecognitionHandler,
+        ICommandHandler<DeleteRecognition> deleteRecognitionHandler) : base()
     {
         _createRecognitionHandler = createRecognitionHandler;
         _getUserRecognitionsHandler = getUserRecognitionsHandler;
+        _approveRecognitionHandler = approveRecognitionHandler;
+        _getTotalReductionDaysHandler = getTotalReductionDaysHandler;
+        _updateRecognitionHandler = updateRecognitionHandler;
+        _deleteRecognitionHandler = deleteRecognitionHandler;
     }
 
     [HttpPost]
@@ -51,15 +63,42 @@ public class RecognitionsController : BaseController
     [HttpPut("{id}/approve")]
     public async Task<IActionResult> ApproveRecognition(Guid id, [FromBody] ApproveRecognitionRequest request)
     {
-        // This would need an approve recognition command and handler
-        return Ok();
+        var command = new ApproveRecognition(new RecognitionId(id), request.ApprovedBy);
+        await _approveRecognitionHandler.HandleAsync(command);
+        return NoContent();
     }
 
     [HttpGet("user/{userId}/specialization/{specializationId}/total-reduction")]
-    public async Task<IActionResult> GetTotalReductionDays(Guid userId, Guid specializationId)
+    public async Task<ActionResult<int>> GetTotalReductionDays(int userId, int specializationId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetTotalReductionDays(userId, specializationId);
+        var totalDays = await _getTotalReductionDaysHandler.HandleAsync(query);
+        return Ok(totalDays);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateRecognition(Guid id, [FromBody] UpdateRecognitionRequest request)
+    {
+        var command = new UpdateRecognition(
+            new RecognitionId(id),
+            (RecognitionType)request.Type,
+            request.Title,
+            request.Description,
+            request.Institution,
+            request.StartDate,
+            request.EndDate,
+            request.DaysReduction);
+
+        await _updateRecognitionHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteRecognition(Guid id)
+    {
+        var command = new DeleteRecognition(new RecognitionId(id));
+        await _deleteRecognitionHandler.HandleAsync(command);
+        return NoContent();
     }
 }
 
@@ -75,3 +114,12 @@ public record CreateRecognitionRequest(
     string? Institution = null);
 
 public record ApproveRecognitionRequest(int ApprovedBy);
+
+public record UpdateRecognitionRequest(
+    int Type,
+    string Title,
+    string? Description,
+    string? Institution,
+    DateTime StartDate,
+    DateTime EndDate,
+    int DaysReduction);

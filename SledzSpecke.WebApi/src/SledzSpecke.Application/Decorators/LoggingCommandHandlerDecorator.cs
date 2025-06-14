@@ -27,7 +27,7 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand> : ICommandHandler
     {
         var commandName = typeof(TCommand).Name;
         var stopwatch = Stopwatch.StartNew();
-        
+
         _logger.LogInformation(
             "Executing command {CommandName} with data: {CommandData}",
             commandName,
@@ -36,7 +36,7 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand> : ICommandHandler
         try
         {
             await _handler.HandleAsync(command);
-            
+
             stopwatch.Stop();
             _logger.LogInformation(
                 "Command {CommandName} executed successfully in {ElapsedMilliseconds}ms",
@@ -51,7 +51,7 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand> : ICommandHandler
                 "Command {CommandName} failed after {ElapsedMilliseconds}ms",
                 commandName,
                 stopwatch.ElapsedMilliseconds);
-            
+
             throw;
         }
     }
@@ -78,7 +78,7 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand, TResult> : IComma
     {
         var commandName = typeof(TCommand).Name;
         var stopwatch = Stopwatch.StartNew();
-        
+
         _logger.LogInformation(
             "Executing command {CommandName} with data: {CommandData}",
             commandName,
@@ -87,14 +87,14 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand, TResult> : IComma
         try
         {
             var result = await _handler.HandleAsync(command);
-            
+
             stopwatch.Stop();
             _logger.LogInformation(
                 "Command {CommandName} executed successfully in {ElapsedMilliseconds}ms with result: {Result}",
                 commandName,
                 stopwatch.ElapsedMilliseconds,
                 JsonSerializer.Serialize(result));
-            
+
             return result;
         }
         catch (Exception ex)
@@ -105,7 +105,7 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand, TResult> : IComma
                 "Command {CommandName} failed after {ElapsedMilliseconds}ms",
                 commandName,
                 stopwatch.ElapsedMilliseconds);
-            
+
             throw;
         }
     }

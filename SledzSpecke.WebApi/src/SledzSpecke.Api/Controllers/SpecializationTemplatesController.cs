@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Api.Controllers;
@@ -27,9 +28,14 @@ public class SpecializationTemplatesController : BaseController
     [HttpGet("{specializationCode}/{smkVersion}")]
     public async Task<IActionResult> GetTemplate(string specializationCode, string smkVersion)
     {
-        if (!Enum.TryParse<SmkVersion>(smkVersion, true, out var version))
+        SmkVersion version;
+        try
         {
-            return BadRequest($"Invalid SMK version: {smkVersion}");
+            version = new SmkVersion(smkVersion);
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var template = await _templateService.GetTemplateAsync(specializationCode, version);
@@ -44,9 +50,14 @@ public class SpecializationTemplatesController : BaseController
     [HttpGet("{specializationCode}/{smkVersion}/modules/{moduleId}")]
     public async Task<IActionResult> GetModuleTemplate(string specializationCode, string smkVersion, int moduleId)
     {
-        if (!Enum.TryParse<SmkVersion>(smkVersion, true, out var version))
+        SmkVersion version;
+        try
         {
-            return BadRequest($"Invalid SMK version: {smkVersion}");
+            version = new SmkVersion(smkVersion);
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var module = await _templateService.GetModuleTemplateAsync(specializationCode, version, moduleId);
@@ -61,9 +72,14 @@ public class SpecializationTemplatesController : BaseController
     [HttpGet("{specializationCode}/{smkVersion}/procedures/{procedureId}")]
     public async Task<IActionResult> GetProcedureTemplate(string specializationCode, string smkVersion, int procedureId)
     {
-        if (!Enum.TryParse<SmkVersion>(smkVersion, true, out var version))
+        SmkVersion version;
+        try
         {
-            return BadRequest($"Invalid SMK version: {smkVersion}");
+            version = new SmkVersion(smkVersion);
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var procedure = await _templateService.GetProcedureTemplateAsync(specializationCode, version, procedureId);
@@ -78,9 +94,14 @@ public class SpecializationTemplatesController : BaseController
     [HttpGet("{specializationCode}/{smkVersion}/internships/{internshipId}")]
     public async Task<IActionResult> GetInternshipTemplate(string specializationCode, string smkVersion, int internshipId)
     {
-        if (!Enum.TryParse<SmkVersion>(smkVersion, true, out var version))
+        SmkVersion version;
+        try
         {
-            return BadRequest($"Invalid SMK version: {smkVersion}");
+            version = new SmkVersion(smkVersion);
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var internship = await _templateService.GetInternshipTemplateAsync(specializationCode, version, internshipId);
@@ -95,9 +116,14 @@ public class SpecializationTemplatesController : BaseController
     [HttpGet("{specializationCode}/{smkVersion}/courses/{courseId}")]
     public async Task<IActionResult> GetCourseTemplate(string specializationCode, string smkVersion, int courseId)
     {
-        if (!Enum.TryParse<SmkVersion>(smkVersion, true, out var version))
+        SmkVersion version;
+        try
         {
-            return BadRequest($"Invalid SMK version: {smkVersion}");
+            version = new SmkVersion(smkVersion);
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var course = await _templateService.GetCourseTemplateAsync(specializationCode, version, courseId);
@@ -111,14 +137,19 @@ public class SpecializationTemplatesController : BaseController
 
     [HttpPost("{specializationCode}/{smkVersion}/procedures/{procedureId}/validate")]
     public async Task<IActionResult> ValidateProcedureCode(
-        string specializationCode, 
-        string smkVersion, 
+        string specializationCode,
+        string smkVersion,
         int procedureId,
         [FromBody] ValidateProcedureRequest request)
     {
-        if (!Enum.TryParse<SmkVersion>(smkVersion, true, out var version))
+        SmkVersion version;
+        try
         {
-            return BadRequest($"Invalid SMK version: {smkVersion}");
+            version = new SmkVersion(smkVersion);
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
         var isValid = await _templateService.ValidateProcedureRequirementsAsync(

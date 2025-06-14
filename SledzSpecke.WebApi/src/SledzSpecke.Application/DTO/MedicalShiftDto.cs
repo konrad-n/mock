@@ -26,7 +26,7 @@ public record MedicalShiftDto(
     /// Shows as "X godz. Y min." with normalized time.
     /// </summary>
     public string FormattedTime => TimeNormalizationHelper.FormatTime(Hours, Minutes, normalize: true);
-    
+
     /// <summary>
     /// Total duration in decimal hours (e.g., 2.5 for 2h 30m).
     /// Used for statistics and summaries.

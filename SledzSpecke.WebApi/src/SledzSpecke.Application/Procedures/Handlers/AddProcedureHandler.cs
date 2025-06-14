@@ -32,7 +32,7 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
     public async Task<int> HandleAsync(AddProcedure command)
     {
         Console.WriteLine($"[DEBUG] AddProcedureHandler: Processing procedure for internship {command.InternshipId}");
-        
+
         // Validate internship exists
         var internship = await _internshipRepository.GetByIdAsync(command.InternshipId);
         if (internship is null)
@@ -78,14 +78,14 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
 
         // Create procedure based on SMK version
         var procedureId = ProcedureId.New();
-        
+
         // Validate year based on specialization
         int procedureYear = command.Year;
         if (specialization.SmkVersion == SmkVersion.Old)
         {
             // For Old SMK, validate the year is within available years
             var availableYears = _yearCalculationService.GetAvailableYears(specialization);
-            
+
             // AI HINT: Year 0 is special - it means "unassigned" in MAUI
             // This is different from the procedure date's calendar year!
             // The Year field represents the medical education year (1-6), not 2024/2025
@@ -103,10 +103,10 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
                 // In production, you might want to log this
             }
         }
-        
+
         // Create the appropriate procedure type based on SMK version
         Console.WriteLine($"[DEBUG] Creating procedure: SMK={specialization.SmkVersion}, Year={procedureYear}, Code={command.Code}");
-        
+
         ProcedureBase procedure;
         try
         {
@@ -125,11 +125,11 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             {
                 Console.WriteLine($"[DEBUG] Creating ProcedureNewSmk");
                 // For New SMK, we need moduleId, procedureRequirementId and procedureName
-                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ?? 
+                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ??
                     throw new InvalidOperationException("Module ID is required for New SMK procedures");
                 var procedureRequirementId = command.ProcedureRequirementId ?? 0; // Will be validated later
                 var procedureName = command.ProcedureName ?? command.Code; // Use code as fallback
-                
+
                 procedure = ProcedureNewSmk.Create(
                     procedureId,
                     internship.Id,
@@ -149,7 +149,7 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         }
 
         // Set additional fields
-        if (!string.IsNullOrWhiteSpace(command.OperatorCode) || 
+        if (!string.IsNullOrWhiteSpace(command.OperatorCode) ||
             !string.IsNullOrWhiteSpace(command.PerformingPerson) ||
             !string.IsNullOrWhiteSpace(command.PatientInitials))
         {
@@ -159,22 +159,22 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
                 command.PatientInitials,
                 command.PatientGender);
         }
-        
+
         // Set SMK-specific fields
         if (specialization.SmkVersion == SmkVersion.Old)
         {
             var oldSmkProcedure = (ProcedureOldSmk)procedure;
-            
+
             if (!string.IsNullOrWhiteSpace(command.ProcedureGroup))
             {
                 oldSmkProcedure.SetProcedureGroup(command.ProcedureGroup);
             }
-            
+
             if (!string.IsNullOrWhiteSpace(command.AssistantData))
             {
                 oldSmkProcedure.SetAssistantData(command.AssistantData);
             }
-            
+
             if (command.ProcedureRequirementId.HasValue)
             {
                 oldSmkProcedure.SetProcedureRequirement(command.ProcedureRequirementId.Value);
@@ -183,12 +183,12 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         else
         {
             var newSmkProcedure = (ProcedureNewSmk)procedure;
-            
+
             if (!string.IsNullOrWhiteSpace(command.Supervisor))
             {
                 newSmkProcedure.SetSupervisor(command.Supervisor);
             }
-            
+
             // Module ID is already set during creation, so we don't need to set it again
         }
 
@@ -248,7 +248,7 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
 
         // Save the procedure
         var procedureIdValue = await _procedureRepository.AddAsync(procedure);
-        
+
         return procedureIdValue;
     }
 }

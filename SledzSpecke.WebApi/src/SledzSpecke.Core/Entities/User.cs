@@ -15,7 +15,7 @@ public class User
 
     private User() { }
 
-    public User(UserId id, Email email, Username username, Password password, FullName fullName, 
+    public User(UserId id, Email email, Username username, Password password, FullName fullName,
         SmkVersion smkVersion, SpecializationId specializationId, DateTime registrationDate)
     {
         Id = id;
@@ -28,7 +28,7 @@ public class User
         RegistrationDate = registrationDate;
     }
 
-    public User(Email email, Username username, Password password, FullName fullName, 
+    public User(Email email, Username username, Password password, FullName fullName,
         SmkVersion smkVersion, SpecializationId specializationId, DateTime registrationDate)
     {
         Email = email;

@@ -13,13 +13,28 @@ public class PublicationsController : BaseController
 {
     private readonly ICommandHandler<CreatePublication> _createPublicationHandler;
     private readonly IQueryHandler<GetUserPublications, IEnumerable<PublicationDto>> _getUserPublicationsHandler;
+    private readonly IQueryHandler<GetPeerReviewedPublications, IEnumerable<PublicationDto>> _getPeerReviewedPublicationsHandler;
+    private readonly IQueryHandler<GetFirstAuthorPublications, IEnumerable<PublicationDto>> _getFirstAuthorPublicationsHandler;
+    private readonly IQueryHandler<GetPublicationImpactScore, decimal> _getPublicationImpactScoreHandler;
+    private readonly ICommandHandler<UpdatePublication> _updatePublicationHandler;
+    private readonly ICommandHandler<DeletePublication> _deletePublicationHandler;
 
     public PublicationsController(
         ICommandHandler<CreatePublication> createPublicationHandler,
-        IQueryHandler<GetUserPublications, IEnumerable<PublicationDto>> getUserPublicationsHandler) : base()
+        IQueryHandler<GetUserPublications, IEnumerable<PublicationDto>> getUserPublicationsHandler,
+        IQueryHandler<GetPeerReviewedPublications, IEnumerable<PublicationDto>> getPeerReviewedPublicationsHandler,
+        IQueryHandler<GetFirstAuthorPublications, IEnumerable<PublicationDto>> getFirstAuthorPublicationsHandler,
+        IQueryHandler<GetPublicationImpactScore, decimal> getPublicationImpactScoreHandler,
+        ICommandHandler<UpdatePublication> updatePublicationHandler,
+        ICommandHandler<DeletePublication> deletePublicationHandler) : base()
     {
         _createPublicationHandler = createPublicationHandler;
         _getUserPublicationsHandler = getUserPublicationsHandler;
+        _getPeerReviewedPublicationsHandler = getPeerReviewedPublicationsHandler;
+        _getFirstAuthorPublicationsHandler = getFirstAuthorPublicationsHandler;
+        _getPublicationImpactScoreHandler = getPublicationImpactScoreHandler;
+        _updatePublicationHandler = updatePublicationHandler;
+        _deletePublicationHandler = deletePublicationHandler;
     }
 
     [HttpPost]
@@ -48,31 +63,54 @@ public class PublicationsController : BaseController
     }
 
     [HttpGet("user/{userId}/peer-reviewed")]
-    public async Task<IActionResult> GetPeerReviewedPublications(Guid userId)
+    public async Task<ActionResult<IEnumerable<PublicationDto>>> GetPeerReviewedPublications(int userId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetPeerReviewedPublications(userId);
+        var publications = await _getPeerReviewedPublicationsHandler.HandleAsync(query);
+        return Ok(publications);
     }
 
     [HttpGet("user/{userId}/first-author")]
-    public async Task<IActionResult> GetFirstAuthorPublications(Guid userId)
+    public async Task<ActionResult<IEnumerable<PublicationDto>>> GetFirstAuthorPublications(int userId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetFirstAuthorPublications(userId);
+        var publications = await _getFirstAuthorPublicationsHandler.HandleAsync(query);
+        return Ok(publications);
     }
 
     [HttpGet("user/{userId}/specialization/{specializationId}/impact-score")]
-    public async Task<IActionResult> GetTotalImpactScore(Guid userId, Guid specializationId)
+    public async Task<ActionResult<decimal>> GetTotalImpactScore(int userId, int specializationId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetPublicationImpactScore(userId, specializationId);
+        var score = await _getPublicationImpactScoreHandler.HandleAsync(query);
+        return Ok(score);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePublication(Guid id, [FromBody] UpdatePublicationRequest request)
     {
-        // This would need an update publication command and handler
-        return Ok();
+        var command = new UpdatePublication(
+            new PublicationId(id),
+            request.Title,
+            request.Authors,
+            request.Journal,
+            request.Publisher,
+            request.Abstract,
+            request.Keywords,
+            request.IsFirstAuthor,
+            request.IsCorrespondingAuthor,
+            request.IsPeerReviewed);
+
+        await _updatePublicationHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePublication(Guid id)
+    {
+        var command = new DeletePublication(new PublicationId(id));
+        await _deletePublicationHandler.HandleAsync(command);
+        return NoContent();
     }
 }
 

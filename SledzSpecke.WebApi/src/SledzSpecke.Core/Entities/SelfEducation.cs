@@ -24,6 +24,7 @@ public class SelfEducation
     public string? ISBN { get; private set; }
     public string? DOI { get; private set; }
     public int CreditHours { get; private set; }
+    public decimal? QualityScore { get; private set; }
     public SyncStatus SyncStatus { get; private set; }
     public string? AdditionalFields { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -142,6 +143,22 @@ public class SelfEducation
             throw new InvalidOperationException("Cannot set certificate for incomplete activity.");
 
         CertificatePath = certificatePath;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateDetails(string title, string? description, string? provider, 
+        int creditHours, DateTime? startDate, DateTime? endDate, int? durationHours)
+    {
+        EnsureCanModify();
+        ValidateInput(title, Year, creditHours);
+
+        Title = title;
+        Description = description;
+        Provider = provider;
+        CreditHours = creditHours;
+        StartDate = startDate;
+        EndDate = endDate;
+        DurationHours = durationHours;
         UpdatedAt = DateTime.UtcNow;
     }
 

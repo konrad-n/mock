@@ -22,7 +22,7 @@ public class SpecializationTemplateService : ISpecializationTemplateService
     public async Task<SpecializationTemplate?> GetTemplateAsync(string specializationCode, SmkVersion smkVersion)
     {
         var cacheKey = GetCacheKey(specializationCode, smkVersion);
-        
+
         await _cacheLock.WaitAsync();
         try
         {
@@ -48,7 +48,7 @@ public class SpecializationTemplateService : ISpecializationTemplateService
     public async Task<IEnumerable<SpecializationTemplate>> GetAllTemplatesAsync()
     {
         var templates = new List<SpecializationTemplate>();
-        
+
         if (!Directory.Exists(_templatesPath))
         {
             _logger.LogWarning("Templates directory not found: {Path}", _templatesPath);
@@ -66,7 +66,7 @@ public class SpecializationTemplateService : ISpecializationTemplateService
                 {
                     var code = parts[0];
                     var version = parts[1] == "old" ? SmkVersion.Old : SmkVersion.New;
-                    
+
                     var template = await GetTemplateAsync(code, version);
                     if (template != null)
                     {

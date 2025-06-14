@@ -30,7 +30,7 @@ public abstract class ProcedureBase
     public bool IsTypeA => !string.IsNullOrEmpty(OperatorCode);
     public bool IsTypeB => string.IsNullOrEmpty(OperatorCode);
 
-    protected ProcedureBase(ProcedureId id, InternshipId internshipId, DateTime date, int year, 
+    protected ProcedureBase(ProcedureId id, InternshipId internshipId, DateTime date, int year,
         string code, string location, ProcedureStatus status, SmkVersion smkVersion)
     {
         Id = id;
@@ -61,7 +61,7 @@ public abstract class ProcedureBase
         PatientInitials = patientInitials;
         PatientGender = patientGender;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // IMPORTANT: Sync Status Management
         // When a synced item is modified, we automatically transition it to Modified status.
         // This allows users to edit synced data while maintaining traceability.
@@ -77,7 +77,7 @@ public abstract class ProcedureBase
         EnsureCanModify();
         AssistantData = assistantData;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -90,7 +90,7 @@ public abstract class ProcedureBase
         EnsureCanModify();
         ProcedureGroup = procedureGroup;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -103,7 +103,7 @@ public abstract class ProcedureBase
         EnsureCanModify();
         Status = newStatus;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -116,7 +116,7 @@ public abstract class ProcedureBase
         EnsureCanModify();
         Status = ProcedureStatus.Completed;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -128,7 +128,7 @@ public abstract class ProcedureBase
     {
         if (Status != ProcedureStatus.Completed)
             throw new InvalidOperationException("Cannot approve procedure that is not completed.");
-        
+
         Status = ProcedureStatus.Approved;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -150,7 +150,7 @@ public abstract class ProcedureBase
         EnsureCanModify();
         AdditionalFields = additionalFields;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -168,7 +168,7 @@ public abstract class ProcedureBase
     {
         if (IsApproved)
             throw new InvalidOperationException("Cannot modify approved procedure.");
-        
+
         // IMPORTANT: Design Decision
         // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
         // Now, synced items CAN be modified - they automatically transition to Modified status.

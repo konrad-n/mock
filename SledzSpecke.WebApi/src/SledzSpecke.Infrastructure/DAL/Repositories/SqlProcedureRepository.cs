@@ -115,20 +115,20 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();
             await connection.OpenAsync();
-            
+
             using var command = connection.CreateCommand();
             command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Procedures\"";
             var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
-            
+
             var newId = new ProcedureId(maxId + 1);
-            
+
             // Use reflection to set the ID since it's private
             var idProperty = procedure.GetType().GetProperty("Id");
             idProperty?.SetValue(procedure, newId);
-            
+
             await connection.CloseAsync();
         }
-        
+
         await _context.Procedures.AddAsync(procedure);
         await _context.SaveChangesAsync();
         return procedure.Id.Value;

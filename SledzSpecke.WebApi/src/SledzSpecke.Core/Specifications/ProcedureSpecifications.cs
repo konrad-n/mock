@@ -63,7 +63,7 @@ public class CompletedProceduresInDateRangeSpecification : Specification<Procedu
 
     public override Expression<Func<ProcedureBase, bool>> ToExpression()
     {
-        return procedure => 
+        return procedure =>
             procedure.Status == ProcedureStatus.Completed &&
             procedure.Date >= _startDate &&
             procedure.Date <= _endDate;

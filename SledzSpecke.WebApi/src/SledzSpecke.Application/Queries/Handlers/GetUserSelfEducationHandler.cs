@@ -29,30 +29,30 @@ internal sealed class GetUserSelfEducationHandler : IQueryHandler<GetUserSelfEdu
             .OrderByDescending(s => s.Year)
             .ThenByDescending(s => s.StartDate)
             .Select(s => new SelfEducationDto
-        {
-            Id = s.Id.Value,
-            SpecializationId = s.SpecializationId.Value,
-            UserId = s.UserId.Value,
-            Type = s.Type.ToString(),
-            Year = s.Year,
-            Title = s.Title,
-            Description = s.Description,
-            Provider = s.Provider,
-            Publisher = s.Publisher,
-            StartDate = s.StartDate,
-            EndDate = s.EndDate,
-            DurationHours = s.DurationHours,
-            IsCompleted = s.IsCompleted,
-            CompletedAt = s.CompletedAt,
-            CertificatePath = s.CertificatePath,
-            URL = s.URL,
-            ISBN = s.ISBN,
-            DOI = s.DOI,
-            CreditHours = s.CreditHours,
-            QualityScore = s.CalculateQualityScore(),
-            SyncStatus = s.SyncStatus.ToString(),
-            CreatedAt = s.CreatedAt,
-            UpdatedAt = s.UpdatedAt
-        });
+            {
+                Id = s.Id.Value,
+                SpecializationId = s.SpecializationId.Value,
+                UserId = s.UserId.Value,
+                Type = s.Type.ToString(),
+                Year = s.Year,
+                Title = s.Title,
+                Description = s.Description,
+                Provider = s.Provider,
+                Publisher = s.Publisher,
+                StartDate = s.StartDate,
+                EndDate = s.EndDate,
+                DurationHours = s.DurationHours,
+                IsCompleted = s.IsCompleted,
+                CompletedAt = s.CompletedAt,
+                CertificatePath = s.CertificatePath,
+                URL = s.URL,
+                ISBN = s.ISBN,
+                DOI = s.DOI,
+                CreditHours = s.CreditHours,
+                QualityScore = s.CalculateQualityScore(),
+                SyncStatus = s.SyncStatus.ToString(),
+                CreatedAt = s.CreatedAt,
+                UpdatedAt = s.UpdatedAt
+            });
     }
 }

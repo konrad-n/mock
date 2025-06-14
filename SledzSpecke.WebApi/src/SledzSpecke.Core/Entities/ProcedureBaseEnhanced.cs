@@ -32,12 +32,12 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
     private SmkVersion _smkVersion;
 
     // Public properties with private setters
-    public override int Id 
-    { 
-        get => _id.Value; 
-        protected set => _id = value; 
+    public override int Id
+    {
+        get => _id.Value;
+        protected set => _id = value;
     }
-    
+
     public ProcedureId ProcedureId => _id;
     public InternshipId InternshipId => _internshipId;
     public DateTime Date => _date;
@@ -70,22 +70,22 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
     }
 
     protected ProcedureBaseEnhanced(
-        ProcedureId id, 
-        InternshipId internshipId, 
-        DateTime date, 
+        ProcedureId id,
+        InternshipId internshipId,
+        DateTime date,
         int year,
-        string code, 
-        string location, 
-        ProcedureStatus status, 
+        string code,
+        string location,
+        ProcedureStatus status,
         SmkVersion smkVersion)
     {
         // Guard clauses
         if (string.IsNullOrWhiteSpace(code))
             throw new DomainException("Procedure code cannot be empty");
-        
+
         if (string.IsNullOrWhiteSpace(location))
             throw new DomainException("Procedure location cannot be empty");
-        
+
         if (year < 1 || year > 6)
             throw new DomainException("Year must be between 1 and 6");
 
@@ -103,9 +103,9 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
 
         // Raise domain event
         AddDomainEvent(new ProcedureCreatedEvent(
-            id.Value, 
-            code, 
-            status.ToString(), 
+            id.Value,
+            code,
+            status.ToString(),
             internshipId.Value));
     }
 
@@ -174,7 +174,7 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
         if (hasChanges)
         {
             _updatedAt = DateTime.UtcNow;
-            
+
             // Update sync status if needed
             if (_syncStatus == SyncStatus.Synced)
             {
@@ -253,8 +253,8 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
 
     private static DateTime EnsureUtc(DateTime dateTime)
     {
-        return dateTime.Kind == DateTimeKind.Utc 
-            ? dateTime 
+        return dateTime.Kind == DateTimeKind.Utc
+            ? dateTime
             : DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
     }
 

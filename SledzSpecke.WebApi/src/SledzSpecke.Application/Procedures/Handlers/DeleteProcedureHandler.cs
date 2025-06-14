@@ -21,7 +21,7 @@ public class DeleteProcedureHandler : ICommandHandler<DeleteProcedure>
     {
         var userId = _userContextService.GetUserId();
         var procedure = await _procedureRepository.GetByIdAsync(new ProcedureId(command.ProcedureId));
-        
+
         if (procedure is null)
         {
             throw new ProcedureNotFoundException(command.ProcedureId);

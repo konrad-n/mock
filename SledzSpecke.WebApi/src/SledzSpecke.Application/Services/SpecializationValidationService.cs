@@ -25,7 +25,7 @@ public class SpecializationValidationService : ISpecializationValidationService
     public async Task<ValidationResult> ValidateProcedureAsync(ProcedureBase procedure, int specializationId)
     {
         var result = new ValidationResult { IsValid = true };
-        
+
         try
         {
             var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(specializationId));
@@ -40,7 +40,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                 result.AddWarning("Template not found for validation");
                 return result;
             }
-            
+
             // Module-based validation for New SMK
             if (specialization.SmkVersion == SmkVersion.New)
             {
@@ -50,7 +50,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                     result.AddError("No current module selected. Cannot add procedures without an active module.");
                     return result;
                 }
-                
+
                 // Validate procedure belongs to current module
                 var currentModule = template.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId.Value);
                 if (currentModule == null)
@@ -63,24 +63,24 @@ public class SpecializationValidationService : ISpecializationValidationService
             // Enhanced procedure requirement validation
             ProcedureTemplate? procedureTemplate = null;
             ModuleTemplate? moduleContainingProcedure = null;
-            
+
             // Search for the procedure in all modules
             foreach (var module in template.Modules)
             {
                 // For New SMK, match by procedure name
                 if (specialization.SmkVersion == SmkVersion.New)
                 {
-                    procedureTemplate = module.Procedures.FirstOrDefault(p => 
+                    procedureTemplate = module.Procedures.FirstOrDefault(p =>
                         p.Name.Equals(procedure.Code, StringComparison.OrdinalIgnoreCase));
                 }
                 // For Old SMK, match by code
                 else
                 {
-                    procedureTemplate = module.Procedures.FirstOrDefault(p => 
+                    procedureTemplate = module.Procedures.FirstOrDefault(p =>
                         p.Id.ToString().Equals(procedure.Code, StringComparison.OrdinalIgnoreCase) ||
                         p.Name.Equals(procedure.Code, StringComparison.OrdinalIgnoreCase));
                 }
-                
+
                 if (procedureTemplate != null)
                 {
                     moduleContainingProcedure = module;
@@ -112,7 +112,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                         result.AddError("No current module selected");
                         return result;
                     }
-                    
+
                     // Check if procedure belongs to current module
                     var currentModule = template.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId.Value);
                     if (currentModule != null && moduleContainingProcedure != null)
@@ -123,7 +123,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                             return result;
                         }
                     }
-                    
+
                     // Validate internship requirement
                     if (procedureTemplate.InternshipId.HasValue && procedureTemplate.InternshipId.Value > 0)
                     {
@@ -132,7 +132,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                         result.AddWarning($"Procedure should be performed during internship ID {procedureTemplate.InternshipId.Value}");
                     }
                 }
-                
+
                 // Validate operator code
                 if (specialization.SmkVersion == SmkVersion.New)
                 {
@@ -156,30 +156,30 @@ public class SpecializationValidationService : ISpecializationValidationService
                 else if (specialization.SmkVersion == SmkVersion.Old)
                 {
                     // For Old SMK, operator code is optional but if provided must be A or B
-                    if (!string.IsNullOrEmpty(procedure.OperatorCode) && 
+                    if (!string.IsNullOrEmpty(procedure.OperatorCode) &&
                         procedure.OperatorCode != "A" && procedure.OperatorCode != "B")
                     {
                         result.AddError("Invalid operator code. Must be 'A' or 'B' for Old SMK");
                     }
                 }
-                
+
                 // Validate procedure type matches template
-                if (!string.IsNullOrEmpty(procedureTemplate.Type) && 
+                if (!string.IsNullOrEmpty(procedureTemplate.Type) &&
                     moduleContainingProcedure != null &&
                     !procedureTemplate.Type.Equals(moduleContainingProcedure.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     result.AddWarning($"Procedure type mismatch. Expected: {procedureTemplate.Type}");
                 }
             }
-            
+
             // Common validations
             if (string.IsNullOrEmpty(procedure.Location))
             {
                 result.AddError("Procedure location is required");
             }
-            
+
             // No future date validation - MAUI app allows future dates
-            
+
             // Validate procedure status transitions
             if (procedure.Status == ProcedureStatus.Completed && procedure.SyncStatus != SyncStatus.Synced)
             {
@@ -199,7 +199,7 @@ public class SpecializationValidationService : ISpecializationValidationService
     public async Task<ValidationResult> ValidateMedicalShiftAsync(MedicalShift medicalShift, int specializationId)
     {
         var result = new ValidationResult { IsValid = true };
-        
+
         try
         {
             var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(specializationId));
@@ -222,12 +222,12 @@ public class SpecializationValidationService : ISpecializationValidationService
                 // MAUI implementation does not enforce maximum shift duration limits
                 // Only validate that duration is greater than zero
                 var totalHours = medicalShift.Hours + (medicalShift.Minutes / 60.0);
-                
+
                 if (totalHours == 0)
                 {
                     result.AddError("Medical shift duration must be greater than zero");
                 }
-                
+
                 // Validate weekly hours don't exceed limits (warning only)
                 if (currentModule.MedicalShifts.HoursPerWeek > 0)
                 {
@@ -241,7 +241,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             {
                 result.AddError("Medical shift location is required");
             }
-            
+
             // No future date validation - MAUI app allows future dates
 
             return result;
@@ -256,7 +256,7 @@ public class SpecializationValidationService : ISpecializationValidationService
     public async Task<ValidationResult> ValidateInternshipAsync(Internship internship, int specializationId)
     {
         var result = new ValidationResult { IsValid = true };
-        
+
         try
         {
             var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(specializationId));
@@ -274,8 +274,8 @@ public class SpecializationValidationService : ISpecializationValidationService
 
             // Find internship template
             var internshipTemplate = await _templateService.GetInternshipTemplateAsync(
-                specialization.ProgramCode, 
-                specialization.SmkVersion, 
+                specialization.ProgramCode,
+                specialization.SmkVersion,
                 internship.Id);
 
             if (internshipTemplate != null)
@@ -293,7 +293,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             {
                 result.AddError("Start date cannot be after end date");
             }
-            
+
             if (internship.EndDate > DateTime.UtcNow && internship.IsCompleted)
             {
                 result.AddError("Cannot mark future internship as completed");
@@ -311,7 +311,7 @@ public class SpecializationValidationService : ISpecializationValidationService
     public async Task<ValidationResult> ValidateCourseAsync(Course course, int specializationId)
     {
         var result = new ValidationResult { IsValid = true };
-        
+
         try
         {
             var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(specializationId));
@@ -329,8 +329,8 @@ public class SpecializationValidationService : ISpecializationValidationService
 
             // Find course template
             var courseTemplate = await _templateService.GetCourseTemplateAsync(
-                specialization.ProgramCode, 
-                specialization.SmkVersion, 
+                specialization.ProgramCode,
+                specialization.SmkVersion,
                 course.Id);
 
             if (courseTemplate != null)
@@ -368,8 +368,8 @@ public class SpecializationValidationService : ISpecializationValidationService
             }
 
             var moduleTemplate = await _templateService.GetModuleTemplateAsync(
-                specialization.ProgramCode, 
-                specialization.SmkVersion, 
+                specialization.ProgramCode,
+                specialization.SmkVersion,
                 moduleId);
 
             if (moduleTemplate == null)
@@ -428,19 +428,19 @@ public class SpecializationValidationService : ISpecializationValidationService
             return (false, "Error occurred during validation");
         }
     }
-    
+
     /// <summary>
     /// Validates if a procedure can be added based on template requirements and current progress.
     /// For New SMK, ensures procedures match template and checks if requirements are already met.
     /// </summary>
     public async Task<ValidationResult> ValidateProcedureRequirementAsync(
-        string procedureCode, 
-        string operatorCode, 
+        string procedureCode,
+        string operatorCode,
         int specializationId,
         int userId)
     {
         var result = new ValidationResult { IsValid = true };
-        
+
         try
         {
             var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(specializationId));
@@ -455,7 +455,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                 result.AddWarning("Template not found for validation");
                 return result;
             }
-            
+
             // Module-based validation for New SMK
             ModuleTemplate? targetModule = null;
             if (specialization.SmkVersion == SmkVersion.New)
@@ -464,7 +464,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                 {
                     return ValidationResult.Failure("No current module selected for New SMK procedures");
                 }
-                
+
                 targetModule = template.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId.Value);
                 if (targetModule == null)
                 {
@@ -477,9 +477,9 @@ public class SpecializationValidationService : ISpecializationValidationService
             if (specialization.SmkVersion == SmkVersion.New && targetModule != null)
             {
                 // For New SMK, only search in current module
-                procedureTemplate = targetModule.Procedures.FirstOrDefault(p => 
+                procedureTemplate = targetModule.Procedures.FirstOrDefault(p =>
                     p.Name.Equals(procedureCode, StringComparison.OrdinalIgnoreCase));
-                    
+
                 if (procedureTemplate == null)
                 {
                     result.AddError($"Procedure '{procedureCode}' is not available in current module '{targetModule.Name}'");
@@ -491,7 +491,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                 // For Old SMK, search all modules
                 foreach (var module in template.Modules)
                 {
-                    procedureTemplate = module.Procedures.FirstOrDefault(p => 
+                    procedureTemplate = module.Procedures.FirstOrDefault(p =>
                         p.Name.Equals(procedureCode, StringComparison.OrdinalIgnoreCase));
                     if (procedureTemplate != null) break;
                 }
@@ -536,7 +536,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             return ValidationResult.Failure("Validation error occurred");
         }
     }
-    
+
     /// <summary>
     /// Calculates module progress including procedure completion percentages.
     /// For New SMK, this is essential for tracking module-based requirements.
@@ -544,7 +544,7 @@ public class SpecializationValidationService : ISpecializationValidationService
     public async Task<ModuleProgress> CalculateModuleProgressAsync(int specializationId, int moduleId)
     {
         var progress = new ModuleProgress { ModuleId = moduleId };
-        
+
         try
         {
             var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(specializationId));
@@ -558,13 +558,13 @@ public class SpecializationValidationService : ISpecializationValidationService
             {
                 return progress;
             }
-            
+
             var moduleTemplate = template.Modules.FirstOrDefault(m => m.ModuleId == moduleId);
             if (moduleTemplate == null)
             {
                 return progress;
             }
-            
+
             // Calculate procedure requirements
             foreach (var procedureTemplate in moduleTemplate.Procedures)
             {
@@ -577,7 +577,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                     progress.TotalRequiredProceduresB += procedureTemplate.RequiredCountB;
                 }
             }
-            
+
             // Get actual module progress from specialization
             var module = specialization.Modules.FirstOrDefault(m => m.Id.Value == moduleId);
             if (module != null)
@@ -591,36 +591,36 @@ public class SpecializationValidationService : ISpecializationValidationService
                 progress.CompletedShiftHours = module.CompletedShiftHours;
                 progress.RequiredShiftHours = module.RequiredShiftHours;
             }
-            
+
             // Calculate percentages
             if (progress.TotalRequiredProceduresA > 0)
             {
-                progress.ProcedureACompletionPercentage = 
+                progress.ProcedureACompletionPercentage =
                     (progress.CompletedProceduresA * 100) / progress.TotalRequiredProceduresA;
             }
-            
+
             if (progress.TotalRequiredProceduresB > 0)
             {
-                progress.ProcedureBCompletionPercentage = 
+                progress.ProcedureBCompletionPercentage =
                     (progress.CompletedProceduresB * 100) / progress.TotalRequiredProceduresB;
             }
-            
+
             // Calculate overall progress (MAUI formula)
             // Internship: 35%, Courses: 25%, Procedures: 30%, Shifts: 10%
-            double internshipProgress = progress.TotalInternships > 0 ? 
+            double internshipProgress = progress.TotalInternships > 0 ?
                 (progress.CompletedInternships * 100.0 / progress.TotalInternships) : 0;
-            double courseProgress = progress.TotalCourses > 0 ? 
+            double courseProgress = progress.TotalCourses > 0 ?
                 (progress.CompletedCourses * 100.0 / progress.TotalCourses) : 0;
             double procedureProgress = (progress.ProcedureACompletionPercentage + progress.ProcedureBCompletionPercentage) / 2.0;
-            double shiftProgress = progress.RequiredShiftHours > 0 ? 
+            double shiftProgress = progress.RequiredShiftHours > 0 ?
                 (progress.CompletedShiftHours * 100.0 / progress.RequiredShiftHours) : 0;
-                
-            progress.OverallCompletionPercentage = 
-                (internshipProgress * 0.35) + 
-                (courseProgress * 0.25) + 
-                (procedureProgress * 0.30) + 
+
+            progress.OverallCompletionPercentage =
+                (internshipProgress * 0.35) +
+                (courseProgress * 0.25) +
+                (procedureProgress * 0.30) +
                 (shiftProgress * 0.10);
-            
+
             return progress;
         }
         catch (Exception ex)

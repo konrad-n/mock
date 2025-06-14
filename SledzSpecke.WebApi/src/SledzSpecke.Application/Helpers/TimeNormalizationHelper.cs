@@ -21,10 +21,10 @@ public static class TimeNormalizationHelper
             hours += minutes / 60;
             minutes = minutes % 60;
         }
-        
+
         return (hours, minutes);
     }
-    
+
     /// <summary>
     /// Calculates total hours as a decimal value.
     /// For example: 2 hours 30 minutes = 2.5 hours
@@ -36,7 +36,7 @@ public static class TimeNormalizationHelper
     {
         return hours + (minutes / 60.0);
     }
-    
+
     /// <summary>
     /// Formats time for display similar to MAUI's FormattedTime property.
     /// </summary>
@@ -50,7 +50,7 @@ public static class TimeNormalizationHelper
         {
             (hours, minutes) = NormalizeTime(hours, minutes);
         }
-        
+
         return $"{hours} godz. {minutes} min.";
     }
 }

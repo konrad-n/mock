@@ -10,7 +10,7 @@ internal sealed class SelfEducationConfiguration : IEntityTypeConfiguration<Self
     public void Configure(EntityTypeBuilder<SelfEducation> builder)
     {
         builder.HasKey(se => se.Id);
-        
+
         builder.Property(se => se.Id)
             .HasConversion(id => id.Value, value => new SelfEducationId(value));
 

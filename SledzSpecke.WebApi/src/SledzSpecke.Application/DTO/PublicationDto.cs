@@ -24,6 +24,7 @@ public class PublicationDto
     public bool IsFirstAuthor { get; set; }
     public bool IsCorrespondingAuthor { get; set; }
     public bool IsPeerReviewed { get; set; }
+    public decimal? ImpactFactor { get; set; }
     public double ImpactScore { get; set; }
     public string SyncStatus { get; set; }
     public DateTime CreatedAt { get; set; }

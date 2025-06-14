@@ -25,7 +25,7 @@ internal sealed class ValidationCommandHandlerDecorator<TCommand> : ICommandHand
     {
         var validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
         var context = new ValidationContext(command, _serviceProvider, null);
-        
+
         if (!Validator.TryValidateObject(command, context, validationResults, validateAllProperties: true))
         {
             var errors = validationResults.Select(r => r.ErrorMessage ?? "Validation error").ToList();
@@ -57,7 +57,7 @@ internal sealed class ValidationCommandHandlerDecorator<TCommand, TResult> : ICo
     {
         var validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
         var context = new ValidationContext(command, _serviceProvider, null);
-        
+
         if (!Validator.TryValidateObject(command, context, validationResults, validateAllProperties: true))
         {
             var errors = validationResults.Select(r => r.ErrorMessage ?? "Validation error").ToList();

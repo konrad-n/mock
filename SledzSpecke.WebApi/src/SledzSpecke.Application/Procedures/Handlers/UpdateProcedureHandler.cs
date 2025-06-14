@@ -21,7 +21,7 @@ public class UpdateProcedureHandler : ICommandHandler<UpdateProcedure>
     {
         var userId = _userContextService.GetUserId();
         var procedure = await _procedureRepository.GetByIdAsync(new ProcedureId(command.ProcedureId));
-        
+
         if (procedure is null)
         {
             throw new ProcedureNotFoundException(command.ProcedureId);
@@ -55,7 +55,7 @@ public class UpdateProcedureHandler : ICommandHandler<UpdateProcedure>
             command.PerformingPerson,
             command.PatientInitials,
             command.PatientGender);
-        
+
         // Note: Date, Code, and Location updates are not supported in the base model
         // These fields are typically immutable after creation
 

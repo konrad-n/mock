@@ -37,16 +37,16 @@ internal sealed class SqlUserRepository : IUserRepository
                 .DefaultIfEmpty(0)
                 .MaxAsync();
             var newId = new UserId(maxId + 1);
-            
+
             // Create a new user with the generated ID
-            var newUser = new User(newId, user.Email, user.Username, user.Password, 
+            var newUser = new User(newId, user.Email, user.Username, user.Password,
                 user.FullName, user.SmkVersion, user.SpecializationId, user.RegistrationDate);
-            
+
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
             return newUser.Id;
         }
-        
+
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return user.Id;

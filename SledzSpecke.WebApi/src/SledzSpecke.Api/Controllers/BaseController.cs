@@ -19,7 +19,7 @@ public abstract class BaseController : ControllerBase
         return Ok();
     }
 
-    protected async Task<ActionResult<T>> HandleAsync<TQuery, T>(TQuery query, IQueryHandler<TQuery, T> handler) 
+    protected async Task<ActionResult<T>> HandleAsync<TQuery, T>(TQuery query, IQueryHandler<TQuery, T> handler)
         where TQuery : class, IQuery<T>
     {
         var result = await handler.HandleAsync(query);

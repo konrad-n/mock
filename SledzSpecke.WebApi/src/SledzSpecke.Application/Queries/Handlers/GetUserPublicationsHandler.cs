@@ -28,33 +28,33 @@ internal sealed class GetUserPublicationsHandler : IQueryHandler<GetUserPublicat
         return publications
             .OrderByDescending(p => p.PublicationDate)
             .Select(p => new PublicationDto
-        {
-            Id = p.Id.Value,
-            SpecializationId = p.SpecializationId.Value,
-            UserId = p.UserId.Value,
-            Type = p.Type.ToString(),
-            Title = p.Title,
-            Authors = p.Authors,
-            Journal = p.Journal,
-            Publisher = p.Publisher,
-            PublicationDate = p.PublicationDate,
-            Volume = p.Volume,
-            Issue = p.Issue,
-            Pages = p.Pages,
-            DOI = p.DOI,
-            PMID = p.PMID,
-            ISBN = p.ISBN,
-            URL = p.URL,
-            Abstract = p.Abstract,
-            Keywords = p.Keywords,
-            FilePath = p.FilePath,
-            IsFirstAuthor = p.IsFirstAuthor,
-            IsCorrespondingAuthor = p.IsCorrespondingAuthor,
-            IsPeerReviewed = p.IsPeerReviewed,
-            ImpactScore = p.CalculateImpactScore(),
-            SyncStatus = p.SyncStatus.ToString(),
-            CreatedAt = p.CreatedAt,
-            UpdatedAt = p.UpdatedAt
-        });
+            {
+                Id = p.Id.Value,
+                SpecializationId = p.SpecializationId.Value,
+                UserId = p.UserId.Value,
+                Type = p.Type.ToString(),
+                Title = p.Title,
+                Authors = p.Authors,
+                Journal = p.Journal,
+                Publisher = p.Publisher,
+                PublicationDate = p.PublicationDate,
+                Volume = p.Volume,
+                Issue = p.Issue,
+                Pages = p.Pages,
+                DOI = p.DOI,
+                PMID = p.PMID,
+                ISBN = p.ISBN,
+                URL = p.URL,
+                Abstract = p.Abstract,
+                Keywords = p.Keywords,
+                FilePath = p.FilePath,
+                IsFirstAuthor = p.IsFirstAuthor,
+                IsCorrespondingAuthor = p.IsCorrespondingAuthor,
+                IsPeerReviewed = p.IsPeerReviewed,
+                ImpactScore = p.CalculateImpactScore(),
+                SyncStatus = p.SyncStatus.ToString(),
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt
+            });
     }
 }

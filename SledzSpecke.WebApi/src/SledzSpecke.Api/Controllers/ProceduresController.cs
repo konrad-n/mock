@@ -62,7 +62,7 @@ public class ProceduresController : BaseController
         {
             // Log the incoming request for debugging
             Console.WriteLine($"[DEBUG] AddProcedure request: InternshipId={request.InternshipId}, Code={request.Code}, Status={request.Status}");
-            
+
             var command = new AddProcedure(
                 request.InternshipId,
                 request.Date,
@@ -124,7 +124,7 @@ public class ProceduresController : BaseController
             request.Supervisor,
             request.Institution,
             request.Comments);
-        
+
         return await HandleAsync(command, _updateProcedureHandler);
     }
 
@@ -157,13 +157,13 @@ public class AddProcedureRequest
     public string? PerformingPerson { get; set; }
     public string? PatientInitials { get; set; }
     public char? PatientGender { get; set; }
-    
+
     // Old SMK specific fields
     public int? ProcedureRequirementId { get; set; }
     public string? ProcedureGroup { get; set; }
     public string? AssistantData { get; set; }
     public string? InternshipName { get; set; }
-    
+
     // New SMK specific fields
     public int? ModuleId { get; set; }
     public string? ProcedureName { get; set; }
@@ -184,13 +184,13 @@ public class UpdateProcedureRequest
     public string? PerformingPerson { get; set; }
     public string? PatientInitials { get; set; }
     public char? PatientGender { get; set; }
-    
+
     // Old SMK specific fields
     public int? ProcedureRequirementId { get; set; }
     public string? ProcedureGroup { get; set; }
     public string? AssistantData { get; set; }
     public string? InternshipName { get; set; }
-    
+
     // New SMK specific fields
     public int? CountA { get; set; }
     public int? CountB { get; set; }

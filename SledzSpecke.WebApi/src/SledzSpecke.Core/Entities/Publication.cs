@@ -27,6 +27,7 @@ public class Publication
     public bool IsFirstAuthor { get; private set; }
     public bool IsCorrespondingAuthor { get; private set; }
     public bool IsPeerReviewed { get; private set; }
+    public decimal? ImpactFactor { get; private set; }
     public SyncStatus SyncStatus { get; private set; }
     public string? AdditionalFields { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -72,7 +73,7 @@ public class Publication
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdatePublicationDetails(string? volume, string? issue, string? pages, 
+    public void UpdatePublicationDetails(string? volume, string? issue, string? pages,
         string? doi, string? pmid, string? isbn, string? url)
     {
         EnsureCanModify();
@@ -124,6 +125,24 @@ public class Publication
     public void SetSyncStatus(SyncStatus status)
     {
         SyncStatus = status;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateDetails(string title, string? authors, string? journal, string? publisher,
+        string? abstractText, string? keywords, bool isFirstAuthor, bool isCorrespondingAuthor, bool isPeerReviewed)
+    {
+        EnsureCanModify();
+        ValidateInput(title, PublicationDate);
+
+        Title = title;
+        Authors = authors;
+        Journal = journal;
+        Publisher = publisher;
+        Abstract = abstractText;
+        Keywords = keywords;
+        IsFirstAuthor = isFirstAuthor;
+        IsCorrespondingAuthor = isCorrespondingAuthor;
+        IsPeerReviewed = isPeerReviewed;
         UpdatedAt = DateTime.UtcNow;
     }
 

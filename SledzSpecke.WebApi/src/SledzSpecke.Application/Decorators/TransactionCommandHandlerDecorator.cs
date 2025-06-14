@@ -27,15 +27,15 @@ internal sealed class TransactionCommandHandlerDecorator<TCommand> : ICommandHan
     public async Task HandleAsync(TCommand command)
     {
         var commandName = typeof(TCommand).Name;
-        
+
         _logger.LogDebug("Starting transaction for command {CommandName}", commandName);
-        
+
         await _unitOfWork.BeginTransactionAsync();
-        
+
         try
         {
             await _handler.HandleAsync(command);
-            
+
             await _unitOfWork.CommitTransactionAsync();
             _logger.LogDebug("Transaction committed for command {CommandName}", commandName);
         }
@@ -71,18 +71,18 @@ internal sealed class TransactionCommandHandlerDecorator<TCommand, TResult> : IC
     public async Task<TResult> HandleAsync(TCommand command)
     {
         var commandName = typeof(TCommand).Name;
-        
+
         _logger.LogDebug("Starting transaction for command {CommandName}", commandName);
-        
+
         await _unitOfWork.BeginTransactionAsync();
-        
+
         try
         {
             var result = await _handler.HandleAsync(command);
-            
+
             await _unitOfWork.CommitTransactionAsync();
             _logger.LogDebug("Transaction committed for command {CommandName}", commandName);
-            
+
             return result;
         }
         catch (Exception ex)

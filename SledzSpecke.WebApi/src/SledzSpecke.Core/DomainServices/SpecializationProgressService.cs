@@ -118,16 +118,16 @@ public class SpecializationProgressService : ISpecializationProgressService
         var absences = await _absenceRepository.GetByUserAndSpecializationAsync(userId, specializationId);
         var recognitions = await _recognitionRepository.GetByUserAndSpecializationAsync(userId, specializationId);
 
-        var internshipProgress = basicProgress.TotalInternships > 0 
-            ? (double)basicProgress.CompletedInternships / basicProgress.TotalInternships 
+        var internshipProgress = basicProgress.TotalInternships > 0
+            ? (double)basicProgress.CompletedInternships / basicProgress.TotalInternships
             : 0;
-        
-        var courseProgress = basicProgress.TotalCourses > 0 
-            ? (double)basicProgress.CompletedCourses / basicProgress.TotalCourses 
+
+        var courseProgress = basicProgress.TotalCourses > 0
+            ? (double)basicProgress.CompletedCourses / basicProgress.TotalCourses
             : 0;
-        
-        var procedureProgress = basicProgress.TotalProcedures > 0 
-            ? (double)basicProgress.CompletedProcedures / basicProgress.TotalProcedures 
+
+        var procedureProgress = basicProgress.TotalProcedures > 0
+            ? (double)basicProgress.CompletedProcedures / basicProgress.TotalProcedures
             : 0;
 
         var selfEducationProgress = CalculateSelfEducationProgress(selfEducation);
@@ -145,7 +145,7 @@ public class SpecializationProgressService : ISpecializationProgressService
             TotalRecognitions = recognitions.Count()
         };
 
-        weightedProgress.WeightedProgressPercentage = 
+        weightedProgress.WeightedProgressPercentage =
             (internshipProgress * weightedProgress.InternshipWeight) +
             (courseProgress * weightedProgress.CourseWeight) +
             (procedureProgress * weightedProgress.ProcedureWeight) +
@@ -166,7 +166,7 @@ public class SpecializationProgressService : ISpecializationProgressService
         {
             var moduleInternships = await _internshipRepository.GetByModuleAsync(module.Id);
             var moduleCourses = await _courseRepository.GetByModuleAsync(module.Id);
-            
+
             var completedInternships = moduleInternships.Count(i => i.IsCompleted);
             var completedCourses = moduleCourses.Count(c => c.IsApproved);
 
@@ -200,7 +200,7 @@ public class SpecializationProgressService : ISpecializationProgressService
 
         var remainingDays = (int)(progress.EstimatedCompletionDate - DateTime.UtcNow).TotalDays;
         var completionProbability = CalculateCompletionProbability(progress, weightedProgress);
-        
+
         var riskFactors = IdentifyRiskFactors(progress, weightedProgress);
         var recommendations = GenerateRecommendations(progress, weightedProgress, riskFactors);
         var requiresIntervention = completionProbability < 0.7 || remainingDays > progress.OriginalCompletionDate.Subtract(DateTime.UtcNow).TotalDays * 1.2;
@@ -256,7 +256,7 @@ public class SpecializationProgressService : ISpecializationProgressService
         return total > 0 ? (double)completed / total : 0;
     }
 
-    private static int CalculateQualityScore(IEnumerable<Publication> publications, 
+    private static int CalculateQualityScore(IEnumerable<Publication> publications,
         IEnumerable<SelfEducation> selfEducation, IEnumerable<Recognition> recognitions)
     {
         var publicationScore = publications.Sum(p => p.CalculateImpactScore());
@@ -273,7 +273,7 @@ public class SpecializationProgressService : ISpecializationProgressService
         return Math.Min(100, Math.Max(0, (elapsedDays / totalDays) * 100));
     }
 
-    private static double CalculateCompletionProbability(SpecializationProgressSummary progress, 
+    private static double CalculateCompletionProbability(SpecializationProgressSummary progress,
         WeightedProgressStatistics weightedProgress)
     {
         var progressFactor = progress.OverallProgressPercentage / 100.0;
@@ -284,7 +284,7 @@ public class SpecializationProgressService : ISpecializationProgressService
         return Math.Min(1.0, progressFactor * 0.5 + qualityFactor * 0.2 + timeFactor * 0.2 + absenceFactor * 0.1);
     }
 
-    private static IEnumerable<string> IdentifyRiskFactors(SpecializationProgressSummary progress, 
+    private static IEnumerable<string> IdentifyRiskFactors(SpecializationProgressSummary progress,
         WeightedProgressStatistics weightedProgress)
     {
         var risks = new List<string>();
@@ -307,7 +307,7 @@ public class SpecializationProgressService : ISpecializationProgressService
         return risks;
     }
 
-    private static IEnumerable<string> GenerateRecommendations(SpecializationProgressSummary progress, 
+    private static IEnumerable<string> GenerateRecommendations(SpecializationProgressSummary progress,
         WeightedProgressStatistics weightedProgress, IEnumerable<string> riskFactors)
     {
         var recommendations = new List<string>();

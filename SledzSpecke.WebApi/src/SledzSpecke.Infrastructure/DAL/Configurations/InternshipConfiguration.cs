@@ -18,7 +18,7 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
             .IsRequired();
 
         builder.Property(x => x.ModuleId)
-            .HasConversion(x => x != null ? x.Value : (int?)null, 
+            .HasConversion(x => x != null ? x.Value : (int?)null,
                            x => x.HasValue ? new ModuleId(x.Value) : null);
 
         builder.Property(x => x.InstitutionName)

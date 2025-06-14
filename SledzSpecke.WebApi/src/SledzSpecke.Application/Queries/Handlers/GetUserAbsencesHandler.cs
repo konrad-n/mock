@@ -28,23 +28,23 @@ internal sealed class GetUserAbsencesHandler : IQueryHandler<GetUserAbsences, IE
         return absences
             .OrderByDescending(a => a.StartDate)
             .Select(a => new AbsenceDto
-        {
-            Id = a.Id.Value,
-            SpecializationId = a.SpecializationId.Value,
-            UserId = a.UserId.Value,
-            Type = a.Type.ToString(),
-            StartDate = a.StartDate,
-            EndDate = a.EndDate,
-            DurationInDays = a.DurationInDays,
-            Description = a.Description,
-            DocumentPath = a.DocumentPath,
-            IsApproved = a.IsApproved,
-            ApprovedAt = a.ApprovedAt,
-            ApprovedBy = a.ApprovedBy?.Value,
-            ExtensionDays = a.CalculateSpecializationExtensionDays(),
-            SyncStatus = a.SyncStatus.ToString(),
-            CreatedAt = a.CreatedAt,
-            UpdatedAt = a.UpdatedAt
-        });
+            {
+                Id = a.Id.Value,
+                SpecializationId = a.SpecializationId.Value,
+                UserId = a.UserId.Value,
+                Type = a.Type.ToString(),
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                DurationInDays = a.DurationInDays,
+                Description = a.Description,
+                DocumentPath = a.DocumentPath,
+                IsApproved = a.IsApproved,
+                ApprovedAt = a.ApprovedAt,
+                ApprovedBy = a.ApprovedBy?.Value,
+                ExtensionDays = a.CalculateSpecializationExtensionDays(),
+                SyncStatus = a.SyncStatus.ToString(),
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt
+            });
     }
 }

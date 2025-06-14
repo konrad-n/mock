@@ -10,7 +10,7 @@ internal sealed class PublicationConfiguration : IEntityTypeConfiguration<Public
     public void Configure(EntityTypeBuilder<Publication> builder)
     {
         builder.HasKey(p => p.Id);
-        
+
         builder.Property(p => p.Id)
             .HasConversion(id => id.Value, value => new PublicationId(value));
 

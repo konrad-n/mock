@@ -13,13 +13,34 @@ public class SelfEducationController : BaseController
 {
     private readonly ICommandHandler<CreateSelfEducation> _createSelfEducationHandler;
     private readonly IQueryHandler<GetUserSelfEducation, IEnumerable<SelfEducationDto>> _getUserSelfEducationHandler;
+    private readonly IQueryHandler<GetSelfEducationByYear, IEnumerable<SelfEducationDto>> _getSelfEducationByYearHandler;
+    private readonly IQueryHandler<GetCompletedSelfEducation, IEnumerable<SelfEducationDto>> _getCompletedSelfEducationHandler;
+    private readonly IQueryHandler<GetTotalCreditHours, int> _getTotalCreditHoursHandler;
+    private readonly IQueryHandler<GetTotalQualityScore, decimal> _getTotalQualityScoreHandler;
+    private readonly ICommandHandler<CompleteSelfEducation> _completeSelfEducationHandler;
+    private readonly ICommandHandler<UpdateSelfEducation> _updateSelfEducationHandler;
+    private readonly ICommandHandler<DeleteSelfEducation> _deleteSelfEducationHandler;
 
     public SelfEducationController(
         ICommandHandler<CreateSelfEducation> createSelfEducationHandler,
-        IQueryHandler<GetUserSelfEducation, IEnumerable<SelfEducationDto>> getUserSelfEducationHandler) : base()
+        IQueryHandler<GetUserSelfEducation, IEnumerable<SelfEducationDto>> getUserSelfEducationHandler,
+        IQueryHandler<GetSelfEducationByYear, IEnumerable<SelfEducationDto>> getSelfEducationByYearHandler,
+        IQueryHandler<GetCompletedSelfEducation, IEnumerable<SelfEducationDto>> getCompletedSelfEducationHandler,
+        IQueryHandler<GetTotalCreditHours, int> getTotalCreditHoursHandler,
+        IQueryHandler<GetTotalQualityScore, decimal> getTotalQualityScoreHandler,
+        ICommandHandler<CompleteSelfEducation> completeSelfEducationHandler,
+        ICommandHandler<UpdateSelfEducation> updateSelfEducationHandler,
+        ICommandHandler<DeleteSelfEducation> deleteSelfEducationHandler) : base()
     {
         _createSelfEducationHandler = createSelfEducationHandler;
         _getUserSelfEducationHandler = getUserSelfEducationHandler;
+        _getSelfEducationByYearHandler = getSelfEducationByYearHandler;
+        _getCompletedSelfEducationHandler = getCompletedSelfEducationHandler;
+        _getTotalCreditHoursHandler = getTotalCreditHoursHandler;
+        _getTotalQualityScoreHandler = getTotalQualityScoreHandler;
+        _completeSelfEducationHandler = completeSelfEducationHandler;
+        _updateSelfEducationHandler = updateSelfEducationHandler;
+        _deleteSelfEducationHandler = deleteSelfEducationHandler;
     }
 
     [HttpPost]
@@ -48,45 +69,72 @@ public class SelfEducationController : BaseController
     }
 
     [HttpGet("user/{userId}/year/{year}")]
-    public async Task<IActionResult> GetSelfEducationByYear(Guid userId, int year)
+    public async Task<ActionResult<IEnumerable<SelfEducationDto>>> GetSelfEducationByYear(int userId, int year)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetSelfEducationByYear(userId, year);
+        var activities = await _getSelfEducationByYearHandler.HandleAsync(query);
+        return Ok(activities);
     }
 
     [HttpGet("user/{userId}/specialization/{specializationId}/completed")]
-    public async Task<IActionResult> GetCompletedActivities(Guid userId, Guid specializationId)
+    public async Task<ActionResult<IEnumerable<SelfEducationDto>>> GetCompletedActivities(int userId, int specializationId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetCompletedSelfEducation(userId, specializationId);
+        var activities = await _getCompletedSelfEducationHandler.HandleAsync(query);
+        return Ok(activities);
     }
 
     [HttpGet("user/{userId}/specialization/{specializationId}/credit-hours")]
-    public async Task<IActionResult> GetTotalCreditHours(Guid userId, Guid specializationId)
+    public async Task<ActionResult<int>> GetTotalCreditHours(int userId, int specializationId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetTotalCreditHours(userId, specializationId);
+        var totalHours = await _getTotalCreditHoursHandler.HandleAsync(query);
+        return Ok(totalHours);
     }
 
     [HttpGet("user/{userId}/specialization/{specializationId}/quality-score")]
-    public async Task<IActionResult> GetTotalQualityScore(Guid userId, Guid specializationId)
+    public async Task<ActionResult<decimal>> GetTotalQualityScore(int userId, int specializationId)
     {
-        // This would need a query handler implementation
-        return Ok();
+        var query = new GetTotalQualityScore(userId, specializationId);
+        var score = await _getTotalQualityScoreHandler.HandleAsync(query);
+        return Ok(score);
     }
 
     [HttpPut("{id}/complete")]
     public async Task<IActionResult> CompleteSelfEducation(Guid id, [FromBody] CompleteSelfEducationRequest request)
     {
-        // This would need a complete self-education command and handler
-        return Ok();
+        var command = new CompleteSelfEducation(
+            new SelfEducationId(id),
+            request.CompletedAt,
+            request.CertificatePath);
+
+        await _completeSelfEducationHandler.HandleAsync(command);
+        return NoContent();
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSelfEducation(Guid id, [FromBody] UpdateSelfEducationRequest request)
     {
-        // This would need an update self-education command and handler
-        return Ok();
+        var command = new UpdateSelfEducation(
+            new SelfEducationId(id),
+            request.Title,
+            request.Description,
+            request.Provider,
+            request.CreditHours,
+            request.StartDate,
+            request.EndDate,
+            request.DurationHours);
+
+        await _updateSelfEducationHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteSelfEducation(Guid id)
+    {
+        var command = new DeleteSelfEducation(new SelfEducationId(id));
+        await _deleteSelfEducationHandler.HandleAsync(command);
+        return NoContent();
     }
 }
 

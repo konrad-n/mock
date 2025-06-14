@@ -13,13 +13,22 @@ public class AbsencesController : BaseController
 {
     private readonly ICommandHandler<CreateAbsence> _createAbsenceHandler;
     private readonly IQueryHandler<GetUserAbsences, IEnumerable<AbsenceDto>> _getUserAbsencesHandler;
+    private readonly ICommandHandler<ApproveAbsence> _approveAbsenceHandler;
+    private readonly ICommandHandler<UpdateAbsence> _updateAbsenceHandler;
+    private readonly ICommandHandler<DeleteAbsence> _deleteAbsenceHandler;
 
     public AbsencesController(
         ICommandHandler<CreateAbsence> createAbsenceHandler,
-        IQueryHandler<GetUserAbsences, IEnumerable<AbsenceDto>> getUserAbsencesHandler) : base()
+        IQueryHandler<GetUserAbsences, IEnumerable<AbsenceDto>> getUserAbsencesHandler,
+        ICommandHandler<ApproveAbsence> approveAbsenceHandler,
+        ICommandHandler<UpdateAbsence> updateAbsenceHandler,
+        ICommandHandler<DeleteAbsence> deleteAbsenceHandler) : base()
     {
         _createAbsenceHandler = createAbsenceHandler;
         _getUserAbsencesHandler = getUserAbsencesHandler;
+        _approveAbsenceHandler = approveAbsenceHandler;
+        _updateAbsenceHandler = updateAbsenceHandler;
+        _deleteAbsenceHandler = deleteAbsenceHandler;
     }
 
     [HttpPost]
@@ -48,8 +57,31 @@ public class AbsencesController : BaseController
     [HttpPut("{id}/approve")]
     public async Task<IActionResult> ApproveAbsence(Guid id, [FromBody] ApproveAbsenceRequest request)
     {
-        // This would need an approve absence command and handler
-        return Ok();
+        var command = new ApproveAbsence(new AbsenceId(id), request.ApprovedBy);
+        await _approveAbsenceHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateAbsence(Guid id, [FromBody] UpdateAbsenceRequest request)
+    {
+        var command = new UpdateAbsence(
+            new AbsenceId(id),
+            (AbsenceType)request.Type,
+            request.StartDate,
+            request.EndDate,
+            request.Description);
+
+        await _updateAbsenceHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAbsence(Guid id)
+    {
+        var command = new DeleteAbsence(new AbsenceId(id));
+        await _deleteAbsenceHandler.HandleAsync(command);
+        return NoContent();
     }
 }
 
@@ -62,3 +94,9 @@ public record CreateAbsenceRequest(
     string? Description = null);
 
 public record ApproveAbsenceRequest(int ApprovedBy);
+
+public record UpdateAbsenceRequest(
+    int Type,
+    DateTime StartDate,
+    DateTime EndDate,
+    string? Description);

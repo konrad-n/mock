@@ -96,7 +96,7 @@ public class AddMedicalShiftHandlerEnhanced : ICommandHandler<AddMedicalShift, i
         return shiftId;
     }
 
-    private async Task<Result<(Internship internship, Specialization specialization)>> 
+    private async Task<Result<(Internship internship, Specialization specialization)>>
         LoadRequiredEntitiesAsync(AddMedicalShift command)
     {
         var internship = await _internshipRepository.GetByIdAsync(new InternshipId(command.InternshipId));
@@ -147,21 +147,24 @@ public class AddMedicalShiftHandlerEnhanced : ICommandHandler<AddMedicalShift, i
 
     private Result ValidateForSmkVersion(AddMedicalShift command, Specialization specialization)
     {
-        switch (specialization.SmkVersion)
+        if (specialization.SmkVersion.IsOld)
         {
-            case SmkVersion.Old:
-                return ValidateOldSmkShift(command, specialization);
-            case SmkVersion.New:
-                return ValidateNewSmkShift(command, specialization);
-            default:
-                return Result.Failure($"Unknown SMK version: {specialization.SmkVersion}");
+            return ValidateOldSmkShift(command, specialization);
+        }
+        else if (specialization.SmkVersion.IsNew)
+        {
+            return ValidateNewSmkShift(command, specialization);
+        }
+        else
+        {
+            return Result.Failure($"Unknown SMK version: {specialization.SmkVersion}");
         }
     }
 
     private Result ValidateOldSmkShift(AddMedicalShift command, Specialization specialization)
     {
         var availableYears = _yearCalculationService.GetAvailableYears(specialization);
-        
+
         // Allow year 0 for unassigned shifts
         if (command.Year != 0 && !availableYears.Contains(command.Year))
         {
@@ -233,9 +236,9 @@ public class AddMedicalShiftHandlerEnhanced : ICommandHandler<AddMedicalShift, i
     private async Task<Result> ValidateWithTemplateAsync(MedicalShift medicalShift, Specialization specialization)
     {
         var validationResult = await _validationService.ValidateMedicalShiftAsync(
-            medicalShift, 
+            medicalShift,
             specialization.Id.Value);
-        
+
         if (!validationResult.IsValid)
         {
             var errors = string.Join(", ", validationResult.Errors);

@@ -78,7 +78,7 @@ public class MedicalShiftsController : BaseController
             request.Hours,
             request.Minutes,
             request.Location);
-        
+
         return await HandleAsync(command, _updateMedicalShiftHandler);
     }
 

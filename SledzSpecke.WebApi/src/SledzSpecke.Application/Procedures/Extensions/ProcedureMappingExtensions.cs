@@ -19,7 +19,7 @@ internal static class ProcedureMappingExtensions
         string? supervisor = null;
         string? institution = null;
         string? comments = null;
-        
+
         // Handle specific procedure types
         if (procedure is ProcedureOldSmk oldSmk)
         {
@@ -36,7 +36,7 @@ internal static class ProcedureMappingExtensions
             institution = newSmk.Institution;
             comments = newSmk.Comments;
         }
-        
+
         return new ProcedureDto(
             procedure.Id.Value,
             procedure.InternshipId.Value,

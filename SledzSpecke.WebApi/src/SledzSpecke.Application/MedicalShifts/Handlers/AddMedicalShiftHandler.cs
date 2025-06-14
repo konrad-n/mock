@@ -93,7 +93,7 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         {
             throw new ArgumentException("Shift duration cannot be negative.");
         }
-        
+
         // AI HINT: MAUI allows minutes > 59 (e.g., 90 minutes is valid)
         // DO NOT add validation like "if (command.Minutes > 59)" - this is intentional!
         // Normalization happens at display/summary level via TimeNormalizationHelper
@@ -105,16 +105,17 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         }
 
         // SMK version-specific validations
-        switch (specialization.SmkVersion)
+        if (specialization.SmkVersion.IsOld)
         {
-            case SmkVersion.Old:
-                ValidateOldSmkShift(command, specialization);
-                break;
-            case SmkVersion.New:
-                ValidateNewSmkShift(command, specialization);
-                break;
-            default:
-                throw new InvalidOperationException($"Unknown SMK version: {specialization.SmkVersion}");
+            ValidateOldSmkShift(command, specialization);
+        }
+        else if (specialization.SmkVersion.IsNew)
+        {
+            ValidateNewSmkShift(command, specialization);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unknown SMK version: {specialization.SmkVersion}");
         }
     }
 
@@ -122,7 +123,7 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
     {
         // Old SMK specific validations
         var availableYears = _yearCalculationService.GetAvailableYears(specialization);
-        
+
         // Allow year 0 for unassigned shifts
         if (command.Year != 0 && !availableYears.Contains(command.Year))
         {
@@ -164,7 +165,7 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         {
             throw new ArgumentException("Location name cannot exceed 100 characters.");
         }
-        
+
         // For New SMK, we should validate that the shift is within an active internship period
         // This is done by ensuring the InternshipId is valid and the date is within internship dates
         // The actual internship validation is done when fetching the internship

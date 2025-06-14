@@ -10,7 +10,7 @@ internal sealed class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
     public void Configure(EntityTypeBuilder<Absence> builder)
     {
         builder.HasKey(a => a.Id);
-        
+
         builder.Property(a => a.Id)
             .HasConversion(id => id.Value, value => new AbsenceId(value));
 
@@ -44,7 +44,7 @@ internal sealed class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
         builder.Property(a => a.ApprovedAt);
 
         builder.Property(a => a.ApprovedBy)
-            .HasConversion(id => id != null ? (int?)id.Value : null, 
+            .HasConversion(id => id != null ? (int?)id.Value : null,
                           value => value.HasValue ? new UserId(value.Value) : null);
 
         builder.Property(a => a.SyncStatus)

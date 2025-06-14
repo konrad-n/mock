@@ -23,19 +23,19 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand> : ICommandHandler
     {
         var commandName = typeof(TCommand).Name;
         var stopwatch = Stopwatch.StartNew();
-        
+
         _logger.LogInformation("Handling command {CommandName}", commandName);
-        
+
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             var commandJson = JsonSerializer.Serialize(command);
             _logger.LogDebug("Command details: {CommandJson}", commandJson);
         }
-        
+
         try
         {
             await _handler.HandleAsync(command);
-            
+
             stopwatch.Stop();
             _logger.LogInformation(
                 "Command {CommandName} handled successfully in {ElapsedMilliseconds}ms",
@@ -73,25 +73,25 @@ internal sealed class LoggingCommandHandlerDecorator<TCommand, TResult> : IComma
     {
         var commandName = typeof(TCommand).Name;
         var stopwatch = Stopwatch.StartNew();
-        
+
         _logger.LogInformation("Handling command {CommandName}", commandName);
-        
+
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             var commandJson = JsonSerializer.Serialize(command);
             _logger.LogDebug("Command details: {CommandJson}", commandJson);
         }
-        
+
         try
         {
             var result = await _handler.HandleAsync(command);
-            
+
             stopwatch.Stop();
             _logger.LogInformation(
                 "Command {CommandName} handled successfully in {ElapsedMilliseconds}ms",
                 commandName,
                 stopwatch.ElapsedMilliseconds);
-            
+
             return result;
         }
         catch (Exception ex)

@@ -63,18 +63,18 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();
             await connection.OpenAsync();
-            
+
             using var command = connection.CreateCommand();
             command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"MedicalShifts\"";
             var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
-            
+
             var newId = new MedicalShiftId(maxId + 1);
-            
+
             // Use reflection to set the ID since it's private
             var idProperty = shift.GetType().GetProperty("Id");
             idProperty?.SetValue(shift, newId);
         }
-        
+
         await _medicalShifts.AddAsync(shift);
         await _context.SaveChangesAsync();
         return shift.Id.Value;
@@ -102,8 +102,8 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
 
         return await _medicalShifts
             .AsNoTracking()
-            .Where(s => internshipIds.Contains(s.InternshipId) && 
-                       s.Date >= startDate && 
+            .Where(s => internshipIds.Contains(s.InternshipId) &&
+                       s.Date >= startDate &&
                        s.Date <= endDate)
             .OrderByDescending(s => s.Date)
             .ToListAsync();
@@ -153,7 +153,7 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
 
     public async Task<int> CountAsync(Expression<Func<MedicalShift, bool>>? predicate = null)
     {
-        return predicate is null 
+        return predicate is null
             ? await _medicalShifts.CountAsync()
             : await _medicalShifts.CountAsync(predicate);
     }
@@ -171,8 +171,8 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
             query = query.Where(predicate);
         }
 
-        query = orderByDateDescending 
-            ? query.OrderByDescending(s => s.Date) 
+        query = orderByDateDescending
+            ? query.OrderByDescending(s => s.Date)
             : query.OrderBy(s => s.Date);
 
         return await query

@@ -23,7 +23,7 @@ public class Absence
     public DateTime UpdatedAt { get; private set; }
 
     public bool CanBeModified => SyncStatus != SyncStatus.Synced && !IsApproved;
-    public bool ExtendsDuration => Type == AbsenceType.Sick || Type == AbsenceType.Maternity || 
+    public bool ExtendsDuration => Type == AbsenceType.Sick || Type == AbsenceType.Maternity ||
                                    Type == AbsenceType.Paternity || Type == AbsenceType.Unpaid;
     public bool IsActive => DateTime.UtcNow.Date >= StartDate.Date && DateTime.UtcNow.Date <= EndDate.Date;
 

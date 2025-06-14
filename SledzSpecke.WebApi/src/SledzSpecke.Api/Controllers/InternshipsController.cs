@@ -15,30 +15,35 @@ public class InternshipsController : BaseController
     private readonly ICommandHandler<ApproveInternship> _approveInternshipHandler;
     private readonly ICommandHandler<MarkInternshipAsCompleted> _markInternshipAsCompletedHandler;
     private readonly IQueryHandler<GetInternships, IEnumerable<InternshipDto>> _getInternshipsHandler;
+    private readonly IQueryHandler<GetInternshipById, InternshipDto> _getInternshipByIdHandler;
+    private readonly ICommandHandler<DeleteInternship> _deleteInternshipHandler;
 
     public InternshipsController(
         ICommandHandler<CreateInternship, int> createInternshipHandler,
         ICommandHandler<UpdateInternship> updateInternshipHandler,
         ICommandHandler<ApproveInternship> approveInternshipHandler,
         ICommandHandler<MarkInternshipAsCompleted> markInternshipAsCompletedHandler,
-        IQueryHandler<GetInternships, IEnumerable<InternshipDto>> getInternshipsHandler)
+        IQueryHandler<GetInternships, IEnumerable<InternshipDto>> getInternshipsHandler,
+        IQueryHandler<GetInternshipById, InternshipDto> getInternshipByIdHandler,
+        ICommandHandler<DeleteInternship> deleteInternshipHandler)
     {
         _createInternshipHandler = createInternshipHandler;
         _updateInternshipHandler = updateInternshipHandler;
         _approveInternshipHandler = approveInternshipHandler;
         _markInternshipAsCompletedHandler = markInternshipAsCompletedHandler;
         _getInternshipsHandler = getInternshipsHandler;
+        _getInternshipByIdHandler = getInternshipByIdHandler;
+        _deleteInternshipHandler = deleteInternshipHandler;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<InternshipDto>>> GetInternships(
         [FromQuery] int specializationId, [FromQuery] int? moduleId = null)
         => await HandleAsync(new GetInternships(specializationId, moduleId), _getInternshipsHandler);
-    
-    // TODO: Implement GetInternshipById query and handler
-    // [HttpGet("{internshipId:int}")]
-    // public async Task<ActionResult<InternshipDto>> GetInternship(int internshipId)
-    //     => await HandleAsync(new GetInternshipById(internshipId), _getInternshipByIdHandler);
+
+    [HttpGet("{internshipId:int}")]
+    public async Task<ActionResult<InternshipDto>> GetInternship(int internshipId)
+        => await HandleAsync(new GetInternshipById(internshipId), _getInternshipByIdHandler);
 
     [HttpPost]
     public async Task<ActionResult<int>> CreateInternship([FromBody] CreateInternship command)
@@ -58,7 +63,7 @@ public class InternshipsController : BaseController
             request.StartDate,
             request.EndDate,
             request.ModuleId);
-        
+
         return await HandleAsync(command, _updateInternshipHandler);
     }
 
@@ -68,21 +73,20 @@ public class InternshipsController : BaseController
         var command = new ApproveInternship(internshipId, request.ApproverName);
         return await HandleAsync(command, _approveInternshipHandler);
     }
-    
+
     [HttpPost("{internshipId:int}/complete")]
     public async Task<ActionResult> MarkInternshipAsCompleted(int internshipId)
     {
         var command = new MarkInternshipAsCompleted(internshipId);
         return await HandleAsync(command, _markInternshipAsCompletedHandler);
     }
-    
-    // TODO: Implement DeleteInternship command and handler
-    // [HttpDelete("{internshipId:int}")]
-    // public async Task<ActionResult> DeleteInternship(int internshipId)
-    // {
-    //     var command = new DeleteInternship(internshipId);
-    //     return await HandleAsync(command, _deleteInternshipHandler);
-    // }
+
+    [HttpDelete("{internshipId:int}")]
+    public async Task<ActionResult> DeleteInternship(int internshipId)
+    {
+        var command = new DeleteInternship(internshipId);
+        return await HandleAsync(command, _deleteInternshipHandler);
+    }
 }
 
 public class UpdateInternshipRequest

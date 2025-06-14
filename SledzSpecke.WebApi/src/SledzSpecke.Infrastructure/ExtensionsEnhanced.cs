@@ -31,7 +31,7 @@ public static class ExtensionsEnhanced
         services.AddSingleton<IPasswordManager, PasswordManager>();
         services.AddSingleton<IAuthenticator, Authenticator>();
         services.AddScoped<IUserContextService, UserContextService>();
-        
+
         // Template services
         services.AddSingleton<ISpecializationTemplateService, SpecializationTemplateService>();
 
@@ -74,11 +74,11 @@ public static class ExtensionsEnhanced
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        
+
         services.AddDbContext<SledzSpeckeDbContext>(options =>
         {
             options.UseNpgsql(connectionString);
-            
+
             // Enable sensitive data logging in development
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
@@ -142,7 +142,7 @@ public static class ExtensionsEnhanced
     {
         // Note: This is a simplified version. 
         // In a real implementation, you'd use Scrutor or a similar library for automatic decoration
-        
+
         // Example of manual decoration for a specific handler:
         // services.Decorate<ICommandHandler<AddProcedure, int>, LoggingCommandHandlerDecorator<AddProcedure, int>>();
         // services.Decorate<ICommandHandler<AddProcedure, int>, UnitOfWorkCommandHandlerDecorator<AddProcedure, int>>();

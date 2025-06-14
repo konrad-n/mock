@@ -10,13 +10,13 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
     public void Configure(EntityTypeBuilder<ProcedureBase> builder)
     {
         builder.ToTable("Procedures");
-        
+
         // Configure inheritance using discriminator
         builder.HasDiscriminator<string>("Discriminator")
             .HasValue<Procedure>("Procedure")
             .HasValue<ProcedureOldSmk>("ProcedureOldSmk")
             .HasValue<ProcedureNewSmk>("ProcedureNewSmk");
-        
+
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id)
             .HasConversion(x => x.Value, x => new ProcedureId(x));
@@ -53,7 +53,7 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
             .HasConversion<int>();
 
         builder.Property(x => x.SmkVersion)
-            .HasConversion<string>()
+            .HasConversion(x => x.Value, x => new SmkVersion(x))
             .HasMaxLength(10);
 
         builder.Property(x => x.AssistantData)
@@ -92,23 +92,23 @@ internal sealed class ProcedureNewSmkConfiguration : IEntityTypeConfiguration<Pr
     {
         builder.Property(x => x.ModuleId)
             .HasConversion(x => x!.Value, x => new ModuleId(x));
-        
+
         builder.Property(x => x.ProcedureRequirementId)
             .IsRequired();
-        
+
         builder.Property(x => x.ProcedureName)
             .HasMaxLength(200)
             .IsRequired();
-        
+
         builder.Property(x => x.CountA);
         builder.Property(x => x.CountB);
-        
+
         builder.Property(x => x.Supervisor)
             .HasMaxLength(100);
-        
+
         builder.Property(x => x.Institution)
             .HasMaxLength(200);
-        
+
         builder.Property(x => x.Comments)
             .HasMaxLength(1000);
     }

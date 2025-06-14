@@ -17,7 +17,7 @@ internal sealed class UnitOfWorkCommandHandlerDecorator<TCommand> : ICommandHand
     public async Task HandleAsync(TCommand command)
     {
         await _unitOfWork.BeginTransactionAsync();
-        
+
         try
         {
             await _handler.HandleAsync(command);
@@ -46,7 +46,7 @@ internal sealed class UnitOfWorkCommandHandlerDecorator<TCommand, TResult> : ICo
     public async Task<TResult> HandleAsync(TCommand command)
     {
         await _unitOfWork.BeginTransactionAsync();
-        
+
         try
         {
             var result = await _handler.HandleAsync(command);

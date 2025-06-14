@@ -25,7 +25,7 @@ public class YearCalculationService : IYearCalculationService
 
         // Calculate total years based on specialization duration
         int totalYears = specialization.DurationYears;
-        
+
         // If there are additional months, add one more year
         var totalDuration = specialization.PlannedEndDate - specialization.StartDate;
         if (totalDuration.Days % 365 > 30) // More than a month of extra days
@@ -54,7 +54,7 @@ public class YearCalculationService : IYearCalculationService
         }
 
         var hasBasicModule = specialization.Modules.Any(m => m.Type == ModuleType.Basic);
-        
+
         if (module.Type == ModuleType.Basic)
         {
             return (1, 2);
@@ -112,10 +112,10 @@ public class YearCalculationService : IYearCalculationService
 
         var currentDate = referenceDate ?? DateTime.UtcNow;
         var elapsedTime = currentDate - specialization.StartDate;
-        
+
         // Calculate year based on elapsed time (365 days per year)
         int currentYear = (int)(elapsedTime.TotalDays / 365) + 1;
-        
+
         // Limit to available years
         var availableYears = GetAvailableYears(specialization);
         if (availableYears.Length > 0)

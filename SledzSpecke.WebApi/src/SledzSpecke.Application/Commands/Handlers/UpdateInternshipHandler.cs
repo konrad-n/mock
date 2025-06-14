@@ -73,7 +73,7 @@ public class UpdateInternshipHandler : ICommandHandler<UpdateInternship>
         {
             var startDate = command.StartDate ?? internship.StartDate;
             var endDate = command.EndDate ?? internship.EndDate;
-            
+
             internship.UpdateDates(startDate, endDate);
         }
 

@@ -54,7 +54,7 @@ internal abstract class BaseRepository<TEntity> where TEntity : AggregateRoot
         Expression<Func<TEntity, bool>>? predicate = null,
         CancellationToken cancellationToken = default)
     {
-        return predicate is null 
+        return predicate is null
             ? await DbSet.CountAsync(cancellationToken)
             : await DbSet.CountAsync(predicate, cancellationToken);
     }
@@ -111,8 +111,8 @@ internal abstract class BaseRepository<TEntity> where TEntity : AggregateRoot
 
         if (orderBy != null)
         {
-            query = ascending 
-                ? query.OrderBy(orderBy) 
+            query = ascending
+                ? query.OrderBy(orderBy)
                 : query.OrderByDescending(orderBy);
         }
 

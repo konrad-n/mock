@@ -6,7 +6,7 @@ public class Result
     {
         if (isSuccess && !string.IsNullOrEmpty(error))
             throw new InvalidOperationException("Success result cannot have an error message");
-        
+
         if (!isSuccess && string.IsNullOrEmpty(error))
             throw new InvalidOperationException("Failed result must have an error message");
 

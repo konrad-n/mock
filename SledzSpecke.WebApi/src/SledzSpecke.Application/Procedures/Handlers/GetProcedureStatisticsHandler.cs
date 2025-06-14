@@ -54,10 +54,10 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
                 if (specialization != null && query.ProcedureRequirementId.HasValue)
                 {
                     var procedureTemplate = await _templateService.GetProcedureTemplateAsync(
-                        specialization.ProgramCode, 
-                        specialization.SmkVersion, 
+                        specialization.ProgramCode,
+                        specialization.SmkVersion,
                         query.ProcedureRequirementId.Value);
-                    
+
                     if (procedureTemplate != null)
                     {
                         summary.RequiredCountA = procedureTemplate.RequiredCountA;
@@ -97,8 +97,8 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
     }
 
     private async Task<IEnumerable<ProcedureBase>> GetProceduresForModule(
-        SpecializationId specializationId, 
-        int moduleId, 
+        SpecializationId specializationId,
+        int moduleId,
         int? procedureRequirementId)
     {
         var module = await _moduleRepository.GetByIdAsync(moduleId);
@@ -121,13 +121,13 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
         {
             // For New SMK, filter by module ID
             var allProcedures = await _procedureRepository.GetByUserIdAsync(specializationId.Value);
-            
+
             // Get internships for this module
             var moduleInternshipIds = allProcedures
                 .Where(p => p.InternshipId.Value > 0) // TODO: Need to join with internships to filter by module
                 .Select(p => p.InternshipId.Value)
                 .Distinct();
-            
+
             return allProcedures.Where(p => moduleInternshipIds.Contains(p.InternshipId.Value));
         }
     }

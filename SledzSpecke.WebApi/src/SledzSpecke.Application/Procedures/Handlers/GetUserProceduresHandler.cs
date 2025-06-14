@@ -27,7 +27,7 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
     public async Task<IEnumerable<ProcedureDto>> HandleAsync(GetUserProcedures query)
     {
         var userId = new UserId(query.UserId);
-        
+
         // Get all procedures for the user
         var procedures = await _procedureRepository.GetByUserAsync(userId);
 
@@ -62,7 +62,7 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
 
         // Get user's specializations to filter by SMK version
         var userSpecializations = await _specializationRepository.GetByUserIdAsync(userId);
-        
+
         // If user has specializations, filter procedures by SMK version
         if (userSpecializations.Any())
         {
@@ -71,7 +71,7 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
 
             // Get all unique internship IDs from procedures
             var internshipIds = proceduresList.Select(p => p.InternshipId).Distinct().ToList();
-            
+
             // Batch fetch all internships
             var internships = new Dictionary<InternshipId, Core.Entities.Internship>();
             foreach (var internshipId in internshipIds)

@@ -67,7 +67,7 @@ public class DeleteMedicalShiftHandlerEnhanced : ICommandHandler<DeleteMedicalSh
         LoadAndValidateEntitiesAsync(DeleteMedicalShift command)
     {
         var userId = _userContextService.GetUserId();
-        
+
         var shift = await _medicalShiftRepository.GetByIdAsync(command.ShiftId);
         if (shift == null)
         {

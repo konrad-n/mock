@@ -31,7 +31,7 @@ internal sealed class PerformanceCommandHandlerDecorator<TCommand> : ICommandHan
         await _handler.HandleAsync(command);
 
         stopwatch.Stop();
-        
+
         if (stopwatch.ElapsedMilliseconds > SlowOperationThresholdMs)
         {
             _logger.LogWarning(
@@ -69,7 +69,7 @@ internal sealed class PerformanceCommandHandlerDecorator<TCommand, TResult> : IC
         var result = await _handler.HandleAsync(command);
 
         stopwatch.Stop();
-        
+
         if (stopwatch.ElapsedMilliseconds > SlowOperationThresholdMs)
         {
             _logger.LogWarning(

@@ -44,7 +44,7 @@ public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
         {
             throw new NotFoundException($"Internship with ID {shift.InternshipId} not found.");
         }
-        
+
         // Get user to verify ownership through specialization
         var user = await _userRepository.GetByIdAsync(new UserId(userId));
         if (user == null || user.SpecializationId != internship.SpecializationId)
@@ -62,26 +62,26 @@ public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
         var hours = command.Hours ?? shift.Hours;
         var minutes = command.Minutes ?? shift.Minutes;
         var location = !string.IsNullOrWhiteSpace(command.Location) ? command.Location : shift.Location;
-        
+
         // Validate values before update - align with MAUI implementation
         if (command.Hours.HasValue && command.Hours.Value < 0)
         {
             throw new ValidationException("Hours cannot be negative.");
         }
-        
+
         // MAUI allows minutes > 59, normalization happens at summary level
         if (command.Minutes.HasValue && command.Minutes.Value < 0)
         {
             throw new ValidationException("Minutes cannot be negative.");
         }
-        
+
         // Note: Date changes are not supported through the UpdateShiftDetails method
         // If date update is needed, we'd need a separate method in MedicalShift entity
         if (command.Date.HasValue && command.Date.Value != shift.Date)
         {
             throw new BusinessRuleException("Cannot change the date of a medical shift. Please delete and create a new shift instead.");
         }
-        
+
         // Update the shift using the proper method
         shift.UpdateShiftDetails(hours, minutes, location);
 
@@ -91,7 +91,7 @@ public class UpdateMedicalShiftHandler : ICommandHandler<UpdateMedicalShift>
         {
             throw new NotFoundException($"Specialization not found for internship {shift.InternshipId}.");
         }
-        
+
         // MAUI implementation only validates that duration is greater than zero
         // No maximum duration limits are enforced
         var totalMinutes = shift.TotalMinutes;

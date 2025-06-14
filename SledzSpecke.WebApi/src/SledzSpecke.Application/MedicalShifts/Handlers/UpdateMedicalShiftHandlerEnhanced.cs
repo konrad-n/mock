@@ -92,11 +92,11 @@ public class UpdateMedicalShiftHandlerEnhanced : ICommandHandler<UpdateMedicalSh
         await _unitOfWork.SaveChangesAsync();
     }
 
-    private async Task<Result<(Core.Entities.MedicalShift shift, Core.Entities.Internship internship, 
+    private async Task<Result<(Core.Entities.MedicalShift shift, Core.Entities.Internship internship,
         Core.Entities.User user, Core.Entities.Specialization specialization)>> ValidateAndLoadEntitiesAsync(UpdateMedicalShift command)
     {
         var userId = _userContextService.GetUserId();
-        
+
         var shift = await _medicalShiftRepository.GetByIdAsync(command.ShiftId);
         if (shift == null)
         {

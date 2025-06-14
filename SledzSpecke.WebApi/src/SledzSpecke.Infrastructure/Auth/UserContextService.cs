@@ -16,7 +16,7 @@ public class UserContextService : IUserContextService
     public int GetUserId()
     {
         var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (string.IsNullOrEmpty(userIdClaim))
         {
             throw new UnauthorizedAccessException("User is not authenticated");

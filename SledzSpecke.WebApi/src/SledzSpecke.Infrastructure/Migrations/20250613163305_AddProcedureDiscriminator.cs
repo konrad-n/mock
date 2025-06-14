@@ -106,7 +106,7 @@ namespace SledzSpecke.Infrastructure.Migrations
                 maxLength: 21,
                 nullable: false,
                 defaultValue: "Procedure");
-                
+
             // Update existing procedures to have the correct discriminator value
             migrationBuilder.Sql("UPDATE \"Procedures\" SET \"Discriminator\" = 'Procedure' WHERE \"Discriminator\" IS NULL OR \"Discriminator\" = '';");
 

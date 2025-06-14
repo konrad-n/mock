@@ -6,7 +6,7 @@ public class ProcedureNotFoundException : CustomException
 {
     public int ProcedureId { get; }
 
-    public ProcedureNotFoundException(int procedureId) 
+    public ProcedureNotFoundException(int procedureId)
         : base($"Procedure with ID '{procedureId}' was not found.")
     {
         ProcedureId = procedureId;

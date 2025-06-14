@@ -6,7 +6,7 @@ public class InternshipNotFoundException : CustomException
 {
     public int InternshipId { get; }
 
-    public InternshipNotFoundException(int internshipId) 
+    public InternshipNotFoundException(int internshipId)
         : base($"Internship with ID {internshipId} was not found.")
     {
         InternshipId = internshipId;

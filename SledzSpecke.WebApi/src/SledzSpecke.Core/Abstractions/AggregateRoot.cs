@@ -3,7 +3,7 @@ namespace SledzSpecke.Core.Abstractions;
 public abstract class AggregateRoot
 {
     private readonly List<IDomainEvent> _domainEvents = new();
-    
+
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     protected void AddDomainEvent(IDomainEvent domainEvent)
@@ -15,6 +15,6 @@ public abstract class AggregateRoot
     {
         _domainEvents.Clear();
     }
-    
+
     public abstract int Id { get; protected set; }
 }

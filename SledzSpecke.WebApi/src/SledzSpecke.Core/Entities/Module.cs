@@ -13,7 +13,7 @@ public class Module
     public DateTime StartDate { get; private set; }
     public DateTime EndDate { get; private set; }
     public string Structure { get; private set; }
-    
+
     public int CompletedInternships { get; private set; }
     public int TotalInternships { get; private set; }
     public int CompletedCourses { get; private set; }

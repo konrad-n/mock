@@ -65,7 +65,7 @@ internal sealed class DataSeeder : IDataSeeder
             new SpecializationId(1), // WARNING: This assumes specialization ID 1 exists!
             DateTime.UtcNow
         );
-        
+
         // AI HINT: If you get "Specialization with ID 1 not found" errors:
         // 1. Check that specializations are seeded BEFORE users
         // 2. Verify the migration includes specialization data
@@ -73,7 +73,7 @@ internal sealed class DataSeeder : IDataSeeder
 
         _context.Users.Add(testUser);
         await _context.SaveChangesAsync();
-        
+
         _logger.LogInformation("Basic data seeding completed.");
     }
 
@@ -84,7 +84,7 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(cardiologyTemplate, SmkVersion.New);
         _context.Specializations.Add(specialization);
-        
+
         // Add modules explicitly since navigation property is ignored
         foreach (var module in specialization.Modules)
         {
@@ -99,7 +99,7 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(cardiologyTemplate, SmkVersion.Old);
         _context.Specializations.Add(specialization);
-        
+
         // Add modules explicitly since navigation property is ignored
         foreach (var module in specialization.Modules)
         {
@@ -114,7 +114,7 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(psychiatryTemplate, SmkVersion.New);
         _context.Specializations.Add(specialization);
-        
+
         // Add modules explicitly since navigation property is ignored
         foreach (var module in specialization.Modules)
         {
@@ -129,7 +129,7 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(psychiatryTemplate, SmkVersion.Old);
         _context.Specializations.Add(specialization);
-        
+
         // Add modules explicitly since navigation property is ignored
         foreach (var module in specialization.Modules)
         {
@@ -142,7 +142,7 @@ internal sealed class DataSeeder : IDataSeeder
         try
         {
             var jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "SpecializationTemplates", fileName);
-            
+
             if (!File.Exists(jsonPath))
             {
                 _logger.LogWarning("Specialization template file not found: {FileName}", fileName);
@@ -173,7 +173,7 @@ internal sealed class DataSeeder : IDataSeeder
         var specializationId = smkVersion == SmkVersion.Old
             ? (template.Code == "cardiology" ? 1 : 2)
             : (template.Code == "cardiology" ? 3 : 4);
-        
+
         var startDate = DateTime.UtcNow.Date;
         var plannedEndDate = startDate.AddYears(template.TotalDuration.Years)
             .AddMonths(template.TotalDuration.Months)
@@ -225,7 +225,7 @@ internal sealed class DataSeeder : IDataSeeder
             var shiftHoursPerWeek = moduleTemplate.MedicalShifts?.HoursPerWeek ?? 0;
             var totalShiftHours = (int)(shiftHoursPerWeek * 52 * moduleTemplate.Duration.Years);
             module.UpdateShiftHours(0, totalShiftHours, shiftHoursPerWeek);
-            
+
             module.UpdateSelfEducation(0, moduleTemplate.SelfEducation?.TotalDays ?? 0);
 
             specialization.AddModule(module);

@@ -48,10 +48,10 @@ public class Internship
     {
         if (string.IsNullOrWhiteSpace(institutionName))
             throw new ArgumentException("Institution name cannot be empty.", nameof(institutionName));
-        
+
         if (string.IsNullOrWhiteSpace(departmentName))
             throw new ArgumentException("Department name cannot be empty.", nameof(departmentName));
-        
+
         if (endDate <= startDate)
             throw new InvalidDateRangeException();
 
@@ -63,7 +63,7 @@ public class Internship
         EnsureCanModify();
         ModuleId = moduleId;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -76,50 +76,50 @@ public class Internship
         EnsureCanModify();
         if (string.IsNullOrWhiteSpace(supervisorName))
             throw new ArgumentException("Supervisor name cannot be empty.", nameof(supervisorName));
-        
+
         SupervisorName = supervisorName;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
             SyncStatus = SyncStatus.Modified;
         }
     }
-    
+
     public void UpdateInstitution(string institutionName, string departmentName)
     {
         EnsureCanModify();
-        
+
         if (string.IsNullOrWhiteSpace(institutionName))
             throw new ArgumentException("Institution name cannot be empty.", nameof(institutionName));
-            
+
         if (string.IsNullOrWhiteSpace(departmentName))
             throw new ArgumentException("Department name cannot be empty.", nameof(departmentName));
-        
+
         InstitutionName = institutionName;
         DepartmentName = departmentName;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
             SyncStatus = SyncStatus.Modified;
         }
     }
-    
+
     public void UpdateDates(DateTime startDate, DateTime endDate)
     {
         EnsureCanModify();
-        
+
         if (endDate <= startDate)
             throw new InvalidDateRangeException();
-            
+
         StartDate = startDate.ToUniversalTime();
         EndDate = endDate.ToUniversalTime();
         DaysCount = CalculateDaysCount(startDate, endDate);
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -132,7 +132,7 @@ public class Internship
         EnsureCanModify();
         IsCompleted = true;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -144,7 +144,7 @@ public class Internship
     {
         if (string.IsNullOrWhiteSpace(approverName))
             throw new ArgumentException("Approver name cannot be empty.", nameof(approverName));
-        
+
         IsApproved = true;
         ApprovalDate = DateTime.UtcNow;
         ApproverName = approverName;
@@ -164,10 +164,10 @@ public class Internship
         EnsureCanModify();
         if (medicalShift.InternshipId != Id)
             throw new InvalidOperationException("Medical shift must belong to this internship.");
-        
+
         _medicalShifts.Add(medicalShift);
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -180,10 +180,10 @@ public class Internship
         EnsureCanModify();
         if (procedure.InternshipId != Id)
             throw new InvalidOperationException("Procedure must belong to this internship.");
-        
+
         _procedures.Add(procedure);
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -222,7 +222,7 @@ public class Internship
     {
         if (IsApproved)
             throw new InvalidOperationException("Cannot modify approved internship.");
-        
+
         // IMPORTANT: Design Decision
         // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
         // Now, synced items CAN be modified - they automatically transition to Modified status.

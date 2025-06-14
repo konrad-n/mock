@@ -6,20 +6,20 @@ namespace SledzSpecke.Core.Entities;
 public class Procedure : ProcedureBase
 {
     private Procedure(ProcedureId id, InternshipId internshipId, DateTime date, int year, string code,
-        string location, ProcedureStatus status, SmkVersion smkVersion = SmkVersion.New)
+        string location, ProcedureStatus status, SmkVersion smkVersion)
         : base(id, internshipId, date, year, code, location, status, smkVersion)
     {
     }
 
-    public static Procedure Create(ProcedureId id, InternshipId internshipId, DateTime date, 
-        string code, string location, int year, SmkVersion smkVersion = SmkVersion.New)
+    public static Procedure Create(ProcedureId id, InternshipId internshipId, DateTime date,
+        string code, string location, int year, SmkVersion smkVersion)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new InvalidProcedureCodeException(code ?? string.Empty);
-        
+
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));
-        
+
         if (date > DateTime.UtcNow.Date)
             throw new ArgumentException("Procedure date cannot be in the future.", nameof(date));
 
@@ -36,7 +36,7 @@ public class Procedure : ProcedureBase
         // Generic validation for backward compatibility
         if (string.IsNullOrEmpty(Code))
             throw new InvalidOperationException("Procedure code is required.");
-        
+
         if (string.IsNullOrEmpty(Location))
             throw new InvalidOperationException("Location is required.");
     }

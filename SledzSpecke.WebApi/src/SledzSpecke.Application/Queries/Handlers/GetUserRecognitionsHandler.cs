@@ -28,24 +28,24 @@ internal sealed class GetUserRecognitionsHandler : IQueryHandler<GetUserRecognit
         return recognitions
             .OrderByDescending(r => r.StartDate)
             .Select(r => new RecognitionDto
-        {
-            Id = r.Id.Value,
-            SpecializationId = r.SpecializationId.Value,
-            UserId = r.UserId.Value,
-            Type = r.Type.ToString(),
-            Title = r.Title,
-            Description = r.Description,
-            Institution = r.Institution,
-            StartDate = r.StartDate,
-            EndDate = r.EndDate,
-            DaysReduction = r.DaysReduction,
-            IsApproved = r.IsApproved,
-            ApprovedAt = r.ApprovedAt,
-            ApprovedBy = r.ApprovedBy?.Value,
-            DocumentPath = r.DocumentPath,
-            SyncStatus = r.SyncStatus.ToString(),
-            CreatedAt = r.CreatedAt,
-            UpdatedAt = r.UpdatedAt
-        });
+            {
+                Id = r.Id.Value,
+                SpecializationId = r.SpecializationId.Value,
+                UserId = r.UserId.Value,
+                Type = r.Type.ToString(),
+                Title = r.Title,
+                Description = r.Description,
+                Institution = r.Institution,
+                StartDate = r.StartDate,
+                EndDate = r.EndDate,
+                DaysReduction = r.DaysReduction,
+                IsApproved = r.IsApproved,
+                ApprovedAt = r.ApprovedAt,
+                ApprovedBy = r.ApprovedBy?.Value,
+                DocumentPath = r.DocumentPath,
+                SyncStatus = r.SyncStatus.ToString(),
+                CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt
+            });
     }
 }

@@ -32,16 +32,16 @@ public class ExceptionHandlingMiddleware : IMiddleware
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/problem+json";
-        
+
         var (statusCode, problemDetails) = MapExceptionToProblemDetails(exception, context);
-        
+
         context.Response.StatusCode = statusCode;
-        
+
         var json = JsonSerializer.Serialize(problemDetails, new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
-        
+
         await context.Response.WriteAsync(json);
     }
 
@@ -71,7 +71,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
                     Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
                 }.CopyExtensions(problemDetails)
             ),
-            
+
             EntityNotFoundException e => (
                 StatusCodes.Status404NotFound,
                 new ProblemDetails
@@ -82,7 +82,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
                     Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4"
                 }.CopyExtensions(problemDetails)
             ),
-            
+
             DomainException e => (
                 StatusCodes.Status400BadRequest,
                 new ProblemDetails
@@ -93,7 +93,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
                     Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
                 }.CopyExtensions(problemDetails)
             ),
-            
+
             UnauthorizedAccessException => (
                 StatusCodes.Status401Unauthorized,
                 new ProblemDetails
@@ -104,7 +104,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
                     Type = "https://tools.ietf.org/html/rfc7235#section-3.1"
                 }.CopyExtensions(problemDetails)
             ),
-            
+
             // Default
             _ => (
                 StatusCodes.Status500InternalServerError,

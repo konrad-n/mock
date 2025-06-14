@@ -31,7 +31,7 @@ internal sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedical
         // Get user to determine SMK version
         var userId = new UserId(query.UserId);
         var user = await _userRepository.GetByIdAsync(userId);
-        
+
         if (user == null)
         {
             return Enumerable.Empty<MedicalShiftDto>();
@@ -39,7 +39,7 @@ internal sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedical
 
         // Get user's specialization to check SMK version
         var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
-        
+
         if (specialization == null)
         {
             return Enumerable.Empty<MedicalShiftDto>();
@@ -47,17 +47,17 @@ internal sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedical
 
         // Get medical shifts based on filters
         IEnumerable<MedicalShift> medicalShifts;
-        
+
         // If specific internship ID is provided, get shifts for that internship only
         if (query.InternshipId.HasValue)
         {
             medicalShifts = await _medicalShiftRepository.GetByInternshipIdAsync(query.InternshipId.Value);
-            
+
             // Apply date range filter if provided
             if (query.StartDate.HasValue && query.EndDate.HasValue)
             {
-                medicalShifts = medicalShifts.Where(s => 
-                    s.Date >= query.StartDate.Value && 
+                medicalShifts = medicalShifts.Where(s =>
+                    s.Date >= query.StartDate.Value &&
                     s.Date <= query.EndDate.Value);
             }
         }
@@ -65,8 +65,8 @@ internal sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedical
         else if (query.StartDate.HasValue && query.EndDate.HasValue)
         {
             medicalShifts = await _medicalShiftRepository.GetByDateRangeAsync(
-                query.StartDate.Value, 
-                query.EndDate.Value, 
+                query.StartDate.Value,
+                query.EndDate.Value,
                 query.UserId);
         }
         else

@@ -45,7 +45,7 @@ public class MedicalShift
     {
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));
-        
+
         // No future date validation - MAUI app allows future dates
 
         return new MedicalShift(id, internshipId, date, hours, minutes, location, year);
@@ -67,7 +67,7 @@ public class MedicalShift
         Minutes = Math.Max(0, Math.Min(59, minutes));
         Location = location ?? throw new ArgumentNullException(nameof(location));
         UpdatedAt = DateTime.UtcNow;
-        
+
         // AI HINT: This is a KEY CHANGE from original MAUI implementation!
         // Original: Synced items were read-only (CanBeModified => SyncStatus != SyncStatus.Synced)
         // New: Synced items CAN be modified and auto-transition to Modified status
@@ -117,7 +117,7 @@ public class MedicalShift
     {
         if (IsApproved)
             throw new InvalidOperationException("Cannot modify approved medical shift.");
-        
+
         // IMPORTANT: Design Decision
         // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
         // Now, synced items CAN be modified - they automatically transition to Modified status.

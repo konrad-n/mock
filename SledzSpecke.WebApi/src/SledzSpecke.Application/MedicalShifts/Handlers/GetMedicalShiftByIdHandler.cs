@@ -42,7 +42,7 @@ public class GetMedicalShiftByIdHandler : IQueryHandler<GetMedicalShiftById, Med
         {
             throw new NotFoundException($"Internship with ID {shift.InternshipId} not found.");
         }
-        
+
         // Get user to verify ownership through specialization
         var user = await _userRepository.GetByIdAsync(new UserId(userId));
         if (user == null || user.SpecializationId != internship.SpecializationId)

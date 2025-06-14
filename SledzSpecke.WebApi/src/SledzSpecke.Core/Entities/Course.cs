@@ -41,10 +41,10 @@ public class Course
     {
         if (string.IsNullOrWhiteSpace(courseName))
             throw new ArgumentException("Course name cannot be empty.", nameof(courseName));
-        
+
         if (string.IsNullOrWhiteSpace(institutionName))
             throw new ArgumentException("Institution name cannot be empty.", nameof(institutionName));
-        
+
         if (completionDate > DateTime.UtcNow.Date)
             throw new ArgumentException("Completion date cannot be in the future.", nameof(completionDate));
 
@@ -56,7 +56,7 @@ public class Course
         EnsureCanModify();
         ModuleId = moduleId;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -69,7 +69,7 @@ public class Course
         EnsureCanModify();
         CourseNumber = courseNumber;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -82,11 +82,11 @@ public class Course
         EnsureCanModify();
         if (string.IsNullOrWhiteSpace(certificateNumber))
             throw new ArgumentException("Certificate number cannot be empty.", nameof(certificateNumber));
-        
+
         HasCertificate = true;
         CertificateNumber = certificateNumber;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -100,7 +100,7 @@ public class Course
         HasCertificate = false;
         CertificateNumber = null;
         UpdatedAt = DateTime.UtcNow;
-        
+
         // Automatically transition from Synced to Modified
         if (SyncStatus == SyncStatus.Synced)
         {
@@ -112,7 +112,7 @@ public class Course
     {
         if (string.IsNullOrWhiteSpace(approverName))
             throw new ArgumentException("Approver name cannot be empty.", nameof(approverName));
-        
+
         IsApproved = true;
         ApprovalDate = DateTime.UtcNow;
         ApproverName = approverName;
@@ -153,7 +153,7 @@ public class Course
     {
         if (IsApproved)
             throw new InvalidOperationException("Cannot modify approved course.");
-        
+
         // IMPORTANT: Design Decision
         // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
         // Now, synced items CAN be modified - they automatically transition to Modified status.

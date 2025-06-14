@@ -65,20 +65,20 @@ internal sealed class SqlInternshipRepository : IInternshipRepository
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();
             await connection.OpenAsync();
-            
+
             using var command = connection.CreateCommand();
             command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Internships\"";
             var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
-            
+
             var newId = new InternshipId(maxId + 1);
-            
+
             // Use reflection to set the ID since it's private
             var idProperty = internship.GetType().GetProperty("Id");
             idProperty?.SetValue(internship, newId);
-            
+
             await connection.CloseAsync();
         }
-        
+
         await _internships.AddAsync(internship);
         await _context.SaveChangesAsync();
     }

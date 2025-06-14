@@ -6,7 +6,7 @@ namespace SledzSpecke.Core.ValueObjects;
 public record Email
 {
     private static readonly Regex EmailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
-    
+
     public string Value { get; }
 
     public Email(string value)

@@ -23,7 +23,7 @@ public class GetProcedureByIdHandler : IQueryHandler<GetProcedureById, Procedure
     {
         var userId = _userContextService.GetUserId();
         var procedure = await _procedureRepository.GetByIdAsync(new ProcedureId(query.ProcedureId));
-        
+
         if (procedure is null)
         {
             throw new ProcedureNotFoundException(query.ProcedureId);

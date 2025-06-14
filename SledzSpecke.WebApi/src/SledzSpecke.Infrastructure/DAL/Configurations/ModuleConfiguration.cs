@@ -20,7 +20,7 @@ internal sealed class ModuleConfiguration : IEntityTypeConfiguration<Module>
             .HasConversion<int>();
 
         builder.Property(x => x.SmkVersion)
-            .HasConversion<int>();
+            .HasConversion(x => x.Value, x => new SmkVersion(x));
 
         builder.Property(x => x.Version)
             .IsRequired();
