@@ -30,7 +30,7 @@ public class MedicalShift
     {
         Id = id;
         InternshipId = internshipId;
-        Date = date;
+        Date = EnsureUtc(date);
         Hours = Math.Max(0, hours);
         Minutes = Math.Max(0, Math.Min(59, minutes));
         Location = location ?? throw new ArgumentNullException(nameof(location));
@@ -46,8 +46,7 @@ public class MedicalShift
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));
         
-        if (date > DateTime.UtcNow.Date)
-            throw new ArgumentException("Shift date cannot be in the future.", nameof(date));
+        // No future date validation - MAUI app allows future dates
 
         return new MedicalShift(id, internshipId, date, hours, minutes, location, year);
     }
@@ -124,5 +123,16 @@ public class MedicalShift
         // Now, synced items CAN be modified - they automatically transition to Modified status.
         // This allows users to correct/update synced data while maintaining the audit trail.
         // Only APPROVED items are truly read-only.
+    }
+
+    private static DateTime EnsureUtc(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => dateTime,
+            DateTimeKind.Local => dateTime.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
+            _ => dateTime
+        };
     }
 }

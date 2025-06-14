@@ -241,7 +241,7 @@ def get_auth_token() -> Optional[str]:
         )
         
         if response.status_code == 200:
-            token = response.json().get("accessToken")
+            token = response.json().get("AccessToken")
             return token
         else:
             print(f"Authentication failed: {response.status_code} - {response.text}")
@@ -269,7 +269,8 @@ def test_authentication():
             "password": "Test123!",
             "fullName": "New Test User",
             "email": f"test_{int(time.time())}@example.com",
-            "role": "user"
+            "smkVersion": 1,  # Old SMK
+            "specializationId": 1  # Anestezjologia i intensywna terapia
         }
         
         response = requests.post(
@@ -312,12 +313,12 @@ def test_internships(token: str):
     try:
         internship_data = {
             "specializationId": 1,
-            "moduleId": 1,
+            "moduleId": 101,  # Module ID for specialization 1: 1*100 + 1
             "institutionName": "Test Hospital",
             "departmentName": "Cardiology",
             "supervisorName": "Dr. Test",
-            "startDate": datetime.now().isoformat(),
-            "endDate": (datetime.now() + timedelta(days=30)).isoformat()
+            "startDate": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            "endDate": (datetime.utcnow() + timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         }
         
         response = requests.post(
@@ -366,8 +367,8 @@ def test_procedures(token: str, internship_id: int, smk_version: str = "new"):
     try:
         procedure_data = {
             "internshipId": internship_id,
-            "date": datetime.now().isoformat(),
-            "year": datetime.now().year,
+            "date": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            "year": 1,  # Education year, not calendar year
             "code": "CARD-001" if smk_version == "new" else "P001",
             "location": "Test Hospital",
             "status": "completed",
@@ -457,11 +458,11 @@ def test_medical_shifts(token: str, internship_id: int, smk_version: str = "new"
     try:
         shift_data = {
             "internshipId": internship_id,
-            "date": datetime.now().isoformat(),
+            "date": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
             "hours": 8,
             "minutes": 30,
             "location": "Emergency Department",
-            "year": datetime.now().year
+            "year": 1  # Education year, not calendar year
         }
         
         response = requests.post(

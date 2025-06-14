@@ -14,20 +14,20 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
         _context = context;
     }
 
-    public async Task<Procedure?> GetByIdAsync(ProcedureId id)
+    public async Task<ProcedureBase?> GetByIdAsync(ProcedureId id)
     {
         return await _context.Procedures
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<IEnumerable<Procedure>> GetByInternshipIdAsync(int internshipId)
+    public async Task<IEnumerable<ProcedureBase>> GetByInternshipIdAsync(int internshipId)
     {
         return await _context.Procedures
             .Where(p => p.InternshipId.Value == internshipId)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Procedure>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<ProcedureBase>> GetByUserIdAsync(int userId)
     {
         var internshipIds = await _context.Internships
             .Join(_context.Specializations,
@@ -47,7 +47,7 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Procedure>> GetByUserAsync(UserId userId)
+    public async Task<IEnumerable<ProcedureBase>> GetByUserAsync(UserId userId)
     {
         var internshipIds = await _context.Internships
             .Join(_context.Specializations,
@@ -67,14 +67,14 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Procedure>> GetByCodeAsync(string code)
+    public async Task<IEnumerable<ProcedureBase>> GetByCodeAsync(string code)
     {
         return await _context.Procedures
             .Where(p => p.Code == code)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Procedure>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, int userId)
+    public async Task<IEnumerable<ProcedureBase>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, int userId)
     {
         var internshipIds = await _context.Internships
             .Join(_context.Specializations,
@@ -94,7 +94,7 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Procedure>> GetAllAsync()
+    public async Task<IEnumerable<ProcedureBase>> GetAllAsync()
     {
         return await _context.Procedures.ToListAsync();
     }
@@ -107,20 +107,40 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .ToDictionary(g => g.Key, g => g.Count());
     }
 
-    public async Task<int> AddAsync(Procedure procedure)
+    public async Task<int> AddAsync(ProcedureBase procedure)
     {
+        // Generate new ID if it's 0
+        if (procedure.Id.Value == 0)
+        {
+            // Query raw database to get max ID
+            var connection = _context.Database.GetDbConnection();
+            await connection.OpenAsync();
+            
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Procedures\"";
+            var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
+            
+            var newId = new ProcedureId(maxId + 1);
+            
+            // Use reflection to set the ID since it's private
+            var idProperty = procedure.GetType().GetProperty("Id");
+            idProperty?.SetValue(procedure, newId);
+            
+            await connection.CloseAsync();
+        }
+        
         await _context.Procedures.AddAsync(procedure);
         await _context.SaveChangesAsync();
         return procedure.Id.Value;
     }
 
-    public async Task UpdateAsync(Procedure procedure)
+    public async Task UpdateAsync(ProcedureBase procedure)
     {
         _context.Procedures.Update(procedure);
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Procedure procedure)
+    public async Task DeleteAsync(ProcedureBase procedure)
     {
         _context.Procedures.Remove(procedure);
         await _context.SaveChangesAsync();

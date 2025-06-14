@@ -29,13 +29,16 @@ public static class Extensions
         
         // Template services
         services.AddSingleton<ISpecializationTemplateService, SpecializationTemplateService>();
+        
+        // Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IUserRepository, SqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();
         services.AddScoped<IInternshipRepository, SqlInternshipRepository>();
         services.AddScoped<IProcedureRepository, SqlProcedureRepository>();
-        services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepository>();
+        services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepositoryEnhanced>();
         services.AddScoped<ICourseRepository, SqlCourseRepository>();
         services.AddScoped<IAbsenceRepository, SqlAbsenceRepository>();
         services.AddScoped<IRecognitionRepository, SqlRecognitionRepository>();

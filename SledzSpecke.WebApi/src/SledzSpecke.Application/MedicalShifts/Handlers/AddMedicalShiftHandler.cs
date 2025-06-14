@@ -164,5 +164,9 @@ public class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
         {
             throw new ArgumentException("Location name cannot exceed 100 characters.");
         }
+        
+        // For New SMK, we should validate that the shift is within an active internship period
+        // This is done by ensuring the InternshipId is valid and the date is within internship dates
+        // The actual internship validation is done when fetching the internship
     }
 }

@@ -31,19 +31,25 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
 
     public async Task<int> HandleAsync(AddProcedure command)
     {
+        Console.WriteLine($"[DEBUG] AddProcedureHandler: Processing procedure for internship {command.InternshipId}");
+        
         // Validate internship exists
         var internship = await _internshipRepository.GetByIdAsync(command.InternshipId);
         if (internship is null)
         {
+            Console.WriteLine($"[ERROR] Internship with ID {command.InternshipId} not found");
             throw new InvalidOperationException($"Internship with ID {command.InternshipId} not found.");
         }
+        Console.WriteLine($"[DEBUG] Found internship: {internship.Id.Value}, Specialization: {internship.SpecializationId.Value}");
 
         // Get specialization to determine SMK version
         var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
         if (specialization is null)
         {
+            Console.WriteLine($"[ERROR] Specialization with ID {internship.SpecializationId} not found");
             throw new InvalidOperationException($"Specialization with ID {internship.SpecializationId} not found.");
         }
+        Console.WriteLine($"[DEBUG] Specialization: {specialization.ProgramCode}, SMK Version: {specialization.SmkVersion}");
 
         // Validate procedure code
         if (string.IsNullOrWhiteSpace(command.Code))
@@ -57,11 +63,7 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             throw new ArgumentException("Location cannot be empty.", nameof(command.Location));
         }
 
-        // Validate date
-        if (command.Date > DateTime.UtcNow.Date)
-        {
-            throw new ArgumentException("Procedure date cannot be in the future.", nameof(command.Date));
-        }
+        // No future date validation - MAUI app allows future dates
 
         if (command.Date < internship.StartDate || command.Date > internship.EndDate)
         {
@@ -102,15 +104,49 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             }
         }
         
-        // Create the procedure using the generic Procedure class
-        var procedure = Procedure.Create(
-            procedureId,
-            internship.Id,
-            command.Date,
-            command.Code,
-            command.Location,
-            procedureYear,
-            specialization.SmkVersion);
+        // Create the appropriate procedure type based on SMK version
+        Console.WriteLine($"[DEBUG] Creating procedure: SMK={specialization.SmkVersion}, Year={procedureYear}, Code={command.Code}");
+        
+        ProcedureBase procedure;
+        try
+        {
+            if (specialization.SmkVersion == SmkVersion.Old)
+            {
+                Console.WriteLine($"[DEBUG] Creating ProcedureOldSmk");
+                procedure = ProcedureOldSmk.Create(
+                    procedureId,
+                    internship.Id,
+                    command.Date,
+                    procedureYear,
+                    command.Code,
+                    command.Location);
+            }
+            else
+            {
+                Console.WriteLine($"[DEBUG] Creating ProcedureNewSmk");
+                // For New SMK, we need moduleId, procedureRequirementId and procedureName
+                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ?? 
+                    throw new InvalidOperationException("Module ID is required for New SMK procedures");
+                var procedureRequirementId = command.ProcedureRequirementId ?? 0; // Will be validated later
+                var procedureName = command.ProcedureName ?? command.Code; // Use code as fallback
+                
+                procedure = ProcedureNewSmk.Create(
+                    procedureId,
+                    internship.Id,
+                    command.Date,
+                    command.Code,
+                    command.Location,
+                    new ModuleId(moduleId),
+                    procedureRequirementId,
+                    procedureName);
+            }
+            Console.WriteLine($"[DEBUG] Procedure entity created successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Failed to create procedure entity: {ex.GetType().Name}: {ex.Message}");
+            throw;
+        }
 
         // Set additional fields
         if (!string.IsNullOrWhiteSpace(command.OperatorCode) || 
@@ -123,30 +159,58 @@ internal sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
                 command.PatientInitials,
                 command.PatientGender);
         }
-
-        // SMK version-specific validation
+        
+        // Set SMK-specific fields
         if (specialization.SmkVersion == SmkVersion.Old)
         {
-            // For Old SMK, performing person is required for completed procedures
-            if (procedureStatus == ProcedureStatus.Completed && string.IsNullOrWhiteSpace(command.PerformingPerson))
+            var oldSmkProcedure = (ProcedureOldSmk)procedure;
+            
+            if (!string.IsNullOrWhiteSpace(command.ProcedureGroup))
             {
-                throw new InvalidOperationException("Performing person is required for completed procedures in Old SMK.");
+                oldSmkProcedure.SetProcedureGroup(command.ProcedureGroup);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(command.AssistantData))
+            {
+                oldSmkProcedure.SetAssistantData(command.AssistantData);
+            }
+            
+            if (command.ProcedureRequirementId.HasValue)
+            {
+                oldSmkProcedure.SetProcedureRequirement(command.ProcedureRequirementId.Value);
             }
         }
-        else // New SMK
+        else
         {
-            // Check if operator code is required for New SMK procedures
-            bool requiresOperatorCode = command.Code.StartsWith("A") || 
-                                      command.Code.Contains("OPER") || 
-                                      command.Code.Contains("SURG");
+            var newSmkProcedure = (ProcedureNewSmk)procedure;
             
-            if (requiresOperatorCode && string.IsNullOrWhiteSpace(command.OperatorCode))
+            if (!string.IsNullOrWhiteSpace(command.Supervisor))
             {
-                throw new InvalidOperationException("Operator code is required for this procedure type in New SMK.");
+                newSmkProcedure.SetSupervisor(command.Supervisor);
             }
             
-            // For New SMK, supervisor would be required for completed procedures
-            // but since it's not in the command, we'll skip this validation for now
+            // Module ID is already set during creation, so we don't need to set it again
+        }
+
+        // SMK version-specific validation for completed procedures
+        if (procedureStatus == ProcedureStatus.Completed)
+        {
+            if (specialization.SmkVersion == SmkVersion.Old)
+            {
+                // For Old SMK, performing person is required for completed procedures
+                if (string.IsNullOrWhiteSpace(command.PerformingPerson))
+                {
+                    throw new InvalidOperationException("Performing person is required for completed procedures in Old SMK.");
+                }
+            }
+            else // New SMK
+            {
+                // For New SMK, supervisor is required for completed procedures
+                if (string.IsNullOrWhiteSpace(command.Supervisor))
+                {
+                    throw new InvalidOperationException("Supervisor is required for completed procedures in New SMK.");
+                }
+            }
         }
 
         // Set procedure status

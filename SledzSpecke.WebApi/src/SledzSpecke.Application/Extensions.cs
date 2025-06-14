@@ -45,6 +45,8 @@ public static class Extensions
         services.AddScoped<IQueryHandler<Queries.GetProcedureById, DTO.ProcedureDto>, GetProcedureByIdHandler>();
         services.AddScoped<IQueryHandler<Queries.GetUserMedicalShifts, IEnumerable<DTO.MedicalShiftDto>>, GetUserMedicalShiftsHandler>();
         services.AddScoped<IQueryHandler<Queries.GetMedicalShiftById, DTO.MedicalShiftDto>, GetMedicalShiftByIdHandler>();
+        services.AddScoped<IQueryHandler<Queries.GetProcedureStatistics, DTO.ProcedureSummaryDto>, GetProcedureStatisticsHandler>();
+        services.AddScoped<IQueryHandler<Queries.GetMedicalShiftStatistics, DTO.MedicalShiftSummaryDto>, GetMedicalShiftStatisticsHandler>();
 
         // Register validation services
         services.AddScoped<ISpecializationValidationService, SpecializationValidationService>();

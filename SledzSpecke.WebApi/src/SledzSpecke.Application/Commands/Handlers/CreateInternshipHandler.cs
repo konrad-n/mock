@@ -59,6 +59,6 @@ internal sealed class CreateInternshipHandler : ICommandHandler<CreateInternship
         }
 
         await _internshipRepository.AddAsync(internship);
-        return internship.Id;
+        return internship.Id.Value;
     }
 }

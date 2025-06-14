@@ -367,7 +367,7 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.ToTable("Modules");
                 });
 
-            modelBuilder.Entity("SledzSpecke.Core.Entities.Procedure", b =>
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureBase", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer");
@@ -376,12 +376,13 @@ namespace SledzSpecke.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AssistantData")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -389,17 +390,22 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
                     b.Property<int>("InternshipId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("OperatorCode")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<char?>("PatientGender")
                         .HasMaxLength(1)
@@ -414,14 +420,18 @@ namespace SledzSpecke.Infrastructure.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("ProcedureGroup")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<int>("SmkVersion")
-                        .HasColumnType("integer");
+                    b.Property<string>("SmkVersion")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("integer");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int>("SyncStatus")
                         .HasColumnType("integer");
@@ -440,7 +450,11 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("InternshipId");
 
-                    b.ToTable("Procedures");
+                    b.ToTable("Procedures", (string)null);
+
+                    b.HasDiscriminator().HasValue("ProcedureBase");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Publication", b =>
@@ -839,6 +853,69 @@ namespace SledzSpecke.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.Procedure", b =>
+                {
+                    b.HasBaseType("SledzSpecke.Core.Entities.ProcedureBase");
+
+                    b.HasDiscriminator().HasValue("Procedure");
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureNewSmk", b =>
+                {
+                    b.HasBaseType("SledzSpecke.Core.Entities.ProcedureBase");
+
+                    b.Property<string>("Comments")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("CountA")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountB")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Institution")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProcedureName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("ProcedureRequirementId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Supervisor")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasDiscriminator().HasValue("ProcedureNewSmk");
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureOldSmk", b =>
+                {
+                    b.HasBaseType("SledzSpecke.Core.Entities.ProcedureBase");
+
+                    b.Property<string>("InternshipName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int?>("ProcedureRequirementId")
+                        .HasColumnType("integer");
+
+                    b.ToTable("Procedures", t =>
+                        {
+                            t.Property("ProcedureRequirementId")
+                                .HasColumnName("ProcedureOldSmk_ProcedureRequirementId");
+                        });
+
+                    b.HasDiscriminator().HasValue("ProcedureOldSmk");
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.MedicalShift", b =>

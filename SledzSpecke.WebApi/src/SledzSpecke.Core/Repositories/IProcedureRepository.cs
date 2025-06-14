@@ -5,16 +5,16 @@ namespace SledzSpecke.Core.Repositories;
 
 public interface IProcedureRepository
 {
-    Task<Procedure?> GetByIdAsync(ProcedureId id);
-    Task<IEnumerable<Procedure>> GetByInternshipIdAsync(int internshipId);
-    Task<IEnumerable<Procedure>> GetByUserIdAsync(int userId);
-    Task<IEnumerable<Procedure>> GetByUserAsync(UserId userId);
-    Task<IEnumerable<Procedure>> GetByCodeAsync(string code);
-    Task<IEnumerable<Procedure>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, int userId);
-    Task<IEnumerable<Procedure>> GetAllAsync();
-    Task<int> AddAsync(Procedure procedure);
-    Task UpdateAsync(Procedure procedure);
-    Task DeleteAsync(Procedure procedure);
+    Task<ProcedureBase?> GetByIdAsync(ProcedureId id);
+    Task<IEnumerable<ProcedureBase>> GetByInternshipIdAsync(int internshipId);
+    Task<IEnumerable<ProcedureBase>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<ProcedureBase>> GetByUserAsync(UserId userId);
+    Task<IEnumerable<ProcedureBase>> GetByCodeAsync(string code);
+    Task<IEnumerable<ProcedureBase>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, int userId);
+    Task<IEnumerable<ProcedureBase>> GetAllAsync();
+    Task<int> AddAsync(ProcedureBase procedure);
+    Task UpdateAsync(ProcedureBase procedure);
+    Task DeleteAsync(ProcedureBase procedure);
     Task<Dictionary<string, int>> GetProcedureCountsByCodeAsync(int internshipId);
     Task<IEnumerable<int>> GetUserInternshipIdsAsync(int userId);
 }

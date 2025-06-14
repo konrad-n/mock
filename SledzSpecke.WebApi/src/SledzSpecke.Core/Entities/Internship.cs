@@ -35,8 +35,8 @@ public class Internship
         SpecializationId = specializationId;
         InstitutionName = institutionName;
         DepartmentName = departmentName;
-        StartDate = startDate;
-        EndDate = endDate;
+        StartDate = EnsureUtc(startDate);
+        EndDate = EnsureUtc(endDate);
         DaysCount = CalculateDaysCount(startDate, endDate);
         SyncStatus = SyncStatus.NotSynced;
         CreatedAt = DateTime.UtcNow;
@@ -115,8 +115,8 @@ public class Internship
         if (endDate <= startDate)
             throw new InvalidDateRangeException();
             
-        StartDate = startDate;
-        EndDate = endDate;
+        StartDate = startDate.ToUniversalTime();
+        EndDate = endDate.ToUniversalTime();
         DaysCount = CalculateDaysCount(startDate, endDate);
         UpdatedAt = DateTime.UtcNow;
         
@@ -233,5 +233,16 @@ public class Internship
     private static int CalculateDaysCount(DateTime startDate, DateTime endDate)
     {
         return (endDate - startDate).Days + 1;
+    }
+
+    private static DateTime EnsureUtc(DateTime dateTime)
+    {
+        return dateTime.Kind switch
+        {
+            DateTimeKind.Utc => dateTime,
+            DateTimeKind.Local => dateTime.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
+            _ => dateTime
+        };
     }
 }

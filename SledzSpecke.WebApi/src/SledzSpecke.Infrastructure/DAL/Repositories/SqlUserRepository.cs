@@ -32,7 +32,10 @@ internal sealed class SqlUserRepository : IUserRepository
         if (user.Id == null || user.Id.Value == 0)
         {
             // Get the next available ID
-            var maxId = await _context.Users.MaxAsync(u => (int?)u.Id.Value) ?? 0;
+            var maxId = await _context.Users
+                .Select(u => u.Id.Value)
+                .DefaultIfEmpty(0)
+                .MaxAsync();
             var newId = new UserId(maxId + 1);
             
             // Create a new user with the generated ID

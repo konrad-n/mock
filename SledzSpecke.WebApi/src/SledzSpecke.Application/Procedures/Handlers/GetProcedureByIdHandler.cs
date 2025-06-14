@@ -1,6 +1,7 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.DTO;
 using SledzSpecke.Application.Exceptions;
+using SledzSpecke.Application.Procedures.Extensions;
 using SledzSpecke.Application.Queries;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
@@ -35,24 +36,6 @@ public class GetProcedureByIdHandler : IQueryHandler<GetProcedureById, Procedure
             throw new UnauthorizedAccessException("Cannot access procedure from another user's internship");
         }
 
-        return new ProcedureDto(
-            procedure.Id.Value,
-            procedure.InternshipId.Value,
-            procedure.Date,
-            procedure.Year,
-            procedure.Code,
-            procedure.OperatorCode,
-            procedure.PerformingPerson,
-            procedure.Location,
-            procedure.PatientInitials,
-            procedure.PatientGender,
-            procedure.AssistantData,
-            procedure.ProcedureGroup,
-            procedure.Status.ToString(),
-            procedure.SyncStatus,
-            procedure.AdditionalFields,
-            procedure.IsCompleted,
-            procedure.CanBeModified
-        );
+        return procedure.ToDto();
     }
 }

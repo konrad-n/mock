@@ -24,4 +24,10 @@
     <PackageReference Include="Scrutor" Version="5.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data/SpecializationTemplates/**/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

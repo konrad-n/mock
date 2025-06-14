@@ -84,6 +84,12 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(cardiologyTemplate, SmkVersion.New);
         _context.Specializations.Add(specialization);
+        
+        // Add modules explicitly since navigation property is ignored
+        foreach (var module in specialization.Modules)
+        {
+            _context.Modules.Add(module);
+        }
     }
 
     private async Task SeedCardiologyOldAsync()
@@ -93,6 +99,12 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(cardiologyTemplate, SmkVersion.Old);
         _context.Specializations.Add(specialization);
+        
+        // Add modules explicitly since navigation property is ignored
+        foreach (var module in specialization.Modules)
+        {
+            _context.Modules.Add(module);
+        }
     }
 
     private async Task SeedPsychiatryNewAsync()
@@ -102,6 +114,12 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(psychiatryTemplate, SmkVersion.New);
         _context.Specializations.Add(specialization);
+        
+        // Add modules explicitly since navigation property is ignored
+        foreach (var module in specialization.Modules)
+        {
+            _context.Modules.Add(module);
+        }
     }
 
     private async Task SeedPsychiatryOldAsync()
@@ -111,6 +129,12 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = await CreateSpecializationFromTemplateAsync(psychiatryTemplate, SmkVersion.Old);
         _context.Specializations.Add(specialization);
+        
+        // Add modules explicitly since navigation property is ignored
+        foreach (var module in specialization.Modules)
+        {
+            _context.Modules.Add(module);
+        }
     }
 
     private async Task<SpecializationTemplate?> LoadSpecializationTemplateAsync(string fileName)
@@ -144,6 +168,8 @@ internal sealed class DataSeeder : IDataSeeder
     private async Task<Specialization> CreateSpecializationFromTemplateAsync(SpecializationTemplate template, SmkVersion smkVersion)
     {
         // Use hardcoded IDs for now (1-4 for the 4 specializations)
+        // Old: Cardiology=1, Psychiatry=2
+        // New: Cardiology=3, Psychiatry=4
         var specializationId = smkVersion == SmkVersion.Old
             ? (template.Code == "cardiology" ? 1 : 2)
             : (template.Code == "cardiology" ? 3 : 4);
@@ -166,7 +192,8 @@ internal sealed class DataSeeder : IDataSeeder
         // Create modules
         foreach (var moduleTemplate in template.Modules)
         {
-            var moduleId = new ModuleId(moduleTemplate.ModuleId);
+            // Generate unique module ID by combining specialization ID and module ID
+            var moduleId = new ModuleId(specializationId * 100 + moduleTemplate.ModuleId);
             var moduleType = Enum.Parse<ModuleType>(moduleTemplate.ModuleType);
             var moduleStartDate = startDate;
             var moduleEndDate = moduleStartDate.AddYears(moduleTemplate.Duration.Years)
