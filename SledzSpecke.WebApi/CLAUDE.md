@@ -60,6 +60,16 @@ SledzSpecke to aplikacja mobilna i webowa dla lekarzy do śledzenia postępu spe
 - Wsparcie dla starego i nowego SMK
 - Jedna specjalizacja na użytkownika
 
+### Materiały Referencyjne
+W folderze `/projects/mock/AdditionalContext/` znajdują się:
+- **Oficjalne instrukcje SMK** (pliki PDF w języku polskim i angielskim)
+- **20 screenshotów** z poprzedniej wersji aplikacji pokazujących:
+  - Dashboard z postępem modułów (podstawowy i specjalistyczny)
+  - Zarządzanie stażami, dyżurami, procedurami
+  - Formularze dodawania i edycji
+  - Różnice interfejsu między starym i nowym SMK
+  - Śledzenie postępu z podziałem na lata (1-5)
+
 ---
 
 ## 2. Architektura Systemu
@@ -531,6 +541,15 @@ public class SmkExcelExporter
 ---
 
 ## 9. Integracja z SMK
+
+### Dokumentacja Referencyjna
+W folderze `/projects/mock/AdditionalContext/` znajdują się:
+- **Dokumenty PDF**: Oficjalne instrukcje SMK w języku polskim i angielskim
+- **Screenshoty**: 20 zrzutów ekranu z poprzedniej aplikacji mobilnej pokazujące:
+  - Dashboard z postępem modułów
+  - Listy staży, dyżurów, procedur
+  - Formularze dodawania danych
+  - Różnice między starym i nowym SMK
 
 ### Mapowanie Wersji SMK
 
@@ -1015,8 +1034,8 @@ TEST_PASSWORD = "Test123!"
 ### Business Logic Changes
 
 #### Sync Status Management
-- **Original MAUI**: Synced items were read-only
-- **New Behavior**: Synced items CAN be modified
+- **Previous Implementation**: Synced items were read-only
+- **Current Behavior**: Synced items CAN be modified
 - **Auto-transition**: Synced → Modified when edited
 - **Files affected**:
   - `MedicalShift.cs`
@@ -1025,7 +1044,8 @@ TEST_PASSWORD = "Test123!"
 - **Key point**: Only APPROVED items are truly read-only
 
 #### Medical Shift Duration Validation
-- **MAUI behavior**: Allows hours > 24 and minutes > 59
+- **Reference screenshots show**: Flexible time input (visible in AdditionalContext screenshots)
+- **Allows**: hours > 24 and minutes > 59
 - **Example**: 8 hours 90 minutes is VALID
 - **Normalization**: Only happens at display level via `TimeNormalizationHelper`
 - **Don't add**: Validation like `if (minutes > 59)` - this is intentional!
@@ -1365,7 +1385,7 @@ All update methods:
 ### Medical Shift Duration Validation
 
 #### Overview
-The medical shift duration validation has been aligned with the MAUI implementation to provide consistent behavior across platforms.
+The medical shift duration validation follows the patterns shown in the reference screenshots (AdditionalContext folder) to provide consistent behavior across platforms.
 
 #### Key Principles
 
@@ -1396,15 +1416,15 @@ The medical shift duration validation has been aligned with the MAUI implementat
 
 ###### Old SMK Specific
 - Year must be between 1 and 5
-- Default initialization: 24 hours, 0 minutes (matching MAUI)
+- Default initialization: 24 hours, 0 minutes (as seen in reference screenshots)
 
 ###### New SMK Specific
 - Year must be provided (> 0)
-- Default initialization: 10 hours, 5 minutes (matching MAUI)
+- Default initialization: 10 hours, 5 minutes (as seen in reference screenshots)
 - Shift date must be within internship period
 
 ##### Removed Restrictions
-The following restrictions were removed to match MAUI behavior:
+The following restrictions were removed to match the behavior shown in reference screenshots:
 - Maximum 24-hour limit for Old SMK
 - Maximum 16-hour limit for New SMK
 - Minimum 4-hour requirement for New SMK
@@ -1460,7 +1480,7 @@ Test cases should include:
 The Sync Status Management system tracks the synchronization state of entities between the local application and the SMK (System Monitorowania Kształcenia) system.
 
 ### Key Design Decision
-**Important Change**: Unlike the original MAUI implementation where synced items were read-only, the Web API implementation allows synced items to be modified. When a synced item is updated, it automatically transitions to `Modified` status, maintaining an audit trail while allowing data corrections.
+**Important Change**: Unlike the previous implementation where synced items were read-only, the Web API implementation allows synced items to be modified. When a synced item is updated, it automatically transitions to `Modified` status, maintaining an audit trail while allowing data corrections.
 
 ### Sync Status States
 The `SyncStatus` enum has five possible values:
@@ -1509,11 +1529,11 @@ shift.UpdateShiftDetails(8, 30, "New Hospital");
 await _repository.UpdateAsync(shift);
 ```
 
-### Migration from MAUI
+### Implementation Philosophy
 
-#### Key Differences
-1. **MAUI**: Synced items were completely read-only
-2. **Web API**: Synced items can be modified (with automatic status transition)
+#### Key Design Decisions
+1. **Previous behavior**: Synced items were completely read-only
+2. **Current behavior**: Synced items can be modified (with automatic status transition)
 
 #### Rationale
 This change was made to:
