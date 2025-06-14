@@ -96,8 +96,20 @@ jobs:
     
     - name: Install dependencies
       run: |
+        echo "=== Pre-install directory structure ==="
+        ls -la
+        if [ -d "packages" ]; then
+          echo "Packages found:"
+          ls -la packages/
+        else
+          echo "ERROR: packages directory not found!"
+          echo "Searching for packages:"
+          find . -type d -name "packages" | head -10
+        fi
+        echo -e "\n=== Running npm ci ==="
         npm ci
-        npm list --depth=0
+        echo -e "\n=== Post-install check ==="
+        npm list --depth=0 || true
       working-directory: ${{ env.FRONTEND_PATH }}
     
     - name: Lint

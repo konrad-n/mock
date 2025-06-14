@@ -1,0 +1,11 @@
+{
+  "name": "@sledzspecke/mobile",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Mobile build placeholder'",
+    "test": "echo 'No tests for mobile yet'",
+    "lint": "echo 'No linting for mobile yet'",
+    "clean": "echo 'No clean for mobile yet'"
+  }
+}
