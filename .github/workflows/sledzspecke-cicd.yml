@@ -110,16 +110,31 @@ jobs:
     
     - name: Build
       run: |
+        echo "=== Environment Info ==="
         echo "Node version: $(node --version)"
         echo "NPM version: $(npm --version)"
-        echo "TypeScript version:"
-        npx tsc --version || echo "TypeScript not found"
-        echo "Workspace structure:"
-        ls -la packages/
-        echo "Building shared package first..."
-        cd packages/shared && npm run build && cd ../..
-        echo "Building web package..."
-        cd packages/web && npm run build && cd ../..
+        echo "Current directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        
+        echo -e "\n=== Package.json contents ==="
+        cat package.json | head -20
+        
+        echo -e "\n=== Checking for packages directory ==="
+        if [ -d "packages" ]; then
+          echo "Found packages directory:"
+          ls -la packages/
+          echo -e "\nPackage.json files in packages:"
+          find packages -name "package.json" -type f
+        else
+          echo "No packages directory found"
+        fi
+        
+        echo -e "\n=== Checking npm workspaces ==="
+        npm config get workspaces || echo "No workspaces config"
+        
+        echo -e "\n=== Running build ==="
+        npm run build
       working-directory: ${{ env.FRONTEND_PATH }}
       env:
         VITE_API_URL: https://api.sledzspecke.pl
