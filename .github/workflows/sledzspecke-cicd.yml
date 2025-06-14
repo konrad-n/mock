@@ -262,3 +262,46 @@ jobs:
           echo "Deployment failed!"
           # Add failure notification here
         fi
+  
+  # Save logs to VPS
+  save-logs:
+    name: Save Build Logs
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, security-scan, deploy]
+    if: always()
+    
+    steps:
+    - name: Send logs to VPS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT || 22 }}
+        script: |
+          mkdir -p /var/log/github-actions/builds
+          
+          # Zapisz informacje o buildzie
+          cat > /var/log/github-actions/builds/build-${{ github.run_id }}-$(date +%Y%m%d-%H%M%S).json << 'EOF'
+          {
+            "run_id": "${{ github.run_id }}",
+            "run_number": "${{ github.run_number }}",
+            "repository": "${{ github.repository }}",
+            "branch": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "actor": "${{ github.actor }}",
+            "event": "${{ github.event_name }}",
+            "timestamp": "$(date -Iseconds)",
+            "jobs": {
+              "backend": "${{ needs.test-backend.result }}",
+              "frontend": "${{ needs.test-frontend.result }}",
+              "security": "${{ needs.security-scan.result }}",
+              "deploy": "${{ needs.deploy.result }}"
+            },
+            "workflow_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
+          
+          # Pokaż ostatnie 5 buildów
+          echo "=== Recent builds ==="
+          ls -lt /var/log/github-actions/builds/ | head -6
