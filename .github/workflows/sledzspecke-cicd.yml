@@ -65,10 +65,18 @@ jobs:
       working-directory: ${{ env.BACKEND_PATH }}
     
     - name: Test
+      id: backend-test
       run: dotnet test --no-build --verbosity normal -c Release --collect:"XPlat Code Coverage"
       working-directory: ${{ env.BACKEND_PATH }}
       env:
         ConnectionStrings__DefaultConnection: "Host=localhost;Database=sledzspecke_test;Username=postgres;Password=postgres"
+      continue-on-error: true
+    
+    - name: Check test results
+      if: steps.backend-test.outcome == 'failure'
+      run: |
+        echo "Backend tests failed!"
+        exit 1
 
   # Frontend Tests
   test-frontend:
@@ -271,7 +279,66 @@ jobs:
     if: always()
     
     steps:
-    - name: Send logs to VPS
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+      continue-on-error: true
+      
+    - name: Collect job logs
+      id: collect-logs
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const run_id = context.runId;
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          
+          try {
+            // Get workflow run
+            const run = await github.rest.actions.getWorkflowRun({
+              owner,
+              repo,
+              run_id
+            });
+            
+            // Get jobs for this run
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner,
+              repo,
+              run_id
+            });
+            
+            // Collect failed job details
+            const failedJobs = {};
+            for (const job of jobs.data.jobs) {
+              if (job.conclusion === 'failure') {
+                // Get failed steps
+                const failedSteps = job.steps.filter(step => step.conclusion === 'failure');
+                failedJobs[job.name] = {
+                  status: job.conclusion,
+                  started_at: job.started_at,
+                  completed_at: job.completed_at,
+                  failed_steps: failedSteps.map(step => ({
+                    name: step.name,
+                    conclusion: step.conclusion,
+                    completed_at: step.completed_at
+                  }))
+                };
+              }
+            }
+            
+            core.setOutput('failed_jobs', JSON.stringify(failedJobs));
+            core.setOutput('total_jobs', jobs.data.total_count);
+          } catch (error) {
+            console.error('Error collecting logs:', error);
+            core.setOutput('failed_jobs', '{}');
+          }
+      
+    - name: Send detailed logs to VPS
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -280,8 +347,9 @@ jobs:
         port: ${{ secrets.VPS_PORT || 22 }}
         script: |
           mkdir -p /var/log/github-actions/builds
+          mkdir -p /var/log/github-actions/details
           
-          # Zapisz informacje o buildzie
+          # Zapisz szczegółowe informacje o buildzie
           cat > /var/log/github-actions/builds/build-${{ github.run_id }}-$(date +%Y%m%d-%H%M%S).json << 'EOF'
           {
             "run_id": "${{ github.run_id }}",
@@ -289,18 +357,56 @@ jobs:
             "repository": "${{ github.repository }}",
             "branch": "${{ github.ref_name }}",
             "commit": "${{ github.sha }}",
+            "commit_message": $(echo "${{ github.event.head_commit.message }}" | jq -Rs .),
             "actor": "${{ github.actor }}",
             "event": "${{ github.event_name }}",
             "timestamp": "$(date -Iseconds)",
+            "workflow_name": "${{ github.workflow }}",
             "jobs": {
-              "backend": "${{ needs.test-backend.result }}",
-              "frontend": "${{ needs.test-frontend.result }}",
-              "security": "${{ needs.security-scan.result }}",
-              "deploy": "${{ needs.deploy.result }}"
+              "backend": {
+                "status": "${{ needs.test-backend.result }}",
+                "conclusion": "${{ needs.test-backend.outputs.conclusion || needs.test-backend.result }}"
+              },
+              "frontend": {
+                "status": "${{ needs.test-frontend.result }}",
+                "conclusion": "${{ needs.test-frontend.outputs.conclusion || needs.test-frontend.result }}"
+              },
+              "security": {
+                "status": "${{ needs.security-scan.result }}",
+                "conclusion": "${{ needs.security-scan.outputs.conclusion || needs.security-scan.result }}"
+              },
+              "deploy": {
+                "status": "${{ needs.deploy.result }}",
+                "conclusion": "${{ needs.deploy.outputs.conclusion || needs.deploy.result }}"
+              }
             },
+            "failed_job_details": ${{ steps.collect-logs.outputs.failed_jobs || '{}' }},
+            "total_jobs": "${{ steps.collect-logs.outputs.total_jobs || '0' }}",
             "workflow_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
           EOF
+          
+          # Jeśli są błędy, zapisz dodatkowe szczegóły
+          if [ "${{ contains(needs.*.result, 'failure') }}" == "true" ]; then
+            cat > /var/log/github-actions/details/failure-${{ github.run_id }}-$(date +%Y%m%d-%H%M%S).log << 'EOF'
+          === Build Failure Details ===
+          Run ID: ${{ github.run_id }}
+          Time: $(date)
+          
+          Failed Jobs:
+          ${{ steps.collect-logs.outputs.failed_jobs }}
+          
+          Environment:
+          - Runner OS: ${{ runner.os }}
+          - Runner Arch: ${{ runner.arch }}
+          
+          Context:
+          - Event: ${{ github.event_name }}
+          - Actor: ${{ github.actor }}
+          - Ref: ${{ github.ref }}
+          - SHA: ${{ github.sha }}
+          EOF
+          fi
           
           # Pokaż ostatnie 5 buildów
           echo "=== Recent builds ==="
