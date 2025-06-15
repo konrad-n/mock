@@ -240,6 +240,46 @@ npm run build
    - Check token expiration settings
    - Verify CORS configuration
 
+### Monitoring and Metrics
+
+The application includes comprehensive monitoring and error tracking:
+
+#### Development Dashboard
+Access the monitoring dashboard at `http://localhost:5000/monitoring/dashboard` (development mode only).
+
+Features:
+- Real-time request statistics
+- Error tracking with stack traces
+- API call monitoring
+- Live log streaming
+
+#### Structured Logging
+All application events are logged with structured data:
+- **Log files**: `/var/log/sledzspecke/`
+- **Formats**: Plain text (`.log`) and JSON (`.json`)
+- **Correlation IDs**: Track requests across the system
+
+#### Using the Log Viewer
+```bash
+# View recent errors
+./view-logs.sh errors
+
+# Search for specific terms
+./view-logs.sh search "user@example.com"
+
+# View statistics
+./view-logs.sh stats
+```
+
+#### Error Codes
+Common error codes for troubleshooting:
+- `USER_EMAIL_IN_USE` - Email already registered
+- `USER_USERNAME_IN_USE` - Username already taken
+- `AUTH_INVALID_CREDENTIALS` - Invalid login credentials
+- `VALIDATION_FAILED` - Input validation error
+
+For detailed monitoring instructions, see [monitoring-runbook.md](./monitoring-runbook.md).
+
 ### Detailed Documentation
 
 For comprehensive technical documentation, including:
