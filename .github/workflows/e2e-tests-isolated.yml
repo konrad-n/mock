@@ -1,4 +1,4 @@
-name: E2E Tests with Database Isolation
+name: E2E Tests
 
 on:
   push:

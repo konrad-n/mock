@@ -1,13 +1,8 @@
-name: E2E Tests
+name: E2E Tests (Production) - DISABLED
 
+# This workflow is disabled - use e2e-tests-isolated.yml instead
+# It was testing against production which is risky
 on:
-  push:
-    branches: [ master, develop ]
-  pull_request:
-    branches: [ master ]
-  schedule:
-    # Run E2E tests daily at 2 AM UTC
-    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       browser:

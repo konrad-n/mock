@@ -332,6 +332,16 @@
             </div>
         </div>
         
+        <div class="test-list" style="margin-top: 30px;">
+            <h2 style="text-align: center; color: #ff1493; margin-bottom: 20px;">
+                🎬 Video z Testów E2E 🎬
+            </h2>
+            
+            <div id="video-results" style="text-align: center; padding: 20px;">
+                <p style="color: #ff69b4;">Ładowanie wyników testów...</p>
+            </div>
+        </div>
+        
         <div class="instructions">
             <h2>💕 Instrukcja dla Księżniczki 💕</h2>
             
@@ -396,6 +406,75 @@
         }
         
         setInterval(createSparkle, 300);
+        
+        // Ładowanie wyników video testów
+        async function loadVideoResults() {
+            try {
+                const response = await fetch('/api/e2e/results');
+                const results = await response.json();
+                
+                const container = document.getElementById('video-results');
+                
+                if (!results || results.length === 0) {
+                    // Sprawdź GitHub Actions results
+                    container.innerHTML = `
+                        <div style="background: #ffe4e1; padding: 20px; border-radius: 15px; text-align: center;">
+                            <p style="color: #d63384; font-size: 1.2em;">
+                                <strong>Brak lokalnych wyników testów 📹</strong><br>
+                                Sprawdzam wyniki z GitHub Actions...
+                            </p>
+                            <div style="margin-top: 20px;">
+                                <a href="/e2e-dashboard" class="instruction-button" style="margin: 5px;">
+                                    📊 Panel E2E Dashboard
+                                </a>
+                                <a href="https://github.com/konrad-n/mock/actions" class="instruction-button" style="margin: 5px;">
+                                    🚀 GitHub Actions
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = results.map(result => `
+                    <div class="test-item" style="margin: 20px auto; max-width: 800px;">
+                        <div>
+                            <span class="test-name">${result.name || 'Test'}</span>
+                            <br>
+                            <small style="color: #ff69b4;">Czas: ${result.duration || 'N/A'}</small>
+                        </div>
+                        <span class="${result.status === 'passed' ? 'test-passed' : 'test-failed'}">
+                            ${result.status === 'passed' ? '✅' : '❌'}
+                        </span>
+                    </div>
+                    ${result.videoPath ? `
+                        <div style="margin: 20px auto; max-width: 800px;">
+                            <video controls style="width: 100%; border-radius: 15px; border: 3px solid #ffb6c1;">
+                                <source src="${result.videoPath}" type="video/webm">
+                                Twoja przeglądarka nie obsługuje odtwarzania video.
+                            </video>
+                        </div>
+                    ` : ''}
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading video results:', error);
+                document.getElementById('video-results').innerHTML = `
+                    <div style="background: #ffe4e1; padding: 20px; border-radius: 15px;">
+                        <p style="color: #d63384;">
+                            Nie mogę załadować wyników video.<br>
+                            Sprawdź konsolę przeglądarki.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Załaduj wyniki po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', loadVideoResults);
+        
+        // Odświeżaj co 30 sekund
+        setInterval(loadVideoResults, 30000);
     </script>
 </body>
 </html>
