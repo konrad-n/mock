@@ -293,10 +293,14 @@ jobs:
           sudo cp -r /tmp/sledzspecke-api-new/* /var/www/sledzspecke-api/
           sudo chown -R www-data:www-data /var/www/sledzspecke-api
           
-          # Skip migrations for now - they hang the deployment
-          # TODO: Fix migration script to run non-interactively
-          # cd /var/www/sledzspecke-api
-          # sudo -u www-data dotnet SledzSpecke.Api.dll --migrate || true
+          # Run database migrations
+          echo "Running database migrations..."
+          cd /var/www/sledzspecke-api
+          export ConnectionStrings__DefaultConnection="Host=localhost;Database=sledzspecke_db;Username=sledzspecke_user;Password=SledzSpecke123!"
+          sudo -u www-data dotnet SledzSpecke.Api.dll migrate-database || {
+            echo "Migration failed! Check logs at /var/log/sledzspecke/"
+            exit 1
+          }
           
           # Start service
           sudo systemctl start sledzspecke-api
