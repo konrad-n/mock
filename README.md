@@ -5,9 +5,24 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=konrad-n_mock)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=security_rating)](https://sonarcloud.io/dashboard?id=konrad-n_mock)
 
+## 🚀 Live Demo
+
+- **Web Application**: https://sledzspecke.pl
+- **API Documentation**: https://api.sledzspecke.pl/swagger
+
 ## Project Description
 
 SledzSpecke is a comprehensive web application that allows resident physicians in Poland to track their progress in medical specialization programs. The application supports both the old and new SMK (System Monitorowania Kształcenia) formats, offering an intuitive interface to manage all aspects of medical specialty training.
+
+## 📊 Project Status
+
+- ✅ **Core API**: Fully functional with all CRUD operations
+- ✅ **Frontend**: Complete UI with Polish localization
+- ✅ **Database**: PostgreSQL with migrations and seeding
+- ✅ **Authentication**: JWT-based auth system
+- ✅ **Deployment**: Automated CI/CD pipeline
+- 🔄 **Export**: Mock implementation (real SMK export coming soon)
+- 📱 **Mobile App**: Planned for future release
 
 ## Architecture
 
@@ -16,6 +31,9 @@ SledzSpecke is a comprehensive web application that allows resident physicians i
 - **Database**: PostgreSQL with Entity Framework Core
 - **Authentication**: JWT Bearer tokens
 - **API Documentation**: Swagger/OpenAPI
+- **CI/CD**: GitHub Actions with automated deployment
+- **Hosting**: VPS with Nginx reverse proxy and SSL certificates
+- **Monitoring**: Automated build status tracking and logging
 
 ## Prerequisites
 
@@ -95,7 +113,7 @@ The API will be available at `http://localhost:5000` with Swagger documentation 
 
 In a new terminal, navigate to the frontend directory:
 ```bash
-cd SledzSpecke-Frontend/packages/web
+cd SledzSpecke-Frontend
 ```
 
 Install dependencies:
@@ -170,10 +188,10 @@ cd SledzSpecke.WebApi
 dotnet test
 ```
 
-Frontend tests:
+API Integration tests:
 ```bash
-cd SledzSpecke-Frontend/packages/web
-npm test
+cd SledzSpecke.WebApi
+python test_api.py
 ```
 
 ### Code Quality
@@ -231,6 +249,18 @@ For comprehensive technical documentation, including:
 - Deployment guides
 
 See [CLAUDE.md](./CLAUDE.md) and [FRONTEND-INSTRUCTION.md](./FRONTEND-INSTRUCTION.md).
+
+## Deployment
+
+The application is automatically deployed via GitHub Actions when pushing to the master branch:
+
+1. **Tests** run for backend and frontend
+2. **Security scan** checks for vulnerabilities
+3. **Build** creates production artifacts
+4. **Deploy** updates the live servers
+5. **Health checks** verify deployment success
+
+Deployment logs are available at `/var/log/github-actions/` on the VPS.
 
 ## Contributing
 
