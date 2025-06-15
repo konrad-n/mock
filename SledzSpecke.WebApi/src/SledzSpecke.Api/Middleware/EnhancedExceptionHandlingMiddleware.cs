@@ -32,18 +32,41 @@ public class EnhancedExceptionHandlingMiddleware : IMiddleware
         catch (Exception exception)
         {
             var traceId = context.TraceIdentifier;
-            _logger.LogError(exception, "An error occurred. TraceId: {TraceId}, Path: {Path}", 
-                traceId, context.Request.Path);
+            var correlationId = context.Items["CorrelationId"]?.ToString() ?? traceId;
             
-            await HandleExceptionAsync(context, exception);
+            // Structured logging with rich context
+            using (_logger.BeginScope(new Dictionary<string, object>
+            {
+                ["CorrelationId"] = correlationId,
+                ["TraceId"] = traceId,
+                ["RequestPath"] = context.Request.Path.ToString(),
+                ["RequestMethod"] = context.Request.Method,
+                ["UserAgent"] = context.Request.Headers["User-Agent"].ToString(),
+                ["RemoteIp"] = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                ["UserId"] = context.User?.FindFirst("sub")?.Value ?? "Anonymous",
+                ["ExceptionType"] = exception.GetType().Name,
+                ["ExceptionMessage"] = exception.Message
+            }))
+            {
+                _logger.LogError(exception, 
+                    "Unhandled exception occurred. Type: {ExceptionType}, Message: {ExceptionMessage}, Path: {Path}", 
+                    exception.GetType().Name, 
+                    exception.Message, 
+                    context.Request.Path);
+            }
+            
+            await HandleExceptionAsync(context, exception, correlationId);
         }
     }
 
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
     {
         context.Response.ContentType = "application/problem+json";
 
         var (statusCode, problemDetails) = MapExceptionToProblemDetails(exception, context);
+        
+        // Add correlation ID to the response
+        problemDetails.Extensions["correlationId"] = correlationId;
 
         context.Response.StatusCode = statusCode;
 

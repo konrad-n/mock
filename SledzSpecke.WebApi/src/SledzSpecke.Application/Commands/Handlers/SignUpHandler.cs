@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Application.Constants;
 using SledzSpecke.Application.Security;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
@@ -48,12 +49,14 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
 
             if (await _userRepository.ExistsByEmailAsync(email))
             {
-                return Result.Failure($"Email '{command.Email}' is already in use.");
+                _logger.LogWarning("Registration failed: Email {Email} already in use", command.Email);
+                return Result.Failure($"Email '{command.Email}' is already in use.", ErrorCodes.EMAIL_ALREADY_IN_USE);
             }
 
             if (await _userRepository.ExistsByUsernameAsync(username))
             {
-                return Result.Failure($"Username '{command.Username}' is already in use.");
+                _logger.LogWarning("Registration failed: Username {Username} already in use", command.Username);
+                return Result.Failure($"Username '{command.Username}' is already in use.", ErrorCodes.USERNAME_ALREADY_IN_USE);
             }
 
             var securedPassword = _passwordManager.Secure(password);

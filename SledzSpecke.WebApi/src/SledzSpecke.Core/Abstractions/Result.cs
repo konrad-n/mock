@@ -2,7 +2,7 @@ namespace SledzSpecke.Core.Abstractions;
 
 public class Result
 {
-    protected Result(bool isSuccess, string error)
+    protected Result(bool isSuccess, string error, string? errorCode = null)
     {
         if (isSuccess && !string.IsNullOrEmpty(error))
             throw new InvalidOperationException("Success result cannot have an error message");
@@ -12,24 +12,26 @@ public class Result
 
         IsSuccess = isSuccess;
         Error = error;
+        ErrorCode = errorCode;
     }
 
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;
     public string Error { get; }
+    public string? ErrorCode { get; }
 
     public static Result Success() => new(true, string.Empty);
-    public static Result Failure(string error) => new(false, error);
+    public static Result Failure(string error, string? errorCode = null) => new(false, error, errorCode);
 
     public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
-    public static Result<T> Failure<T>(string error) => new(default, false, error);
+    public static Result<T> Failure<T>(string error, string? errorCode = null) => new(default, false, error, errorCode);
 }
 
 public class Result<T> : Result
 {
     private readonly T? _value;
 
-    protected internal Result(T? value, bool isSuccess, string error) : base(isSuccess, error)
+    protected internal Result(T? value, bool isSuccess, string error, string? errorCode = null) : base(isSuccess, error, errorCode)
     {
         _value = value;
     }
