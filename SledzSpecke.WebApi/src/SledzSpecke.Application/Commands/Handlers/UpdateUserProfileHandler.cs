@@ -51,7 +51,9 @@ public sealed class UpdateUserProfileHandler : IResultCommandHandler<UpdateUserP
             user.UpdateProfile(email, fullName);
 
             // Update additional details
-            user.UpdateProfileDetails(command.PhoneNumber, command.DateOfBirth, command.Bio);
+            var phoneNumber = command.PhoneNumber != null ? new PhoneNumber(command.PhoneNumber) : null;
+            var bio = command.Bio != null ? new UserBio(command.Bio) : null;
+            user.UpdateProfileDetails(phoneNumber, command.DateOfBirth, bio);
 
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();

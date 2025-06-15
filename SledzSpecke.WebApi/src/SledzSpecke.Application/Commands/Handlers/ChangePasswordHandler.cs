@@ -52,7 +52,7 @@ public sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword
 
             // Hash and update password
             var hashedPassword = _passwordManager.Secure(command.NewPassword);
-            user.ChangePassword(new Password(hashedPassword));
+            user.ChangePassword(new HashedPassword(hashedPassword));
 
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();

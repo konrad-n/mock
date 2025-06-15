@@ -43,14 +43,14 @@ public sealed class GetUserProfileHandler : IQueryHandler<GetUserProfile, UserPr
             SmkVersion = user.SmkVersion.Value,
             SpecializationId = user.SpecializationId.Value,
             SpecializationName = specialization?.Name ?? "Unknown",
-            PhoneNumber = user.PhoneNumber,
+            PhoneNumber = user.PhoneNumber?.Value,
             DateOfBirth = user.DateOfBirth,
-            Bio = user.Bio,
-            ProfilePicturePath = user.ProfilePicturePath,
+            Bio = user.Bio?.Value,
+            ProfilePicturePath = user.ProfilePicturePath?.Value,
             Preferences = new UserPreferencesDto
             {
-                Language = user.PreferredLanguage ?? "en",
-                Theme = user.PreferredTheme ?? "light",
+                Language = user.PreferredLanguage?.Value ?? "en",
+                Theme = user.PreferredTheme?.Value ?? "light",
                 NotificationsEnabled = user.NotificationsEnabled,
                 EmailNotificationsEnabled = user.EmailNotificationsEnabled
             },

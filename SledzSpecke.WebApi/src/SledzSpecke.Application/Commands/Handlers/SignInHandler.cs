@@ -42,7 +42,7 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
             }
 
             // Update last login time
-            user.UpdateLastLoginTime();
+            user.RecordLogin();
             await _userRepository.UpdateAsync(user);
 
             var claims = new Dictionary<string, IEnumerable<string>>

@@ -55,10 +55,11 @@ internal sealed class DataSeeder : IDataSeeder
         _logger.LogInformation("Starting basic data seeding...");
 
         // Seed a test user
-        var testUser = new User(
+        var testUser = User.CreateWithId(
+            new UserId(1),
             new Email("test@example.com"),
             new Username("testuser"),
-            new Password("VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U="), // SHA256 hash of "Test123!"
+            new HashedPassword("VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U="), // SHA256 hash of "Test123!"
             new FullName("Test User"),
             SmkVersion.Old,
             new SpecializationId(1), // WARNING: This assumes specialization ID 1 exists!
@@ -70,7 +71,6 @@ internal sealed class DataSeeder : IDataSeeder
         // 2. Verify the migration includes specialization data
         // 3. The user references SpecializationId(1) which must exist
         
-        testUser.SetId(new UserId(1));
         _context.Users.Add(testUser);
         await _context.SaveChangesAsync();
 

@@ -118,8 +118,9 @@ public sealed class SignUpHandlerEnhanced : ICommandHandler<SignUp>
         try
         {
             var securedPassword = _passwordManager.Secure(password);
-            var user = new User(email, username, securedPassword, fullName,
-                smkVersion, specializationId, _clock.Current());
+            var hashedPassword = new HashedPassword(securedPassword);
+            var user = User.Create(email, username, hashedPassword, fullName,
+                smkVersion, specializationId);
 
             return Result.Success(user);
         }

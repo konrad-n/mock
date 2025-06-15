@@ -46,9 +46,12 @@ public sealed class UpdateUserPreferencesHandler : ICommandHandler<UpdateUserPre
             throw new ValidationException($"Invalid theme. Allowed values: {string.Join(", ", allowedThemes)}");
         }
 
+        var language = new Language(command.Language);
+        var theme = new Theme(command.Theme);
+        
         user.UpdatePreferences(
-            command.Language,
-            command.Theme,
+            language,
+            theme,
             command.NotificationsEnabled,
             command.EmailNotificationsEnabled);
 

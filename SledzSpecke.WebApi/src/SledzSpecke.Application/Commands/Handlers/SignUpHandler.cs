@@ -60,17 +60,17 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
             }
 
             var securedPassword = _passwordManager.Secure(password);
+            var hashedPassword = new HashedPassword(securedPassword);
             var smkVersion = new SmkVersion(command.SmkVersion);
             
             _logger.LogInformation("Creating user entity...");
-            var user = new User(
+            var user = User.Create(
                 email, 
                 username, 
-                securedPassword, 
+                hashedPassword, 
                 fullName,
                 smkVersion, 
-                specializationId, 
-                _clock.Current());
+                specializationId);
             
             _logger.LogInformation("User entity created with ID: {UserId}", user.Id?.Value ?? 0);
 
