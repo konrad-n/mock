@@ -101,6 +101,9 @@ jobs:
       run: |
         cd SledzSpecke.WebApi
         ~/.dotnet/tools/dotnet-ef database update -p src/SledzSpecke.Infrastructure -s src/SledzSpecke.Api
+        
+        # Create test user
+        PGPASSWORD=postgres psql -h localhost -U postgres -d "${{ env.TEST_DB_NAME }}" < tests/SledzSpecke.E2E.Tests/setup-test-user.sql
     
     - name: Start API with test database
       env:
