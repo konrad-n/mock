@@ -33,10 +33,12 @@ public class MonitoringDashboardController : ControllerBase
     [Produces("text/html")]
     public IActionResult Dashboard()
     {
-        if (!_environment.IsDevelopment())
-        {
-            return Content("<h1>403 - Monitoring Dashboard</h1><p>This dashboard is only available in development environment for security reasons.</p>", "text/html");
-        }
+        // Temporarily enabled in production - REMOVE BEFORE CUSTOMER RELEASE
+        // TODO: Remove this comment and uncomment the check below before going live
+        // if (!_environment.IsDevelopment())
+        // {
+        //     return Content("<h1>403 - Monitoring Dashboard</h1><p>This dashboard is only available in development environment for security reasons.</p>", "text/html");
+        // }
         
         var html = """
 <!DOCTYPE html>
