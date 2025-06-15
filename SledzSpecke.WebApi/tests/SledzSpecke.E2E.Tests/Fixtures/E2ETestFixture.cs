@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Extensions.Logging;
 using SledzSpecke.E2E.Tests.Infrastructure;
 
 namespace SledzSpecke.E2E.Tests.Fixtures;
