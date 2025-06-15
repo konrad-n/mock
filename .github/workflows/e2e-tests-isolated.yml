@@ -90,7 +90,7 @@ jobs:
     
     - name: Install EF Core tools
       run: |
-        dotnet tool install --global dotnet-ef
+        dotnet tool install --global dotnet-ef --version 9.0.*
     
     - name: Run migrations on test database
       env:
