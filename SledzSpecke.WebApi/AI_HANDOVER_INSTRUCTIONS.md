@@ -103,7 +103,7 @@ SledzSpecke.Infrastructure → EF Core, repositories, external services
 
 ### 🔴 HIGH PRIORITY - Core Functionality
 
-#### 1. Test Result Pattern End-to-End ⏱️ 1-2 hours (IN PROGRESS)
+#### 1. Test Result Pattern End-to-End (IN PROGRESS)
 **Why**: Verify error handling flows from domain to API
 **How**:
 1. Create test endpoint that triggers domain validation failure
@@ -115,7 +115,7 @@ curl -X POST http://localhost:5263/api/internships/1/complete \
   -H "Authorization: Bearer {token}"
 ```
 
-#### 2. Fix Procedure Entity Domain Methods ⏱️ 3-4 hours
+#### 2. Fix Procedure Entity Domain Methods
 **Why**: Currently bypassed with TODO comment
 **Location**: `/src/SledzSpecke.Core/Entities/Internship.cs` line 270
 **What to do**:
@@ -126,7 +126,7 @@ curl -X POST http://localhost:5263/api/internships/1/complete \
 
 ### 🟡 MEDIUM PRIORITY - Architecture Enhancements
 
-#### 4. Implement Repository with Unit of Work ⏱️ 4-5 hours
+#### 4. Implement Repository with Unit of Work
 **Why**: Ensure transactional consistency
 **Current Issue**: Each repository calls SaveChangesAsync independently
 **Implementation**:
@@ -141,7 +141,7 @@ public interface IUnitOfWork
 ```
 **Update handlers** to use single UnitOfWork.SaveChangesAsync()
 
-#### 5. Configure Missing EF Core Value Converters ⏱️ 2 hours
+#### 5. Configure Missing EF Core Value Converters
 **Why**: Points and DateRange aren't persisted correctly
 **Location**: `/src/SledzSpecke.Infrastructure/DAL/Configurations/`
 **What to do**:
@@ -149,7 +149,7 @@ public interface IUnitOfWork
 2. Configure as owned entities or value converters
 3. Test with actual database operations
 
-#### 6. Complete Domain Event Implementation ⏱️ 3-4 hours
+#### 6. Complete Domain Event Implementation
 **Why**: Events are raised but not dispatched
 **Current**: `DomainEventDispatcher.cs.bak` is disabled
 **Steps**:
@@ -160,16 +160,16 @@ public interface IUnitOfWork
 
 ### 🟢 LOW PRIORITY - Nice to Have
 
-#### 7. Add Integration Tests ⏱️ 4-5 hours
+#### 7. Add Integration Tests
 **Why**: Test database operations with real database
 **Use**: TestContainers for PostgreSQL
 **Test**: Repository methods, transactions, value object persistence
 
-#### 8. Performance Monitoring ⏱️ 2-3 hours
+#### 8. Performance Monitoring
 **Current**: PerformanceCommandHandlerDecorator logs but doesn't alert
 **Enhancement**: Add threshold alerts for slow operations
 
-#### 9. API Documentation ⏱️ 2 hours
+#### 9. API Documentation
 **Tool**: Swagger/OpenAPI
 **Include**: Error codes, example requests/responses
 
