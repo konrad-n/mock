@@ -197,6 +197,34 @@ public class E2EDashboardController : ControllerBase
 
         return NotFound();
     }
+    
+    [HttpGet("video-results")]
+    public IActionResult GetVideoResults()
+    {
+        var videoResultsPath = "/var/www/sledzspecke-api/e2e-results/index.html";
+        if (System.IO.File.Exists(videoResultsPath))
+        {
+            var html = System.IO.File.ReadAllText(videoResultsPath);
+            // Update video source to use API endpoint
+            html = html.Replace("bf3f78619c7ef538db3a90dcf6d63652.webm", "/e2e-dashboard/video/latest.webm");
+            return Content(html, "text/html", Encoding.UTF8);
+        }
+        
+        return NotFound("Video results not available yet");
+    }
+    
+    [HttpGet("video/{filename}")]
+    public IActionResult GetVideo(string filename)
+    {
+        var videoPath = "/var/www/sledzspecke-api/e2e-results/bf3f78619c7ef538db3a90dcf6d63652.webm";
+        if (System.IO.File.Exists(videoPath))
+        {
+            var videoBytes = System.IO.File.ReadAllBytes(videoPath);
+            return File(videoBytes, "video/webm");
+        }
+        
+        return NotFound();
+    }
 
     public class RunTestsRequest
     {

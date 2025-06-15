@@ -131,10 +131,8 @@ public abstract class E2ETestBase : IAsyncLifetime
         
         if (Configuration.SmkSimulation.SimulateRealUserSpeed)
         {
-            await Page.TypeAsync(selector, text, new PageTypeOptions
-            {
-                Delay = 50 // 50ms between keystrokes
-            });
+            await Page.FillAsync(selector, text);
+            await Page.PressAsync(selector, "End"); // Simulate real typing by moving cursor
         }
         else
         {

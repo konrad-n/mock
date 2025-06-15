@@ -1,0 +1,13 @@
+# Test results
+Reports/Videos/
+Reports/Screenshots/
+Reports/TestResults/
+Reports/Traces/
+
+# Node modules
+node_modules/
+
+# Test output
+*.trx
+*.log
+test-results.html

@@ -139,3 +139,78 @@ jobs:
         echo "- Screenshots (if failed)" >> $GITHUB_STEP_SUMMARY
         echo "- Videos (if failed)" >> $GITHUB_STEP_SUMMARY
         echo "- Traces (if failed)" >> $GITHUB_STEP_SUMMARY
+
+  save-results-to-vps:
+    needs: [e2e-tests, e2e-summary]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: e2e-artifacts
+    
+    - name: Prepare results package
+      run: |
+        # Create results directory
+        mkdir -p e2e-results
+        
+        # Copy all test results
+        cp -r e2e-artifacts/* e2e-results/ || true
+        
+        # Create metadata file
+        cat > e2e-results/metadata.json << EOF
+        {
+          "runId": "${{ github.run_id }}",
+          "runNumber": "${{ github.run_number }}",
+          "sha": "${{ github.sha }}",
+          "ref": "${{ github.ref }}",
+          "actor": "${{ github.actor }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "conclusion": "${{ needs.e2e-tests.result }}",
+          "event": "${{ github.event_name }}"
+        }
+        EOF
+        
+        # Create archive
+        tar -czf e2e-results-${{ github.run_id }}.tar.gz e2e-results/
+    
+    - name: Save results to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ubuntu
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: "e2e-results-${{ github.run_id }}.tar.gz"
+        target: "/var/log/github-actions/e2e-tests/"
+        
+    - name: Extract and organize on VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ubuntu
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          cd /var/log/github-actions/e2e-tests/
+          
+          # Extract the archive
+          tar -xzf e2e-results-${{ github.run_id }}.tar.gz
+          
+          # Create organized directory structure
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          mkdir -p runs/${{ github.run_id }}
+          mv e2e-results/* runs/${{ github.run_id }}/ || true
+          
+          # Clean up
+          rm -f e2e-results-${{ github.run_id }}.tar.gz
+          rm -rf e2e-results
+          
+          # Keep only last 10 runs to save space
+          cd runs
+          ls -t | tail -n +11 | xargs -r rm -rf
+          
+          # Create latest symlink
+          ln -sfn ${{ github.run_id }} ../latest
+          
+          echo "E2E test results saved to /var/log/github-actions/e2e-tests/runs/${{ github.run_id }}"
