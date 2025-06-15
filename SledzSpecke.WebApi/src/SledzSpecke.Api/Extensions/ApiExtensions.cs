@@ -1,4 +1,6 @@
 using SledzSpecke.Api.Middleware;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace SledzSpecke.Api.Extensions;
 
@@ -34,8 +36,38 @@ public static class ApiExtensions
 
         app.UseHttpsRedirection();
         
-        // Enable static files serving
-        app.UseStaticFiles();
+        // Enable static files serving with proper content types
+        var provider = new FileExtensionContentTypeProvider();
+        provider.Mappings[".md"] = "text/markdown; charset=utf-8";
+        
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            ContentTypeProvider = provider,
+            OnPrepareResponse = ctx =>
+            {
+                // Add UTF-8 charset to text files
+                if (ctx.Context.Response.ContentType?.StartsWith("text/") == true &&
+                    !ctx.Context.Response.ContentType.Contains("charset"))
+                {
+                    ctx.Context.Response.ContentType += "; charset=utf-8";
+                }
+            }
+        });
+        
+        // Serve E2E test results if directory exists
+        var e2eResultsPath = Path.Combine(app.Environment.ContentRootPath, "e2e-results");
+        if (Directory.Exists(e2eResultsPath))
+        {
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(e2eResultsPath),
+                RequestPath = "/e2e-results",
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
+                }
+            });
+        }
         
         // Use enhanced middleware pipeline
         app.UseCustomMiddleware();
