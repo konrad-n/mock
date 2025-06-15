@@ -1,11 +1,15 @@
+using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Events;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.ValueObjects;
+using System.Linq;
 
 namespace SledzSpecke.Core.Entities;
 
-public class Internship
+public class Internship : AggregateRoot
 {
-    public InternshipId Id { get; private set; }
+    public override int Id { get => InternshipId.Value; protected set => InternshipId = new InternshipId(value); }
+    public InternshipId InternshipId { get; private set; }
     public SpecializationId SpecializationId { get; private set; }
     public ModuleId? ModuleId { get; private set; }
     public string InstitutionName { get; private set; }
@@ -31,7 +35,7 @@ public class Internship
     private Internship(InternshipId id, SpecializationId specializationId, string institutionName,
         string departmentName, DateTime startDate, DateTime endDate)
     {
-        Id = id;
+        InternshipId = id;
         SpecializationId = specializationId;
         InstitutionName = institutionName;
         DepartmentName = departmentName;
@@ -159,10 +163,102 @@ public class Internship
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AddMedicalShift(MedicalShift medicalShift)
+    public Result<MedicalShift> AddMedicalShift(
+        DateTime date,
+        int hours,
+        int minutes,
+        string location,
+        int year,
+        SmkVersion smkVersion,
+        int[] availableYears)
+    {
+        // Check if internship can be modified
+        if (IsApproved)
+            return Result.Failure<MedicalShift>("Cannot modify approved internship.", "INTERN_CANNOT_MODIFY");
+
+        // Validate shift duration
+        if (hours < 0)
+            return Result.Failure<MedicalShift>("Hours cannot be negative.", "SHIFT_INVALID_DURATION");
+        
+        if (minutes < 0)
+            return Result.Failure<MedicalShift>("Minutes cannot be negative.", "SHIFT_INVALID_DURATION");
+        
+        if (hours == 0 && minutes == 0)
+            return Result.Failure<MedicalShift>("Shift duration must be greater than zero.", "SHIFT_INVALID_DURATION");
+
+        // Validate location
+        if (string.IsNullOrWhiteSpace(location))
+            return Result.Failure<MedicalShift>("Location is required.", "VAL_REQUIRED_FIELD");
+        
+        if (location.Length > 100)
+            return Result.Failure<MedicalShift>("Location name cannot exceed 100 characters.", "VAL_OUT_OF_RANGE");
+
+        // Date range validation for New SMK
+        if (smkVersion == SmkVersion.New)
+        {
+            if (date < StartDate || date > EndDate)
+                return Result.Failure<MedicalShift>("Medical shift date must be within the internship period for New SMK.", "SHIFT_OUTSIDE_INTERNSHIP");
+        }
+
+        // Year validation based on SMK version
+        if (smkVersion.IsOld)
+        {
+            // Old SMK: Allow year 0 (unassigned) or valid years from specialization
+            if (year != 0 && (availableYears == null || !availableYears.Contains(year)))
+            {
+                var minYear = availableYears?.Min() ?? 1;
+                var maxYear = availableYears?.Max() ?? 6;
+                return Result.Failure<MedicalShift>($"Year must be 0 (unassigned) or between {minYear} and {maxYear} for this specialization.", "VAL_OUT_OF_RANGE");
+            }
+        }
+        else if (smkVersion.IsNew)
+        {
+            // New SMK: Year must be provided (> 0)
+            if (year <= 0)
+                return Result.Failure<MedicalShift>("Year must be provided for New SMK.", "VAL_REQUIRED_FIELD");
+        }
+
+        // Create the medical shift
+        var medicalShiftId = MedicalShiftId.New();
+        var medicalShift = MedicalShift.Create(
+            medicalShiftId,
+            InternshipId,
+            date,
+            hours,
+            minutes,
+            location,
+            year
+        );
+
+        _medicalShifts.Add(medicalShift);
+        UpdatedAt = DateTime.UtcNow;
+
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+
+        // Add domain event
+        AddDomainEvent(new MedicalShiftCreatedEvent(
+            medicalShiftId,
+            InternshipId,
+            date,
+            hours,
+            minutes,
+            location,
+            year
+        ));
+
+        return Result.Success(medicalShift);
+    }
+
+    // Keep the old method for backward compatibility temporarily
+    [Obsolete("Use AddMedicalShift with Result pattern instead")]
+    public void AddMedicalShiftLegacy(MedicalShift medicalShift)
     {
         EnsureCanModify();
-        if (medicalShift.InternshipId != Id)
+        if (medicalShift.InternshipId != InternshipId)
             throw new InvalidOperationException("Medical shift must belong to this internship.");
 
         _medicalShifts.Add(medicalShift);
@@ -178,7 +274,7 @@ public class Internship
     public void AddProcedure(Procedure procedure)
     {
         EnsureCanModify();
-        if (procedure.InternshipId != Id)
+        if (procedure.InternshipId != InternshipId)
             throw new InvalidOperationException("Procedure must belong to this internship.");
 
         _procedures.Add(procedure);
