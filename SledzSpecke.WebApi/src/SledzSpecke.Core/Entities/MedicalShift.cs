@@ -25,6 +25,9 @@ public class MedicalShift
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
+    // Parameterless constructor for EF Core
+    private MedicalShift() { }
+
     private MedicalShift(MedicalShiftId id, InternshipId internshipId, DateTime date, Duration duration,
         string location, int year)
     {

@@ -44,6 +44,7 @@ internal sealed class MedicalShiftConfiguration : IEntityTypeConfiguration<Medic
             duration.Property(d => d.Minutes)
                 .HasColumnName("Minutes")
                 .IsRequired();
+            duration.Ignore(d => d.TotalMinutes);
         });
     }
 }
