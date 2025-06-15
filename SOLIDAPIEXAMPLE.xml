@@ -1,0 +1,3556 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where security check has been disabled.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: src/MySpot.Infrastructure/DAL/Migrations/**, .gitignore, MySpot.sln, **/**Tests.cs
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Security check has been disabled - content may contain sensitive information
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+src/
+  MySpot.Api/
+    Controllers/
+      HomeController.cs
+      ParkingSpotsController.cs
+      ReservationsController.cs
+      UsersController.cs
+    Properties/
+      launchSettings.json
+    appsettings.Development.json
+    appsettings.json
+    appsettings.test.json
+    MySpot.Api.csproj
+    Program.cs
+    UsersApi.cs
+  MySpot.Application/
+    Abstractions/
+      ICommand.cs
+      ICommandHandler.cs
+      IQuery.cs
+      IQueryHandler.cs
+    Commands/
+      Handlers/
+        ChangeReservationLicencePlateHandler.cs
+        DeleteReservationHandler.cs
+        ReserveParkingSpotForCleaningHandler.cs
+        ReserveParkingSpotForVehicleHandler.cs
+        SignInHandler.cs
+        SignUpHandler.cs
+      ChangeReservationLicencePlate.cs
+      DeleteReservation.cs
+      ReserveParkingSpotForCleaning.cs
+      ReserveParkingSpotForVehicle.cs
+      SignIn.cs
+      SignUp.cs
+    DTO/
+      JwtDto.cs
+      ReservationDto.cs
+      UserDto.cs
+      WeeklyParkingSpotDto.cs
+    Exceptions/
+      EmailAlreadyInUseException.cs
+      InvalidCredentialsException.cs
+      ReservationNotFoundException.cs
+      UsernameAlreadyInUseException.cs
+      UserNotFoundException.cs
+      WeeklyParkingSpotNotFoundException.cs
+    Queries/
+      GetUser.cs
+      GetUsers.cs
+      GetWeeklyParkingSpots.cs
+    Security/
+      IAuthenticator.cs
+      IPasswordManager.cs
+      ITokenStorage.cs
+    Extensions.cs
+    MySpot.Application.csproj
+  MySpot.Core/
+    Abstractions/
+      IClock.cs
+    DomainServices/
+      IParkingReservationService.cs
+      ParkingReservationService.cs
+    Entities/
+      CleaningReservation.cs
+      Reservation.cs
+      User.cs
+      VehicleReservation.cs
+      WeeklyParkingSpot.cs
+    Exceptions/
+      CannotReserveParkingSpotException.cs
+      CustomException.cs
+      InvalidCapacityException.cs
+      InvalidEmailException.cs
+      InvalidEmployeeNameException.cs
+      InvalidEntityIdException.cs
+      InvalidFullNameException.cs
+      InvalidLicencePlateException.cs
+      InvalidParkingSpotNameException.cs
+      InvalidPasswordException.cs
+      InvalidReservationDateException.cs
+      InvalidRoleException.cs
+      InvalidUsernameException.cs
+      NoReservationPolicyFoundException.cs
+      ParkingSpotAlreadyReservedException.cs
+      ParkingSpotCapacityExceededException.cs
+    Policies/
+      BossReservationPolicy.cs
+      IReservationPolicy.cs
+      ManagerReservationPolicy.cs
+      RegularEmployeeReservationPolicy.cs
+    Repositories/
+      IUserRepository.cs
+      IWeeklyParkingSpotRepository.cs
+    ValueObjects/
+      Capacity.cs
+      Date.cs
+      Email.cs
+      EmployeeName.cs
+      FullName.cs
+      JobTitle.cs
+      LicencePlate.cs
+      ParkingSpotId.cs
+      ParkingSpotName.cs
+      Password.cs
+      ReservationId.cs
+      Role.cs
+      UserId.cs
+      Username.cs
+      Week.cs
+    Extensions.cs
+    MySpot.Core.csproj
+  MySpot.Infrastructure/
+    Auth/
+      Authenticator.cs
+      AuthOptions.cs
+      Extensions.cs
+      HttpContextTokenStorage.cs
+    DAL/
+      Configurations/
+        CleaningReservationConfiguration.cs
+        ReservationConfiguration.cs
+        UserConfiguration.cs
+        VehicleReservationConfiguration.cs
+        WeeklyParkingSpotConfiguration.cs
+      Decorators/
+        UnitOfWorkCommandHandlerDecorator.cs
+      Handlers/
+        Extensions.cs
+        GetUserHandler.cs
+        GetUsersHandler.cs
+        GetWeeklyParkingSpotsHandler.cs
+      Repositories/
+        InMemoryWeeklyParkingSpotRepository.cs
+        PostgresUserRepository.cs
+        PostgresWeeklyParkingSpotRepository.cs
+      DatabaseInitializer.cs
+      Extensions.cs
+      IUnitOfWork.cs
+      MySpotDbContext.cs
+      PostgresOptions.cs
+      PostgresUnitOfWork.cs
+    Exceptions/
+      ExceptionMiddleware.cs
+    Logging/
+      Decorators/
+        LoggingCommandHandlerDecorator.cs
+      Extensions.cs
+    Security/
+      Extensions.cs
+      PasswordManager.cs
+    Time/
+      Clock.cs
+    AppOptions.cs
+    Extensions.cs
+    MySpot.Infrastructure.csproj
+tests/
+  MySpot.Tests.Integration/
+    MySpot.Tests.Integration.csproj
+    MySpotTestApp.cs
+    OptionsProvider.cs
+    TestDatabase.cs
+    TestUserRepository.cs
+  MySpot.Tests.Unit/
+    MySpot.Tests.Unit.csproj
+docker-compose.yml
+MySpot.http
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/MySpot.Api/Controllers/HomeController.cs">
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using MySpot.Infrastructure;
+
+namespace MySpot.Api.Controllers;
+
+[Route("")]
+public class HomeController : ControllerBase
+{
+    private readonly AppOptions _appOptions;
+
+    public HomeController(IOptions<AppOptions> appOptions)
+    {
+        _appOptions = appOptions.Value;
+    }
+    
+    [HttpGet]
+    public ActionResult Get() => Ok(_appOptions.Name);
+}
+</file>
+
+<file path="src/MySpot.Api/Controllers/ParkingSpotsController.cs">
+using Microsoft.AspNetCore.Mvc;
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+using MySpot.Application.Queries;
+
+namespace MySpot.Api.Controllers;
+
+[ApiController]
+[Route("parking-spots")]
+public class ParkingSpotsController : ControllerBase
+{
+    private readonly IQueryHandler<GetWeeklyParkingSpots, IEnumerable<WeeklyParkingSpotDto>>
+        _getWeeklyParkingSpotsHandler;
+
+    public ParkingSpotsController(
+        IQueryHandler<GetWeeklyParkingSpots, IEnumerable<WeeklyParkingSpotDto>> getWeeklyParkingSpotsHandler)
+    {
+        _getWeeklyParkingSpotsHandler = getWeeklyParkingSpotsHandler;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<WeeklyParkingSpotDto>>> Get([FromQuery] GetWeeklyParkingSpots query)
+        => Ok(await _getWeeklyParkingSpotsHandler.HandleAsync(query));
+}
+</file>
+
+<file path="src/MySpot.Api/Controllers/ReservationsController.cs">
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MySpot.Application.Abstractions;
+using MySpot.Application.Commands;
+
+namespace MySpot.Api.Controllers;
+
+[ApiController]
+[Route("parking-spots")]
+public class ReservationsController : ControllerBase
+{
+    private readonly ICommandHandler<ReserveParkingSpotForVehicle> _reserveParkingSpotsForVehicleHandler;
+    private readonly ICommandHandler<ReserveParkingSpotForCleaning> _reserveParkingSpotsForCleaningHandler;
+    private readonly ICommandHandler<ChangeReservationLicencePlate> _changeReservationLicencePlateHandler;
+    private readonly ICommandHandler<DeleteReservation> _deleteReservationHandler;
+
+    public ReservationsController(ICommandHandler<ReserveParkingSpotForVehicle> reserveParkingSpotsForVehicleHandler,
+        ICommandHandler<ReserveParkingSpotForCleaning> reserveParkingSpotsForCleaningHandler,
+        ICommandHandler<ChangeReservationLicencePlate> changeReservationLicencePlateHandler,
+        ICommandHandler<DeleteReservation> deleteReservationHandler)
+    {
+        _reserveParkingSpotsForVehicleHandler = reserveParkingSpotsForVehicleHandler;
+        _reserveParkingSpotsForCleaningHandler = reserveParkingSpotsForCleaningHandler;
+        _changeReservationLicencePlateHandler = changeReservationLicencePlateHandler;
+        _deleteReservationHandler = deleteReservationHandler;
+    }
+
+
+    [Authorize]
+    [HttpPost("{parkingSpotId:guid}/reservations/vehicle")]
+    public async Task<ActionResult> Post(Guid parkingSpotId, ReserveParkingSpotForVehicle command)
+    {
+        await _reserveParkingSpotsForVehicleHandler.HandleAsync(command with
+        {
+            ReservationId = Guid.NewGuid(),
+            ParkingSpotId = parkingSpotId,
+            UserId = Guid.Parse(User.Identity.Name)
+        });
+        return NoContent();
+    }
+
+    [HttpPost("reservations/cleaning")]
+    public async Task<ActionResult> Post(ReserveParkingSpotForCleaning command)
+    {
+        await _reserveParkingSpotsForCleaningHandler.HandleAsync(command);
+        return NoContent();
+    }
+
+    [HttpPut("reservations/{reservationId:guid}")]
+    public async Task<ActionResult> Put(Guid reservationId, ChangeReservationLicencePlate command)
+    {
+        await _changeReservationLicencePlateHandler.HandleAsync(command with {ReservationId = reservationId});
+        return NoContent();
+    }
+
+    [HttpDelete("reservations/{reservationId:guid}")]
+    public async Task<ActionResult> Delete(Guid reservationId)
+    {
+        await _deleteReservationHandler.HandleAsync(new DeleteReservation(reservationId));
+        return NoContent();
+    }
+}
+</file>
+
+<file path="src/MySpot.Api/Controllers/UsersController.cs">
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MySpot.Application.Abstractions;
+using MySpot.Application.Commands;
+using MySpot.Application.DTO;
+using MySpot.Application.Queries;
+using MySpot.Application.Security;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace MySpot.Api.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class UsersController : ControllerBase
+{
+    private readonly IQueryHandler<GetUsers, IEnumerable<UserDto>> _getUsersHandler;
+    private readonly IQueryHandler<GetUser, UserDto> _getUserHandler;
+    private readonly ICommandHandler<SignUp> _signUpHandler;
+    private readonly ICommandHandler<SignIn> _signInHandler;
+    private readonly ITokenStorage _tokenStorage;
+
+    public UsersController(ICommandHandler<SignUp> signUpHandler,
+        ICommandHandler<SignIn> signInHandler,
+        IQueryHandler<GetUsers, IEnumerable<UserDto>> getUsersHandler,
+        IQueryHandler<GetUser, UserDto> getUserHandler,
+        ITokenStorage tokenStorage)
+    {
+        _signUpHandler = signUpHandler;
+        _signInHandler = signInHandler;
+        _getUsersHandler = getUsersHandler;
+        _getUserHandler = getUserHandler;
+        _tokenStorage = tokenStorage;
+    }
+
+    [Authorize(Policy = "is-admin")]
+    [HttpGet("{userId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserDto>> Get(Guid userId)
+    {
+        var user = await _getUserHandler.HandleAsync(new GetUser {UserId = userId});
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        return user;
+    }
+    
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [HttpGet("me")]
+    public async Task<ActionResult<UserDto>> Get()
+    {
+        if (string.IsNullOrWhiteSpace(User.Identity?.Name))
+        {
+            return NotFound();
+        }
+
+        var userId = Guid.Parse(User.Identity?.Name);
+        var user = await _getUserHandler.HandleAsync(new GetUser {UserId = userId});
+
+        return user;
+    }
+
+    [HttpGet]
+    [SwaggerOperation("Get list of all the users")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [Authorize(Policy = "is-admin")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> Get([FromQuery] GetUsers query)
+        => Ok(await _getUsersHandler.HandleAsync(query));
+
+    [HttpPost]
+    [SwaggerOperation("Create the user account")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Post(SignUp command)
+    {
+        command = command with {UserId = Guid.NewGuid()};
+        await _signUpHandler.HandleAsync(command);
+        return CreatedAtAction(nameof(Get), new {command.UserId}, null);
+    }
+    
+    [HttpPost("sign-in")]
+    [SwaggerOperation("Sign in the user and return the JSON Web Token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<JwtDto>> Post(SignIn command)
+    {
+        await _signInHandler.HandleAsync(command);
+        var jwt = _tokenStorage.Get();
+        return jwt;
+    }
+}
+</file>
+
+<file path="src/MySpot.Api/Properties/launchSettings.json">
+{
+
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:53644",
+      "sslPort": 44315
+    }
+  },
+  "profiles": {
+    "MySpot.Api": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "",
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+</file>
+
+<file path="src/MySpot.Api/appsettings.Development.json">
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "app": {
+    "name": "MySpot API [dev]"
+  }
+}
+</file>
+
+<file path="src/MySpot.Api/appsettings.json">
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Warning",
+      "Microsoft.EntityFrameworkCore.Infrastructure": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "app": {
+    "name": "MySpot API"
+  },
+  "auth": {
+    "issuer": "myspot-issuer",
+    "audience": "myspot-audience",
+    "signingKey": "VhagJ82N5Yz8jhC8nU88tUuwxE35GtXNgVFY4aae",
+    "expiry": "00.01:00:00"
+  },
+  "postgres": {
+    "connectionString": "Host=localhost;Database=MySpot;Username=postgres;Password="
+  }
+}
+</file>
+
+<file path="src/MySpot.Api/appsettings.test.json">
+{
+  "app": {
+    "name": "MySpot API [test]"
+  },
+  "auth": {
+    "issuer": "myspot-issuer",
+    "audience": "myspot-audience",
+    "signingKey": "VhagJ82N5Yz8jhC8nU88tUuwxE35GtXNgVFY4aae",
+    "expiry": "00.01:00:00"
+  },
+  "postgres": {
+    "connectionString": "Host=localhost;Database=MySpot-test;Username=postgres;Password="
+  }
+}
+</file>
+
+<file path="src/MySpot.Api/MySpot.Api.csproj">
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MySpot.Infrastructure\MySpot.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MySpot.Tests.Integration" />
+  </ItemGroup>
+
+</Project>
+</file>
+
+<file path="src/MySpot.Api/Program.cs">
+using Microsoft.Extensions.Options;
+using MySpot.Api;
+using MySpot.Application;
+using MySpot.Core;
+using MySpot.Infrastructure;
+using Serilog;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddCore()
+    .AddApplication()
+    .AddInfrastructure(builder.Configuration);
+
+builder.Host.UseSerilog((context, loggerConfiguration) =>
+{
+    loggerConfiguration.WriteTo
+        .Console();
+    // .WriteTo
+    // .File("logs.txt")
+    // .WriteTo
+    // .Seq("http://localhost:5341");
+});
+
+var app = builder.Build();
+app.UseInfrastructure();
+app.MapGet("api", (IOptions<AppOptions> options) => Results.Ok(options.Value.Name));
+app.UseUsersApi();
+app.Run();
+</file>
+
+<file path="src/MySpot.Api/UsersApi.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.Commands;
+using MySpot.Application.DTO;
+using MySpot.Application.Queries;
+
+namespace MySpot.Api;
+
+public static class UsersApi
+{
+    private const string MeRoute = "me";
+    
+    public static WebApplication UseUsersApi(this WebApplication app)
+    {
+        app.MapGet("api/users/me", async (HttpContext context, IQueryHandler<GetUser, UserDto> handler) =>
+        {
+            var userDto = await handler.HandleAsync(new GetUser {UserId = Guid.Parse(context.User.Identity.Name)});
+            return Results.Ok(userDto);
+        }).RequireAuthorization().WithName(MeRoute);
+
+        app.MapGet("api/users/{userId:guid}", async (Guid userId, IQueryHandler<GetUser, UserDto> handler) =>
+        {
+            var userDto = await handler.HandleAsync(new GetUser {UserId = userId});
+            return userDto is null ? Results.NotFound() : Results.Ok(userDto);
+        }).RequireAuthorization("is-admin");
+
+        app.MapPost("api/users", async (SignUp command, ICommandHandler<SignUp> handler) =>
+        {
+            command = command with {UserId = Guid.NewGuid()};
+            await handler.HandleAsync(command);
+            return Results.CreatedAtRoute(MeRoute);
+        });
+
+        return app;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Abstractions/ICommand.cs">
+namespace MySpot.Application.Abstractions;
+
+// Marker
+public interface ICommand
+{
+}
+</file>
+
+<file path="src/MySpot.Application/Abstractions/ICommandHandler.cs">
+namespace MySpot.Application.Abstractions;
+
+public interface ICommandHandler<in TCommand> where TCommand : class, ICommand
+{
+    Task HandleAsync(TCommand command);
+}
+</file>
+
+<file path="src/MySpot.Application/Abstractions/IQuery.cs">
+namespace MySpot.Application.Abstractions;
+
+public interface IQuery<TResult>
+{
+}
+</file>
+
+<file path="src/MySpot.Application/Abstractions/IQueryHandler.cs">
+namespace MySpot.Application.Abstractions;
+
+public interface IQueryHandler<in TQuery, TResult> where TQuery: class, IQuery<TResult>
+{
+    Task<TResult> HandleAsync(TQuery query);
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/Handlers/ChangeReservationLicencePlateHandler.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.Exceptions;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Application.Commands.Handlers;
+
+public sealed class ChangeReservationLicencePlateHandler : ICommandHandler<ChangeReservationLicencePlate>
+{
+    private readonly IWeeklyParkingSpotRepository _repository;
+
+    public ChangeReservationLicencePlateHandler(IWeeklyParkingSpotRepository repository)
+        => _repository = repository;
+
+    public async Task HandleAsync(ChangeReservationLicencePlate command)
+    {
+        var weeklyParkingSpot = await GetWeeklyParkingSpotByReservation(command.ReservationId);
+        if (weeklyParkingSpot is null)
+        {
+            throw new WeeklyParkingSpotNotFoundException();
+        }
+
+        var reservationId = new ReservationId(command.ReservationId);
+        var reservation = weeklyParkingSpot.Reservations
+            .OfType<VehicleReservation>()
+            .SingleOrDefault(x => x.Id == reservationId);
+
+        if (reservation is null)
+        {
+            throw new ReservationNotFoundException(command.ReservationId);
+        }
+    
+        reservation.ChangeLicencePlate(command.LicencePlate);
+        await _repository.UpdateAsync(weeklyParkingSpot);
+    }
+    
+    private async Task<WeeklyParkingSpot> GetWeeklyParkingSpotByReservation(ReservationId id)
+        => (await _repository.GetAllAsync())
+            .SingleOrDefault(x => x.Reservations.Any(r => r.Id == id));
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/Handlers/DeleteReservationHandler.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.Exceptions;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Application.Commands.Handlers;
+
+public sealed class DeleteReservationHandler : ICommandHandler<DeleteReservation>
+{
+    private readonly IWeeklyParkingSpotRepository _repository;
+
+    public DeleteReservationHandler(IWeeklyParkingSpotRepository repository)
+        => _repository = repository;
+    
+    public async Task HandleAsync(DeleteReservation command)
+    {
+        var weeklyParkingSpot = await GetWeeklyParkingSpotByReservation(command.ReservationId);
+        if (weeklyParkingSpot is null)
+        {
+            throw new WeeklyParkingSpotNotFoundException();
+        }
+
+        weeklyParkingSpot.RemoveReservation(command.ReservationId);
+        await _repository.UpdateAsync(weeklyParkingSpot);
+    }
+    
+    private async Task<WeeklyParkingSpot> GetWeeklyParkingSpotByReservation(ReservationId id)
+        => (await _repository.GetAllAsync())
+            .SingleOrDefault(x => x.Reservations.Any(r => r.Id == id));
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/Handlers/ReserveParkingSpotForCleaningHandler.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Core.DomainServices;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Application.Commands.Handlers;
+
+public sealed class ReserveParkingSpotForCleaningHandler : ICommandHandler<ReserveParkingSpotForCleaning>
+{
+    private readonly IWeeklyParkingSpotRepository _repository;
+    private readonly IParkingReservationService _reservationService;
+
+    public ReserveParkingSpotForCleaningHandler(IWeeklyParkingSpotRepository repository, 
+        IParkingReservationService reservationService)
+    {
+        _repository = repository;
+        _reservationService = reservationService;
+    }
+    
+    public async Task HandleAsync(ReserveParkingSpotForCleaning command)
+    {
+        var week = new Week(command.Date);
+        var weeklyParkingSpots = (await _repository.GetByWeekAsync(week)).ToList();
+
+        _reservationService.ReserveParkingForCleaning(weeklyParkingSpots, new Date(command.Date));
+
+        var tasks = weeklyParkingSpots.Select(x => _repository.UpdateAsync(x));
+        await Task.WhenAll(tasks);
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/Handlers/ReserveParkingSpotForVehicleHandler.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.Exceptions;
+using MySpot.Core.Abstractions;
+using MySpot.Core.DomainServices;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Application.Commands.Handlers;
+
+public sealed class ReserveParkingSpotForVehicleHandler : ICommandHandler<ReserveParkingSpotForVehicle>
+{
+    private readonly IWeeklyParkingSpotRepository _repository;
+    private readonly IParkingReservationService _reservationService;
+    private readonly IUserRepository _userRepository;
+    private readonly IClock _clock;
+
+    public ReserveParkingSpotForVehicleHandler(IWeeklyParkingSpotRepository repository, 
+        IParkingReservationService reservationService, IUserRepository userRepository, IClock clock)
+    {
+        _repository = repository;
+        _reservationService = reservationService;
+        _userRepository = userRepository;
+        _clock = clock;
+    }
+
+    public async Task HandleAsync(ReserveParkingSpotForVehicle command)
+    {
+        var (spotId, reservationId, userId, licencePlate, capacity, date) = command;
+        var week = new Week(_clock.Current());
+        var parkingSpotId = new ParkingSpotId(spotId);
+        var weeklyParkingSpots = (await _repository.GetByWeekAsync(week)).ToList();
+        var parkingSpotToReserve = weeklyParkingSpots.SingleOrDefault(x => x.Id == parkingSpotId);
+        
+        if (parkingSpotToReserve is null)
+        {
+            throw new WeeklyParkingSpotNotFoundException(spotId);
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            throw new UserNotFoundException(userId);
+        }
+
+        var reservation = new VehicleReservation(reservationId, user.Id, new EmployeeName(user.FullName),
+            licencePlate, capacity, new Date(date));
+
+        _reservationService.ReserveSpotForVehicle(weeklyParkingSpots, JobTitle.Employee, 
+            parkingSpotToReserve, reservation);
+        
+        await _repository.UpdateAsync(parkingSpotToReserve);
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/Handlers/SignInHandler.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.Exceptions;
+using MySpot.Application.Security;
+using MySpot.Core.Repositories;
+
+namespace MySpot.Application.Commands.Handlers;
+
+internal sealed class SignInHandler : ICommandHandler<SignIn>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IAuthenticator _authenticator;
+    private readonly IPasswordManager _passwordManager;
+    private readonly ITokenStorage _tokenStorage;
+
+    public SignInHandler(IUserRepository userRepository, IAuthenticator authenticator, IPasswordManager passwordManager,
+        ITokenStorage tokenStorage)
+    {
+        _userRepository = userRepository;
+        _authenticator = authenticator;
+        _passwordManager = passwordManager;
+        _tokenStorage = tokenStorage;
+    }
+    
+    public async Task HandleAsync(SignIn command)
+    {
+        var user = await _userRepository.GetByEmailAsync(command.Email);
+        if (user is null)
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        if (!_passwordManager.Validate(command.Password, user.Password))
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        var jwt = _authenticator.CreateToken(user.Id, user.Role);
+        _tokenStorage.Set(jwt);
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/Handlers/SignUpHandler.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.Exceptions;
+using MySpot.Application.Security;
+using MySpot.Core.Abstractions;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Application.Commands.Handlers;
+
+internal sealed class SignUpHandler : ICommandHandler<SignUp>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IPasswordManager _passwordManager;
+    private readonly IClock _clock;
+
+    public SignUpHandler(IUserRepository userRepository, IPasswordManager passwordManager, IClock clock)
+    {
+        _userRepository = userRepository;
+        _passwordManager = passwordManager;
+        _clock = clock;
+    }
+
+    public async Task HandleAsync(SignUp command)
+    {
+        var userId = new UserId(command.UserId);
+        var email = new Email(command.Email);
+        var username = new Username(command.Username);
+        var password = new Password(command.Password);
+        var fullName = new FullName(command.FullName);
+        var role = string.IsNullOrWhiteSpace(command.Role) ? Role.User() : new Role(command.Role);
+        
+        if (await _userRepository.GetByEmailAsync(email) is not null)
+        {
+            throw new EmailAlreadyInUseException(email);
+        }
+
+        if (await _userRepository.GetByUsernameAsync(username) is not null)
+        {
+            throw new UsernameAlreadyInUseException(username);
+        }
+
+        var securedPassword = _passwordManager.Secure(password);
+        var user = new User(userId, email, username, securedPassword, fullName, role, _clock.Current());
+        await _userRepository.AddAsync(user);
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Commands/ChangeReservationLicencePlate.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application.Commands;
+
+public sealed record ChangeReservationLicencePlate(Guid ReservationId, string LicencePlate) : ICommand;
+</file>
+
+<file path="src/MySpot.Application/Commands/DeleteReservation.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application.Commands;
+
+public sealed record DeleteReservation(Guid ReservationId) : ICommand;
+</file>
+
+<file path="src/MySpot.Application/Commands/ReserveParkingSpotForCleaning.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application.Commands;
+
+public record ReserveParkingSpotForCleaning(DateTime Date) : ICommand;
+</file>
+
+<file path="src/MySpot.Application/Commands/ReserveParkingSpotForVehicle.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application.Commands;
+
+public sealed record ReserveParkingSpotForVehicle(Guid ParkingSpotId, Guid ReservationId, Guid UserId,
+    string LicencePlate, int Capacity, DateTime Date) : ICommand;
+</file>
+
+<file path="src/MySpot.Application/Commands/SignIn.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application.Commands;
+
+public record SignIn(string Email, string Password) : ICommand;
+</file>
+
+<file path="src/MySpot.Application/Commands/SignUp.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application.Commands;
+
+public record SignUp(Guid UserId, string Email, string Username, string Password, string FullName, string Role) : ICommand;
+</file>
+
+<file path="src/MySpot.Application/DTO/JwtDto.cs">
+namespace MySpot.Application.DTO;
+
+public class JwtDto
+{
+    public string AccessToken { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Application/DTO/ReservationDto.cs">
+namespace MySpot.Application.DTO;
+
+public class ReservationDto
+{
+    public Guid Id { get; set;}
+    public string EmployeeName { get; set; }
+    public DateTime Date { get;  set; }
+}
+</file>
+
+<file path="src/MySpot.Application/DTO/UserDto.cs">
+namespace MySpot.Application.DTO;
+
+public class UserDto
+{
+    public Guid Id { get; set; }
+    public string Username { get; set; }
+    public string FullName { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Application/DTO/WeeklyParkingSpotDto.cs">
+namespace MySpot.Application.DTO;
+
+public class WeeklyParkingSpotDto
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public DateTime From { get; set; }
+    public DateTime To { get; set; }
+    public int Capacity { get; set; }
+    public IEnumerable<ReservationDto> Reservations { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Application/Exceptions/EmailAlreadyInUseException.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Application.Exceptions;
+
+public sealed class EmailAlreadyInUseException : CustomException
+{
+    public string Email { get; }
+
+    public EmailAlreadyInUseException(string email) : base($"Email: '{email}' is already in use.")
+    {
+        Email = email;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Exceptions/InvalidCredentialsException.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Application.Exceptions;
+
+public class InvalidCredentialsException : CustomException
+{
+    public InvalidCredentialsException() : base("Invalid credentials.")
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Exceptions/ReservationNotFoundException.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Application.Exceptions;
+
+public sealed class ReservationNotFoundException : CustomException
+{
+    public Guid Id { get; }
+
+    public ReservationNotFoundException(Guid id) 
+        : base($"Reservation with ID: {id} was not found.")
+    {
+        Id = id;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Exceptions/UsernameAlreadyInUseException.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Application.Exceptions;
+
+public sealed class UsernameAlreadyInUseException : CustomException
+{
+    public string Username { get; }
+
+    public UsernameAlreadyInUseException(string username) : base($"Username: '{username}' is already in use.")
+    {
+        Username = username;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Exceptions/UserNotFoundException.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Application.Exceptions;
+
+public class UserNotFoundException : CustomException
+{
+    public Guid UserId { get; private set; }
+
+    public UserNotFoundException(Guid userId) : base($"User with ID: '{userId}' was not found.")
+    {
+        UserId = userId;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Exceptions/WeeklyParkingSpotNotFoundException.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Application.Exceptions;
+
+public sealed class WeeklyParkingSpotNotFoundException : CustomException
+{
+    public Guid? Id { get; }
+
+    public WeeklyParkingSpotNotFoundException() 
+        : base("Weekly parking spot with ID was not found.")
+    {
+    }
+
+    public WeeklyParkingSpotNotFoundException(Guid id) 
+        : base($"Weekly parking spot with ID: {id} was not found.")
+    {
+        Id = id;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/Queries/GetUser.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+
+namespace MySpot.Application.Queries;
+
+public class GetUser : IQuery<UserDto>
+{
+    public Guid UserId { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Application/Queries/GetUsers.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+
+namespace MySpot.Application.Queries;
+
+public class GetUsers : IQuery<IEnumerable<UserDto>>
+{
+}
+</file>
+
+<file path="src/MySpot.Application/Queries/GetWeeklyParkingSpots.cs">
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+
+namespace MySpot.Application.Queries;
+
+public class GetWeeklyParkingSpots : IQuery<IEnumerable<WeeklyParkingSpotDto>>
+{
+    public DateTime? Date { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Application/Security/IAuthenticator.cs">
+using MySpot.Application.DTO;
+
+namespace MySpot.Application.Security;
+
+public interface IAuthenticator
+{
+    JwtDto CreateToken(Guid userId, string role);
+}
+</file>
+
+<file path="src/MySpot.Application/Security/IPasswordManager.cs">
+namespace MySpot.Application.Security;
+
+public interface IPasswordManager
+{
+    string Secure(string password);
+    bool Validate(string password, string securedPassword);
+}
+</file>
+
+<file path="src/MySpot.Application/Security/ITokenStorage.cs">
+using MySpot.Application.DTO;
+
+namespace MySpot.Application.Security;
+
+public interface ITokenStorage
+{
+    void Set(JwtDto jwt);
+    JwtDto Get();
+}
+</file>
+
+<file path="src/MySpot.Application/Extensions.cs">
+using Microsoft.Extensions.DependencyInjection;
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Application;
+
+public static class Extensions
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        var applicationAssembly = typeof(ICommandHandler<>).Assembly;
+
+        services.Scan(s => s.FromAssemblies(applicationAssembly)
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+        
+        return services;
+    }
+}
+</file>
+
+<file path="src/MySpot.Application/MySpot.Application.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MySpot.Core\MySpot.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+      <PackageReference Include="Scrutor" Version="4.1.0" />
+    </ItemGroup>
+
+</Project>
+</file>
+
+<file path="src/MySpot.Core/Abstractions/IClock.cs">
+namespace MySpot.Core.Abstractions;
+
+public interface IClock
+{
+    DateTime Current();
+}
+</file>
+
+<file path="src/MySpot.Core/DomainServices/IParkingReservationService.cs">
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.DomainServices;
+
+public interface IParkingReservationService
+{
+    void ReserveSpotForVehicle(IEnumerable<WeeklyParkingSpot> allParkingSpots, JobTitle jobTitle,
+        WeeklyParkingSpot parkingSpotToReserve, VehicleReservation reservation);
+
+    void ReserveParkingForCleaning(IEnumerable<WeeklyParkingSpot> allParkingSpots, Date date);
+}
+</file>
+
+<file path="src/MySpot.Core/DomainServices/ParkingReservationService.cs">
+using MySpot.Core.Abstractions;
+using MySpot.Core.Entities;
+using MySpot.Core.Exceptions;
+using MySpot.Core.Policies;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.DomainServices;
+
+public sealed class ParkingReservationService : IParkingReservationService
+{
+    private readonly IEnumerable<IReservationPolicy> _policies;
+    private readonly IClock _clock;
+
+    public ParkingReservationService(IEnumerable<IReservationPolicy> policies, IClock clock)
+    {
+        _policies = policies;
+        _clock = clock;
+    }
+
+    public void ReserveSpotForVehicle(IEnumerable<WeeklyParkingSpot> allParkingSpots, JobTitle jobTitle,
+        WeeklyParkingSpot parkingSpotToReserve,
+        VehicleReservation reservation)
+    {
+        var parkingSpotId = parkingSpotToReserve.Id;
+        var policy = _policies.SingleOrDefault(x => x.CanBeApplied(jobTitle));
+
+        if (policy is null)
+        {
+            throw new NoReservationPolicyFoundException(jobTitle);
+        }
+
+        if (!policy.CanReserve(allParkingSpots, reservation.EmployeeName))
+        {
+            throw new CannotReserveParkingSpotException(parkingSpotId);
+        }
+
+        parkingSpotToReserve.AddReservation(reservation, new Date(_clock.Current()));
+    }
+
+    public void ReserveParkingForCleaning(IEnumerable<WeeklyParkingSpot> allParkingSpots, Date date)
+    {
+        foreach (var parkingSpot in allParkingSpots)
+        {
+            var reservationsForSameDate = parkingSpot.Reservations.Where(x => x.Date == date);
+            parkingSpot.RemoveReservations(reservationsForSameDate);
+            parkingSpot.AddReservation(new CleaningReservation(ReservationId.Create(), date),
+                new Date(_clock.Current()));
+        }
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Entities/CleaningReservation.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Entities;
+
+public class CleaningReservation : Reservation
+{
+    public CleaningReservation(ReservationId id, Date date) : base(id, capacity:2, date)
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Entities/Reservation.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Entities;
+
+public abstract class Reservation
+{
+    public ReservationId Id { get; }
+    public Capacity Capacity { get; private set; }
+    public Date Date { get; private set; }
+
+    protected Reservation()
+    {
+    }
+
+    protected Reservation(ReservationId id, Capacity capacity, Date date)
+    {
+        Id = id;
+        Capacity = capacity;
+        Date = date;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Entities/User.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Entities;
+
+public class User
+{
+    public UserId Id { get; private set; }
+    public Email Email { get; private set; }
+    public Username Username { get; private set; }
+    public Password Password { get; private set; }
+    public FullName FullName { get; private set; }
+    public Role Role { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+
+    public User(UserId id, Email email, Username username, Password password, FullName fullName, Role role,
+        DateTime createdAt)
+    {
+        Id = id;
+        Email = email;
+        Username = username;
+        Password = password;
+        FullName = fullName;
+        Role = role;
+        CreatedAt = createdAt;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Entities/VehicleReservation.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Entities;
+
+public class VehicleReservation : Reservation
+{
+    public UserId UserId { get; private set; }
+    public EmployeeName EmployeeName { get; private set; }
+    public LicencePlate LicencePlate { get; private set; }
+
+    private VehicleReservation()
+    {
+    }
+
+    public VehicleReservation(ReservationId reservationId, UserId userId, EmployeeName employeeName,
+        LicencePlate licencePlate, Capacity capacity, Date date) : base(reservationId, capacity, date)
+    {
+        UserId = userId;
+        EmployeeName = employeeName;
+        LicencePlate = licencePlate;
+    }
+
+    public void ChangeLicencePlate(LicencePlate licencePlate)
+        => LicencePlate = licencePlate;
+}
+</file>
+
+<file path="src/MySpot.Core/Entities/WeeklyParkingSpot.cs">
+using MySpot.Core.Exceptions;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Entities;
+
+public class WeeklyParkingSpot
+{
+    public const int MaximumCapacity = 2;
+    
+    public ParkingSpotId Id { get; }
+    public Week Week { get; private set; }
+    public ParkingSpotName Name { get; private set; }
+    public Capacity Capacity { get; private set; }
+    public IEnumerable<Reservation> Reservations => _reservations;
+
+    private readonly HashSet<Reservation> _reservations = new();
+
+    private WeeklyParkingSpot(ParkingSpotId id, Week week, ParkingSpotName name, Capacity capacity)
+    {
+        Id = id;
+        Week = week;
+        Name = name;
+        Capacity = capacity;
+    }
+
+    public static WeeklyParkingSpot Create(ParkingSpotId id, Week week, ParkingSpotName name)
+        => new(id, week, name, MaximumCapacity);
+
+    internal void AddReservation(Reservation reservation, Date now)
+    {
+        var isInvalidDate = reservation.Date < Week.From ||
+                            reservation.Date > Week.To || 
+                            reservation.Date < now;
+        if (isInvalidDate)
+        {
+            throw new InvalidReservationDateException(reservation.Date.Value.Date);
+        }
+
+        if (_reservations.Any(x => x.Date == reservation.Date))
+        {
+            throw new ParkingSpotAlreadyReservedException(Name, reservation.Date.Value.Date);
+        }
+
+        var dateCapacity = _reservations
+            .Where(x => x.Date == reservation.Date)
+            .Sum(x => x.Capacity);
+
+        if (dateCapacity + reservation.Capacity > Capacity)
+        {
+            throw new ParkingSpotCapacityExceededException(Id);
+        }
+
+        _reservations.Add(reservation);
+    }
+
+    public void RemoveReservation(ReservationId id)
+        => _reservations.RemoveWhere(x => x.Id == id);
+    
+    public void RemoveReservations(IEnumerable<Reservation> reservations)
+        => _reservations.RemoveWhere(x => reservations.Any(r => r.Id == x.Id));
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/CannotReserveParkingSpotException.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Exceptions;
+
+public sealed class CannotReserveParkingSpotException : CustomException
+{
+    public ParkingSpotId ParkingSpotId { get; }
+
+    public CannotReserveParkingSpotException(ParkingSpotId parkingSpotId) 
+        : base($"Cannot reserve parking spot with ID: {parkingSpotId} due to reservation policy.")
+    {
+        ParkingSpotId = parkingSpotId;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/CustomException.cs">
+namespace MySpot.Core.Exceptions;
+
+public abstract class CustomException : Exception
+{
+    protected CustomException(string message) : base(message)
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidCapacityException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidCapacityException : CustomException
+{
+    public int Capacity { get; }
+
+    public InvalidCapacityException(int capacity) 
+        : base($"Capacity {capacity} is invalid.")
+    {
+        Capacity = capacity;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidEmailException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidEmailException : CustomException
+{
+    public string Email { get; }
+
+    public InvalidEmailException(string email) : base($"Email: '{email}' is invalid.")
+    {
+        Email = email;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidEmployeeNameException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidEmployeeNameException : CustomException
+{
+    public InvalidEmployeeNameException() : base("Employee name is invalid.")
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidEntityIdException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidEntityIdException : CustomException
+{
+    public object Id { get; }
+
+    public InvalidEntityIdException(object id) : base($"Cannot set: {id}  as entity identifier.")
+        => Id = id;
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidFullNameException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidFullNameException : CustomException
+{
+    public string FullName { get; }
+
+    public InvalidFullNameException(string fullName) : base($"Full name: '{fullName}' is invalid.")
+    {
+        FullName = fullName;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidLicencePlateException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidLicencePlateException : CustomException
+{
+    public string LicencePlate { get; }
+
+    public InvalidLicencePlateException(string licencePlate) 
+        : base($"Licence plate: {licencePlate} is invalid.")
+    {
+        LicencePlate = licencePlate;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidParkingSpotNameException.cs">
+namespace MySpot.Core.Exceptions;
+
+public class InvalidParkingSpotNameException : CustomException
+{
+    public InvalidParkingSpotNameException() : base("Parking spot name is invalid.")
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidPasswordException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidPasswordException : CustomException
+{
+    public InvalidPasswordException() : base("Invalid password.")
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidReservationDateException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidReservationDateException : CustomException
+{
+    public DateTime Date { get; }
+
+    public InvalidReservationDateException(DateTime date) 
+        : base($"Reservation date: {date:d} is invalid.")
+    {
+        Date = date;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidRoleException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class InvalidRoleException : CustomException
+{
+    public string Role { get; }
+
+    public InvalidRoleException(string role) : base($"Role: '{role}' is invalid.")
+    {
+        Role = role;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/InvalidUsernameException.cs">
+namespace MySpot.Core.Exceptions;
+
+public class InvalidUsernameException : CustomException
+{
+    public string UserName { get; }
+
+    public InvalidUsernameException(string userName) : base($"Username: '{userName}' is invalid.")
+    {
+        UserName = userName;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/NoReservationPolicyFoundException.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Exceptions;
+
+public sealed class NoReservationPolicyFoundException : CustomException
+{
+    public JobTitle JobTitle { get; }
+
+    public NoReservationPolicyFoundException(JobTitle jobTitle) 
+        : base($"No reservation policy for {jobTitle} found")
+    {
+        JobTitle = jobTitle;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/ParkingSpotAlreadyReservedException.cs">
+namespace MySpot.Core.Exceptions;
+
+public sealed class ParkingSpotAlreadyReservedException : CustomException
+{
+    public string ParkingSpotName { get; }
+    public DateTime Date { get; }
+
+    public ParkingSpotAlreadyReservedException(string parkingSpotName, DateTime date) 
+        : base($"Parking spot with name {parkingSpotName} is already reserved for date: {date}")
+    {
+        ParkingSpotName = parkingSpotName;
+        Date = date;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Exceptions/ParkingSpotCapacityExceededException.cs">
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Exceptions;
+
+public sealed class ParkingSpotCapacityExceededException : CustomException
+{
+    public ParkingSpotId ParkingSpotId { get; }
+
+    public ParkingSpotCapacityExceededException(ParkingSpotId parkingSpotId) 
+        : base($"Parking spot with ID: {parkingSpotId} exceeded its reservation capacity.")
+    {
+        ParkingSpotId = parkingSpotId;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Policies/BossReservationPolicy.cs">
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Policies;
+
+internal sealed class BossReservationPolicy : IReservationPolicy
+{
+    public bool CanBeApplied(JobTitle jobTitle)
+        => jobTitle == JobTitle.Boss;
+
+    public bool CanReserve(IEnumerable<WeeklyParkingSpot> weeklyParkingSpots, EmployeeName employeeName)
+        => true;
+}
+</file>
+
+<file path="src/MySpot.Core/Policies/IReservationPolicy.cs">
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Policies;
+
+public interface IReservationPolicy
+{
+    bool CanBeApplied(JobTitle jobTitle);
+    bool CanReserve(IEnumerable<WeeklyParkingSpot> weeklyParkingSpots, EmployeeName employeeName);
+}
+</file>
+
+<file path="src/MySpot.Core/Policies/ManagerReservationPolicy.cs">
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Policies;
+
+internal sealed class ManagerReservationPolicy : IReservationPolicy
+{
+    public bool CanBeApplied(JobTitle jobTitle)
+        => jobTitle == JobTitle.Manager;
+
+    public bool CanReserve(IEnumerable<WeeklyParkingSpot> weeklyParkingSpots, EmployeeName employeeName)
+    {
+        var totalEmployeeReservations = weeklyParkingSpots
+            .SelectMany(x => x.Reservations)
+            .OfType<VehicleReservation>()
+            .Count(x => x.EmployeeName == employeeName);
+
+        return totalEmployeeReservations <= 4;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Policies/RegularEmployeeReservationPolicy.cs">
+using MySpot.Core.Abstractions;
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Policies;
+
+internal sealed class RegularEmployeeReservationPolicy : IReservationPolicy
+{
+    private readonly IClock _clock;
+
+    public RegularEmployeeReservationPolicy(IClock clock)
+        => _clock = clock;
+    
+    public bool CanBeApplied(JobTitle jobTitle)
+        => jobTitle == JobTitle.Employee;
+
+    public bool CanReserve(IEnumerable<WeeklyParkingSpot> weeklyParkingSpots, EmployeeName employeeName)
+    {
+        var totalEmployeeReservations = weeklyParkingSpots
+            .SelectMany(x => x.Reservations)
+            .OfType<VehicleReservation>()
+            .Count(x => x.EmployeeName == employeeName);
+
+        return totalEmployeeReservations < 2 && _clock.Current().Hour > 4;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/Repositories/IUserRepository.cs">
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Repositories;
+
+public interface IUserRepository
+{
+    Task<User> GetByIdAsync(UserId id);
+    Task<User> GetByEmailAsync(Email email);
+    Task<User> GetByUsernameAsync(Username username);
+    Task AddAsync(User user);
+}
+</file>
+
+<file path="src/MySpot.Core/Repositories/IWeeklyParkingSpotRepository.cs">
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Core.Repositories;
+
+public interface IWeeklyParkingSpotRepository
+{
+    Task<IEnumerable<WeeklyParkingSpot>> GetAllAsync();
+    Task<IEnumerable<WeeklyParkingSpot>> GetByWeekAsync(Week week) => throw new NotImplementedException();
+    Task<WeeklyParkingSpot> GetAsync(ParkingSpotId id);
+    Task AddAsync(WeeklyParkingSpot weeklyParkingSpot);
+    Task UpdateAsync(WeeklyParkingSpot weeklyParkingSpot);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Capacity.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Capacity
+{
+    public int Value { get; }
+
+    public Capacity(int value)
+    {
+        if (value is < 0 or > 4)
+        {
+            throw new InvalidCapacityException(value);
+        }
+        
+        Value = value;
+    }
+    
+    public static implicit operator int(Capacity capacity)
+        => capacity.Value;
+
+    public static implicit operator Capacity(int value)
+        => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Date.cs">
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Date
+{
+    public DateTimeOffset Value { get; }
+
+    public Date(DateTimeOffset value)
+    {
+        Value = value.Date;
+    }
+    
+    public Date AddDays(int days) => new(Value.AddDays(days));
+    
+    public static implicit operator DateTimeOffset(Date date)
+        => date.Value;
+    
+    public static implicit operator Date(DateTimeOffset value)
+        => new(value);
+
+    public static bool operator <(Date date1, Date date2)
+        => date1.Value < date2.Value;
+
+    public static bool operator >(Date date1, Date date2)
+        => date1.Value > date2.Value;
+
+    public static bool operator <=(Date date1, Date date2)
+        => date1.Value <= date2.Value;
+    
+    public static bool operator >=(Date date1, Date date2)
+        => date1.Value >= date2.Value;
+
+    public static Date Now => new(DateTimeOffset.Now);
+
+    public override string ToString() => Value.ToString("d");
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Email.cs">
+using System.Text.RegularExpressions;
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Email
+{
+    private static readonly Regex Regex = new(
+        @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+        @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+        RegexOptions.Compiled);
+        
+    public string Value { get; }
+
+    public Email(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidEmailException(value);
+        }
+
+        if (value.Length > 100)
+        {
+            throw new InvalidEmailException(value);
+        }
+
+        value = value.ToLowerInvariant();
+        if (!Regex.IsMatch(value))
+        {
+            throw new InvalidEmailException(value);
+        }
+
+        Value = value;
+    }
+
+    public static implicit operator string(Email email) => email.Value;
+
+    public static implicit operator Email(string email) => new(email);
+        
+    public override string ToString() => Value;
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/EmployeeName.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record EmployeeName(string Value)
+{
+    public string Value { get; } = Value ?? throw new InvalidEmployeeNameException();
+
+    public static implicit operator string(EmployeeName name)
+        => name.Value;
+    
+    public static implicit operator EmployeeName(string value)
+        => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/FullName.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record FullName
+{
+    public string Value { get; }
+        
+    public FullName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length is > 100 or < 3)
+        {
+            throw new InvalidFullNameException(value);
+        }
+            
+        Value = value;
+    }
+
+    public static implicit operator FullName(string value) => value is null ? null : new FullName(value);
+
+    public static implicit operator string(FullName value) => value?.Value;
+
+    public override string ToString() => Value;
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/JobTitle.cs">
+namespace MySpot.Core.ValueObjects;
+
+public sealed record JobTitle
+{
+    public string Value { get; }
+
+    public const string Employee = nameof(Employee);
+    public const string Manager = nameof(Manager);
+    public const string Boss = nameof(Boss);
+
+    private JobTitle(string value)
+        => Value = value;
+
+    public static implicit operator string(JobTitle jobTitle)
+        => jobTitle.Value;
+
+    public static implicit operator JobTitle(string value)
+        => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/LicencePlate.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record LicencePlate
+{
+    public string Value { get; }
+
+    public LicencePlate(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidLicencePlateException(value);
+        }
+        if (value.Length is < 5 or > 8)
+        {
+            throw new InvalidLicencePlateException(value);
+        }
+        
+        Value = value;
+    }
+
+    public static implicit operator string(LicencePlate licencePlate)
+        => licencePlate.Value;
+
+    public static implicit operator LicencePlate(string value)
+        => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/ParkingSpotId.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record ParkingSpotId
+{
+    public Guid Value { get; }
+
+    public ParkingSpotId(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            throw new InvalidEntityIdException(value);
+        }
+
+        Value = value;
+    }
+
+    public static ParkingSpotId Create() => new(Guid.NewGuid());
+
+    public static implicit operator Guid(ParkingSpotId date)
+        => date.Value;
+    
+    public static implicit operator ParkingSpotId(Guid value)
+        => new(value);
+
+    public override string ToString() => Value.ToString("N");
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/ParkingSpotName.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record ParkingSpotName(string Value)
+{
+    public string Value { get; } = Value ?? throw new InvalidParkingSpotNameException();
+
+    public static implicit operator string(ParkingSpotName name)
+        => name.Value;
+    
+    public static implicit operator ParkingSpotName(string value)
+        => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Password.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Password
+{
+    public string Value { get; }
+        
+    public Password(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length is > 200 or < 6)
+        {
+            throw new InvalidPasswordException();
+        }
+            
+        Value = value;
+    }
+
+    public static implicit operator Password(string value) => new(value);
+
+    public static implicit operator string(Password value) => value?.Value;
+
+    public override string ToString() => Value;
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/ReservationId.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record ReservationId
+{
+    public Guid Value { get; }
+
+    public ReservationId(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            throw new InvalidEntityIdException(value);
+        }
+
+        Value = value;
+    }
+
+    public static ReservationId Create() => new(Guid.NewGuid());
+
+    public static implicit operator Guid(ReservationId date)
+        => date.Value;
+    
+    public static implicit operator ReservationId(Guid value)
+        => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Role.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Role
+{
+
+    public static IEnumerable<string> AvailableRoles { get; } = new[] {"admin", "user"};
+
+    public string Value { get; }
+
+    public Role(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length > 30)
+        {
+            throw new InvalidRoleException(value);
+        }
+
+        if (!AvailableRoles.Contains(value))
+        {
+            throw new InvalidRoleException(value);
+        }
+
+        Value = value;
+    }
+
+    public static Role Admin() => new("admin");
+    
+    public static Role User() => new("user");
+
+    public static implicit operator Role(string value) => new Role(value);
+
+    public static implicit operator string(Role value) => value?.Value;
+
+    public override string ToString() => Value;
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/UserId.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record UserId
+{
+    public Guid Value { get; }
+
+    public UserId(Guid value)
+    {
+        if (value == Guid.Empty)
+        {
+            throw new InvalidEntityIdException(value);
+        }
+
+        Value = value;
+    }
+
+    public static implicit operator Guid(UserId date) => date.Value;
+    
+    public static implicit operator UserId(Guid value) => new(value);
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Username.cs">
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Username
+{
+    public string Value { get; }
+        
+    public Username(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length is > 30 or < 3)
+        {
+            throw new InvalidFullNameException(value);
+        }
+            
+        Value = value;
+    }
+
+    public static implicit operator Username(string value) => new Username(value);
+
+    public static implicit operator string(Username value) => value?.Value;
+
+    public override string ToString() => Value;
+}
+</file>
+
+<file path="src/MySpot.Core/ValueObjects/Week.cs">
+namespace MySpot.Core.ValueObjects;
+
+public sealed record Week
+{
+    public Date From { get; }
+    public Date To { get; }
+
+    public Week(DateTimeOffset value)
+    {
+        var pastDays = value.DayOfWeek is DayOfWeek.Sunday ? 7 : (int) value.DayOfWeek;
+        var remainingDays = 7 - pastDays;
+        From = new Date(value.AddDays(-1 * pastDays));
+        To = new Date(value.AddDays(remainingDays));
+    }
+
+    public override string ToString() => $"{From} -> {To}";
+}
+</file>
+
+<file path="src/MySpot.Core/Extensions.cs">
+using Microsoft.Extensions.DependencyInjection;
+using MySpot.Core.DomainServices;
+using MySpot.Core.Policies;
+
+namespace MySpot.Core;
+
+public static class Extensions
+{
+    public static IServiceCollection AddCore(this IServiceCollection services)
+    {
+        services.AddSingleton<IReservationPolicy, RegularEmployeeReservationPolicy>();
+        services.AddSingleton<IReservationPolicy, ManagerReservationPolicy>();
+        services.AddSingleton<IReservationPolicy, BossReservationPolicy>();
+        services.AddSingleton<IParkingReservationService, ParkingReservationService>();
+        
+        return services;
+    }
+}
+</file>
+
+<file path="src/MySpot.Core/MySpot.Core.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MySpot.Tests.Unit" />
+    </ItemGroup>
+
+</Project>
+</file>
+
+<file path="src/MySpot.Infrastructure/Auth/Authenticator.cs">
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using MySpot.Application.DTO;
+using MySpot.Application.Security;
+using MySpot.Core.Abstractions;
+
+namespace MySpot.Infrastructure.Auth;
+
+internal sealed class Authenticator : IAuthenticator
+{
+    private readonly IClock _clock;
+    private readonly string _issuer;
+    private readonly TimeSpan _expiry;
+    private readonly string _audience;
+    private readonly SigningCredentials _signingCredentials;
+    private readonly JwtSecurityTokenHandler _jwtSecurityToken = new JwtSecurityTokenHandler();
+
+    public Authenticator(IOptions<AuthOptions> options, IClock clock)
+    {
+        _clock = clock;
+        _issuer = options.Value.Issuer;
+        _audience = options.Value.Audience;
+        _expiry = options.Value.Expiry ?? TimeSpan.FromHours(1);
+        _signingCredentials = new SigningCredentials(new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(options.Value.SigningKey)),
+                SecurityAlgorithms.HmacSha256);
+    }
+    
+    public JwtDto CreateToken(Guid userId, string role)
+    {
+        var now = _clock.Current();
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new(JwtRegisteredClaimNames.UniqueName, userId.ToString()),
+            new(ClaimTypes.Role, role)
+        };
+
+        var expires = now.Add(_expiry);
+        var jwt = new JwtSecurityToken(_issuer, _audience, claims, now, expires, _signingCredentials);
+        var token = _jwtSecurityToken.WriteToken(jwt);
+
+        return new JwtDto
+        {
+            AccessToken = token
+        };
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Auth/AuthOptions.cs">
+namespace MySpot.Infrastructure.Auth;
+
+public sealed class AuthOptions
+{
+    public string Issuer { get; set; }
+    public string Audience { get; set; }
+    public string SigningKey { get; set; }
+    public TimeSpan? Expiry { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Auth/Extensions.cs">
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using MySpot.Application.Security;
+
+namespace MySpot.Infrastructure.Auth;
+
+internal static class Extensions
+{
+    private const string OptionsSectionName = "auth";
+    
+    public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
+    {
+        var options = configuration.GetOptions<AuthOptions>(OptionsSectionName);
+
+        services
+            .Configure<AuthOptions>(configuration.GetRequiredSection(OptionsSectionName))
+            .AddSingleton<IAuthenticator, Authenticator>()
+            .AddSingleton<ITokenStorage, HttpContextTokenStorage>()
+            .AddAuthentication(o =>
+            {
+                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(o =>
+            {
+                o.Audience = options.Audience;
+                o.IncludeErrorDetails = true;
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = options.Issuer,
+                    ClockSkew = TimeSpan.Zero,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SigningKey))
+                };
+            });
+
+        services.AddAuthorization(authorization =>
+        {
+            authorization.AddPolicy("is-admin", policy =>
+            {
+                policy.RequireRole("admin");
+            });
+        });
+
+        return services;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Auth/HttpContextTokenStorage.cs">
+using Microsoft.AspNetCore.Http;
+using MySpot.Application.DTO;
+using MySpot.Application.Security;
+
+namespace MySpot.Infrastructure.Auth;
+
+internal sealed class HttpContextTokenStorage : ITokenStorage
+{
+    private const string TokenKey = "jwt";
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public HttpContextTokenStorage(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public void Set(JwtDto jwt) => _httpContextAccessor.HttpContext?.Items.TryAdd(TokenKey, jwt);
+
+    public JwtDto Get()
+    {
+        if (_httpContextAccessor.HttpContext is null)
+        {
+            return null;
+        }
+
+        if (_httpContextAccessor.HttpContext.Items.TryGetValue(TokenKey, out var jwt))
+        {
+            return jwt as JwtDto;
+        }
+
+        return null;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Configurations/CleaningReservationConfiguration.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MySpot.Core.Entities;
+
+namespace MySpot.Infrastructure.DAL.Configurations;
+
+internal sealed class CleaningReservationConfiguration : IEntityTypeConfiguration<CleaningReservation>
+{
+    public void Configure(EntityTypeBuilder<CleaningReservation> builder)
+    {
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Configurations/ReservationConfiguration.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Configurations;
+
+internal sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
+{
+    public void Configure(EntityTypeBuilder<Reservation> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .HasConversion(x => x.Value, x => new ReservationId(x));
+        builder.Property(x => x.Capacity)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new(x));
+        builder.Property(x => x.Date)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new Date(x));
+
+        builder
+            .HasDiscriminator<string>("Type")
+            .HasValue<CleaningReservation>(nameof(CleaningReservation))
+            .HasValue<VehicleReservation>(nameof(VehicleReservation));
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Configurations/UserConfiguration.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Configurations;
+
+internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
+{
+    public void Configure(EntityTypeBuilder<User> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .HasConversion(x => x.Value, x => new UserId(x));
+        builder.HasIndex(x => x.Email).IsUnique();
+        builder.Property(x => x.Email)
+            .HasConversion(x => x.Value, x => new Email(x))
+            .IsRequired()
+            .HasMaxLength(100);
+        builder.HasIndex(x => x.Username).IsUnique();
+        builder.Property(x => x.Username)
+            .HasConversion(x => x.Value, x => new Username(x))
+            .IsRequired()
+            .HasMaxLength(30);
+        builder.Property(x => x.Password)
+            .HasConversion(x => x.Value, x => new Password(x))
+            .IsRequired()
+            .HasMaxLength(200);
+        builder.Property(x => x.FullName)
+            .HasConversion(x => x.Value, x => new FullName(x))
+            .IsRequired()
+            .HasMaxLength(100);
+        builder.Property(x => x.Role)
+            .HasConversion(x => x.Value, x => new Role(x))
+            .IsRequired()
+            .HasMaxLength(30);
+        builder.Property(x => x.CreatedAt).IsRequired();
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Configurations/VehicleReservationConfiguration.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Configurations;
+
+internal sealed class VehicleReservationConfiguration : IEntityTypeConfiguration<VehicleReservation>
+{
+    public void Configure(EntityTypeBuilder<VehicleReservation> builder)
+    {
+        builder.HasOne<User>().WithMany().HasForeignKey(x => x.UserId);
+        builder.Property(x => x.UserId)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new UserId(x));
+        builder.Property(x => x.EmployeeName)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new EmployeeName(x));
+        builder.Property(x => x.LicencePlate)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new LicencePlate(x));
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Configurations/WeeklyParkingSpotConfiguration.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Configurations;
+
+internal sealed class WeeklyParkingSpotConfiguration : IEntityTypeConfiguration<WeeklyParkingSpot>
+{
+    public void Configure(EntityTypeBuilder<WeeklyParkingSpot> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .HasConversion(x => x.Value, x => new ParkingSpotId(x));
+        builder.Property(x => x.Week)
+            .IsRequired()
+            .HasConversion(x => x.To.Value, x => new Week(x));
+        builder.Property(x => x.Name)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new ParkingSpotName(x));
+        builder.Property(x => x.Capacity)
+            .IsRequired()
+            .HasConversion(x => x.Value, x => new(x));
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Decorators/UnitOfWorkCommandHandlerDecorator.cs">
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Infrastructure.DAL.Decorators;
+
+internal sealed class UnitOfWorkCommandHandlerDecorator<TCommand> : ICommandHandler<TCommand> where TCommand : class, ICommand
+{
+    private readonly ICommandHandler<TCommand> _commandHandler;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public UnitOfWorkCommandHandlerDecorator(ICommandHandler<TCommand> commandHandler, IUnitOfWork unitOfWork)
+    {
+        _commandHandler = commandHandler;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task HandleAsync(TCommand command)
+    {
+        await _unitOfWork.ExecuteAsync(() => _commandHandler.HandleAsync(command));
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Handlers/Extensions.cs">
+using MySpot.Application.DTO;
+using MySpot.Core.Entities;
+
+namespace MySpot.Infrastructure.DAL.Handlers;
+
+public static class Extensions
+{
+    public static WeeklyParkingSpotDto AsDto(this WeeklyParkingSpot entity)
+        => new()
+        {
+            Id = entity.Id.Value.ToString(),
+            Name = entity.Name,
+            Capacity = entity.Capacity,
+            From = entity.Week.From.Value.DateTime,
+            To = entity.Week.To.Value.DateTime,
+            Reservations = entity.Reservations.Select(x => new ReservationDto
+            {
+                Id = x.Id,
+                EmployeeName = x is VehicleReservation vr ? vr.EmployeeName : null,
+                Date = x.Date.Value.Date
+            })
+        };
+
+    public static UserDto AsDto(this User entity)
+        => new()
+        {
+            Id = entity.Id,
+            Username = entity.Username,
+            FullName = entity.FullName
+        };
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Handlers/GetUserHandler.cs">
+using Microsoft.EntityFrameworkCore;
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+using MySpot.Application.Queries;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Handlers;
+
+internal sealed class GetUserHandler : IQueryHandler<GetUser, UserDto>
+{
+    private readonly MySpotDbContext _dbContext;
+    
+    public GetUserHandler(MySpotDbContext dbContext)
+        => _dbContext = dbContext;
+    
+    public async Task<UserDto> HandleAsync(GetUser query)
+    {
+        var userId = new UserId(query.UserId);
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == userId);
+
+        return user?.AsDto();
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Handlers/GetUsersHandler.cs">
+using Microsoft.EntityFrameworkCore;
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+using MySpot.Application.Queries;
+
+namespace MySpot.Infrastructure.DAL.Handlers;
+
+internal sealed class GetUsersHandler : IQueryHandler<GetUsers, IEnumerable<UserDto>>
+{
+    private readonly MySpotDbContext _dbContext;
+
+    public GetUsersHandler(MySpotDbContext dbContext)
+        => _dbContext = dbContext;
+
+    public async Task<IEnumerable<UserDto>> HandleAsync(GetUsers query)
+        => await _dbContext.Users
+            .AsNoTracking()
+            .Select(x => x.AsDto())
+            .ToListAsync();
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Handlers/GetWeeklyParkingSpotsHandler.cs">
+using Microsoft.EntityFrameworkCore;
+using MySpot.Application.Abstractions;
+using MySpot.Application.DTO;
+using MySpot.Application.Queries;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Handlers;
+
+internal sealed class GetWeeklyParkingSpotsHandler : IQueryHandler<GetWeeklyParkingSpots, IEnumerable<WeeklyParkingSpotDto>>
+{
+    private readonly MySpotDbContext _dbContext;
+
+    public GetWeeklyParkingSpotsHandler(MySpotDbContext dbContext)
+        => _dbContext = dbContext;
+
+    public async Task<IEnumerable<WeeklyParkingSpotDto>> HandleAsync(GetWeeklyParkingSpots query)
+    {
+        var week = query.Date.HasValue ? new Week(query.Date.Value) : null;
+        var weeklyParkingSpots = await _dbContext.WeeklyParkingSpots
+            .Where(x => week == null || x.Week == week)
+            .Include(x => x.Reservations)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return weeklyParkingSpots.Select(x => x.AsDto());
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Repositories/InMemoryWeeklyParkingSpotRepository.cs">
+using MySpot.Core.Abstractions;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Repositories;
+
+internal sealed class InMemoryWeeklyParkingSpotRepository : IWeeklyParkingSpotRepository
+{
+    private readonly List<WeeklyParkingSpot> _weeklyParkingSpots;
+    
+    public InMemoryWeeklyParkingSpotRepository(IClock clock)
+    {
+        _weeklyParkingSpots = new List<WeeklyParkingSpot>
+        {
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000001"), new Week(clock.Current()), "P1"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000002"), new Week(clock.Current()), "P2"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000003"), new Week(clock.Current()), "P3"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000004"), new Week(clock.Current()), "P4"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000005"), new Week(clock.Current()), "P5"),
+        };
+    }
+
+    public async Task<IEnumerable<WeeklyParkingSpot>> GetAllAsync()
+    {
+        await Task.CompletedTask;
+        return _weeklyParkingSpots;
+    }
+
+    public async Task<WeeklyParkingSpot> GetAsync(ParkingSpotId id)
+    {
+        await Task.CompletedTask;
+        return _weeklyParkingSpots.SingleOrDefault(x => x.Id == id);
+    }
+
+    public Task AddAsync(WeeklyParkingSpot weeklyParkingSpot)
+    {
+        _weeklyParkingSpots.Add(weeklyParkingSpot);
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(WeeklyParkingSpot weeklyParkingSpot) => Task.CompletedTask;
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Repositories/PostgresUserRepository.cs">
+using Microsoft.EntityFrameworkCore;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Repositories;
+
+internal sealed class PostgresUserRepository : IUserRepository
+{
+    private readonly DbSet<User> _users;
+
+    public PostgresUserRepository(MySpotDbContext dbContext)
+    {
+        _users = dbContext.Users;
+    }
+
+    public Task<User> GetByIdAsync(UserId id)
+        => _users.SingleOrDefaultAsync(x => x.Id == id);
+
+    public Task<User> GetByEmailAsync(Email email)
+        => _users.SingleOrDefaultAsync(x => x.Email == email);
+
+    public Task<User> GetByUsernameAsync(Username username)
+        => _users.SingleOrDefaultAsync(x => x.Username == username);
+
+    public async Task AddAsync(User user)
+        => await _users.AddAsync(user);
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Repositories/PostgresWeeklyParkingSpotRepository.cs">
+using Microsoft.EntityFrameworkCore;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL.Repositories;
+
+internal sealed class PostgresWeeklyParkingSpotRepository : IWeeklyParkingSpotRepository
+{
+    private readonly MySpotDbContext _dbContext;
+    private readonly DbSet<WeeklyParkingSpot> _weeklyParkingSpots;
+
+    public PostgresWeeklyParkingSpotRepository(MySpotDbContext dbContext)
+    {
+        _dbContext = dbContext;
+        _weeklyParkingSpots = _dbContext.WeeklyParkingSpots;
+    }
+
+    public async Task<IEnumerable<WeeklyParkingSpot>> GetAllAsync()
+        => await _weeklyParkingSpots
+            .Include(x => x.Reservations)
+            .ToListAsync();
+    
+    public async Task<IEnumerable<WeeklyParkingSpot>> GetByWeekAsync(Week week)
+        => await _weeklyParkingSpots
+            .Include(x => x.Reservations)
+            .Where(x => x.Week == week)
+            .ToListAsync();
+
+    public async Task<WeeklyParkingSpot> GetAsync(ParkingSpotId id)
+        => await _weeklyParkingSpots
+            .Include(x => x.Reservations)
+            .SingleOrDefaultAsync(x => x.Id == id);
+
+    public async Task AddAsync(WeeklyParkingSpot weeklyParkingSpot)
+    {
+        await _weeklyParkingSpots.AddAsync(weeklyParkingSpot);
+    }
+
+    public Task UpdateAsync(WeeklyParkingSpot weeklyParkingSpot)
+    {
+        _weeklyParkingSpots.Update(weeklyParkingSpot);
+        return Task.CompletedTask;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/DatabaseInitializer.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using MySpot.Core.Abstractions;
+using MySpot.Core.Entities;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Infrastructure.DAL;
+
+internal sealed class DatabaseInitializer : IHostedService
+{
+    // Service locator "anti-pattern" (but it depends) :)
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IClock _clock;
+
+    public DatabaseInitializer(IServiceProvider serviceProvider, IClock clock)
+    {
+        _serviceProvider = serviceProvider;
+        _clock = clock;
+    }
+    
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<MySpotDbContext>();
+        await dbContext.Database.MigrateAsync(cancellationToken);
+
+        if (await dbContext.WeeklyParkingSpots.AnyAsync(cancellationToken))
+        {
+            return;
+        }
+        
+        var weeklyParkingSpots = new List<WeeklyParkingSpot>
+        {
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000001"), new Week(_clock.Current()), "P1"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000002"), new Week(_clock.Current()), "P2"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000003"), new Week(_clock.Current()), "P3"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000004"), new Week(_clock.Current()), "P4"),
+            WeeklyParkingSpot.Create(Guid.Parse("00000000-0000-0000-0000-000000000005"), new Week(_clock.Current()), "P5"),
+        };
+
+        await dbContext.WeeklyParkingSpots.AddRangeAsync(weeklyParkingSpots, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/Extensions.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MySpot.Application.Abstractions;
+using MySpot.Core.Repositories;
+using MySpot.Infrastructure.DAL.Decorators;
+using MySpot.Infrastructure.DAL.Repositories;
+
+namespace MySpot.Infrastructure.DAL;
+
+internal static class Extensions
+{
+    private const string OptionsSectionName = "postgres";
+    
+    public static IServiceCollection AddPostgres(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<PostgresOptions>(configuration.GetRequiredSection(OptionsSectionName));
+        var postgresOptions = configuration.GetOptions<PostgresOptions>(OptionsSectionName);
+        services.AddDbContext<MySpotDbContext>(x => x.UseNpgsql(postgresOptions.ConnectionString));
+        services.AddScoped<IWeeklyParkingSpotRepository, PostgresWeeklyParkingSpotRepository>();
+        services.AddScoped<IUserRepository, PostgresUserRepository>();
+        services.AddHostedService<DatabaseInitializer>();
+        services.AddScoped<IUnitOfWork, PostgresUnitOfWork>();
+
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(UnitOfWorkCommandHandlerDecorator<>));
+
+        // EF Core + Npgsql issue
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        
+        return services;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/IUnitOfWork.cs">
+namespace MySpot.Infrastructure.DAL;
+
+public interface IUnitOfWork
+{
+    Task ExecuteAsync(Func<Task> action);
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/MySpotDbContext.cs">
+using Microsoft.EntityFrameworkCore;
+using MySpot.Core.Entities;
+
+namespace MySpot.Infrastructure.DAL;
+
+internal sealed class MySpotDbContext : DbContext
+{
+    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<WeeklyParkingSpot> WeeklyParkingSpots { get; set; }
+    public DbSet<User> Users { get; set; }
+
+    public MySpotDbContext(DbContextOptions<MySpotDbContext> options) : base(options)
+    {
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/PostgresOptions.cs">
+namespace MySpot.Infrastructure.DAL;
+
+internal sealed class PostgresOptions
+{
+    public string ConnectionString { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/DAL/PostgresUnitOfWork.cs">
+namespace MySpot.Infrastructure.DAL;
+
+internal sealed class PostgresUnitOfWork : IUnitOfWork
+{
+    private readonly MySpotDbContext _dbContext;
+
+    public PostgresUnitOfWork(MySpotDbContext dbContext)
+        => _dbContext = dbContext;
+
+    public async Task ExecuteAsync(Func<Task> action)
+    {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            await action();
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Exceptions/ExceptionMiddleware.cs">
+using Humanizer;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using MySpot.Core.Exceptions;
+
+namespace MySpot.Infrastructure.Exceptions;
+
+internal sealed class ExceptionMiddleware : IMiddleware
+{
+    private readonly ILogger<ExceptionMiddleware> _logger;
+
+    public ExceptionMiddleware(ILogger<ExceptionMiddleware> logger)
+    {
+        _logger = logger;
+    }
+    
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    {
+        try
+        {
+            await next(context);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, exception.Message);
+            await HandleExceptionAsync(exception, context);
+        }
+    }
+
+    private async Task HandleExceptionAsync(Exception exception, HttpContext context)
+    {
+        var (statusCode, error) = exception switch
+        {
+            CustomException => (StatusCodes.Status400BadRequest,
+                new Error(exception.GetType().Name.Underscore().Replace("_exception", string.Empty), exception.Message)),
+            _ => (StatusCodes.Status500InternalServerError, new Error("error", "There was an error."))
+        };
+
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(error);
+    }
+
+    private record Error(string Code, string Reason);
+    
+    
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Logging/Decorators/LoggingCommandHandlerDecorator.cs">
+using Humanizer;
+using Microsoft.Extensions.Logging;
+using MySpot.Application.Abstractions;
+
+namespace MySpot.Infrastructure.Logging.Decorators;
+
+internal sealed class LoggingCommandHandlerDecorator<TCommand> : ICommandHandler<TCommand> where TCommand : class, ICommand
+{
+    private readonly ICommandHandler<TCommand> _commandHandler;
+    private readonly ILogger<LoggingCommandHandlerDecorator<TCommand>> _logger;
+
+    public LoggingCommandHandlerDecorator(ICommandHandler<TCommand> commandHandler,
+        ILogger<LoggingCommandHandlerDecorator<TCommand>> logger)
+    {
+        _commandHandler = commandHandler;
+        _logger = logger;
+    }
+
+    public async Task HandleAsync(TCommand command)
+    {
+        var commandName = typeof(TCommand).Name.Underscore();
+        _logger.LogInformation("Started handling a command: {CommandName}...", commandName);
+        await _commandHandler.HandleAsync(command);
+        _logger.LogInformation("Completed handling a command: {CommandName}.", commandName);
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Logging/Extensions.cs">
+using Microsoft.Extensions.DependencyInjection;
+using MySpot.Application.Abstractions;
+using MySpot.Infrastructure.Logging.Decorators;
+
+namespace MySpot.Infrastructure.Logging;
+
+internal static class Extensions
+{
+    public static IServiceCollection AddCustomLogging(this IServiceCollection services)
+    {
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(LoggingCommandHandlerDecorator<>));
+
+        return services;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Security/Extensions.cs">
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using MySpot.Application.Security;
+using MySpot.Core.Entities;
+
+namespace MySpot.Infrastructure.Security;
+
+internal static class Extensions
+{
+    public static IServiceCollection AddSecurity(this IServiceCollection services)
+    {
+        services
+            .AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>()
+            .AddSingleton<IPasswordManager, PasswordManager>();
+
+        return services;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Security/PasswordManager.cs">
+using Microsoft.AspNetCore.Identity;
+using MySpot.Application.Security;
+using MySpot.Core.Entities;
+
+namespace MySpot.Infrastructure.Security;
+
+internal sealed class PasswordManager : IPasswordManager
+{
+    private readonly IPasswordHasher<User> _passwordHasher;
+
+    public PasswordManager(IPasswordHasher<User> passwordHasher)
+    {
+        _passwordHasher = passwordHasher;
+    }
+
+    public string Secure(string password) => _passwordHasher.HashPassword(default, password);
+
+    public bool Validate(string password, string securedPassword)
+        => _passwordHasher.VerifyHashedPassword(default, securedPassword, password) ==
+           PasswordVerificationResult.Success;
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Time/Clock.cs">
+using MySpot.Core.Abstractions;
+
+namespace MySpot.Infrastructure.Time;
+
+internal sealed class Clock : IClock
+{
+    public DateTime Current() => DateTime.UtcNow;
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/AppOptions.cs">
+namespace MySpot.Infrastructure;
+
+public sealed class AppOptions
+{
+    public string Name { get; set; }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/Extensions.cs">
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using MySpot.Application.Abstractions;
+using MySpot.Core.Abstractions;
+using MySpot.Infrastructure.Auth;
+using MySpot.Infrastructure.DAL;
+using MySpot.Infrastructure.Exceptions;
+using MySpot.Infrastructure.Logging;
+using MySpot.Infrastructure.Security;
+using MySpot.Infrastructure.Time;
+
+[assembly: InternalsVisibleTo("MySpot.Tests.Integration")]
+[assembly: InternalsVisibleTo("MySpot.Tests.Unit")]
+namespace MySpot.Infrastructure;
+
+public static class Extensions
+{
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddControllers();
+        services.Configure<AppOptions>(configuration.GetRequiredSection("app"));
+        services.AddSingleton<ExceptionMiddleware>();
+        services.AddHttpContextAccessor();
+        
+        services
+            .AddPostgres(configuration)
+            // .AddSingleton<IWeeklyParkingSpotRepository, InMemoryWeeklyParkingSpotRepository>()
+            .AddSingleton<IClock, Clock>();
+
+        services.AddCustomLogging();
+        services.AddSecurity();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(swagger =>
+        {
+            swagger.EnableAnnotations();
+            swagger.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "MySpot API",
+                Version = "v1"
+            });
+        });
+        
+        var infrastructureAssembly = typeof(AppOptions).Assembly;
+        
+        services.Scan(s => s.FromAssemblies(infrastructureAssembly)
+            .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+        services.AddAuth(configuration);
+
+        return services;
+    }
+
+    public static WebApplication UseInfrastructure(this WebApplication app)
+    {
+        app.UseMiddleware<ExceptionMiddleware>();
+        app.UseSwagger();
+        app.UseReDoc(reDoc =>
+        {
+            reDoc.RoutePrefix = "docs";
+            reDoc.SpecUrl("/swagger/v1/swagger.json");
+            reDoc.DocumentTitle = "MySpot API";
+        });
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapControllers();
+        
+        return app;
+    }
+
+    public static T GetOptions<T>(this IConfiguration configuration, string sectionName) where T : class, new()
+    {
+        var options = new T();
+        var section = configuration.GetRequiredSection(sectionName);
+        section.Bind(options);
+
+        return options;
+    }
+}
+</file>
+
+<file path="src/MySpot.Infrastructure/MySpot.Infrastructure.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MySpot.Application\MySpot.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Humanizer" Version="2.14.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.4" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
+      <PackageReference Include="Serilog" Version="2.11.0" />
+      <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+      <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+      <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.3.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="6.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+</Project>
+</file>
+
+<file path="tests/MySpot.Tests.Integration/MySpot.Tests.Integration.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.4" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="Shouldly" Version="4.0.3" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="3.1.2">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\MySpot.Api\MySpot.Api.csproj" />
+    </ItemGroup>
+
+</Project>
+</file>
+
+<file path="tests/MySpot.Tests.Integration/MySpotTestApp.cs">
+using System;
+using System.Net.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MySpot.Tests.Integration;
+
+internal sealed class MySpotTestApp : WebApplicationFactory<Program>
+{
+    public HttpClient Client { get; }
+
+    public MySpotTestApp(Action<IServiceCollection> services = null)
+    {
+        Client = WithWebHostBuilder(builder =>
+        {
+            if (services is not null)
+            {
+                builder.ConfigureServices(services);
+            }
+            
+            builder.UseEnvironment("test");
+        }).CreateClient();
+    }
+}
+</file>
+
+<file path="tests/MySpot.Tests.Integration/OptionsProvider.cs">
+using Microsoft.Extensions.Configuration;
+using MySpot.Infrastructure;
+
+namespace MySpot.Tests.Integration;
+
+public sealed class OptionsProvider
+{
+    private readonly IConfigurationRoot _configuration;
+
+    public OptionsProvider()
+    {
+        _configuration = GetConfigurationRoot();
+    }
+
+    public T Get<T>(string sectionName) where T : class, new() => _configuration.GetOptions<T>(sectionName);
+    
+    private static IConfigurationRoot GetConfigurationRoot()
+        => new ConfigurationBuilder()
+            .AddJsonFile("appsettings.test.json", true)
+            .AddEnvironmentVariables()
+            .Build();
+}
+</file>
+
+<file path="tests/MySpot.Tests.Integration/TestDatabase.cs">
+using System;
+using Microsoft.EntityFrameworkCore;
+using MySpot.Infrastructure.DAL;
+
+namespace MySpot.Tests.Integration;
+
+internal sealed class TestDatabase : IDisposable
+{
+    public MySpotDbContext Context { get; }
+
+    public TestDatabase()
+    {
+        var options = new OptionsProvider().Get<PostgresOptions>("postgres");
+        Context = new MySpotDbContext(new DbContextOptionsBuilder<MySpotDbContext>().UseNpgsql(options.ConnectionString).Options);
+    }
+
+    public void Dispose()
+    {
+        Context.Database.EnsureDeleted();
+        Context.Dispose();
+    }
+}
+</file>
+
+<file path="tests/MySpot.Tests.Integration/TestUserRepository.cs">
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MySpot.Core.Entities;
+using MySpot.Core.Repositories;
+using MySpot.Core.ValueObjects;
+
+namespace MySpot.Tests.Integration;
+
+internal sealed class TestUserRepository : IUserRepository
+{
+    private readonly List<User> _users = new();
+    
+    public async Task<User> GetByIdAsync(UserId id)
+    {
+        await Task.CompletedTask;
+        return _users.SingleOrDefault(x => x.Id == id);
+    }
+
+    public async Task<User> GetByEmailAsync(Email email)
+    {
+        await Task.CompletedTask;
+        return _users.SingleOrDefault(x => x.Email == email);
+    }
+
+    public async Task<User> GetByUsernameAsync(Username username)
+    {
+        await Task.CompletedTask;
+        return _users.SingleOrDefault(x => x.Username == username);
+    }
+
+    public async Task AddAsync(User user)
+    {
+        _users.Add(user);
+        await Task.CompletedTask;
+    }
+}
+</file>
+
+<file path="tests/MySpot.Tests.Unit/MySpot.Tests.Unit.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="Shouldly" Version="4.0.3" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="3.1.2">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\MySpot.Api\MySpot.Api.csproj" />
+    </ItemGroup>
+
+</Project>
+</file>
+
+<file path="docker-compose.yml">
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    shm_size: '4gb'
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:
+    driver: local
+</file>
+
+<file path="MySpot.http">
+@url = http://localhost:5000
+@reservationId = 00000000-0000-0000-0000-000000000001
+@parkingSpotId = 00000000-0000-0000-0000-000000000001
+@userId = 00000000-0000-0000-0000-000000000001
+
+
+###
+GET {{url}}/users
+
+###
+GET {{url}}/users/{{userId}}
+
+###
+POST {{url}}/users
+Content-Type: application/json
+
+{
+    "email": "user1@myspot.io",
+    "username": "user1",
+    "password": "secret",
+    "fullName": "John Doe",
+    "role": "user"
+}
+
+###
+# @name sign_in
+POST {{url}}/users/sign-in
+Content-Type: application/json
+
+{
+    "email": "user1@myspot.io",
+    "password": "secret"
+}
+
+###
+@accessToken = {{sign_in.response.body.$.accessToken}}
+
+###
+GET {{url}}/users/me
+Authorization: Bearer {{accessToken}}
+
+###
+GET {{url}}/parking-spots
+
+###
+POST {{url}}/parking-spots/{{parkingSpotId}}/reservations/vehicle
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+    "parkingSpotId": "{{parkingSpotId}}",
+    "date": "2022-04-26",
+    "licencePlate": "XYZ123"
+}
+
+###
+POST {{url}}/parking-spots/reservations/cleaning
+Content-Type: application/json
+
+{
+    "date": "2022-04-26"
+}
+
+
+###
+PUT {{url}}/parking-spots/reservations/{{reservationId}}
+Content-Type: application/json
+
+{
+    "licencePlate": "XYZ1234"
+}
+
+
+###
+DELETE {{url}}/parking-spots/reservations/{{reservationId}}
+
+###
+GET {{url}}/api/users/me
+Authorization: Bearer {{accessToken}}
+
+###
+GET {{url}}/api/users/{{userId}}
+Authorization: Bearer {{accessToken}}
+
+###
+###
+POST {{url}}/api/users
+Content-Type: application/json
+
+{
+    "email": "user1@myspot.io",
+    "username": "user1",
+    "password": "secret",
+    "fullName": "John Doe",
+    "role": "user"
+}
+</file>
+
+<file path="README.md">
+# MySpot
+
+Sample parking spots reservation Web API with the properly encapsulated domain layer.
+
+Repository for [SOLID Web API](https://solidwebapi.net) course.
+</file>
+
+</files>
