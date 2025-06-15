@@ -18,6 +18,10 @@
   - Password: `SledzSpecke2024!`
 - **Prometheus (Metrics)**: http://51.77.59.184:9090
 - **cAdvisor (Container Metrics)**: http://51.77.59.184:8080
+- **E2E Test Dashboard**: https://api.sledzspecke.pl/e2e-dashboard
+  - Mobile-friendly interface
+  - Real-time test results
+  - One-click test execution
 
 ## Project Description
 
@@ -204,7 +208,7 @@ Main endpoint groups:
 
 ### Running Tests
 
-Backend tests:
+Backend unit tests:
 ```bash
 cd SledzSpecke.WebApi
 dotnet test
@@ -214,6 +218,18 @@ API Integration tests:
 ```bash
 cd SledzSpecke.WebApi
 python test_api.py
+```
+
+E2E tests (Playwright):
+```bash
+cd SledzSpecke.WebApi
+./run-e2e-tests.sh
+
+# Run specific browser
+./run-e2e-tests.sh --browser firefox --headless
+
+# View test results dashboard
+https://api.sledzspecke.pl/e2e-dashboard
 ```
 
 ### Code Quality

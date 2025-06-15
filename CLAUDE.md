@@ -245,6 +245,66 @@ sudo -u postgres psql sledzspecke_db -c "SELECT * FROM \"Users\" ORDER BY \"Id\"
 
 ---
 
+## E2E Testing with Playwright
+
+### Architecture
+- **Framework**: Playwright.NET with Page Object Model
+- **Design**: SOLID principles, Clean Architecture
+- **Location**: `/home/ubuntu/projects/mock/SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests`
+
+### Running E2E Tests
+```bash
+# Run all tests
+cd /home/ubuntu/projects/mock/SledzSpecke.WebApi
+./run-e2e-tests.sh
+
+# Run headless
+./run-e2e-tests.sh --headless
+
+# Run specific browser
+./run-e2e-tests.sh --browser firefox
+
+# Filter tests
+./run-e2e-tests.sh --filter "MedicalShifts"
+```
+
+### Test Scenarios
+1. **Medical Shifts Management** - Based on SMK manual workflows
+2. **Complete SMK Workflow** - Full monthly user journey
+3. **Performance Tests** - Load testing with realistic data
+
+### Test Results Dashboard
+- **URL**: https://api.sledzspecke.pl/e2e-dashboard
+- **Features**:
+  - Mobile-friendly interface
+  - Real-time test execution
+  - Visual results with screenshots
+  - Test history and trends
+  - One-click test runs
+
+### Key Components
+```
+PageObjects/
+├── LoginPage.cs         # Login interactions
+├── DashboardPage.cs     # Main navigation
+└── MedicalShiftsPage.cs # Shift management
+
+Scenarios/
+├── MedicalShiftsScenarios.cs      # Shift workflows
+└── CompleteSMKWorkflowScenario.cs # Full user journey
+
+Builders/
+└── TestDataBuilder.cs   # Polish medical test data
+```
+
+### CI/CD Integration
+- GitHub Actions workflow: `.github/workflows/e2e-tests.yml`
+- Runs on: Push to master, PRs, Daily at 2 AM
+- Multi-browser testing (Chromium, Firefox)
+- Artifact collection on failures
+
+---
+
 ## Remember: You Are a World-Class Developer
 
 Every decision, every line of code, every architecture choice must reflect excellence:
