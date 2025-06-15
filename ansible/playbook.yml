@@ -1,0 +1,56 @@
+---
+# ansible-playbook.yml - SledzSpecke Infrastructure as Code
+# Usage: ansible-playbook -i inventory.yml playbook.yml
+
+- name: Configure SledzSpecke Production Environment
+  hosts: sledzspecke
+  become: yes
+  vars:
+    app_user: www-data
+    app_name: sledzspecke
+    domain: sledzspecke.pl
+    api_domain: api.sledzspecke.pl
+    postgres_version: 16
+    nodejs_version: 20
+    
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: always
+    
+  roles:
+    - common
+    - database
+    - api
+    - frontend
+    - monitoring
+
+# Second play for post-deployment tasks
+- name: Post-deployment verification
+  hosts: sledzspecke
+  become: yes
+  
+  tasks:
+    - name: Verify all services are running
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - sledzspecke-api
+        - postgresql
+        - nginx
+        - docker
+      tags: verify
+    
+    - name: Run health checks
+      uri:
+        url: "{{ item }}"
+        status_code: 200
+      loop:
+        - "https://{{ api_domain }}/monitoring/health"
+        - "https://{{ domain }}"
+      delegate_to: localhost
+      tags: verify

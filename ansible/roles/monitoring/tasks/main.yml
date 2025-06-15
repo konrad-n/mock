@@ -1,0 +1,163 @@
+---
+# Monitoring stack setup
+
+- name: Install Docker
+  shell: |
+    curl -fsSL https://get.docker.com | sh
+    usermod -aG docker {{ ansible_user }}
+    usermod -aG docker {{ app_user }}
+  args:
+    creates: /usr/bin/docker
+  tags: docker
+
+- name: Install Docker Compose
+  get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+  tags: docker
+
+- name: Start and enable Docker
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  tags: docker
+
+- name: Create monitoring directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/monitoring
+    - /opt/monitoring/prometheus
+    - /opt/monitoring/grafana
+    - /opt/monitoring/grafana/dashboards
+    - /opt/monitoring/grafana/datasources
+  tags: monitoring
+
+- name: Deploy Prometheus configuration
+  template:
+    src: prometheus.yml.j2
+    dest: /opt/monitoring/prometheus/prometheus.yml
+    mode: '0644'
+  tags: monitoring
+
+- name: Deploy Prometheus alerts
+  template:
+    src: alert_rules.yml.j2
+    dest: /opt/monitoring/prometheus/alert_rules.yml
+    mode: '0644'
+  tags: monitoring
+
+- name: Deploy Grafana datasource configuration
+  copy:
+    dest: /opt/monitoring/grafana/datasources/prometheus.yml
+    content: |
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://prometheus:9090
+          isDefault: true
+          editable: false
+  tags: monitoring
+
+- name: Deploy monitoring docker-compose
+  template:
+    src: docker-compose-monitoring.yml.j2
+    dest: /opt/monitoring/docker-compose.yml
+    mode: '0644'
+  tags: monitoring
+
+- name: Start monitoring stack
+  shell: |
+    cd /opt/monitoring
+    docker-compose up -d
+  tags: monitoring
+
+- name: Install Seq container
+  docker_container:
+    name: seq
+    image: datalust/seq:latest
+    state: started
+    restart_policy: unless-stopped
+    env:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "5341:80"
+    volumes:
+      - /opt/seq/data:/data
+  tags: seq
+
+- name: Install node exporter for system metrics
+  shell: |
+    wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-1.7.0.linux-amd64.tar.gz
+    tar xvf node_exporter-1.7.0.linux-amd64.tar.gz
+    cp node_exporter-1.7.0.linux-amd64/node_exporter /usr/local/bin/
+    rm -rf node_exporter-1.7.0.linux-amd64*
+  args:
+    creates: /usr/local/bin/node_exporter
+  tags: monitoring
+
+- name: Create node exporter service
+  copy:
+    dest: /etc/systemd/system/node_exporter.service
+    content: |
+      [Unit]
+      Description=Node Exporter
+      After=network.target
+      
+      [Service]
+      Type=simple
+      User=nobody
+      Group=nogroup
+      ExecStart=/usr/local/bin/node_exporter
+      Restart=always
+      RestartSec=5
+      
+      [Install]
+      WantedBy=multi-user.target
+  notify: reload systemd
+  tags: monitoring
+
+- name: Start and enable node exporter
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: monitoring
+
+- name: Configure log rotation
+  copy:
+    dest: /etc/logrotate.d/sledzspecke
+    content: |
+      /var/log/sledzspecke/*.log /var/log/sledzspecke/*.json {
+          daily
+          rotate 7
+          compress
+          delaycompress
+          missingok
+          notifempty
+          create 0644 {{ app_user }} {{ app_user }}
+          sharedscripts
+          postrotate
+              systemctl reload sledzspecke-api > /dev/null 2>&1 || true
+          endscript
+      }
+  tags: logs
+
+- name: Create monitoring dashboard script
+  template:
+    src: sledzspecke-monitor.sh.j2
+    dest: /usr/local/bin/sledzspecke-monitor
+    mode: '0755'
+  tags: monitoring
+
+handlers:
+  - name: reload systemd
+    systemd:
+      daemon_reload: yes

@@ -1,0 +1,150 @@
+---
+# Frontend and Nginx setup
+
+- name: Install Node.js repository
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_{{ nodejs_version }}.x | sudo -E bash -
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
+  tags: nodejs
+
+- name: Install Node.js and Nginx
+  apt:
+    name:
+      - nodejs
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+  tags: packages
+
+- name: Build frontend
+  shell: |
+    cd /opt/sledzspecke/SledzSpecke-Frontend
+    npm ci
+    VITE_API_URL=https://{{ api_domain }} npm run build
+  tags: deploy
+
+- name: Deploy frontend files
+  synchronize:
+    src: /opt/sledzspecke/SledzSpecke-Frontend/packages/web/dist/
+    dest: /var/www/sledzspecke-web/dist/
+    delete: yes
+    recursive: yes
+  delegate_to: "{{ inventory_hostname }}"
+  tags: deploy
+
+- name: Set frontend ownership
+  file:
+    path: /var/www/sledzspecke-web
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    recurse: yes
+  tags: deploy
+
+- name: Configure Nginx rate limiting
+  copy:
+    dest: /etc/nginx/conf.d/rate-limiting.conf
+    content: |
+      # Rate limiting zones
+      limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+      limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
+      limit_req_zone $binary_remote_addr zone=register:10m rate=3r/m;
+      limit_req_status 429;
+      
+      # Connection limiting
+      limit_conn_zone $binary_remote_addr zone=addr:10m;
+      limit_conn addr 100;
+      
+      # Cache zones
+      proxy_cache_path /var/cache/nginx/api levels=1:2 keys_zone=api_cache:10m max_size=100m inactive=60m use_temp_path=off;
+  notify: reload nginx
+  tags: nginx
+
+- name: Configure Nginx sites
+  template:
+    src: "{{ item.template }}"
+    dest: "/etc/nginx/sites-available/{{ item.name }}"
+  loop:
+    - { name: 'sledzspecke-web', template: 'nginx-web.conf.j2' }
+    - { name: 'sledzspecke-api', template: 'nginx-api.conf.j2' }
+  notify: reload nginx
+  tags: nginx
+
+- name: Enable Nginx sites
+  file:
+    src: "/etc/nginx/sites-available/{{ item }}"
+    dest: "/etc/nginx/sites-enabled/{{ item }}"
+    state: link
+  loop:
+    - sledzspecke-web
+    - sledzspecke-api
+  notify: reload nginx
+  tags: nginx
+
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+  tags: nginx
+
+- name: Create Nginx cache directory
+  file:
+    path: /var/cache/nginx/api
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  tags: nginx
+
+- name: Obtain SSL certificates
+  shell: |
+    certbot certonly --nginx --non-interactive --agree-tos \
+      --email admin@{{ domain }} \
+      -d {{ domain }} \
+      -d {{ api_domain }}
+  args:
+    creates: /etc/letsencrypt/live/{{ domain }}
+  tags: ssl
+
+- name: Configure auto-renewal for SSL certificates
+  cron:
+    name: "Renew SSL certificates"
+    minute: "0"
+    hour: "3"
+    day: "1"
+    job: "certbot renew --quiet && systemctl reload nginx"
+  tags: ssl
+
+- name: Configure Nginx performance
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.after | default(omit) }}"
+  loop:
+    - { regexp: '^worker_processes', line: 'worker_processes auto;' }
+    - { regexp: '^worker_connections', line: '    worker_connections 2048;', after: 'events {' }
+    - { regexp: '^multi_accept', line: '    multi_accept on;', after: 'worker_connections' }
+    - { regexp: '^use epoll', line: '    use epoll;', after: 'multi_accept' }
+  notify: restart nginx
+  tags: nginx
+
+- name: Start and enable Nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+  tags: nginx
+
+handlers:
+  - name: reload nginx
+    systemd:
+      name: nginx
+      state: reloaded
+  
+  - name: restart nginx
+    systemd:
+      name: nginx
+      state: restarted

@@ -1,0 +1,20 @@
+all:
+  hosts:
+    sledzspecke:
+      ansible_host: 51.77.59.184
+      ansible_user: ubuntu
+      ansible_ssh_private_key_file: ~/.ssh/sledzspecke_key
+      ansible_python_interpreter: /usr/bin/python3
+  
+  vars:
+    # Database credentials
+    db_name: sledzspecke_db
+    db_user: sledzspecke_user
+    db_password: "{{ vault_db_password | default('SledzSpecke123!') }}"
+    
+    # Application settings
+    jwt_secret: "{{ vault_jwt_secret | default('YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong') }}"
+    
+    # Monitoring
+    grafana_admin_password: "{{ vault_grafana_password | default('admin') }}"
+    seq_api_key: "{{ vault_seq_api_key | default('') }}"

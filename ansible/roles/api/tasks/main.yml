@@ -1,0 +1,149 @@
+---
+# .NET API setup
+
+- name: Install Microsoft package repository
+  shell: |
+    wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    dpkg -i packages-microsoft-prod.deb
+    rm packages-microsoft-prod.deb
+  args:
+    creates: /etc/apt/sources.list.d/microsoft-prod.list
+  tags: dotnet
+
+- name: Install .NET SDK and runtime
+  apt:
+    name:
+      - dotnet-sdk-9.0
+      - aspnetcore-runtime-9.0
+    state: present
+    update_cache: yes
+  tags: dotnet
+
+- name: Clone or update repository
+  git:
+    repo: https://github.com/konrad-n/mock.git
+    dest: /opt/sledzspecke
+    version: master
+    force: yes
+  tags: deploy
+
+- name: Build API
+  shell: |
+    cd /opt/sledzspecke/SledzSpecke.WebApi
+    dotnet restore
+    dotnet publish -c Release -o /tmp/sledzspecke-api-publish src/SledzSpecke.Api/SledzSpecke.Api.csproj
+  tags: deploy
+
+- name: Stop API service if running
+  systemd:
+    name: sledzspecke-api
+    state: stopped
+  ignore_errors: yes
+  tags: deploy
+
+- name: Deploy API files
+  synchronize:
+    src: /tmp/sledzspecke-api-publish/
+    dest: /var/www/sledzspecke-api/
+    delete: yes
+    recursive: yes
+  delegate_to: "{{ inventory_hostname }}"
+  tags: deploy
+
+- name: Set ownership
+  file:
+    path: /var/www/sledzspecke-api
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    recurse: yes
+  tags: deploy
+
+- name: Create API configuration
+  template:
+    src: appsettings.Production.json.j2
+    dest: /var/www/sledzspecke-api/appsettings.Production.json
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0640'
+  tags: config
+
+- name: Create systemd service
+  copy:
+    dest: /etc/systemd/system/sledzspecke-api.service
+    content: |
+      [Unit]
+      Description=SledzSpecke API
+      After=network.target postgresql.service
+      
+      [Service]
+      Type=notify
+      WorkingDirectory=/var/www/sledzspecke-api
+      ExecStart=/usr/bin/dotnet /var/www/sledzspecke-api/SledzSpecke.Api.dll
+      Restart=always
+      RestartSec=10
+      KillSignal=SIGINT
+      SyslogIdentifier=sledzspecke-api
+      User={{ app_user }}
+      Environment=ASPNETCORE_ENVIRONMENT=Production
+      Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+      
+      # Security hardening
+      NoNewPrivileges=true
+      PrivateTmp=true
+      ProtectSystem=strict
+      ProtectHome=true
+      ReadWritePaths=/var/log/sledzspecke
+      
+      # Resource limits
+      LimitNOFILE=65535
+      LimitNPROC=4096
+      
+      [Install]
+      WantedBy=multi-user.target
+  notify: reload systemd
+  tags: service
+
+- name: Create migration script
+  copy:
+    dest: /var/www/sledzspecke-api/migrate.sh
+    content: |
+      #!/bin/bash
+      export ConnectionStrings__DefaultConnection="Host=localhost;Database={{ db_name }};Username={{ db_user }};Password={{ db_password }}"
+      cd /var/www/sledzspecke-api
+      dotnet SledzSpecke.Api.dll migrate-database
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0750'
+  tags: deploy
+
+- name: Run database migrations
+  shell: /var/www/sledzspecke-api/migrate.sh
+  become_user: "{{ app_user }}"
+  tags: deploy
+
+- name: Start and enable API service
+  systemd:
+    name: sledzspecke-api
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: service
+
+- name: Create health check script
+  template:
+    src: health-check.sh.j2
+    dest: /usr/local/bin/health-check-sledzspecke.sh
+    mode: '0755'
+  tags: monitoring
+
+- name: Add health check cron job
+  cron:
+    name: "API health check"
+    minute: "*/5"
+    job: "/usr/local/bin/health-check-sledzspecke.sh > /dev/null 2>&1"
+  tags: monitoring
+
+handlers:
+  - name: reload systemd
+    systemd:
+      daemon_reload: yes
