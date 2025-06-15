@@ -1,21 +1,17 @@
 using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Core.Events;
 
-public record ProcedureCreatedEvent : IDomainEvent
+public sealed record ProcedureCreatedEvent(
+    ProcedureId ProcedureId,
+    InternshipId InternshipId,
+    DateTime Date,
+    string Code,
+    string Location,
+    SmkVersion SmkVersion
+) : IDomainEvent
 {
     public Guid EventId { get; } = Guid.NewGuid();
     public DateTime OccurredAt { get; } = DateTime.UtcNow;
-    public int ProcedureId { get; }
-    public string Code { get; }
-    public string Status { get; }
-    public int UserId { get; }
-
-    public ProcedureCreatedEvent(int procedureId, string code, string status, int userId)
-    {
-        ProcedureId = procedureId;
-        Code = code;
-        Status = status;
-        UserId = userId;
-    }
 }

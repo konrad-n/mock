@@ -51,34 +51,40 @@ public sealed class CreatePublicationHandler : IResultCommandHandler<CreatePubli
                 return Result.Failure("You are not authorized to create publications for this specialization.");
             }
 
-            // Validate publication date
-            if (command.PublicationDate > DateTime.UtcNow)
-            {
-                return Result.Failure("Publication date cannot be in the future.");
-            }
-
-            // Create the publication
+            // Create the publication - factory method now handles date validation
             var publicationId = PublicationId.New();
-            var publication = Publication.Create(
+            var result = Publication.Create(
                 publicationId,
                 command.SpecializationId,
                 command.UserId,
                 command.Type,
                 command.Title,
                 command.PublicationDate);
+                
+            if (!result.IsSuccess)
+            {
+                return Result.Failure(result.Error, result.ErrorCode);
+            }
+            
+            var publication = result.Value;
 
             // Update basic details if provided
             if (!string.IsNullOrEmpty(command.Authors) || 
                 !string.IsNullOrEmpty(command.Journal) || 
                 !string.IsNullOrEmpty(command.Publisher))
             {
-                publication.UpdateBasicDetails(
+                var updateResult = publication.UpdateBasicDetails(
                     command.Type,
                     command.Title,
                     command.PublicationDate,
                     command.Authors,
                     command.Journal,
                     command.Publisher);
+                    
+                if (!updateResult.IsSuccess)
+                {
+                    return Result.Failure(updateResult.Error, updateResult.ErrorCode);
+                }
             }
 
             // Save the publication

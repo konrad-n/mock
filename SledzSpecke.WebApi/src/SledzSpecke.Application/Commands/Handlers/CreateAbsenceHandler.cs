@@ -1,11 +1,12 @@
 using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-public sealed class CreateAbsenceHandler : ICommandHandler<CreateAbsence>
+public sealed class CreateAbsenceHandler : IResultCommandHandler<CreateAbsence>
 {
     private readonly IAbsenceRepository _absenceRepository;
 
@@ -14,26 +15,27 @@ public sealed class CreateAbsenceHandler : ICommandHandler<CreateAbsence>
         _absenceRepository = absenceRepository;
     }
 
-    public async Task HandleAsync(CreateAbsence command)
+    public async Task<Result> HandleAsync(CreateAbsence command)
     {
-        // Check for overlapping absences
-        var hasOverlapping = await _absenceRepository.HasOverlappingAbsencesAsync(
-            command.UserId, command.StartDate, command.EndDate);
+        // Get existing absences for overlap check
+        var existingAbsences = await _absenceRepository.GetByUserIdAsync(command.UserId);
 
-        if (hasOverlapping)
-        {
-            throw new InvalidOperationException("Absence period overlaps with existing absence.");
-        }
-
-        var absence = Absence.Create(
+        var result = Absence.CreateWithOverlapCheck(
             AbsenceId.New(),
             command.SpecializationId,
             command.UserId,
             command.Type,
             command.StartDate,
             command.EndDate,
+            existingAbsences,
             command.Description);
+            
+        if (!result.IsSuccess)
+        {
+            return Result.Failure(result.Error, result.ErrorCode);
+        }
 
-        await _absenceRepository.AddAsync(absence);
+        await _absenceRepository.AddAsync(result.Value);
+        return Result.Success();
     }
 }

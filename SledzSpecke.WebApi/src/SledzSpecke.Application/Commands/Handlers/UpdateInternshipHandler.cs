@@ -83,12 +83,11 @@ public sealed class UpdateInternshipHandlerRefactored : IResultCommandHandler<Up
                 var startDate = command.StartDate ?? internship.StartDate;
                 var endDate = command.EndDate ?? internship.EndDate;
 
-                if (startDate >= endDate)
+                var updateResult = internship.UpdateDates(startDate, endDate);
+                if (!updateResult.IsSuccess)
                 {
-                    return Result.Failure("Start date must be before end date.");
+                    return Result.Failure(updateResult.Error, updateResult.ErrorCode);
                 }
-
-                internship.UpdateDates(startDate, endDate);
             }
 
             // Update module assignment if provided

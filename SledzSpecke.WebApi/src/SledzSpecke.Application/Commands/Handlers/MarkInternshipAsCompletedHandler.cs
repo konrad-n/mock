@@ -58,14 +58,12 @@ public sealed class MarkInternshipAsCompletedHandler : IResultCommandHandler<Mar
                 return Result.Failure("Internship is already marked as completed.");
             }
 
-            // Validate that the internship has ended or is ending today
-            if (internship.EndDate > _clock.Current().Date)
+            // Mark as completed - domain method now handles date validation
+            var markResult = internship.MarkAsCompleted();
+            if (!markResult.IsSuccess)
             {
-                return Result.Failure("Cannot mark an internship as completed before its end date.");
+                return Result.Failure(markResult.Error, markResult.ErrorCode);
             }
-
-            // Mark as completed
-            internship.MarkAsCompleted();
 
             await _internshipRepository.UpdateAsync(internship);
             await _unitOfWork.SaveChangesAsync();

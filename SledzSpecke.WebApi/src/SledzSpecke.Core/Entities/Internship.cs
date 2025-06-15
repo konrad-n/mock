@@ -29,8 +29,8 @@ public class Internship : AggregateRoot
     private readonly List<MedicalShift> _medicalShifts = new();
     public IReadOnlyList<MedicalShift> MedicalShifts => _medicalShifts.AsReadOnly();
 
-    private readonly List<Procedure> _procedures = new();
-    public IReadOnlyList<Procedure> Procedures => _procedures.AsReadOnly();
+    private readonly List<ProcedureBase> _procedures = new();
+    public IReadOnlyList<ProcedureBase> Procedures => _procedures.AsReadOnly();
 
     // Parameterless constructor for EF Core
     private Internship() { }
@@ -115,12 +115,12 @@ public class Internship : AggregateRoot
         }
     }
 
-    public void UpdateDates(DateTime startDate, DateTime endDate)
+    public Result UpdateDates(DateTime startDate, DateTime endDate)
     {
         EnsureCanModify();
 
         if (endDate <= startDate)
-            throw new InvalidDateRangeException();
+            return Result.Failure("End date must be after start date.", "INVALID_DATE_RANGE");
 
         StartDate = startDate.ToUniversalTime();
         EndDate = endDate.ToUniversalTime();
@@ -132,11 +132,20 @@ public class Internship : AggregateRoot
         {
             SyncStatus = SyncStatus.Modified;
         }
+        
+        return Result.Success();
     }
 
-    public void MarkAsCompleted()
+    public Result MarkAsCompleted()
     {
         EnsureCanModify();
+        
+        // Business rule: Cannot mark as completed before the end date
+        if (DateTime.UtcNow.Date < EndDate.Date)
+        {
+            return Result.Failure("Cannot mark internship as completed before the end date.", "INTERN_NOT_ENDED");
+        }
+        
         IsCompleted = true;
         UpdatedAt = DateTime.UtcNow;
 
@@ -145,6 +154,8 @@ public class Internship : AggregateRoot
         {
             SyncStatus = SyncStatus.Modified;
         }
+        
+        return Result.Success();
     }
 
     public void Approve(string approverName)
@@ -255,6 +266,9 @@ public class Internship : AggregateRoot
 
         return Result.Success(medicalShift);
     }
+    
+    // TODO: Implement AddProcedure when Procedure entities are refactored to use domain methods
+    // For now, procedures should be created through their respective repositories
 
     // Keep the old method for backward compatibility temporarily
     [Obsolete("Use AddMedicalShift with Result pattern instead")]

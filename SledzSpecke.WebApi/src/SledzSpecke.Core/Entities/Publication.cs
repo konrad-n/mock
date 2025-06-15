@@ -1,3 +1,4 @@
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.ValueObjects;
 
@@ -51,18 +52,25 @@ public class Publication
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static Publication Create(PublicationId id, SpecializationId specializationId, UserId userId,
+    public static Result<Publication> Create(PublicationId id, SpecializationId specializationId, UserId userId,
         PublicationType type, string title, DateTime publicationDate)
     {
-        ValidateInput(title, publicationDate);
-        return new Publication(id, specializationId, userId, type, title, publicationDate);
+        var validationResult = ValidateInput(title, publicationDate);
+        if (!validationResult.IsSuccess)
+            return Result.Failure<Publication>(validationResult.Error, validationResult.ErrorCode);
+            
+        var publication = new Publication(id, specializationId, userId, type, title, publicationDate);
+        return Result.Success(publication);
     }
 
-    public void UpdateBasicDetails(PublicationType type, string title, DateTime publicationDate,
+    public Result UpdateBasicDetails(PublicationType type, string title, DateTime publicationDate,
         string? authors = null, string? journal = null, string? publisher = null)
     {
         EnsureCanModify();
-        ValidateInput(title, publicationDate);
+        
+        var validationResult = ValidateInput(title, publicationDate);
+        if (!validationResult.IsSuccess)
+            return validationResult;
 
         Type = type;
         Title = title;
@@ -71,6 +79,8 @@ public class Publication
         Journal = journal;
         Publisher = publisher;
         UpdatedAt = DateTime.UtcNow;
+        
+        return Result.Success();
     }
 
     public void UpdatePublicationDetails(string? volume, string? issue, string? pages,
@@ -218,15 +228,17 @@ public class Publication
             throw new CannotModifySyncedDataException();
     }
 
-    private static void ValidateInput(string title, DateTime publicationDate)
+    private static Result ValidateInput(string title, DateTime publicationDate)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Title cannot be empty.", nameof(title));
+            return Result.Failure("Title cannot be empty.", "PUB_INVALID_TITLE");
 
         if (publicationDate > DateTime.UtcNow.Date)
-            throw new ArgumentException("Publication date cannot be in the future.", nameof(publicationDate));
+            return Result.Failure("Publication date cannot be in the future.", "PUB_FUTURE_DATE");
 
         if (publicationDate < DateTime.UtcNow.AddYears(-50))
-            throw new ArgumentException("Publication date cannot be more than 50 years in the past.", nameof(publicationDate));
+            return Result.Failure("Publication date cannot be more than 50 years in the past.", "PUB_DATE_TOO_OLD");
+            
+        return Result.Success();
     }
 }

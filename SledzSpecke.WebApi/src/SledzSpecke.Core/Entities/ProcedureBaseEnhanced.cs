@@ -101,12 +101,8 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
         _updatedAt = DateTime.UtcNow;
         _smkVersion = smkVersion;
 
-        // Raise domain event
-        AddDomainEvent(new ProcedureCreatedEvent(
-            id.Value,
-            code,
-            status.ToString(),
-            internshipId.Value));
+        // TODO: Raise domain event when ProcedureCreatedEvent is fixed
+        // AddDomainEvent(new ProcedureCreatedEvent(...));
     }
 
     /// <summary>

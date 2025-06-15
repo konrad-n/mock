@@ -1,3 +1,4 @@
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.ValueObjects;
 
@@ -44,17 +45,47 @@ public class Absence
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static Absence Create(AbsenceId id, SpecializationId specializationId, UserId userId,
+    public static Result<Absence> Create(AbsenceId id, SpecializationId specializationId, UserId userId,
         AbsenceType type, DateTime startDate, DateTime endDate, string? description = null)
     {
-        ValidateInput(startDate, endDate);
-        return new Absence(id, specializationId, userId, type, startDate, endDate, description);
+        var validationResult = ValidateInput(startDate, endDate);
+        if (!validationResult.IsSuccess)
+            return Result.Failure<Absence>(validationResult.Error, validationResult.ErrorCode);
+            
+        var absence = new Absence(id, specializationId, userId, type, startDate, endDate, description);
+        return Result.Success(absence);
+    }
+    
+    public static Result<Absence> CreateWithOverlapCheck(
+        AbsenceId id, 
+        SpecializationId specializationId, 
+        UserId userId,
+        AbsenceType type, 
+        DateTime startDate, 
+        DateTime endDate, 
+        IEnumerable<Absence> existingAbsences,
+        string? description = null)
+    {
+        var validationResult = ValidateInput(startDate, endDate);
+        if (!validationResult.IsSuccess)
+            return Result.Failure<Absence>(validationResult.Error, validationResult.ErrorCode);
+            
+        // Check for overlapping absences
+        var hasOverlap = existingAbsences.Any(a => a.OverlapsWith(startDate, endDate));
+        if (hasOverlap)
+            return Result.Failure<Absence>("The specified date range overlaps with an existing absence.", "ABSENCE_OVERLAP");
+            
+        var absence = new Absence(id, specializationId, userId, type, startDate, endDate, description);
+        return Result.Success(absence);
     }
 
-    public void UpdateDetails(AbsenceType type, DateTime startDate, DateTime endDate, string? description)
+    public Result UpdateDetails(AbsenceType type, DateTime startDate, DateTime endDate, string? description)
     {
         EnsureCanModify();
-        ValidateInput(startDate, endDate);
+        
+        var validationResult = ValidateInput(startDate, endDate);
+        if (!validationResult.IsSuccess)
+            return validationResult;
 
         Type = type;
         StartDate = startDate;
@@ -62,6 +93,8 @@ public class Absence
         DurationInDays = CalculateDurationInDays(startDate, endDate);
         Description = description;
         UpdatedAt = DateTime.UtcNow;
+        
+        return Result.Success();
     }
 
     public void SetDocumentPath(string? documentPath)
@@ -145,15 +178,17 @@ public class Absence
         return (int)(endDate - startDate).TotalDays + 1;
     }
 
-    private static void ValidateInput(DateTime startDate, DateTime endDate)
+    private static Result ValidateInput(DateTime startDate, DateTime endDate)
     {
         if (startDate > endDate)
-            throw new InvalidDateRangeException("Start date cannot be after end date.");
+            return Result.Failure("Start date cannot be after end date.", "INVALID_DATE_RANGE");
 
         if (endDate < DateTime.UtcNow.Date.AddDays(-365))
-            throw new ArgumentException("End date cannot be more than a year in the past.");
+            return Result.Failure("End date cannot be more than a year in the past.", "DATE_TOO_OLD");
 
         if (startDate > DateTime.UtcNow.Date.AddDays(365))
-            throw new ArgumentException("Start date cannot be more than a year in the future.");
+            return Result.Failure("Start date cannot be more than a year in the future.", "DATE_TOO_FUTURE");
+            
+        return Result.Success();
     }
 }
