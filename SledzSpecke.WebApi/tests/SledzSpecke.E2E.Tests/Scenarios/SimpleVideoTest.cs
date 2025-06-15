@@ -20,7 +20,9 @@ public class SimpleVideoTest : E2ETestBase
     [Fact]
     public async Task Simple_Navigation_Should_Record_Video()
     {
-        _output.WriteLine("Starting simple video test");
+        _output.WriteLine($"Starting simple video test");
+        _output.WriteLine($"Video recording enabled: {Configuration.RecordVideo}");
+        _output.WriteLine($"Video path: {Configuration.VideoPath}");
         
         // Navigate to Google as a simple test
         await Page.GotoAsync("https://www.google.com");
@@ -29,11 +31,13 @@ public class SimpleVideoTest : E2ETestBase
         await Page.WaitForTimeoutAsync(3000);
         
         // Take a screenshot for princess dashboard
+        var screenshotPath = "Reports/Screenshots/simple-video-test.png";
         await Page.ScreenshotAsync(new() 
         { 
-            Path = "Reports/Screenshots/simple-video-test.png",
+            Path = screenshotPath,
             FullPage = true 
         });
+        _output.WriteLine($"Screenshot saved to: {screenshotPath}");
         
         // Type something in search box
         await Page.FillAsync("textarea[name='q']", "SledzSpecke");

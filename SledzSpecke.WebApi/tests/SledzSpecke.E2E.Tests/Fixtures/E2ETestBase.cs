@@ -72,6 +72,17 @@ public abstract class E2ETestBase : IAsyncLifetime
             if (Context != null)
             {
                 await Context.CloseAsync();
+                
+                // Log video files created
+                if (Configuration.RecordVideo && Directory.Exists(Configuration.VideoPath))
+                {
+                    var videos = Directory.GetFiles(Configuration.VideoPath, "*.webm");
+                    Logger.Information("Videos created: {Count}", videos.Length);
+                    foreach (var video in videos)
+                    {
+                        Logger.Information("Video file: {Path} ({Size} bytes)", video, new FileInfo(video).Length);
+                    }
+                }
             }
             
             // Dispose browser factory
