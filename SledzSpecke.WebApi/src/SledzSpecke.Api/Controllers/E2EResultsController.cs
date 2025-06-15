@@ -16,97 +16,20 @@ public class E2EResultsController : ControllerBase
     }
 
     [HttpGet("results")]
+    [ApiExplorerSettings(IgnoreApi = true)] // Hide from Swagger in production
     public IActionResult GetResults()
     {
-        try
+        // This endpoint was used for demo purposes only
+        // In production, E2E test results should be accessed through CI/CD pipeline
+        if (_environment.IsProduction())
         {
-            var resultsPath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "e2e-results");
-            
-            if (!Directory.Exists(resultsPath))
-            {
-                _logger.LogWarning("E2E results directory not found: {Path}", resultsPath);
-                return Ok(Array.Empty<object>());
-            }
-
-            var results = new List<object>();
-            
-            // Check for latest symlink first
-            var latestPath = Path.Combine(resultsPath, "latest");
-            if (Directory.Exists(latestPath))
-            {
-                var metadataPath = Path.Combine(latestPath, "metadata.json");
-                if (System.IO.File.Exists(metadataPath))
-                {
-                    try
-                    {
-                        var json = System.IO.File.ReadAllText(metadataPath);
-                        var metadata = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                        
-                        // Add video information for each browser
-                        var browsers = new[] { "chromium", "firefox" };
-                        foreach (var browser in browsers)
-                        {
-                            var browserVideoPath = Path.Combine(latestPath, browser, "videos");
-                            if (Directory.Exists(browserVideoPath))
-                            {
-                                var videos = Directory.GetFiles(browserVideoPath, "*.webm");
-                                if (videos.Length > 0)
-                                {
-                                    metadata[$"{browser}Videos"] = videos.Select(v => $"/e2e-results/latest/{browser}/videos/{Path.GetFileName(v)}").ToArray();
-                                }
-                            }
-                            
-                            var browserScreenshotPath = Path.Combine(latestPath, browser, "screenshots");
-                            if (Directory.Exists(browserScreenshotPath))
-                            {
-                                var screenshots = Directory.GetFiles(browserScreenshotPath, "*.png");
-                                if (screenshots.Length > 0)
-                                {
-                                    metadata[$"{browser}Screenshots"] = screenshots.Select(s => $"/e2e-results/latest/{browser}/screenshots/{Path.GetFileName(s)}").ToArray();
-                                }
-                            }
-                        }
-                        
-                        results.Add(metadata);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error reading latest metadata");
-                    }
-                }
-            }
-            
-            // Also get all run directories
-            var runDirs = Directory.GetDirectories(resultsPath)
-                .Where(d => long.TryParse(Path.GetFileName(d), out _))
-                .OrderByDescending(d => Path.GetFileName(d))
-                .Take(10);
-                
-            foreach (var runDir in runDirs)
-            {
-                var metadataPath = Path.Combine(runDir, "metadata.json");
-                if (System.IO.File.Exists(metadataPath))
-                {
-                    try
-                    {
-                        var json = System.IO.File.ReadAllText(metadataPath);
-                        var metadata = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                        metadata["runPath"] = $"/e2e-results/{Path.GetFileName(runDir)}/";
-                        results.Add(metadata);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error reading metadata for run: {RunDir}", runDir);
-                    }
-                }
-            }
-
-            return Ok(results);
+            return NotFound();
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting E2E results");
-            return StatusCode(500, new { error = "Failed to load results" });
-        }
+        
+        return Ok(new 
+        { 
+            message = "E2E results endpoint is disabled in production. Use CI/CD pipeline for test results.",
+            documentation = "https://github.com/konrad-n/mock/actions"
+        });
     }
 }

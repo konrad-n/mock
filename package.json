@@ -1,0 +1,23 @@
+{
+  "name": "mock",
+  "version": "1.0.0",
+  "description": "![Build Status](https://github.com/konrad-n/mock/actions/workflows/sledzspecke-cicd.yml/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=alert_status)](https://sonarcloud.io/dashboard?id=konrad-n_mock) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=konrad-n_mock) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=security_rating)](https://sonarcloud.io/dashboard?id=konrad-n_mock)",
+  "main": "create-demo-video.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/konrad-n/mock.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/konrad-n/mock/issues"
+  },
+  "homepage": "https://github.com/konrad-n/mock#readme",
+  "dependencies": {
+    "playwright": "^1.53.0"
+  }
+}
