@@ -274,7 +274,17 @@ jobs:
             cd sledzspecke
           else
             cd /home/ubuntu/sledzspecke
-            git pull origin master
+            # Fix potential permission issues
+            sudo chown -R ubuntu:ubuntu .
+            git reset --hard HEAD
+            git clean -fd
+            git pull origin master || {
+              echo "Git pull failed, removing and re-cloning..."
+              cd /home/ubuntu
+              sudo rm -rf sledzspecke
+              git clone https://github.com/${{ github.repository }}.git sledzspecke
+              cd sledzspecke
+            }
           fi
           
           # Build and deploy API
@@ -307,6 +317,14 @@ jobs:
           
           # Cleanup
           rm -rf /tmp/sledzspecke-api-new
+          
+          # Run DevOps improvements (only if script exists and hasn't been run)
+          if [ -f "/home/ubuntu/sledzspecke/scripts/fix-devops.sh" ] && [ ! -f "/var/log/sledzspecke/devops-fixes-applied.flag" ]; then
+            echo "Running DevOps improvements..."
+            cd /home/ubuntu/sledzspecke
+            sudo bash scripts/fix-devops.sh || echo "DevOps script completed with warnings"
+            sudo touch /var/log/sledzspecke/devops-fixes-applied.flag
+          fi
         EOF
     
     - name: Deploy Frontend
