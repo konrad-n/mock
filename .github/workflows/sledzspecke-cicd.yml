@@ -302,6 +302,13 @@ jobs:
           sudo mkdir -p /var/www/sledzspecke-api
           sudo rm -rf /var/www/sledzspecke-api/*
           sudo cp -r /tmp/sledzspecke-api-new/* /var/www/sledzspecke-api/
+          
+          # Ensure wwwroot exists
+          if [ ! -d "/var/www/sledzspecke-api/wwwroot" ]; then
+            echo "Creating wwwroot directory..."
+            sudo mkdir -p /var/www/sledzspecke-api/wwwroot
+          fi
+          
           sudo chown -R www-data:www-data /var/www/sledzspecke-api
           
           # Run database migrations
