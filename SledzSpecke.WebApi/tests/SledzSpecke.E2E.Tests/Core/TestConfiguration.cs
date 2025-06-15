@@ -16,6 +16,9 @@ public class TestConfiguration
     public string TracePath { get; set; } = "Reports/Traces";
     public string ScreenshotPath { get; set; } = "Reports/Screenshots";
     
+    // Test database connection string (set dynamically for isolated tests)
+    public string? TestDatabaseConnectionString { get; set; }
+    
     // Test user credentials
     public TestUserConfiguration TestUser { get; set; } = new();
     

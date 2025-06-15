@@ -296,3 +296,175 @@ public class MedicalShiftTestData
         }
     }
 }
+
+/// <summary>
+/// Builder for medical procedures following Polish medical standards
+/// </summary>
+public class MedicalProcedureBuilder : TestDataBuilder<MedicalProcedureTestData>
+{
+    private DateTime? _date;
+    private string? _name;
+    private string? _category;
+    private string? _icdCode;
+    private string? _description;
+    private bool _supervised = true;
+    private int? _patientAge;
+
+    public MedicalProcedureBuilder OnDate(DateTime date)
+    {
+        _date = date;
+        return this;
+    }
+
+    public MedicalProcedureBuilder WithName(string name)
+    {
+        _name = name;
+        return this;
+    }
+
+    public MedicalProcedureBuilder InCategory(string category)
+    {
+        _category = category;
+        return this;
+    }
+
+    public MedicalProcedureBuilder WithIcdCode(string code)
+    {
+        _icdCode = code;
+        return this;
+    }
+
+    public MedicalProcedureBuilder Unsupervised()
+    {
+        _supervised = false;
+        return this;
+    }
+
+    public MedicalProcedureBuilder ForPatientAge(int age)
+    {
+        _patientAge = age;
+        return this;
+    }
+
+    public override MedicalProcedureTestData Build()
+    {
+        var procedureData = GetRandomProcedure();
+        
+        return new MedicalProcedureTestData
+        {
+            Date = _date ?? Faker.Date.Recent(30),
+            Name = _name ?? procedureData.Name,
+            Category = _category ?? procedureData.Category,
+            IcdCode = _icdCode ?? procedureData.IcdCode,
+            Description = _description ?? GenerateProcedureDescription(procedureData.Name),
+            Supervised = _supervised,
+            PatientAge = _patientAge ?? Faker.Random.Int(18, 85)
+        };
+    }
+
+    private (string Name, string Category, string IcdCode) GetRandomProcedure()
+    {
+        var procedures = new[]
+        {
+            ("Intubacja dotchawicza", "Anestezjologia", "89.01"),
+            ("Kaniulacja żyły centralnej", "Anestezjologia", "38.93"),
+            ("Znieczulenie podpajęczynówkowe", "Anestezjologia", "03.91"),
+            ("Znieczulenie zewnątrzoponowe", "Anestezjologia", "03.92"),
+            ("Blokada splotu ramiennego", "Anestezjologia", "04.81"),
+            ("Znieczulenie ogólne do zabiegu", "Anestezjologia", "00.01"),
+            ("Sedacja do badania endoskopowego", "Anestezjologia", "00.02"),
+            ("Intubacja światłowodowa", "Anestezjologia", "89.02"),
+            ("Założenie maski krtaniowej", "Anestezjologia", "89.03"),
+            ("Punkcja lędźwiowa", "Neurologia", "03.31")
+        };
+        
+        return Faker.PickRandom(procedures);
+    }
+
+    private string GenerateProcedureDescription(string procedureName)
+    {
+        var templates = new[]
+        {
+            $"Wykonano {procedureName} zgodnie z procedurą. Bez powikłań.",
+            $"{procedureName} - zabieg przebiegł bez komplikacji. Pacjent stabilny.",
+            $"Procedura {procedureName} wykonana pod nadzorem specjalisty.",
+            $"{procedureName} - technika standardowa, przebieg typowy."
+        };
+        
+        return Faker.PickRandom(templates);
+    }
+}
+
+public class MedicalProcedureTestData
+{
+    public DateTime Date { get; set; }
+    public string Name { get; set; } = "";
+    public string Category { get; set; } = "";
+    public string IcdCode { get; set; } = "";
+    public string Description { get; set; } = "";
+    public bool Supervised { get; set; }
+    public int PatientAge { get; set; }
+}
+
+/// <summary>
+/// Extension methods for TestDataBuilder
+/// </summary>
+public static class TestDataBuilderExtensions
+{
+    /// <summary>
+    /// Builds a complete Polish medical resident profile
+    /// </summary>
+    public static PolishMedicalResident BuildPolishMedicalResident()
+    {
+        var faker = new Faker("pl");
+        var firstName = faker.Name.FirstName();
+        var lastName = faker.Name.LastName();
+        
+        var universities = new[]
+        {
+            "Warszawski Uniwersytet Medyczny",
+            "Uniwersytet Medyczny w Łodzi",
+            "Śląski Uniwersytet Medyczny w Katowicach",
+            "Uniwersytet Medyczny w Lublinie",
+            "Gdański Uniwersytet Medyczny",
+            "Uniwersytet Medyczny we Wrocławiu",
+            "Collegium Medicum UJ w Krakowie"
+        };
+        
+        var cities = new[]
+        {
+            "Warszawa", "Kraków", "Łódź", "Wrocław", "Poznań", 
+            "Gdańsk", "Katowice", "Lublin", "Białystok", "Szczecin"
+        };
+        
+        return new PolishMedicalResident
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = $"{firstName.ToLower()}.{lastName.ToLower()}@example.com".Replace(" ", ""),
+            Location = faker.PickRandom(cities),
+            University = faker.PickRandom(universities),
+            Year = faker.Random.Int(1, 6),
+            Phone = $"+48{faker.Random.Replace("#########")}"
+        };
+    }
+    
+    /// <summary>
+    /// Builds a medical procedure
+    /// </summary>
+    public static MedicalProcedureTestData BuildMedicalProcedure()
+    {
+        return new MedicalProcedureBuilder().Build();
+    }
+}
+
+public class PolishMedicalResident
+{
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Location { get; set; } = "";
+    public string University { get; set; } = "";
+    public int Year { get; set; }
+    public string Phone { get; set; } = "";
+}

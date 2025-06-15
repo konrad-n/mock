@@ -1,0 +1,549 @@
+name: E2E Tests with Database Isolation
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Run E2E tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to test with'
+        required: false
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+      test_filter:
+        description: 'Test filter pattern'
+        required: false
+        default: ''
+
+jobs:
+  e2e-tests-isolated:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    strategy:
+      matrix:
+        browser: ['chromium', 'firefox']
+        include:
+          - browser: chromium
+            browser-channel: chrome
+          - browser: firefox
+            browser-channel: firefox
+      fail-fast: false
+        
+    name: E2E Tests Isolated - ${{ matrix.browser }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Setup Node.js (for report generation)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Create test database
+      env:
+        PGPASSWORD: postgres
+      run: |
+        # Create a unique test database for this run
+        TEST_DB_NAME="sledzspecke_e2e_${{ github.run_id }}_${{ matrix.browser }}"
+        echo "TEST_DB_NAME=$TEST_DB_NAME" >> $GITHUB_ENV
+        
+        # Create the database
+        psql -h localhost -U postgres -c "CREATE DATABASE \"$TEST_DB_NAME\";"
+        
+        # Export connection string
+        echo "TEST_CONNECTION_STRING=Host=localhost;Database=$TEST_DB_NAME;Username=postgres;Password=postgres" >> $GITHUB_ENV
+    
+    - name: Build API project
+      run: |
+        cd SledzSpecke.WebApi
+        dotnet restore
+        dotnet build --configuration Release
+    
+    - name: Run migrations on test database
+      env:
+        ConnectionStrings__DefaultConnection: ${{ env.TEST_CONNECTION_STRING }}
+      run: |
+        cd SledzSpecke.WebApi
+        dotnet ef database update -p src/SledzSpecke.Infrastructure -s src/SledzSpecke.Api
+    
+    - name: Start API with test database
+      env:
+        ConnectionStrings__DefaultConnection: ${{ env.TEST_CONNECTION_STRING }}
+        ASPNETCORE_ENVIRONMENT: Development
+        ASPNETCORE_URLS: http://localhost:5000
+      run: |
+        cd SledzSpecke.WebApi/src/SledzSpecke.Api
+        dotnet run &
+        
+        # Wait for API to be ready
+        echo "Waiting for API to start..."
+        for i in {1..30}; do
+          if curl -s http://localhost:5000/health > /dev/null; then
+            echo "API is ready!"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 2
+        done
+    
+    - name: Install Playwright
+      run: |
+        cd SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests
+        dotnet tool install --global Microsoft.Playwright.CLI
+        playwright install ${{ matrix.browser }} --with-deps
+    
+    - name: Run E2E Tests
+      env:
+        E2ETests__BaseUrl: http://localhost:3000
+        E2ETests__ApiUrl: http://localhost:5000
+        E2ETests__Browser: ${{ matrix.browser }}
+        E2ETests__Headless: true
+        E2ETests__VideoPath: Reports/Videos
+        E2ETests__TracePath: Reports/Traces
+        E2ETests__ScreenshotPath: Reports/Screenshots
+        E2ETests__TraceEnabled: true
+        E2ETests__VideoEnabled: true
+        ConnectionStrings__DefaultConnection: ${{ env.TEST_CONNECTION_STRING }}
+        TEST_FILTER: ${{ github.event.inputs.test_filter || '' }}
+      run: |
+        cd SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests
+        
+        # Create directories
+        mkdir -p Reports/Videos Reports/Screenshots Reports/Traces Reports/Logs
+        
+        # Run tests with optional filter
+        if [ -n "$TEST_FILTER" ]; then
+          dotnet test --logger "console;verbosity=normal" \
+                      --logger "trx;LogFileName=${{ matrix.browser }}_results.trx" \
+                      --logger "html;LogFileName=${{ matrix.browser }}_results.html" \
+                      --filter "$TEST_FILTER" \
+                      -- RunConfiguration.TestSessionTimeout=600000
+        else
+          dotnet test --logger "console;verbosity=normal" \
+                      --logger "trx;LogFileName=${{ matrix.browser }}_results.trx" \
+                      --logger "html;LogFileName=${{ matrix.browser }}_results.html" \
+                      -- RunConfiguration.TestSessionTimeout=600000
+        fi
+    
+    - name: Generate detailed report
+      if: always()
+      run: |
+        cd SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests
+        
+        # Create a detailed HTML report
+        cat > Reports/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>E2E Test Results - ${{ matrix.browser }}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
+                .section { margin: 20px 0; }
+                .success { color: green; }
+                .failure { color: red; }
+                .screenshot { max-width: 800px; margin: 10px 0; border: 1px solid #ddd; }
+                .metadata { background-color: #f9f9f9; padding: 10px; border-radius: 3px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>E2E Test Results - ${{ matrix.browser }}</h1>
+                <div class="metadata">
+                    <p><strong>Run ID:</strong> ${{ github.run_id }}</p>
+                    <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+                    <p><strong>Commit:</strong> ${{ github.sha }}</p>
+                    <p><strong>Triggered by:</strong> ${{ github.actor }}</p>
+                    <p><strong>Event:</strong> ${{ github.event_name }}</p>
+                    <p><strong>Date:</strong> $(date)</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Test Summary</h2>
+                <p>View the detailed test results in the artifacts.</p>
+            </div>
+            
+            <div class="section">
+                <h2>Screenshots</h2>
+                <p>Screenshots captured during test execution:</p>
+                <!-- Screenshots will be listed here -->
+            </div>
+            
+            <div class="section">
+                <h2>Videos</h2>
+                <p>Test execution videos are available in the artifacts.</p>
+            </div>
+        </body>
+        </html>
+        EOF
+    
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.browser }}-${{ github.run_id }}
+        path: |
+          SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests/TestResults/
+          SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests/Reports/
+        retention-days: 30
+    
+    - name: Upload Screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: screenshots-${{ matrix.browser }}-${{ github.run_id }}
+        path: SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests/Reports/Screenshots/
+        retention-days: 7
+    
+    - name: Upload Videos
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: videos-${{ matrix.browser }}-${{ github.run_id }}
+        path: SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests/Reports/Videos/
+        retention-days: 7
+    
+    - name: Upload Traces
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: traces-${{ matrix.browser }}-${{ github.run_id }}
+        path: SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests/Reports/Traces/
+        retention-days: 7
+    
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: E2E Tests Report - ${{ matrix.browser }}
+        path: SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests/TestResults/*.trx
+        reporter: dotnet-trx
+        fail-on-error: false
+    
+    - name: Cleanup test database
+      if: always()
+      env:
+        PGPASSWORD: postgres
+      run: |
+        # Drop the test database
+        psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS \"${{ env.TEST_DB_NAME }}\";"
+
+  e2e-summary:
+    needs: e2e-tests-isolated
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Create Summary
+      run: |
+        echo "## 🧪 E2E Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add run information
+        echo "### 📋 Run Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Run ID:** ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add test results summary
+        echo "### 🎯 Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Browser | Status | Artifacts |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|--------|-----------|" >> $GITHUB_STEP_SUMMARY
+        
+        for browser in chromium firefox; do
+          if [ -d "artifacts/test-results-$browser-${{ github.run_id }}" ]; then
+            echo "| $browser | ✅ Completed | [Results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| $browser | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add database isolation note
+        echo "### 🗄️ Database Isolation" >> $GITHUB_STEP_SUMMARY
+        echo "Each test run used an isolated PostgreSQL database instance, ensuring:" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ No interference between test runs" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Clean state for each scenario" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Production data remains untouched" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Add links to artifacts
+        echo "### 📦 Artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "The following artifacts are available:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Results:** Detailed test execution reports" >> $GITHUB_STEP_SUMMARY
+        echo "- **Screenshots:** Visual captures of test execution" >> $GITHUB_STEP_SUMMARY
+        echo "- **Videos:** Full recordings of browser interactions" >> $GITHUB_STEP_SUMMARY
+        echo "- **Traces:** Playwright traces for debugging (on failure)" >> $GITHUB_STEP_SUMMARY
+
+  deploy-results-to-vps:
+    needs: [e2e-tests-isolated, e2e-summary]
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: e2e-artifacts
+    
+    - name: Prepare results package
+      run: |
+        # Create organized results directory
+        mkdir -p e2e-results/{chromium,firefox}/{screenshots,videos,traces}
+        
+        # Copy results for each browser
+        for browser in chromium firefox; do
+          if [ -d "e2e-artifacts/test-results-$browser-${{ github.run_id }}" ]; then
+            cp -r e2e-artifacts/test-results-$browser-${{ github.run_id }}/* e2e-results/$browser/ || true
+          fi
+          if [ -d "e2e-artifacts/screenshots-$browser-${{ github.run_id }}" ]; then
+            cp -r e2e-artifacts/screenshots-$browser-${{ github.run_id }}/* e2e-results/$browser/screenshots/ || true
+          fi
+          if [ -d "e2e-artifacts/videos-$browser-${{ github.run_id }}" ]; then
+            cp -r e2e-artifacts/videos-$browser-${{ github.run_id }}/* e2e-results/$browser/videos/ || true
+          fi
+          if [ -d "e2e-artifacts/traces-$browser-${{ github.run_id }}" ]; then
+            cp -r e2e-artifacts/traces-$browser-${{ github.run_id }}/* e2e-results/$browser/traces/ || true
+          fi
+        done
+        
+        # Create metadata file
+        cat > e2e-results/metadata.json << EOF
+        {
+          "runId": "${{ github.run_id }}",
+          "runNumber": "${{ github.run_number }}",
+          "sha": "${{ github.sha }}",
+          "ref": "${{ github.ref }}",
+          "actor": "${{ github.actor }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "conclusion": "${{ needs.e2e-tests-isolated.result }}",
+          "event": "${{ github.event_name }}",
+          "databaseIsolation": true,
+          "browsers": ["chromium", "firefox"]
+        }
+        EOF
+        
+        # Create HTML index
+        cat > e2e-results/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>E2E Test Results - Run ${{ github.run_id }}</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }
+                .container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                h1 { color: #333; margin-bottom: 10px; }
+                .metadata {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-bottom: 30px;
+                }
+                .browser-section {
+                    margin-bottom: 40px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    padding: 20px;
+                }
+                .browser-header {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .artifact-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                    margin-top: 20px;
+                }
+                .artifact-card {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 8px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                }
+                .artifact-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                }
+                .artifact-card h3 {
+                    margin: 0 0 10px 0;
+                    color: #495057;
+                }
+                .artifact-card a {
+                    color: #007bff;
+                    text-decoration: none;
+                    font-weight: 500;
+                }
+                .artifact-card a:hover {
+                    text-decoration: underline;
+                }
+                .status-badge {
+                    display: inline-block;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+                .status-success { background-color: #d4edda; color: #155724; }
+                .status-failure { background-color: #f8d7da; color: #721c24; }
+                .icon { width: 24px; height: 24px; vertical-align: middle; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🧪 E2E Test Results - Run #${{ github.run_id }}</h1>
+                
+                <div class="metadata">
+                    <h2>📋 Run Information</h2>
+                    <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+                    <p><strong>Commit:</strong> <code>${{ github.sha }}</code></p>
+                    <p><strong>Triggered by:</strong> ${{ github.actor }}</p>
+                    <p><strong>Date:</strong> $(date)</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${{ needs.e2e-tests-isolated.result }}">${{ needs.e2e-tests-isolated.result }}</span></p>
+                    <p><strong>Database Isolation:</strong> ✅ Enabled</p>
+                </div>
+                
+                <div class="browser-section">
+                    <div class="browser-header">
+                        <span>🌐 Chromium</span>
+                    </div>
+                    <div class="artifact-grid">
+                        <div class="artifact-card">
+                            <h3>📊 Test Results</h3>
+                            <a href="chromium/TestResults/chromium_results.html">View Report</a>
+                        </div>
+                        <div class="artifact-card">
+                            <h3>📸 Screenshots</h3>
+                            <a href="chromium/screenshots/">Browse</a>
+                        </div>
+                        <div class="artifact-card">
+                            <h3>🎬 Videos</h3>
+                            <a href="chromium/videos/">Watch</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="browser-section">
+                    <div class="browser-header">
+                        <span>🦊 Firefox</span>
+                    </div>
+                    <div class="artifact-grid">
+                        <div class="artifact-card">
+                            <h3>📊 Test Results</h3>
+                            <a href="firefox/TestResults/firefox_results.html">View Report</a>
+                        </div>
+                        <div class="artifact-card">
+                            <h3>📸 Screenshots</h3>
+                            <a href="firefox/screenshots/">Browse</a>
+                        </div>
+                        <div class="artifact-card">
+                            <h3>🎬 Videos</h3>
+                            <a href="firefox/videos/">Watch</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        EOF
+        
+        # Create archive
+        tar -czf e2e-results-${{ github.run_id }}.tar.gz e2e-results/
+    
+    - name: Deploy to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ubuntu
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: "e2e-results-${{ github.run_id }}.tar.gz"
+        target: "/tmp/"
+    
+    - name: Setup results on VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ubuntu
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          # Create directory structure
+          sudo mkdir -p /var/www/sledzspecke-api/e2e-results
+          
+          # Extract results
+          cd /var/www/sledzspecke-api/e2e-results
+          sudo tar -xzf /tmp/e2e-results-${{ github.run_id }}.tar.gz
+          sudo mv e2e-results ${{ github.run_id }}
+          
+          # Create latest symlink
+          sudo ln -sfn ${{ github.run_id }} latest
+          
+          # Set permissions
+          sudo chown -R www-data:www-data /var/www/sledzspecke-api/e2e-results
+          
+          # Cleanup
+          sudo rm -f /tmp/e2e-results-${{ github.run_id }}.tar.gz
+          
+          # Keep only last 10 results
+          cd /var/www/sledzspecke-api/e2e-results
+          ls -t | grep -E '^[0-9]+$' | tail -n +11 | xargs -r sudo rm -rf
+          
+          echo "✅ E2E test results deployed to: https://api.sledzspecke.pl/e2e-results/latest/"
