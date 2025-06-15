@@ -10,6 +10,15 @@
 - **Web Application**: https://sledzspecke.pl
 - **API Documentation**: https://api.sledzspecke.pl/swagger
 
+## 📊 Monitoring Services
+
+- **Seq (Log Aggregation)**: http://51.77.59.184:5341
+- **Grafana (Metrics Dashboard)**: http://51.77.59.184:3000
+  - Username: `admin`
+  - Password: `SledzSpecke2024!`
+- **Prometheus (Metrics)**: http://51.77.59.184:9090
+- **cAdvisor (Container Metrics)**: http://51.77.59.184:8080
+
 ## Project Description
 
 SledzSpecke is a comprehensive web application that allows resident physicians in Poland to track their progress in medical specialization programs. The application supports both the old and new SMK (System Monitorowania Kształcenia) formats, offering an intuitive interface to manage all aspects of medical specialty training.
@@ -33,7 +42,13 @@ SledzSpecke is a comprehensive web application that allows resident physicians i
 - **API Documentation**: Swagger/OpenAPI
 - **CI/CD**: GitHub Actions with automated deployment
 - **Hosting**: VPS with Nginx reverse proxy and SSL certificates
-- **Monitoring**: Automated build status tracking and logging
+- **Monitoring Stack**:
+  - Seq for centralized logging
+  - Grafana for metrics visualization
+  - Prometheus for time-series metrics
+  - Node Exporter & cAdvisor for system/container metrics
+- **Security**: UFW firewall, Fail2ban, Let's Encrypt SSL
+- **Backup**: Automated daily backups with 7-day retention
 
 ## Prerequisites
 

@@ -1,0 +1,6 @@
+# SledzSpecke automated backup schedule
+# Run backup every day at 2:00 AM
+0 2 * * * /usr/local/bin/backup-sledzspecke.sh >> /var/log/sledzspecke-backup.log 2>&1
+
+# Run backup every Sunday at 3:00 AM (weekly full backup)
+0 3 * * 0 /usr/local/bin/backup-sledzspecke.sh >> /var/log/sledzspecke-backup-weekly.log 2>&1
