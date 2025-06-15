@@ -194,7 +194,7 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
                 u => u.SpecializationId,
                 (x, u) => new { x.Internship, User = u })
             .Where(x => x.User.Id.Value == userId)
-            .Select(x => x.Internship.Id)
+            .Select(x => x.Internship.InternshipId)
             .ToListAsync();
     }
 }

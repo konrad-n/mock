@@ -158,7 +158,7 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
                 u => u.SpecializationId,
                 (x, u) => new { x.Internship, User = u })
             .Where(x => x.User.Id.Value == userId)
-            .Select(x => x.Internship.Id.Value)
+            .Select(x => x.Internship.InternshipId.Value)
             .ToListAsync();
     }
 }

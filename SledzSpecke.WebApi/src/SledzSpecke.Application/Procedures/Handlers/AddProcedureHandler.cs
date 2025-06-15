@@ -40,7 +40,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             Console.WriteLine($"[ERROR] Internship with ID {command.InternshipId} not found");
             throw new InvalidOperationException($"Internship with ID {command.InternshipId} not found.");
         }
-        Console.WriteLine($"[DEBUG] Found internship: {internship.Id.Value}, Specialization: {internship.SpecializationId.Value}");
+        Console.WriteLine($"[DEBUG] Found internship: {internship.InternshipId.Value}, Specialization: {internship.SpecializationId.Value}");
 
         // Get specialization to determine SMK version
         var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);

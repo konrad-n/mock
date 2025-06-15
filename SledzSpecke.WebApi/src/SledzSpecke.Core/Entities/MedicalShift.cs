@@ -8,8 +8,7 @@ public class MedicalShift
     public MedicalShiftId Id { get; private set; }
     public InternshipId InternshipId { get; private set; }
     public DateTime Date { get; private set; }
-    public int Hours { get; private set; }
-    public int Minutes { get; private set; }
+    public Duration Duration { get; private set; }
     public string Location { get; private set; }
     public int Year { get; private set; }
     public SyncStatus SyncStatus { get; private set; }
@@ -20,19 +19,19 @@ public class MedicalShift
 
     public bool IsApproved => SyncStatus == SyncStatus.Synced && ApprovalDate.HasValue;
     public bool CanBeDeleted => !IsApproved;
-    public TimeSpan Duration => new(Hours, Minutes, 0);
-    public int TotalMinutes => Hours * 60 + Minutes;
+    public int Hours => Duration.Hours;
+    public int Minutes => Duration.Minutes;
+    public int TotalMinutes => Duration.TotalMinutes;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private MedicalShift(MedicalShiftId id, InternshipId internshipId, DateTime date, int hours, int minutes,
+    private MedicalShift(MedicalShiftId id, InternshipId internshipId, DateTime date, Duration duration,
         string location, int year)
     {
         Id = id;
         InternshipId = internshipId;
         Date = EnsureUtc(date);
-        Hours = Math.Max(0, hours);
-        Minutes = Math.Max(0, Math.Min(59, minutes));
+        Duration = duration ?? throw new ArgumentNullException(nameof(duration));
         Location = location ?? throw new ArgumentNullException(nameof(location));
         Year = year;
         SyncStatus = SyncStatus.NotSynced;
@@ -47,8 +46,9 @@ public class MedicalShift
             throw new ArgumentException("Location cannot be empty.", nameof(location));
 
         // No future date validation - MAUI app allows future dates
+        var duration = new Duration(hours, minutes);
 
-        return new MedicalShift(id, internshipId, date, hours, minutes, location, year);
+        return new MedicalShift(id, internshipId, date, duration, location, year);
     }
 
     /// <summary>
@@ -63,8 +63,7 @@ public class MedicalShift
     {
         EnsureCanModify();
 
-        Hours = Math.Max(0, hours);
-        Minutes = Math.Max(0, Math.Min(59, minutes));
+        Duration = new Duration(hours, minutes);
         Location = location ?? throw new ArgumentNullException(nameof(location));
         UpdatedAt = DateTime.UtcNow;
 

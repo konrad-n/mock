@@ -32,6 +32,9 @@ public class Internship : AggregateRoot
     private readonly List<Procedure> _procedures = new();
     public IReadOnlyList<Procedure> Procedures => _procedures.AsReadOnly();
 
+    // Parameterless constructor for EF Core
+    private Internship() { }
+
     private Internship(InternshipId id, SpecializationId specializationId, string institutionName,
         string departmentName, DateTime startDate, DateTime endDate)
     {

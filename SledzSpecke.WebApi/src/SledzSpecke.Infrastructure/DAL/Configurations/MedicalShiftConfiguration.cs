@@ -34,6 +34,16 @@ internal sealed class MedicalShiftConfiguration : IEntityTypeConfiguration<Medic
 
         builder.Ignore(x => x.IsApproved);
         builder.Ignore(x => x.CanBeDeleted);
-        builder.Ignore(x => x.Duration);
+        
+        // Configure Duration as an owned entity
+        builder.OwnsOne(x => x.Duration, duration =>
+        {
+            duration.Property(d => d.Hours)
+                .HasColumnName("Hours")
+                .IsRequired();
+            duration.Property(d => d.Minutes)
+                .HasColumnName("Minutes")
+                .IsRequired();
+        });
     }
 }

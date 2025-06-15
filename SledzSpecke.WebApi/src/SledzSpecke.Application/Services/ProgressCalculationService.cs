@@ -157,7 +157,7 @@ public class ProgressCalculationService : IProgressCalculationService
         var procedures = new List<Core.Entities.ProcedureBase>();
         foreach (var internship in internships)
         {
-            var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id.Value);
+            var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.InternshipId.Value);
             procedures.AddRange(internshipProcedures);
         }
 

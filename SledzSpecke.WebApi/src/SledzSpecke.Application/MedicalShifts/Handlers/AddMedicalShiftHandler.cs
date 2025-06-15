@@ -42,79 +42,62 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
             var internship = await _internshipRepository.GetByIdAsync(internshipId);
             if (internship is null)
             {
-                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.");
+                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.", "INTERN_NOT_FOUND");
             }
 
             // Validate specialization exists
             var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
             if (specialization is null)
             {
-                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.");
+                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.", "SPEC_NOT_FOUND");
             }
 
-            // Validate date range for New SMK
-            if (specialization.SmkVersion == SmkVersion.New)
-            {
-                if (command.Date < internship.StartDate || command.Date > internship.EndDate)
-                {
-                    return Result.Failure<int>("Medical shift date must be within the internship period for New SMK.");
-                }
-            }
+            // Get available years for validation
+            var availableYears = _yearCalculationService.GetAvailableYears(specialization);
 
-            // Validate year
-            if (specialization.SmkVersion.IsOld)
-            {
-                var availableYears = _yearCalculationService.GetAvailableYears(specialization);
-                // Allow year 0 for unassigned shifts
-                if (command.Year != 0 && !availableYears.Contains(command.Year))
-                {
-                    return Result.Failure<int>(
-                        $"Year must be 0 (unassigned) or between {availableYears.Min()} and {availableYears.Max()} for this specialization.");
-                }
-            }
-            else if (specialization.SmkVersion.IsNew)
-            {
-                if (command.Year <= 0)
-                {
-                    return Result.Failure<int>("Year must be provided for New SMK.");
-                }
-            }
-
-            // Create medical shift
-            var medicalShiftId = new MedicalShiftId(0); // Will be assigned by repository
-            var medicalShift = MedicalShift.Create(
-                medicalShiftId,
-                internshipId,
+            // Use domain method to add medical shift with all business logic
+            var result = internship.AddMedicalShift(
                 command.Date,
                 command.Hours,
                 command.Minutes,
                 command.Location,
-                command.Year
+                command.Year,
+                specialization.SmkVersion,
+                availableYears.ToArray()
             );
 
-            // Validate using template service
+            if (result.IsFailure)
+            {
+                return Result.Failure<int>(result.Error, result.ErrorCode);
+            }
+
+            var medicalShift = result.Value;
+
+            // Validate using template service (external validation)
             var validationResult = await _validationService.ValidateMedicalShiftAsync(
                 medicalShift,
                 specialization.Id.Value);
 
             if (!validationResult.IsValid)
             {
-                return Result.Failure<int>($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}");
+                return Result.Failure<int>($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}", "VAL_FAILED");
             }
 
-            // Save the medical shift
-            var shiftId = await _medicalShiftRepository.AddAsync(medicalShift);
+            // Update the internship (with the new shift already added)
+            await _internshipRepository.UpdateAsync(internship);
+            
+            // Save changes and dispatch domain events
             await _unitOfWork.SaveChangesAsync();
 
-            return Result.Success(shiftId);
+            return Result.Success(medicalShift.Id.Value);
         }
         catch (Exception ex) when (ex is CustomException)
         {
-            return Result.Failure<int>(ex.Message);
+            return Result.Failure<int>(ex.Message, "DOMAIN_ERROR");
         }
         catch (Exception)
         {
-            return Result.Failure<int>("An error occurred while adding the medical shift.");
+            return Result.Failure<int>("An error occurred while adding the medical shift.", "INTERNAL_ERROR");
         }
     }
 }

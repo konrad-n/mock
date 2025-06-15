@@ -76,7 +76,7 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
 
         // Get all internships for the user's specialization
         var internships = await _internshipRepository.GetByUserAndSpecializationAsync(userId, user.SpecializationId);
-        var internshipDict = internships.ToDictionary(i => i.Id.Value);
+        var internshipDict = internships.ToDictionary(i => i.InternshipId.Value);
 
         // Filter shifts based on SMK version and valid internships
         var filteredShifts = medicalShifts.Where(shift =>
@@ -119,7 +119,7 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
             ApproverRole: shift.ApproverRole,
             IsApproved: shift.IsApproved,
             CanBeDeleted: shift.CanBeDeleted,
-            Duration: shift.Duration
+            Duration: TimeSpan.FromMinutes(shift.Duration.TotalMinutes)
         );
     }
 }

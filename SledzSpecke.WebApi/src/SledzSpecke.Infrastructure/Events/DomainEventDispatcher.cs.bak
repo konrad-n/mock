@@ -1,0 +1,40 @@
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using SledzSpecke.Core.Abstractions;
+
+namespace SledzSpecke.Infrastructure.Events;
+
+/// <summary>
+/// Dispatches domain events from aggregate roots after saving changes
+/// Integrates with EF Core to ensure events are published after successful persistence
+/// </summary>
+public sealed class DomainEventDispatcher : IDomainEventDispatcher
+{
+    private readonly IPublisher _mediator;
+
+    public DomainEventDispatcher(IPublisher mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public async Task DispatchEventsAsync(DbContext context, CancellationToken cancellationToken = default)
+    {
+        var domainEntities = context.ChangeTracker
+            .Entries<AggregateRoot>()
+            .Where(x => x.Entity.DomainEvents.Any())
+            .ToList();
+
+        var domainEvents = domainEntities
+            .SelectMany(x => x.Entity.DomainEvents)
+            .ToList();
+
+        // Clear events from entities before saving
+        domainEntities.ForEach(entity => entity.Entity.ClearDomainEvents());
+
+        // Publish each event
+        foreach (var domainEvent in domainEvents)
+        {
+            await _mediator.Publish(domainEvent, cancellationToken);
+        }
+    }
+}

@@ -1,26 +1,14 @@
+using System.Linq.Expressions;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.ValueObjects;
-using System.Linq.Expressions;
 
 namespace SledzSpecke.Core.Specifications;
 
-public class MedicalShiftByYearSpecification : Specification<MedicalShift>
-{
-    private readonly int _year;
-
-    public MedicalShiftByYearSpecification(int year)
-    {
-        _year = year;
-    }
-
-    public override Expression<Func<MedicalShift, bool>> ToExpression()
-    {
-        return shift => shift.Year == _year;
-    }
-}
-
-public class MedicalShiftByInternshipSpecification : Specification<MedicalShift>
+/// <summary>
+/// Specification for finding medical shifts by internship
+/// </summary>
+public sealed class MedicalShiftByInternshipSpecification : Specification<MedicalShift>
 {
     private readonly InternshipId _internshipId;
 
@@ -35,7 +23,10 @@ public class MedicalShiftByInternshipSpecification : Specification<MedicalShift>
     }
 }
 
-public class MedicalShiftInDateRangeSpecification : Specification<MedicalShift>
+/// <summary>
+/// Specification for finding medical shifts in a date range
+/// </summary>
+public sealed class MedicalShiftInDateRangeSpecification : Specification<MedicalShift>
 {
     private readonly DateTime _startDate;
     private readonly DateTime _endDate;
@@ -52,55 +43,49 @@ public class MedicalShiftInDateRangeSpecification : Specification<MedicalShift>
     }
 }
 
-public class ApprovedMedicalShiftsSpecification : Specification<MedicalShift>
+/// <summary>
+/// Specification for finding approved medical shifts
+/// </summary>
+public sealed class ApprovedMedicalShiftSpecification : Specification<MedicalShift>
 {
     public override Expression<Func<MedicalShift, bool>> ToExpression()
     {
-        return shift => shift.SyncStatus == SyncStatus.Synced && shift.ApprovalDate.HasValue;
+        return shift => shift.IsApproved;
     }
 }
 
-public class UnsyncedMedicalShiftsSpecification : Specification<MedicalShift>
+/// <summary>
+/// Specification for finding medical shifts by year
+/// </summary>
+public sealed class MedicalShiftByYearSpecification : Specification<MedicalShift>
 {
-    public override Expression<Func<MedicalShift, bool>> ToExpression()
-    {
-        return shift => shift.SyncStatus != SyncStatus.Synced;
-    }
-}
+    private readonly int _year;
 
-public class MedicalShiftWithMinimumDurationSpecification : Specification<MedicalShift>
-{
-    private readonly int _minimumHours;
-
-    public MedicalShiftWithMinimumDurationSpecification(int minimumHours)
+    public MedicalShiftByYearSpecification(int year)
     {
-        _minimumHours = minimumHours;
+        _year = year;
     }
 
     public override Expression<Func<MedicalShift, bool>> ToExpression()
     {
-        return shift => shift.Hours >= _minimumHours || (shift.Hours == _minimumHours - 1 && shift.Minutes > 0);
+        return shift => shift.Year == _year;
     }
 }
 
-// Composite specifications
-public static class MedicalShiftSpecificationExtensions
+/// <summary>
+/// Specification for finding medical shifts that exceed a certain duration
+/// </summary>
+public sealed class LongMedicalShiftSpecification : Specification<MedicalShift>
 {
-    public static ISpecification<MedicalShift> GetShiftsForYearAndInternship(int year, InternshipId internshipId)
+    private readonly int _minHours;
+
+    public LongMedicalShiftSpecification(int minHours)
     {
-        return new MedicalShiftByYearSpecification(year)
-            .And(new MedicalShiftByInternshipSpecification(internshipId));
+        _minHours = minHours;
     }
 
-    public static ISpecification<MedicalShift> GetApprovedShiftsInDateRange(DateTime startDate, DateTime endDate)
+    public override Expression<Func<MedicalShift, bool>> ToExpression()
     {
-        return new ApprovedMedicalShiftsSpecification()
-            .And(new MedicalShiftInDateRangeSpecification(startDate, endDate));
-    }
-
-    public static ISpecification<MedicalShift> GetLongShiftsNeedingApproval(int minimumHours = 12)
-    {
-        return new UnsyncedMedicalShiftsSpecification()
-            .And(new MedicalShiftWithMinimumDurationSpecification(minimumHours));
+        return shift => shift.Hours >= _minHours;
     }
 }

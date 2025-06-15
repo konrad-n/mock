@@ -40,7 +40,7 @@ public sealed class GetInternshipByIdHandler : IQueryHandler<GetInternshipById, 
 
         return new InternshipDto
         {
-            Id = internship.Id.Value,
+            Id = internship.InternshipId.Value,
             SpecializationId = internship.SpecializationId.Value,
             ModuleId = internship.ModuleId?.Value,
             InstitutionName = internship.InstitutionName,

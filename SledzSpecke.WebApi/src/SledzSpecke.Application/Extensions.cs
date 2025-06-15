@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace SledzSpecke.Application;
 
-public static class Extensions
+public static partial class Extensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
@@ -49,6 +49,9 @@ public static class Extensions
         
         // Add validation
         services.AddValidation();
+        
+        // Add decorators for cross-cutting concerns
+        services.AddDecorators();
 
         // Override specific handlers if needed (enhanced versions)
         // Commented out - using Result-based handlers now
