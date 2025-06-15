@@ -20,7 +20,7 @@ public class E2EResultsController : ControllerBase
     {
         try
         {
-            var resultsPath = Path.Combine(_environment.ContentRootPath, "e2e-results");
+            var resultsPath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "e2e-results");
             
             if (!Directory.Exists(resultsPath))
             {
@@ -29,39 +29,79 @@ public class E2EResultsController : ControllerBase
             }
 
             var results = new List<object>();
-            var resultFiles = Directory.GetFiles(resultsPath, "*.json");
-
-            foreach (var file in resultFiles)
+            
+            // Check for latest symlink first
+            var latestPath = Path.Combine(resultsPath, "latest");
+            if (Directory.Exists(latestPath))
             {
-                try
+                var metadataPath = Path.Combine(latestPath, "metadata.json");
+                if (System.IO.File.Exists(metadataPath))
                 {
-                    var json = System.IO.File.ReadAllText(file);
-                    var result = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                    
-                    // Add video path if exists
-                    var videoName = Path.GetFileNameWithoutExtension(file) + ".webm";
-                    var videoPath = Path.Combine(resultsPath, videoName);
-                    if (System.IO.File.Exists(videoPath))
+                    try
                     {
-                        result["videoPath"] = $"/e2e-results/{videoName}";
+                        var json = System.IO.File.ReadAllText(metadataPath);
+                        var metadata = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+                        
+                        // Add video information for each browser
+                        var browsers = new[] { "chromium", "firefox" };
+                        foreach (var browser in browsers)
+                        {
+                            var browserVideoPath = Path.Combine(latestPath, browser, "videos");
+                            if (Directory.Exists(browserVideoPath))
+                            {
+                                var videos = Directory.GetFiles(browserVideoPath, "*.webm");
+                                if (videos.Length > 0)
+                                {
+                                    metadata[$"{browser}Videos"] = videos.Select(v => $"/e2e-results/latest/{browser}/videos/{Path.GetFileName(v)}").ToArray();
+                                }
+                            }
+                            
+                            var browserScreenshotPath = Path.Combine(latestPath, browser, "screenshots");
+                            if (Directory.Exists(browserScreenshotPath))
+                            {
+                                var screenshots = Directory.GetFiles(browserScreenshotPath, "*.png");
+                                if (screenshots.Length > 0)
+                                {
+                                    metadata[$"{browser}Screenshots"] = screenshots.Select(s => $"/e2e-results/latest/{browser}/screenshots/{Path.GetFileName(s)}").ToArray();
+                                }
+                            }
+                        }
+                        
+                        results.Add(metadata);
                     }
-
-                    results.Add(result);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error reading latest metadata");
+                    }
                 }
-                catch (Exception ex)
+            }
+            
+            // Also get all run directories
+            var runDirs = Directory.GetDirectories(resultsPath)
+                .Where(d => long.TryParse(Path.GetFileName(d), out _))
+                .OrderByDescending(d => Path.GetFileName(d))
+                .Take(10);
+                
+            foreach (var runDir in runDirs)
+            {
+                var metadataPath = Path.Combine(runDir, "metadata.json");
+                if (System.IO.File.Exists(metadataPath))
                 {
-                    _logger.LogError(ex, "Error reading result file: {File}", file);
+                    try
+                    {
+                        var json = System.IO.File.ReadAllText(metadataPath);
+                        var metadata = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+                        metadata["runPath"] = $"/e2e-results/{Path.GetFileName(runDir)}/";
+                        results.Add(metadata);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error reading metadata for run: {RunDir}", runDir);
+                    }
                 }
             }
 
-            return Ok(results.OrderByDescending(r => 
-            {
-                if (r is Dictionary<string, object> dict && dict.TryGetValue("timestamp", out var timestamp))
-                {
-                    return timestamp?.ToString() ?? "";
-                }
-                return "";
-            }).Take(20));
+            return Ok(results);
         }
         catch (Exception ex)
         {
