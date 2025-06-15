@@ -1,0 +1,78 @@
+# docker-compose.prod.yml - Production configuration
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # Production database configuration
+  postgres:
+    ports: []  # Don't expose database port externally
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+
+  # Production API configuration
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=sledzspecke_db;Username=sledzspecke_user;Password=${DB_PASSWORD}"
+      Jwt__Secret_FILE: /run/secrets/jwt_secret
+    secrets:
+      - db_password
+      - jwt_secret
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Production frontend
+  frontend:
+    build:
+      args:
+        VITE_API_URL: https://api.sledzspecke.pl
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # Enable nginx in production
+  nginx:
+    profiles: []
+
+  # Enable certbot in production
+  certbot:
+    profiles: []
+
+  # Monitoring services resource limits
+  seq:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  prometheus:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+  grafana:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+secrets:
+  db_password:
+    external: true
+  jwt_secret:
+    external: true

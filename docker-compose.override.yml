@@ -1,0 +1,44 @@
+# docker-compose.override.yml - Development overrides
+# This file is automatically loaded by docker-compose in development
+
+version: '3.8'
+
+services:
+  # Development database with exposed port
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: devpassword
+
+  # API in development mode
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=sledzspecke_db;Username=sledzspecke_user;Password=devpassword"
+    volumes:
+      - ./SledzSpecke.WebApi/src:/src
+      - ./logs:/app/logs
+    ports:
+      - "5000:5000"
+
+  # Frontend with hot reload
+  frontend:
+    build:
+      args:
+        VITE_API_URL: http://localhost:5000
+    volumes:
+      - ./SledzSpecke-Frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:80"
+
+  # Skip nginx in development
+  nginx:
+    profiles:
+      - production
+
+  # Skip certbot in development
+  certbot:
+    profiles:
+      - production
