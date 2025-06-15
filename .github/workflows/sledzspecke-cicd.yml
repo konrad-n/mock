@@ -111,6 +111,7 @@ jobs:
       id: backend-test
       run: |
         dotnet test --no-build --verbosity normal -c Release \
+          --filter "FullyQualifiedName!~E2E" \
           /p:CollectCoverage=true \
           /p:CoverletOutputFormat=opencover \
           /p:CoverletOutput=./coverage.opencover.xml

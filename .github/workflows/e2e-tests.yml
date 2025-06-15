@@ -183,7 +183,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.VPS_SSH_KEY }}
         source: "e2e-results-${{ github.run_id }}.tar.gz"
-        target: "/var/log/github-actions/e2e-tests/"
+        target: "/tmp/"
         
     - name: Extract and organize on VPS
       uses: appleboy/ssh-action@v1.0.3
@@ -192,9 +192,13 @@ jobs:
         username: ubuntu
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
-          cd /var/log/github-actions/e2e-tests/
+          # Create directory with proper permissions
+          sudo mkdir -p /var/log/github-actions/e2e-tests/runs
+          sudo chown -R ubuntu:ubuntu /var/log/github-actions/e2e-tests
           
-          # Extract the archive
+          # Move and extract archive
+          cd /var/log/github-actions/e2e-tests/
+          mv /tmp/e2e-results-${{ github.run_id }}.tar.gz .
           tar -xzf e2e-results-${{ github.run_id }}.tar.gz
           
           # Create organized directory structure
@@ -212,5 +216,8 @@ jobs:
           
           # Create latest symlink
           ln -sfn ${{ github.run_id }} ../latest
+          
+          # Fix permissions
+          sudo chown -R ubuntu:ubuntu /var/log/github-actions/e2e-tests
           
           echo "E2E test results saved to /var/log/github-actions/e2e-tests/runs/${{ github.run_id }}"
