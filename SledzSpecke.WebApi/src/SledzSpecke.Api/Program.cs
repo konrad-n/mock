@@ -5,6 +5,41 @@ using SledzSpecke.Api.Extensions;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
+using Microsoft.EntityFrameworkCore;
+using SledzSpecke.Infrastructure.DAL;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+// Handle migrate-database command
+if (args.Length > 0 && args[0] == "migrate-database")
+{
+    var configuration = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: false)
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+        .AddEnvironmentVariables()
+        .Build();
+
+    var services = new ServiceCollection();
+    services.AddDbContext<SledzSpeckeDbContext>(options =>
+        options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+    
+    var serviceProvider = services.BuildServiceProvider();
+    using var scope = serviceProvider.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<SledzSpeckeDbContext>();
+    
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+        Console.WriteLine("Database migration completed successfully.");
+        Environment.Exit(0);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database migration failed: {ex.Message}");
+        Environment.Exit(1);
+    }
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
