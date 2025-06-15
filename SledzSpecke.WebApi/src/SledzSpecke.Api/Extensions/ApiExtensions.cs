@@ -23,15 +23,14 @@ public static class ApiExtensions
     public static WebApplication UseApiMiddleware(this WebApplication app)
     {
         // Override the infrastructure middleware configuration
-        if (app.Environment.IsDevelopment())
+        // Enable Swagger in both Development and Production for easier testing
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "SledzSpecke API v1");
-                c.RoutePrefix = "swagger";
-            });
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SledzSpecke API v1");
+            c.RoutePrefix = "swagger";
+            c.DocumentTitle = "SledzSpecke API Documentation";
+        });
 
         app.UseHttpsRedirection();
         
