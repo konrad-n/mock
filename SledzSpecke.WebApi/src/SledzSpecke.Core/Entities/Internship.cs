@@ -267,8 +267,75 @@ public class Internship : AggregateRoot
         return Result.Success(medicalShift);
     }
     
-    // TODO: Implement AddProcedure when Procedure entities are refactored to use domain methods
-    // For now, procedures should be created through their respective repositories
+    public Result<ProcedureOldSmk> AddProcedureOldSmk(
+        ProcedureId procedureId,
+        DateTime date,
+        int year,
+        string code,
+        string location)
+    {
+        if (IsCompleted || IsApproved)
+        {
+            return Result<ProcedureOldSmk>.Failure("Cannot add procedure to a completed or approved internship.", "INTERNSHIP_NOT_MODIFIABLE");
+        }
+
+        // Note: SMK version validation should be done at the handler level since Internship doesn't track SMK version
+
+        try
+        {
+            var procedure = ProcedureOldSmk.Create(procedureId, InternshipId, date, year, code, location);
+            _procedures.Add(procedure);
+            UpdatedAt = DateTime.UtcNow;
+
+            // Automatically transition from Synced to Modified
+            if (SyncStatus == SyncStatus.Synced)
+            {
+                SyncStatus = SyncStatus.Modified;
+            }
+
+            return Result<ProcedureOldSmk>.Success(procedure);
+        }
+        catch (Exception ex)
+        {
+            return Result<ProcedureOldSmk>.Failure($"Failed to add procedure: {ex.Message}", "PROCEDURE_CREATION_FAILED");
+        }
+    }
+
+    public Result<ProcedureNewSmk> AddProcedureNewSmk(
+        ProcedureId procedureId,
+        DateTime date,
+        string code,
+        string location,
+        ModuleId moduleId,
+        int procedureRequirementId,
+        string procedureName)
+    {
+        if (IsCompleted || IsApproved)
+        {
+            return Result<ProcedureNewSmk>.Failure("Cannot add procedure to a completed or approved internship.", "INTERNSHIP_NOT_MODIFIABLE");
+        }
+
+        // Note: SMK version validation should be done at the handler level since Internship doesn't track SMK version
+
+        try
+        {
+            var procedure = ProcedureNewSmk.Create(procedureId, InternshipId, date, code, location, moduleId, procedureRequirementId, procedureName);
+            _procedures.Add(procedure);
+            UpdatedAt = DateTime.UtcNow;
+
+            // Automatically transition from Synced to Modified
+            if (SyncStatus == SyncStatus.Synced)
+            {
+                SyncStatus = SyncStatus.Modified;
+            }
+
+            return Result<ProcedureNewSmk>.Success(procedure);
+        }
+        catch (Exception ex)
+        {
+            return Result<ProcedureNewSmk>.Failure($"Failed to add procedure: {ex.Message}", "PROCEDURE_CREATION_FAILED");
+        }
+    }
 
     // Keep the old method for backward compatibility temporarily
     [Obsolete("Use AddMedicalShift with Result pattern instead")]

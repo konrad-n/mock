@@ -11,6 +11,9 @@ public static partial class Extensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         var applicationAssembly = typeof(ICommandHandler<>).Assembly;
+        
+        // Register MediatR for domain events
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
 
         // Auto-register all command handlers using Scrutor
         services.Scan(s => s.FromAssemblies(applicationAssembly)

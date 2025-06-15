@@ -20,6 +20,7 @@ using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Infrastructure.Time;
 using SledzSpecke.Infrastructure.Exceptions;
 using SledzSpecke.Infrastructure.Options;
+using SledzSpecke.Infrastructure.Events;
 using System.Text;
 
 namespace SledzSpecke.Infrastructure;
@@ -57,6 +58,9 @@ public static class Extensions
         services.AddSingleton<IAuthenticator, Authenticator>();
         services.AddScoped<IUserContextService, UserContextService>();
         services.AddScoped<IUserContext, UserContext>();
+        
+        // Domain event dispatcher
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         // Template services
         services.AddSingleton<ISpecializationTemplateService, SpecializationTemplateService>();
@@ -67,7 +71,7 @@ public static class Extensions
         services.AddScoped<IUserRepository, SqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();
-        services.AddScoped<IInternshipRepository, SqlInternshipRepository>();
+        services.AddScoped<IInternshipRepository, SqlInternshipRepositoryEnhanced>();
         services.AddScoped<IProcedureRepository, SqlProcedureRepository>();
         services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepositoryEnhanced>();
         services.AddScoped<ICourseRepository, SqlCourseRepository>();

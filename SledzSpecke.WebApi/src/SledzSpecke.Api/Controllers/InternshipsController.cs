@@ -8,24 +8,24 @@ using SledzSpecke.Application.Queries;
 namespace SledzSpecke.Api.Controllers;
 
 [Authorize]
-public class InternshipsController : BaseController
+public class InternshipsController : BaseResultController
 {
     private readonly ICommandHandler<CreateInternship, int> _createInternshipHandler;
-    private readonly ICommandHandler<UpdateInternship> _updateInternshipHandler;
-    private readonly ICommandHandler<ApproveInternship> _approveInternshipHandler;
-    private readonly ICommandHandler<MarkInternshipAsCompleted> _markInternshipAsCompletedHandler;
+    private readonly IResultCommandHandler<UpdateInternship> _updateInternshipHandler;
+    private readonly IResultCommandHandler<ApproveInternship> _approveInternshipHandler;
+    private readonly IResultCommandHandler<MarkInternshipAsCompleted> _markInternshipAsCompletedHandler;
     private readonly IQueryHandler<GetInternships, IEnumerable<InternshipDto>> _getInternshipsHandler;
     private readonly IQueryHandler<GetInternshipById, InternshipDto> _getInternshipByIdHandler;
-    private readonly ICommandHandler<DeleteInternship> _deleteInternshipHandler;
+    private readonly IResultCommandHandler<DeleteInternship> _deleteInternshipHandler;
 
     public InternshipsController(
         ICommandHandler<CreateInternship, int> createInternshipHandler,
-        ICommandHandler<UpdateInternship> updateInternshipHandler,
-        ICommandHandler<ApproveInternship> approveInternshipHandler,
-        ICommandHandler<MarkInternshipAsCompleted> markInternshipAsCompletedHandler,
+        IResultCommandHandler<UpdateInternship> updateInternshipHandler,
+        IResultCommandHandler<ApproveInternship> approveInternshipHandler,
+        IResultCommandHandler<MarkInternshipAsCompleted> markInternshipAsCompletedHandler,
         IQueryHandler<GetInternships, IEnumerable<InternshipDto>> getInternshipsHandler,
         IQueryHandler<GetInternshipById, InternshipDto> getInternshipByIdHandler,
-        ICommandHandler<DeleteInternship> deleteInternshipHandler)
+        IResultCommandHandler<DeleteInternship> deleteInternshipHandler)
     {
         _createInternshipHandler = createInternshipHandler;
         _updateInternshipHandler = updateInternshipHandler;

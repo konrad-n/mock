@@ -58,7 +58,7 @@ public static class ExtensionsEnhanced
         services.AddScoped<IUserRepository, SqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();
-        services.AddScoped<IInternshipRepository, SqlInternshipRepository>();
+        services.AddScoped<IInternshipRepository, SqlInternshipRepositoryEnhanced>();
         services.AddScoped<IProcedureRepository, SqlProcedureRepository>();
         services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepository>();
         services.AddScoped<ICourseRepository, SqlCourseRepository>();
