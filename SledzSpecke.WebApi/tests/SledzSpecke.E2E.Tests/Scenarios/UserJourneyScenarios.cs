@@ -20,7 +20,7 @@ public class UserJourneyScenarios : IsolatedE2ETestBase, IClassFixture<E2ETestFi
         _fixture = fixture;
     }
     
-    [Fact]
+    [Fact(Skip = "Requires frontend - use ApiOnlyScenarios instead")]
     public async Task CompleteUserJourney_FromRegistrationToProcedures_ShouldSucceed()
     {
         Logger.Information("Starting complete user journey test");
@@ -43,7 +43,7 @@ public class UserJourneyScenarios : IsolatedE2ETestBase, IClassFixture<E2ETestFi
         Logger.Information("Complete user journey test completed successfully");
     }
     
-    [Fact]
+    [Fact(Skip = "Requires frontend - use ApiOnlyScenarios instead")]
     public async Task UserRegistration_WithValidPolishData_ShouldCreateAccount()
     {
         Logger.Information("=== SCENARIO 1: User Registration ===");
