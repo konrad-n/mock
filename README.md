@@ -12,10 +12,10 @@
 
 ## 📊 Monitoring Services
 
-- **Seq (Log Aggregation)**: https://sledzspecke.pl:5341
-- **Grafana (Metrics Dashboard)**: https://sledzspecke.pl:3000
-- **Prometheus (Metrics)**: https://sledzspecke.pl:9090
-- **cAdvisor (Container Metrics)**: https://sledzspecke.pl:8080
+- **Seq (Log Aggregation)**: http://sledzspecke.pl:5341
+- **Grafana (Metrics Dashboard)**: http://sledzspecke.pl:3000
+- **Prometheus (Metrics)**: http://sledzspecke.pl:9090
+- **cAdvisor (Container Metrics)**: http://sledzspecke.pl:8080
 - **E2E Test Dashboard**: https://api.sledzspecke.pl/e2e-dashboard
   - Mobile-friendly interface
   - Real-time test results
