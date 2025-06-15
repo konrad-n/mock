@@ -42,6 +42,8 @@ You understand the medical domain context of this specialization tracking system
 15. [API Implementation Details](#api-implementation-details)
 16. [Business Rules and Validation](#business-rules-and-validation)
 17. [Sync Status Management](#sync-status-management)
+18. [Application Monitoring and Logging System](#application-monitoring-and-logging-system)
+19. [GitHub Actions Build Monitoring on VPS](#github-actions-build-monitoring-on-vps)
 
 ---
 
@@ -276,6 +278,27 @@ GET  /api/calculations/internship-days
 POST /api/calculations/normalize-time
 GET  /api/calculations/required-shift-hours/{smkVersion}
 ```
+
+### Monitoring i Logowanie
+```http
+GET  /monitoring/dashboard         # Web dashboard (HTML)
+GET  /monitoring/health           # Health check endpoint
+GET  /api/logs/recent            # Recent structured logs
+GET  /api/logs/errors            # Error logs with filtering
+GET  /api/logs/stats             # Monitoring statistics
+```
+
+#### Dashboard Features
+- **Real-time Statistics**: Total requests, errors, warnings, average response time (24h)
+- **Error Tracking**: Detailed error logs with timestamps, messages, and stack traces
+- **Recent API Calls**: Table showing method, path, status, duration, and user
+- **Live Log Streaming**: Real-time log viewer with level filtering (All/Error/Warning/Info)
+- **Search & Filter**: Search errors by keyword, filter by time range
+
+#### Log API Parameters
+- `/api/logs/recent?count=100&level=error&correlationId=xxx`
+- `/api/logs/errors?hours=24` (default: 24 hours)
+- `/api/logs/stats?hours=24` (returns JSON with statistics)
 
 ---
 
@@ -2065,6 +2088,199 @@ ssh ubuntu@51.77.59.184
 sudo journalctl -u sledzspecke-api -n 100
 ls -la /var/www/sledzspecke-api/
 ```
+
+---
+
+## Application Monitoring and Logging System
+
+### Overview
+SledzSpecke implements a comprehensive monitoring and logging system using Serilog for structured logging and custom endpoints for real-time monitoring. The system provides detailed insights into application behavior, performance, and errors.
+
+### Architecture
+
+#### Logging Infrastructure
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Serilog Core                        │
+├─────────────────────────────────────────────────────────┤
+│ Enrichers:                                              │
+│ - FromLogContext (CorrelationId, UserId, etc.)         │
+│ - WithMachineName                                       │
+│ - WithEnvironmentName                                   │
+│ - WithExceptionDetails                                  │
+├─────────────────────────────────────────────────────────┤
+│ Sinks:                                                  │
+│ - Console (for systemd journal)                         │
+│ - File (rolling daily .log files)                       │
+│ - File (rolling daily .json structured logs)            │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### Monitoring Components
+1. **EnhancedExceptionHandlingMiddleware**
+   - Catches all unhandled exceptions
+   - Logs with full context and correlation IDs
+   - Returns structured error responses
+
+2. **MonitoringDashboardController**
+   - Serves HTML dashboard at `/monitoring/dashboard`
+   - Real-time statistics and visualizations
+   - No external dependencies (pure HTML/CSS/JS)
+
+3. **LogsController**
+   - RESTful API for log access
+   - Filtering and search capabilities
+   - Statistics aggregation
+
+### Log Structure
+
+#### Structured Log Entry (JSON)
+```json
+{
+  "Timestamp": "2025-06-15T10:45:58.123Z",
+  "Level": "Error",
+  "MessageTemplate": "Registration failed for email {Email}",
+  "Properties": {
+    "Email": "user@example.com",
+    "UserId": 123,
+    "CorrelationId": "abc123",
+    "RequestPath": "/api/auth/sign-up",
+    "ClientIP": "192.168.1.100",
+    "ElapsedTime": 145
+  },
+  "Exception": {
+    "Type": "InvalidOperationException",
+    "Message": "Email already in use",
+    "StackTrace": "..."
+  }
+}
+```
+
+### Monitoring Dashboard
+
+#### Access
+- Development: `http://localhost:5000/monitoring/dashboard`
+- Production: `https://api.sledzspecke.pl/monitoring/dashboard`
+
+#### Features
+1. **Statistics Cards**
+   - Total Requests (24h)
+   - Error Count (24h)
+   - Warning Count (24h)
+   - Average Response Time
+
+2. **Recent Errors Section**
+   - Filterable by time range (1h, 6h, 24h, 7d)
+   - Searchable error messages
+   - Expandable stack traces
+
+3. **Recent API Calls Table**
+   - Real-time updates every 10 seconds
+   - Shows: Time, Method, Path, Status, Duration, User
+   - Color-coded status badges
+
+4. **Live Logs Viewer**
+   - Start/Stop live updates
+   - Filter by log level
+   - Auto-scroll with new entries
+
+### Error Handling
+
+#### Error Response Format
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7807",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "Email 'invalid-email' is not valid",
+  "instance": "/api/auth/sign-up",
+  "errorCode": "VALIDATION_FAILED",
+  "traceId": "0HN4JQGV8KLM9:00000001",
+  "timestamp": "2025-06-15T10:45:58.123Z",
+  "correlationId": "abc123",
+  "requestId": "0HN4JQGV8KLM9",
+  "method": "POST"
+}
+```
+
+#### Error Codes
+Centralized in `ErrorCodes.cs`:
+- Authentication: `AUTH_*`
+- User Management: `USER_*`
+- Validation: `VALIDATION_*`
+- Business Logic: `BUSINESS_*`
+- Infrastructure: `INFRA_*`
+
+### Log Management
+
+#### Log Rotation
+- Daily rotation for both text and JSON logs
+- Automatic cleanup after 30 days (configurable)
+- Location: `/var/log/sledzspecke/`
+
+#### Log Files
+- `api-YYYY-MM-DD.log` - Human-readable text logs
+- `structured-YYYY-MM-DD.json` - Machine-readable JSON logs
+
+#### Viewing Logs
+```bash
+# Using the provided script
+./view-logs.sh errors    # Show recent errors
+./view-logs.sh recent    # Show recent entries
+./view-logs.sh search "term"  # Search logs
+./view-logs.sh stats     # Show statistics
+
+# Direct file access
+tail -f /var/log/sledzspecke/api-$(date +%Y-%m-%d).log
+
+# Using jq for JSON logs
+cat /var/log/sledzspecke/structured-$(date +%Y-%m-%d).json | jq '.Level == "Error"'
+```
+
+### Performance Considerations
+
+#### Logging Performance
+- Asynchronous writing to prevent blocking
+- Buffered output for efficiency
+- Minimal overhead (~1-2ms per request)
+
+#### Dashboard Performance
+- Client-side rendering (no server load)
+- Efficient log file reading (tail operations)
+- Configurable refresh intervals
+
+### Security Considerations
+
+#### Production Security (TEMPORARY DISABLED)
+**WARNING**: Currently all monitoring features are enabled in production for testing.
+Before customer release, re-enable these security measures:
+
+1. **Dashboard Access**: Restrict to development environment only
+2. **Log API Access**: Require authentication or restrict to dev
+3. **Error Details**: Hide sensitive information in production
+4. **Request Details**: Remove internal details from responses
+
+Files to update:
+- `MonitoringDashboardController.cs` - Uncomment environment check
+- `LogsController.cs` - Uncomment environment checks
+- `EnhancedExceptionHandlingMiddleware.cs` - Restore generic error messages
+
+### Troubleshooting Common Issues
+
+#### No Logs Appearing
+1. Check log directory permissions: `ls -la /var/log/sledzspecke/`
+2. Verify Serilog configuration in `Program.cs`
+3. Check systemd journal: `sudo journalctl -u sledzspecke-api -f`
+
+#### Dashboard Not Loading
+1. Verify endpoint registration: Check `MapControllers()` in startup
+2. Check browser console for JavaScript errors
+3. Verify API endpoints are responding
+
+#### High Memory Usage
+1. Check log file sizes: `du -sh /var/log/sledzspecke/*`
+2. Implement log cleanup if needed
+3. Consider reducing log retention period
 
 ---
 

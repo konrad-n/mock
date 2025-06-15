@@ -178,6 +178,13 @@ Main endpoint groups:
 - `/api/publications` - Scientific publications
 - `/api/export` - Data export (PDF, Excel, JSON)
 
+### Monitoring & Logging Endpoints
+- `/monitoring/dashboard` - Web-based monitoring dashboard (HTML)
+- `/monitoring/health` - Health check endpoint
+- `/api/logs/recent` - Recent structured logs (JSON)
+- `/api/logs/errors` - Error logs with time filtering
+- `/api/logs/stats` - Monitoring statistics
+
 ## Development
 
 ### Running Tests
@@ -244,31 +251,57 @@ npm run build
 
 The application includes comprehensive monitoring and error tracking:
 
-#### Development Dashboard
-Access the monitoring dashboard at `http://localhost:5000/monitoring/dashboard` (development mode only).
+#### Monitoring Dashboard
+Access the comprehensive monitoring dashboard at:
+- **Development**: `http://localhost:5000/monitoring/dashboard`
+- **Production**: `https://api.sledzspecke.pl/monitoring/dashboard` (temporarily enabled)
 
 Features:
-- Real-time request statistics
-- Error tracking with stack traces
-- API call monitoring
-- Live log streaming
+- Real-time request statistics (24h totals)
+- Error tracking with detailed messages
+- Recent API calls with status codes
+- Live log streaming with level filtering
+- Request activity visualization
+- Search and filter capabilities
 
 #### Structured Logging
-All application events are logged with structured data:
-- **Log files**: `/var/log/sledzspecke/`
-- **Formats**: Plain text (`.log`) and JSON (`.json`)
-- **Correlation IDs**: Track requests across the system
+All application events are logged with structured data using Serilog:
+- **Log directory**: `/var/log/sledzspecke/`
+- **Log formats**: 
+  - Plain text: `api-YYYY-MM-DD.log`
+  - Structured JSON: `structured-YYYY-MM-DD.json`
+- **Features**:
+  - Correlation IDs for request tracking
+  - User context (userId, email)
+  - Request details (path, method, IP)
+  - Performance metrics (elapsed time)
+  - Exception details with stack traces
 
-#### Using the Log Viewer
+#### Using the Log Viewer Script
 ```bash
 # View recent errors
 ./view-logs.sh errors
 
+# View last 50 log entries
+./view-logs.sh recent
+
 # Search for specific terms
 ./view-logs.sh search "user@example.com"
 
-# View statistics
+# View daily statistics
 ./view-logs.sh stats
+```
+
+#### Programmatic Log Access
+```bash
+# Get recent logs via API
+curl https://api.sledzspecke.pl/api/logs/recent?count=100
+
+# Get errors from last 24 hours
+curl https://api.sledzspecke.pl/api/logs/errors?hours=24
+
+# Get monitoring statistics
+curl https://api.sledzspecke.pl/api/logs/stats?hours=24
 ```
 
 #### Error Codes
