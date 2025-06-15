@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace SledzSpecke.Api.Controllers;
 
@@ -146,6 +146,76 @@ public class LogsController : ControllerBase
             count = errors.Count,
             since = cutoffTime,
             hours
+        });
+    }
+    
+    /// <summary>
+    /// Gets monitoring statistics
+    /// </summary>
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetStats([FromQuery] int hours = 24)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return Forbid("Stats are only available in development environment");
+        }
+        
+        var totalRequests = 0;
+        var totalErrors = 0;
+        var totalWarnings = 0;
+        var avgResponseTime = 0;
+        var topEndpoints = new List<object>();
+        var errorsByType = new Dictionary<string, int>();
+        var requestsPerHour = new List<object>();
+        
+        var logPath = "/var/log/sledzspecke";
+        var cutoffTime = DateTimeOffset.UtcNow.AddHours(-hours);
+        
+        // Analyze logs
+        for (int i = 0; i < Math.Min(hours / 24 + 1, 7); i++)
+        {
+            var date = DateTime.UtcNow.AddDays(-i).ToString("yyyy-MM-dd");
+            var logFile = Path.Combine(logPath, $"structured-{date}.json");
+            
+            if (!System.IO.File.Exists(logFile)) continue;
+            
+            var lines = await System.IO.File.ReadAllLinesAsync(logFile);
+            
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                
+                try
+                {
+                    var log = JsonSerializer.Deserialize<JsonElement>(line);
+                    var timestamp = log.GetProperty("Timestamp").GetDateTimeOffset();
+                    
+                    if (timestamp < cutoffTime) continue;
+                    
+                    // Count by level
+                    var level = log.GetProperty("Level").GetString();
+                    if (level == "Error" || level == "Fatal") totalErrors++;
+                    if (level == "Warning") totalWarnings++;
+                    
+                    // Count requests
+                    if (log.TryGetProperty("RequestPath", out var path))
+                    {
+                        totalRequests++;
+                    }
+                }
+                catch { }
+            }
+        }
+        
+        return Ok(new
+        {
+            totalRequests,
+            totalErrors,
+            totalWarnings,
+            avgResponseTime,
+            topEndpoints,
+            errorsByType,
+            requestsPerHour
         });
     }
 }
