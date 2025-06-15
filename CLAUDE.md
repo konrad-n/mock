@@ -1750,6 +1750,159 @@ System jest gotowy do wdrożenia z drobnymi brakami funkcjonalności (głównie 
 - Plan feature additions
 - Regular security updates
 
+### 🔍 Monitoring & Analytics
+
+#### GitHub Actions CLI (`gh`)
+
+The GitHub CLI provides powerful ways to monitor builds and deployments:
+
+```bash
+# List recent workflow runs
+gh run list --limit 5
+
+# View specific run details
+gh run view <run_id>
+
+# Watch a run in progress
+gh run watch <run_id>
+
+# View job logs
+gh run view <run_id> --log
+gh run view <run_id> --log-failed  # Only failed jobs
+
+# Cancel a stuck run
+gh run cancel <run_id>
+
+# Re-run failed jobs
+gh run rerun <run_id> --failed
+
+# Download artifacts
+gh run download <run_id>
+
+# View workflow file
+gh workflow view <workflow_name>
+```
+
+#### SonarCloud Integration
+
+The project is integrated with SonarCloud for code quality analysis. Current status and metrics:
+
+```bash
+# Check Quality Gate status via API
+curl -s "https://sonarcloud.io/api/qualitygates/project_status?projectKey=konrad-n_mock" | python3 -m json.tool
+
+# Get specific metrics
+curl -s "https://sonarcloud.io/api/measures/component?component=konrad-n_mock&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density" | python3 -m json.tool
+
+# Get open issues
+curl -s "https://sonarcloud.io/api/issues/search?componentKeys=konrad-n_mock&types=BUG&statuses=OPEN&severities=CRITICAL,MAJOR" | python3 -m json.tool
+```
+
+##### Current Quality Gate Issues (as of Dec 2024)
+- **Coverage**: 0% (requires 80%) - Need to add unit tests
+- **Bugs**: 1 new bug in recent code
+- **Duplications**: 5.14% (max allowed 3%)
+- **Code Smells**: 102 new code smells
+- **Security Hotspots**: Not reviewed
+
+##### SonarCloud Configuration in CI/CD
+The pipeline now includes:
+1. SonarScanner installation and caching
+2. Code analysis during build
+3. Test coverage collection with coverlet
+4. Results upload to SonarCloud
+
+##### SonarCloud Badges
+```markdown
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=konrad-n_mock)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=coverage)](https://sonarcloud.io/summary/new_code?id=konrad-n_mock)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=konrad-n_mock&metric=bugs)](https://sonarcloud.io/summary/new_code?id=konrad-n_mock)
+```
+
+#### VPS Build Monitoring
+
+Build results are automatically saved to the VPS after each GitHub Actions run:
+
+```bash
+# Check latest build
+/home/ubuntu/check-builds.sh latest
+
+# List all builds
+/home/ubuntu/check-builds.sh list
+
+# Show failed builds only
+/home/ubuntu/check-builds.sh failed
+
+# Get details for specific run
+/home/ubuntu/check-builds.sh details <run_id>
+
+# View raw build logs
+ls -la /var/log/github-actions/builds/
+cat /var/log/github-actions/builds/build-*.json | python3 -m json.tool
+
+# Check failure details
+ls -la /var/log/github-actions/details/
+cat /var/log/github-actions/details/failure-*.log
+```
+
+#### Useful Monitoring Commands
+
+```bash
+# Check API health
+curl -s https://api.sledzspecke.pl/health || echo "No health endpoint"
+systemctl status sledzspecke-api
+
+# Check Nginx status
+sudo nginx -t
+sudo systemctl status nginx
+
+# View API logs
+sudo journalctl -u sledzspecke-api -f
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+
+# Database status
+sudo -u postgres psql -c "SELECT version();"
+sudo -u postgres psql sledzspecke_db -c "\dt"
+
+# Resource usage
+htop
+free -h
+df -h
+
+# Check running processes
+ps aux | grep dotnet
+ps aux | grep node
+```
+
+### 🎯 Fixing Quality Gate
+
+To pass SonarCloud Quality Gate, prioritize:
+
+1. **Add Unit Tests** (Critical)
+   ```bash
+   cd SledzSpecke.WebApi
+   dotnet new xunit -n SledzSpecke.Core.Tests -o tests/SledzSpecke.Core.Tests
+   dotnet add tests/SledzSpecke.Core.Tests reference src/SledzSpecke.Core
+   dotnet add tests/SledzSpecke.Core.Tests package FluentAssertions
+   dotnet add tests/SledzSpecke.Core.Tests package Bogus
+   dotnet add tests/SledzSpecke.Core.Tests package coverlet.msbuild
+   ```
+
+2. **Fix the Bug**
+   - Check SonarCloud dashboard for specific bug location
+   - Usually related to null checks or floating point comparisons
+
+3. **Reduce Code Duplication**
+   - Extract common code into helper methods
+   - Use base classes for similar functionality
+   - Consider using generics for repeated patterns
+
+4. **Review Security Hotspots**
+   - Log into SonarCloud.io
+   - Go to Security Hotspots tab
+   - Mark each as reviewed after verification
+
 ### 💡 Quick Wins Before Production
 
 1. **API Health Check**
@@ -1842,6 +1995,76 @@ When creating git commits or suggesting commit messages:
 - Keep commit messages focused on the actual changes made
 - Use conventional commit format when appropriate (feat:, fix:, docs:, etc.)
 - Avoid mentioning AI assistance in commits
+
+---
+
+## CI/CD Pipeline Architecture
+
+### Workflow Overview
+
+The `sledzspecke-cicd.yml` workflow includes:
+
+1. **Test Backend & Analyze** (with SonarCloud)
+   - PostgreSQL service container
+   - .NET build and test
+   - Code coverage with coverlet
+   - SonarCloud analysis
+   
+2. **Test Frontend**
+   - Node.js setup with npm caching
+   - Monorepo build (packages/shared, packages/web)
+   - TypeScript compilation
+   - Vite build
+
+3. **Security Scan**
+   - Trivy vulnerability scanner
+   - SARIF report generation
+   - GitHub security integration
+
+4. **Deploy to Production** (on master/main push)
+   - SSH deployment to VPS
+   - Backend: .NET publish and systemd service
+   - Frontend: npm build and nginx static files
+   - Health checks
+
+5. **Save Build Logs**
+   - Collects job results
+   - Saves to VPS at `/var/log/github-actions/`
+   - Includes failure details
+
+### Key Features
+
+- **Parallel Jobs**: Tests run concurrently for speed
+- **Caching**: NuGet, npm, and SonarCloud scanner caching
+- **Conditional Deployment**: Only deploys from master branch
+- **Build Monitoring**: Automatic log collection on VPS
+- **SonarCloud Integration**: Quality gate checks on every push
+
+### Secrets Required
+
+Configure these in GitHub repository settings:
+
+```yaml
+VPS_SSH_KEY     # Private SSH key for deployment
+VPS_HOST        # VPS IP address (51.77.59.184)
+VPS_USER        # SSH username (ubuntu)
+SONAR_TOKEN     # SonarCloud authentication token
+```
+
+### Common Commands
+
+```bash
+# Trigger manual workflow
+gh workflow run sledzspecke-cicd.yml
+
+# View workflow history
+gh run list --workflow=sledzspecke-cicd.yml
+
+# Debug failed deployment
+ssh ubuntu@51.77.59.184
+sudo journalctl -u sledzspecke-api -n 100
+ls -la /var/www/sledzspecke-api/
+```
 
 ---
 
