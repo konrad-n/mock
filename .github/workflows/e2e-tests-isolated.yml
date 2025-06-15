@@ -128,7 +128,69 @@ jobs:
           exit 1
         fi
     
-    # Skip frontend for now - API tests only
+    - name: Setup Frontend with Proxy
+      run: |
+        cd SledzSpecke-Frontend
+        npm install
+        
+        # Create a simple proxy server configuration
+        cat > proxy-server.js << 'EOF'
+        const express = require('express');
+        const { createProxyMiddleware } = require('http-proxy-middleware');
+        const path = require('path');
+        
+        const app = express();
+        
+        // Proxy API requests
+        app.use('/api', createProxyMiddleware({
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          logLevel: 'debug'
+        }));
+        
+        // Serve static files from the built frontend
+        app.use(express.static(path.join(__dirname, 'packages/web/dist')));
+        
+        // Serve index.html for all other routes (SPA)
+        app.get('*', (req, res) => {
+          res.sendFile(path.join(__dirname, 'packages/web/dist/index.html'));
+        });
+        
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+          console.log(`Frontend server with proxy running on http://localhost:${PORT}`);
+        });
+        EOF
+        
+        # Install proxy dependencies
+        npm install express http-proxy-middleware
+        
+        # Build the frontend
+        npm run build
+        
+        # Start the proxy server
+        nohup node proxy-server.js > frontend.log 2>&1 &
+        echo $! > frontend.pid
+        
+        # Wait for frontend to be ready
+        echo "Waiting for frontend to start..."
+        for i in {1..30}; do
+          if curl -s http://localhost:3000 > /dev/null; then
+            echo "Frontend is ready!"
+            # Test that proxy is working
+            curl -s http://localhost:3000/api/health || echo "Warning: API proxy may not be working"
+            break
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 2
+        done
+        
+        # Show frontend logs if it didn't start
+        if ! curl -s http://localhost:3000 > /dev/null; then
+          echo "Frontend failed to start. Logs:"
+          cat frontend.log
+          exit 1
+        fi
     
     - name: Install Playwright
       run: |
@@ -139,7 +201,7 @@ jobs:
     - name: Run E2E Tests
       env:
         ASPNETCORE_ENVIRONMENT: Development
-        E2ETests__BaseUrl: http://localhost:5000
+        E2ETests__BaseUrl: http://localhost:3000
         E2ETests__ApiUrl: http://localhost:5000
         E2ETests__Browser: ${{ matrix.browser }}
         E2ETests__Headless: true
@@ -149,7 +211,7 @@ jobs:
         E2ETests__TraceEnabled: true
         E2ETests__VideoEnabled: true
         ConnectionStrings__DefaultConnection: ${{ env.TEST_CONNECTION_STRING }}
-        TEST_FILTER: ${{ github.event.inputs.test_filter || 'FullyQualifiedName~ApiOnlyScenarios' }}
+        TEST_FILTER: ${{ github.event.inputs.test_filter || '' }}
       run: |
         cd SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests
         
@@ -274,6 +336,11 @@ jobs:
         # Kill the API process
         if [ -f SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid ]; then
           kill $(cat SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid) || true
+        fi
+        
+        # Kill the frontend process
+        if [ -f SledzSpecke-Frontend/frontend.pid ]; then
+          kill $(cat SledzSpecke-Frontend/frontend.pid) || true
         fi
         
         # Drop the test database
