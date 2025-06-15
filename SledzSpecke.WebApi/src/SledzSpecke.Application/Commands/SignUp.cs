@@ -8,6 +8,6 @@ public record SignUp(
     string Username,
     string Password,
     string FullName,
-    SmkVersion SmkVersion,
+    string SmkVersion,
     int SpecializationId
 ) : ICommand;

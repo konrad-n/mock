@@ -42,6 +42,7 @@ public class User
     public User(Email email, Username username, Password password, FullName fullName,
         SmkVersion smkVersion, SpecializationId specializationId, DateTime registrationDate)
     {
+        Id = new UserId(0); // Temporary value, will be set by repository
         Email = email;
         Username = username;
         Password = password;
@@ -50,6 +51,13 @@ public class User
         SpecializationId = specializationId;
         RegistrationDate = registrationDate;
         CreatedAt = DateTime.UtcNow;
+    }
+    
+    public void SetId(UserId id)
+    {
+        if (Id != null && Id.Value != 0)
+            throw new InvalidOperationException("Cannot change ID once it's set");
+        Id = id;
     }
 
     public void ChangePassword(Password newPassword)
