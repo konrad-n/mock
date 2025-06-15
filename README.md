@@ -12,12 +12,10 @@
 
 ## 📊 Monitoring Services
 
-- **Seq (Log Aggregation)**: http://51.77.59.184:5341
-- **Grafana (Metrics Dashboard)**: http://51.77.59.184:3000
-  - Username: `admin`
-  - Password: `SledzSpecke2024!`
-- **Prometheus (Metrics)**: http://51.77.59.184:9090
-- **cAdvisor (Container Metrics)**: http://51.77.59.184:8080
+- **Seq (Log Aggregation)**: https://sledzspecke.pl:5341
+- **Grafana (Metrics Dashboard)**: https://sledzspecke.pl:3000
+- **Prometheus (Metrics)**: https://sledzspecke.pl:9090
+- **cAdvisor (Container Metrics)**: https://sledzspecke.pl:8080
 - **E2E Test Dashboard**: https://api.sledzspecke.pl/e2e-dashboard
   - Mobile-friendly interface
   - Real-time test results
