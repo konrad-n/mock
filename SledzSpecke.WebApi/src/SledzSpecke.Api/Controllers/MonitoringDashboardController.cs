@@ -17,13 +17,25 @@ public class MonitoringDashboardController : ControllerBase
         _logger = logger;
     }
     
+    [HttpGet("health")]
+    public IActionResult Health()
+    {
+        return Ok(new 
+        { 
+            status = "healthy",
+            environment = _environment.EnvironmentName,
+            timestamp = DateTime.UtcNow,
+            message = "Monitoring endpoints are available"
+        });
+    }
+    
     [HttpGet("dashboard")]
     [Produces("text/html")]
     public IActionResult Dashboard()
     {
         if (!_environment.IsDevelopment())
         {
-            return Content("<h1>403 - Dashboard is only available in development environment</h1>", "text/html");
+            return Content("<h1>403 - Monitoring Dashboard</h1><p>This dashboard is only available in development environment for security reasons.</p>", "text/html");
         }
         
         var html = """
