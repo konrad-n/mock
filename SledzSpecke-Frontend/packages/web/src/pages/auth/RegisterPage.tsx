@@ -77,6 +77,17 @@ export const RegisterPage = () => {
   return (
     <Box>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Box sx={{ mb: 2 }}>
+          <img 
+            src="/logo.png" 
+            alt="SledzSpecke Logo" 
+            style={{ 
+              width: 100, 
+              height: 100,
+              objectFit: 'contain'
+            }}
+          />
+        </Box>
         <Typography variant="h4" component="h1" gutterBottom color="primary">
           Rejestracja
         </Typography>

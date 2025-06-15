@@ -65,6 +65,17 @@ export const LoginPage = () => {
   return (
     <Box>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Box sx={{ mb: 2 }}>
+          <img 
+            src="/logo.png" 
+            alt="SledzSpecke Logo" 
+            style={{ 
+              width: 120, 
+              height: 120,
+              objectFit: 'contain'
+            }}
+          />
+        </Box>
         <Typography variant="h4" component="h1" gutterBottom color="primary">
           SledzSpecke
         </Typography>
