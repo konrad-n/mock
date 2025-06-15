@@ -128,6 +128,32 @@ jobs:
           exit 1
         fi
     
+    - name: Build and Start Frontend
+      run: |
+        cd SledzSpecke-Frontend
+        npm install
+        npm run build
+        nohup npm run preview -- --port 3000 > frontend.log 2>&1 &
+        echo $! > frontend.pid
+        
+        # Wait for frontend to be ready
+        echo "Waiting for frontend to start..."
+        for i in {1..20}; do
+          if curl -s http://localhost:3000 > /dev/null; then
+            echo "Frontend is ready!"
+            break
+          fi
+          echo "Waiting... ($i/20)"
+          sleep 2
+        done
+        
+        # Show frontend logs if it didn't start
+        if ! curl -s http://localhost:3000 > /dev/null; then
+          echo "Frontend failed to start. Logs:"
+          cat frontend.log
+          exit 1
+        fi
+    
     - name: Install Playwright
       run: |
         cd SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests
@@ -137,7 +163,7 @@ jobs:
     - name: Run E2E Tests
       env:
         ASPNETCORE_ENVIRONMENT: Development
-        E2ETests__BaseUrl: http://localhost:5000
+        E2ETests__BaseUrl: http://localhost:3000
         E2ETests__ApiUrl: http://localhost:5000
         E2ETests__Browser: ${{ matrix.browser }}
         E2ETests__Headless: true
@@ -272,6 +298,11 @@ jobs:
         # Kill the API process
         if [ -f SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid ]; then
           kill $(cat SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid) || true
+        fi
+        
+        # Kill the frontend process
+        if [ -f SledzSpecke-Frontend/frontend.pid ]; then
+          kill $(cat SledzSpecke-Frontend/frontend.pid) || true
         fi
         
         # Drop the test database
