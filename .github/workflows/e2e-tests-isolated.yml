@@ -225,9 +225,9 @@ jobs:
         E2ETests__TracePath: Reports/Traces
         E2ETests__ScreenshotPath: Reports/Screenshots
         E2ETests__TraceEnabled: true
-        E2ETests__VideoEnabled: true
+        E2ETests__RecordVideo: true
         ConnectionStrings__DefaultConnection: ${{ env.TEST_CONNECTION_STRING }}
-        TEST_FILTER: ${{ github.event.inputs.test_filter || 'FullyQualifiedName~MinimalPassingTest' }}
+        TEST_FILTER: ${{ github.event.inputs.test_filter || 'FullyQualifiedName~HealthCheckScenarios' }}
       run: |
         cd SledzSpecke.WebApi/tests/SledzSpecke.E2E.Tests
         
