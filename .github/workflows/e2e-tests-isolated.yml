@@ -133,8 +133,10 @@ jobs:
         cd SledzSpecke-Frontend
         npm install
         npm run build
-        nohup npm run preview -- --port 3000 > frontend.log 2>&1 &
-        echo $! > frontend.pid
+        cd packages/web
+        nohup npm run preview -- --port 3000 --host > ../../frontend.log 2>&1 &
+        echo $! > ../../frontend.pid
+        cd ../..
         
         # Wait for frontend to be ready
         echo "Waiting for frontend to start..."
