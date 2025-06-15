@@ -10,11 +10,11 @@ namespace SledzSpecke.E2E.Tests.Scenarios;
 /// <summary>
 /// Simple health check scenarios to verify E2E setup is working
 /// </summary>
-public class HealthCheckScenarios : E2ETestBase, IClassFixture<E2ETestFixture>
+public class HealthCheckScenarios : E2ETestBase
 {
     private readonly ITestOutputHelper _output;
     
-    public HealthCheckScenarios(E2ETestFixture fixture, ITestOutputHelper output) : base(fixture)
+    public HealthCheckScenarios(ITestOutputHelper output)
     {
         _output = output;
     }
@@ -23,7 +23,7 @@ public class HealthCheckScenarios : E2ETestBase, IClassFixture<E2ETestFixture>
     public async Task Frontend_HomePage_ShouldLoad()
     {
         // Navigate to home page
-        await Page.GotoAsync(Configuration["E2ETests:BaseUrl"]);
+        await Page.GotoAsync(Configuration.BaseUrl);
         
         // Wait for page to load
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
@@ -45,13 +45,12 @@ public class HealthCheckScenarios : E2ETestBase, IClassFixture<E2ETestFixture>
     [Fact]
     public async Task API_HealthEndpoint_ShouldReturnOK()
     {
-        var apiUrl = Configuration["E2ETests:ApiUrl"];
-        var response = await Page.APIRequest.GetAsync($"{apiUrl}/health");
+        var response = await Page.APIRequest.GetAsync($"{Configuration.ApiUrl}/health");
         
         response.Status.Should().Be((int)HttpStatusCode.OK);
         
         var json = await response.JsonAsync();
-        json?.Value.GetProperty("status").GetString().Should().Be("Healthy");
+        json?.GetProperty("status").GetString().Should().Be("Healthy");
         
         _output.WriteLine("API health check passed");
     }
@@ -60,7 +59,7 @@ public class HealthCheckScenarios : E2ETestBase, IClassFixture<E2ETestFixture>
     public async Task Frontend_LoginPage_ShouldBeAccessible()
     {
         // Navigate to login page
-        await Page.GotoAsync($"{Configuration["E2ETests:BaseUrl"]}/login");
+        await Page.GotoAsync($"{Configuration.BaseUrl}/login");
         
         // Wait for page to load
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
