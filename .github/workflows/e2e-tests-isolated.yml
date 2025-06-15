@@ -88,6 +88,11 @@ jobs:
         dotnet restore
         dotnet build --configuration Release
     
+    - name: Install EF Core tools
+      run: |
+        dotnet tool install --global dotnet-ef
+        export PATH="$PATH:$HOME/.dotnet/tools"
+    
     - name: Run migrations on test database
       env:
         ConnectionStrings__DefaultConnection: ${{ env.TEST_CONNECTION_STRING }}
