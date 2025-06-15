@@ -150,6 +150,48 @@ public interface IUnitOfWork
 **Tool**: Swagger/OpenAPI
 **Include**: Error codes, example requests/responses
 
+## ⚡ CRITICAL LESSON: Avoiding Over-Engineering
+
+### Real Example from This Project
+We created an `EmployeeNumber` Value Object with full validation, exceptions, and tests. After implementing it, we discovered:
+- **Zero usage** in any entity, handler, or API endpoint
+- **No mention** in E2E tests or user scenarios
+- **No field** in the database that would use it
+
+**This was immediately deleted** as it violated YAGNI.
+
+### How to Validate Before Creating New Abstractions
+Before creating ANY new Value Object, pattern, or abstraction:
+
+1. **Search for usage first**:
+   ```bash
+   # Check if the concept exists in entities
+   grep -r "employee.*number\|employeeId" src/
+   
+   # Check E2E tests for real scenarios
+   grep -r "employee" tests/SledzSpecke.E2E.Tests/
+   ```
+
+2. **Check the database schema**:
+   - Look at entity configurations
+   - Check migration files
+   - Verify actual column names
+
+3. **Review E2E test scenarios**:
+   - These represent REAL user workflows
+   - If it's not tested in E2E, users probably don't need it
+
+4. **Ask yourself**:
+   - Is this solving a problem that exists TODAY?
+   - Is there primitive obsession that's causing bugs?
+   - Will this abstraction be used in at least 2-3 places?
+
+### Value Objects That ARE Justified
+- `Email` - Used in User entity, has complex validation
+- `Duration` - Used in MedicalShift, prevents invalid time values
+- `Points` - Used in procedures, has business rules (0-1000 range)
+- `DateRange` - Used for validations, has overlap logic
+
 ## 🛑 WHAT NOT TO DO
 
 1. **DO NOT** add new patterns without clear justification
@@ -157,6 +199,7 @@ public interface IUnitOfWork
 3. **DO NOT** implement features not in current requirements
 4. **DO NOT** use complex libraries when simple solutions work
 5. **DO NOT** ignore existing patterns - follow what's established
+6. **DO NOT** create Value Objects without confirming they solve real problems
 
 ## 🔍 How to Verify Your Work
 
