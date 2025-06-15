@@ -34,6 +34,9 @@ public static class ApiExtensions
 
         app.UseHttpsRedirection();
         
+        // Enable static files serving
+        app.UseStaticFiles();
+        
         // Use enhanced middleware pipeline
         app.UseCustomMiddleware();
         
