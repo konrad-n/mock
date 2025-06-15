@@ -8,7 +8,7 @@ public record UserId
 
     public UserId(int value)
     {
-        if (value < 0)
+        if (value <= 0)
         {
             throw new InvalidEntityIdException(value);
         }
