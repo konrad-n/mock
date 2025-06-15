@@ -1,0 +1,35 @@
+[Unit]
+Description=SledzSpecke Web API
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/sledzspecke-api
+Environment="ASPNETCORE_ENVIRONMENT=Production"
+Environment="DOTNET_PRINT_TELEMETRY_MESSAGE=false"
+
+# Run cleanup script before starting
+ExecStartPre=/bin/bash /home/ubuntu/sledzspecke/SledzSpecke.WebApi/scripts/cleanup-old-processes.sh
+
+# Main process
+ExecStart=/usr/bin/dotnet /var/www/sledzspecke-api/SledzSpecke.Api.dll
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGTERM
+
+# Timeout for stopping
+TimeoutStopSec=30
+
+# Resource limits
+LimitNOFILE=100000
+LimitNPROC=4096
+
+# Security
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
