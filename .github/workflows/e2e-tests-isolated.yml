@@ -106,18 +106,27 @@ jobs:
         ASPNETCORE_URLS: http://localhost:5000
       run: |
         cd SledzSpecke.WebApi/src/SledzSpecke.Api
-        dotnet run &
+        nohup dotnet run > api.log 2>&1 &
+        echo $! > api.pid
         
         # Wait for API to be ready
         echo "Waiting for API to start..."
         for i in {1..30}; do
           if curl -s http://localhost:5000/health > /dev/null; then
             echo "API is ready!"
+            curl http://localhost:5000/health
             break
           fi
           echo "Waiting... ($i/30)"
           sleep 2
         done
+        
+        # Show API logs if it didn't start
+        if ! curl -s http://localhost:5000/health > /dev/null; then
+          echo "API failed to start. Logs:"
+          cat api.log
+          exit 1
+        fi
     
     - name: Install Playwright
       run: |
@@ -260,6 +269,11 @@ jobs:
       env:
         PGPASSWORD: postgres
       run: |
+        # Kill the API process
+        if [ -f SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid ]; then
+          kill $(cat SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid) || true
+        fi
+        
         # Drop the test database
         psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS \"${{ env.TEST_DB_NAME }}\";"
 
