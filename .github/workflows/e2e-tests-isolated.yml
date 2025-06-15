@@ -128,49 +128,56 @@ jobs:
           exit 1
         fi
     
-    - name: Setup Frontend with Proxy
+    - name: Install nginx
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nginx
+    
+    - name: Setup Frontend with nginx proxy
       run: |
         cd SledzSpecke-Frontend
         npm install
-        
-        # Create a simple proxy server configuration
-        cat > proxy-server.js << 'EOF'
-        const express = require('express');
-        const { createProxyMiddleware } = require('http-proxy-middleware');
-        const path = require('path');
-        
-        const app = express();
-        
-        // Proxy API requests
-        app.use('/api', createProxyMiddleware({
-          target: 'http://localhost:5000',
-          changeOrigin: true,
-          logLevel: 'debug'
-        }));
-        
-        // Serve static files from the built frontend
-        app.use(express.static(path.join(__dirname, 'packages/web/dist')));
-        
-        // Serve index.html for all other routes (SPA)
-        app.get('*', (req, res) => {
-          res.sendFile(path.join(__dirname, 'packages/web/dist/index.html'));
-        });
-        
-        const PORT = process.env.PORT || 3000;
-        app.listen(PORT, () => {
-          console.log(`Frontend server with proxy running on http://localhost:${PORT}`);
-        });
-        EOF
-        
-        # Install proxy dependencies
-        npm install express http-proxy-middleware
-        
-        # Build the frontend
         npm run build
         
-        # Start the proxy server
-        nohup node proxy-server.js > frontend.log 2>&1 &
-        echo $! > frontend.pid
+        # Create nginx configuration
+        sudo tee /etc/nginx/sites-available/sledzspecke-e2e << 'EOF'
+        server {
+            listen 3000;
+            server_name localhost;
+            
+            root /home/runner/work/mock/mock/SledzSpecke-Frontend/packages/web/dist;
+            index index.html;
+            
+            # Proxy API requests to backend
+            location /api {
+                proxy_pass http://localhost:5000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+            
+            # Proxy health check
+            location /health {
+                proxy_pass http://localhost:5000/health;
+            }
+            
+            # SPA routing - serve index.html for all other routes
+            location / {
+                try_files $uri $uri/ /index.html;
+            }
+        }
+        EOF
+        
+        # Enable the site
+        sudo ln -sf /etc/nginx/sites-available/sledzspecke-e2e /etc/nginx/sites-enabled/
+        sudo rm -f /etc/nginx/sites-enabled/default
+        
+        # Test nginx config
+        sudo nginx -t
+        
+        # Start nginx
+        sudo systemctl start nginx
         
         # Wait for frontend to be ready
         echo "Waiting for frontend to start..."
@@ -178,17 +185,20 @@ jobs:
           if curl -s http://localhost:3000 > /dev/null; then
             echo "Frontend is ready!"
             # Test that proxy is working
-            curl -s http://localhost:3000/api/health || echo "Warning: API proxy may not be working"
+            echo "Testing API proxy..."
+            curl -s http://localhost:3000/api/health | jq . || echo "Warning: API proxy may not be working"
             break
           fi
           echo "Waiting... ($i/30)"
           sleep 2
         done
         
-        # Show frontend logs if it didn't start
+        # Check if frontend is accessible
         if ! curl -s http://localhost:3000 > /dev/null; then
-          echo "Frontend failed to start. Logs:"
-          cat frontend.log
+          echo "Frontend failed to start. Nginx status:"
+          sudo systemctl status nginx
+          echo "Nginx error log:"
+          sudo tail -20 /var/log/nginx/error.log
           exit 1
         fi
     
@@ -338,10 +348,8 @@ jobs:
           kill $(cat SledzSpecke.WebApi/src/SledzSpecke.Api/api.pid) || true
         fi
         
-        # Kill the frontend process
-        if [ -f SledzSpecke-Frontend/frontend.pid ]; then
-          kill $(cat SledzSpecke-Frontend/frontend.pid) || true
-        fi
+        # Stop nginx
+        sudo systemctl stop nginx || true
         
         # Drop the test database
         psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS \"${{ env.TEST_DB_NAME }}\";"
