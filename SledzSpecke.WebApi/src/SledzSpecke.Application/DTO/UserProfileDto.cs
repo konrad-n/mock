@@ -4,15 +4,14 @@ public class UserProfileDto
 {
     public int Id { get; set; }
     public string Email { get; set; } = string.Empty;
-    public string Username { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string SmkVersion { get; set; } = string.Empty;
-    public int SpecializationId { get; set; }
-    public string SpecializationName { get; set; } = string.Empty;
-    public string? PhoneNumber { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string? Bio { get; set; }
-    public string? ProfilePicturePath { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string FullName => $"{FirstName} {LastName}";
+    public string Pesel { get; set; } = string.Empty;
+    public string PwzNumber { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public DateTime DateOfBirth { get; set; }
+    public AddressDto CorrespondenceAddress { get; set; } = new();
     public UserPreferencesDto Preferences { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
@@ -20,8 +19,16 @@ public class UserProfileDto
 
 public class UserPreferencesDto
 {
-    public string Language { get; set; } = "en";
-    public string Theme { get; set; } = "light";
     public bool NotificationsEnabled { get; set; } = true;
     public bool EmailNotificationsEnabled { get; set; } = true;
+}
+
+public class AddressDto
+{
+    public string Street { get; set; } = string.Empty;
+    public string HouseNumber { get; set; } = string.Empty;
+    public string? ApartmentNumber { get; set; }
+    public string PostalCode { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string Province { get; set; } = string.Empty;
 }

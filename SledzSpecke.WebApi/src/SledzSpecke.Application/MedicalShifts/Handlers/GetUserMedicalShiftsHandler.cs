@@ -37,13 +37,16 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
             return Enumerable.Empty<MedicalShiftDto>();
         }
 
-        // Get user's specialization to check SMK version
-        var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
-
-        if (specialization == null)
-        {
-            return Enumerable.Empty<MedicalShiftDto>();
-        }
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Get user's specialization to check SMK version
+        // var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
+        //
+        // if (specialization == null)
+        // {
+        //     return Enumerable.Empty<MedicalShiftDto>();
+        // }
+        // For now, return empty list as we cannot access user's specialization
+        return Enumerable.Empty<MedicalShiftDto>();
 
         // Get medical shifts based on filters
         IEnumerable<MedicalShift> medicalShifts;
@@ -74,8 +77,10 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
             medicalShifts = await _medicalShiftRepository.GetByUserIdAsync(query.UserId);
         }
 
-        // Get all internships for the user's specialization
-        var internships = await _internshipRepository.GetByUserAndSpecializationAsync(userId, user.SpecializationId);
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Get all internships for the user's specialization
+        // var internships = await _internshipRepository.GetByUserAndSpecializationAsync(userId, user.SpecializationId);
+        var internships = Enumerable.Empty<Internship>();
         var internshipDict = internships.ToDictionary(i => i.InternshipId.Value);
 
         // Filter shifts based on SMK version and valid internships

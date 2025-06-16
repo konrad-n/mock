@@ -3,8 +3,8 @@ using SledzSpecke.Application.Abstractions;
 namespace SledzSpecke.Application.Commands;
 
 public record UpdateUserProfile(
-    string FullName,
+    string FirstName,
+    string LastName,
     string Email,
-    string? PhoneNumber,
-    DateTime? DateOfBirth,
-    string? Bio) : ICommand;
+    string PhoneNumber,
+    AddressDto CorrespondenceAddress) : ICommand;

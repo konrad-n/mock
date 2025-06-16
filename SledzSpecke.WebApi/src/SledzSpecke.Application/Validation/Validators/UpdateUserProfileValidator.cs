@@ -9,10 +9,11 @@ public class UpdateUserProfileValidator : CommandValidatorBase<UpdateUserProfile
         // Validate Email
         ValidateEmail(command.Email, result);
 
-        // Validate FullName
-        ValidateRequired(command.FullName, nameof(command.FullName), result);
-        ValidateMinLength(command.FullName, 2, nameof(command.FullName), result);
-        ValidateMaxLength(command.FullName, 200, nameof(command.FullName), result);
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Validate FullName
+        // ValidateRequired(command.FullName, nameof(command.FullName), result);
+        // ValidateMinLength(command.FullName, 2, nameof(command.FullName), result);
+        // ValidateMaxLength(command.FullName, 200, nameof(command.FullName), result);
 
         // Validate PhoneNumber if provided
         if (!string.IsNullOrWhiteSpace(command.PhoneNumber))
@@ -20,30 +21,33 @@ public class UpdateUserProfileValidator : CommandValidatorBase<UpdateUserProfile
             ValidatePhoneNumber(command.PhoneNumber, result);
         }
 
-        // Validate DateOfBirth if provided
-        if (command.DateOfBirth.HasValue)
-        {
-            var minDate = DateTime.UtcNow.AddYears(-120); // Max age 120 years
-            var maxDate = DateTime.UtcNow.AddYears(-18);  // Min age 18 years
+        // TODO: User-Specialization relationship needs to be redesigned
+        // DateOfBirth no longer exists in UpdateUserProfile command
+        // // Validate DateOfBirth if provided
+        // if (command.DateOfBirth.HasValue)
+        // {
+        //     var minDate = DateTime.UtcNow.AddYears(-120); // Max age 120 years
+        //     var maxDate = DateTime.UtcNow.AddYears(-18);  // Min age 18 years
+        //
+        //     if (command.DateOfBirth.Value < minDate)
+        //     {
+        //         result.AddError(nameof(command.DateOfBirth), 
+        //             "Date of birth is too far in the past");
+        //     }
+        //
+        //     if (command.DateOfBirth.Value > maxDate)
+        //     {
+        //         result.AddError(nameof(command.DateOfBirth), 
+        //             "User must be at least 18 years old");
+        //     }
+        // }
 
-            if (command.DateOfBirth.Value < minDate)
-            {
-                result.AddError(nameof(command.DateOfBirth), 
-                    "Date of birth is too far in the past");
-            }
-
-            if (command.DateOfBirth.Value > maxDate)
-            {
-                result.AddError(nameof(command.DateOfBirth), 
-                    "User must be at least 18 years old");
-            }
-        }
-
-        // Validate Bio if provided
-        if (!string.IsNullOrWhiteSpace(command.Bio))
-        {
-            ValidateMaxLength(command.Bio, 1000, nameof(command.Bio), result);
-        }
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Validate Bio if provided
+        // if (!string.IsNullOrWhiteSpace(command.Bio))
+        // {
+        //     ValidateMaxLength(command.Bio, 1000, nameof(command.Bio), result);
+        // }
     }
 
     private void ValidatePhoneNumber(string phoneNumber, ValidationResult result)

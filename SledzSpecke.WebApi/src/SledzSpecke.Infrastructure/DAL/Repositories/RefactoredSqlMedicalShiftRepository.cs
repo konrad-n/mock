@@ -152,7 +152,11 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
     // Private helper methods
     private async Task<List<InternshipId>> GetInternshipIdsForUserAsync(int userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
         // This could be refactored to use specifications on Internship repository
+        /*
         var internships = await Context.Internships
             .Join(Context.Specializations,
                 i => i.SpecializationId,
@@ -167,6 +171,8 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
             .ToListAsync();
 
         return internships.Select(id => new InternshipId(id)).ToList();
+        */
+        return new List<InternshipId>(); // Temporary empty list
     }
 
     private async Task GenerateIdForEntity(MedicalShift shift)

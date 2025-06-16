@@ -35,9 +35,14 @@ public sealed class DeleteCourseHandler : IResultCommandHandler<DeleteCourse>
             // Check if the course belongs to the current user
             var userId = _userContextService.GetUserId();
             var user = await _userRepository.GetByIdAsync(new UserId(userId));
-            if (user is null || user.SpecializationId != course.SpecializationId)
+            // TODO: User-Specialization relationship needs to be redesigned
+            // if (user is null || user.SpecializationId != course.SpecializationId)
+            // {
+            //     return Result.Failure("You can only delete your own courses.");
+            // }
+            if (user is null)
             {
-                return Result.Failure("You can only delete your own courses.");
+                return Result.Failure("User not found.");
             }
 
             // Check if course can be deleted

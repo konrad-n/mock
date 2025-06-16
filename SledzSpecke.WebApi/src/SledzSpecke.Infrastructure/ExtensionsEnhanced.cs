@@ -55,7 +55,7 @@ public static class ExtensionsEnhanced
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IUserRepository, SqlUserRepository>();
+        services.AddScoped<IUserRepository, RefactoredSqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();
         services.AddScoped<IInternshipRepository, SqlInternshipRepositoryEnhanced>();

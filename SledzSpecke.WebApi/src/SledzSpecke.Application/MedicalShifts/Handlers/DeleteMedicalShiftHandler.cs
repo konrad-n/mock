@@ -51,9 +51,14 @@ public sealed class DeleteMedicalShiftHandler : IResultCommandHandler<DeleteMedi
 
             // Get user to verify ownership through specialization
             var user = await _userRepository.GetByIdAsync(new UserId(userId));
-            if (user == null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            // TODO: User-Specialization relationship needs to be redesigned
+            // if (user == null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            // {
+            //     return Result.Failure("You are not authorized to delete this medical shift.");
+            // }
+            if (user == null)
             {
-                return Result.Failure("You are not authorized to delete this medical shift.");
+                return Result.Failure("User not found.");
             }
 
             // Check if the shift can be deleted

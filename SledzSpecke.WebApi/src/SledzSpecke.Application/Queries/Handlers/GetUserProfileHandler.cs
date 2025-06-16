@@ -9,16 +9,13 @@ namespace SledzSpecke.Application.Queries.Handlers;
 public sealed class GetUserProfileHandler : IQueryHandler<GetUserProfile, UserProfileDto>
 {
     private readonly IUserRepository _userRepository;
-    private readonly ISpecializationRepository _specializationRepository;
     private readonly IUserContextService _userContextService;
 
     public GetUserProfileHandler(
         IUserRepository userRepository,
-        ISpecializationRepository specializationRepository,
         IUserContextService userContextService)
     {
         _userRepository = userRepository;
-        _specializationRepository = specializationRepository;
         _userContextService = userContextService;
     }
 
@@ -31,26 +28,28 @@ public sealed class GetUserProfileHandler : IQueryHandler<GetUserProfile, UserPr
         {
             throw new NotFoundException($"User with ID {currentUserId} not found.");
         }
-
-        var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
         
         return new UserProfileDto
         {
             Id = user.Id.Value,
             Email = user.Email.Value,
-            Username = user.Username.Value,
-            FullName = user.FullName.Value,
-            SmkVersion = user.SmkVersion.Value,
-            SpecializationId = user.SpecializationId.Value,
-            SpecializationName = specialization?.Name ?? "Unknown",
-            PhoneNumber = user.PhoneNumber?.Value,
+            FirstName = user.FirstName.Value,
+            LastName = user.LastName.Value,
+            Pesel = user.Pesel.Value,
+            PwzNumber = user.PwzNumber.Value,
+            PhoneNumber = user.PhoneNumber.Value,
             DateOfBirth = user.DateOfBirth,
-            Bio = user.Bio?.Value,
-            ProfilePicturePath = user.ProfilePicturePath?.Value,
+            CorrespondenceAddress = new AddressDto
+            {
+                Street = user.CorrespondenceAddress.Street,
+                HouseNumber = user.CorrespondenceAddress.HouseNumber,
+                ApartmentNumber = user.CorrespondenceAddress.ApartmentNumber,
+                PostalCode = user.CorrespondenceAddress.PostalCode,
+                City = user.CorrespondenceAddress.City,
+                Province = user.CorrespondenceAddress.Province
+            },
             Preferences = new UserPreferencesDto
             {
-                Language = user.PreferredLanguage?.Value ?? "en",
-                Theme = user.PreferredTheme?.Value ?? "light",
                 NotificationsEnabled = user.NotificationsEnabled,
                 EmailNotificationsEnabled = user.EmailNotificationsEnabled
             },

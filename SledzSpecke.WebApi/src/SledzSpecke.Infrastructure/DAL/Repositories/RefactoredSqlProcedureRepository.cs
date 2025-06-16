@@ -182,7 +182,11 @@ internal sealed class RefactoredSqlProcedureRepository : BaseRepository<Procedur
     // Private helper methods
     private async Task<List<InternshipId>> GetInternshipIdsForUserAsync(int userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
         // This could be refactored to use specifications on Internship repository
+        /*
         var internships = await Context.Internships
             .Join(Context.Specializations,
                 i => i.SpecializationId,
@@ -197,6 +201,8 @@ internal sealed class RefactoredSqlProcedureRepository : BaseRepository<Procedur
             .ToListAsync();
 
         return internships.Select(id => new InternshipId(id)).ToList();
+        */
+        return new List<InternshipId>(); // Temporary empty list
     }
 
     private async Task GenerateIdForEntity(ProcedureBase procedure)

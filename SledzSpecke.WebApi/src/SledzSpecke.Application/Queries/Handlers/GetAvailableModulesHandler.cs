@@ -32,11 +32,12 @@ public sealed class GetAvailableModulesHandler : IQueryHandler<GetAvailableModul
             throw new NotFoundException("User not found.");
         }
 
-        // Verify user owns this specialization
-        if (user.SpecializationId.Value != query.SpecializationId)
-        {
-            throw new UnauthorizedAccessException("You can only view modules for your own specialization.");
-        }
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Verify user owns this specialization
+        // if (user.SpecializationId.Value != query.SpecializationId)
+        // {
+        //     throw new UnauthorizedAccessException("You can only view modules for your own specialization.");
+        // }
 
         // Get specialization with modules
         var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(query.SpecializationId));

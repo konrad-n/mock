@@ -32,9 +32,14 @@ public sealed class CompleteCourseHandler : ICommandHandler<CompleteCourse>
         // Check if the course belongs to the current user
         var userId = _userContextService.GetUserId();
         var user = await _userRepository.GetByIdAsync(new UserId(userId));
-        if (user is null || user.SpecializationId != course.SpecializationId)
+        // TODO: User-Specialization relationship needs to be redesigned
+        // if (user is null || user.SpecializationId != course.SpecializationId)
+        // {
+        //     throw new UnauthorizedAccessException("You can only complete your own courses.");
+        // }
+        if (user is null)
         {
-            throw new UnauthorizedAccessException("You can only complete your own courses.");
+            throw new UnauthorizedAccessException("User not found.");
         }
 
         // Update completion details

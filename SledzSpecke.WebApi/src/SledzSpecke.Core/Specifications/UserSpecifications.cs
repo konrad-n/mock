@@ -5,21 +5,6 @@ using System.Linq.Expressions;
 
 namespace SledzSpecke.Core.Specifications;
 
-public class UserByUsernameSpecification : Specification<User>
-{
-    private readonly Username _username;
-
-    public UserByUsernameSpecification(Username username)
-    {
-        _username = username;
-    }
-
-    public override Expression<Func<User, bool>> ToExpression()
-    {
-        return user => user.Username == _username;
-    }
-}
-
 public class UserByEmailSpecification : Specification<User>
 {
     private readonly Email _email;
@@ -35,18 +20,33 @@ public class UserByEmailSpecification : Specification<User>
     }
 }
 
-public class UserBySpecializationSpecification : Specification<User>
+public class UserByPeselSpecification : Specification<User>
 {
-    private readonly SpecializationId _specializationId;
+    private readonly Pesel _pesel;
 
-    public UserBySpecializationSpecification(SpecializationId specializationId)
+    public UserByPeselSpecification(Pesel pesel)
     {
-        _specializationId = specializationId;
+        _pesel = pesel;
     }
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        return user => user.SpecializationId == _specializationId;
+        return user => user.Pesel == _pesel;
+    }
+}
+
+public class UserByPwzNumberSpecification : Specification<User>
+{
+    private readonly PwzNumber _pwzNumber;
+
+    public UserByPwzNumberSpecification(PwzNumber pwzNumber)
+    {
+        _pwzNumber = pwzNumber;
+    }
+
+    public override Expression<Func<User, bool>> ToExpression()
+    {
+        return user => user.PwzNumber == _pwzNumber;
     }
 }
 
@@ -66,16 +66,6 @@ public class UserByRecentActivitySpecification : Specification<User>
     }
 }
 
-public class UserByProfileCompleteSpecification : Specification<User>
-{
-    public override Expression<Func<User, bool>> ToExpression()
-    {
-        return user => user.PhoneNumber != null && 
-                      user.DateOfBirth.HasValue && 
-                      user.Bio != null;
-    }
-}
-
 public class UserByFullNameSpecification : Specification<User>
 {
     private readonly string _searchTerm;
@@ -87,22 +77,40 @@ public class UserByFullNameSpecification : Specification<User>
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        return user => user.FullName.Value.ToLower().Contains(_searchTerm);
+        // Search by first name, last name, or full name
+        return user => user.FirstName.Value.ToLower().Contains(_searchTerm) ||
+                      user.LastName.Value.ToLower().Contains(_searchTerm) ||
+                      (user.FirstName.Value + " " + user.LastName.Value).ToLower().Contains(_searchTerm);
     }
 }
 
-public class UserByUsernameContainsSpecification : Specification<User>
+public class UserByProvinceSpecification : Specification<User>
 {
-    private readonly string _searchTerm;
+    private readonly string _province;
 
-    public UserByUsernameContainsSpecification(string searchTerm)
+    public UserByProvinceSpecification(string province)
     {
-        _searchTerm = searchTerm.ToLower();
+        _province = province.ToLower();
     }
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        return user => user.Username.Value.ToLower().Contains(_searchTerm);
+        return user => user.CorrespondenceAddress.Province.ToLower() == _province;
+    }
+}
+
+public class UserByCitySpecification : Specification<User>
+{
+    private readonly string _city;
+
+    public UserByCitySpecification(string city)
+    {
+        _city = city.ToLower();
+    }
+
+    public override Expression<Func<User, bool>> ToExpression()
+    {
+        return user => user.CorrespondenceAddress.City.ToLower() == _city;
     }
 }
 
@@ -114,37 +122,31 @@ public static class UserSpecificationExtensions
         return new UserByRecentActivitySpecification(daysThreshold);
     }
 
-    public static ISpecification<User> GetUsersWithCompleteProfiles()
+    public static ISpecification<User> GetUsersByProvince(string province)
     {
-        return new UserByProfileCompleteSpecification();
+        return new UserByProvinceSpecification(province);
     }
 
-    public static ISpecification<User> GetUsersBySpecialization(SpecializationId specializationId)
+    public static ISpecification<User> GetUsersByCity(string city)
     {
-        return new UserBySpecializationSpecification(specializationId);
+        return new UserByCitySpecification(city);
     }
 
     public static ISpecification<User> SearchUsers(string searchTerm)
     {
-        // Always search by full name
+        // Search by full name
         Specification<User> fullNameSpec = new UserByFullNameSpecification(searchTerm);
         
-        // Try to search by username if valid
+        // Try to search by email if it's a valid email format
         try
         {
-            // If the search term is a valid username format, search by exact username
-            var usernameSpec = new UserByUsernameSpecification(new Username(searchTerm));
-            
-            // Also search by username containing the search term (case-insensitive)
-            var usernameContainsSpec = new UserByUsernameContainsSpecification(searchTerm);
-            
-            return fullNameSpec.Or(usernameSpec).Or(usernameContainsSpec);
+            var emailSpec = new UserByEmailSpecification(new Email(searchTerm));
+            return fullNameSpec.Or(emailSpec);
         }
         catch
         {
-            // If not a valid username, search by username contains and full name
-            var usernameContainsSpec = new UserByUsernameContainsSpecification(searchTerm);
-            return fullNameSpec.Or(usernameContainsSpec);
+            // If not a valid email, just search by name
+            return fullNameSpec;
         }
     }
 }

@@ -6,6 +6,7 @@ using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
+using SledzSpecke.Core.Specifications;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
@@ -36,14 +37,24 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
     {
         try
         {
-            _logger.LogInformation("Starting sign up for email: {Email}, username: {Username}, specializationId: {SpecializationId}", 
-                command.Email, command.Username, command.SpecializationId);
+            _logger.LogInformation("Starting sign up for email: {Email}, PESEL: {Pesel}", 
+                command.Email, command.Pesel);
                 
             var email = new Email(command.Email);
-            var username = new Username(command.Username);
             var password = new Password(command.Password);
-            var fullName = new FullName(command.FullName);
-            var specializationId = new SpecializationId(command.SpecializationId);
+            var firstName = new FirstName(command.FirstName);
+            var lastName = new LastName(command.LastName);
+            var pesel = new Pesel(command.Pesel);
+            var pwzNumber = new PwzNumber(command.PwzNumber);
+            var phoneNumber = new PhoneNumber(command.PhoneNumber);
+            var address = new Address(
+                command.CorrespondenceAddress.Street,
+                command.CorrespondenceAddress.HouseNumber,
+                command.CorrespondenceAddress.ApartmentNumber,
+                command.CorrespondenceAddress.PostalCode,
+                command.CorrespondenceAddress.City,
+                command.CorrespondenceAddress.Province
+            );
             
             _logger.LogInformation("Value objects created successfully");
 
@@ -53,24 +64,36 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
                 return Result.Failure($"Email '{command.Email}' is already in use.", ErrorCodes.EMAIL_ALREADY_IN_USE);
             }
 
-            if (await _userRepository.ExistsByUsernameAsync(username))
+            // Check if PESEL already exists
+            var existingUserByPesel = await _userRepository.GetSingleBySpecificationAsync(new UserByPeselSpecification(pesel));
+            if (existingUserByPesel != null)
             {
-                _logger.LogWarning("Registration failed: Username {Username} already in use", command.Username);
-                return Result.Failure($"Username '{command.Username}' is already in use.", ErrorCodes.USERNAME_ALREADY_IN_USE);
+                _logger.LogWarning("Registration failed: PESEL already registered");
+                return Result.Failure("User with this PESEL already exists.", ErrorCodes.PESEL_ALREADY_IN_USE);
+            }
+
+            // Check if PWZ already exists
+            var existingUserByPwz = await _userRepository.GetSingleBySpecificationAsync(new UserByPwzNumberSpecification(pwzNumber));
+            if (existingUserByPwz != null)
+            {
+                _logger.LogWarning("Registration failed: PWZ number already registered");
+                return Result.Failure("User with this PWZ number already exists.", ErrorCodes.PWZ_ALREADY_IN_USE);
             }
 
             var securedPassword = _passwordManager.Secure(password);
             var hashedPassword = new HashedPassword(securedPassword);
-            var smkVersion = new SmkVersion(command.SmkVersion);
             
             _logger.LogInformation("Creating user entity...");
             var user = User.Create(
                 email, 
-                username, 
                 hashedPassword, 
-                fullName,
-                smkVersion, 
-                specializationId);
+                firstName,
+                lastName,
+                pesel,
+                pwzNumber,
+                phoneNumber,
+                command.DateOfBirth,
+                address);
             
             _logger.LogInformation("User entity created with ID: {UserId}", user.Id?.Value ?? 0);
 

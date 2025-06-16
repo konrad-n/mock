@@ -41,11 +41,11 @@ public class UserProfileController : BaseController
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserProfileRequest request)
     {
         var command = new UpdateUserProfile(
-            request.FullName,
+            request.FirstName,
+            request.LastName,
             request.Email,
             request.PhoneNumber,
-            request.DateOfBirth,
-            request.Bio);
+            request.CorrespondenceAddress);
 
         await _updateUserProfileHandler.HandleAsync(command);
         return NoContent();
@@ -66,8 +66,6 @@ public class UserProfileController : BaseController
     public async Task<IActionResult> UpdatePreferences([FromBody] UpdateUserPreferencesRequest request)
     {
         var command = new UpdateUserPreferences(
-            request.Language,
-            request.Theme,
             request.NotificationsEnabled,
             request.EmailNotificationsEnabled);
 
@@ -77,18 +75,16 @@ public class UserProfileController : BaseController
 }
 
 public record UpdateUserProfileRequest(
-    string FullName,
+    string FirstName,
+    string LastName,
     string Email,
-    string? PhoneNumber,
-    DateTime? DateOfBirth,
-    string? Bio);
+    string PhoneNumber,
+    SledzSpecke.Application.Commands.AddressDto CorrespondenceAddress);
 
 public record ChangePasswordRequest(
     string CurrentPassword,
     string NewPassword);
 
 public record UpdateUserPreferencesRequest(
-    string Language,
-    string Theme,
     bool NotificationsEnabled,
     bool EmailNotificationsEnabled);

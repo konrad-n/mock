@@ -67,10 +67,12 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
             }
         }
 
-        // Get completed counts from database
-        var procedures = query.ModuleId.HasValue
-            ? await GetProceduresForModule(user.SpecializationId, query.ModuleId.Value, query.ProcedureRequirementId)
-            : await _procedureRepository.GetByUserAsync(new UserId(userId));
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Get completed counts from database
+        // var procedures = query.ModuleId.HasValue
+        //     ? await GetProceduresForModule(user.SpecializationId, query.ModuleId.Value, query.ProcedureRequirementId)
+        //     : await _procedureRepository.GetByUserAsync(new UserId(userId));
+        var procedures = await _procedureRepository.GetByUserAsync(new UserId(userId));
 
         foreach (var procedure in procedures)
         {

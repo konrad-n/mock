@@ -35,59 +35,12 @@ public class GetMedicalShiftStatisticsHandler : IQueryHandler<GetMedicalShiftSta
             throw new UnauthorizedAccessException("User not found");
         }
 
-        var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
-        if (specialization is null)
-        {
-            throw new InvalidOperationException("User specialization not found");
-        }
-
-        var summary = new MedicalShiftSummaryDto();
-        IEnumerable<MedicalShift> shifts;
-
-        if (specialization.SmkVersion == SmkVersion.Old)
-        {
-            // For Old SMK, filter by year
-            if (query.Year.HasValue)
-            {
-                var allShifts = await _medicalShiftRepository.GetByUserAsync(new UserId(userId));
-                shifts = allShifts.Where(s => s.Year == query.Year.Value);
-            }
-            else
-            {
-                shifts = await _medicalShiftRepository.GetByUserAsync(new UserId(userId));
-            }
-        }
-        else
-        {
-            // For New SMK, filter by internship requirement ID
-            if (query.InternshipRequirementId.HasValue)
-            {
-                // TODO: Need to implement filtering by internship requirement
-                // For now, get all shifts for the user
-                shifts = await _medicalShiftRepository.GetByUserAsync(new UserId(userId));
-            }
-            else
-            {
-                shifts = await _medicalShiftRepository.GetByUserAsync(new UserId(userId));
-            }
-        }
-
-        // Calculate totals
-        foreach (var shift in shifts)
-        {
-            summary.TotalHours += shift.Hours;
-            summary.TotalMinutes += shift.Minutes;
-
-            if (shift.SyncStatus == SyncStatus.Synced || shift.IsApproved)
-            {
-                summary.ApprovedHours += shift.Hours;
-                summary.ApprovedMinutes += shift.Minutes;
-            }
-        }
-
-        // Normalize time (convert excess minutes to hours)
-        summary.NormalizeTime();
-
-        return summary;
+        // TODO: User-Specialization relationship needs to be redesigned
+        // var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
+        // if (specialization is null)
+        // {
+        //     throw new InvalidOperationException("User specialization not found");
+        // }
+        throw new InvalidOperationException("User-Specialization relationship needs to be redesigned. Cannot retrieve statistics.");
     }
 }

@@ -114,12 +114,15 @@ public class CourseRequirementService : ICourseRequirementService
             return Result.Failure("Liczba godzin musi być większa niż 0");
         }
 
-        // Get course requirement to validate
+        // TODO: Fix after User-Specialization relationship is properly implemented
+        // For now, this is commented out as User no longer has SpecializationId
+        /*
         var specialization = await _specializationRepository.GetByIdAsync(user.SpecializationId);
         if (specialization == null)
         {
             return Result.Failure("Nie znaleziono specjalizacji użytkownika");
         }
+        */
 
         // Record the participation
         var completedCourse = new CompletedCourse

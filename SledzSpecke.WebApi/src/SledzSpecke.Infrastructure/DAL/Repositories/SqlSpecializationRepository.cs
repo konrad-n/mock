@@ -26,12 +26,8 @@ internal sealed class SqlSpecializationRepository : ISpecializationRepository
 
     public async Task<IEnumerable<Specialization>> GetByUserIdAsync(UserId userId)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null)
-            return Enumerable.Empty<Specialization>();
-
         return await _context.Specializations
-            .Where(s => s.Id == user.SpecializationId)
+            .Where(s => s.UserId == userId)
             .ToListAsync();
     }
 

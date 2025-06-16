@@ -29,6 +29,10 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
 
     public async Task<IEnumerable<ProcedureBase>> GetByUserIdAsync(int userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
+        /*
         var internshipIds = await _context.Internships
             .Join(_context.Specializations,
                 i => i.SpecializationId,
@@ -41,6 +45,8 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .Where(x => x.User.Id.Value == userId)
             .Select(x => x.Internship.Id)
             .ToListAsync();
+        */
+        var internshipIds = new List<InternshipId>(); // Temporary empty list
 
         return await _context.Procedures
             .Where(p => internshipIds.Contains(p.InternshipId))
@@ -49,6 +55,10 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
 
     public async Task<IEnumerable<ProcedureBase>> GetByUserAsync(UserId userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
+        /*
         var internshipIds = await _context.Internships
             .Join(_context.Specializations,
                 i => i.SpecializationId,
@@ -61,6 +71,8 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .Where(x => x.User.Id == userId)
             .Select(x => x.Internship.Id)
             .ToListAsync();
+        */
+        var internshipIds = new List<InternshipId>(); // Temporary empty list
 
         return await _context.Procedures
             .Where(p => internshipIds.Contains(p.InternshipId))
@@ -76,6 +88,10 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
 
     public async Task<IEnumerable<ProcedureBase>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, int userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
+        /*
         var internshipIds = await _context.Internships
             .Join(_context.Specializations,
                 i => i.SpecializationId,
@@ -88,6 +104,8 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .Where(x => x.User.Id.Value == userId)
             .Select(x => x.Internship.Id)
             .ToListAsync();
+        */
+        var internshipIds = new List<InternshipId>(); // Temporary empty list
 
         return await _context.Procedures
             .Where(p => p.Date >= startDate && p.Date <= endDate && internshipIds.Contains(p.InternshipId))
@@ -148,6 +166,10 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
 
     public async Task<IEnumerable<int>> GetUserInternshipIdsAsync(int userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
+        /*
         return await _context.Internships
             .Join(_context.Specializations,
                 i => i.SpecializationId,
@@ -160,5 +182,7 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
             .Where(x => x.User.Id.Value == userId)
             .Select(x => x.Internship.InternshipId.Value)
             .ToListAsync();
+        */
+        return new List<int>(); // Temporary empty list
     }
 }

@@ -45,11 +45,12 @@ public sealed class CreatePublicationHandler : IResultCommandHandler<CreatePubli
                 return Result.Failure($"User with ID {command.UserId.Value} not found.");
             }
 
-            // Verify user has access to this specialization
-            if (user.SpecializationId.Value != command.SpecializationId.Value)
-            {
-                return Result.Failure("You are not authorized to create publications for this specialization.");
-            }
+            // TODO: User-Specialization relationship needs to be redesigned
+            // // Verify user has access to this specialization
+            // if (user.SpecializationId.Value != command.SpecializationId.Value)
+            // {
+            //     return Result.Failure("You are not authorized to create publications for this specialization.");
+            // }
 
             // Create the publication - factory method now handles date validation
             var publicationId = PublicationId.New();

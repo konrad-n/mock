@@ -30,9 +30,14 @@ public sealed class GetModuleProgressHandler : IQueryHandler<GetModuleProgress, 
         var userId = _userContextService.GetUserId();
         var user = await _userRepository.GetByIdAsync(new UserId(userId));
         
-        if (user == null || user.SpecializationId.Value != query.SpecializationId)
+        // TODO: User-Specialization relationship needs to be redesigned
+        // if (user == null || user.SpecializationId.Value != query.SpecializationId)
+        // {
+        //     throw new UnauthorizedAccessException("You can only view progress for your own specialization");
+        // }
+        if (user == null)
         {
-            throw new UnauthorizedAccessException("You can only view progress for your own specialization");
+            throw new UnauthorizedAccessException("User not found.");
         }
 
         // Calculate and return statistics

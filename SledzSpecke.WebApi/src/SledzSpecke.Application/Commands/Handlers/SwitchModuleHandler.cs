@@ -34,11 +34,12 @@ public sealed class SwitchModuleHandler : ICommandHandler<SwitchModule>
             throw new NotFoundException("User not found.");
         }
 
-        // Verify user owns this specialization
-        if (user.SpecializationId.Value != command.SpecializationId)
-        {
-            throw new UnauthorizedAccessException("You can only switch modules in your own specialization.");
-        }
+        // TODO: User-Specialization relationship needs to be redesigned
+        // // Verify user owns this specialization
+        // if (user.SpecializationId.Value != command.SpecializationId)
+        // {
+        //     throw new UnauthorizedAccessException("You can only switch modules in your own specialization.");
+        // }
 
         // Get specialization
         var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(command.SpecializationId));

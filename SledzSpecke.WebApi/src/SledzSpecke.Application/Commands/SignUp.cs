@@ -1,13 +1,24 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands;
 
 public record SignUp(
     string Email,
-    string Username,
     string Password,
-    string FullName,
-    string SmkVersion,
-    int SpecializationId
+    string FirstName,
+    string LastName,
+    string Pesel,
+    string PwzNumber,
+    string PhoneNumber,
+    DateTime DateOfBirth,
+    AddressDto CorrespondenceAddress
 ) : ICommand;
+
+public record AddressDto(
+    string Street,
+    string HouseNumber,
+    string? ApartmentNumber,
+    string PostalCode,
+    string City,
+    string Province
+);

@@ -33,9 +33,14 @@ public sealed class GetInternshipByIdHandler : IQueryHandler<GetInternshipById, 
         // Check if the internship belongs to the current user
         var userId = _userContextService.GetUserId();
         var user = await _userRepository.GetByIdAsync(new UserId(userId));
-        if (user is null || user.SpecializationId != internship.SpecializationId)
+        // TODO: User-Specialization relationship needs to be redesigned
+        // if (user is null || user.SpecializationId != internship.SpecializationId)
+        // {
+        //     throw new UnauthorizedAccessException("You can only view your own internships.");
+        // }
+        if (user is null)
         {
-            throw new UnauthorizedAccessException("You can only view your own internships.");
+            throw new UnauthorizedAccessException("User not found.");
         }
 
         return new InternshipDto

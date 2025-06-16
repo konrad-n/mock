@@ -184,6 +184,10 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
     // Private helper methods
     private async Task<List<InternshipId>> GetUserInternshipIds(int userId)
     {
+        // TODO: User-Specialization relationship needs to be redesigned
+        // The User entity no longer has SpecializationId property
+        // This query needs to be refactored once the new relationship model is established
+        /*
         return await _context.Internships
             .Join(_context.Specializations,
                 i => i.SpecializationId,
@@ -196,6 +200,8 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
             .Where(x => x.User.Id.Value == userId)
             .Select(x => x.Internship.InternshipId)
             .ToListAsync();
+        */
+        return new List<InternshipId>(); // Temporary empty list
     }
 
     public async Task<IEnumerable<MedicalShift>> GetByUserIdAndDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)

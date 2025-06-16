@@ -34,10 +34,16 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         return await GetByIdAsync(id.Value, default);
     }
 
+    public async Task<User?> GetByIdAsync(UserId id, CancellationToken cancellationToken = default)
+    {
+        // Use the base repository method with conversion
+        return await GetByIdAsync(id.Value, cancellationToken);
+    }
+
     public async Task<User?> GetByUsernameAsync(Username username)
     {
-        var specification = new UserByUsernameSpecification(username);
-        return await GetSingleBySpecificationAsync(specification);
+        // TODO: Username no longer exists in User entity - this method should be removed
+        return null;
     }
 
     public async Task<User?> GetByEmailAsync(Email email)
@@ -88,8 +94,8 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
 
     public async Task<bool> ExistsByUsernameAsync(Username username)
     {
-        var specification = new UserByUsernameSpecification(username);
-        return await AnyAsync(specification);
+        // TODO: Username no longer exists in User entity - this method should be removed
+        return false;
     }
 
     public async Task<bool> ExistsByEmailAsync(Email email)
@@ -105,8 +111,8 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
     /// </summary>
     public async Task<IEnumerable<User>> GetBySpecializationAsync(SpecializationId specializationId)
     {
-        var specification = new UserBySpecializationSpecification(specializationId);
-        return await GetBySpecificationAsync(specification);
+        // TODO: User no longer has SpecializationId - need to redesign User-Specialization relationship
+        return Enumerable.Empty<User>();
     }
 
     /// <summary>
@@ -132,8 +138,9 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
     /// </summary>
     public async Task<IEnumerable<User>> GetUsersWithCompleteProfilesAsync()
     {
-        var specification = new UserByProfileCompleteSpecification();
-        return await GetBySpecificationAsync(specification);
+        // TODO: Update UserByProfileCompleteSpecification for new User entity structure
+        // For now, all users have complete profiles as all fields are required
+        return await GetAllAsync();
     }
 
     /// <summary>

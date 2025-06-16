@@ -58,11 +58,21 @@ internal sealed class DataSeeder : IDataSeeder
         var testUser = User.CreateWithId(
             new UserId(1),
             new Email("test@example.com"),
-            new Username("testuser"),
-            new HashedPassword("VN5/YG8lI8uo76wXP6tC+39Z1Wzv+XTI/bc0LPLP40U="), // SHA256 hash of "Test123!"
-            new FullName("Test User"),
-            SmkVersion.Old,
-            new SpecializationId(1), // WARNING: This assumes specialization ID 1 exists!
+            new HashedPassword("$2a$10$abc123"), // BCrypt hash format
+            new FirstName("Jan"),
+            new LastName("Kowalski"),
+            new Pesel("90010112345"), // Valid PESEL for DOB 1990-01-01
+            new PwzNumber("1234567"),
+            new PhoneNumber("+48123456789"),
+            new DateTime(1990, 1, 1), // Date of birth matching PESEL
+            new Address(
+                "Marszałkowska",
+                "100",
+                "5A",
+                "00-001",
+                "Warszawa",
+                "Mazowieckie"
+            ),
             DateTime.UtcNow
         );
 
@@ -181,11 +191,14 @@ internal sealed class DataSeeder : IDataSeeder
 
         var specialization = new Specialization(
             new SpecializationId(specializationId),
+            new UserId(1), // Default user ID for template specializations
             template.Name,
             template.Code,
             smkVersion,
+            "standard", // Default program variant
             startDate,
             plannedEndDate,
+            1, // Default planned PES year
             JsonSerializer.Serialize(template),
             template.TotalDuration.Years);
 

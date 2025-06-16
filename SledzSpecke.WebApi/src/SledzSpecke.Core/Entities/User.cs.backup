@@ -7,15 +7,18 @@ public sealed class User
 {
     public UserId Id { get; private set; }
     public Email Email { get; private set; }
+    public Username Username { get; private set; }
     public HashedPassword Password { get; private set; }
-    public FirstName FirstName { get; private set; }
-    public LastName LastName { get; private set; }
-    public Pesel Pesel { get; private set; }
-    public PwzNumber PwzNumber { get; private set; }
-    public PhoneNumber PhoneNumber { get; private set; }
-    public DateTime DateOfBirth { get; private set; }
-    public Address CorrespondenceAddress { get; private set; }
+    public FullName FullName { get; private set; }
+    public SmkVersion SmkVersion { get; private set; }
+    public SpecializationId SpecializationId { get; private set; }
     public DateTime RegistrationDate { get; private set; }
+    public PhoneNumber? PhoneNumber { get; private set; }
+    public DateTime? DateOfBirth { get; private set; }
+    public UserBio? Bio { get; private set; }
+    public FilePath? ProfilePicturePath { get; private set; }
+    public Language? PreferredLanguage { get; private set; }
+    public Theme? PreferredTheme { get; private set; }
     public bool NotificationsEnabled { get; private set; }
     public bool EmailNotificationsEnabled { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -27,32 +30,21 @@ public sealed class User
     // Factory method for creating a new user
     public static User Create(
         Email email, 
+        Username username, 
         HashedPassword password, 
-        FirstName firstName,
-        LastName lastName,
-        Pesel pesel,
-        PwzNumber pwzNumber,
-        PhoneNumber phoneNumber,
-        DateTime dateOfBirth,
-        Address correspondenceAddress)
+        FullName fullName,
+        SmkVersion smkVersion, 
+        SpecializationId specializationId)
     {
-        // Validate that date of birth matches PESEL
-        var peselDateOfBirth = pesel.GetDateOfBirth();
-        if (peselDateOfBirth.Date != dateOfBirth.Date)
-            throw new DomainException("Date of birth does not match PESEL.");
-
         return new User
         {
             Id = new UserId(0), // Will be set by repository
             Email = email,
+            Username = username,
             Password = password,
-            FirstName = firstName,
-            LastName = lastName,
-            Pesel = pesel,
-            PwzNumber = pwzNumber,
-            PhoneNumber = phoneNumber,
-            DateOfBirth = dateOfBirth,
-            CorrespondenceAddress = correspondenceAddress,
+            FullName = fullName,
+            SmkVersion = smkVersion,
+            SpecializationId = specializationId,
             RegistrationDate = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             NotificationsEnabled = true,
@@ -64,30 +56,24 @@ public sealed class User
     public static User CreateWithId(
         UserId id,
         Email email, 
+        Username username, 
         HashedPassword password, 
-        FirstName firstName,
-        LastName lastName,
-        Pesel pesel,
-        PwzNumber pwzNumber,
-        PhoneNumber phoneNumber,
-        DateTime dateOfBirth,
-        Address correspondenceAddress,
+        FullName fullName,
+        SmkVersion smkVersion, 
+        SpecializationId specializationId,
         DateTime registrationDate)
     {
         return new User
         {
             Id = id,
             Email = email,
+            Username = username,
             Password = password,
-            FirstName = firstName,
-            LastName = lastName,
-            Pesel = pesel,
-            PwzNumber = pwzNumber,
-            PhoneNumber = phoneNumber,
-            DateOfBirth = dateOfBirth,
-            CorrespondenceAddress = correspondenceAddress,
+            FullName = fullName,
+            SmkVersion = smkVersion,
+            SpecializationId = specializationId,
             RegistrationDate = registrationDate,
-            CreatedAt = registrationDate,
+            CreatedAt = registrationDate, // Use registration date as created date for existing users
             NotificationsEnabled = true,
             EmailNotificationsEnabled = true
         };
@@ -109,35 +95,35 @@ public sealed class User
         Password = newPassword;
     }
 
-    public void UpdateProfile(
-        Email email, 
-        FirstName firstName, 
-        LastName lastName,
-        PhoneNumber phoneNumber,
-        Address correspondenceAddress)
+    public void UpdateProfile(Email email, FullName fullName)
     {
         if (email == null)
             throw new ArgumentNullException(nameof(email));
-        if (firstName == null)
-            throw new ArgumentNullException(nameof(firstName));
-        if (lastName == null)
-            throw new ArgumentNullException(nameof(lastName));
-        if (phoneNumber == null)
-            throw new ArgumentNullException(nameof(phoneNumber));
-        if (correspondenceAddress == null)
-            throw new ArgumentNullException(nameof(correspondenceAddress));
+        if (fullName == null)
+            throw new ArgumentNullException(nameof(fullName));
             
         Email = email;
-        FirstName = firstName;
-        LastName = lastName;
-        PhoneNumber = phoneNumber;
-        CorrespondenceAddress = correspondenceAddress;
+        FullName = fullName;
     }
 
-    public void UpdateNotificationPreferences(bool notificationsEnabled, bool emailNotificationsEnabled)
+    public void UpdateProfileDetails(PhoneNumber? phoneNumber, DateTime? dateOfBirth, UserBio? bio)
     {
+        PhoneNumber = phoneNumber;
+        DateOfBirth = dateOfBirth;
+        Bio = bio;
+    }
+
+    public void UpdatePreferences(Language? language, Theme? theme, bool notificationsEnabled, bool emailNotificationsEnabled)
+    {
+        PreferredLanguage = language;
+        PreferredTheme = theme;
         NotificationsEnabled = notificationsEnabled;
         EmailNotificationsEnabled = emailNotificationsEnabled;
+    }
+
+    public void SetProfilePicture(FilePath? path)
+    {
+        ProfilePicturePath = path;
     }
 
     public void RecordLogin()
@@ -146,14 +132,16 @@ public sealed class User
     }
     
     // Business logic methods
-    public string GetFullName()
+    public bool CanAccessSpecialization(SpecializationId specializationId)
     {
-        return $"{FirstName} {LastName}";
+        return SpecializationId == specializationId;
     }
     
     public bool IsProfileComplete()
     {
-        return true; // All required fields are mandatory during registration
+        return PhoneNumber != null && 
+               DateOfBirth != null && 
+               Bio != null && !Bio.IsEmpty;
     }
     
     public bool HasRecentActivity(int daysThreshold = 30)

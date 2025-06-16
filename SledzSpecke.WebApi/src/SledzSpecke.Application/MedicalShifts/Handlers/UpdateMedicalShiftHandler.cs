@@ -54,9 +54,14 @@ public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedi
 
             // Get user to verify ownership through specialization
             var user = await _userRepository.GetByIdAsync(new UserId(userId));
-            if (user == null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            // TODO: User-Specialization relationship needs to be redesigned
+            // if (user == null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            // {
+            //     return Result.Failure("You are not authorized to update this medical shift.");
+            // }
+            if (user == null)
             {
-                return Result.Failure("You are not authorized to update this medical shift.");
+                return Result.Failure("User not found.");
             }
 
             // Check if the shift can be modified

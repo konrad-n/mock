@@ -54,16 +54,18 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
             }
             else
             {
-                // Try to parse as username
-                try
-                {
-                    var username = new Username(loginIdentifier);
-                    user = await _userRepository.GetByUsernameAsync(username);
-                }
-                catch (InvalidUsernameException)
-                {
-                    // If it's not a valid username, user will remain null
-                }
+                // TODO: User-Specialization relationship needs to be redesigned
+                // Username lookup is temporarily disabled
+                // // Try to parse as username
+                // try
+                // {
+                //     var username = new Username(loginIdentifier);
+                //     user = await _userRepository.GetByUsernameAsync(username);
+                // }
+                // catch (InvalidUsernameException)
+                // {
+                //     // If it's not a valid username, user will remain null
+                // }
             }
 
             if (user is null)

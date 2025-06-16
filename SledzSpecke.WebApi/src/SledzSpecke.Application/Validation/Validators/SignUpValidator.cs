@@ -23,20 +23,21 @@ internal sealed class SignUpValidator : IValidator<SignUp>
             return Result.Failure("Email is not in valid format.");
         }
 
-        if (string.IsNullOrWhiteSpace(command.Username))
-        {
-            return Result.Failure("Username is required.");
-        }
-
-        if (command.Username.Length < 3)
-        {
-            return Result.Failure("Username must be at least 3 characters long.");
-        }
-
-        if (command.Username.Length > 30)
-        {
-            return Result.Failure("Username cannot exceed 30 characters.");
-        }
+        // TODO: User-Specialization relationship needs to be redesigned
+        // if (string.IsNullOrWhiteSpace(command.Username))
+        // {
+        //     return Result.Failure("Username is required.");
+        // }
+        //
+        // if (command.Username.Length < 3)
+        // {
+        //     return Result.Failure("Username must be at least 3 characters long.");
+        // }
+        //
+        // if (command.Username.Length > 30)
+        // {
+        //     return Result.Failure("Username cannot exceed 30 characters.");
+        // }
 
         if (string.IsNullOrWhiteSpace(command.Password))
         {
@@ -53,25 +54,26 @@ internal sealed class SignUpValidator : IValidator<SignUp>
             return Result.Failure("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
         }
 
-        if (string.IsNullOrWhiteSpace(command.FullName))
-        {
-            return Result.Failure("Full name is required.");
-        }
-
-        if (command.FullName.Length < 2)
-        {
-            return Result.Failure("Full name must be at least 2 characters long.");
-        }
-
-        if (command.SmkVersion != "old" && command.SmkVersion != "new")
-        {
-            return Result.Failure("SMK version must be either 'old' or 'new'.");
-        }
-
-        if (command.SpecializationId <= 0)
-        {
-            return Result.Failure("Specialization ID must be a positive number.");
-        }
+        // TODO: User-Specialization relationship needs to be redesigned
+        // if (string.IsNullOrWhiteSpace(command.FullName))
+        // {
+        //     return Result.Failure("Full name is required.");
+        // }
+        //
+        // if (command.FullName.Length < 2)
+        // {
+        //     return Result.Failure("Full name must be at least 2 characters long.");
+        // }
+        //
+        // if (command.SmkVersion != "old" && command.SmkVersion != "new")
+        // {
+        //     return Result.Failure("SMK version must be either 'old' or 'new'.");
+        // }
+        //
+        // if (command.SpecializationId <= 0)
+        // {
+        //     return Result.Failure("Specialization ID must be a positive number.");
+        // }
 
         return Result.Success();
     }

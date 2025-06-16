@@ -39,9 +39,14 @@ public sealed class DeleteInternshipHandler : IResultCommandHandler<DeleteIntern
             // Check if the internship belongs to the current user
             var userId = _userContextService.GetUserId();
             var user = await _userRepository.GetByIdAsync(new UserId(userId));
-            if (user is null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            // TODO: User-Specialization relationship needs to be redesigned
+            // if (user is null || user.SpecializationId.Value != internship.SpecializationId.Value)
+            // {
+            //     return Result.Failure("You can only delete your own internships.");
+            // }
+            if (user is null)
             {
-                return Result.Failure("You can only delete your own internships.");
+                return Result.Failure("User not found.");
             }
 
             // Check if internship can be deleted

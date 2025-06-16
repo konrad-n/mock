@@ -19,57 +19,64 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(x => x.Username)
-            .HasConversion(x => x.Value, x => new Username(x))
-            .HasMaxLength(50)
-            .IsRequired();
-
         builder.Property(x => x.Password)
             .HasConversion(x => x.Value, x => new HashedPassword(x))
             .IsRequired();
 
-        builder.Property(x => x.FullName)
-            .HasConversion(x => x.Value, x => new FullName(x))
-            .HasMaxLength(200)
+        builder.Property(x => x.FirstName)
+            .HasConversion(x => x.Value, x => new FirstName(x))
+            .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(x => x.SmkVersion)
-            .HasConversion(x => x.Value, x => new SmkVersion(x));
+        builder.Property(x => x.LastName)
+            .HasConversion(x => x.Value, x => new LastName(x))
+            .HasMaxLength(100)
+            .IsRequired();
 
-        builder.Property(x => x.SpecializationId)
-            .HasConversion(x => x.Value, x => new SpecializationId(x));
+        builder.Property(x => x.Pesel)
+            .HasConversion(x => x.Value, x => new Pesel(x))
+            .HasMaxLength(11)
+            .IsRequired();
+
+        builder.Property(x => x.PwzNumber)
+            .HasConversion(x => x.Value, x => new PwzNumber(x))
+            .HasMaxLength(7)
+            .IsRequired();
 
         builder.Property(x => x.PhoneNumber)
-            .HasConversion(
-                x => x != null ? x.Value : null,
-                x => x != null ? new PhoneNumber(x) : null)
-            .HasMaxLength(20);
+            .HasConversion(x => x.Value, x => new PhoneNumber(x))
+            .HasMaxLength(20)
+            .IsRequired();
 
-        builder.Property(x => x.Bio)
-            .HasConversion(
-                x => x != null ? x.Value : null,
-                x => x != null ? new UserBio(x) : null)
-            .HasMaxLength(1000);
+        builder.Property(x => x.DateOfBirth)
+            .IsRequired();
 
-        builder.Property(x => x.ProfilePicturePath)
-            .HasConversion(
-                x => x != null ? x.Value : null,
-                x => x != null ? new FilePath(x) : null)
-            .HasMaxLength(500);
+        builder.OwnsOne(x => x.CorrespondenceAddress, address =>
+        {
+            address.Property(a => a.Street).HasMaxLength(200).IsRequired();
+            address.Property(a => a.HouseNumber).HasMaxLength(50).IsRequired();
+            address.Property(a => a.ApartmentNumber).HasMaxLength(50);
+            address.Property(a => a.PostalCode).HasMaxLength(10).IsRequired();
+            address.Property(a => a.City).HasMaxLength(100).IsRequired();
+            address.Property(a => a.Province).HasMaxLength(100).IsRequired();
+        });
 
-        builder.Property(x => x.PreferredLanguage)
-            .HasConversion(
-                x => x != null ? x.Value : null,
-                x => x != null ? new Language(x) : null)
-            .HasMaxLength(2);
+        builder.Property(x => x.RegistrationDate)
+            .IsRequired();
 
-        builder.Property(x => x.PreferredTheme)
-            .HasConversion(
-                x => x != null ? x.Value : null,
-                x => x != null ? new Theme(x) : null)
-            .HasMaxLength(10);
+        builder.Property(x => x.NotificationsEnabled)
+            .IsRequired();
+
+        builder.Property(x => x.EmailNotificationsEnabled)
+            .IsRequired();
+
+        builder.Property(x => x.CreatedAt)
+            .IsRequired();
+
+        builder.Property(x => x.LastLoginAt);
 
         builder.HasIndex(x => x.Email).IsUnique();
-        builder.HasIndex(x => x.Username).IsUnique();
+        builder.HasIndex(x => x.Pesel).IsUnique();
+        builder.HasIndex(x => x.PwzNumber).IsUnique();
     }
 }

@@ -34,26 +34,34 @@ public sealed class UpdateUserProfileHandler : IResultCommandHandler<UpdateUserP
                 return Result.Failure($"User with ID {currentUserId} not found.");
             }
 
-            // Validate and update basic profile
+            // Validate and create value objects
             Email email;
-            FullName fullName;
+            FirstName firstName;
+            LastName lastName;
+            PhoneNumber phoneNumber;
+            Address address;
             
             try
             {
                 email = new Email(command.Email);
-                fullName = new FullName(command.FullName);
+                firstName = new FirstName(command.FirstName);
+                lastName = new LastName(command.LastName);
+                phoneNumber = new PhoneNumber(command.PhoneNumber);
+                address = new Address(
+                    command.CorrespondenceAddress.Street,
+                    command.CorrespondenceAddress.HouseNumber,
+                    command.CorrespondenceAddress.ApartmentNumber,
+                    command.CorrespondenceAddress.PostalCode,
+                    command.CorrespondenceAddress.City,
+                    command.CorrespondenceAddress.Province
+                );
             }
             catch (Exception ex)
             {
                 return Result.Failure($"Invalid profile data: {ex.Message}");
             }
             
-            user.UpdateProfile(email, fullName);
-
-            // Update additional details
-            var phoneNumber = command.PhoneNumber != null ? new PhoneNumber(command.PhoneNumber) : null;
-            var bio = command.Bio != null ? new UserBio(command.Bio) : null;
-            user.UpdateProfileDetails(phoneNumber, command.DateOfBirth, bio);
+            user.UpdateProfile(email, firstName, lastName, phoneNumber, address);
 
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();

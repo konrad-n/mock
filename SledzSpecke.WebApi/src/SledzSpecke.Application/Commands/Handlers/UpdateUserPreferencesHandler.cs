@@ -32,26 +32,7 @@ public sealed class UpdateUserPreferencesHandler : ICommandHandler<UpdateUserPre
             throw new NotFoundException($"User with ID {currentUserId} not found.");
         }
 
-        // Validate language and theme
-        var allowedLanguages = new[] { "en", "pl", "de" };
-        var allowedThemes = new[] { "light", "dark", "auto" };
-
-        if (!allowedLanguages.Contains(command.Language))
-        {
-            throw new ValidationException($"Invalid language. Allowed values: {string.Join(", ", allowedLanguages)}");
-        }
-
-        if (!allowedThemes.Contains(command.Theme))
-        {
-            throw new ValidationException($"Invalid theme. Allowed values: {string.Join(", ", allowedThemes)}");
-        }
-
-        var language = new Language(command.Language);
-        var theme = new Theme(command.Theme);
-        
-        user.UpdatePreferences(
-            language,
-            theme,
+        user.UpdateNotificationPreferences(
             command.NotificationsEnabled,
             command.EmailNotificationsEnabled);
 
