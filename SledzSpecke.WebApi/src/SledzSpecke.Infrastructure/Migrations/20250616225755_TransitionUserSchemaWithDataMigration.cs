@@ -683,23 +683,12 @@ namespace SledzSpecke.Infrastructure.Migrations
                 column: "ModuleId");
 
             // Handle NULL ModuleId values before adding foreign key constraints
+            // NOTE: Only updating tables where ModuleId column exists
             migrationBuilder.Sql(@"
-                -- Update NULL ModuleId values to use the first available module
+                -- Update NULL ModuleId values in Procedures (ModuleId is being altered from nullable to non-nullable)
                 UPDATE ""Procedures"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                SET ""ModuleId"" = COALESCE(""ModuleId"", (SELECT MIN(""Id"") FROM ""Modules""))
                 WHERE ""ModuleId"" IS NULL OR ""ModuleId"" = 0;
-                
-                UPDATE ""MedicalShifts"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
-                
-                UPDATE ""Internships"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
-                
-                UPDATE ""Courses"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
             ");
 
             migrationBuilder.AddForeignKey(
