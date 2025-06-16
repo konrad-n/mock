@@ -3,6 +3,26 @@
 *Last Updated: 2025-06-16*  
 *Status: Production-Ready with World-Class Architecture*
 
+## 🚨 CRITICAL DEVELOPER REMINDER
+
+As a world-class developer, you MUST:
+1. **BUILD FREQUENTLY** - Run `dotnet build` after every significant change
+2. **TEST CONTINUOUSLY** - Run `dotnet test` to ensure nothing breaks
+3. **CHECK APPLICATION** - Verify the API is running: `sudo systemctl status sledzspecke-api`
+4. **COMMIT OFTEN** - Make small, focused commits with clear messages
+5. **PUSH REGULARLY** - Push to remote repository to trigger CI/CD
+
+```bash
+# Your development workflow should be:
+dotnet build                              # After every change
+dotnet test                               # Before committing
+git add -A && git commit -m "feat: ..."   # Small, focused commits
+git push                                  # Trigger deployment
+sudo journalctl -u sledzspecke-api -f    # Monitor production logs
+```
+
+Remember: Real developers ship working code, not just write it!
+
 ---
 
 ## Table of Contents

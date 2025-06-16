@@ -76,7 +76,8 @@ public static class Extensions
         services.AddScoped<IPdfGenerationService, PdfGenerationService>();
         services.AddScoped<IValidationService, ValidationService>();
 
-        services.AddScoped<IUserRepository, SqlUserRepository>();
+        // Using refactored repository with Specification pattern
+        services.AddScoped<IUserRepository, RefactoredSqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();
         services.AddScoped<IInternshipRepository, SqlInternshipRepositoryEnhanced>();
