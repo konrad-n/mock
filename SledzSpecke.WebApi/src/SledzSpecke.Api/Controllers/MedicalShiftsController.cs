@@ -4,6 +4,7 @@ using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Commands;
 using SledzSpecke.Application.DTO;
 using SledzSpecke.Application.Queries;
+using System.ComponentModel.DataAnnotations;
 
 namespace SledzSpecke.Api.Controllers;
 
@@ -101,18 +102,39 @@ public class MedicalShiftsController : BaseController
 
 public class AddMedicalShiftRequest
 {
+    [Required]
     public int InternshipId { get; set; }
+    
+    [Required]
     public DateTime Date { get; set; }
+    
+    [Required]
+    [Range(0, 24, ErrorMessage = "Hours must be between 0 and 24")]
     public int Hours { get; set; }
+    
+    [Required]
+    [Range(0, int.MaxValue, ErrorMessage = "Minutes cannot be negative")]
     public int Minutes { get; set; }
+    
+    [Required]
+    [MaxLength(200)]
     public string Location { get; set; } = string.Empty;
+    
+    [Required]
+    [Range(1, 6, ErrorMessage = "Medical year must be between 1 and 6")]
     public int Year { get; set; }
 }
 
 public class UpdateMedicalShiftRequest
 {
     public DateTime? Date { get; set; }
+    
+    [Range(0, 24, ErrorMessage = "Hours must be between 0 and 24")]
     public int? Hours { get; set; }
+    
+    [Range(0, int.MaxValue, ErrorMessage = "Minutes cannot be negative")]
     public int? Minutes { get; set; }
+    
+    [MaxLength(200)]
     public string? Location { get; set; }
 }

@@ -12,6 +12,7 @@ public static class MiddlewareExtensions
         services.AddSingleton<CorrelationIdMiddleware>();
         services.AddSingleton<RequestResponseLoggingMiddleware>();
         services.AddSingleton<EnhancedExceptionHandlingMiddleware>();
+        services.AddSingleton<SmkOperationLoggingMiddleware>();
         
         // Keep the original one for backward compatibility
         services.AddSingleton<ExceptionHandlingMiddleware>();
@@ -32,6 +33,9 @@ public static class MiddlewareExtensions
 
         // Exception handling should be early in the pipeline
         app.UseMiddleware<EnhancedExceptionHandlingMiddleware>();
+
+        // SMK operation logging
+        app.UseMiddleware<SmkOperationLoggingMiddleware>();
 
         return app;
     }

@@ -26,4 +26,13 @@ public class UsersController : BaseController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> Get()
         => await HandleAsync(new GetUsers(), _getUsersHandler);
+
+    // TODO: Implement once GetUserSmkDetails handler is created
+    /*
+    [HttpGet("{userId:int}/smk-details")]
+    [ProducesResponseType(typeof(UserSmkDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserSmkDto>> GetSmkDetails(int userId)
+        => await HandleAsync(new GetUserSmkDetails(userId), _getUserSmkHandler);
+    */
 }

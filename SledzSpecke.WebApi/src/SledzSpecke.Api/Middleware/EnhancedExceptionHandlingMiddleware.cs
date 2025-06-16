@@ -217,6 +217,53 @@ public class EnhancedExceptionHandlingMiddleware : IMiddleware
                 "business-error",
                 baseDetails),
 
+            // SMK-specific exceptions
+            SmkValidationException e => CreateProblemDetailsWithExtensions(
+                StatusCodes.Status400BadRequest,
+                "SMK Validation Error",
+                e.Message,
+                "smk-validation-error",
+                baseDetails,
+                new Dictionary<string, object?>
+                {
+                    ["field"] = e.Field,
+                    ["attemptedValue"] = e.AttemptedValue
+                }),
+
+            SmkExportException e => CreateProblemDetailsWithExtensions(
+                StatusCodes.Status400BadRequest,
+                "SMK Export Error",
+                e.Message,
+                "smk-export-error",
+                baseDetails,
+                new Dictionary<string, object?>
+                {
+                    ["specializationId"] = e.SpecializationId,
+                    ["smkVersion"] = e.SmkVersion
+                }),
+
+            SmkDataIncompleteException e => CreateProblemDetailsWithExtensions(
+                StatusCodes.Status422UnprocessableEntity,
+                "SMK Data Incomplete",
+                e.Message,
+                "smk-data-incomplete",
+                baseDetails,
+                new Dictionary<string, object?>
+                {
+                    ["missingFields"] = e.MissingFields
+                }),
+
+            SmkBusinessRuleViolationException e => CreateProblemDetailsWithExtensions(
+                StatusCodes.Status409Conflict,
+                "SMK Business Rule Violation",
+                e.Message,
+                "smk-rule-violation",
+                baseDetails,
+                new Dictionary<string, object?>
+                {
+                    ["ruleCode"] = e.RuleCode
+                }),
+
             // System exceptions
             UnauthorizedAccessException => CreateProblemDetails(
                 StatusCodes.Status401Unauthorized,
@@ -305,5 +352,24 @@ public class EnhancedExceptionHandlingMiddleware : IMiddleware
         problemDetails.Extensions["errorCode"] = errorCode;
 
         return (statusCode, problemDetails);
+    }
+
+    private (int statusCode, ProblemDetails problemDetails) CreateProblemDetailsWithExtensions(
+        int statusCode,
+        string title,
+        string detail,
+        string errorCode,
+        ProblemDetails baseDetails,
+        Dictionary<string, object?> additionalExtensions)
+    {
+        var (status, problemDetails) = CreateProblemDetails(statusCode, title, detail, errorCode, baseDetails);
+
+        // Add additional extensions
+        foreach (var extension in additionalExtensions)
+        {
+            problemDetails.Extensions[extension.Key] = extension.Value;
+        }
+
+        return (status, problemDetails);
     }
 }

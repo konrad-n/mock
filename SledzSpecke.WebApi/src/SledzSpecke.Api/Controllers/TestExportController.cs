@@ -14,7 +14,7 @@ namespace SledzSpecke.Api.Controllers;
 public class TestExportController : ControllerBase
 {
     [HttpGet("preview")]
-    public IActionResult GetTestPreview()
+    public IActionResult GetTestPreview([FromQuery] string version = "old")
     {
         var testData = new SpecializationExportDto
         {
@@ -27,7 +27,7 @@ public class TestExportController : ControllerBase
                 Email = "jan.kowalski@example.com",
                 PhoneNumber = "+48123456789",
                 SpecializationName = "Chirurgia Ogólna",
-                SmkVersion = "old",
+                SmkVersion = version,
                 ProgramVariant = "normal",
                 PlannedPesYear = "2027",
                 SpecializationStartDate = "01.03.2022",
@@ -87,25 +87,7 @@ public class TestExportController : ControllerBase
                 }
             },
             
-            Procedures = new List<ProcedureExportDto>
-            {
-                new ProcedureExportDto
-                {
-                    Date = "10.06.2022",
-                    ProcedureCode = "JGP.F03",
-                    ProcedureName = "Appendektomia",
-                    Location = "Blok operacyjny",
-                    ModuleName = "Podstawowy",
-                    PatientInitials = "JK",
-                    PatientGender = "M",
-                    YearOfTraining = "1",
-                    InternshipName = "Szpital Uniwersytecki - Oddział Chirurgii",
-                    FirstAssistantData = "dr Anna Nowak, PWZ: 8765432",
-                    SecondAssistantData = "",
-                    Role = "A",
-                    Supervisor = "dr Piotr Wiśniewski, PWZ: 9876543"
-                }
-            },
+            Procedures = GetTestProcedures(version),
             
             AdditionalSelfEducationDays = new List<AdditionalSelfEducationExportDto>
             {
@@ -136,19 +118,7 @@ public class TestExportController : ControllerBase
     {
         try
         {
-            var testData = GetTestData();
-            testData.BasicInfo.SmkVersion = version;
-            
-            // Adjust procedure data for new SMK version
-            if (version == "new")
-            {
-                foreach (var procedure in testData.Procedures)
-                {
-                    procedure.CountA = 1;
-                    procedure.CountB = 0;
-                    procedure.Role = null;
-                }
-            }
+            var testData = GetTestData(version);
             
             byte[] excelBytes = await generator.GenerateAsync(testData);
             
@@ -162,7 +132,7 @@ public class TestExportController : ControllerBase
         }
     }
     
-    private SpecializationExportDto GetTestData()
+    private SpecializationExportDto GetTestData(string version = "old")
     {
         return new SpecializationExportDto
         {
@@ -175,7 +145,7 @@ public class TestExportController : ControllerBase
                 Email = "jan.kowalski@example.com",
                 PhoneNumber = "+48123456789",
                 SpecializationName = "Chirurgia Ogólna",
-                SmkVersion = "old",
+                SmkVersion = version,
                 ProgramVariant = "normal",
                 PlannedPesYear = "2027",
                 SpecializationStartDate = "01.03.2022",
@@ -235,25 +205,7 @@ public class TestExportController : ControllerBase
                 }
             },
             
-            Procedures = new List<ProcedureExportDto>
-            {
-                new ProcedureExportDto
-                {
-                    Date = "10.06.2022",
-                    ProcedureCode = "JGP.F03",
-                    ProcedureName = "Appendektomia",
-                    Location = "Blok operacyjny",
-                    ModuleName = "Podstawowy",
-                    PatientInitials = "JK",
-                    PatientGender = "M",
-                    YearOfTraining = "1",
-                    InternshipName = "Szpital Uniwersytecki - Oddział Chirurgii",
-                    FirstAssistantData = "dr Anna Nowak, PWZ: 8765432",
-                    SecondAssistantData = "",
-                    Role = "A",
-                    Supervisor = "dr Piotr Wiśniewski, PWZ: 9876543"
-                }
-            },
+            Procedures = GetTestProcedures(version),
             
             AdditionalSelfEducationDays = new List<AdditionalSelfEducationExportDto>
             {
@@ -269,5 +221,47 @@ public class TestExportController : ControllerBase
                 }
             }
         };
+    }
+
+    private List<ProcedureExportDto> GetTestProcedures(string version)
+    {
+        if (version == "old")
+        {
+            return new List<ProcedureExportDto>
+            {
+                new ProcedureExportDto
+                {
+                    Date = "10.06.2022",
+                    ProcedureCode = "JGP.F03",
+                    ProcedureName = "Appendektomia",
+                    Location = "Blok operacyjny",
+                    ModuleName = "Podstawowy",
+                    PatientInitials = "JK",
+                    PatientGender = "M",
+                    YearOfTraining = "1",
+                    InternshipName = "Szpital Uniwersytecki - Oddział Chirurgii",
+                    FirstAssistantData = "dr Anna Nowak, PWZ: 8765432",
+                    SecondAssistantData = "",
+                    Role = "A"
+                }
+            };
+        }
+        else
+        {
+            return new List<ProcedureExportDto>
+            {
+                new ProcedureExportDto
+                {
+                    Date = "10.06.2022",
+                    ProcedureCode = "JGP.F03",
+                    ProcedureName = "Appendektomia",
+                    Location = "Blok operacyjny",
+                    ModuleName = "Podstawowy",
+                    CountA = 1,
+                    CountB = 0,
+                    Supervisor = "dr Piotr Wiśniewski, PWZ: 9876543"
+                }
+            };
+        }
     }
 }
