@@ -318,3 +318,227 @@ Every decision, every line of code, every architecture choice must reflect excel
 - **Always secure**
 
 The codebase should be a masterpiece that other developers learn from.
+
+---
+
+## 🏗️ CRITICAL: Current Architecture State (85% Complete)
+
+### ✅ Already Implemented - DO NOT REBUILD
+1. **Value Objects** - Perfect implementation, 89 tests passing
+2. **Specification Pattern** - Fully implemented with composable queries
+3. **Domain Events** - MediatR configured, handlers ready
+4. **Decorator Pattern** - All cross-cutting concerns handled
+5. **Result Pattern** - Consistent error handling throughout
+6. **E2E Testing** - World-class Playwright implementation with DB isolation
+
+### 🔧 Pending Work (Priority Order)
+1. **Repository Migration** - 12 repos need specification pattern (User first)
+2. **Domain Services** - Add real SMK business logic to stubs
+3. **Integration Tests** - Test domain event flows
+
+### ⚠️ DO NOT
+- Recreate Value Objects (they're perfect)
+- Change the architecture layers
+- Add new patterns without clear justification
+- Create entities/VOs that aren't used in E2E tests
+- Add complexity for theoretical scenarios
+
+---
+
+## 📋 Architecture Patterns Reference
+
+### Repository Pattern Template
+```csharp
+// Use RefactoredSqlMedicalShiftRepository as template
+// Key: Inherit from BaseRepository, use specifications
+public class SqlUserRepository : BaseRepository<User>, IUserRepository
+{
+    // NO SaveChangesAsync - let UnitOfWork handle it
+}
+```
+
+### Specification Usage
+```csharp
+// Always use existing specifications first
+var spec = new UserByEmailSpecification(email)
+    .And(new ActiveEntitySpecification<User>());
+var user = await repository.GetSingleBySpecificationAsync(spec);
+```
+
+### Domain Event Pattern
+```csharp
+// Events are raised in domain methods, not handlers
+public Result<MedicalShift> AddShift(...)
+{
+    // Business logic
+    var shift = MedicalShift.Create(...);
+    _shifts.Add(shift);
+    
+    // Raise event
+    AddDomainEvent(new MedicalShiftAddedEvent(...));
+    return Result<MedicalShift>.Success(shift);
+}
+```
+
+---
+
+## 🚀 Quick Start Commands
+
+### Verify Everything Works
+```bash
+# 1. Build check
+dotnet build
+
+# 2. Run tests (97/106 passing is current state)
+dotnet test
+
+# 3. Run E2E tests with isolation
+./run-e2e-tests-isolated.sh
+
+# 4. Check latest deployment
+./check-builds.sh latest
+```
+
+### Common Tasks
+```bash
+# Deploy to production
+sudo systemctl restart sledzspecke-api
+
+# View logs
+sudo journalctl -u sledzspecke-api -f
+
+# Check monitoring
+https://api.sledzspecke.pl/monitoring/dashboard
+```
+
+---
+
+## 📊 Current Test Status
+- **Unit Tests**: 89/89 passing (Core)
+- **Integration Tests**: 8/17 passing (Hash format issues)
+- **E2E Tests**: Fully operational with DB isolation
+- **Total**: 97/106 tests passing
+
+---
+
+## 🎯 Migration Priorities
+
+When refactoring repositories, follow this order:
+1. **UserRepository** (most used, high impact)
+2. **InternshipRepository** (complex queries)
+3. **ProcedureRepository** (has specifications already)
+4. **Others** (as needed)
+
+---
+
+## ⚡ Performance Considerations
+
+### Current Optimizations
+- Specification pattern reduces query complexity
+- NoTracking for read-only queries
+- Compiled queries for hot paths
+- E2E tests use isolated databases
+
+### Don't Add Yet
+- Caching (measure first)
+- Read/write DB separation
+- Event sourcing
+- Microservices
+
+---
+
+## 🔒 Security Notes
+
+### Already Implemented
+- Password hashing (BCrypt)
+- Value Object validation
+- SQL injection prevention via EF Core
+- Input validation in commands
+
+### Current Format
+- Password hash format in tests: `$2a$10$...`
+- Test users have password: `Test123!`
+
+---
+
+## 📝 Documentation State
+
+### Comprehensive Docs Available
+- `SledzSpecke Complete Architecture Documentation.md` - Full architecture guide
+- E2E test documentation in test project
+- SMK government requirements (Polish PDFs)
+
+### When Making Changes
+1. Update the consolidated documentation
+2. Add ADR (Architecture Decision Record) for significant changes
+3. Update E2E tests if behavior changes
+4. Document any new business rules discovered
+
+---
+
+## 🚨 Common Pitfalls to Avoid
+
+1. **Creating Unused Code**
+   - Example: EmployeeNumber VO was created but never used
+   - Always check E2E tests for actual usage
+
+2. **Over-Engineering**
+   - Don't add patterns that aren't needed NOW
+   - YAGNI (You Aren't Gonna Need It) applies
+
+3. **Breaking Existing Tests**
+   - 89 core tests must continue passing
+   - E2E tests are the source of truth
+
+4. **Ignoring Production State**
+   - This is a live system used by medical professionals
+   - Always check monitoring after deployment
+
+---
+
+## 🏥 Domain Context
+
+### SMK System Requirements
+- Monthly hour minimum: 160 hours
+- Weekly hour maximum: 48 hours
+- Procedures vary by specialization/year
+- Module progression: basic → specialistic
+
+### Polish Medical Education
+- Universities: WUM, UJ, etc.
+- Specializations: 70+ different types
+- SMK versions: "old" and "new"
+
+---
+
+## 🔧 Build Configuration
+
+### Current Warnings (Acceptable)
+- Nullable reference warnings
+- Unused parameter warnings in stubs
+- These are tracked but not blocking
+
+### GitHub Actions
+- Builds on push to master/develop
+- E2E tests run automatically
+- Results at: https://api.sledzspecke.pl/e2e-results/
+
+---
+
+## 💡 Architecture Philosophy
+
+### Follow These Principles
+1. **SOLID** - Already applied throughout
+2. **DDD** - Rich domain model with business logic
+3. **Clean Architecture** - Maintain layer separation
+4. **KISS** - Keep It Simple, Stupid
+5. **YAGNI** - You Aren't Gonna Need It
+
+### The Goal
+Create software that is:
+- Simple enough for juniors to understand
+- Robust enough for production medical use
+- Flexible enough for future changes
+- Fast enough for daily use
+
+Remember: **This is not a playground for patterns - it's a production medical system.**
