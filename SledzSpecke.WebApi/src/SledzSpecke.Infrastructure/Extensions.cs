@@ -68,6 +68,14 @@ public static class Extensions
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        // Application services
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IStatisticsService, StatisticsService>();
+        services.AddScoped<IProjectionService, ProjectionService>();
+        services.AddScoped<IMilestoneService, MilestoneService>();
+        services.AddScoped<IPdfGenerationService, PdfGenerationService>();
+        services.AddScoped<IValidationService, ValidationService>();
+
         services.AddScoped<IUserRepository, SqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();

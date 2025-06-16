@@ -5,7 +5,7 @@ using Scrutor;
 
 namespace SledzSpecke.Application;
 
-public static partial class Extensions
+public static partial class ApplicationExtensions
 {
     /// <summary>
     /// Registers decorators for command handlers following the decorator pattern

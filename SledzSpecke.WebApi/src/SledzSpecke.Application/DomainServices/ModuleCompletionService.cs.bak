@@ -1,0 +1,393 @@
+using Microsoft.Extensions.Logging;
+using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.DomainServices;
+using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Repositories;
+using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Application.Abstractions;
+
+namespace SledzSpecke.Application.DomainServices;
+
+public sealed class ModuleCompletionService : IModuleCompletionService
+{
+    private readonly ILogger<ModuleCompletionService> _logger;
+    private readonly IInternshipRepository _internshipRepository;
+    private readonly IProcedureRepository _procedureRepository;
+    private readonly IMedicalShiftRepository _medicalShiftRepository;
+    private readonly ICourseRepository _courseRepository;
+    private readonly IModuleRepository _moduleRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ModuleCompletionService(
+        ILogger<ModuleCompletionService> logger,
+        IInternshipRepository internshipRepository,
+        IProcedureRepository procedureRepository,
+        IMedicalShiftRepository medicalShiftRepository,
+        ICourseRepository courseRepository,
+        IModuleRepository moduleRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _logger = logger;
+        _internshipRepository = internshipRepository;
+        _procedureRepository = procedureRepository;
+        _medicalShiftRepository = medicalShiftRepository;
+        _courseRepository = courseRepository;
+        _moduleRepository = moduleRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<Result<ModuleCompletionStatus>> ValidateModuleCompletionAsync(
+        InternshipId internshipId,
+        ModuleId moduleId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var module = await _moduleRepository.GetByIdAsync(moduleId.Value);
+            if (module == null)
+            {
+                return Result<ModuleCompletionStatus>.Failure("Module not found");
+            }
+
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null)
+            {
+                return Result<ModuleCompletionStatus>.Failure("Internship not found");
+            }
+
+            // Get all module internships
+            var moduleInternships = await _internshipRepository.GetByModuleIdAsync(moduleId);
+            var completedInternships = moduleInternships.Count(i => i.IsCompleted && i.IsApproved);
+
+            // Get procedures for this module
+            var procedures = new List<ProcedureBase>();
+            foreach (var moduleInternship in moduleInternships)
+            {
+                var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(moduleInternship.Id);
+                procedures.AddRange(internshipProcedures);
+            }
+
+            // Get medical shifts
+            var medicalShifts = new List<MedicalShift>();
+            foreach (var moduleInternship in moduleInternships)
+            {
+                var shifts = await _medicalShiftRepository.GetByInternshipIdAsync(moduleInternship.Id);
+                medicalShifts.AddRange(shifts);
+            }
+
+            // Get courses
+            var courses = new List<Course>();
+            foreach (var moduleInternship in moduleInternships)
+            {
+                var internshipCourses = await _courseRepository.GetByInternshipIdAsync(moduleInternship.Id);
+                courses.AddRange(internshipCourses);
+            }
+
+            // Calculate requirements
+            var requirements = new Dictionary<string, RequirementStatus>
+            {
+                ["Internships"] = new RequirementStatus
+                {
+                    RequirementType = "Internships",
+                    Required = module.TotalInternships,
+                    Completed = completedInternships,
+                    PercentageComplete = module.TotalInternships > 0 
+                        ? (completedInternships * 100.0) / module.TotalInternships 
+                        : 0
+                },
+                ["Procedures Type A"] = new RequirementStatus
+                {
+                    RequirementType = "Procedures Type A",
+                    Required = module.TotalProceduresA,
+                    Completed = module.CompletedProceduresA,
+                    PercentageComplete = module.TotalProceduresA > 0 
+                        ? (module.CompletedProceduresA * 100.0) / module.TotalProceduresA 
+                        : 0
+                },
+                ["Procedures Type B"] = new RequirementStatus
+                {
+                    RequirementType = "Procedures Type B",
+                    Required = module.TotalProceduresB,
+                    Completed = module.CompletedProceduresB,
+                    PercentageComplete = module.TotalProceduresB > 0 
+                        ? (module.CompletedProceduresB * 100.0) / module.TotalProceduresB 
+                        : 0
+                },
+                ["Medical Shifts"] = new RequirementStatus
+                {
+                    RequirementType = "Medical Shifts",
+                    Required = module.RequiredShiftHours,
+                    Completed = module.CompletedShiftHours,
+                    PercentageComplete = module.RequiredShiftHours > 0 
+                        ? (module.CompletedShiftHours * 100.0) / module.RequiredShiftHours 
+                        : 0
+                },
+                ["Courses"] = new RequirementStatus
+                {
+                    RequirementType = "Courses",
+                    Required = module.TotalCourses,
+                    Completed = module.CompletedCourses,
+                    PercentageComplete = module.TotalCourses > 0 
+                        ? (module.CompletedCourses * 100.0) / module.TotalCourses 
+                        : 0
+                }
+            };
+
+            var overallProgress = requirements.Values.Average(r => r.PercentageComplete);
+            var isComplete = requirements.Values.All(r => r.PercentageComplete >= 100);
+
+            var status = new ModuleCompletionStatus
+            {
+                ModuleId = moduleId,
+                IsComplete = isComplete,
+                Requirements = requirements,
+                OverallProgress = overallProgress,
+                EstimatedCompletionDate = EstimateCompletionDate(module, overallProgress)
+            };
+
+            _logger.LogInformation(
+                "Module completion validated: ModuleId={ModuleId}, Progress={Progress}%, Complete={IsComplete}",
+                moduleId.Value,
+                overallProgress,
+                isComplete);
+
+            return Result<ModuleCompletionStatus>.Success(status);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating module completion for ModuleId={ModuleId}", moduleId.Value);
+            return Result<ModuleCompletionStatus>.Failure("Failed to validate module completion");
+        }
+    }
+
+    public async Task<Result<Core.DomainServices.ModuleProgress>> CalculateWeightedProgressAsync(
+        InternshipId internshipId,
+        ModuleId moduleId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var status = await ValidateModuleCompletionAsync(internshipId, moduleId, cancellationToken);
+            if (!status.IsSuccess)
+            {
+                return Result<Core.DomainServices.ModuleProgress>.Failure(status.Error);
+            }
+
+            var requirements = status.Value.Requirements;
+            
+            var progress = Core.DomainServices.ModuleProgress.Calculate(
+                internships: requirements.GetValueOrDefault("Internships")?.PercentageComplete ?? 0,
+                courses: requirements.GetValueOrDefault("Courses")?.PercentageComplete ?? 0,
+                procedures: (requirements.GetValueOrDefault("Procedures Type A")?.PercentageComplete ?? 0 +
+                            requirements.GetValueOrDefault("Procedures Type B")?.PercentageComplete ?? 0) / 2,
+                shifts: requirements.GetValueOrDefault("Medical Shifts")?.PercentageComplete ?? 0
+            );
+
+            _logger.LogInformation(
+                "Calculated weighted progress for ModuleId={ModuleId}: {WeightedTotal}%",
+                moduleId.Value,
+                progress.WeightedTotal);
+
+            return Result<Core.DomainServices.ModuleProgress>.Success(progress);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calculating weighted progress for ModuleId={ModuleId}", moduleId.Value);
+            return Result<Core.DomainServices.ModuleProgress>.Failure("Failed to calculate weighted progress");
+        }
+    }
+
+    public async Task<Result> TransitionToNextModuleAsync(
+        InternshipId internshipId,
+        ModuleId currentModuleId,
+        ModuleId nextModuleId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Validate current module is complete
+            var currentStatus = await ValidateModuleCompletionAsync(internshipId, currentModuleId, cancellationToken);
+            if (!currentStatus.IsSuccess || !currentStatus.Value.IsComplete)
+            {
+                return Result.Failure("Current module must be completed before transitioning");
+            }
+
+            // Validate next module exists and is valid
+            var nextModule = await _moduleRepository.GetByIdAsync(nextModuleId.Value);
+            if (nextModule == null)
+            {
+                return Result.Failure("Next module not found");
+            }
+
+            var currentModule = await _moduleRepository.GetByIdAsync(currentModuleId.Value);
+            if (currentModule == null)
+            {
+                return Result.Failure("Current module not found");
+            }
+
+            // Validate transition is allowed
+            if (nextModule.StartDate < currentModule.EndDate)
+            {
+                return Result.Failure("Cannot transition to a module that starts before current module ends");
+            }
+
+            // Get internship and update module assignment
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null)
+            {
+                return Result.Failure("Internship not found");
+            }
+
+            internship.AssignToModule(nextModuleId);
+            await _internshipRepository.UpdateAsync(internship);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Transitioned InternshipId={InternshipId} from ModuleId={CurrentModule} to ModuleId={NextModule}",
+                internshipId.Value,
+                currentModuleId.Value,
+                nextModuleId.Value);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, 
+                "Error transitioning from ModuleId={CurrentModule} to ModuleId={NextModule}", 
+                currentModuleId.Value, 
+                nextModuleId.Value);
+            return Result.Failure("Failed to transition to next module");
+        }
+    }
+
+    public async Task<Result<ProcedureAllocation>> AllocateProcedureToRequirementAsync(
+        ProcedureId procedureId,
+        InternshipId internshipId,
+        ModuleRequirementId requirementId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var procedure = await _procedureRepository.GetByIdAsync(procedureId.Value);
+            if (procedure == null)
+            {
+                return Result<ProcedureAllocation>.Failure("Procedure not found");
+            }
+
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null || !internship.ModuleId.HasValue)
+            {
+                return Result<ProcedureAllocation>.Failure("Internship not found or not assigned to module");
+            }
+
+            var module = await _moduleRepository.GetByIdAsync(internship.ModuleId.Value.Value);
+            if (module == null)
+            {
+                return Result<ProcedureAllocation>.Failure("Module not found");
+            }
+
+            // Determine requirement type based on procedure operator role
+            var requirementType = DetermineRequirementType(procedure);
+            
+            // Calculate remaining
+            var remaining = requirementType == "Type A" 
+                ? module.TotalProceduresA - module.CompletedProceduresA - 1
+                : module.TotalProceduresB - module.CompletedProceduresB - 1;
+
+            var allocation = new ProcedureAllocation
+            {
+                ProcedureId = procedureId,
+                AllocatedTo = requirementId,
+                RequirementType = requirementType,
+                RemainingForRequirement = Math.Max(0, remaining)
+            };
+
+            _logger.LogInformation(
+                "Allocated ProcedureId={ProcedureId} to requirement {RequirementType}, {Remaining} remaining",
+                procedureId.Value,
+                requirementType,
+                remaining);
+
+            return Result<ProcedureAllocation>.Success(allocation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error allocating ProcedureId={ProcedureId}", procedureId.Value);
+            return Result<ProcedureAllocation>.Failure("Failed to allocate procedure");
+        }
+    }
+
+    public async Task<Result<bool>> CanSwitchModuleTypeAsync(
+        InternshipId internshipId,
+        Core.DomainServices.ModuleType targetType,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null || !internship.ModuleId.HasValue)
+            {
+                return Result<bool>.Success(false);
+            }
+
+            var currentModule = await _moduleRepository.GetByIdAsync(internship.ModuleId.Value.Value);
+            if (currentModule == null)
+            {
+                return Result<bool>.Success(false);
+            }
+
+            // Basic modules must be completed before specialistic
+            if (targetType == Core.DomainServices.ModuleType.Specialistic && currentModule.Type == Core.ValueObjects.ModuleType.Basic)
+            {
+                var completionStatus = await ValidateModuleCompletionAsync(internshipId, internship.ModuleId.Value, cancellationToken);
+                if (!completionStatus.IsSuccess || !completionStatus.Value.IsComplete)
+                {
+                    _logger.LogInformation(
+                        "Cannot switch to specialistic module - basic module not complete");
+                    return Result<bool>.Success(false);
+                }
+            }
+
+            // Cannot go back from specialistic to basic
+            if (targetType == Core.DomainServices.ModuleType.Basic && currentModule.Type == Core.ValueObjects.ModuleType.Specialistic)
+            {
+                _logger.LogInformation(
+                    "Cannot switch from specialistic back to basic module");
+                return Result<bool>.Success(false);
+            }
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking module type switch for InternshipId={InternshipId}", 
+                internshipId.Value);
+            return Result<bool>.Failure("Failed to check module type switch");
+        }
+    }
+
+    private DateTime? EstimateCompletionDate(Module module, double currentProgress)
+    {
+        if (currentProgress >= 100)
+        {
+            return DateTime.UtcNow;
+        }
+
+        if (currentProgress <= 0)
+        {
+            return null;
+        }
+
+        // Simple linear projection
+        var daysElapsed = (DateTime.UtcNow - module.StartDate).Days;
+        var estimatedTotalDays = (int)(daysElapsed / (currentProgress / 100));
+        return module.StartDate.AddDays(estimatedTotalDays);
+    }
+
+    private string DetermineRequirementType(ProcedureBase procedure)
+    {
+        // In a real implementation, this would check the operator role
+        // For now, we'll use a simple heuristic
+        return procedure.Count > 0 ? "Type A" : "Type B";
+    }
+}

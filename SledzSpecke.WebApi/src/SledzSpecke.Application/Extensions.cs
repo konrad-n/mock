@@ -2,11 +2,13 @@ using Microsoft.Extensions.DependencyInjection;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Validation;
 using SledzSpecke.Application.Services;
+using SledzSpecke.Application.DomainServices;
+using SledzSpecke.Core.DomainServices;
 using System.Reflection;
 
 namespace SledzSpecke.Application;
 
-public static partial class Extensions
+public static partial class ApplicationExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
@@ -48,6 +50,14 @@ public static partial class Extensions
         // Register specific services
         services.AddScoped<ISpecializationValidationService, SpecializationValidationService>();
         services.AddScoped<IYearCalculationService, YearCalculationService>();
+        
+        // Register Domain Services
+        services.AddScoped<ISMKSynchronizationService, SimplifiedSMKSynchronizationService>();
+        services.AddScoped<IModuleCompletionService, SimplifiedModuleCompletionService>();
+        // TODO: Add implementations for remaining domain services
+        // services.AddScoped<ISpecializationDurationService, SpecializationDurationService>();
+        // services.AddScoped<IProcedureAllocationService, ProcedureAllocationService>();
+        // services.AddScoped<IMedicalEducationComplianceService, MedicalEducationComplianceService>();
         services.AddScoped<IProgressCalculationService, ProgressCalculationService>();
         
         // Add validation

@@ -1,0 +1,327 @@
+using Microsoft.Extensions.Logging;
+using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.DomainServices;
+using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Repositories;
+using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Application.Abstractions;
+
+namespace SledzSpecke.Application.DomainServices;
+
+public sealed class SMKSynchronizationService : ISMKSynchronizationService
+{
+    private readonly ILogger<SMKSynchronizationService> _logger;
+    private readonly IInternshipRepository _internshipRepository;
+    private readonly IProcedureRepository _procedureRepository;
+    private readonly IMedicalShiftRepository _medicalShiftRepository;
+    private readonly ICourseRepository _courseRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public SMKSynchronizationService(
+        ILogger<SMKSynchronizationService> logger,
+        IInternshipRepository internshipRepository,
+        IProcedureRepository procedureRepository,
+        IMedicalShiftRepository medicalShiftRepository,
+        ICourseRepository courseRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _logger = logger;
+        _internshipRepository = internshipRepository;
+        _procedureRepository = procedureRepository;
+        _medicalShiftRepository = medicalShiftRepository;
+        _courseRepository = courseRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<Result<SynchronizationReadiness>> ValidateReadinessForSyncAsync(
+        InternshipId internshipId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null)
+            {
+                return Result<SynchronizationReadiness>.Failure("Internship not found");
+            }
+
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var medicalShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internshipId.Value);
+            var courses = await _courseRepository.GetByInternshipIdAsync(internshipId.Value);
+
+            var missingRequirements = new List<string>();
+
+            // Check minimum requirements
+            if (!internship.IsApproved)
+            {
+                missingRequirements.Add("Internship must be approved");
+            }
+
+            if (!procedures.Any())
+            {
+                missingRequirements.Add("At least one procedure is required");
+            }
+
+            if (!medicalShifts.Any(ms => ms.IsApproved))
+            {
+                missingRequirements.Add("At least one approved medical shift is required");
+            }
+
+            // Check for incomplete data
+            var incompleteProcedures = procedures.Where(p => string.IsNullOrEmpty(p.Code)).ToList();
+            if (incompleteProcedures.Any())
+            {
+                missingRequirements.Add($"{incompleteProcedures.Count} procedures have missing codes");
+            }
+
+            var unapprovedShifts = medicalShifts.Where(ms => !ms.IsApproved).ToList();
+            if (unapprovedShifts.Any())
+            {
+                missingRequirements.Add($"{unapprovedShifts.Count} medical shifts pending approval");
+            }
+
+            var readiness = new SynchronizationReadiness
+            {
+                IsReady = !missingRequirements.Any(),
+                MissingRequirements = missingRequirements,
+                ProcedureCount = procedures.Count(),
+                MedicalShiftCount = medicalShifts.Count(),
+                CourseCount = courses.Count()
+            };
+
+            _logger.LogInformation(
+                "Synchronization readiness validated for InternshipId={InternshipId}: Ready={IsReady}",
+                internshipId.Value,
+                readiness.IsReady);
+
+            return Result<SynchronizationReadiness>.Success(readiness);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating synchronization readiness for InternshipId={InternshipId}", 
+                internshipId.Value);
+            return Result<SynchronizationReadiness>.Failure("Failed to validate synchronization readiness");
+        }
+    }
+
+    public async Task<Result> PrepareForSynchronizationAsync(
+        InternshipId internshipId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var readiness = await ValidateReadinessForSyncAsync(internshipId, cancellationToken);
+            if (!readiness.IsSuccess || !readiness.Value.IsReady)
+            {
+                return Result.Failure("Internship is not ready for synchronization");
+            }
+
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null)
+            {
+                return Result.Failure("Internship not found");
+            }
+
+            // Update sync status to indicate preparation
+            internship.UpdateSyncStatus(SyncStatus.Preparing);
+            await _internshipRepository.UpdateAsync(internship);
+
+            // Update related entities
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            foreach (var procedure in procedures)
+            {
+                procedure.UpdateSyncStatus(SyncStatus.Preparing);
+                await _procedureRepository.UpdateAsync(procedure);
+            }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Prepared InternshipId={InternshipId} for synchronization",
+                internshipId.Value);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error preparing InternshipId={InternshipId} for synchronization", 
+                internshipId.Value);
+            return Result.Failure("Failed to prepare for synchronization");
+        }
+    }
+
+    public async Task<Result> ProcessApprovalWorkflowAsync(
+        InternshipId internshipId,
+        string approverName,
+        DateTime approvalDate,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null)
+            {
+                return Result.Failure("Internship not found");
+            }
+
+            // Approve the internship
+            var approvalResult = internship.Approve(approverName, approvalDate);
+            if (!approvalResult.IsSuccess)
+            {
+                return approvalResult;
+            }
+
+            // Cascade approval to medical shifts
+            var medicalShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internshipId.Value);
+            foreach (var shift in medicalShifts.Where(ms => !ms.IsApproved))
+            {
+                shift.Approve(approverName, approvalDate);
+                await _medicalShiftRepository.UpdateAsync(shift);
+            }
+
+            // Update sync status if previously synced
+            if (internship.SyncStatus == SyncStatus.Synced)
+            {
+                internship.UpdateSyncStatus(SyncStatus.Modified);
+            }
+
+            await _internshipRepository.UpdateAsync(internship);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Processed approval workflow for InternshipId={InternshipId} by {Approver}",
+                internshipId.Value,
+                approverName);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing approval workflow for InternshipId={InternshipId}", 
+                internshipId.Value);
+            return Result.Failure("Failed to process approval workflow");
+        }
+    }
+
+    public async Task<Result<BatchSyncResult>> SynchronizeBatchAsync(
+        IEnumerable<InternshipId> internshipIds,
+        CancellationToken cancellationToken = default)
+    {
+        var result = new BatchSyncResult
+        {
+            TotalProcessed = internshipIds.Count(),
+            Errors = new List<SyncError>()
+        };
+
+        foreach (var internshipId in internshipIds)
+        {
+            try
+            {
+                var prepareResult = await PrepareForSynchronizationAsync(internshipId, cancellationToken);
+                if (prepareResult.IsSuccess)
+                {
+                    // In a real implementation, this would call the SMK API
+                    // For now, we simulate success
+                    var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+                    internship!.UpdateSyncStatus(SyncStatus.Synced);
+                    await _internshipRepository.UpdateAsync(internship);
+                    
+                    result = result with { SuccessfulSyncs = result.SuccessfulSyncs + 1 };
+                }
+                else
+                {
+                    result = result with { FailedSyncs = result.FailedSyncs + 1 };
+                    result.Errors.Add(new SyncError
+                    {
+                        InternshipId = internshipId,
+                        ErrorMessage = prepareResult.Error,
+                        ErrorCode = "PREP_FAILED"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error syncing InternshipId={InternshipId}", internshipId.Value);
+                result = result with { FailedSyncs = result.FailedSyncs + 1 };
+                result.Errors.Add(new SyncError
+                {
+                    InternshipId = internshipId,
+                    ErrorMessage = ex.Message,
+                    ErrorCode = "SYNC_EXCEPTION"
+                });
+            }
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Batch sync completed: Total={Total}, Success={Success}, Failed={Failed}",
+            result.TotalProcessed,
+            result.SuccessfulSyncs,
+            result.FailedSyncs);
+
+        return Result<BatchSyncResult>.Success(result);
+    }
+
+    public async Task<Result<ConflictResolution>> ResolveConflictsAsync(
+        InternshipId internshipId,
+        ConflictResolutionStrategy strategy,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            if (internship == null)
+            {
+                return Result<ConflictResolution>.Failure("Internship not found");
+            }
+
+            var resolution = new ConflictResolution
+            {
+                InternshipId = internshipId,
+                Actions = new List<string>()
+            };
+
+            switch (strategy)
+            {
+                case ConflictResolutionStrategy.KeepLocal:
+                    // Mark as modified to force overwrite on next sync
+                    internship.UpdateSyncStatus(SyncStatus.Modified);
+                    resolution.Actions.Add("Marked internship as modified to keep local changes");
+                    resolution = resolution with { ConflictsResolved = 1 };
+                    break;
+
+                case ConflictResolutionStrategy.KeepRemote:
+                    // In real implementation, would fetch remote data and overwrite
+                    resolution.Actions.Add("Remote data would be fetched and local data overwritten");
+                    resolution = resolution with { ConflictsResolved = 1 };
+                    break;
+
+                case ConflictResolutionStrategy.Merge:
+                    // Complex merge logic would go here
+                    resolution.Actions.Add("Merge strategy requires manual implementation");
+                    break;
+
+                case ConflictResolutionStrategy.Manual:
+                    resolution.Actions.Add("Manual resolution required by user");
+                    break;
+            }
+
+            await _internshipRepository.UpdateAsync(internship);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Resolved conflicts for InternshipId={InternshipId} using strategy={Strategy}",
+                internshipId.Value,
+                strategy);
+
+            return Result<ConflictResolution>.Success(resolution);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resolving conflicts for InternshipId={InternshipId}", 
+                internshipId.Value);
+            return Result<ConflictResolution>.Failure("Failed to resolve conflicts");
+        }
+    }
+}

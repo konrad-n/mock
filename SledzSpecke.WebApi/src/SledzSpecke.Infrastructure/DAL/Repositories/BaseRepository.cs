@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Repositories;
 using System.Linq.Expressions;
 
 namespace SledzSpecke.Infrastructure.DAL.Repositories;
 
-internal abstract class BaseRepository<TEntity> where TEntity : AggregateRoot
+internal abstract class BaseRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
 {
     protected readonly SledzSpeckeDbContext Context;
     protected readonly DbSet<TEntity> DbSet;
@@ -120,5 +121,41 @@ internal abstract class BaseRepository<TEntity> where TEntity : AggregateRoot
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
+    }
+
+    public virtual async Task<int> CountBySpecificationAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(specification.ToExpression())
+            .CountAsync(cancellationToken);
+    }
+
+    public virtual async Task<(IEnumerable<TEntity> Items, int TotalCount)> GetPagedAsync(
+        ISpecification<TEntity> specification,
+        int pageNumber,
+        int pageSize,
+        Expression<Func<TEntity, object>>? orderBy = null,
+        bool ascending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.Where(specification.ToExpression());
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        if (orderBy != null)
+        {
+            query = ascending
+                ? query.OrderBy(orderBy)
+                : query.OrderByDescending(orderBy);
+        }
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 }

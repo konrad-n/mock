@@ -1,0 +1,310 @@
+using MediatR;
+using Microsoft.Extensions.Logging;
+using SledzSpecke.Core.Events;
+using SledzSpecke.Core.Repositories;
+using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Entities;
+
+namespace SledzSpecke.Application.Events.Handlers;
+
+public sealed class ProcedureCompletedEventHandler : INotificationHandler<Core.Events.ProcedureCompletedEvent>
+{
+    private readonly ILogger<ProcedureCompletedEventHandler> _logger;
+    private readonly IProcedureRepository _procedureRepository;
+    private readonly IInternshipRepository _internshipRepository;
+    private readonly ISpecializationRepository _specializationRepository;
+    private readonly IModuleRepository _moduleRepository;
+    private readonly INotificationService _notificationService;
+    private readonly IStatisticsService _statisticsService;
+    private readonly IProjectionService _projectionService;
+    private readonly IMilestoneService _milestoneService;
+
+    public ProcedureCompletedEventHandler(
+        ILogger<ProcedureCompletedEventHandler> logger,
+        IProcedureRepository procedureRepository,
+        IInternshipRepository internshipRepository,
+        ISpecializationRepository specializationRepository,
+        IModuleRepository moduleRepository,
+        INotificationService notificationService,
+        IStatisticsService statisticsService,
+        IProjectionService projectionService,
+        IMilestoneService milestoneService)
+    {
+        _logger = logger;
+        _procedureRepository = procedureRepository;
+        _internshipRepository = internshipRepository;
+        _specializationRepository = specializationRepository;
+        _moduleRepository = moduleRepository;
+        _notificationService = notificationService;
+        _statisticsService = statisticsService;
+        _projectionService = projectionService;
+        _milestoneService = milestoneService;
+    }
+
+    public async Task Handle(Core.Events.ProcedureCompletedEvent notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation(
+            "Processing ProcedureCompleted event: ProcedureId={ProcedureId}, Code={Code}, Count={Count}",
+            notification.ProcedureId.Value,
+            notification.ProcedureCode,
+            notification.Count);
+
+        try
+        {
+            // 1. Get procedure and related data
+            var procedure = await _procedureRepository.GetByIdAsync(notification.ProcedureId.Value);
+            if (procedure == null)
+            {
+                _logger.LogWarning("Procedure not found: ProcedureId={ProcedureId}", notification.ProcedureId.Value);
+                return;
+            }
+
+            var internship = await _internshipRepository.GetByIdAsync(procedure.InternshipId);
+            if (internship == null)
+            {
+                _logger.LogWarning("Internship not found: InternshipId={InternshipId}", procedure.InternshipId);
+                return;
+            }
+
+            // 2. Update module completion percentage
+            var moduleProgress = await CalculateModuleProgress(internship, cancellationToken);
+            await _statisticsService.UpdateModuleProgressAsync(
+                new InternshipId(internship.Id),
+                moduleProgress,
+                cancellationToken);
+
+            // 3. Check for milestone achievements
+            var milestones = await _milestoneService.CheckMilestonesAsync(
+                new InternshipId(internship.Id),
+                notification.ProcedureCode,
+                notification.Count,
+                cancellationToken);
+
+            foreach (var milestone in milestones)
+            {
+                await _notificationService.SendMilestoneAchievementNotificationAsync(
+                    internship.UserId,
+                    milestone,
+                    cancellationToken);
+                
+                _logger.LogInformation(
+                    "Milestone achieved: UserId={UserId}, Milestone={MilestoneType}",
+                    internship.UserId.Value,
+                    milestone.Type);
+            }
+
+            // 4. Update department analytics
+            await _statisticsService.UpdateProcedureStatisticsAsync(
+                internship.Department,
+                notification.ProcedureCode,
+                notification.Count,
+                cancellationToken);
+
+            // 5. Check if this completes a module
+            var completedModule = moduleProgress.FirstOrDefault(m => 
+                m.CompletionPercentage >= 100 && 
+                m.PreviousPercentage < 100);
+
+            if (completedModule != null)
+            {
+                await HandleModuleCompletion(internship, completedModule, cancellationToken);
+            }
+
+            // 6. Update projections
+            await _projectionService.UpdateStudentProgressProjectionAsync(
+                new InternshipId(internship.Id),
+                cancellationToken);
+
+            await _projectionService.UpdateDepartmentAnalyticsProjectionAsync(
+                internship.Department,
+                cancellationToken);
+
+            // 7. Check for unlocked procedures
+            var unlockedProcedures = await CheckUnlockedProcedures(internship, notification, cancellationToken);
+            if (unlockedProcedures.Any())
+            {
+                await _notificationService.SendUnlockedProceduresNotificationAsync(
+                    internship.UserId,
+                    unlockedProcedures,
+                    cancellationToken);
+            }
+
+            // 8. Update specialization progress
+            await UpdateSpecializationProgress(internship, notification, cancellationToken);
+
+            _logger.LogInformation(
+                "Successfully processed ProcedureCompleted event for ProcedureId={ProcedureId}",
+                notification.ProcedureId.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Error processing ProcedureCompleted event for ProcedureId={ProcedureId}",
+                notification.ProcedureId.Value);
+        }
+    }
+
+    private async Task<List<ModuleProgress>> CalculateModuleProgress(Internship internship, CancellationToken cancellationToken)
+    {
+        var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId);
+        var procedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
+        var progressList = new List<ModuleProgress>();
+
+        foreach (var module in modules)
+        {
+            var moduleProcedures = procedures.Where(p => p.ModuleId == module.Id).ToList();
+            var totalRequired = module.RequiredProcedures.Sum(r => r.RequiredCount);
+            var totalCompleted = 0;
+
+            foreach (var required in module.RequiredProcedures)
+            {
+                var completed = moduleProcedures
+                    .Where(p => p.Code == required.ProcedureCode)
+                    .Sum(p => p.Count);
+                totalCompleted += Math.Min(completed, required.RequiredCount);
+            }
+
+            var percentage = totalRequired > 0 ? (totalCompleted * 100.0 / totalRequired) : 0;
+            
+            progressList.Add(new ModuleProgress
+            {
+                ModuleId = module.Id,
+                ModuleName = module.Name,
+                CompletionPercentage = percentage,
+                PreviousPercentage = await GetPreviousModulePercentage(internship.Id, module.Id, cancellationToken),
+                RequiredCount = totalRequired,
+                CompletedCount = totalCompleted
+            });
+        }
+
+        return progressList;
+    }
+
+    private async Task<double> GetPreviousModulePercentage(int internshipId, int moduleId, CancellationToken cancellationToken)
+    {
+        // This would retrieve from a projection or cache
+        return await _projectionService.GetModuleCompletionPercentageAsync(
+            new InternshipId(internshipId),
+            new ModuleId(moduleId),
+            cancellationToken);
+    }
+
+    private async Task HandleModuleCompletion(Internship internship, ModuleProgress completedModule, CancellationToken cancellationToken)
+    {
+        // Send completion notification
+        await _notificationService.SendModuleCompletionNotificationAsync(
+            internship.UserId,
+            completedModule.ModuleName,
+            DateTime.UtcNow,
+            cancellationToken);
+
+        // Generate certificate if applicable
+        var module = await _moduleRepository.GetByIdAsync(completedModule.ModuleId);
+        if (module != null && module.GeneratesCertificate)
+        {
+            await _notificationService.RequestCertificateGenerationAsync(
+                internship.UserId,
+                new ModuleId(module.Id),
+                cancellationToken);
+        }
+
+        // Update internship status if all modules completed
+        var allModulesProgress = await CalculateModuleProgress(internship, cancellationToken);
+        if (allModulesProgress.All(m => m.CompletionPercentage >= 100))
+        {
+            await _notificationService.SendSpecializationCompletionNotificationAsync(
+                internship.UserId,
+                internship.SpecializationId,
+                cancellationToken);
+        }
+    }
+
+    private async Task<List<string>> CheckUnlockedProcedures(
+        Internship internship,
+        Core.Events.ProcedureCompletedEvent notification,
+        CancellationToken cancellationToken)
+    {
+        // Some procedures unlock after completing prerequisites
+        var unlockedProcedures = new List<string>();
+
+        // Example: Advanced procedures unlock after basic ones
+        var advancedProcedureMap = new Dictionary<string, List<string>>
+        {
+            ["A.1"] = new[] { "A.1a", "A.1b", "A.1c" }.ToList(),
+            ["B.1"] = new[] { "B.1a", "B.1b" }.ToList(),
+            ["C.1"] = new[] { "C.1a", "C.1b", "C.1c", "C.1d" }.ToList()
+        };
+
+        if (advancedProcedureMap.ContainsKey(notification.ProcedureCode))
+        {
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
+            var completedBasic = procedures.FirstOrDefault(p => 
+                p.Code == notification.ProcedureCode && p.Count >= 5); // Assuming 5 completions unlock advanced
+
+            if (completedBasic != null)
+            {
+                unlockedProcedures.AddRange(advancedProcedureMap[notification.ProcedureCode]);
+            }
+        }
+
+        return unlockedProcedures;
+    }
+
+    private async Task UpdateSpecializationProgress(
+        Internship internship,
+        Core.Events.ProcedureCompletedEvent notification,
+        CancellationToken cancellationToken)
+    {
+        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+        if (specialization == null) return;
+
+        // Calculate year-wise progress
+        var procedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
+        var yearProcedures = procedures.Where(p => p.Year == internship.CurrentYear).ToList();
+        
+        var yearProgress = new YearProgress
+        {
+            Year = internship.CurrentYear,
+            TotalProcedures = yearProcedures.Count,
+            UniqueProcedureCodes = yearProcedures.Select(p => p.Code).Distinct().Count(),
+            TotalCount = yearProcedures.Sum(p => p.Count)
+        };
+
+        await _statisticsService.UpdateYearProgressAsync(
+            new InternshipId(internship.Id),
+            yearProgress,
+            cancellationToken);
+
+        // Check if moving to next year
+        var requiredProceduresForYear = specialization.YearRequirements
+            .FirstOrDefault(r => r.Year == internship.CurrentYear);
+
+        if (requiredProceduresForYear != null && 
+            yearProgress.UniqueProcedureCodes >= requiredProceduresForYear.MinimumProcedures)
+        {
+            await _notificationService.SendYearCompletionNotificationAsync(
+                internship.UserId,
+                internship.CurrentYear,
+                cancellationToken);
+        }
+    }
+
+    private record ModuleProgress
+    {
+        public int ModuleId { get; init; }
+        public string ModuleName { get; init; }
+        public double CompletionPercentage { get; init; }
+        public double PreviousPercentage { get; init; }
+        public int RequiredCount { get; init; }
+        public int CompletedCount { get; init; }
+    }
+
+    private record YearProgress
+    {
+        public int Year { get; init; }
+        public int TotalProcedures { get; init; }
+        public int UniqueProcedureCodes { get; init; }
+        public int TotalCount { get; init; }
+    }
+}
