@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Infrastructure.DAL.Configurations;
+using SledzSpecke.Infrastructure.Persistence.EntityTypeConfigurations;
 
 namespace SledzSpecke.Infrastructure.DAL;
 
@@ -21,6 +22,7 @@ public sealed class SledzSpeckeDbContext : DbContext
     public DbSet<SelfEducation> SelfEducations => Set<SelfEducation>();
     public DbSet<EducationalActivity> EducationalActivities => Set<EducationalActivity>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<AdditionalSelfEducationDays> AdditionalSelfEducationDays => Set<AdditionalSelfEducationDays>();
 
     public SledzSpeckeDbContext(DbContextOptions<SledzSpeckeDbContext> options) : base(options)
     {
@@ -43,5 +45,6 @@ public sealed class SledzSpeckeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SelfEducationConfiguration());
         modelBuilder.ApplyConfiguration(new EducationalActivityConfiguration());
         modelBuilder.ApplyConfiguration(new FileMetadataConfiguration());
+        modelBuilder.ApplyConfiguration(new AdditionalSelfEducationDaysConfiguration());
     }
 }

@@ -15,6 +15,7 @@ using SledzSpecke.Infrastructure.Auth;
 using SledzSpecke.Infrastructure.DAL;
 using SledzSpecke.Infrastructure.DAL.Repositories;
 using SledzSpecke.Infrastructure.DAL.Seeding;
+using SledzSpecke.Infrastructure.Repositories;
 using SledzSpecke.Infrastructure.Security;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Infrastructure.Time;
@@ -90,6 +91,7 @@ public static class Extensions
         services.AddScoped<ISelfEducationRepository, SqlSelfEducationRepository>();
         services.AddScoped<IEducationalActivityRepository, EducationalActivityRepository>();
         services.AddScoped<IFileMetadataRepository, FileMetadataRepository>();
+        services.AddScoped<IAdditionalSelfEducationDaysRepository, SqlAdditionalSelfEducationDaysRepository>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IDataSeeder, DataSeeder>();
         

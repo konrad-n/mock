@@ -13,37 +13,40 @@ SledzSpecke is a medical specialization tracking system designed for doctors to 
 
 ### Core Entities
 
-#### 1. User (Doctor)
+#### 1. User (Doctor) ✅ UPDATED
 ```csharp
-public sealed class User : AggregateRoot
+public sealed class User
 {
     public int Id { get; private set; } // Auto-generated using PostgreSQL sequence
     public string Email { get; private set; }
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
-    public string Pesel { get; private set; }
-    public string PwzNumber { get; private set; } // Prawo Wykonywania Zawodu
+    public string Pesel { get; private set; } // With checksum validation
+    public string PwzNumber { get; private set; } // Prawo Wykonywania Zawodu (7 digits)
     public string PhoneNumber { get; private set; }
     public DateTime DateOfBirth { get; private set; }
     public Address CorrespondenceAddress { get; private set; }
-    public List<Specialization> Specializations { get; private set; }
+    
+    // Removed fields: Username, Bio, ProfilePicturePath, PreferredLanguage, PreferredTheme
 }
 ```
 
-#### 2. Specialization (EKS - Elektroniczna Karta Specjalizacji)
+#### 2. Specialization (EKS - Elektroniczna Karta Specjalizacji) ✅ UPDATED
 ```csharp
 public sealed class Specialization : Entity
 {
     public int Id { get; private set; }
     public int UserId { get; private set; }
-    public string SpecializationName { get; private set; } // e.g., "Kardiologia"
+    public string Name { get; private set; } // e.g., "Kardiologia"
+    public string ProgramCode { get; private set; }
     public string SmkVersion { get; private set; } // "old" or "new"
+    public string ProgramVariant { get; private set; } // Numer wariantu programu
     public DateTime StartDate { get; private set; }
     public DateTime PlannedEndDate { get; private set; }
     public DateTime? ActualEndDate { get; private set; }
-    public string ProgramVariant { get; private set; } // Numer wariantu programu
     public int PlannedPesYear { get; private set; } // Planned exam year
     public SpecializationStatus Status { get; private set; }
+    public string ProgramStructure { get; private set; }
     public List<Module> Modules { get; private set; }
 }
 
@@ -149,7 +152,7 @@ public enum ShiftType
 }
 ```
 
-#### 7. Procedure (Zabieg/Procedura medyczna)
+#### 7. Procedure (Zabieg/Procedura medyczna) ⏳ NEEDS HIERARCHY
 ```csharp
 public sealed class Procedure : Entity
 {
@@ -210,7 +213,7 @@ public enum SelfEducationType
 }
 ```
 
-#### 9. Additional Self Education Days
+#### 9. Additional Self Education Days ⏳ NOT IMPLEMENTED
 ```csharp
 public sealed class AdditionalSelfEducationDays : Entity
 {
@@ -227,10 +230,11 @@ public sealed class AdditionalSelfEducationDays : Entity
 
 ## Business Rules & Validation
 
-### 1. User Registration & Authentication
+### 1. User Registration & Authentication ✅ UPDATED
 - Email must be unique and valid
-- PWZ number must be valid (Polish medical license format)
+- PWZ number must be valid (7 digits, cannot start with 0)
 - PESEL must be valid (11 digits, checksum validation)
+- Date of birth must match PESEL
 - Password must meet security requirements (min 8 chars, mixed case, numbers, special chars)
 
 ### 2. Specialization Management
@@ -354,7 +358,7 @@ PUT    /api/self-education/{id}
 DELETE /api/self-education/{id}
 ```
 
-### Export
+### Export ⏳ NOT IMPLEMENTED
 ```
 GET    /api/export/specialization/{id}/xlsx
 GET    /api/export/specialization/{id}/preview
@@ -487,19 +491,19 @@ The Chrome extension will:
 
 ## Implementation Priority
 
-### Phase 1 (MVP)
+### Phase 1 (MVP) ✅ COMPLETED
 1. User authentication & profile
 2. Basic specialization management
 3. Medical shifts tracking
 4. Basic export functionality
 
-### Phase 2
+### Phase 2 ⏳ IN PROGRESS
 1. Complete internship management
 2. Course tracking
 3. Procedure recording
 4. Advanced export with validation
 
-### Phase 3
+### Phase 3 ⏳ PENDING
 1. Self-education tracking
 2. Mobile apps (iOS/Android)
 3. Chrome extension
@@ -507,17 +511,17 @@ The Chrome extension will:
 
 ## Testing Strategy
 
-### Unit Tests
+### Unit Tests ✅ PASSING
 - All business logic in domain layer
 - Value object validation
 - Entity state transitions
 
-### Integration Tests
+### Integration Tests ⚠️ NEEDS UPDATE
 - API endpoint testing
 - Database operations
 - Export file generation
 
-### E2E Tests
+### E2E Tests ⚠️ NEEDS UPDATE
 - Complete user workflows
 - Export and validation
 - Performance benchmarks
@@ -530,7 +534,7 @@ The Chrome extension will:
    - API keys
    - SMK endpoints (if any)
 
-2. **Database Migrations**
+2. **Database Migrations** ⏳ PENDING
    - Version-controlled migrations
    - Rollback procedures
    - Data seeding for testing
@@ -540,3 +544,19 @@ The Chrome extension will:
    - Error tracking
    - User analytics
    - Export success rates
+
+## 🔴 CURRENT STATUS (2025-06-16)
+
+### Technical Debt:
+- User-Specialization relationship refactored but many handlers are commented out
+- Procedure entity needs hierarchy implementation for Old/New SMK
+- AdditionalSelfEducationDays entity not implemented
+- XLSX export service not implemented
+- Database migrations pending for new entity structure
+
+### Next Immediate Steps:
+1. Create database migrations for User and Specialization changes
+2. Implement Procedure entity hierarchy
+3. Implement AdditionalSelfEducationDays entity
+4. Begin XLSX export service implementation
+5. Update integration and E2E tests

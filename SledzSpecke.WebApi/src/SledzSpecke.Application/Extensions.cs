@@ -54,6 +54,10 @@ public static partial class ApplicationExtensions
         // Register Domain Services
         services.AddScoped<ISMKSynchronizationService, SimplifiedSMKSynchronizationService>();
         services.AddScoped<IModuleCompletionService, SimplifiedModuleCompletionService>();
+        services.AddScoped<IModuleProgressionService, ModuleProgressionService>();
+        services.AddScoped<IDurationCalculationService, DurationCalculationService>();
+        services.AddScoped<IMedicalShiftValidationService, MedicalShiftValidationService>();
+        services.AddScoped<IProcedureValidationService, ProcedureValidationService>();
         // TODO: Add implementations for remaining domain services
         // services.AddScoped<ISpecializationDurationService, SpecializationDurationService>();
         // services.AddScoped<IProcedureAllocationService, ProcedureAllocationService>();
