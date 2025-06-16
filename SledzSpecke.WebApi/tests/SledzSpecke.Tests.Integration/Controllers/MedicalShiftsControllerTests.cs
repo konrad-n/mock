@@ -45,13 +45,18 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         await _specializationRepository.AddAsync(specialization);
         await DbContext.SaveChangesAsync();
 
-        var command = new CreateMedicalShift(
-            SpecializationId: specialization.Id.Value,
+        // Create an internship first
+        var internship = TestDataFactory.CreateInternship(specialization.Id.Value);
+        await DbContext.Internships.AddAsync(internship);
+        await DbContext.SaveChangesAsync();
+        
+        var command = new AddMedicalShift(
+            InternshipId: internship.Id,
             Date: DateTime.Today.AddDays(1),
-            StartTime: new TimeSpan(8, 0, 0),
-            EndTime: new TimeSpan(16, 0, 0),
+            Hours: 8,
+            Minutes: 0,
             Location: "Hospital A",
-            Description: "Regular shift");
+            Year: 1);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/medical-shifts", command);
@@ -71,13 +76,18 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         await _specializationRepository.AddAsync(specialization);
         await DbContext.SaveChangesAsync();
 
-        var command = new CreateMedicalShift(
-            SpecializationId: specialization.Id.Value,
+        // Create an internship first
+        var internship = TestDataFactory.CreateInternship(specialization.Id.Value);
+        await DbContext.Internships.AddAsync(internship);
+        await DbContext.SaveChangesAsync();
+        
+        var command = new AddMedicalShift(
+            InternshipId: internship.Id,
             Date: DateTime.Today.AddDays(-1),
-            StartTime: new TimeSpan(8, 0, 0),
-            EndTime: new TimeSpan(16, 0, 0),
+            Hours: 8,
+            Minutes: 0,
             Location: "Hospital A",
-            Description: "Regular shift");
+            Year: 1);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/medical-shifts", command);
@@ -98,13 +108,18 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         await _specializationRepository.AddAsync(specialization);
         await DbContext.SaveChangesAsync();
 
-        var command = new CreateMedicalShift(
-            SpecializationId: specialization.Id.Value,
+        // Create an internship first
+        var internship = TestDataFactory.CreateInternship(specialization.Id.Value);
+        await DbContext.Internships.AddAsync(internship);
+        await DbContext.SaveChangesAsync();
+        
+        var command = new AddMedicalShift(
+            InternshipId: internship.Id,
             Date: DateTime.Today.AddDays(1),
-            StartTime: new TimeSpan(16, 0, 0),
-            EndTime: new TimeSpan(8, 0, 0),
+            Hours: -8, // This should be invalid (negative hours)
+            Minutes: 0,
             Location: "Hospital A",
-            Description: "Regular shift");
+            Year: 1);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/medical-shifts", command);
@@ -121,13 +136,13 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
     public async Task CreateMedicalShift_WithoutAuthentication_ShouldReturnUnauthorized()
     {
         // Arrange
-        var command = new CreateMedicalShift(
-            SpecializationId: 1,
+        var command = new AddMedicalShift(
+            InternshipId: 1,
             Date: DateTime.Today.AddDays(1),
-            StartTime: new TimeSpan(8, 0, 0),
-            EndTime: new TimeSpan(16, 0, 0),
+            Hours: 8,
+            Minutes: 0,
             Location: "Hospital A",
-            Description: "Regular shift");
+            Year: 1);
 
         // Act
         var response = await Client.PostAsJsonAsync("/medical-shifts", command);

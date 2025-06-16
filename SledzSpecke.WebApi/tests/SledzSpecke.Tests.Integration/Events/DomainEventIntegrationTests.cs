@@ -240,7 +240,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var user = User.Create(
             new Username("testuser"),
             new Email("test@example.com"),
-            new HashedPassword("hashedpassword"),
+            new HashedPassword("tL8XQn5ScIhHqxKNMQJfYGD3GmjptUPgxlrXH1zVBvI="),
             new FullName("Test User"),
             new SmkVersion("new")
         );

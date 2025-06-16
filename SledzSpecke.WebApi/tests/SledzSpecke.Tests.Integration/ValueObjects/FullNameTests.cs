@@ -17,11 +17,11 @@ public class FullNameTests
     public void Create_WithValidName_ShouldSucceed(string name)
     {
         // Act
-        var result = () => FullName.Create(name);
+        var result = () => new FullName(name);
 
         // Assert
         result.Should().NotThrow();
-        var fullName = FullName.Create(name);
+        var fullName = new FullName(name);
         fullName.Value.Should().Be(name);
     }
 
@@ -34,22 +34,22 @@ public class FullNameTests
     public void Create_WithEmptyOrWhitespace_ShouldThrow(string name)
     {
         // Act
-        var result = () => FullName.Create(name);
+        var result = () => new FullName(name);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Full name cannot be empty.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.DomainException>()
+            .WithMessage("Full name cannot be empty.");
     }
 
     [Fact]
     public void Create_WithNull_ShouldThrow()
     {
         // Act
-        var result = () => FullName.Create(null!);
+        var result = () => new FullName(null!);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Full name cannot be empty.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.DomainException>()
+            .WithMessage("Full name cannot be empty.");
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class FullNameTests
         var longName = new string('A', 200);
 
         // Act
-        var result = () => FullName.Create(longName);
+        var result = () => new FullName(longName);
 
         // Assert
         result.Should().NotThrow();
@@ -69,8 +69,8 @@ public class FullNameTests
     public void Equals_WithSameName_ShouldReturnTrue()
     {
         // Arrange
-        var name1 = FullName.Create("John Doe");
-        var name2 = FullName.Create("John Doe");
+        var name1 = new FullName("John Doe");
+        var name2 = new FullName("John Doe");
 
         // Act & Assert
         name1.Should().Be(name2);
@@ -82,8 +82,8 @@ public class FullNameTests
     public void Equals_WithDifferentName_ShouldReturnFalse()
     {
         // Arrange
-        var name1 = FullName.Create("John Doe");
-        var name2 = FullName.Create("Jane Doe");
+        var name1 = new FullName("John Doe");
+        var name2 = new FullName("Jane Doe");
 
         // Act & Assert
         name1.Should().NotBe(name2);
@@ -108,7 +108,7 @@ public class FullNameTests
     public void ImplicitConversion_ToString_ShouldWork()
     {
         // Arrange
-        var fullName = FullName.Create("John Doe");
+        var fullName = new FullName("John Doe");
 
         // Act
         string nameString = fullName;
@@ -121,7 +121,7 @@ public class FullNameTests
     public void ToString_ShouldReturnValue()
     {
         // Arrange
-        var fullName = FullName.Create("John Doe");
+        var fullName = new FullName("John Doe");
 
         // Act
         var result = fullName.ToString();

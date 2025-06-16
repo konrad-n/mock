@@ -17,12 +17,15 @@ public class SimpleDomainTests : IntegrationTestBase
         await ClearDatabaseAsync();
         
         var internship = Internship.Create(
-            new InternshipId(1),
+            InternshipId.New(),
             new SpecializationId(1),
+            "Test Internship",
             "Test Hospital",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, // plannedWeeks
+            20  // plannedDays
         );
 
         // Act
@@ -42,22 +45,26 @@ public class SimpleDomainTests : IntegrationTestBase
         await ClearDatabaseAsync();
         
         var internship = Internship.Create(
-            new InternshipId(1),
+            InternshipId.New(),
             new SpecializationId(1),
+            "Test Internship",
             "Test Hospital",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, // plannedWeeks
+            20  // plannedDays
         );
 
         // Act
         var result = internship.AddMedicalShift(
-            new MedicalShiftId(1),
             DateTime.UtcNow.Date.AddDays(5),
             8,
             30,
             "Emergency Room",
-            2024
+            2024,
+            SmkVersion.New,
+            new int[] { 1, 2, 3, 4, 5, 6 } // availableYears
         );
 
         // Assert
@@ -101,12 +108,15 @@ public class SimpleDomainTests : IntegrationTestBase
     {
         // Arrange
         var internship = Internship.Create(
-            new InternshipId(1),
+            InternshipId.New(),
             new SpecializationId(1),
+            "Test Internship",
             "Test Hospital",
             "Test Department",
             DateTime.UtcNow.Date.AddDays(-30),
-            DateTime.UtcNow.Date.AddDays(30) // Not ended yet
+            DateTime.UtcNow.Date.AddDays(30), // Not ended yet
+            8, // plannedWeeks
+            40  // plannedDays
         );
 
         // Act - Try to mark as completed (should fail because not ended)

@@ -16,11 +16,11 @@ public class DescriptionTests
     public void Create_WithValidDescription_ShouldSucceed(string description)
     {
         // Act
-        var result = () => Description.Create(description);
+        var result = () => new Description(description);
 
         // Assert
         result.Should().NotThrow();
-        var descriptionValue = Description.Create(description);
+        var descriptionValue = new Description(description);
         descriptionValue.Value.Should().Be(description);
     }
 
@@ -33,22 +33,22 @@ public class DescriptionTests
     public void Create_WithEmptyOrWhitespace_ShouldThrow(string description)
     {
         // Act
-        var result = () => Description.Create(description);
+        var result = () => new Description(description);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Description cannot be empty.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.DomainException>()
+            .WithMessage("Description cannot be empty.");
     }
 
     [Fact]
     public void Create_WithNull_ShouldThrow()
     {
         // Act
-        var result = () => Description.Create(null!);
+        var result = () => new Description(null!);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Description cannot be empty.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.DomainException>()
+            .WithMessage("Description cannot be empty.");
     }
 
     [Fact]
@@ -58,11 +58,11 @@ public class DescriptionTests
         var longDescription = new string('A', 1000);
 
         // Act
-        var result = () => Description.Create(longDescription);
+        var result = () => new Description(longDescription);
 
         // Assert
         result.Should().NotThrow();
-        var descriptionValue = Description.Create(longDescription);
+        var descriptionValue = new Description(longDescription);
         descriptionValue.Value.Should().Be(longDescription);
     }
 
@@ -75,11 +75,11 @@ Second line with more details.
 Third line with final information.";
 
         // Act
-        var result = () => Description.Create(multilineDescription);
+        var result = () => new Description(multilineDescription);
 
         // Assert
         result.Should().NotThrow();
-        var descriptionValue = Description.Create(multilineDescription);
+        var descriptionValue = new Description(multilineDescription);
         descriptionValue.Value.Should().Be(multilineDescription);
     }
 
@@ -87,8 +87,8 @@ Third line with final information.";
     public void Equals_WithSameDescription_ShouldReturnTrue()
     {
         // Arrange
-        var description1 = Description.Create("Test description");
-        var description2 = Description.Create("Test description");
+        var description1 = new Description("Test description");
+        var description2 = new Description("Test description");
 
         // Act & Assert
         description1.Should().Be(description2);
@@ -100,8 +100,8 @@ Third line with final information.";
     public void Equals_WithDifferentDescription_ShouldReturnFalse()
     {
         // Arrange
-        var description1 = Description.Create("First description");
-        var description2 = Description.Create("Second description");
+        var description1 = new Description("First description");
+        var description2 = new Description("Second description");
 
         // Act & Assert
         description1.Should().NotBe(description2);
@@ -126,7 +126,7 @@ Third line with final information.";
     public void ImplicitConversion_ToString_ShouldWork()
     {
         // Arrange
-        var description = Description.Create("Test description");
+        var description = new Description("Test description");
 
         // Act
         string descriptionString = description;
@@ -139,7 +139,7 @@ Third line with final information.";
     public void ToString_ShouldReturnValue()
     {
         // Arrange
-        var description = Description.Create("Test description");
+        var description = new Description("Test description");
 
         // Act
         var result = description.ToString();

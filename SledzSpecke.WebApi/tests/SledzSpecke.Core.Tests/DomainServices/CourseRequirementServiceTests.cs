@@ -38,11 +38,14 @@ public class CourseRequirementServiceTests
         var specializationId = new SpecializationId(1);
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Anestezjologia i intensywna terapia",
             "ANEST",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -96,15 +99,18 @@ public class CourseRequirementServiceTests
 
         var specialization = new Specialization(
             specializationId,
+            user.Id,
             "Test Specialization",
             "TEST",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
@@ -132,7 +138,7 @@ public class CourseRequirementServiceTests
 
         var user = CreateTestUser(new SpecializationId(1), SmkVersion.Old);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         // Act
@@ -159,15 +165,18 @@ public class CourseRequirementServiceTests
 
         var specialization = new Specialization(
             specializationId,
+            user.Id,
             "Anestezjologia",
             "ANEST",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
@@ -203,15 +212,18 @@ public class CourseRequirementServiceTests
 
         var specialization = new Specialization(
             specializationId,
+            user.Id,
             "Anestezjologia",
             "ANEST",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
@@ -249,15 +261,18 @@ public class CourseRequirementServiceTests
 
         var specialization = new Specialization(
             specializationId,
+            user.Id,
             "Anestezjologia",
             "ANEST",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
@@ -289,15 +304,18 @@ public class CourseRequirementServiceTests
 
         var specialization = new Specialization(
             specializationId,
+            user.Id,
             "Anestezjologia",
             "ANEST",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
@@ -333,12 +351,16 @@ public class CourseRequirementServiceTests
     {
         return User.CreateWithId(
             new UserId(_testUserId++),
-            new Email("test@example.com"),
-            new Username("testuser"),
-            new HashedPassword("abcdefghijklmnopqrstuvwxyz0123456789ABCD="),
-            new FullName("Test User"),
-            smkVersion,
-            specializationId,
+            new Email($"test{_testUserId}@example.com"),
+            new HashedPassword("tL8XQn5ScIhHqxKNMQJfYGD3GmjptUPgxlrXH1zVBvI="), // Valid base64 hash
+            new FirstName("Test"),
+            null, // SecondName
+            new LastName("User"),
+            new Pesel("44051401458"), // Valid PESEL with correct checksum
+            new PwzNumber("1234567"), // Valid PWZ
+            new PhoneNumber("+48123456789"), // Valid phone
+            new DateTime(1944, 5, 14), // Date of birth matching PESEL 44051401458
+            new Address("Test Street", "1", null, "00-000", "Warsaw", "Mazowieckie", "Poland"),
             DateTime.UtcNow);
     }
 
@@ -354,18 +376,21 @@ public class CourseRequirementServiceTests
 
         var specialization = new Specialization(
             specializationId,
+            user.Id,
             "Chirurgia onkologiczna",
             "CHOG",
-            SmkVersion.New,
+            new SmkVersion("new"),
+            "modular", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(5),
+            2025, // plannedPesYear
             "Modular Program",
             0); // Module-based, not year-based
             
         // Update user to have matching SMK version
         var userWithNewSmk = CreateTestUser(specializationId, SmkVersion.New);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<UserId>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(userWithNewSmk);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);

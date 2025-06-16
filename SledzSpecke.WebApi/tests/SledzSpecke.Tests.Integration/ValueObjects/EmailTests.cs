@@ -16,11 +16,11 @@ public class EmailTests
     public void Create_WithValidEmail_ShouldSucceed(string email)
     {
         // Act
-        var result = () => Email.Create(email);
+        var result = () => new Email(email);
 
         // Assert
         result.Should().NotThrow();
-        var emailValue = Email.Create(email);
+        var emailValue = new Email(email);
         emailValue.Value.Should().Be(email);
     }
 
@@ -38,30 +38,28 @@ public class EmailTests
     public void Create_WithInvalidEmail_ShouldThrow(string email)
     {
         // Act
-        var result = () => Email.Create(email);
+        var result = () => new Email(email);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Invalid email format.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.InvalidEmailException>();
     }
 
     [Fact]
     public void Create_WithNull_ShouldThrow()
     {
         // Act
-        var result = () => Email.Create(null!);
+        var result = () => new Email(null!);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Invalid email format.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.InvalidEmailException>();
     }
 
     [Fact]
     public void Equals_WithSameEmail_ShouldReturnTrue()
     {
         // Arrange
-        var email1 = Email.Create("user@example.com");
-        var email2 = Email.Create("user@example.com");
+        var email1 = new Email("user@example.com");
+        var email2 = new Email("user@example.com");
 
         // Act & Assert
         email1.Should().Be(email2);
@@ -73,8 +71,8 @@ public class EmailTests
     public void Equals_WithDifferentEmail_ShouldReturnFalse()
     {
         // Arrange
-        var email1 = Email.Create("user1@example.com");
-        var email2 = Email.Create("user2@example.com");
+        var email1 = new Email("user1@example.com");
+        var email2 = new Email("user2@example.com");
 
         // Act & Assert
         email1.Should().NotBe(email2);
@@ -99,7 +97,7 @@ public class EmailTests
     public void ImplicitConversion_ToString_ShouldWork()
     {
         // Arrange
-        var email = Email.Create("user@example.com");
+        var email = new Email("user@example.com");
 
         // Act
         string emailString = email;

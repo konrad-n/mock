@@ -16,6 +16,7 @@ public record UserId
         Value = value;
     }
 
+    public static UserId New() => new(0); // Will be set by EF Core
     public static implicit operator int(UserId userId) => userId.Value;
     public static implicit operator UserId(int value) => new(value);
 }

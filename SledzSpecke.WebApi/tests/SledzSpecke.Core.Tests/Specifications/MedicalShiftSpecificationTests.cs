@@ -183,11 +183,14 @@ public class MedicalShiftSpecificationTests
         return MedicalShift.Create(
             id,
             internshipId ?? new InternshipId(1),
+            null, // moduleId
             date ?? DateTime.UtcNow,
             8, // hours
             0, // minutes
-            "Test Department",
-            2024
+            ShiftType.Independent,
+            "Test Department", // location
+            "Dr. Test", // supervisorName
+            2024 // year
         );
     }
 

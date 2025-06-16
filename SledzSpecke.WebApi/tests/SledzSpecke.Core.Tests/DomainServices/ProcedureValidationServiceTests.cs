@@ -42,19 +42,26 @@ public class ProcedureValidationServiceTests
         
         var procedure = ProcedureOldSmk.Create(
             procedureId,
+            null, // moduleId
             internshipId,
             DateTime.Today,
             1, // year
             "PROC001",
-            "Department A");
+            "Test Procedure", // name
+            "Department A", // location
+            ProcedureExecutionType.CodeA,
+            "Dr. Smith"); // supervisorName
 
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -83,19 +90,26 @@ public class ProcedureValidationServiceTests
         
         var procedure = ProcedureOldSmk.Create(
             procedureId,
+            null, // moduleId
             internshipId,
             DateTime.Today,
             1,
             "INVALID_CODE", // Invalid code
-            "Department A");
+            "Test Procedure", // name
+            "Department A", // location
+            ProcedureExecutionType.CodeA,
+            "Dr. Smith"); // supervisorName
 
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -137,12 +151,16 @@ public class ProcedureValidationServiceTests
         {
             var proc = ProcedureOldSmk.Create(
                 new ProcedureId(i + 1),
+                null, // moduleId
                 new InternshipId(1),
                 DateTime.Today.AddDays(-i),
                 1,
                 "PROC001",
-                "Department A");
-            proc.UpdateProcedureDetails("A", "Dr. Smith", "AB", 'M');
+                "Test Procedure", // name
+                "Department A", // location
+                ProcedureExecutionType.CodeA,
+                "Dr. Smith"); // supervisorName
+            proc.UpdateProcedureDetails(ProcedureExecutionType.CodeA, "Dr. Smith", null, "AB", 'M');
             proc.Complete();
             procedures.Add(proc);
         }
@@ -152,12 +170,16 @@ public class ProcedureValidationServiceTests
         {
             var proc = ProcedureOldSmk.Create(
                 new ProcedureId(i + 10),
+                null, // moduleId
                 new InternshipId(1),
                 DateTime.Today.AddDays(-i),
                 1,
                 "PROC001",
-                "Department B");
-            proc.UpdateProcedureDetails("B", "Dr. Smith", "CD", 'K');
+                "Test Procedure", // name
+                "Department B", // location
+                ProcedureExecutionType.CodeB,
+                "Dr. Smith"); // supervisorName
+            proc.UpdateProcedureDetails(ProcedureExecutionType.CodeB, "Dr. Smith", null, "CD", 'K');
             proc.Complete();
             procedures.Add(proc);
         }
@@ -198,13 +220,15 @@ public class ProcedureValidationServiceTests
         // Add New SMK procedure with counts
         var proc1 = ProcedureNewSmk.Create(
             new ProcedureId(1),
+            moduleId,
             new InternshipId(1),
             DateTime.Today,
             "PROC001",
-            "Department A",
-            moduleId,
-            3,
-            "Test Procedure");
+            "Test Procedure", // procedureName
+            "Department A", // location
+            ProcedureExecutionType.CodeA,
+            "Dr. Smith", // supervisorName
+            3); // procedureRequirementId
         proc1.UpdateCounts(15, 8);
         proc1.Complete();
         procedures.Add(proc1);
@@ -245,24 +269,32 @@ public class ProcedureValidationServiceTests
         {
             var proc = ProcedureOldSmk.Create(
                 new ProcedureId(i + 1),
+                null, // moduleId
                 new InternshipId(1),
                 DateTime.Today.AddDays(-i),
                 1,
                 "PROC001",
-                "Department A");
-            proc.UpdateProcedureDetails("A", "Dr. Smith", "AB", 'M');
+                "Test Procedure", // name
+                "Department A", // location
+                ProcedureExecutionType.CodeA,
+                "Dr. Smith"); // supervisorName
+            proc.UpdateProcedureDetails(ProcedureExecutionType.CodeA, "Dr. Smith", null, "AB", 'M');
             proc.Complete();
             procedures.Add(proc);
         }
         
         var procB = ProcedureOldSmk.Create(
             new ProcedureId(10),
+            null, // moduleId
             new InternshipId(1),
             DateTime.Today,
             1,
             "PROC001",
-            "Department B");
-        procB.UpdateProcedureDetails("B", "Dr. Smith", "CD", 'K');
+            "Test Procedure", // name
+            "Department B", // location
+            ProcedureExecutionType.CodeB,
+            "Dr. Smith"); // supervisorName
+        procB.UpdateProcedureDetails(ProcedureExecutionType.CodeB, "Dr. Smith", null, "CD", 'K');
         procB.Complete();
         procedures.Add(procB);
 
@@ -284,11 +316,14 @@ public class ProcedureValidationServiceTests
         
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.New,
+            new SmkVersion("new"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -298,13 +333,15 @@ public class ProcedureValidationServiceTests
         var procedures = new List<ProcedureBase>();
         var proc = ProcedureNewSmk.Create(
             new ProcedureId(1),
+            moduleId,
             new InternshipId(1),
             DateTime.Today,
             "PROC001",
-            "Department A",
-            moduleId,
-            3,
-            "Badanie fizykalne");
+            "Badanie fizykalne", // procedureName
+            "Department A", // location
+            ProcedureExecutionType.CodeA,
+            "Dr. Smith", // supervisorName
+            3); // procedureRequirementId
         proc.UpdateCounts(15, 5);
         proc.Complete();
         procedures.Add(proc);
@@ -334,11 +371,14 @@ public class ProcedureValidationServiceTests
         
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 

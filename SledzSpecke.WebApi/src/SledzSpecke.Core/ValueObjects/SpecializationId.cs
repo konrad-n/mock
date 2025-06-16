@@ -16,6 +16,7 @@ public record SpecializationId
         Value = value;
     }
 
+    public static SpecializationId New() => new(0); // Will be set by EF Core
     public static implicit operator int(SpecializationId specializationId) => specializationId.Value;
     public static implicit operator SpecializationId(int value) => new(value);
 }

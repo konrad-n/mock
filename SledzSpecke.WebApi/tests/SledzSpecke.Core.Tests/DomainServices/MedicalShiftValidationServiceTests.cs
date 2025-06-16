@@ -41,19 +41,25 @@ public class MedicalShiftValidationServiceTests
         var shift = MedicalShift.Create(
             new MedicalShiftId(1),
             internshipId,
+            null, // moduleId
             DateTime.Now,
             3, // hours
             0, // minutes
-            "Department A",
+            ShiftType.Independent,
+            "Department A", // location
+            "Dr. Smith", // supervisorName
             1); // year
 
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -89,28 +95,37 @@ public class MedicalShiftValidationServiceTests
         var newShift = MedicalShift.Create(
             new MedicalShiftId(2),
             internshipId,
+            null, // moduleId
             shiftDate,
             4, // hours
             0, // minutes
-            "Department A",
+            ShiftType.Independent,
+            "Department A", // location
+            "Dr. Smith", // supervisorName
             1); // year
 
         var existingShift = MedicalShift.Create(
             new MedicalShiftId(1),
             internshipId,
+            null, // moduleId
             shiftDate.AddHours(2), // Overlaps with new shift
             3, // hours
             0, // minutes
-            "Department A",
+            ShiftType.Independent,
+            "Department A", // location
+            "Dr. Smith", // supervisorName
             1); // year
 
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -141,19 +156,25 @@ public class MedicalShiftValidationServiceTests
         var newShift = MedicalShift.Create(
             new MedicalShiftId(2),
             internshipId,
+            null, // moduleId
             shiftDate,
             10, // hours
             0, // minutes
-            "Department A",
+            ShiftType.Independent,
+            "Department A", // location
+            "Dr. Smith", // supervisorName
             1); // year
 
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -164,10 +185,13 @@ public class MedicalShiftValidationServiceTests
             existingShifts.Add(MedicalShift.Create(
                 new MedicalShiftId(i + 10),
                 internshipId,
+                null, // moduleId
                 shiftDate.AddDays(-i),
                 10, // hours
                 0, // minutes
-                "Department A",
+                ShiftType.Independent,
+                "Department A", // location
+                "Dr. Smith", // supervisorName
                 1)); // year
         }
 
@@ -205,26 +229,35 @@ public class MedicalShiftValidationServiceTests
             MedicalShift.Create(
                 new MedicalShiftId(1),
                 internshipId,
+                null, // moduleId
                 new DateTime(2025, 6, 5),
                 8, // hours
                 0, // minutes
-                "Department A",
+                ShiftType.Independent,
+                "Department A", // location
+                "Dr. Smith", // supervisorName
                 1), // year
             MedicalShift.Create(
                 new MedicalShiftId(2),
                 internshipId,
+                null, // moduleId
                 new DateTime(2025, 6, 10),
                 6, // hours
                 0, // minutes
-                "Department B",
+                ShiftType.Independent,
+                "Department B", // location
+                "Dr. Jones", // supervisorName
                 1), // year
             MedicalShift.Create(
                 new MedicalShiftId(3),
                 internshipId,
+                null, // moduleId
                 new DateTime(2025, 6, 15),
                 12, // hours
                 0, // minutes
-                "Department C",
+                ShiftType.Independent,
+                "Department C", // location
+                "Dr. Brown", // supervisorName
                 1) // year
         };
 
@@ -253,19 +286,25 @@ public class MedicalShiftValidationServiceTests
         var newShift = MedicalShift.Create(
             new MedicalShiftId(1),
             internshipId,
+            null, // moduleId
             shiftDate,
             4, // hours
             0, // minutes
-            "Department A",
+            ShiftType.Independent,
+            "Department A", // location
+            "Dr. Smith", // supervisorName
             1); // year
 
         var existingShift = MedicalShift.Create(
             new MedicalShiftId(2),
             internshipId,
+            null, // moduleId
             shiftDate.AddHours(5), // No overlap
             3, // hours
             0, // minutes
-            "Department B",
+            ShiftType.Independent,
+            "Department B", // location
+            "Dr. Jones", // supervisorName
             1); // year
 
         // Act
@@ -287,11 +326,14 @@ public class MedicalShiftValidationServiceTests
         
         var specialization = new Specialization(
             specializationId,
+            userId,
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -303,18 +345,24 @@ public class MedicalShiftValidationServiceTests
             MedicalShift.Create(
                 new MedicalShiftId(1),
                 internshipId,
+                null, // moduleId
                 date.AddDays(-1),
                 10, // hours
                 0, // minutes
-                "Department A",
+                ShiftType.Independent,
+                "Department A", // location
+                "Dr. Smith", // supervisorName
                 1), // year
             MedicalShift.Create(
                 new MedicalShiftId(2),
                 internshipId,
+                null, // moduleId
                 date,
                 8, // hours
                 0, // minutes
-                "Department B",
+                ShiftType.Independent,
+                "Department B", // location
+                "Dr. Jones", // supervisorName
                 1) // year
         };
 

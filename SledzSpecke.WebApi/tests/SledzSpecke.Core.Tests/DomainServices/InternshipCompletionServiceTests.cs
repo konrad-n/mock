@@ -45,10 +45,13 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-31),
-            DateTime.UtcNow.AddDays(-1)); // End date is yesterday to ensure it's completed
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-31), // startDate
+            DateTime.UtcNow.AddDays(-1), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var shifts = new List<MedicalShift>();
         // Add 180 hours of shifts (more than required 160)
@@ -57,11 +60,14 @@ public class InternshipCompletionServiceTests
             var shift = MedicalShift.Create(
                 new MedicalShiftId(i + 1),
                 internshipId,
+                null, // moduleId
                 DateTime.UtcNow.AddDays(-30 + i), // Start from 30 days ago
                 6, // 6 hours per day
-                0,
-                "Department B",
-                1);
+                0, // minutes
+                ShiftType.Independent,
+                "Department B", // location
+                "Dr. Smith", // supervisorName
+                1); // year
             shifts.Add(shift);
         }
 
@@ -71,22 +77,29 @@ public class InternshipCompletionServiceTests
         {
             var proc = ProcedureOldSmk.Create(
                 new ProcedureId(i + 1),
+                null, // moduleId
                 internshipId,
                 DateTime.UtcNow.AddDays(-25 + i), // Within internship dates
                 1,
                 "PROC001",
-                "Department B");
+                "Test Procedure", // name
+                "Department B", // location
+                ProcedureExecutionType.CodeA,
+                "Dr. Smith"); // supervisorName
             proc.Complete();
             procedures.Add(proc);
         }
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -119,10 +132,13 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-15), // Half way through
-            DateTime.UtcNow.AddDays(15));
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-15), // startDate (Half way through)
+            DateTime.UtcNow.AddDays(15), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var shifts = new List<MedicalShift>();
         // Add only 60 hours of shifts
@@ -131,11 +147,14 @@ public class InternshipCompletionServiceTests
             var shift = MedicalShift.Create(
                 new MedicalShiftId(i + 1),
                 internshipId,
+                null, // moduleId
                 DateTime.UtcNow.AddDays(-14 + i),
-                6,
-                0,
-                "Department B",
-                1);
+                6, // hours
+                0, // minutes
+                ShiftType.Independent,
+                "Department B", // location
+                "Dr. Smith", // supervisorName
+                1); // year
             shifts.Add(shift);
         }
 
@@ -145,22 +164,29 @@ public class InternshipCompletionServiceTests
         {
             var proc = ProcedureOldSmk.Create(
                 new ProcedureId(i + 1),
+                null, // moduleId
                 internshipId,
                 DateTime.UtcNow.AddDays(-10 + i),
                 1,
                 "PROC001",
-                "Department B");
+                "Test Procedure", // name
+                "Department B", // location
+                ProcedureExecutionType.CodeA,
+                "Dr. Smith"); // supervisorName
             proc.Complete();
             procedures.Add(proc);
         }
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -195,21 +221,27 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-31),
-            DateTime.UtcNow.AddDays(-1)); // End date is yesterday to ensure it's completed
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-31), // startDate
+            DateTime.UtcNow.AddDays(-1), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var shifts = CreateCompletedShifts(internshipId, 180); // Sufficient hours
         var procedures = CreateCompletedProcedures(internshipId, 12); // Sufficient procedures
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -235,21 +267,27 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-15),
-            DateTime.UtcNow.AddDays(15));
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-15), // startDate
+            DateTime.UtcNow.AddDays(15), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var shifts = CreateCompletedShifts(internshipId, 60); // Insufficient hours
         var procedures = CreateCompletedProcedures(internshipId, 5); // Insufficient procedures
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -278,21 +316,27 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-31),
-            DateTime.UtcNow.AddDays(-1)); // End date is yesterday to ensure it's completed
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-31), // startDate
+            DateTime.UtcNow.AddDays(-1), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var shifts = CreateCompletedShifts(internshipId, 180);
         var procedures = CreateCompletedProcedures(internshipId, 12);
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -323,18 +367,24 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-31),
-            DateTime.UtcNow.AddDays(-1)); // End date is yesterday to ensure it's completed
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-31), // startDate
+            DateTime.UtcNow.AddDays(-1), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -365,21 +415,27 @@ public class InternshipCompletionServiceTests
         var internship = Internship.Create(
             internshipId,
             specializationId,
-            "Hospital A",
-            "Department B",
-            DateTime.UtcNow.AddDays(-15),
-            DateTime.UtcNow.AddDays(15));
+            "Internship Name", // name
+            "Hospital A", // institutionName
+            "Department B", // departmentName
+            DateTime.UtcNow.AddDays(-15), // startDate
+            DateTime.UtcNow.AddDays(15), // endDate
+            4, // plannedWeeks
+            20); // plannedDays
 
         var shifts = CreateCompletedShifts(internshipId, 80);
         var procedures = CreateCompletedProcedures(internshipId, 5);
 
         var specialization = new Specialization(
             specializationId,
+            new UserId(1),
             "Test Specialization",
             "TST001",
-            SmkVersion.Old,
+            new SmkVersion("old"),
+            "standard", // programVariant
             DateTime.Today.AddYears(-1),
             DateTime.Today.AddYears(4),
+            2025, // plannedPesYear
             "Standard Program",
             5);
 
@@ -422,11 +478,14 @@ public class InternshipCompletionServiceTests
             var shift = MedicalShift.Create(
                 new MedicalShiftId(i + 1),
                 internshipId,
+                null, // moduleId
                 DateTime.UtcNow.AddDays(-30 + i), // Start from 30 days ago
                 hoursPerShift,
-                0,
-                "Department",
-                1);
+                0, // minutes
+                ShiftType.Independent,
+                "Department", // location
+                "Dr. Smith", // supervisorName
+                1); // year
             shifts.Add(shift);
         }
         
@@ -441,11 +500,15 @@ public class InternshipCompletionServiceTests
         {
             var proc = ProcedureOldSmk.Create(
                 new ProcedureId(i + 1),
+                null, // moduleId
                 internshipId,
                 DateTime.UtcNow.AddDays(-25 + i), // Within internship dates
                 1,
                 "PROC001",
-                "Department");
+                "Test Procedure", // name
+                "Department", // location
+                ProcedureExecutionType.CodeA,
+                "Dr. Smith"); // supervisorName
             proc.Complete();
             procedures.Add(proc);
         }

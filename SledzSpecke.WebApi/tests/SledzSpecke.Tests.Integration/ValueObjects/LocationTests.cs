@@ -16,11 +16,11 @@ public class LocationTests
     public void Create_WithValidLocation_ShouldSucceed(string location)
     {
         // Act
-        var result = () => Location.Create(location);
+        var result = () => new Location(location);
 
         // Assert
         result.Should().NotThrow();
-        var locationValue = Location.Create(location);
+        var locationValue = new Location(location);
         locationValue.Value.Should().Be(location);
     }
 
@@ -33,22 +33,22 @@ public class LocationTests
     public void Create_WithEmptyOrWhitespace_ShouldThrow(string location)
     {
         // Act
-        var result = () => Location.Create(location);
+        var result = () => new Location(location);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Location cannot be empty.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.DomainException>()
+            .WithMessage("Location cannot be empty.");
     }
 
     [Fact]
     public void Create_WithNull_ShouldThrow()
     {
         // Act
-        var result = () => Location.Create(null!);
+        var result = () => new Location(null!);
 
         // Assert
-        result.Should().Throw<ArgumentException>()
-            .WithMessage("Location cannot be empty.*");
+        result.Should().Throw<SledzSpecke.Core.Exceptions.DomainException>()
+            .WithMessage("Location cannot be empty.");
     }
 
     [Fact]
@@ -58,11 +58,11 @@ public class LocationTests
         var location = "St. Mary's Hospital - Ward #3 (2nd Floor)";
 
         // Act
-        var result = () => Location.Create(location);
+        var result = () => new Location(location);
 
         // Assert
         result.Should().NotThrow();
-        var locationValue = Location.Create(location);
+        var locationValue = new Location(location);
         locationValue.Value.Should().Be(location);
     }
 
@@ -70,8 +70,8 @@ public class LocationTests
     public void Equals_WithSameLocation_ShouldReturnTrue()
     {
         // Arrange
-        var location1 = Location.Create("Hospital A");
-        var location2 = Location.Create("Hospital A");
+        var location1 = new Location("Hospital A");
+        var location2 = new Location("Hospital A");
 
         // Act & Assert
         location1.Should().Be(location2);
@@ -83,8 +83,8 @@ public class LocationTests
     public void Equals_WithDifferentLocation_ShouldReturnFalse()
     {
         // Arrange
-        var location1 = Location.Create("Hospital A");
-        var location2 = Location.Create("Hospital B");
+        var location1 = new Location("Hospital A");
+        var location2 = new Location("Hospital B");
 
         // Act & Assert
         location1.Should().NotBe(location2);
@@ -109,7 +109,7 @@ public class LocationTests
     public void ImplicitConversion_ToString_ShouldWork()
     {
         // Arrange
-        var location = Location.Create("Hospital A");
+        var location = new Location("Hospital A");
 
         // Act
         string locationString = location;
@@ -122,7 +122,7 @@ public class LocationTests
     public void ToString_ShouldReturnValue()
     {
         // Arrange
-        var location = Location.Create("Hospital A");
+        var location = new Location("Hospital A");
 
         // Act
         var result = location.ToString();

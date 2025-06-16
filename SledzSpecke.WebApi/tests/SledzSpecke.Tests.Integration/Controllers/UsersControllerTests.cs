@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using SledzSpecke.Application.Commands;
 using SledzSpecke.Application.DTO;
+using AddressDto = SledzSpecke.Application.Commands.AddressDto;
 using SledzSpecke.Tests.Integration.Common;
 using System.Net;
 using System.Net.Http;
@@ -40,8 +41,20 @@ public class UsersControllerTests : IntegrationTestBase
         var command = new SignUp(
             Email: "newuser@example.com",
             Password: "SecurePassword123!",
-            FullName: "John Doe",
-            Role: "User");
+            FirstName: "John",
+            LastName: "Doe",
+            Pesel: "90010123456",
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1990, 1, 1),
+            CorrespondenceAddress: new SledzSpecke.Application.Commands.AddressDto(
+                Street: "Main Street",
+                HouseNumber: "123",
+                ApartmentNumber: "4A",
+                PostalCode: "00-001",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/users", command);

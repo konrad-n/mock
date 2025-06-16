@@ -12,27 +12,60 @@ public static class TestDataFactory
 
     public static User CreateUser(string? email = null, string? role = null)
     {
-        var userId = UserId.New();
         email ??= Faker.Internet.Email();
-        var fullName = Faker.Name.FullName();
-        var passwordHash = "hashedPassword123";
-        role ??= "User";
+        var password = new HashedPassword("$2a$10$abcdefghijklmnopqrstuvwxyz123456789012345678901234567890"); // BCrypt hash format
+        var firstName = new FirstName(Faker.Name.FirstName());
+        var secondName = Faker.Random.Bool() ? new SecondName(Faker.Name.FirstName()) : null;
+        var lastName = new LastName(Faker.Name.LastName());
+        var pesel = new Pesel($"{Faker.Random.Int(70, 99):D2}{Faker.Random.Int(1, 12):D2}{Faker.Random.Int(1, 28):D2}{Faker.Random.Int(10000, 99999):D5}");
+        var pwzNumber = new PwzNumber(Faker.Random.Int(1000000, 9999999).ToString());
+        var phoneNumber = new PhoneNumber($"+48{Faker.Random.Int(100000000, 999999999):D9}");
+        var dateOfBirth = new DateTime(1970 + Faker.Random.Int(0, 29), Faker.Random.Int(1, 12), Faker.Random.Int(1, 28));
+        var address = new Address(
+            Faker.Address.StreetName(),
+            Faker.Random.Int(1, 200).ToString(),
+            Faker.Random.Bool() ? Faker.Random.Int(1, 100).ToString() : null,
+            $"{Faker.Random.Int(10, 99):D2}-{Faker.Random.Int(100, 999):D3}",
+            Faker.Address.City(),
+            Faker.PickRandom("Mazowieckie", "Małopolskie", "Śląskie", "Wielkopolskie", "Dolnośląskie"),
+            "Polska"
+        );
         
-        return User.Create(userId, email, fullName, passwordHash, role);
+        return User.Create(
+            new Email(email),
+            password,
+            firstName,
+            secondName,
+            lastName,
+            pesel,
+            pwzNumber,
+            phoneNumber,
+            dateOfBirth,
+            address);
     }
 
-    public static Specialization CreateSpecialization(SmkVersion? smkVersion = null)
+    public static Specialization CreateSpecialization(SmkVersion? smkVersion = null, int userId = 1)
     {
         var specializationId = SpecializationId.New();
         var programCode = Faker.Random.AlphaNumeric(6).ToUpper();
         var name = Faker.Lorem.Word();
         var actualSmkVersion = smkVersion ?? Faker.PickRandom<SmkVersion>();
+        var startDate = Faker.Date.Recent(30);
+        var plannedEndDate = startDate.AddYears(5);
+        var durationYears = 5;
         
-        var specialization = Specialization.Create(
+        var specialization = new Specialization(
             specializationId,
-            programCode,
+            new UserId(userId),
             name,
-            actualSmkVersion);
+            programCode,
+            actualSmkVersion,
+            "Standard", // programVariant
+            startDate,
+            plannedEndDate,
+            1, // plannedPesYear
+            "Basic + Specialized", // programStructure
+            durationYears);
             
         return specialization;
     }
@@ -43,14 +76,18 @@ public static class TestDataFactory
         var moduleName = $"Module {moduleNumber}";
         var startDate = Faker.Date.Recent(30);
         var endDate = startDate.AddMonths(3);
+        var moduleType = moduleNumber == 1 ? ModuleType.Basic : ModuleType.Specialistic;
         
-        return Module.Create(
+        return new Module(
             moduleId,
             new SpecializationId(specializationId),
+            moduleType,
+            SmkVersion.New,
+            "1.0", // version
             moduleName,
-            moduleNumber,
             startDate,
-            endDate);
+            endDate,
+            "Standard Structure"); // structure
     }
 
     public static Internship CreateInternship(
@@ -68,10 +105,13 @@ public static class TestDataFactory
         var internship = Internship.Create(
             internshipId,
             new SpecializationId(specializationId),
+            $"{institutionName} Internship", // name
             institutionName,
             departmentName,
             startDate.Value,
-            endDate.Value);
+            endDate.Value,
+            8, // plannedWeeks
+            40); // plannedDays
             
         if (moduleId.HasValue)
         {
@@ -91,20 +131,25 @@ public static class TestDataFactory
     {
         var procedureId = ProcedureId.New();
         var procedureCode = Faker.Random.AlphaNumeric(8).ToUpper();
-        var location = Faker.Address.City();
+        var location = new Location(Faker.Address.City());
         date ??= Faker.Date.Recent(7);
         
         ProcedureBase procedure;
         
         if (smkVersion == SmkVersion.Old)
         {
+            var actualModuleId = moduleId ?? Faker.Random.Int(1, 1000);
             procedure = ProcedureOldSmk.Create(
                 procedureId,
+                new ModuleId(actualModuleId),
                 new InternshipId(internshipId),
                 date.Value,
                 year,
                 procedureCode,
-                location);
+                Faker.Lorem.Sentence(3), // name
+                location.Value,
+                ProcedureExecutionType.CodeA,
+                Faker.Name.FullName()); // supervisorName
         }
         else
         {
@@ -114,13 +159,15 @@ public static class TestDataFactory
             
             procedure = ProcedureNewSmk.Create(
                 procedureId,
+                new ModuleId(actualModuleId),
                 new InternshipId(internshipId),
                 date.Value,
                 procedureCode,
-                location,
-                new ModuleId(actualModuleId),
-                procedureRequirementId,
-                procedureName);
+                procedureName,
+                location.Value,
+                ProcedureExecutionType.CodeA,
+                Faker.Name.FullName(), // supervisorName
+                procedureRequirementId);
         }
         
         if (status != ProcedureStatus.Pending)
@@ -132,26 +179,32 @@ public static class TestDataFactory
     }
 
     public static MedicalShift CreateMedicalShift(
-        int specializationId,
+        int internshipId,
         DateTime? date = null,
-        TimeSpan? startTime = null,
-        TimeSpan? endTime = null)
+        int? hours = null,
+        int? minutes = null,
+        int? moduleId = null,
+        int year = 1)
     {
         var shiftId = MedicalShiftId.New();
         date ??= Faker.Date.Recent(7);
-        startTime ??= new TimeSpan(8, 0, 0);
-        endTime ??= new TimeSpan(16, 0, 0);
+        hours ??= Faker.Random.Int(1, 8);
+        minutes ??= Faker.Random.Int(0, 59);
         var location = Faker.Address.City();
-        var description = Faker.Lorem.Sentence();
+        var supervisorName = Faker.Name.FullName();
+        var shiftType = Faker.PickRandom<ShiftType>();
         
         return MedicalShift.Create(
             shiftId,
-            new SpecializationId(specializationId),
+            new InternshipId(internshipId),
+            moduleId.HasValue ? new ModuleId(moduleId.Value) : null,
             date.Value,
-            startTime.Value,
-            endTime.Value,
+            hours.Value,
+            minutes.Value,
+            shiftType,
             location,
-            description);
+            supervisorName,
+            year);
     }
 
     public static Course CreateCourse(
@@ -168,11 +221,15 @@ public static class TestDataFactory
         
         return Course.Create(
             courseId,
+            new SpecializationId(1), // default specialization
+            CourseType.Mandatory,
             name,
-            description,
+            "Test Organizer", // organizerName
+            "Test Institution", // institutionName
             startDate.Value,
             endDate.Value,
-            credits);
+            5, // durationDays
+            40); // durationHours
     }
 
     public static Recognition CreateRecognition(
@@ -187,10 +244,13 @@ public static class TestDataFactory
         
         return Recognition.Create(
             recognitionId,
+            new SpecializationId(1), // default specialization
+            new UserId(1), // default user
+            RecognitionType.Award,
             title,
-            description,
             date.Value,
-            issuer);
+            date.Value.AddDays(1), // endDate
+            0); // daysReduction
     }
 
     public static Publication CreatePublication(
@@ -204,13 +264,22 @@ public static class TestDataFactory
         publicationDate ??= Faker.Date.Recent(90);
         var doi = $"10.{Faker.Random.Int(1000, 9999)}/{Faker.Random.AlphaNumeric(10)}";
         
-        return Publication.Create(
+        var result = Publication.Create(
             publicationId,
+            new SpecializationId(1), // default specialization
+            new UserId(1), // default user
+            PublicationType.Journal,
             title,
-            authors,
-            journal,
-            publicationDate.Value,
-            doi);
+            publicationDate.Value);
+            
+        if (!result.IsSuccess)
+            throw new InvalidOperationException($"Failed to create publication: {result.Error}");
+            
+        var publication = result.Value;
+        publication.UpdatePublicationDetails(null, null, null, doi, null, null, null);
+        publication.UpdateBasicDetails(PublicationType.Journal, title, publicationDate.Value, authors, journal, null);
+        
+        return publication;
     }
 
     public static SelfEducation CreateSelfEducation(
@@ -225,9 +294,10 @@ public static class TestDataFactory
         
         return SelfEducation.Create(
             selfEducationId,
+            new ModuleId(1), // default module
+            SelfEducationType.Literature,
             topic,
-            description,
-            hoursSpent,
-            date.Value);
+            date.Value,
+            hoursSpent);
     }
 }

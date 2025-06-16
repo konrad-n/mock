@@ -1,6 +1,7 @@
 using FluentAssertions;
 using SledzSpecke.Application.Commands;
 using SledzSpecke.Application.DTO;
+using AddressDto = SledzSpecke.Application.Commands.AddressDto;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Tests.Integration.Common;
@@ -21,11 +22,21 @@ public class AuthControllerTests : IntegrationTestBase
         
         var command = new SignUp(
             Email: "newuser@example.com",
-            Username: "newuser",
             Password: "SecurePassword123!",
-            FullName: "John Doe",
-            SmkVersion: "new",
-            SpecializationId: 1);
+            FirstName: "John",
+            LastName: "Doe",
+            Pesel: "90010123456",
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1990, 1, 1),
+            CorrespondenceAddress: new AddressDto(
+                Street: "Main Street",
+                HouseNumber: "123",
+                ApartmentNumber: "4A",
+                PostalCode: "00-001",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/auth/sign-up", command);
@@ -37,8 +48,8 @@ public class AuthControllerTests : IntegrationTestBase
         var user = await DbContext.Users.FindAsync(2); // ID 2 because seed data creates user with ID 1
         user.Should().NotBeNull();
         user!.Email.Value.Should().Be("newuser@example.com");
-        user.Username.Value.Should().Be("newuser");
-        user.FullName.Value.Should().Be("John Doe");
+        user.FirstName.Value.Should().Be("John");
+        user.LastName.Value.Should().Be("Doe");
     }
 
     [Fact]
@@ -50,11 +61,21 @@ public class AuthControllerTests : IntegrationTestBase
         
         var command = new SignUp(
             Email: "test@example.com", // Same as seeded user
-            Username: "differentuser",
             Password: "SecurePassword123!",
-            FullName: "Jane Doe",
-            SmkVersion: "new",
-            SpecializationId: 1);
+            FirstName: "Jane",
+            LastName: "Doe",
+            Pesel: "90020234567",
+            PwzNumber: "2345678",
+            PhoneNumber: "+48234567890",
+            DateOfBirth: new DateTime(1990, 2, 2),
+            CorrespondenceAddress: new AddressDto(
+                Street: "Main Street",
+                HouseNumber: "456",
+                ApartmentNumber: null,
+                PostalCode: "00-002",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/auth/sign-up", command);
@@ -74,11 +95,21 @@ public class AuthControllerTests : IntegrationTestBase
         
         var command = new SignUp(
             Email: "different@example.com",
-            Username: "testuser", // Same as seeded user
             Password: "SecurePassword123!",
-            FullName: "Jane Doe",
-            SmkVersion: "new",
-            SpecializationId: 1);
+            FirstName: "Jane",
+            LastName: "Doe",
+            Pesel: "90030345678",
+            PwzNumber: "3456789",
+            PhoneNumber: "+48345678901",
+            DateOfBirth: new DateTime(1990, 3, 3),
+            CorrespondenceAddress: new AddressDto(
+                Street: "Second Street",
+                HouseNumber: "789",
+                ApartmentNumber: "2B",
+                PostalCode: "00-003",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/auth/sign-up", command);
@@ -97,11 +128,21 @@ public class AuthControllerTests : IntegrationTestBase
         
         var command = new SignUp(
             Email: "invalid-email",
-            Username: "newuser",
             Password: "SecurePassword123!",
-            FullName: "John Doe",
-            SmkVersion: "new",
-            SpecializationId: 1);
+            FirstName: "John",
+            LastName: "Doe",
+            Pesel: "90040456789",
+            PwzNumber: "4567890",
+            PhoneNumber: "+48456789012",
+            DateOfBirth: new DateTime(1990, 4, 4),
+            CorrespondenceAddress: new AddressDto(
+                Street: "Third Street",
+                HouseNumber: "100",
+                ApartmentNumber: null,
+                PostalCode: "00-004",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/auth/sign-up", command);

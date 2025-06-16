@@ -9,20 +9,8 @@ namespace SledzSpecke.Core.Tests.Specifications;
 
 public class UserSpecificationTests
 {
-    [Fact]
-    public void UserByUsernameSpecification_Should_Match_Exact_Username()
-    {
-        // Arrange
-        var targetUsername = new Username("johndoe");
-        var specification = new UserByUsernameSpecification(targetUsername);
-        
-        var matchingUser = CreateUser(username: "johndoe");
-        var nonMatchingUser = CreateUser(username: "janedoe");
-
-        // Act & Assert
-        specification.IsSatisfiedBy(matchingUser).Should().BeTrue();
-        specification.IsSatisfiedBy(nonMatchingUser).Should().BeFalse();
-    }
+    // NOTE: UserByUsernameSpecification does not exist in the current implementation
+    // The User entity doesn't have a Username property, it uses Email for authentication
 
     [Fact]
     public void UserByEmailSpecification_Should_Match_Exact_Email()
@@ -39,21 +27,8 @@ public class UserSpecificationTests
         specification.IsSatisfiedBy(nonMatchingUser).Should().BeFalse();
     }
 
-    [Fact]
-    public void UserBySpecializationSpecification_Should_Match_Specialization()
-    {
-        // Arrange
-        var targetSpecializationId = new SpecializationId(5);
-        var specification = new UserBySpecializationSpecification(targetSpecializationId);
-        
-        // Create users with different specialization IDs
-        var matchingUser = CreateUserWithSpecialization(targetSpecializationId);
-        var nonMatchingUser = CreateUserWithSpecialization(new SpecializationId(10));
-
-        // Act & Assert
-        specification.IsSatisfiedBy(matchingUser).Should().BeTrue();
-        specification.IsSatisfiedBy(nonMatchingUser).Should().BeFalse();
-    }
+    // NOTE: UserBySpecializationSpecification does not exist in the current implementation
+    // Users don't directly have specializations - specializations reference users via UserId
 
     [Fact]
     public void UserByRecentActivitySpecification_Should_Match_Recent_Logins()
@@ -73,28 +48,7 @@ public class UserSpecificationTests
         specification.IsSatisfiedBy(inactiveUser).Should().BeFalse();
     }
 
-    [Fact]
-    public void UserByProfileCompleteSpecification_Should_Match_Complete_Profiles()
-    {
-        // Arrange
-        var specification = new UserByProfileCompleteSpecification();
-        
-        // Create user with complete profile
-        var completeUser = CreateUser();
-        // Note: User entity doesn't have public methods to update profile fields
-        // Using reflection or internal methods would be needed for testing
-        // For now, testing with basic user
-        
-        var incompleteUser1 = CreateUser();
-        var incompleteUser2 = CreateUser();
-
-        // Act & Assert
-        // Note: Since we can't easily set profile fields in tests,
-        // this test would need to be adjusted based on actual User implementation
-        specification.IsSatisfiedBy(completeUser).Should().BeFalse(); // All users incomplete by default
-        specification.IsSatisfiedBy(incompleteUser1).Should().BeFalse();
-        specification.IsSatisfiedBy(incompleteUser2).Should().BeFalse();
-    }
+    // NOTE: UserByProfileCompleteSpecification does not exist in the current implementation
 
     [Fact]
     public void UserByFullNameSpecification_Should_Match_Partial_Names()
@@ -113,6 +67,34 @@ public class UserSpecificationTests
         specification.IsSatisfiedBy(janeDoe).Should().BeTrue();
         specification.IsSatisfiedBy(doesNotMatch).Should().BeFalse();
         specification.IsSatisfiedBy(bobSmith).Should().BeFalse();
+    }
+
+    [Fact]
+    public void UserByProvinceSpecification_Should_Match_Province()
+    {
+        // Arrange
+        var specification = new UserByProvinceSpecification("Mazowieckie");
+        
+        var userInMazowieckie = CreateUser();
+        var userInOtherProvince = CreateUserWithAddress(province: "Pomorskie");
+
+        // Act & Assert
+        specification.IsSatisfiedBy(userInMazowieckie).Should().BeTrue();
+        specification.IsSatisfiedBy(userInOtherProvince).Should().BeFalse();
+    }
+
+    [Fact]
+    public void UserByCitySpecification_Should_Match_City()
+    {
+        // Arrange
+        var specification = new UserByCitySpecification("Warsaw");
+        
+        var userInWarsaw = CreateUser();
+        var userInKrakow = CreateUserWithAddress(city: "Krakow");
+
+        // Act & Assert
+        specification.IsSatisfiedBy(userInWarsaw).Should().BeTrue();
+        specification.IsSatisfiedBy(userInKrakow).Should().BeFalse();
     }
 
     [Fact]
@@ -150,12 +132,12 @@ public class UserSpecificationTests
         var specification = UserSpecificationExtensions.SearchUsers(searchTerm);
         
         var userWithMatchingFullName = CreateUser(fullName: "John Doe");
-        var userWithMatchingUsername = CreateUser(username: "johnny123", fullName: "Bob Smith");
-        var userWithNoMatch = CreateUser(username: "alice", fullName: "Alice Smith");
+        var userWithMatchingEmail = CreateUser(email: "john@example.com", fullName: "Bob Smith");
+        var userWithNoMatch = CreateUser(email: "alice@example.com", fullName: "Alice Smith");
 
         // Act & Assert
         specification.IsSatisfiedBy(userWithMatchingFullName).Should().BeTrue();
-        specification.IsSatisfiedBy(userWithMatchingUsername).Should().BeTrue();
+        specification.IsSatisfiedBy(userWithMatchingEmail).Should().BeTrue();
         specification.IsSatisfiedBy(userWithNoMatch).Should().BeFalse();
     }
 
@@ -163,35 +145,45 @@ public class UserSpecificationTests
     private static int _testUserId = 1;
     
     private User CreateUser(
-        string username = "testuser",
         string email = "test@example.com",
         string fullName = "Test User")
     {
-        // Note: User.Create requires SpecializationId in some overloads
-        // Using the factory method that matches available parameters
-        // For tests, we use CreateWithId to avoid ID validation issues
+        var names = fullName.Split(' ');
+        var firstName = names.Length > 0 ? names[0] : "Test";
+        var lastName = names.Length > 1 ? names[names.Length - 1] : "User";
+        
         return User.CreateWithId(
-            new UserId(_testUserId++), // Auto-increment test ID
+            new UserId(_testUserId++),
             new Email(email),
-            new Username(username),
-            new HashedPassword("abcdefghijklmnopqrstuvwxyz0123456789ABCD="), // Valid hash format
-            new FullName(fullName),
-            new SmkVersion("new"),
-            new SpecializationId(1), // Default specialization
+            new HashedPassword("tL8XQn5ScIhHqxKNMQJfYGD3GmjptUPgxlrXH1zVBvI="), // Valid base64 hash format
+            new FirstName(firstName),
+            null, // SecondName
+            new LastName(lastName),
+            new Pesel("44051401458"), // Valid PESEL with correct checksum
+            new PwzNumber("1234567"), // Valid PWZ
+            new PhoneNumber("+48123456789"), // Valid phone number
+            new DateTime(1944, 5, 14), // Date of birth matching PESEL 44051401458
+            new Address("Test Street", "1", null, "00-000", "Warsaw", "Mazowieckie", "Poland"),
             DateTime.UtcNow
         );
     }
     
-    private User CreateUserWithSpecialization(SpecializationId specializationId)
+    private User CreateUserWithAddress(
+        string city = "Warsaw",
+        string province = "Mazowieckie")
     {
         return User.CreateWithId(
-            new UserId(_testUserId++), // Auto-increment test ID
-            new Email("test@example.com"),
-            new Username("testuser"),
-            new HashedPassword("abcdefghijklmnopqrstuvwxyz0123456789ABCD="), // Valid hash format
-            new FullName("Test User"),
-            new SmkVersion("new"),
-            specializationId,
+            new UserId(_testUserId++),
+            new Email($"test{_testUserId}@example.com"),
+            new HashedPassword("tL8XQn5ScIhHqxKNMQJfYGD3GmjptUPgxlrXH1zVBvI="),
+            new FirstName("Test"),
+            null,
+            new LastName("User"),
+            new Pesel("44051401458"),
+            new PwzNumber("1234567"),
+            new PhoneNumber("+48123456789"),
+            new DateTime(1944, 5, 14),
+            new Address("Test Street", "1", null, "00-000", city, province, "Poland"),
             DateTime.UtcNow
         );
     }
