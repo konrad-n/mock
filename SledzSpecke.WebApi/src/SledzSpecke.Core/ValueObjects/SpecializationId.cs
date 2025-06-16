@@ -4,7 +4,12 @@ namespace SledzSpecke.Core.ValueObjects;
 
 public record SpecializationId
 {
-    public int Value { get; }
+    public int Value { get; init; }
+
+    private SpecializationId()
+    {
+        // Required for EF Core
+    }
 
     public SpecializationId(int value)
     {

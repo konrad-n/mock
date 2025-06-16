@@ -4,7 +4,12 @@ namespace SledzSpecke.Core.ValueObjects;
 
 public record UserId
 {
-    public int Value { get; }
+    public int Value { get; init; }
+
+    private UserId()
+    {
+        // Required for EF Core
+    }
 
     public UserId(int value)
     {
