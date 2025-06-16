@@ -33,6 +33,7 @@ public class Module
     public ICollection<Course> Courses { get; private set; } = new List<Course>();
     public ICollection<MedicalShift> MedicalShifts { get; private set; } = new List<MedicalShift>();
     public ICollection<ProcedureBase> Procedures { get; private set; } = new List<ProcedureBase>();
+    public ICollection<SelfEducation> SelfEducations { get; private set; } = new List<SelfEducation>();
 
     public Module(ModuleId id, SpecializationId specializationId, ModuleType type, SmkVersion smkVersion,
         string version, string name, DateTime startDate, DateTime endDate, string structure)

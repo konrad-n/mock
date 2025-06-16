@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Infrastructure.DAL.Configurations;
 using SledzSpecke.Infrastructure.Persistence.EntityTypeConfigurations;
+using System.Linq;
 
 namespace SledzSpecke.Infrastructure.DAL;
 
@@ -30,6 +31,17 @@ public sealed class SledzSpeckeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Explicitly ignore all value objects to prevent them from being treated as entities
+        var valueObjectTypes = typeof(Core.ValueObjects.ModuleId).Assembly
+            .GetTypes()
+            .Where(t => t.Namespace == "SledzSpecke.Core.ValueObjects" && !t.IsAbstract && !t.IsInterface)
+            .ToList();
+            
+        foreach (var valueObjectType in valueObjectTypes)
+        {
+            modelBuilder.Ignore(valueObjectType);
+        }
+        
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new SpecializationConfiguration());
         modelBuilder.ApplyConfiguration(new ModuleConfiguration());

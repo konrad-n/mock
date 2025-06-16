@@ -58,11 +58,6 @@ internal sealed class SelfEducationConfiguration : IEntityTypeConfiguration<Self
         builder.HasIndex(se => se.Type);
         builder.HasIndex(se => se.Date);
         
-        // Navigation
-        // Temporarily disabled for migration
-        // builder.HasOne(se => se.Module)
-        //     .WithMany()
-        //     .HasForeignKey(se => se.ModuleId)
-        //     .OnDelete(DeleteBehavior.Restrict);
+        // Note: The navigation property is configured from the Module side in ModuleConfiguration
     }
 }

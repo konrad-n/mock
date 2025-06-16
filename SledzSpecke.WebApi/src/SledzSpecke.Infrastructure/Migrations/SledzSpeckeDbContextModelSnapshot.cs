@@ -91,7 +91,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "StartDate", "EndDate");
 
-                    b.ToTable("Absences");
+                    b.ToTable("Absences", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Course", b =>
@@ -161,7 +161,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("SpecializationId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.EducationalActivity", b =>
@@ -217,7 +217,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("StartDate", "EndDate");
 
-                    b.ToTable("EducationalActivities");
+                    b.ToTable("EducationalActivities", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.FileMetadata", b =>
@@ -283,7 +283,7 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.HasIndex("EntityType", "EntityId")
                         .HasFilter("\"IsDeleted\" = false");
 
-                    b.ToTable("FileMetadata");
+                    b.ToTable("FileMetadata", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Internship", b =>
@@ -350,7 +350,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("StartDate", "EndDate");
 
-                    b.ToTable("Internships");
+                    b.ToTable("Internships", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.MedicalShift", b =>
@@ -407,7 +407,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("InternshipId");
 
-                    b.ToTable("MedicalShifts");
+                    b.ToTable("MedicalShifts", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Module", b =>
@@ -487,7 +487,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("SpecializationId");
 
-                    b.ToTable("Modules");
+                    b.ToTable("Modules", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureBase", b =>
@@ -705,7 +705,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "SpecializationId");
 
-                    b.ToTable("Publications");
+                    b.ToTable("Publications", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Recognition", b =>
@@ -788,7 +788,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "SpecializationId");
 
-                    b.ToTable("Recognitions");
+                    b.ToTable("Recognitions", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.SelfEducation", b =>
@@ -895,7 +895,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "SpecializationId");
 
-                    b.ToTable("SelfEducations");
+                    b.ToTable("SelfEducations", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Specialization", b =>
@@ -938,7 +938,7 @@ namespace SledzSpecke.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specializations");
+                    b.ToTable("Specializations", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.User", b =>
@@ -1018,7 +1018,7 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Procedure", b =>
@@ -1075,7 +1075,7 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Property<int?>("ProcedureRequirementId")
                         .HasColumnType("integer");
 
-                    b.ToTable("Procedures", t =>
+                    b.ToTable("Procedures", null, t =>
                         {
                             t.Property("ProcedureRequirementId")
                                 .HasColumnName("ProcedureOldSmk_ProcedureRequirementId");

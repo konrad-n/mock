@@ -33,5 +33,21 @@ internal sealed class ModuleConfiguration : IEntityTypeConfiguration<Module>
             .IsRequired();
 
         builder.HasIndex(x => x.SpecializationId);
+        
+        // Navigation properties
+        builder.HasMany(x => x.Procedures)
+            .WithOne(x => x.Module)
+            .HasForeignKey(x => x.ModuleId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        builder.HasMany(x => x.SelfEducations)
+            .WithOne(x => x.Module)
+            .HasForeignKey(x => x.ModuleId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        builder.HasMany(x => x.Courses)
+            .WithOne(x => x.Module)
+            .HasForeignKey(x => x.ModuleId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -65,5 +65,7 @@ internal sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.HasIndex(x => x.ModuleId);
         builder.HasIndex(x => x.CourseType);
         builder.HasIndex(x => x.CompletionDate);
+        
+        // Note: The navigation property is configured from the Module side in ModuleConfiguration
     }
 }

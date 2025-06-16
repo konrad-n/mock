@@ -93,17 +93,14 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
         builder.Ignore(x => x.IsCodeA);
         builder.Ignore(x => x.IsCodeB);
         
-        // Add ModuleId property and navigation
+        // Add ModuleId property
         builder.Property(x => x.ModuleId)
-            .HasConversion(x => x.Value, x => new ModuleId(x));
+            .HasConversion(x => x.Value, x => new ModuleId(x))
+            .IsRequired();
             
         builder.HasIndex(x => x.ModuleId);
         
-        // Temporarily disabled for migration
-        // builder.HasOne(x => x.Module)
-        //     .WithMany()
-        //     .HasForeignKey(x => x.ModuleId)
-        //     .OnDelete(DeleteBehavior.Restrict);
+        // Note: The navigation property is configured from the Module side in ModuleConfiguration
     }
 }
 
