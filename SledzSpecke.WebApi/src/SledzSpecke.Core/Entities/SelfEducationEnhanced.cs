@@ -209,18 +209,11 @@ public class SelfEducationEnhanced
         // Base score by type
         score += Type switch
         {
-            SelfEducationType.OnlineCourse => 8,
             SelfEducationType.Conference => 10,
             SelfEducationType.Workshop => 7,
-            SelfEducationType.Webinar => 5,
-            SelfEducationType.MedicalJournal => 9,
-            SelfEducationType.ClinicalGuideline => 8,
-            SelfEducationType.Research => 10,
-            SelfEducationType.Book => 6,
-            SelfEducationType.Article => 4,
-            SelfEducationType.Literature => 5,
-            SelfEducationType.Video => 3,
-            SelfEducationType.Podcast => 3,
+            SelfEducationType.ScientificMeeting => 8,
+            SelfEducationType.Publication => 10,
+            SelfEducationType.LiteratureStudy => 5,
             _ => 2
         };
 

@@ -253,7 +253,7 @@ public sealed class SmkExportService : ISpecializationExportService
                     StartDate = course.CompletionDate.ToString("dd.MM.yyyy"), // Using completion date for both
                     EndDate = course.CompletionDate.ToString("dd.MM.yyyy"),   // as Course only has CompletionDate
                     CreditHours = 0, // Not tracked in current Course entity
-                    CourseType = course.CourseType == SledzSpecke.Core.ValueObjects.CourseType.Mandatory ? "Obowiązkowy" : "Dodatkowy",
+                    CourseType = course.CourseType == SledzSpecke.Core.ValueObjects.CourseType.Specialization ? "Obowiązkowy" : "Dodatkowy",
                     ModuleName = module.Name,
                     CertificateNumber = course.CertificateNumber ?? "",
                     Status = course.HasCertificate ? "Zakończony" : "W trakcie"
@@ -285,7 +285,7 @@ public sealed class SmkExportService : ISpecializationExportService
                         InternshipName = oldProc.InternshipName ?? "",
                         FirstAssistantData = oldProc.AssistantData ?? "", // AssistantData holds assistant info
                         SecondAssistantData = "", // Not available in current model
-                        Role = oldProc.OperatorCode ?? "" // OperatorCode is A or B
+                        Role = oldProc.ExecutionType == ProcedureExecutionType.CodeA ? "A" : "B"
                     };
                 }
                 else if (procedure is ProcedureNewSmk newProc)

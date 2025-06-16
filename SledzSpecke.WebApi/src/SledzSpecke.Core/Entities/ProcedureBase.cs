@@ -6,13 +6,20 @@ namespace SledzSpecke.Core.Entities;
 public abstract class ProcedureBase
 {
     public ProcedureId Id { get; protected set; }
+    public ModuleId ModuleId { get; protected set; }
+    public Module Module { get; protected set; }
     public InternshipId InternshipId { get; protected set; }
     public DateTime Date { get; protected set; }
     public int Year { get; protected set; }
     public string Code { get; protected set; }
-    public string? OperatorCode { get; protected set; }
-    public string? PerformingPerson { get; protected set; }
+    public string Name { get; protected set; }
+    public DateTime PerformedDate { get; protected set; }
     public string Location { get; protected set; }
+    public string? PatientInfo { get; protected set; }
+    public ProcedureExecutionType ExecutionType { get; protected set; }
+    public string SupervisorName { get; protected set; }
+    public string? SupervisorPwz { get; protected set; }
+    public string? PerformingPerson { get; protected set; }
     public string? PatientInitials { get; protected set; }
     public char? PatientGender { get; protected set; }
     public string? AssistantData { get; protected set; }
@@ -27,18 +34,24 @@ public abstract class ProcedureBase
     public bool IsCompleted => Status == ProcedureStatus.Completed;
     public bool IsApproved => Status == ProcedureStatus.Approved;
     public bool CanBeModified => SyncStatus != SyncStatus.Synced || !IsApproved;
-    public bool IsTypeA => !string.IsNullOrEmpty(OperatorCode);
-    public bool IsTypeB => string.IsNullOrEmpty(OperatorCode);
+    public bool IsCodeA => ExecutionType == ProcedureExecutionType.CodeA;
+    public bool IsCodeB => ExecutionType == ProcedureExecutionType.CodeB;
 
-    protected ProcedureBase(ProcedureId id, InternshipId internshipId, DateTime date, int year,
-        string code, string location, ProcedureStatus status, SmkVersion smkVersion)
+    protected ProcedureBase(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date, int year,
+        string code, string name, string location, ProcedureExecutionType executionType, 
+        string supervisorName, ProcedureStatus status, SmkVersion smkVersion)
     {
         Id = id;
+        ModuleId = moduleId;
         InternshipId = internshipId;
         Date = EnsureUtc(date);
+        PerformedDate = EnsureUtc(date);
         Year = year;
         Code = code;
+        Name = name;
         Location = location;
+        ExecutionType = executionType;
+        SupervisorName = supervisorName;
         Status = status;
         SyncStatus = SyncStatus.NotSynced;
         CreatedAt = DateTime.UtcNow;
@@ -51,13 +64,14 @@ public abstract class ProcedureBase
     /// it will automatically transition to Modified status to track the change.
     /// This allows synced data to be edited while maintaining audit trail.
     /// </summary>
-    public virtual void UpdateProcedureDetails(string? operatorCode, string? performingPerson,
-        string? patientInitials, char? patientGender)
+    public virtual void UpdateProcedureDetails(ProcedureExecutionType executionType, string? performingPerson,
+        string? patientInfo, string? patientInitials, char? patientGender)
     {
         EnsureCanModify();
 
-        OperatorCode = operatorCode;
+        ExecutionType = executionType;
         PerformingPerson = performingPerson;
+        PatientInfo = patientInfo;
         PatientInitials = patientInitials;
         PatientGender = patientGender;
         UpdatedAt = DateTime.UtcNow;
@@ -149,6 +163,33 @@ public abstract class ProcedureBase
     {
         EnsureCanModify();
         AdditionalFields = additionalFields;
+        UpdatedAt = DateTime.UtcNow;
+
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+
+    public virtual void SetSupervisorPwz(string? supervisorPwz)
+    {
+        EnsureCanModify();
+        SupervisorPwz = supervisorPwz;
+        UpdatedAt = DateTime.UtcNow;
+
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+
+    public virtual void UpdateSupervisor(string supervisorName, string? supervisorPwz)
+    {
+        EnsureCanModify();
+        SupervisorName = supervisorName;
+        SupervisorPwz = supervisorPwz;
         UpdatedAt = DateTime.UtcNow;
 
         // Automatically transition from Synced to Modified

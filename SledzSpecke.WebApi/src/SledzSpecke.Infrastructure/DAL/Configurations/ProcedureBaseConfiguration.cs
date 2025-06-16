@@ -28,8 +28,27 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(x => x.OperatorCode)
+        builder.Property(x => x.Name)
+            .HasMaxLength(300)
+            .IsRequired();
+            
+        builder.Property(x => x.PerformedDate)
+            .IsRequired();
+            
+        builder.Property(x => x.ExecutionType)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+            
+        builder.Property(x => x.SupervisorName)
+            .HasMaxLength(200)
+            .IsRequired();
+            
+        builder.Property(x => x.SupervisorPwz)
             .HasMaxLength(20);
+            
+        builder.Property(x => x.PatientInfo)
+            .HasMaxLength(500);
 
         builder.Property(x => x.PerformingPerson)
             .HasMaxLength(100);
@@ -71,8 +90,20 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
         builder.Ignore(x => x.IsCompleted);
         builder.Ignore(x => x.CanBeModified);
         builder.Ignore(x => x.IsApproved);
-        builder.Ignore(x => x.IsTypeA);
-        builder.Ignore(x => x.IsTypeB);
+        builder.Ignore(x => x.IsCodeA);
+        builder.Ignore(x => x.IsCodeB);
+        
+        // Add ModuleId property and navigation
+        builder.Property(x => x.ModuleId)
+            .HasConversion(x => x.Value, x => new ModuleId(x));
+            
+        builder.HasIndex(x => x.ModuleId);
+        
+        // Temporarily disabled for migration
+        // builder.HasOne(x => x.Module)
+        //     .WithMany()
+        //     .HasForeignKey(x => x.ModuleId)
+        //     .OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -90,9 +121,6 @@ internal sealed class ProcedureNewSmkConfiguration : IEntityTypeConfiguration<Pr
 {
     public void Configure(EntityTypeBuilder<ProcedureNewSmk> builder)
     {
-        builder.Property(x => x.ModuleId)
-            .HasConversion(x => x!.Value, x => new ModuleId(x));
-
         builder.Property(x => x.ProcedureRequirementId)
             .IsRequired();
 
@@ -102,6 +130,9 @@ internal sealed class ProcedureNewSmkConfiguration : IEntityTypeConfiguration<Pr
 
         builder.Property(x => x.CountA);
         builder.Property(x => x.CountB);
+        
+        builder.Property(x => x.RequiredCountCodeA);
+        builder.Property(x => x.RequiredCountCodeB);
 
         builder.Property(x => x.Supervisor)
             .HasMaxLength(100);

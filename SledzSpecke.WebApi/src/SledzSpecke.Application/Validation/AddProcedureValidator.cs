@@ -28,10 +28,19 @@ public sealed class AddProcedureValidator : CommandValidatorBase<AddProcedure>
             result.AddError("Year", "Year must be between 0 and 10");
         }
         
+        // Validate required fields for new entity structure
+        ValidateRequired(command.Name, "Name", result);
+        ValidateMaxLength(command.Name, 300, "Name", result);
+        
+        ValidateRequired(command.ExecutionType, "ExecutionType", result);
+        
+        ValidateRequired(command.SupervisorName, "SupervisorName", result);
+        ValidateMaxLength(command.SupervisorName, 200, "SupervisorName", result);
+        
         // Optional fields validation
-        if (!string.IsNullOrEmpty(command.OperatorCode))
+        if (!string.IsNullOrEmpty(command.SupervisorPwz))
         {
-            ValidateMaxLength(command.OperatorCode, 50, "OperatorCode", result);
+            ValidateMaxLength(command.SupervisorPwz, 20, "SupervisorPwz", result);
         }
         
         if (!string.IsNullOrEmpty(command.PerformingPerson))

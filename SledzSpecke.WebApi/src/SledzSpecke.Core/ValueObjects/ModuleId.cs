@@ -4,7 +4,12 @@ namespace SledzSpecke.Core.ValueObjects;
 
 public record ModuleId
 {
-    public int Value { get; }
+    public int Value { get; init; }
+
+    private ModuleId()
+    {
+        // Required for EF Core
+    }
 
     public ModuleId(int value)
     {

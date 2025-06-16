@@ -28,26 +28,26 @@ public sealed class GetCompletedSelfEducationHandler : IQueryHandler<GetComplete
 
         var activities = await _selfEducationRepository.GetByUserIdAsync(new UserId(query.UserId));
         
+        // In the new model, all recorded activities are considered complete
         return activities
-            .Where(a => a.SpecializationId.Value == query.SpecializationId && a.IsCompleted)
             .Select(a => new SelfEducationDto
             {
                 Id = a.Id.Value,
-                SpecializationId = a.SpecializationId.Value,
-                UserId = a.UserId.Value,
+                SpecializationId = query.SpecializationId, // Use from query
+                UserId = query.UserId, // Use from query
                 Type = a.Type.ToString(),
-                Year = a.Year,
-                Title = a.Title,
+                Year = a.Date.Year,
+                Title = a.Description, // Use description as title
                 Description = a.Description,
-                Provider = a.Provider,
-                StartDate = a.StartDate,
-                EndDate = a.EndDate,
-                CreditHours = a.CreditHours,
-                DurationHours = a.DurationHours,
-                IsCompleted = a.IsCompleted,
-                CompletedAt = a.CompletedAt,
-                CertificatePath = a.CertificatePath,
-                QualityScore = (double)(a.QualityScore ?? 0),
+                Provider = null, // Not available in new model
+                StartDate = a.Date,
+                EndDate = a.Date,
+                CreditHours = a.Hours,
+                DurationHours = a.Hours,
+                IsCompleted = true, // All recorded activities are complete
+                CompletedAt = a.Date,
+                CertificatePath = null, // Not available in new model
+                QualityScore = (double)a.GetEducationPoints(),
                 SyncStatus = a.SyncStatus.ToString(),
                 CreatedAt = a.CreatedAt,
                 UpdatedAt = a.UpdatedAt

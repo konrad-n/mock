@@ -132,12 +132,12 @@ public class ProcedureValidationService : IProcedureValidationService
                 // Old SMK: count individual procedures by operator code
                 if (procedure is ProcedureOldSmk oldSmkProc)
                 {
-                    if (oldSmkProc.OperatorCode == "A")
+                    if (oldSmkProc.ExecutionType == ProcedureExecutionType.CodeA)
                         progress.CompletedCountA++;
-                    else if (oldSmkProc.OperatorCode == "B")
+                    else if (oldSmkProc.ExecutionType == ProcedureExecutionType.CodeB)
                         progress.CompletedCountB++;
                     else
-                        progress.TotalCompleted++; // No operator code specified
+                        progress.TotalCompleted++; // No execution type specified
                 }
             }
             else if (requirement.SmkVersion == SmkVersion.New)

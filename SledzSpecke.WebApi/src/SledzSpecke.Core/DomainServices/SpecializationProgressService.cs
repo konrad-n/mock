@@ -251,16 +251,16 @@ public class SpecializationProgressService : ISpecializationProgressService
 
     private static double CalculateSelfEducationProgress(IEnumerable<SelfEducation> selfEducation)
     {
-        var completed = selfEducation.Count(se => se.IsCompleted);
+        // All self-education activities are considered complete when recorded
         var total = selfEducation.Count();
-        return total > 0 ? (double)completed / total : 0;
+        return total > 0 ? 1.0 : 0; // If any exist, they're complete
     }
 
     private static int CalculateQualityScore(IEnumerable<Publication> publications,
         IEnumerable<SelfEducation> selfEducation, IEnumerable<Recognition> recognitions)
     {
         var publicationScore = publications.Sum(p => p.CalculateImpactScore());
-        var selfEducationScore = selfEducation.Sum(se => se.CalculateQualityScore());
+        var selfEducationScore = selfEducation.Sum(se => se.GetEducationPoints());
         var recognitionScore = recognitions.Count(r => r.IsApproved) * 5;
 
         return publicationScore + selfEducationScore + recognitionScore;

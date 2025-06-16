@@ -10,6 +10,7 @@ public sealed record Address
     public string PostalCode { get; }
     public string City { get; }
     public string Province { get; }
+    public string Country { get; }
 
     public Address(
         string street,
@@ -17,7 +18,8 @@ public sealed record Address
         string? apartmentNumber,
         string postalCode,
         string city,
-        string province)
+        string province,
+        string country = "Polska")
     {
         if (string.IsNullOrWhiteSpace(street))
             throw new DomainException("Street cannot be empty.");
@@ -31,6 +33,8 @@ public sealed record Address
             throw new DomainException("City cannot be empty.");
         if (string.IsNullOrWhiteSpace(province))
             throw new DomainException("Province cannot be empty.");
+        if (string.IsNullOrWhiteSpace(country))
+            throw new DomainException("Country cannot be empty.");
 
         Street = street.Trim();
         HouseNumber = houseNumber.Trim();
@@ -38,6 +42,7 @@ public sealed record Address
         PostalCode = postalCode.Trim();
         City = city.Trim();
         Province = province.Trim();
+        Country = country.Trim();
     }
 
     private static bool IsValidPostalCode(string postalCode)
@@ -49,7 +54,7 @@ public sealed record Address
     public string GetFullAddress()
     {
         var apartment = string.IsNullOrEmpty(ApartmentNumber) ? "" : $"/{ApartmentNumber}";
-        return $"{Street} {HouseNumber}{apartment}, {PostalCode} {City}, {Province}";
+        return $"{Street} {HouseNumber}{apartment}, {PostalCode} {City}, {Province}, {Country}";
     }
 
     public override string ToString() => GetFullAddress();

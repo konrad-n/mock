@@ -17,8 +17,7 @@ internal sealed class ProcedureConfiguration : IEntityTypeConfiguration<Procedur
             .HasMaxLength(20)
             .IsRequired();
 
-        builder.Property(x => x.OperatorCode)
-            .HasMaxLength(10);
+        // OperatorCode has been replaced by ExecutionType in base class
 
         builder.Property(x => x.PerformingPerson)
             .HasMaxLength(100);

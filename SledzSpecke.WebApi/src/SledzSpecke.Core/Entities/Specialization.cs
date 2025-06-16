@@ -20,6 +20,11 @@ public class Specialization
     public ModuleId? CurrentModuleId { get; private set; }
     public int DurationYears { get; private set; }
     public int DurationInDays => DurationYears * 365;
+    
+    // Module tracking
+    public bool HasBasicModule { get; private set; }
+    public bool HasSpecializedModule { get; private set; }
+    public DateTime? BasicModuleCompletionDate { get; private set; }
 
     private readonly List<Module> _modules = new();
     public IReadOnlyList<Module> Modules => _modules.AsReadOnly();
@@ -164,5 +169,41 @@ public class Specialization
 
         Status = SpecializationStatus.Cancelled;
         ActualEndDate = DateTime.UtcNow;
+    }
+    
+    public void MarkBasicModuleCompleted(DateTime completionDate)
+    {
+        if (HasBasicModule)
+        {
+            throw new InvalidOperationException("Basic module is already marked as completed.");
+        }
+        
+        HasBasicModule = true;
+        BasicModuleCompletionDate = completionDate;
+    }
+    
+    public void MarkSpecializedModuleCompleted()
+    {
+        if (!HasBasicModule)
+        {
+            throw new InvalidOperationException("Cannot complete specialized module before basic module.");
+        }
+        
+        if (HasSpecializedModule)
+        {
+            throw new InvalidOperationException("Specialized module is already marked as completed.");
+        }
+        
+        HasSpecializedModule = true;
+    }
+    
+    public bool IsReadyForSpecializedModule()
+    {
+        return HasBasicModule && !HasSpecializedModule;
+    }
+    
+    public bool AreAllModulesCompleted()
+    {
+        return HasBasicModule && HasSpecializedModule;
     }
 }

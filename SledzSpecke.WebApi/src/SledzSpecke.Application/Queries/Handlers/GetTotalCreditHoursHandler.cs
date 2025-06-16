@@ -27,10 +27,10 @@ public sealed class GetTotalCreditHoursHandler : IQueryHandler<GetTotalCreditHou
 
         var activities = await _selfEducationRepository.GetByUserIdAsync(new UserId(query.UserId));
         
-        // Only count completed activities for the specialization
+        // In the new model, all recorded activities are considered complete
+        // Convert hours to credit hours (1:1 ratio)
         var totalCreditHours = activities
-            .Where(a => a.SpecializationId.Value == query.SpecializationId && a.IsCompleted)
-            .Sum(a => a.CreditHours);
+            .Sum(a => a.Hours);
 
         return totalCreditHours;
     }

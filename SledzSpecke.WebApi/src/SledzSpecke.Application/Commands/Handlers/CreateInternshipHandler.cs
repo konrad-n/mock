@@ -43,14 +43,17 @@ public sealed class CreateInternshipHandler : ICommandHandler<CreateInternship, 
         var internship = Internship.Create(
             internshipId,
             command.SpecializationId,
+            command.Name,
             command.InstitutionName,
             command.DepartmentName,
             command.StartDate,
-            command.EndDate);
+            command.EndDate,
+            command.PlannedWeeks,
+            command.PlannedDays);
 
         if (!string.IsNullOrWhiteSpace(command.SupervisorName))
         {
-            internship.SetSupervisor(command.SupervisorName);
+            internship.SetSupervisor(command.SupervisorName, command.SupervisorPwz);
         }
 
         if (command.ModuleId.HasValue)

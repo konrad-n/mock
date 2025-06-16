@@ -82,7 +82,7 @@ public class TypeAProceduresSpecification : Specification<ProcedureBase>
 {
     public override Expression<Func<ProcedureBase, bool>> ToExpression()
     {
-        return procedure => !string.IsNullOrEmpty(procedure.OperatorCode);
+        return procedure => procedure.ExecutionType == ProcedureExecutionType.CodeA;
     }
 }
 

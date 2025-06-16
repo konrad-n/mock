@@ -184,7 +184,7 @@ public class CourseEnhanced
 
     public bool IsMandatory()
     {
-        return CourseType == CourseType.Mandatory || CourseType == CourseType.Attestation;
+        return CourseType == CourseType.Specialization || CourseType == CourseType.Certification;
     }
 
     /// <summary>

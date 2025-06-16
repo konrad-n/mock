@@ -47,13 +47,19 @@ public sealed class CreateCourseHandler : IResultCommandHandler<CreateCourse, in
         try
         {
             var courseId = CourseId.New();
+            // For backward compatibility, use CompletionDate as both start and end date
+            // Duration defaults to 1 day, 8 hours
             var course = Course.Create(
                 courseId,
                 command.SpecializationId,
                 courseType,
                 command.CourseName,
-                command.InstitutionName,
-                command.CompletionDate);
+                command.InstitutionName, // Use as organizer name
+                command.InstitutionName, // Use as institution name
+                command.CompletionDate.AddDays(-1), // Start date (1 day before completion)
+                command.CompletionDate, // End date
+                1, // Duration days
+                8); // Duration hours
 
             if (!string.IsNullOrWhiteSpace(command.CourseNumber))
             {

@@ -218,10 +218,13 @@ public class AddMedicalShiftHandlerEnhanced : ICommandHandler<AddMedicalShift, i
             var medicalShift = MedicalShift.Create(
                 medicalShiftId,
                 internship.Id,
+                internship.ModuleId,
                 command.Date,
                 command.Hours,
                 command.Minutes,
+                ShiftType.Accompanying, // Default to accompanying shift
                 command.Location,
+                internship.SupervisorName, // Use internship's supervisor
                 command.Year
             );
 

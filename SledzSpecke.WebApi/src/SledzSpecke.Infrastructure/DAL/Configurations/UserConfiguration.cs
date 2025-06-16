@@ -59,6 +59,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             address.Property(a => a.PostalCode).HasMaxLength(10).IsRequired();
             address.Property(a => a.City).HasMaxLength(100).IsRequired();
             address.Property(a => a.Province).HasMaxLength(100).IsRequired();
+            address.Property(a => a.Country).HasMaxLength(100).IsRequired();
         });
 
         builder.Property(x => x.RegistrationDate)

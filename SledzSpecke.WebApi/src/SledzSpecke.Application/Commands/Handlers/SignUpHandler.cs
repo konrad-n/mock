@@ -88,6 +88,7 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
                 email, 
                 hashedPassword, 
                 firstName,
+                null, // SecondName - optional
                 lastName,
                 pesel,
                 pwzNumber,

@@ -92,12 +92,16 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
                 }
 
                 // Use domain method to add procedure
+                var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
                 var addResult = internship.AddProcedureOldSmk(
                     procedureId,
                     command.Date,
                     procedureYear,
                     command.Code,
-                    command.Location);
+                    command.Name,
+                    command.Location,
+                    executionType,
+                    command.SupervisorName);
 
                 if (addResult.IsFailure)
                 {
@@ -137,6 +141,7 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
                 var procedureName = command.ProcedureName ?? command.Code;
 
                 // Use domain method to add procedure
+                var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
                 var addResult = internship.AddProcedureNewSmk(
                     procedureId,
                     command.Date,
@@ -144,7 +149,9 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
                     command.Location,
                     new ModuleId(moduleId.Value),
                     procedureRequirementId,
-                    procedureName);
+                    procedureName,
+                    executionType,
+                    command.SupervisorName);
 
                 if (addResult.IsFailure)
                 {
@@ -163,15 +170,23 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
             }
 
             // Set common procedure details
-            if (!string.IsNullOrWhiteSpace(command.OperatorCode) ||
-                !string.IsNullOrWhiteSpace(command.PerformingPerson) ||
+            if (!string.IsNullOrWhiteSpace(command.PerformingPerson) ||
+                !string.IsNullOrWhiteSpace(command.PatientInfo) ||
                 !string.IsNullOrWhiteSpace(command.PatientInitials))
             {
+                var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
                 createdProcedure.UpdateProcedureDetails(
-                    command.OperatorCode,
+                    executionType,
                     command.PerformingPerson,
+                    command.PatientInfo,
                     command.PatientInitials,
-                    command.PatientGender);
+                    command.PatientGender ?? ' ');
+            }
+            
+            // Set supervisor PWZ if provided
+            if (!string.IsNullOrEmpty(command.SupervisorPwz))
+            {
+                createdProcedure.SetSupervisorPwz(command.SupervisorPwz);
             }
 
             // Validate before changing status to completed

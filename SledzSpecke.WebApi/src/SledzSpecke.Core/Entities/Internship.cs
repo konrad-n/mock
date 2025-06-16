@@ -12,12 +12,18 @@ public class Internship : AggregateRoot
     public InternshipId InternshipId { get; private set; }
     public SpecializationId SpecializationId { get; private set; }
     public ModuleId? ModuleId { get; private set; }
+    public string Name { get; private set; }
     public string InstitutionName { get; private set; }
     public string DepartmentName { get; private set; }
     public string? SupervisorName { get; private set; }
+    public string? SupervisorPwz { get; private set; }
     public DateTime StartDate { get; private set; }
     public DateTime EndDate { get; private set; }
     public int DaysCount { get; private set; }
+    public int PlannedWeeks { get; private set; }
+    public int PlannedDays { get; private set; }
+    public int CompletedDays { get; private set; }
+    public InternshipStatus Status { get; private set; }
     public bool IsCompleted { get; private set; }
     public bool IsApproved { get; private set; }
     public DateTime? ApprovalDate { get; private set; }
@@ -35,24 +41,34 @@ public class Internship : AggregateRoot
     // Parameterless constructor for EF Core
     private Internship() { }
 
-    private Internship(InternshipId id, SpecializationId specializationId, string institutionName,
-        string departmentName, DateTime startDate, DateTime endDate)
+    private Internship(InternshipId id, SpecializationId specializationId, string name,
+        string institutionName, string departmentName, DateTime startDate, DateTime endDate,
+        int plannedWeeks, int plannedDays)
     {
         InternshipId = id;
         SpecializationId = specializationId;
+        Name = name;
         InstitutionName = institutionName;
         DepartmentName = departmentName;
         StartDate = EnsureUtc(startDate);
         EndDate = EnsureUtc(endDate);
         DaysCount = CalculateDaysCount(startDate, endDate);
+        PlannedWeeks = plannedWeeks;
+        PlannedDays = plannedDays;
+        CompletedDays = 0;
+        Status = InternshipStatus.Planned;
         SyncStatus = SyncStatus.NotSynced;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 
     public static Internship Create(InternshipId id, SpecializationId specializationId,
-        string institutionName, string departmentName, DateTime startDate, DateTime endDate)
+        string name, string institutionName, string departmentName, DateTime startDate, 
+        DateTime endDate, int plannedWeeks, int plannedDays)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Internship name cannot be empty.", nameof(name));
+
         if (string.IsNullOrWhiteSpace(institutionName))
             throw new ArgumentException("Institution name cannot be empty.", nameof(institutionName));
 
@@ -62,7 +78,14 @@ public class Internship : AggregateRoot
         if (endDate <= startDate)
             throw new InvalidDateRangeException();
 
-        return new Internship(id, specializationId, institutionName, departmentName, startDate, endDate);
+        if (plannedWeeks < 0)
+            throw new ArgumentException("Planned weeks cannot be negative.", nameof(plannedWeeks));
+
+        if (plannedDays < 0)
+            throw new ArgumentException("Planned days cannot be negative.", nameof(plannedDays));
+
+        return new Internship(id, specializationId, name, institutionName, departmentName, 
+            startDate, endDate, plannedWeeks, plannedDays);
     }
 
     public void AssignToModule(ModuleId moduleId)
@@ -78,13 +101,14 @@ public class Internship : AggregateRoot
         }
     }
 
-    public void SetSupervisor(string supervisorName)
+    public void SetSupervisor(string supervisorName, string? supervisorPwz = null)
     {
         EnsureCanModify();
         if (string.IsNullOrWhiteSpace(supervisorName))
             throw new ArgumentException("Supervisor name cannot be empty.", nameof(supervisorName));
 
         SupervisorName = supervisorName;
+        SupervisorPwz = supervisorPwz;
         UpdatedAt = DateTime.UtcNow;
 
         // Automatically transition from Synced to Modified
@@ -147,6 +171,8 @@ public class Internship : AggregateRoot
         }
         
         IsCompleted = true;
+        Status = InternshipStatus.Completed;
+        CompletedDays = DaysCount; // When completed, all planned days are considered completed
         UpdatedAt = DateTime.UtcNow;
 
         // Automatically transition from Synced to Modified
@@ -156,6 +182,45 @@ public class Internship : AggregateRoot
         }
         
         return Result.Success();
+    }
+    
+    public void UpdateStatus(InternshipStatus status)
+    {
+        EnsureCanModify();
+        Status = status;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void UpdateCompletedDays(int completedDays)
+    {
+        EnsureCanModify();
+        
+        if (completedDays < 0)
+            throw new ArgumentException("Completed days cannot be negative.", nameof(completedDays));
+            
+        if (completedDays > DaysCount)
+            throw new ArgumentException("Completed days cannot exceed total days count.", nameof(completedDays));
+            
+        CompletedDays = completedDays;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Update status based on completed days
+        if (completedDays > 0 && Status == InternshipStatus.Planned)
+        {
+            Status = InternshipStatus.InProgress;
+        }
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     public void Approve(string approverName)
@@ -237,10 +302,13 @@ public class Internship : AggregateRoot
         var medicalShift = MedicalShift.Create(
             medicalShiftId,
             InternshipId,
+            ModuleId,
             date,
             hours,
             minutes,
+            ShiftType.Accompanying, // Default to accompanying shift
             location,
+            SupervisorName, // Use internship's supervisor by default
             year
         );
 
@@ -272,7 +340,10 @@ public class Internship : AggregateRoot
         DateTime date,
         int year,
         string code,
-        string location)
+        string name,
+        string location,
+        ProcedureExecutionType executionType,
+        string supervisorName)
     {
         if (IsCompleted || IsApproved)
         {
@@ -283,7 +354,9 @@ public class Internship : AggregateRoot
 
         try
         {
-            var procedure = ProcedureOldSmk.Create(procedureId, InternshipId, date, year, code, location);
+            // Assuming ModuleId comes from a Module navigation property
+            var moduleId = new ModuleId(1); // TODO: Get actual module ID from Module property
+            var procedure = ProcedureOldSmk.Create(procedureId, moduleId, InternshipId, date, year, code, name, location, executionType, supervisorName);
             _procedures.Add(procedure);
             UpdatedAt = DateTime.UtcNow;
 
@@ -308,7 +381,9 @@ public class Internship : AggregateRoot
         string location,
         ModuleId moduleId,
         int procedureRequirementId,
-        string procedureName)
+        string procedureName,
+        ProcedureExecutionType executionType,
+        string supervisorName)
     {
         if (IsCompleted || IsApproved)
         {
@@ -319,7 +394,7 @@ public class Internship : AggregateRoot
 
         try
         {
-            var procedure = ProcedureNewSmk.Create(procedureId, InternshipId, date, code, location, moduleId, procedureRequirementId, procedureName);
+            var procedure = ProcedureNewSmk.Create(procedureId, moduleId, InternshipId, date, code, procedureName, location, executionType, supervisorName, procedureRequirementId);
             _procedures.Add(procedure);
             UpdatedAt = DateTime.UtcNow;
 

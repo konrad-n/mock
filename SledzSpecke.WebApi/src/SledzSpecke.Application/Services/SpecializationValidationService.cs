@@ -133,34 +133,23 @@ public class SpecializationValidationService : ISpecializationValidationService
                     }
                 }
 
-                // Validate operator code
+                // Validate execution type
                 if (specialization.SmkVersion == SmkVersion.New)
                 {
-                    // For New SMK, operator code must match the requirement type
-                    if (!string.IsNullOrEmpty(procedure.OperatorCode))
+                    // For New SMK, execution type must match the requirement type
+                    if (procedure.ExecutionType == ProcedureExecutionType.CodeA && procedureTemplate.RequiredCountA == 0)
                     {
-                        if (procedure.OperatorCode == "A" && procedureTemplate.RequiredCountA == 0)
-                        {
-                            result.AddError("This procedure does not require operator role (A)");
-                        }
-                        else if (procedure.OperatorCode == "B" && procedureTemplate.RequiredCountB == 0)
-                        {
-                            result.AddError("This procedure does not require assistant role (B)");
-                        }
-                        else if (procedure.OperatorCode != "A" && procedure.OperatorCode != "B")
-                        {
-                            result.AddError("Invalid operator code. Must be 'A' (operator) or 'B' (assistant)");
-                        }
+                        result.AddError("This procedure does not require operator role (Code A)");
+                    }
+                    else if (procedure.ExecutionType == ProcedureExecutionType.CodeB && procedureTemplate.RequiredCountB == 0)
+                    {
+                        result.AddError("This procedure does not require assistant role (Code B)");
                     }
                 }
                 else if (specialization.SmkVersion == SmkVersion.Old)
                 {
-                    // For Old SMK, operator code is optional but if provided must be A or B
-                    if (!string.IsNullOrEmpty(procedure.OperatorCode) &&
-                        procedure.OperatorCode != "A" && procedure.OperatorCode != "B")
-                    {
-                        result.AddError("Invalid operator code. Must be 'A' or 'B' for Old SMK");
-                    }
+                    // For Old SMK, only Code A is tracked (no Code B in old SMK)
+                    // Execution type validation is handled by the entity itself
                 }
 
                 // Validate procedure type matches template

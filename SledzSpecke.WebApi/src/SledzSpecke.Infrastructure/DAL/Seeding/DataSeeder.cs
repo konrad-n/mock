@@ -60,6 +60,7 @@ internal sealed class DataSeeder : IDataSeeder
             new Email("test@example.com"),
             new HashedPassword("$2a$10$abc123"), // BCrypt hash format
             new FirstName("Jan"),
+            null, // SecondName - optional
             new LastName("Kowalski"),
             new Pesel("90010112345"), // Valid PESEL for DOB 1990-01-01
             new PwzNumber("1234567"),
@@ -71,7 +72,8 @@ internal sealed class DataSeeder : IDataSeeder
                 "5A",
                 "00-001",
                 "Warszawa",
-                "Mazowieckie"
+                "Mazowieckie",
+                "Polska"
             ),
             DateTime.UtcNow
         );

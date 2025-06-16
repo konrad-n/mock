@@ -43,7 +43,7 @@ internal static class ProcedureMappingExtensions
             procedure.Date,
             procedure.Year,
             procedure.Code,
-            procedure.OperatorCode,
+            procedure.ExecutionType.ToString(),
             procedure.PerformingPerson,
             procedure.Location,
             procedure.PatientInitials,

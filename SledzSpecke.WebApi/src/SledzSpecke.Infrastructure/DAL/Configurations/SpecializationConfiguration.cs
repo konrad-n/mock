@@ -31,10 +31,9 @@ internal sealed class SpecializationConfiguration : IEntityTypeConfiguration<Spe
         builder.Property(x => x.ProgramStructure)
             .IsRequired();
 
-        builder.HasMany<Module>()
+        builder.HasMany(x => x.Modules)
             .WithOne()
-            .HasForeignKey(x => x.SpecializationId);
-
-        builder.Ignore(x => x.Modules);
+            .HasForeignKey(x => x.SpecializationId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

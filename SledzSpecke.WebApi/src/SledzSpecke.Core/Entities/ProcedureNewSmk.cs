@@ -6,13 +6,10 @@ namespace SledzSpecke.Core.Entities;
 /// <summary>
 /// Represents a procedure in the New SMK system.
 /// New SMK tracks aggregated procedure counts by module with date ranges.
+/// New SMK tracks both Code A (performed) and Code B (assisted) separately.
 /// </summary>
 public class ProcedureNewSmk : ProcedureBase
 {
-    /// <summary>
-    /// Module ID this procedure entry belongs to
-    /// </summary>
-    public ModuleId ModuleId { get; private set; }
 
     /// <summary>
     /// Reference to procedure requirement from template
@@ -20,14 +17,24 @@ public class ProcedureNewSmk : ProcedureBase
     public int ProcedureRequirementId { get; private set; }
 
     /// <summary>
-    /// Count of procedures performed as operator (A)
+    /// Count of procedures performed as operator (Code A)
     /// </summary>
     public int CountA { get; private set; }
 
     /// <summary>
-    /// Count of procedures performed as assistant (B)
+    /// Count of procedures performed as assistant (Code B)
     /// </summary>
     public int CountB { get; private set; }
+    
+    /// <summary>
+    /// Required count for Code A procedures
+    /// </summary>
+    public int RequiredCountCodeA { get; private set; }
+    
+    /// <summary>
+    /// Required count for Code B procedures
+    /// </summary>
+    public int RequiredCountCodeB { get; private set; }
 
     /// <summary>
     /// Name of the procedure from requirement template
@@ -49,24 +56,25 @@ public class ProcedureNewSmk : ProcedureBase
     /// </summary>
     public string? Comments { get; private set; }
 
-    private ProcedureNewSmk(ProcedureId id, InternshipId internshipId, DateTime date,
-        string code, string location, ProcedureStatus status, ModuleId moduleId,
-        int procedureRequirementId, string procedureName)
-        : base(id, internshipId, date, date.Year, code, location, status, SmkVersion.New)
+    private ProcedureNewSmk(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+        string code, string name, string location, ProcedureExecutionType executionType,
+        string supervisorName, ProcedureStatus status, int procedureRequirementId)
+        : base(id, moduleId, internshipId, date, date.Year, code, name, location, executionType,
+               supervisorName, status, SmkVersion.New)
     {
-        ModuleId = moduleId;
         ProcedureRequirementId = procedureRequirementId;
-        ProcedureName = procedureName;
+        ProcedureName = name;
         CountA = 0;
         CountB = 0;
     }
 
-    public static ProcedureNewSmk Create(ProcedureId id, InternshipId internshipId, DateTime date,
-        string code, string location, ModuleId moduleId, int procedureRequirementId, string procedureName)
+    public static ProcedureNewSmk Create(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+        string code, string procedureName, string location, ProcedureExecutionType executionType,
+        string supervisorName, int procedureRequirementId)
     {
         ValidateInput(code, location, date, procedureName);
-        return new ProcedureNewSmk(id, internshipId, date, code, location, ProcedureStatus.Pending,
-            moduleId, procedureRequirementId, procedureName);
+        return new ProcedureNewSmk(id, moduleId, internshipId, date, code, procedureName, location,
+            executionType, supervisorName, ProcedureStatus.Pending, procedureRequirementId);
     }
 
     public void UpdateCounts(int countA, int countB)
@@ -156,7 +164,8 @@ public class ProcedureNewSmk : ProcedureBase
                ProcedureRequirementId > 0 &&
                !string.IsNullOrEmpty(ProcedureName) &&
                (CountA > 0 || CountB > 0) &&
-               !string.IsNullOrEmpty(Location);
+               !string.IsNullOrEmpty(Location) &&
+               !string.IsNullOrEmpty(SupervisorName);
     }
 
     public override void ValidateSmkSpecificRules()
@@ -183,13 +192,15 @@ public class ProcedureNewSmk : ProcedureBase
         base.Complete();
     }
 
-    public override void UpdateProcedureDetails(string? operatorCode, string? performingPerson,
-        string? patientInitials, char? patientGender)
+    public override void UpdateProcedureDetails(ProcedureExecutionType executionType, string? performingPerson,
+        string? patientInfo, string? patientInitials, char? patientGender)
     {
-        // New SMK doesn't track individual patient data or operator codes
+        // New SMK doesn't track individual patient data
         // These are aggregated counts, not individual procedures
         EnsureCanModify();
 
+        ExecutionType = executionType;
+        
         // Only update supervisor if provided as performing person
         if (!string.IsNullOrEmpty(performingPerson) && string.IsNullOrEmpty(Supervisor))
         {

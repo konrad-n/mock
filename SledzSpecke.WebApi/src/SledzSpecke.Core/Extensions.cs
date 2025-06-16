@@ -16,6 +16,8 @@ public static class Extensions
         services.AddScoped<IProcedureValidationService, ProcedureValidationService>();
         services.AddScoped<IModuleProgressionService, ModuleProgressionService>();
         services.AddScoped<IDurationCalculationService, DurationCalculationService>();
+        services.AddScoped<ICmkpValidationService, CmkpValidationService>();
+        services.AddScoped<ISmkComplianceValidator, SmkComplianceValidator>();
         
         return services;
     }

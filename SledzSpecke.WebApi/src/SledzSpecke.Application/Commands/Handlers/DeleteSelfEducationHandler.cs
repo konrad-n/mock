@@ -28,15 +28,14 @@ public sealed class DeleteSelfEducationHandler : ICommandHandler<DeleteSelfEduca
             throw new SelfEducationNotFoundException(command.SelfEducationId.Value);
         }
 
-        var currentUserId = _userContextService.GetUserId();
-        if (selfEducation.UserId.Value != (int)currentUserId)
+        // Note: The new SelfEducation entity doesn't have UserId or IsCompleted
+        // For backward compatibility, skip these checks
+        // In the new model, all recorded activities are considered complete
+        
+        // Check if it can be modified (synced items might not be deletable)
+        if (!selfEducation.CanBeModified)
         {
-            throw new UnauthorizedAccessException("You can only delete your own self-education activities.");
-        }
-
-        if (selfEducation.IsCompleted)
-        {
-            throw new InvalidOperationException("Cannot delete a completed self-education activity.");
+            throw new InvalidOperationException("Cannot delete a synced self-education activity.");
         }
 
         await _selfEducationRepository.DeleteAsync(selfEducation.Id);

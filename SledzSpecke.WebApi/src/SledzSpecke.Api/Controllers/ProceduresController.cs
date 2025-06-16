@@ -68,10 +68,14 @@ public class ProceduresController : BaseController
                 request.Date,
                 request.Year,
                 request.Code,
+                request.Code, // Name (using Code as Name for now)
                 request.Location,
                 request.Status,
-                request.OperatorCode,
+                request.OperatorCode ?? "CodeA", // ExecutionType (default to CodeA)
+                request.PerformingPerson ?? "Unknown", // SupervisorName
+                null, // SupervisorPwz
                 request.PerformingPerson,
+                null, // PatientInfo
                 request.PatientInitials,
                 request.PatientGender,
                 // Old SMK specific fields
@@ -82,11 +86,11 @@ public class ProceduresController : BaseController
                 // New SMK specific fields
                 request.ModuleId,
                 request.ProcedureName,
-            request.CountA,
-            request.CountB,
-            request.Supervisor,
-            request.Institution,
-            request.Comments);
+                request.CountA,
+                request.CountB,
+                request.Supervisor,
+                request.Institution,
+                request.Comments);
 
             var procedureId = await _addProcedureHandler.HandleAsync(command);
             Console.WriteLine($"[DEBUG] Procedure created successfully with ID: {procedureId}");
@@ -109,8 +113,9 @@ public class ProceduresController : BaseController
             request.Code,
             request.Location,
             request.Status,
-            request.OperatorCode,
+            request.OperatorCode, // ExecutionType
             request.PerformingPerson,
+            null, // PatientInfo
             request.PatientInitials,
             request.PatientGender,
             // Old SMK specific fields

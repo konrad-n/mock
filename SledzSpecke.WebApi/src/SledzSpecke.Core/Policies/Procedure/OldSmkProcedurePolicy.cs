@@ -15,13 +15,8 @@ public class OldSmkProcedurePolicy : ISmkPolicy<ProcedureBase>
             return Result.Failure("Procedura nie jest zgodna z wersją Old SMK");
         }
 
-        // Validate operator code
-        if (!string.IsNullOrEmpty(procedure.OperatorCode) && 
-            procedure.OperatorCode != "A" && 
-            procedure.OperatorCode != "B")
-        {
-            return Result.Failure("Kod operatora musi być 'A' (operator) lub 'B' (asystent)");
-        }
+        // Validate execution type - Old SMK only tracks Code A (no Code B in old SMK)
+        // This validation is implicit since ExecutionType is always valid as an enum
 
         // Validate year range (0 = unassigned, 1-6 = year)
         if (procedure.Year < 0 || procedure.Year > 6)

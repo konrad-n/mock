@@ -113,13 +113,20 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             if (specialization.SmkVersion == SmkVersion.Old)
             {
                 Console.WriteLine($"[DEBUG] Creating ProcedureOldSmk");
+                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ?? 1; // Default to 1 if not specified
+                var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
+                
                 procedure = ProcedureOldSmk.Create(
                     procedureId,
+                    new ModuleId(moduleId),
                     internship.Id,
                     command.Date,
                     procedureYear,
                     command.Code,
-                    command.Location);
+                    command.Name,
+                    command.Location,
+                    executionType,
+                    command.SupervisorName);
             }
             else
             {
@@ -128,17 +135,20 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
                 var moduleId = command.ModuleId ?? internship.ModuleId?.Value ??
                     throw new InvalidOperationException("Module ID is required for New SMK procedures");
                 var procedureRequirementId = command.ProcedureRequirementId ?? 0; // Will be validated later
-                var procedureName = command.ProcedureName ?? command.Code; // Use code as fallback
+                var procedureName = command.ProcedureName ?? command.Name ?? command.Code; // Use name or code as fallback
+                var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
 
                 procedure = ProcedureNewSmk.Create(
                     procedureId,
+                    new ModuleId(moduleId),
                     internship.Id,
                     command.Date,
                     command.Code,
+                    procedureName,
                     command.Location,
-                    new ModuleId(moduleId),
-                    procedureRequirementId,
-                    procedureName);
+                    executionType,
+                    command.SupervisorName,
+                    procedureRequirementId);
             }
             Console.WriteLine($"[DEBUG] Procedure entity created successfully");
         }
@@ -149,15 +159,23 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         }
 
         // Set additional fields
-        if (!string.IsNullOrWhiteSpace(command.OperatorCode) ||
-            !string.IsNullOrWhiteSpace(command.PerformingPerson) ||
+        if (!string.IsNullOrWhiteSpace(command.PerformingPerson) ||
+            !string.IsNullOrWhiteSpace(command.PatientInfo) ||
             !string.IsNullOrWhiteSpace(command.PatientInitials))
         {
+            var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
             procedure.UpdateProcedureDetails(
-                command.OperatorCode,
+                executionType,
                 command.PerformingPerson,
+                command.PatientInfo,
                 command.PatientInitials,
-                command.PatientGender);
+                command.PatientGender ?? ' ');
+        }
+        
+        // Set supervisor PWZ if provided
+        if (!string.IsNullOrEmpty(command.SupervisorPwz))
+        {
+            procedure.SetSupervisorPwz(command.SupervisorPwz);
         }
 
         // Set SMK-specific fields

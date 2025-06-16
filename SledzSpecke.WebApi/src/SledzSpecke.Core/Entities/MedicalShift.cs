@@ -7,10 +7,17 @@ public class MedicalShift
 {
     public MedicalShiftId Id { get; private set; }
     public InternshipId InternshipId { get; private set; }
+    public ModuleId? ModuleId { get; private set; }
     public DateTime Date { get; private set; }
     public Duration Duration { get; private set; }
+    public ShiftType Type { get; private set; }
     public string Location { get; private set; }
+    public string? SupervisorName { get; private set; }
     public int Year { get; private set; }
+    public bool IsExempt { get; private set; }
+    public string? ExemptionReason { get; private set; }
+    public DateTime? ExemptionStartDate { get; private set; }
+    public DateTime? ExemptionEndDate { get; private set; }
     public SyncStatus SyncStatus { get; private set; }
     public string? AdditionalFields { get; private set; }
     public DateTime? ApprovalDate { get; private set; }
@@ -28,22 +35,27 @@ public class MedicalShift
     // Parameterless constructor for EF Core
     private MedicalShift() { }
 
-    private MedicalShift(MedicalShiftId id, InternshipId internshipId, DateTime date, Duration duration,
-        string location, int year)
+    private MedicalShift(MedicalShiftId id, InternshipId internshipId, ModuleId? moduleId,
+        DateTime date, Duration duration, ShiftType type, string location, string? supervisorName, int year)
     {
         Id = id;
         InternshipId = internshipId;
+        ModuleId = moduleId;
         Date = EnsureUtc(date);
         Duration = duration ?? throw new ArgumentNullException(nameof(duration));
+        Type = type;
         Location = location ?? throw new ArgumentNullException(nameof(location));
+        SupervisorName = supervisorName;
         Year = year;
+        IsExempt = false;
         SyncStatus = SyncStatus.NotSynced;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public static MedicalShift Create(MedicalShiftId id, InternshipId internshipId,
-        DateTime date, int hours, int minutes, string location, int year)
+    public static MedicalShift Create(MedicalShiftId id, InternshipId internshipId, ModuleId? moduleId,
+        DateTime date, int hours, int minutes, ShiftType type, string location, 
+        string? supervisorName, int year)
     {
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));
@@ -51,7 +63,8 @@ public class MedicalShift
         // No future date validation - MAUI app allows future dates
         var duration = new Duration(hours, minutes);
 
-        return new MedicalShift(id, internshipId, date, duration, location, year);
+        return new MedicalShift(id, internshipId, moduleId, date, duration, type, 
+            location, supervisorName, year);
     }
 
     /// <summary>
@@ -107,6 +120,72 @@ public class MedicalShift
     {
         AdditionalFields = additionalFields;
         UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void SetExemption(string reason, DateTime startDate, DateTime endDate)
+    {
+        EnsureCanModify();
+        
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Exemption reason cannot be empty.", nameof(reason));
+            
+        if (endDate < startDate)
+            throw new ArgumentException("Exemption end date must be after start date.");
+            
+        IsExempt = true;
+        ExemptionReason = reason;
+        ExemptionStartDate = EnsureUtc(startDate);
+        ExemptionEndDate = EnsureUtc(endDate);
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void RemoveExemption()
+    {
+        EnsureCanModify();
+        
+        IsExempt = false;
+        ExemptionReason = null;
+        ExemptionStartDate = null;
+        ExemptionEndDate = null;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void AssignToModule(ModuleId moduleId)
+    {
+        EnsureCanModify();
+        ModuleId = moduleId;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
+    }
+    
+    public void SetSupervisor(string? supervisorName)
+    {
+        EnsureCanModify();
+        SupervisorName = supervisorName;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // Automatically transition from Synced to Modified
+        if (SyncStatus == SyncStatus.Synced)
+        {
+            SyncStatus = SyncStatus.Modified;
+        }
     }
 
     /// <summary>

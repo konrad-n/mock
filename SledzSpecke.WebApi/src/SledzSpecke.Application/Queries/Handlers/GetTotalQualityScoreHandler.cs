@@ -27,26 +27,16 @@ public sealed class GetTotalQualityScoreHandler : IQueryHandler<GetTotalQualityS
 
         var activities = await _selfEducationRepository.GetByUserIdAsync(new UserId(query.UserId));
         
-        var specializationActivities = activities
-            .Where(a => a.SpecializationId.Value == query.SpecializationId && a.IsCompleted);
-
+        // In the new model, use GetEducationPoints() method
         decimal totalQualityScore = 0;
 
-        foreach (var activity in specializationActivities)
+        foreach (var activity in activities)
         {
-            // Calculate quality score based on type and credit hours
-            decimal baseScore = activity.QualityScore ?? 0;
+            // Get education points from the activity
+            var points = activity.GetEducationPoints();
             
-            // Add bonus for accredited providers
-            if (!string.IsNullOrEmpty(activity.Provider) && activity.Provider.Contains("Accredited"))
-            {
-                baseScore *= 1.2m;
-            }
-            
-            // Weight by credit hours
-            decimal weightedScore = baseScore * (activity.CreditHours / 10m);
-            
-            totalQualityScore += weightedScore;
+            // Convert to decimal for quality score
+            totalQualityScore += points;
         }
 
         return totalQualityScore;

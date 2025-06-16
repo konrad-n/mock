@@ -161,9 +161,9 @@ public class ProgressCalculationService : IProgressCalculationService
             procedures.AddRange(internshipProcedures);
         }
 
-        // Count procedures by type using IsTypeA and IsTypeB properties
-        var completedTypeA = procedures.Count(p => p.Status == Core.ValueObjects.ProcedureStatus.Approved && p.IsTypeA);
-        var completedTypeB = procedures.Count(p => p.Status == Core.ValueObjects.ProcedureStatus.Approved && p.IsTypeB);
+        // Count procedures by type using IsCodeA and IsCodeB properties
+        var completedTypeA = procedures.Count(p => p.Status == Core.ValueObjects.ProcedureStatus.Approved && p.IsCodeA);
+        var completedTypeB = procedures.Count(p => p.Status == Core.ValueObjects.ProcedureStatus.Approved && p.IsCodeB);
 
         // TODO: Get required procedures from template service
         var requiredTypeA = 50; // Default value

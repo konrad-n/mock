@@ -99,8 +99,11 @@ public static class Extensions
         
         // Export services
         services.AddScoped<ISpecializationExportService, SmkExportService>();
-        services.AddScoped<ISmkExcelGenerator, SmkExcelGenerator>();
+        services.AddScoped<Export.ISmkExcelGenerator, Export.SmkExcelGenerator>();
         services.AddScoped<ISmkValidator, SmkValidator>();
+        
+        // Application layer export services
+        services.AddScoped<Application.Abstractions.ISmkExcelGenerator, Services.ApplicationSmkExcelGenerator>();
         
         // Configure file storage options
         services.Configure<FileStorageOptions>(configuration.GetSection("FileStorage"));

@@ -9,6 +9,7 @@ public sealed class User
     public Email Email { get; private set; }
     public HashedPassword Password { get; private set; }
     public FirstName FirstName { get; private set; }
+    public SecondName? SecondName { get; private set; }
     public LastName LastName { get; private set; }
     public Pesel Pesel { get; private set; }
     public PwzNumber PwzNumber { get; private set; }
@@ -29,6 +30,7 @@ public sealed class User
         Email email, 
         HashedPassword password, 
         FirstName firstName,
+        SecondName? secondName,
         LastName lastName,
         Pesel pesel,
         PwzNumber pwzNumber,
@@ -47,6 +49,7 @@ public sealed class User
             Email = email,
             Password = password,
             FirstName = firstName,
+            SecondName = secondName,
             LastName = lastName,
             Pesel = pesel,
             PwzNumber = pwzNumber,
@@ -66,6 +69,7 @@ public sealed class User
         Email email, 
         HashedPassword password, 
         FirstName firstName,
+        SecondName? secondName,
         LastName lastName,
         Pesel pesel,
         PwzNumber pwzNumber,
@@ -80,6 +84,7 @@ public sealed class User
             Email = email,
             Password = password,
             FirstName = firstName,
+            SecondName = secondName,
             LastName = lastName,
             Pesel = pesel,
             PwzNumber = pwzNumber,
@@ -148,6 +153,8 @@ public sealed class User
     // Business logic methods
     public string GetFullName()
     {
+        if (SecondName != null && SecondName.HasValue)
+            return $"{FirstName} {SecondName} {LastName}";
         return $"{FirstName} {LastName}";
     }
     

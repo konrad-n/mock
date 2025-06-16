@@ -28,6 +28,12 @@ public class Module
     public int CompletedSelfEducationDays { get; private set; }
     public int TotalSelfEducationDays { get; private set; }
 
+    // Navigation properties
+    public ICollection<Internship> Internships { get; private set; } = new List<Internship>();
+    public ICollection<Course> Courses { get; private set; } = new List<Course>();
+    public ICollection<MedicalShift> MedicalShifts { get; private set; } = new List<MedicalShift>();
+    public ICollection<ProcedureBase> Procedures { get; private set; } = new List<ProcedureBase>();
+
     public Module(ModuleId id, SpecializationId specializationId, ModuleType type, SmkVersion smkVersion,
         string version, string name, DateTime startDate, DateTime endDate, string structure)
     {

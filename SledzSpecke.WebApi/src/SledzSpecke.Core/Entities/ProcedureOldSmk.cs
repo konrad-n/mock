@@ -6,6 +6,7 @@ namespace SledzSpecke.Core.Entities;
 /// <summary>
 /// Represents a procedure in the Old SMK system.
 /// Old SMK tracks individual procedure instances with specific patient data and year-based progression.
+/// In Old SMK, procedures only count Code A (performed with supervision).
 /// </summary>
 public class ProcedureOldSmk : ProcedureBase
 {
@@ -13,6 +14,11 @@ public class ProcedureOldSmk : ProcedureBase
     /// Reference to procedure requirement from template (optional)
     /// </summary>
     public int? ProcedureRequirementId { get; private set; }
+    
+    /// <summary>
+    /// Required count for Code A procedures (Old SMK only tracks Code A)
+    /// </summary>
+    public int RequiredCountCodeA { get; private set; }
 
     // Note: ProcedureGroup and AssistantData are inherited from ProcedureBase
 
@@ -21,17 +27,21 @@ public class ProcedureOldSmk : ProcedureBase
     /// </summary>
     public string? InternshipName { get; private set; }
 
-    private ProcedureOldSmk(ProcedureId id, InternshipId internshipId, DateTime date, int year,
-        string code, string location, ProcedureStatus status)
-        : base(id, internshipId, date, year, code, location, status, SmkVersion.Old)
+    private ProcedureOldSmk(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date, int year,
+        string code, string name, string location, ProcedureExecutionType executionType,
+        string supervisorName, ProcedureStatus status)
+        : base(id, moduleId, internshipId, date, year, code, name, location, executionType, 
+               supervisorName, status, SmkVersion.Old)
     {
     }
 
-    public static ProcedureOldSmk Create(ProcedureId id, InternshipId internshipId, DateTime date,
-        int year, string code, string location)
+    public static ProcedureOldSmk Create(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+        int year, string code, string name, string location, ProcedureExecutionType executionType,
+        string supervisorName)
     {
-        ValidateInput(code, location, date, year);
-        return new ProcedureOldSmk(id, internshipId, date, year, code, location, ProcedureStatus.Pending);
+        ValidateInput(code, name, location, date, year);
+        return new ProcedureOldSmk(id, moduleId, internshipId, date, year, code, name, location, 
+                                   executionType, supervisorName, ProcedureStatus.Pending);
     }
 
     public void SetProcedureRequirement(int requirementId)
@@ -64,20 +74,17 @@ public class ProcedureOldSmk : ProcedureBase
 
     public override bool IsValidForSmkVersion()
     {
-        // Old SMK requires operator code to be A or B
+        // Old SMK requires valid execution type
         return SmkVersion == SmkVersion.Old &&
                !string.IsNullOrEmpty(Code) &&
+               !string.IsNullOrEmpty(Name) &&
                !string.IsNullOrEmpty(Location) &&
-               (string.IsNullOrEmpty(OperatorCode) || OperatorCode == "A" || OperatorCode == "B") &&
+               !string.IsNullOrEmpty(SupervisorName) &&
                Year >= 0 && Year <= 6;
     }
 
     public override void ValidateSmkSpecificRules()
     {
-        // Validate operator code for Old SMK
-        if (!string.IsNullOrEmpty(OperatorCode) && OperatorCode != "A" && OperatorCode != "B")
-            throw new InvalidOperationException("Operator code must be 'A' or 'B' for Old SMK procedures.");
-
         // Validate year range
         if (Year < 0 || Year > 6)
             throw new InvalidOperationException("Year must be between 0 (unassigned) and 6 for Old SMK procedures.");
@@ -95,6 +102,10 @@ public class ProcedureOldSmk : ProcedureBase
             if (!PatientGender.HasValue)
                 throw new InvalidOperationException("Patient gender is required for completed procedures.");
         }
+
+        // Supervisor name is required
+        if (string.IsNullOrEmpty(SupervisorName))
+            throw new InvalidOperationException("Supervisor name is required for Old SMK procedures.");
     }
 
     public override void Complete()
@@ -103,18 +114,21 @@ public class ProcedureOldSmk : ProcedureBase
         base.Complete();
     }
 
-    public override void UpdateProcedureDetails(string? operatorCode, string? performingPerson,
-        string? patientInitials, char? patientGender)
+    public override void UpdateProcedureDetails(ProcedureExecutionType executionType, string? performingPerson,
+        string? patientInfo, string? patientInitials, char? patientGender)
     {
-        base.UpdateProcedureDetails(operatorCode, performingPerson, patientInitials, patientGender);
+        base.UpdateProcedureDetails(executionType, performingPerson, patientInfo, patientInitials, patientGender);
 
         // Additional Old SMK specific logic could go here if needed
     }
 
-    private static void ValidateInput(string code, string location, DateTime date, int year)
+    private static void ValidateInput(string code, string name, string location, DateTime date, int year)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new InvalidProcedureCodeException(code ?? string.Empty);
+
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Procedure name cannot be empty.", nameof(name));
 
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));

@@ -8,8 +8,9 @@ public record UpdateProcedure(
     string? Code = null,
     string? Location = null,
     string? Status = null,
-    string? OperatorCode = null,
+    string? ExecutionType = null,
     string? PerformingPerson = null,
+    string? PatientInfo = null,
     string? PatientInitials = null,
     char? PatientGender = null,
     // Old SMK specific fields

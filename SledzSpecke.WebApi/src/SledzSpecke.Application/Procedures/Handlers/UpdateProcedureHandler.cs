@@ -50,11 +50,16 @@ public class UpdateProcedureHandler : ICommandHandler<UpdateProcedure>
         }
 
         // Update procedure details
+        var executionType = command.ExecutionType != null 
+            ? Enum.Parse<ProcedureExecutionType>(command.ExecutionType) 
+            : procedure.ExecutionType;
+            
         procedure.UpdateProcedureDetails(
-            command.OperatorCode,
+            executionType,
             command.PerformingPerson,
+            command.PatientInfo,
             command.PatientInitials,
-            command.PatientGender);
+            command.PatientGender ?? procedure.PatientGender);
 
         // Note: Date, Code, and Location updates are not supported in the base model
         // These fields are typically immutable after creation

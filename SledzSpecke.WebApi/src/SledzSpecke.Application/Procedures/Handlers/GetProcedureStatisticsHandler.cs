@@ -76,8 +76,8 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
 
         foreach (var procedure in procedures)
         {
-            // Check if procedure is Type A (operator) or Type B (assistant)
-            if (procedure.IsTypeA)
+            // Check if procedure is Code A (operator) or Code B (assistant)
+            if (procedure.IsCodeA)
             {
                 summary.CompletedCountA++;
                 if (procedure.Status == ProcedureStatus.Approved || procedure.SyncStatus == SyncStatus.Synced)
@@ -85,7 +85,7 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
                     summary.ApprovedCountA++;
                 }
             }
-            else if (procedure.IsTypeB)
+            else if (procedure.IsCodeB)
             {
                 summary.CompletedCountB++;
                 if (procedure.Status == ProcedureStatus.Approved || procedure.SyncStatus == SyncStatus.Synced)

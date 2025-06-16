@@ -21,9 +21,13 @@ public sealed class UpdateProcedureValidator : CommandValidatorBase<UpdateProced
         }
         
         // Optional fields validation
-        if (!string.IsNullOrEmpty(command.OperatorCode))
+        if (!string.IsNullOrEmpty(command.ExecutionType))
         {
-            ValidateMaxLength(command.OperatorCode, 50, "OperatorCode", result);
+            var validTypes = new[] { "CodeA", "CodeB" };
+            if (!validTypes.Contains(command.ExecutionType))
+            {
+                result.AddError("ExecutionType", $"ExecutionType must be one of: {string.Join(", ", validTypes)}");
+            }
         }
         
         if (!string.IsNullOrEmpty(command.PerformingPerson))
