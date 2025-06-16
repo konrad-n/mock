@@ -638,22 +638,6 @@ namespace SledzSpecke.Infrastructure.Migrations
                     END LOOP;
                 END $$;
                 
-                -- Handle NULL ModuleId values in related tables
-                UPDATE ""Procedures"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
-                
-                UPDATE ""MedicalShifts"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
-                
-                UPDATE ""Internships"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
-                
-                UPDATE ""Courses"" 
-                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
-                WHERE ""ModuleId"" IS NULL;
             ");
 
             migrationBuilder.CreateIndex(
@@ -697,6 +681,26 @@ namespace SledzSpecke.Infrastructure.Migrations
                 name: "IX_AdditionalSelfEducationDays_ModuleId",
                 table: "AdditionalSelfEducationDays",
                 column: "ModuleId");
+
+            // Handle NULL ModuleId values before adding foreign key constraints
+            migrationBuilder.Sql(@"
+                -- Update NULL ModuleId values to use the first available module
+                UPDATE ""Procedures"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL OR ""ModuleId"" = 0;
+                
+                UPDATE ""MedicalShifts"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+                
+                UPDATE ""Internships"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+                
+                UPDATE ""Courses"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+            ");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Courses_Modules_ModuleId",
