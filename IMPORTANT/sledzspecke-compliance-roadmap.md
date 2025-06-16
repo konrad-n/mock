@@ -1,444 +1,590 @@
-# SledzSpecke SMK Compliance Roadmap & Implementation Guide
+# SledzSpecke SMK Compliance Roadmap
 
-## 🚨 Executive Summary
+## Executive Summary
 
-The current SledzSpecke implementation has significant gaps compared to SMK requirements. This roadmap provides a systematic approach to achieve 100% SMK compliance while maintaining the existing clean architecture.
+This document provides a comprehensive roadmap for adjusting SledzSpecke to achieve 100% compliance with the SMK (System Monitorowania Kształcenia) system. Based on detailed analysis of official SMK documentation for both old and new versions, this roadmap ensures 1:1 field mapping for seamless data export and import via XLSX files.
 
-### Critical Issues to Address:
-- ✅ **User entity** missing essential medical fields (PESEL, PWZ) - **COMPLETED**
-- ✅ **SMK version** stored as integer instead of string ("old"/"new") - **COMPLETED** 
-- ✅ **Missing core fields in Specialization**: ProgramVariant, PlannedPesYear, ActualEndDate, Status - **COMPLETED**
-- ⏳ **Missing core entities**: AdditionalSelfEducationDays
-- ⏳ **No XLSX export** functionality
-- ⏳ **Incomplete business rules** implementation
+**Critical Context:**
+- SledzSpecke is for **DOCTORS ONLY** - no students or kierownik specjalizacji
+- No approval workflows - data will be approved in SMK after export
+- Must support both Old SMK (2014-2018) and New SMK (2023+) formats
+- All fields must match SMK exactly for Chrome extension compatibility
 
-## 📋 Phase 1: Core Entity Alignment (Week 1-2) ✅ COMPLETED
+---
 
-### 1.1 Fix User Entity ✅ **COMPLETED**
+## 1. Current State Analysis
 
-**Current State:**
-- ✅ Added: FirstName, LastName, Pesel, PwzNumber, PhoneNumber, DateOfBirth, CorrespondenceAddress
-- ✅ Removed: Username, Bio, ProfilePicturePath, PreferredLanguage, PreferredTheme
+### ✅ Already Implemented
+- User entity with core fields
+- Medical shifts (dyżury medyczne) tracking
+- Procedures tracking with hierarchy
+- Internships (staże) management
+- Basic export functionality
 
-**Implementation:**
-- Created new value objects: Pesel (with checksum validation), PwzNumber, FirstName, LastName, Address
-- Updated User entity with proper factory methods
-- Implemented PESEL validation with full checksum verification
-- Implemented PWZ validation (7 digits, cannot start with 0)
+### ❌ Missing/Incomplete
+- SMK-specific user fields (PESEL, PWZ, correspondence address)
+- Module structure (Basic/Specialized)
+- CMKP course certificate tracking
+- Self-education days tracking
+- Procedure codes (A/B) differentiation
+- Duration validation allowing minutes > 59
 
-### 1.2 Fix SMK Version Type ✅ **COMPLETED**
+---
 
-**Current State:** Already correctly implemented as string type with values "old" or "new"
+## 2. Entity Adjustments Required
 
-### 1.3 Update Specialization Entity ✅ **COMPLETED**
+### 2.1 User Entity Enhancement
 
-**Added fields:**
-- UserId (to establish User-Specialization relationship)
-- ProgramVariant (Wariant programu)
-- PlannedPesYear (Planned PES exam year)  
-- ActualEndDate
-- SpecializationStatus (Active, Completed, Suspended, Cancelled)
+**Current fields:** Id, Email, FirstName, LastName, etc.
 
-## 📋 Phase 2: Complete Missing Entities (Week 2-3) ⏳ PENDING
-
-### 2.1 Implement Procedure Entity Hierarchy
-
-**Create discriminated entities for Old/New SMK:**
-
+**Required SMK fields:**
 ```csharp
-// Base Procedure class
-public abstract class Procedure : Entity
+public class User : BaseEntity
 {
-    public int Id { get; protected set; }
-    public int ModuleId { get; protected set; }
-    public string ProcedureCode { get; protected set; }
-    public DateTime Date { get; protected set; }
-    public string Location { get; protected set; }
+    // Existing fields...
     
-    // Discriminator
-    public abstract string SmkType { get; }
+    // REQUIRED SMK FIELDS
+    public string Pesel { get; set; }  // 11-digit Polish ID
+    public string Pwz { get; set; }    // Medical license number (7 digits)
+    public string FirstName { get; set; }  // Already exists
+    public string LastName { get; set; }   // Already exists
+    public Address CorrespondenceAddress { get; set; }  // Value object
+    
+    // Optional but recommended
+    public string PhoneNumber { get; set; }
+    public string SecondName { get; set; }  // Middle name
 }
 
-// Old SMK version
-public sealed class ProcedureOldSmk : Procedure
+// Value Object
+public record Address(
+    string Street,
+    string HouseNumber,
+    string ApartmentNumber,
+    string PostalCode,
+    string City,
+    string Country = "Polska"
+);
+```
+
+### 2.2 Specialization Entity Enhancement
+
+**Required adjustments:**
+```csharp
+public class Specialization : BaseEntity
 {
-    public override string SmkType => "old";
-    public string ProcedureName { get; private set; }
-    public int YearOfTraining { get; private set; }
-    public string InternshipName { get; private set; }
-    public string PatientInitials { get; private set; }
-    public Gender PatientGender { get; private set; }
-    public string FirstAssistantData { get; private set; }
-    public string SecondAssistantData { get; private set; }
-    public ProcedureRole Role { get; private set; } // A or B
+    public int UserId { get; set; }
+    public User User { get; set; }
+    
+    // SMK Required
+    public string Name { get; set; }  // e.g., "Kardiologia"
+    public SmkVersion SmkVersion { get; set; }  // "old" or "new"
+    public string ProgramVariant { get; set; }  // e.g., "wariant_1"
+    public DateTime StartDate { get; set; }
+    public DateTime PlannedEndDate { get; set; }
+    public DateTime? ActualEndDate { get; set; }
+    public int PlannedPesYear { get; set; }  // Year of planned PES exam
+    public SpecializationStatus Status { get; set; }
+    
+    // Module tracking
+    public bool HasBasicModule { get; set; }
+    public bool HasSpecializedModule { get; set; }
+    public DateTime? BasicModuleCompletionDate { get; set; }
+    
+    // Navigation
+    public ICollection<Module> Modules { get; set; }
 }
 
-// New SMK version
-public sealed class ProcedureNewSmk : Procedure
+public enum SpecializationStatus
 {
-    public override string SmkType => "new";
-    public int ProcedureRequirementId { get; private set; }
-    public string ProcedureName { get; private set; }
-    public int CountA { get; private set; } // Performed count
-    public int CountB { get; private set; } // Assisted count
-    public string Supervisor { get; private set; }
+    Active,
+    Completed,
+    Suspended,
+    Cancelled
 }
 ```
 
-### 2.2 Add AdditionalSelfEducationDays Entity
+### 2.3 Module Entity (NEW)
 
 ```csharp
-public sealed class AdditionalSelfEducationDays : Entity
+public class Module : BaseEntity
 {
-    public int Id { get; private set; }
-    public int ModuleId { get; private set; }
-    public int InternshipId { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime EndDate { get; private set; }
-    public int NumberOfDays { get; private set; } // Max 6 per year
-    public string Purpose { get; private set; }
-    public string EventName { get; private set; }
+    public int SpecializationId { get; set; }
+    public Specialization Specialization { get; set; }
     
-    // Validation in factory method
-    public static Result<AdditionalSelfEducationDays> Create(
-        int moduleId, int internshipId, DateTime start, DateTime end, 
-        string purpose, string eventName)
-    {
-        var days = (end - start).Days + 1;
-        if (days > 6)
-            return Result<AdditionalSelfEducationDays>.Failure(
-                "Additional education cannot exceed 6 days", "EXCEEDED_DAYS_LIMIT");
-                
-        // Create instance
-    }
+    public ModuleType Type { get; set; }  // Basic or Specialized
+    public string Name { get; set; }  // e.g., "Moduł podstawowy - choroby wewnętrzne"
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public bool IsCompleted { get; set; }
+    
+    // Navigation
+    public ICollection<Internship> Internships { get; set; }
+    public ICollection<Course> Courses { get; set; }
+    public ICollection<MedicalShift> MedicalShifts { get; set; }
+    public ICollection<Procedure> Procedures { get; set; }
+}
+
+public enum ModuleType
+{
+    Basic,      // Moduł podstawowy
+    Specialized // Moduł specjalistyczny
 }
 ```
 
-## 📋 Phase 3: Business Rules Implementation (Week 3-4) ⏳ PENDING
+### 2.4 Internship Entity Enhancement
 
-### 3.1 Validation Rules ✅ PARTIALLY COMPLETED
-
-**PESEL Validation:** ✅ **COMPLETED**
-- Full checksum validation implemented
-- Date of birth extraction from PESEL
-- Gender extraction from PESEL
-
-**PWZ Validation:** ✅ **COMPLETED**
-- 7 digits validation
-- Cannot start with 0
-
-### 3.2 Duration Calculations ⏳ PENDING
-
-**Medical Shift Duration (allows > 59 minutes):**
 ```csharp
+public class Internship : BaseEntity
+{
+    public int ModuleId { get; set; }
+    public Module Module { get; set; }
+    
+    // SMK Fields
+    public string Name { get; set; }  // e.g., "Staż kierunkowy w zakresie kardiologii"
+    public string InstitutionName { get; set; }
+    public string Department { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    
+    // Duration tracking (SMK format)
+    public int PlannedWeeks { get; set; }
+    public int PlannedDays { get; set; }
+    public int CompletedDays { get; set; }
+    
+    // Supervisor
+    public string SupervisorName { get; set; }
+    public string SupervisorPwz { get; set; }
+    
+    public InternshipStatus Status { get; set; }
+}
+
+public enum InternshipStatus
+{
+    Planned,
+    InProgress,
+    Completed,
+    Cancelled
+}
+```
+
+### 2.5 MedicalShift Entity Enhancement
+
+```csharp
+public class MedicalShift : BaseEntity
+{
+    public int ModuleId { get; set; }
+    public Module Module { get; set; }
+    public int? InternshipId { get; set; }  // Optional link to internship
+    public Internship Internship { get; set; }
+    
+    // SMK Fields
+    public DateTime Date { get; set; }
+    public ShiftDuration Duration { get; set; }  // Value object
+    public ShiftType Type { get; set; }
+    public string Location { get; set; }  // Hospital/department
+    public string SupervisorName { get; set; }
+    
+    // Exemption tracking
+    public bool IsExempt { get; set; }
+    public string ExemptionReason { get; set; }
+    public DateTime? ExemptionStartDate { get; set; }
+    public DateTime? ExemptionEndDate { get; set; }
+}
+
+public enum ShiftType
+{
+    Accompanying,  // Towarzyszący
+    Independent   // Samodzielny
+}
+
+// Value Object (already implemented)
 public record ShiftDuration
 {
+    public int Hours { get; }
     public int Minutes { get; }
     
-    public ShiftDuration(int minutes)
-    {
-        if (minutes < 60)
-            throw new InvalidShiftDurationException(
-                "Minimum shift duration is 60 minutes");
-        Minutes = minutes;
-    }
-    
-    public string ToDisplayFormat()
-    {
-        var hours = Minutes / 60;
-        var mins = Minutes % 60;
-        return $"{hours}h {mins}min";
-    }
+    // Allows minutes > 59 as per SMK requirements
 }
 ```
 
-### 3.3 Module Progression Rules ⏳ PENDING
+### 2.6 Procedure Entity Enhancement
 
 ```csharp
-public class ModuleProgressionService : IModuleProgressionService
+// Keep existing hierarchy but add SMK fields
+public abstract class ProcedureBase : BaseEntity
 {
-    public Result<Module> CanProgressToModule(
-        Specialization specialization, 
-        ModuleType targetType)
-    {
-        if (targetType == ModuleType.Specialist)
-        {
-            var basicModule = specialization.Modules
-                .FirstOrDefault(m => m.Type == ModuleType.Basic);
-                
-            if (basicModule == null || !basicModule.IsCompleted)
-            {
-                return Result<Module>.Failure(
-                    "Basic module must be completed before specialist module",
-                    "BASIC_MODULE_NOT_COMPLETED");
-            }
-        }
-        
-        // Additional validation...
-    }
+    public int ModuleId { get; set; }
+    public Module Module { get; set; }
+    
+    // SMK Common Fields
+    public string Code { get; set; }  // Procedure code from program
+    public string Name { get; set; }
+    public DateTime PerformedDate { get; set; }
+    public string Location { get; set; }
+    public string PatientInfo { get; set; }  // Anonymized
+    
+    // SMK Specific
+    public ProcedureExecutionType ExecutionType { get; set; }
+    public string SupervisorName { get; set; }
+    public string SupervisorPwz { get; set; }
+}
+
+public enum ProcedureExecutionType
+{
+    CodeA,  // Performed independently with assistance/supervision
+    CodeB   // Assisted as first assistant
+}
+
+// Keep OldSmk and NewSmk specific classes
+public class ProcedureOldSmk : ProcedureBase
+{
+    public int RequiredCountCodeA { get; set; }
+    // No Code B in old SMK for most procedures
+}
+
+public class ProcedureNewSmk : ProcedureBase
+{
+    public int RequiredCountCodeA { get; set; }
+    public int RequiredCountCodeB { get; set; }
 }
 ```
 
-## 📋 Phase 4: XLSX Export Implementation (Week 4-5) ⏳ PENDING
-
-### 4.1 Export Service Architecture
+### 2.7 Course Entity Enhancement
 
 ```csharp
-public interface ISpecializationExportService
+public class Course : BaseEntity
 {
-    Task<Result<byte[]>> ExportToXlsxAsync(int specializationId);
-    Task<Result<ExportPreview>> PreviewExportAsync(int specializationId);
-    Task<Result<ValidationReport>> ValidateForExportAsync(int specializationId);
+    public int ModuleId { get; set; }
+    public Module Module { get; set; }
+    
+    // SMK Fields
+    public string Name { get; set; }  // e.g., "Diagnostyka obrazowa"
+    public string CmkpCertificateNumber { get; set; }  // REQUIRED
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public int DurationDays { get; set; }
+    public int DurationHours { get; set; }  // Didactic hours
+    
+    // CMKP Validation
+    public bool IsVerifiedByCmkp { get; set; }
+    public DateTime? CmkpVerificationDate { get; set; }
+    
+    // Location
+    public string OrganizerName { get; set; }
+    public string Location { get; set; }
+    
+    public CourseType Type { get; set; }
 }
 
-public class SmkExportService : ISpecializationExportService
+public enum CourseType
 {
-    private readonly ISpecializationRepository _specializationRepository;
-    private readonly IExcelGenerator _excelGenerator;
-    private readonly ISmkValidator _smkValidator;
-    
-    public async Task<Result<byte[]>> ExportToXlsxAsync(int specializationId)
-    {
-        // 1. Load complete specialization data
-        var specialization = await LoadCompleteSpecialization(specializationId);
-        
-        // 2. Validate data
-        var validationResult = await _smkValidator.ValidateAsync(specialization);
-        if (!validationResult.IsValid)
-            return Result<byte[]>.Failure(validationResult.Errors);
-            
-        // 3. Generate Excel file
-        return await _excelGenerator.GenerateAsync(specialization);
-    }
+    Specialization,  // Kurs specjalizacyjny
+    Improvement,     // Kurs doskonalący
+    Scientific,      // Kurs naukowy
+    Certification    // Kurs atestacyjny
 }
 ```
 
-### 4.2 Excel Generator with ClosedXML
+### 2.8 SelfEducation Entity (NEW)
 
 ```csharp
-public class SmkExcelGenerator : IExcelGenerator
+public class SelfEducation : BaseEntity
 {
-    public async Task<byte[]> GenerateAsync(SpecializationExportData data)
-    {
-        using var workbook = new XLWorkbook();
-        
-        // Sheet 1: Basic Information
-        var basicSheet = workbook.Worksheets.Add("Informacje podstawowe");
-        GenerateBasicInfoSheet(basicSheet, data);
-        
-        // Sheet 2: Internships
-        var internshipsSheet = workbook.Worksheets.Add("Staże");
-        GenerateInternshipsSheet(internshipsSheet, data.Internships);
-        
-        // Sheet 3: Courses
-        var coursesSheet = workbook.Worksheets.Add("Kursy");
-        GenerateCoursesSheet(coursesSheet, data.Courses);
-        
-        // Sheet 4: Medical Shifts
-        var shiftsSheet = workbook.Worksheets.Add("Dyżury");
-        GenerateMedicalShiftsSheet(shiftsSheet, data.MedicalShifts);
-        
-        // Sheet 5: Procedures
-        var proceduresSheet = workbook.Worksheets.Add("Procedury");
-        GenerateProceduresSheet(proceduresSheet, data.Procedures);
-        
-        // Return as byte array
-        using var stream = new MemoryStream();
-        workbook.SaveAs(stream);
-        return stream.ToArray();
-    }
+    public int ModuleId { get; set; }
+    public Module Module { get; set; }
     
-    private void GenerateInternshipsSheet(IXLWorksheet sheet, List<InternshipExport> internships)
-    {
-        // Headers
-        sheet.Cell(1, 1).Value = "Nazwa stażu";
-        sheet.Cell(1, 2).Value = "Nazwa podmiotu";
-        sheet.Cell(1, 3).Value = "Komórka organizacyjna";
-        sheet.Cell(1, 4).Value = "Data rozpoczęcia";
-        sheet.Cell(1, 5).Value = "Data zakończenia";
-        sheet.Cell(1, 6).Value = "Czas trwania (dni)";
-        sheet.Cell(1, 7).Value = "Kierownik stażu";
-        sheet.Cell(1, 8).Value = "PWZ kierownika";
-        
-        // Data
-        int row = 2;
-        foreach (var internship in internships)
-        {
-            sheet.Cell(row, 1).Value = internship.Name;
-            sheet.Cell(row, 2).Value = internship.InstitutionName;
-            sheet.Cell(row, 3).Value = internship.DepartmentName;
-            sheet.Cell(row, 4).Value = internship.StartDate.ToString("dd.MM.yyyy");
-            sheet.Cell(row, 5).Value = internship.EndDate.ToString("dd.MM.yyyy");
-            sheet.Cell(row, 6).Value = internship.DaysCount;
-            sheet.Cell(row, 7).Value = internship.SupervisorName;
-            sheet.Cell(row, 8).Value = internship.SupervisorPwz;
-            row++;
-        }
-    }
+    // SMK Fields
+    public SelfEducationType Type { get; set; }
+    public string Description { get; set; }
+    public DateTime Date { get; set; }
+    public int Hours { get; set; }
+    
+    // For publications
+    public string PublicationTitle { get; set; }
+    public string JournalName { get; set; }
+    public bool IsPeerReviewed { get; set; }
+    public PublicationRole Role { get; set; }
+}
+
+public enum SelfEducationType
+{
+    LiteratureStudy,     // Studiowanie piśmiennictwa
+    Conference,          // Konferencja
+    ScientificMeeting,   // Posiedzenie naukowe
+    Publication,         // Publikacja
+    Workshop            // Warsztaty
+}
+
+public enum PublicationRole
+{
+    Author,
+    CoAuthor
 }
 ```
 
-## 📋 Phase 5: API Adjustments (Week 5-6) ✅ PARTIALLY COMPLETED
-
-### 5.1 Update DTOs to Match SMK Fields ✅ **COMPLETED**
-
-Updated DTOs:
-- UserRegistrationDto with all new fields
-- UserProfileDto with new structure
-- AddressDto for correspondence address
-
-### 5.2 Add Export Endpoints ⏳ PENDING
+### 2.9 AdditionalSelfEducationDays Entity (Already Implemented)
 
 ```csharp
-[ApiController]
-[Route("api/export")]
-public class ExportController : ControllerBase
+public class AdditionalSelfEducationDays : BaseEntity
 {
-    [HttpGet("specialization/{id}/xlsx")]
-    [ProducesResponseType(typeof(FileResult), 200)]
-    public async Task<IActionResult> ExportToXlsx(int id)
-    {
-        var result = await _exportService.ExportToXlsxAsync(id);
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-            
-        return File(result.Value, 
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            $"EKS_{id}_{DateTime.Now:yyyyMMdd}.xlsx");
-    }
+    public int ModuleId { get; set; }
+    public Module Module { get; set; }
+    public int? InternshipId { get; set; }  // Links to specific internship
+    public Internship Internship { get; set; }
     
-    [HttpGet("specialization/{id}/preview")]
-    public async Task<IActionResult> PreviewExport(int id)
-    {
-        var result = await _exportService.PreviewExportAsync(id);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
-    }
-    
-    [HttpPost("validate/{id}")]
-    public async Task<IActionResult> ValidateForExport(int id)
-    {
-        var result = await _exportService.ValidateForExportAsync(id);
-        return Ok(result);
-    }
+    // SMK Fields (6 days per year since 2019)
+    public DateTime Date { get; set; }
+    public int Days { get; set; }  // 1-6 days
+    public string EventName { get; set; }
+    public string EventType { get; set; }  // Conference, Course, etc.
+    public string Description { get; set; }
 }
 ```
 
-## 📋 Phase 6: Testing & Validation (Week 6-7) ⏳ PENDING
+---
 
-### 6.1 SMK Compatibility Tests
+## 3. Business Rules Implementation
 
+### 3.1 Module Progression Rules
+- Basic module MUST be completed before starting Specialized module
+- Each module has specific internships, courses, and requirements
+- Module completion requires ALL elements to be completed
+
+### 3.2 Duration Calculations
+- **Medical Shifts**: Average 10h 5min per week
+- **Working Days**: 5 days = 1 week (excluding holidays)
+- **Minutes > 59**: Allowed for accurate time tracking
+- **Internship Duration**: Track both planned and actual
+
+### 3.3 CMKP Course Validation
+- Courses MUST have CMKP certificate numbers
+- Only courses from official CMKP list are valid
+- Certificate verification required before course completion
+
+### 3.4 Procedure Counting Rules
+- Code A: Performed with supervision (counts toward requirement)
+- Code B: Assisted only (separate requirement in new SMK)
+- Each specialization has specific procedure requirements
+
+---
+
+## 4. API Endpoints Structure
+
+### 4.1 Core Endpoints
+```
+GET    /api/users/{userId}/specializations
+POST   /api/specializations
+GET    /api/specializations/{id}/modules
+POST   /api/modules/{id}/internships
+POST   /api/modules/{id}/medical-shifts
+POST   /api/modules/{id}/procedures
+POST   /api/modules/{id}/courses
+POST   /api/modules/{id}/self-education
+POST   /api/modules/{id}/additional-days
+```
+
+### 4.2 SMK-Specific Endpoints
+```
+GET    /api/smk/validate/{specializationId}
+GET    /api/smk/export/{specializationId}/xlsx
+GET    /api/smk/export/{specializationId}/preview
+GET    /api/smk/requirements/{specialization}/{smkVersion}
+```
+
+---
+
+## 5. Data Validation Rules
+
+### 5.1 User Validation
+- **PESEL**: 11 digits, valid checksum
+- **PWZ**: 7 digits, valid medical license format
+- **Address**: All fields required except apartment number
+
+### 5.2 Duration Validation
+- **Medical Shifts**: Allow minutes > 59
+- **Total Weekly**: Should average 10h 5min
+- **Internships**: Cannot exceed planned duration
+
+### 5.3 CMKP Validation
+- Certificate numbers must match CMKP format
+- Course dates must be within module dates
+- Required courses must be completed
+
+---
+
+## 6. Export Format Specification
+
+### 6.1 XLSX Structure
+```
+Sheet 1: User Data
+- PESEL, PWZ, Name, Address
+
+Sheet 2: Specialization
+- Dates, Status, Modules
+
+Sheet 3: Internships
+- Per module, with durations
+
+Sheet 4: Medical Shifts
+- Date, Duration, Type, Location
+
+Sheet 5: Procedures
+- Code A/B counts, dates
+
+Sheet 6: Courses
+- CMKP certificates, dates
+
+Sheet 7: Self-Education
+- All activities, publications
+```
+
+### 6.2 Field Mapping
+Each field must map exactly to SMK import format:
+- Use Polish field names in headers
+- Date format: DD.MM.YYYY
+- Duration format: "Xh Ymin"
+- Boolean: "Tak"/"Nie"
+
+---
+
+## 7. Implementation Phases
+
+### Phase 1: Entity Updates (1 week)
+- Update User entity with SMK fields
+- Add Module entity and relationships
+- Update all entities with SMK-specific fields
+- Create necessary value objects
+
+### Phase 2: Database Migration (3 days)
+- Create EF Core migrations
+- Update seed data with SMK examples
+- Ensure backward compatibility
+
+### Phase 3: Business Logic (1 week)
+- Implement module progression rules
+- Add CMKP validation service
+- Update duration calculation services
+- Add SMK-specific validators
+
+### Phase 4: API Updates (1 week)
+- Create module-based endpoints
+- Add SMK validation endpoints
+- Update existing endpoints
+- Implement proper error handling
+
+### Phase 5: Export Enhancement (1 week)
+- Create comprehensive XLSX export
+- Add all SMK sheets and fields
+- Implement preview functionality
+- Add export validation
+
+### Phase 6: Testing & Validation (1 week)
+- Test with real SMK data
+- Validate all field mappings
+- Test both old and new SMK formats
+- E2E testing with Chrome extension
+
+---
+
+## 8. Critical Implementation Notes
+
+### 8.1 No Approval Workflow
+- Remove any approval-related fields
+- Data is entered as "draft" in SledzSpecke
+- Approval happens in SMK after import
+
+### 8.2 SMK Version Handling
 ```csharp
-[TestFixture]
-public class SmkExportTests
+public interface ISmkVersionStrategy
 {
-    [Test]
-    public async Task Export_ShouldGenerateValidSmkFormat()
-    {
-        // Arrange
-        var specialization = CreateTestSpecialization();
-        
-        // Act
-        var exportResult = await _exportService.ExportToXlsxAsync(specialization.Id);
-        
-        // Assert
-        exportResult.IsSuccess.Should().BeTrue();
-        
-        // Validate Excel structure
-        using var workbook = new XLWorkbook(new MemoryStream(exportResult.Value));
-        workbook.Worksheets.Count.Should().Be(5);
-        
-        // Validate date formats
-        var internshipSheet = workbook.Worksheet("Staże");
-        var dateCell = internshipSheet.Cell(2, 4).Value.ToString();
-        dateCell.Should().MatchRegex(@"\d{2}\.\d{2}\.\d{4}"); // DD.MM.YYYY
-    }
+    bool ValidateProcedureRequirements(Module module);
+    bool ValidateCourseRequirements(Module module);
+    int CalculateRequiredProcedureCount(string procedureCode, ProcedureExecutionType type);
 }
+
+public class OldSmkStrategy : ISmkVersionStrategy { }
+public class NewSmkStrategy : ISmkVersionStrategy { }
 ```
 
-### 6.2 Field Validation Tests ✅ **PARTIALLY COMPLETED**
+### 8.3 Chrome Extension Compatibility
+- Field names must match exactly
+- Use data attributes for field identification
+- Maintain consistent ID patterns
 
-- SmkVersion validation: Already correctly validates "old" or "new"
-- PESEL validation with checksum: ✅ Implemented
-- PWZ validation: ✅ Implemented
+---
 
-## 🚀 Migration Strategy
+## 9. Testing Checklist
 
-### Step 1: Database Backup
-```bash
-sudo -u postgres pg_dump sledzspecke_db > backup_$(date +%Y%m%d).sql
-```
+### 9.1 Unit Tests
+- [ ] PESEL validation
+- [ ] PWZ validation
+- [ ] Duration calculations (minutes > 59)
+- [ ] Module progression rules
+- [ ] CMKP certificate validation
 
-### Step 2: Create Migration Scripts ⏳ PENDING
-1. User entity changes
-2. Specialization entity changes
-3. Add missing tables
-4. Data migration for existing records
+### 9.2 Integration Tests
+- [ ] Full specialization workflow
+- [ ] Export all data types
+- [ ] Import validation
+- [ ] Multi-module scenarios
 
-### Step 3: Deploy in Stages
-1. Deploy entity changes with backward compatibility
-2. Run data migrations
-3. Deploy API changes
-4. Remove deprecated fields
+### 9.3 E2E Tests
+- [ ] Create complete specialization
+- [ ] Export to XLSX
+- [ ] Validate with SMK requirements
+- [ ] Test Chrome extension import
 
-## ⚠️ Critical Success Factors
+---
 
-1. **Exact Field Matching**: Every field name, type, and format must match SMK exactly
-2. **Date Format**: Always use DD.MM.YYYY format in exports
-3. **SMK Version**: Must be string "old" or "new", never numeric
-4. **No Approval Workflows**: Remove any approval states - all handled in SMK after import
-5. **Complete Data**: All required fields must be present for successful import
+## 10. Post-Implementation
 
-## 📊 Progress Tracking
+### 10.1 Documentation
+- Update API documentation
+- Create user guide for SMK fields
+- Document export format
+- Add validation rules guide
 
-Create a tracking dashboard:
-- [x] User entity aligned with SMK
-- [x] SMK version converted to string
-- [x] Specialization entity updated
-- [ ] All entities implemented
-- [ ] Business rules validated
-- [ ] Export functionality complete
-- [ ] E2E tests passing
-- [ ] Production deployment
+### 10.2 Monitoring
+- Track export success rates
+- Monitor validation failures
+- Log CMKP verification issues
+- Track Chrome extension compatibility
 
-## 🔍 Validation Checklist
+### 10.3 Future Enhancements
+- Real-time CMKP API integration
+- Automatic SMK synchronization
+- Progress dashboards
+- Requirement tracking
 
-Before marking as complete, ensure:
-- [x] PESEL validation with checksum
-- [x] PWZ format validation (7 digits)
-- [ ] Date formats: DD.MM.YYYY
-- [ ] Time formats: HH:MM
-- [ ] Duration in minutes (can be > 59)
-- [x] SMK version as string
-- [ ] All required fields present
-- [ ] Excel export matches SMK import format exactly
+---
 
-## 📈 Monitoring Post-Deployment
+## Appendix A: SMK Field Mapping
 
-1. Track export success rate
-2. Monitor validation failures
-3. Log SMK import issues
-4. User feedback on missing fields
+| SledzSpecke Field | SMK Field (PL) | Format | Required |
+|-------------------|----------------|---------|----------|
+| User.Pesel | PESEL | 11 digits | Yes |
+| User.Pwz | Numer PWZ | 7 digits | Yes |
+| User.FirstName | Imię | Text | Yes |
+| User.LastName | Nazwisko | Text | Yes |
+| MedicalShift.Duration | Czas trwania | Xh Ymin | Yes |
+| Course.CmkpCertificateNumber | Nr zaświadczenia | Text | Yes |
+| Procedure.ExecutionType | Kod wykonania | A/B | Yes |
 
-## 🔴 CURRENT STATUS (2025-06-16)
+## Appendix B: Specialization Requirements
 
-### Completed:
-- ✅ Phase 1.1: User Entity Updates (PESEL, PWZ, names, address)
-- ✅ Phase 1.2: SMK Version Verification
-- ✅ Phase 1.3: Specialization Entity Updates
-- ✅ Value object validations (PESEL with checksum, PWZ)
-- ✅ API DTOs updated for new entity structure
-- ✅ Build successful, core tests passing (135/135)
+### Cardiology (Kardiologia)
+- **Basic Module**: Internal Medicine (2 years)
+- **Specialized Module**: Cardiology (3 years)
+- **Required Procedures**: See official program PDFs
+- **Required Courses**: 10-18 depending on version
 
-### Next Steps:
-- ⏳ Phase 2: Implement missing entities (Procedure hierarchy, AdditionalSelfEducationDays)
-- ⏳ Phase 3: Complete business rules implementation
-- ⏳ Phase 4: XLSX Export Service
-- ⏳ Database migrations
-- ⏳ Update integration tests
+### Key Differences Old vs New SMK
+- **Old**: Single procedure count (Code A only)
+- **New**: Separate Code A and Code B requirements
+- **Old**: Fixed self-education days
+- **New**: 6 additional days per year since 2019
 
-### Technical Debt:
-- User-Specialization relationship needs proper redesign (currently many handlers are commented out)
-- Infrastructure repositories have commented methods awaiting new relationship model
-- Integration tests need updating for new domain model
+---
 
-This roadmap ensures 100% SMK compliance while maintaining clean architecture and providing a superior user experience compared to the official SMK system.
+**Document Version**: 1.0  
+**Last Updated**: Based on SMK documentation v1.6.2 (2024) and CMKP programs (2023/2024)
