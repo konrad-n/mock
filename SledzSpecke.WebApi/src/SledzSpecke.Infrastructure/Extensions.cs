@@ -22,6 +22,8 @@ using SledzSpecke.Infrastructure.Time;
 using SledzSpecke.Infrastructure.Exceptions;
 using SledzSpecke.Infrastructure.Options;
 using SledzSpecke.Infrastructure.Events;
+using SledzSpecke.Infrastructure.Export;
+using SledzSpecke.Core.DomainServices;
 using System.Text;
 
 namespace SledzSpecke.Infrastructure;
@@ -94,6 +96,11 @@ public static class Extensions
         services.AddScoped<IAdditionalSelfEducationDaysRepository, SqlAdditionalSelfEducationDaysRepository>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IDataSeeder, DataSeeder>();
+        
+        // Export services
+        services.AddScoped<ISpecializationExportService, SmkExportService>();
+        services.AddScoped<ISmkExcelGenerator, SmkExcelGenerator>();
+        services.AddScoped<ISmkValidator, SmkValidator>();
         
         // Configure file storage options
         services.Configure<FileStorageOptions>(configuration.GetSection("FileStorage"));

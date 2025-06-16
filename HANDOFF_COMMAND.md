@@ -1,52 +1,61 @@
 # Handoff Command for Next Claude Session
 
 ## Context
-You are continuing work on the SledzSpecke SMK compliance implementation. Phases 1, 2, and 3 have been completed. The system is a medical specialization tracking system for Polish doctors that must be 100% compatible with SMK (System Monitorowania Kształcenia) for data export.
+You are continuing work on the SledzSpecke SMK compliance implementation. Phases 1-4 have been completed. The system is a medical specialization tracking system for Polish doctors that must be 100% compatible with SMK (System Monitorowania Kształcenia) for data export.
 
 ## Current Status
 - ✅ **Phase 1 COMPLETED**: User and Specialization entities updated with SMK-required fields
 - ✅ **Phase 2 COMPLETED**: Implemented missing entities (Procedure hierarchy already existed, AdditionalSelfEducationDays added)
 - ✅ **Phase 3 COMPLETED**: Business rules implementation (ShiftDuration value object, Module progression service, Duration calculation service)
+- ✅ **Phase 4 COMPLETED**: XLSX Export Implementation (built but needs testing)
 - ✅ **Build successful**: All code compiles without errors
 - ⚠️ **Technical debt**: Many handlers still commented out due to User-Specialization relationship changes
-- ⚠️ **EF Migration issue**: Unable to generate migration due to value object constructor issues
-- 📍 **You are here**: Ready to start Phase 4 - XLSX Export Implementation
+- 🔄 **You are here**: Ready to test Phase 4 Export functionality
 
 ## Command to Send to New Claude Chat:
 
 ```
-Continue implementing the SledzSpecke SMK compliance roadmap. Phases 1, 2, and 3 are complete. Start with Phase 4 - XLSX Export Implementation.
+Continue implementing the SledzSpecke SMK compliance roadmap. Phases 1-4 are complete. The XLSX Export functionality is implemented but needs testing.
 
 Current state:
 - User entity has PESEL, PWZ, FirstName, LastName, CorrespondenceAddress
 - Specialization entity has UserId, ProgramVariant, PlannedPesYear, ActualEndDate, Status
 - Procedure entity hierarchy (ProcedureBase, ProcedureOldSmk, ProcedureNewSmk) is implemented
 - AdditionalSelfEducationDays entity with 6-day/year validation is implemented
-- ShiftDuration value object supports minutes > 59 as per SMK (updated from existing implementation)
+- ShiftDuration value object supports minutes > 59 as per SMK
 - ModuleProgressionService enforces Basic -> Specialistic progression rules
 - DurationCalculationService handles hour calculations and validations
-- All entities and services registered in DI, build successful
+- XLSX Export Service with validation and Excel generation using ClosedXML
+- ExportController with /xlsx, /preview, and /validate endpoints
+- All code builds successfully
 
-Next tasks (Phase 4 - XLSX Export):
-1. Implement ISpecializationExportService interface
-2. Create SmkExportService with validation
-3. Implement SmkExcelGenerator using ClosedXML
-4. Create export DTOs matching SMK format exactly
-5. Add ExportController with endpoints
-6. Test XLSX output format against SMK requirements
+Next tasks (Phase 4 Testing):
+1. Test the export endpoints with sample data
+2. Verify XLSX format matches SMK requirements exactly
+3. Validate date formats (DD.MM.YYYY) and time formats (HH:MM)
+4. Ensure all 6 sheets are generated correctly (Basic Info, Internships, Courses, Shifts, Procedures, Self-education)
+5. Test with both old and new SMK versions
+6. Fix any runtime issues or data mapping problems
 
-Known issues to address:
-- EF Core migrations fail due to value object constructors (workaround: manual SQL migration)
-- Many application handlers are commented out (search for "TODO: User-Specialization relationship")
-- IAbsenceRepository missing GetByInternshipIdAsync method (commented out in DurationCalculationService)
+Known implementation details:
+- Internship doesn't have a Name property - using "Institution - Department" format
+- MedicalShift only tracks duration, not start/end times - using "00:00" as start time
+- Course entity only has CompletionDate, not separate start/end dates
+- Many entities use value objects that need .Value property access
+- ModuleId comparisons need .Value for EF queries
+- Module entity doesn't have navigation properties - data loaded separately
 
 Key files to check:
-- /home/ubuntu/projects/mock/IMPORTANT/sledzspecke-compliance-roadmap.md (master roadmap - see Phase 4)
-- /home/ubuntu/projects/mock/IMPORTANT/sledzspecke-business-logic.md (business rules)
-- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Core/DomainServices/ModuleProgressionService.cs
-- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Core/DomainServices/DurationCalculationService.cs
-- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Core/ValueObjects/ShiftDuration.cs
-- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Core/Entities/AdditionalSelfEducationDays.cs
+- /home/ubuntu/projects/mock/IMPORTANT/sledzspecke-compliance-roadmap.md (master roadmap)
+- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Infrastructure/Export/SmkExportService.cs
+- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Infrastructure/Export/SmkExcelGenerator.cs
+- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Infrastructure/Export/SmkValidator.cs
+- /home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Api/Controllers/ExportController.cs
+
+Test endpoints:
+- GET /api/export/specialization/{id}/xlsx - Download Excel file
+- GET /api/export/specialization/{id}/preview - Preview export data
+- POST /api/export/specialization/{id}/validate - Validate data for export
 
 Remember:
 - This is a PRODUCTION medical system
@@ -54,56 +63,44 @@ Remember:
 - Date format: DD.MM.YYYY, Time format: HH:MM
 - No approval workflows in our system (all approvals happen in SMK)
 - Use clean architecture principles
-- Install ClosedXML NuGet package for Excel generation
 - Run "dotnet build" frequently
 ```
 
 ## Additional Context for Next Session
 
-### Completed in This Session:
+### Completed in Phase 4:
 
-1. **Phase 2 - Missing Entities**:
-   - Discovered Procedure entity hierarchy already existed with proper Old/New SMK support
-   - Created AdditionalSelfEducationDays entity with:
-     - 6-day annual limit validation  
-     - Module and Internship associations
-     - Full CRUD repository with year-based queries
-     - EF Core configuration with proper indexes
-     - Repository registered in DI container
+1. **Export Service Architecture**:
+   - ISpecializationExportService interface with 3 methods
+   - SmkExportService implementation with complete data loading
+   - Separate queries for each entity type due to missing navigation properties
+   - Export preview and validation report DTOs
 
-2. **Phase 3 - Business Rules**:
-   - Enhanced existing ShiftDuration value object:
-     - Now stores total minutes internally to support minutes > 59
-     - Added ToSmkFormat() for HH:MM export
-     - Added ToDisplayFormat() for user-friendly display
-     - Arithmetic and comparison operators
-   - Created ModuleProgressionService:
-     - Validates Basic module must complete before Specialistic
-     - Tracks progression status and completion
-     - Provides progression percentage calculations
-   - Created DurationCalculationService:
-     - Calculates internship and module durations
-     - Validates 48h weekly maximum (SMK requirement)
-     - Validates 160h monthly minimum (SMK requirement)
-     - Handles self-education days in calculations
+2. **Excel Generation**:
+   - SmkExcelGenerator using ClosedXML library
+   - 6 sheets: Basic Info, Internships, Courses, Medical Shifts, Procedures, Self-education
+   - Proper Polish formatting for dates and times
+   - Different procedure sheet structure for old vs new SMK
 
-3. **Technical Decisions Made**:
-   - Used existing entity properties (IsCompleted, IsApproved) instead of Status enums
-   - ModuleType enum uses "Specialistic" not "Specialist" 
-   - Repository methods don't accept CancellationToken parameter
-   - Used .Equals() for enum comparisons to avoid operator issues
-   - Commented out absence calculations pending repository method addition
+3. **Validation**:
+   - SmkValidator with comprehensive field validation
+   - Date/time format validation using regex
+   - Business rule validation (6-day self-education limit, 160h monthly minimum)
+   - Cross-entity validation (module consistency, internship references)
 
-4. **Files Created/Modified**:
-   - Created: AdditionalSelfEducationDays.cs (entity)
-   - Created: AdditionalSelfEducationDaysConfiguration.cs (EF config)
-   - Created: IAdditionalSelfEducationDaysRepository.cs & implementation
-   - Created: ModuleProgressionService.cs
-   - Created: DurationCalculationService.cs
-   - Modified: ShiftDuration.cs (enhanced existing)
-   - Modified: SledzSpeckeDbContext.cs (added new entity)
-   - Modified: Extensions.cs (registered repository)
-   - Modified: Application/Extensions.cs (registered domain services)
+4. **API Layer**:
+   - ExportController with authorization
+   - File download with proper MIME type
+   - Export preview for UI integration
+   - Validation endpoint for pre-export checks
+
+### Data Mapping Decisions:
+- **Internship Name**: Concatenated as `{InstitutionName} - {DepartmentName}`
+- **Medical Shift Times**: Start time hardcoded as "00:00", end time calculated from duration
+- **Course Dates**: Both start and end date use CompletionDate
+- **Supervisor Info**: MedicalShift uses ApproverName, Internship uses SupervisorName
+- **Notes**: MedicalShift uses AdditionalFields property
+- **Procedure Names**: Old SMK uses ProcedureGroup or Code, New SMK has ProcedureName property
 
 ### Development Environment:
 - Working directory: `/home/ubuntu/projects/mock/SledzSpecke.WebApi`
@@ -113,9 +110,12 @@ Remember:
 - Test command: `dotnet test`
 
 ### Git Status:
-- All Phase 2 and 3 changes need to be committed
+- All Phase 4 changes need to be committed
 - Branch: master
 - Many files created and modified
 
 ### Next Priority:
-Phase 4 (XLSX Export) is critical - this is the main deliverable for SMK compliance. The export must match SMK import format EXACTLY or it will be rejected. Use the roadmap's Phase 4 section for detailed requirements.
+1. Test Phase 4 Export functionality thoroughly
+2. Fix any runtime issues
+3. Validate against actual SMK import requirements
+4. Then proceed to Phase 5 (API Adjustments) and Phase 6 (Testing & Validation)
