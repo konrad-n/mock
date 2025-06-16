@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SledzSpecke.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class TransitionUserSchema : Migration
+    public partial class TransitionUserSchemaWithDataMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -565,6 +565,96 @@ namespace SledzSpecke.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_AdditionalSelfEducationDays", x => x.Id);
                 });
+
+            // Populate data for existing users before creating unique indexes
+            migrationBuilder.Sql(@"
+                -- Update missing values first
+                UPDATE ""Users"" SET ""PhoneNumber"" = '+48123456789' WHERE ""PhoneNumber"" IS NULL OR ""PhoneNumber"" = '';
+                UPDATE ""Users"" SET ""DateOfBirth"" = '1990-01-01'::timestamp WHERE ""DateOfBirth"" IS NULL;
+                
+                -- Populate new fields with unique values for existing users
+                DO $$
+                DECLARE
+                    user_record RECORD;
+                    counter INTEGER := 1;
+                BEGIN
+                    FOR user_record IN SELECT ""Id"", ""CorrespondenceAddress_Street"", ""CorrespondenceAddress_HouseNumber"" FROM ""Users"" ORDER BY ""Id""
+                    LOOP
+                        UPDATE ""Users"" 
+                        SET 
+                            ""FirstName"" = CASE 
+                                WHEN ""FirstName"" IS NULL OR ""FirstName"" = '' 
+                                THEN COALESCE(SPLIT_PART(""CorrespondenceAddress_Street"", ' ', 1), 'User' || user_record.""Id"")
+                                ELSE ""FirstName""
+                            END,
+                            ""LastName"" = CASE 
+                                WHEN ""LastName"" IS NULL OR ""LastName"" = '' 
+                                THEN 'Test' || user_record.""Id""
+                                ELSE ""LastName""
+                            END,
+                            ""Pesel"" = CASE 
+                                WHEN ""Pesel"" IS NULL OR ""Pesel"" = '' 
+                                THEN LPAD((90000000000 + user_record.""Id"")::text, 11, '0')
+                                ELSE ""Pesel""
+                            END,
+                            ""PwzNumber"" = CASE 
+                                WHEN ""PwzNumber"" IS NULL OR ""PwzNumber"" = '' 
+                                THEN LPAD((1000000 + user_record.""Id"")::text, 7, '0')
+                                ELSE ""PwzNumber""
+                            END,
+                            ""CorrespondenceAddress_Street"" = CASE 
+                                WHEN ""CorrespondenceAddress_Street"" = '' 
+                                THEN 'Testowa'
+                                ELSE ""CorrespondenceAddress_Street""
+                            END,
+                            ""CorrespondenceAddress_HouseNumber"" = CASE 
+                                WHEN ""CorrespondenceAddress_HouseNumber"" = '' 
+                                THEN user_record.""Id""::text
+                                ELSE ""CorrespondenceAddress_HouseNumber""
+                            END,
+                            ""CorrespondenceAddress_PostalCode"" = CASE 
+                                WHEN ""CorrespondenceAddress_PostalCode"" = '' 
+                                THEN '00-001' 
+                                ELSE ""CorrespondenceAddress_PostalCode"" 
+                            END,
+                            ""CorrespondenceAddress_City"" = CASE 
+                                WHEN ""CorrespondenceAddress_City"" = '' 
+                                THEN 'Warszawa' 
+                                ELSE ""CorrespondenceAddress_City"" 
+                            END,
+                            ""CorrespondenceAddress_Province"" = CASE 
+                                WHEN ""CorrespondenceAddress_Province"" = '' 
+                                THEN 'mazowieckie' 
+                                ELSE ""CorrespondenceAddress_Province"" 
+                            END,
+                            ""CorrespondenceAddress_Country"" = CASE 
+                                WHEN ""CorrespondenceAddress_Country"" = '' 
+                                THEN 'Polska' 
+                                ELSE ""CorrespondenceAddress_Country"" 
+                            END
+                        WHERE ""Id"" = user_record.""Id"";
+                        
+                        counter := counter + 1;
+                    END LOOP;
+                END $$;
+                
+                -- Handle NULL ModuleId values in related tables
+                UPDATE ""Procedures"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+                
+                UPDATE ""MedicalShifts"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+                
+                UPDATE ""Internships"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+                
+                UPDATE ""Courses"" 
+                SET ""ModuleId"" = (SELECT MIN(""Id"") FROM ""Modules"")
+                WHERE ""ModuleId"" IS NULL;
+            ");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Pesel",

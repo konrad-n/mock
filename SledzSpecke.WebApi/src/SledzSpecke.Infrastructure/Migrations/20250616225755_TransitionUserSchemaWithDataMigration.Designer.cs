@@ -12,8 +12,8 @@ using SledzSpecke.Infrastructure.DAL;
 namespace SledzSpecke.Infrastructure.Migrations
 {
     [DbContext(typeof(SledzSpeckeDbContext))]
-    [Migration("20250616161817_TransitionUserSchema")]
-    partial class TransitionUserSchema
+    [Migration("20250616225755_TransitionUserSchemaWithDataMigration")]
+    partial class TransitionUserSchemaWithDataMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
