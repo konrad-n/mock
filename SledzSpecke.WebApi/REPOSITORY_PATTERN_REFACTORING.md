@@ -83,7 +83,48 @@ public class SqlMedicalShiftRepository : BaseRepository<MedicalShift>, IMedicalS
 ```csharp
 public interface IIdGenerationService
 {
-    Task<TId> GenerateNextIdAsync<TEntity, TId>() where TEntity : AggregateRoot;
+    Task<TId> GenerateNextIdAsync<TEntity, TId>() where TEntity : class;
+}
+
+// Implementation
+public class PostgreSqlIdGenerationService : IIdGenerationService
+{
+    private readonly SledzSpeckeDbContext _context;
+    
+    public PostgreSqlIdGenerationService(SledzSpeckeDbContext context)
+    {
+        _context = context;
+    }
+    
+    public async Task<TId> GenerateNextIdAsync<TEntity, TId>() where TEntity : class
+    {
+        var entityType = _context.Model.FindEntityType(typeof(TEntity));
+        var tableName = entityType.GetTableName();
+        var schema = entityType.GetSchema() ?? "public";
+        
+        using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT COALESCE(MAX(\"Id\"), 0) + 1 FROM \"{schema}\".\"{tableName}\"";
+        
+        var nextId = await command.ExecuteScalarAsync();
+        
+        // Handle different ID types
+        if (typeof(TId) == typeof(int))
+        {
+            return (TId)(object)(int)nextId!;
+        }
+        
+        // For value objects like UserId, MedicalShiftId, etc.
+        var constructor = typeof(TId).GetConstructor(new[] { typeof(int) });
+        if (constructor != null)
+        {
+            return (TId)constructor.Invoke(new object[] { (int)nextId! });
+        }
+        
+        throw new NotSupportedException($"ID type {typeof(TId).Name} is not supported");
+    }
 }
 ```
 
@@ -130,6 +171,67 @@ await _unitOfWork.SaveChangesAsync();
 - Create unit tests for new specifications
 - Integration test the refactored repository
 - Ensure backward compatibility
+
+### Step 6: Update Command Handlers
+
+**Before** (Repository handles SaveChanges):
+```csharp
+public sealed class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
+{
+    private readonly IMedicalShiftRepository _repository;
+    
+    public AddMedicalShiftHandler(IMedicalShiftRepository repository)
+    {
+        _repository = repository;
+    }
+    
+    public async Task<int> HandleAsync(AddMedicalShift command)
+    {
+        var shift = MedicalShift.Create(
+            command.InternshipId,
+            command.Date,
+            command.Duration
+        );
+        
+        // Repository saves changes internally
+        return await _repository.AddAsync(shift);
+    }
+}
+```
+
+**After** (UnitOfWork handles SaveChanges):
+```csharp
+public sealed class AddMedicalShiftHandler : ICommandHandler<AddMedicalShift, int>
+{
+    private readonly IMedicalShiftRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
+    
+    public AddMedicalShiftHandler(
+        IMedicalShiftRepository repository,
+        IUnitOfWork unitOfWork)
+    {
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+    }
+    
+    public async Task<int> HandleAsync(AddMedicalShift command)
+    {
+        var shift = MedicalShift.Create(
+            command.InternshipId,
+            command.Date,
+            command.Duration
+        );
+        
+        // Repository only adds to context
+        await _repository.AddAsync(shift);
+        
+        // UnitOfWork handles the transaction
+        await _unitOfWork.SaveChangesAsync();
+        
+        return shift.Id.Value;
+    }
+}
+```
 
 ## Example: Refactoring UserRepository
 
@@ -196,12 +298,23 @@ public async Task GetBySpecification_Should_Return_Matching_Entities()
 }
 ```
 
-## Timeline
+## Current Repository Implementation Status
 
-1. **Week 1**: Refactor high-traffic repositories (User, MedicalShift, Internship)
-2. **Week 2**: Refactor remaining repositories
-3. **Week 3**: Remove SaveChangesAsync, implement ID generation service
-4. **Week 4**: Testing and optimization
+| Repository | Status | Notes |
+|------------|--------|-------|
+| UserRepository | ❌ Not Refactored | High priority - most used |
+| MedicalShiftRepository | ✅ Example Created | RefactoredSqlMedicalShiftRepository ready |
+| InternshipRepository | ❌ Not Refactored | High priority - complex queries |
+| ProcedureRepository | ❌ Not Refactored | Has specifications already |
+| SpecializationRepository | ❌ Not Refactored | Low priority - simple queries |
+| ModuleRepository | ❌ Not Refactored | Medium priority |
+| AbsenceRepository | ❌ Not Refactored | Low priority |
+| RecognitionRepository | ❌ Not Refactored | Low priority |
+| PublicationRepository | ❌ Not Refactored | Low priority |
+| SelfEducationRepository | ❌ Not Refactored | Low priority |
+| CourseRepository | ❌ Not Refactored | Medium priority |
+| EducationalActivityRepository | ❌ Not Refactored | Low priority |
+| FileMetadataRepository | ❌ Not Refactored | Low priority |
 
 ## Checklist
 
