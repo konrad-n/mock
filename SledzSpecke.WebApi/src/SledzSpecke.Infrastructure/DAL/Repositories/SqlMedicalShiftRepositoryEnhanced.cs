@@ -197,4 +197,13 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
             .Select(x => x.Internship.InternshipId)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<MedicalShift>> GetByUserIdAndDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)
+    {
+        var internshipIds = await GetUserInternshipIds(userId.Value);
+        
+        return await _medicalShifts
+            .Where(s => s.Date >= startDate && s.Date <= endDate && internshipIds.Contains(s.InternshipId))
+            .ToListAsync();
+    }
 }

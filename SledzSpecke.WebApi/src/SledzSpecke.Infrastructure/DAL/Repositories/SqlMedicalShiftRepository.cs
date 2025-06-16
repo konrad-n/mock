@@ -92,6 +92,26 @@ internal sealed class SqlMedicalShiftRepository : IMedicalShiftRepository
         return await _context.MedicalShifts.ToListAsync();
     }
 
+    public async Task<IEnumerable<MedicalShift>> GetByUserIdAndDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)
+    {
+        var internshipIds = await _context.Internships
+            .Join(_context.Specializations,
+                i => i.SpecializationId,
+                s => s.Id,
+                (i, s) => new { i, s })
+            .Join(_context.Users,
+                x => x.s.Id,
+                u => u.SpecializationId,
+                (x, u) => new { x.i, User = u })
+            .Where(x => x.User.Id.Value == userId.Value)
+            .Select(x => x.i.Id)
+            .ToListAsync();
+
+        return await _context.MedicalShifts
+            .Where(s => s.Date >= startDate && s.Date <= endDate && internshipIds.Contains(s.InternshipId))
+            .ToListAsync();
+    }
+
     public async Task<int> GetTotalHoursAsync(int internshipId)
     {
         var shifts = await GetByInternshipIdAsync(internshipId);

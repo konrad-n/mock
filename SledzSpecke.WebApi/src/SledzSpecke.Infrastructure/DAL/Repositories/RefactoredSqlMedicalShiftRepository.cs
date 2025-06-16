@@ -98,6 +98,14 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
         await _unitOfWork.SaveChangesAsync();
     }
 
+    public async Task<IEnumerable<MedicalShift>> GetByUserIdAndDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)
+    {
+        // Use GetByDateRangeAsync and filter by user
+        // This is a temporary implementation until we have proper specifications
+        var shifts = await GetByDateRangeAsync(startDate, endDate, userId.Value);
+        return shifts;
+    }
+
     public async Task DeleteAsync(int id)
     {
         var shift = await GetByIdAsync(id);
