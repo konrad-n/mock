@@ -80,8 +80,8 @@ public static class Extensions
         services.AddScoped<IUserRepository, RefactoredSqlUserRepository>();
         services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, SqlModuleRepository>();
-        services.AddScoped<IInternshipRepository, SqlInternshipRepositoryEnhanced>();
-        services.AddScoped<IProcedureRepository, SqlProcedureRepository>();
+        services.AddScoped<IInternshipRepository, RefactoredSqlInternshipRepository>();
+        services.AddScoped<IProcedureRepository, RefactoredSqlProcedureRepository>();
         services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepositoryEnhanced>();
         services.AddScoped<ICourseRepository, SqlCourseRepository>();
         services.AddScoped<IAbsenceRepository, SqlAbsenceRepository>();

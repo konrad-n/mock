@@ -160,6 +160,8 @@ public class UserSpecificationTests
     }
 
     // Helper methods
+    private static int _testUserId = 1;
+    
     private User CreateUser(
         string username = "testuser",
         string email = "test@example.com",
@@ -167,25 +169,30 @@ public class UserSpecificationTests
     {
         // Note: User.Create requires SpecializationId in some overloads
         // Using the factory method that matches available parameters
-        return User.Create(
+        // For tests, we use CreateWithId to avoid ID validation issues
+        return User.CreateWithId(
+            new UserId(_testUserId++), // Auto-increment test ID
             new Email(email),
             new Username(username),
             new HashedPassword("abcdefghijklmnopqrstuvwxyz0123456789ABCD="), // Valid hash format
             new FullName(fullName),
             new SmkVersion("new"),
-            new SpecializationId(1) // Default specialization
+            new SpecializationId(1), // Default specialization
+            DateTime.UtcNow
         );
     }
     
     private User CreateUserWithSpecialization(SpecializationId specializationId)
     {
-        return User.Create(
+        return User.CreateWithId(
+            new UserId(_testUserId++), // Auto-increment test ID
             new Email("test@example.com"),
             new Username("testuser"),
             new HashedPassword("abcdefghijklmnopqrstuvwxyz0123456789ABCD="), // Valid hash format
             new FullName("Test User"),
             new SmkVersion("new"),
-            specializationId
+            specializationId,
+            DateTime.UtcNow
         );
     }
 }

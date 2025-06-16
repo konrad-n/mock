@@ -6,7 +6,6 @@ using SledzSpecke.Core.Specifications;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Infrastructure.DAL.Repositories;
 using SledzSpecke.Tests.Integration.Common;
-using SledzSpecke.Tests.Integration.Fixtures;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace SledzSpecke.Tests.Integration.Repositories;
 
 public class SpecificationPatternTests : IntegrationTestBase
 {
-    public SpecificationPatternTests(IntegrationTestWebAppFactory factory) : base(factory)
+    public SpecificationPatternTests() : base()
     {
     }
 
@@ -27,7 +26,7 @@ public class SpecificationPatternTests : IntegrationTestBase
         var internship1 = await CreateTestInternshipAsync();
         var internship2 = await CreateTestInternshipAsync();
         
-        var repository = _scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
+        var repository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         
         // Create shifts for both internships
         var shift1 = await CreateMedicalShiftAsync(internship1.Id);
@@ -50,7 +49,7 @@ public class SpecificationPatternTests : IntegrationTestBase
     {
         // Arrange
         var internship = await CreateTestInternshipAsync();
-        var repository = _scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
+        var repository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         
         var today = DateTime.UtcNow.Date;
         var yesterday = today.AddDays(-1);
@@ -77,7 +76,7 @@ public class SpecificationPatternTests : IntegrationTestBase
     {
         // Arrange
         var internship = await CreateTestInternshipAsync();
-        var repository = _scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
+        var repository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         
         var startDate = DateTime.UtcNow.Date;
         var endDate = startDate.AddDays(7);
@@ -132,7 +131,7 @@ public class SpecificationPatternTests : IntegrationTestBase
     public async Task UserSpecifications_Should_Filter_By_Profile_Completeness()
     {
         // Arrange
-        var userRepository = _scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var userRepository = Scope.ServiceProvider.GetRequiredService<IUserRepository>();
         
         // Create users with different profile completeness
         var completeUser = User.Create(
@@ -172,7 +171,7 @@ public class SpecificationPatternTests : IntegrationTestBase
     public async Task UserSpecifications_Should_Search_By_Multiple_Fields()
     {
         // Arrange
-        var userRepository = _scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var userRepository = Scope.ServiceProvider.GetRequiredService<IUserRepository>();
         
         var user1 = User.Create(
             new Username("johndoe"),
@@ -213,7 +212,7 @@ public class SpecificationPatternTests : IntegrationTestBase
     public async Task InternshipSpecifications_Should_Filter_Active_And_Approved()
     {
         // Arrange
-        var internshipRepository = _scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
+        var internshipRepository = Scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
         var specialization = await CreateTestSpecializationAsync();
         var user = await CreateTestUserAsync();
         
@@ -268,7 +267,7 @@ public class SpecificationPatternTests : IntegrationTestBase
         var specialization = await CreateTestSpecializationAsync();
         var user = await CreateTestUserAsync();
         
-        var internshipRepository = _scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
+        var internshipRepository = Scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
         var internship = Internship.Create(
             specialization.Id,
             null,
@@ -283,7 +282,7 @@ public class SpecificationPatternTests : IntegrationTestBase
 
     private async Task<MedicalShift> CreateMedicalShiftAsync(InternshipId internshipId, DateTime? date = null)
     {
-        var repository = _scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
+        var repository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         var shift = MedicalShift.Create(
             internshipId,
             date ?? DateTime.UtcNow,
@@ -297,7 +296,7 @@ public class SpecificationPatternTests : IntegrationTestBase
 
     private async Task<User> CreateTestUserAsync()
     {
-        var userRepository = _scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var userRepository = Scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var username = $"user{Guid.NewGuid():N}";
         var user = User.Create(
             new Username(username),
@@ -312,7 +311,7 @@ public class SpecificationPatternTests : IntegrationTestBase
 
     private async Task<Specialization> CreateTestSpecializationAsync()
     {
-        var specializationRepository = _scope.ServiceProvider.GetRequiredService<ISpecializationRepository>();
+        var specializationRepository = Scope.ServiceProvider.GetRequiredService<ISpecializationRepository>();
         var specialization = Specialization.Create(
             $"Specialization {Guid.NewGuid():N}",
             SpecializationType.Medical,

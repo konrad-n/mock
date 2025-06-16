@@ -91,6 +91,21 @@ public class UserByFullNameSpecification : Specification<User>
     }
 }
 
+public class UserByUsernameContainsSpecification : Specification<User>
+{
+    private readonly string _searchTerm;
+
+    public UserByUsernameContainsSpecification(string searchTerm)
+    {
+        _searchTerm = searchTerm.ToLower();
+    }
+
+    public override Expression<Func<User, bool>> ToExpression()
+    {
+        return user => user.Username.Value.ToLower().Contains(_searchTerm);
+    }
+}
+
 // Composite specifications for common scenarios
 public static class UserSpecificationExtensions
 {
@@ -117,13 +132,19 @@ public static class UserSpecificationExtensions
         // Try to search by username if valid
         try
         {
+            // If the search term is a valid username format, search by exact username
             var usernameSpec = new UserByUsernameSpecification(new Username(searchTerm));
-            return fullNameSpec.Or(usernameSpec);
+            
+            // Also search by username containing the search term (case-insensitive)
+            var usernameContainsSpec = new UserByUsernameContainsSpecification(searchTerm);
+            
+            return fullNameSpec.Or(usernameSpec).Or(usernameContainsSpec);
         }
         catch
         {
-            // If not a valid username, just use full name search
-            return fullNameSpec;
+            // If not a valid username, search by username contains and full name
+            var usernameContainsSpec = new UserByUsernameContainsSpecification(searchTerm);
+            return fullNameSpec.Or(usernameContainsSpec);
         }
     }
 }

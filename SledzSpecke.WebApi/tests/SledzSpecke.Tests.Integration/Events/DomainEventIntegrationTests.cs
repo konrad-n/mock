@@ -9,7 +9,6 @@ using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Events.Handlers;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Tests.Integration.Common;
-using SledzSpecke.Tests.Integration.Fixtures;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,11 +22,11 @@ public class DomainEventIntegrationTests : IntegrationTestBase
     private readonly INotificationService _notificationService;
     private readonly IStatisticsService _statisticsService;
     
-    public DomainEventIntegrationTests(IntegrationTestWebAppFactory factory) : base(factory)
+    public DomainEventIntegrationTests() : base()
     {
-        _mediator = _scope.ServiceProvider.GetRequiredService<IMediator>();
-        _notificationService = _scope.ServiceProvider.GetRequiredService<INotificationService>();
-        _statisticsService = _scope.ServiceProvider.GetRequiredService<IStatisticsService>();
+        _mediator = Scope.ServiceProvider.GetRequiredService<IMediator>();
+        _notificationService = Scope.ServiceProvider.GetRequiredService<INotificationService>();
+        _statisticsService = Scope.ServiceProvider.GetRequiredService<IStatisticsService>();
     }
 
     [Fact]
@@ -38,7 +37,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var specialization = await CreateSpecializationAsync();
         var internship = await CreateInternshipAsync(specialization.Id, user.Id);
         
-        var medicalShiftRepository = _scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
+        var medicalShiftRepository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         var shift = MedicalShift.Create(
             internship.Id,
             DateTime.UtcNow.AddDays(1),
@@ -66,7 +65,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         // 2. Statistics were updated
         // 3. Conflicts were checked
         // For now, just verify the handler was reached
-        var handler = _scope.ServiceProvider.GetRequiredService<MedicalShiftCreatedEventHandler>();
+        var handler = Scope.ServiceProvider.GetRequiredService<MedicalShiftCreatedEventHandler>();
         handler.Should().NotBeNull();
     }
 
@@ -78,7 +77,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var specialization = await CreateSpecializationAsync();
         var internship = await CreateInternshipAsync(specialization.Id, user.Id);
         
-        var medicalShiftRepository = _scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
+        var medicalShiftRepository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         
         // Create shifts for a complete month (160 hours)
         var currentMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
@@ -107,7 +106,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
 
         // Assert
         // Verify handler executed (in real implementation would check for generated report)
-        var handler = _scope.ServiceProvider.GetRequiredService<MedicalShiftApprovedEventHandler>();
+        var handler = Scope.ServiceProvider.GetRequiredService<MedicalShiftApprovedEventHandler>();
         handler.Should().NotBeNull();
     }
 
@@ -119,7 +118,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var specialization = await CreateSpecializationAsync();
         var internship = await CreateInternshipAsync(specialization.Id, user.Id);
         
-        var procedureRepository = _scope.ServiceProvider.GetRequiredService<IProcedureRepository>();
+        var procedureRepository = Scope.ServiceProvider.GetRequiredService<IProcedureRepository>();
         var procedure = Procedure.Create(
             internship.Id,
             "Test Procedure",
@@ -144,7 +143,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         await _mediator.Publish(domainEvent);
 
         // Assert
-        var handler = _scope.ServiceProvider.GetRequiredService<ProcedureCreatedEventHandler>();
+        var handler = Scope.ServiceProvider.GetRequiredService<ProcedureCreatedEventHandler>();
         handler.Should().NotBeNull();
     }
 
@@ -156,7 +155,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var specialization = await CreateSpecializationAsync();
         var internship = await CreateInternshipAsync(specialization.Id, user.Id);
         
-        var procedureRepository = _scope.ServiceProvider.GetRequiredService<IProcedureRepository>();
+        var procedureRepository = Scope.ServiceProvider.GetRequiredService<IProcedureRepository>();
         
         // Create multiple procedures
         for (int i = 1; i <= 10; i++)
@@ -186,7 +185,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         await _mediator.Publish(completedEvent);
 
         // Assert
-        var handler = _scope.ServiceProvider.GetRequiredService<ProcedureCompletedEventHandler>();
+        var handler = Scope.ServiceProvider.GetRequiredService<ProcedureCompletedEventHandler>();
         handler.Should().NotBeNull();
     }
 
@@ -229,15 +228,15 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         }
 
         // Assert - All handlers should have been invoked
-        _scope.ServiceProvider.GetRequiredService<MedicalShiftCreatedEventHandler>().Should().NotBeNull();
-        _scope.ServiceProvider.GetRequiredService<ProcedureCreatedEventHandler>().Should().NotBeNull();
-        _scope.ServiceProvider.GetRequiredService<MedicalShiftApprovedEventHandler>().Should().NotBeNull();
+        Scope.ServiceProvider.GetRequiredService<MedicalShiftCreatedEventHandler>().Should().NotBeNull();
+        Scope.ServiceProvider.GetRequiredService<ProcedureCreatedEventHandler>().Should().NotBeNull();
+        Scope.ServiceProvider.GetRequiredService<MedicalShiftApprovedEventHandler>().Should().NotBeNull();
     }
 
     // Helper methods
     private async Task<User> CreateUserAsync()
     {
-        var userRepository = _scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var userRepository = Scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var user = User.Create(
             new Username("testuser"),
             new Email("test@example.com"),
@@ -251,7 +250,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
 
     private async Task<Specialization> CreateSpecializationAsync()
     {
-        var specializationRepository = _scope.ServiceProvider.GetRequiredService<ISpecializationRepository>();
+        var specializationRepository = Scope.ServiceProvider.GetRequiredService<ISpecializationRepository>();
         var specialization = Specialization.Create(
             "Test Specialization",
             SpecializationType.Medical,
@@ -265,7 +264,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
 
     private async Task<Internship> CreateInternshipAsync(SpecializationId specializationId, UserId userId)
     {
-        var internshipRepository = _scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
+        var internshipRepository = Scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
         var internship = Internship.Create(
             specializationId,
             null, // ModuleId

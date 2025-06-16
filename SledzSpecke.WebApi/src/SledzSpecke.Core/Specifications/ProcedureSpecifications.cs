@@ -123,3 +123,35 @@ public class ProcedureBeforeDateSpecification : Specification<ProcedureBase>
         return procedure => procedure.Date < _cutoffDate;
     }
 }
+
+public class ProcedureByCodeSpecification : Specification<ProcedureBase>
+{
+    private readonly string _code;
+
+    public ProcedureByCodeSpecification(string code)
+    {
+        _code = code;
+    }
+
+    public override Expression<Func<ProcedureBase, bool>> ToExpression()
+    {
+        return procedure => procedure.Code == _code;
+    }
+}
+
+public class ProcedureByDateRangeSpecification : Specification<ProcedureBase>
+{
+    private readonly DateTime _startDate;
+    private readonly DateTime _endDate;
+
+    public ProcedureByDateRangeSpecification(DateTime startDate, DateTime endDate)
+    {
+        _startDate = startDate;
+        _endDate = endDate;
+    }
+
+    public override Expression<Func<ProcedureBase, bool>> ToExpression()
+    {
+        return procedure => procedure.Date >= _startDate && procedure.Date <= _endDate;
+    }
+}
