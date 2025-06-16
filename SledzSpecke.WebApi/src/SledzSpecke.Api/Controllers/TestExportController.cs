@@ -132,16 +132,29 @@ public class TestExportController : ControllerBase
     }
     
     [HttpGet("generate-excel")]
-    public async Task<IActionResult> GenerateTestExcel([FromServices] ISmkExcelGenerator generator)
+    public async Task<IActionResult> GenerateTestExcel([FromServices] ISmkExcelGenerator generator, [FromQuery] string version = "old")
     {
         try
         {
             var testData = GetTestData();
+            testData.BasicInfo.SmkVersion = version;
+            
+            // Adjust procedure data for new SMK version
+            if (version == "new")
+            {
+                foreach (var procedure in testData.Procedures)
+                {
+                    procedure.CountA = 1;
+                    procedure.CountB = 0;
+                    procedure.Role = null;
+                }
+            }
+            
             byte[] excelBytes = await generator.GenerateAsync(testData);
             
             return File(excelBytes, 
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"test_export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                $"test_export_{version}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
         }
         catch (Exception ex)
         {
