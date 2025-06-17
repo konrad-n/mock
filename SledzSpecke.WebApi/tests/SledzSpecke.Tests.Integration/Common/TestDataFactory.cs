@@ -17,10 +17,11 @@ public static class TestDataFactory
         var firstName = new FirstName(Faker.Name.FirstName());
         var secondName = Faker.Random.Bool() ? new SecondName(Faker.Name.FirstName()) : null;
         var lastName = new LastName(Faker.Name.LastName());
-        var pesel = new Pesel($"{Faker.Random.Int(70, 99):D2}{Faker.Random.Int(1, 12):D2}{Faker.Random.Int(1, 28):D2}{Faker.Random.Int(10000, 99999):D5}");
-        var pwzNumber = new PwzNumber(Faker.Random.Int(1000000, 9999999).ToString());
-        var phoneNumber = new PhoneNumber($"+48{Faker.Random.Int(100000000, 999999999):D9}");
         var dateOfBirth = new DateTime(1970 + Faker.Random.Int(0, 29), Faker.Random.Int(1, 12), Faker.Random.Int(1, 28));
+        var gender = Faker.Random.Bool() ? Gender.Male : Gender.Female;
+        var pesel = new Pesel(Pesel.GenerateValidPesel(dateOfBirth, gender, Faker.Random.Int(0, 999)));
+        var pwzNumber = new PwzNumber(PwzNumber.GenerateValidPwz(Faker.Random.Int(0, 999999)));
+        var phoneNumber = new PhoneNumber($"+48{Faker.Random.Int(100000000, 999999999):D9}");
         var address = new Address(
             Faker.Address.StreetName(),
             Faker.Random.Int(1, 200).ToString(),
