@@ -88,12 +88,12 @@ public static class Extensions
         services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepositoryEnhanced>();
         services.AddScoped<ICourseRepository, RefactoredSqlCourseRepository>();
         services.AddScoped<IAbsenceRepository, RefactoredSqlAbsenceRepository>();
-        services.AddScoped<IRecognitionRepository, SqlRecognitionRepository>();
+        services.AddScoped<IRecognitionRepository, RefactoredSqlRecognitionRepository>();
         services.AddScoped<IPublicationRepository, RefactoredSqlPublicationRepository>();
-        services.AddScoped<ISelfEducationRepository, SqlSelfEducationRepository>();
+        services.AddScoped<ISelfEducationRepository, RefactoredSqlSelfEducationRepository>();
         services.AddScoped<IEducationalActivityRepository, EducationalActivityRepository>();
         services.AddScoped<IFileMetadataRepository, FileMetadataRepository>();
-        services.AddScoped<IAdditionalSelfEducationDaysRepository, SqlAdditionalSelfEducationDaysRepository>();
+        services.AddScoped<IAdditionalSelfEducationDaysRepository, RefactoredSqlAdditionalSelfEducationDaysRepository>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IDataSeeder, DataSeeder>();
         
