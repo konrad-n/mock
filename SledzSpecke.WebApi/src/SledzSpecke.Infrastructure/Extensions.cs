@@ -73,11 +73,15 @@ public static class Extensions
 
         // Application services
         services.AddScoped<INotificationService, NotificationService>();
-        services.AddScoped<IStatisticsService, StatisticsService>();
+        services.AddScoped<IStatisticsService, RealStatisticsService>();
         services.AddScoped<IProjectionService, ProjectionService>();
         services.AddScoped<IMilestoneService, MilestoneService>();
         services.AddScoped<IPdfGenerationService, PdfGenerationService>();
         services.AddScoped<IValidationService, ValidationService>();
+        
+        // Cache service
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService, InMemoryCacheService>();
 
         // Using refactored repository with Specification pattern
         services.AddScoped<IUserRepository, RefactoredSqlUserRepository>();
