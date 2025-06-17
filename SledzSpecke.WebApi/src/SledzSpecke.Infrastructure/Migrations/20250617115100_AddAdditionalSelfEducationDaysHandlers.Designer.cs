@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SledzSpecke.Infrastructure.DAL;
@@ -11,9 +12,11 @@ using SledzSpecke.Infrastructure.DAL;
 namespace SledzSpecke.Infrastructure.Migrations
 {
     [DbContext(typeof(SledzSpeckeDbContext))]
-    partial class SledzSpeckeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617115100_AddAdditionalSelfEducationDaysHandlers")]
+    partial class AddAdditionalSelfEducationDaysHandlers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
