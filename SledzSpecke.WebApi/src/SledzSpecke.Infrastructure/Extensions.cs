@@ -48,8 +48,57 @@ public static class Extensions
             {
                 Title = "SledzSpecke API",
                 Version = "v1",
-                Description = "Medical internship tracking API"
+                Description = "Medical Specialization Tracking System API - SMK Compliant",
+                Contact = new OpenApiContact
+                {
+                    Name = "SledzSpecke Team",
+                    Email = "support@sledzspecke.pl"
+                }
             });
+
+            // Add JWT authentication
+            swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter JWT with Bearer prefix",
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
+            // Include XML comments if available
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                swagger.IncludeXmlComments(xmlPath);
+            }
+
+            // Include API XML comments
+            var apiXmlFile = "SledzSpecke.Api.xml";
+            var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXmlFile);
+            if (File.Exists(apiXmlPath))
+            {
+                swagger.IncludeXmlComments(apiXmlPath);
+            }
+
+            // Custom schema IDs
+            swagger.CustomSchemaIds(type => type.FullName);
         });
 
         // Register middleware

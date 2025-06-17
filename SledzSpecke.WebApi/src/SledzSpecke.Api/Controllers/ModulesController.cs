@@ -18,6 +18,12 @@ public class ModulesController : BaseController
     private readonly IQueryHandler<GetModuleById, ModuleDto> _getModuleByIdHandler;
     private readonly IQueryHandler<GetModuleProgress, SpecializationStatisticsDto> _getModuleProgressHandler;
     private readonly ICommandHandler<CompleteModule> _completeModuleHandler;
+    private readonly ICommandHandler<CreateInternship, int> _createInternshipHandler;
+    private readonly ICommandHandler<AddMedicalShift> _addMedicalShiftHandler;
+    private readonly ICommandHandler<AddProcedure, int> _addProcedureHandler;
+    private readonly ICommandHandler<CreateCourse, int> _createCourseHandler;
+    private readonly ICommandHandler<CreateSelfEducation> _createSelfEducationHandler;
+    private readonly ICommandHandler<AddAdditionalSelfEducationDays, int> _addAdditionalDaysHandler;
     private readonly IUserContextService _userContextService;
 
     public ModulesController(
@@ -26,6 +32,12 @@ public class ModulesController : BaseController
         IQueryHandler<GetModuleById, ModuleDto> getModuleByIdHandler,
         IQueryHandler<GetModuleProgress, SpecializationStatisticsDto> getModuleProgressHandler,
         ICommandHandler<CompleteModule> completeModuleHandler,
+        ICommandHandler<CreateInternship, int> createInternshipHandler,
+        ICommandHandler<AddMedicalShift> addMedicalShiftHandler,
+        ICommandHandler<AddProcedure, int> addProcedureHandler,
+        ICommandHandler<CreateCourse, int> createCourseHandler,
+        ICommandHandler<CreateSelfEducation> createSelfEducationHandler,
+        ICommandHandler<AddAdditionalSelfEducationDays, int> addAdditionalDaysHandler,
         IUserContextService userContextService)
     {
         _switchModuleHandler = switchModuleHandler;
@@ -33,6 +45,12 @@ public class ModulesController : BaseController
         _getModuleByIdHandler = getModuleByIdHandler;
         _getModuleProgressHandler = getModuleProgressHandler;
         _completeModuleHandler = completeModuleHandler;
+        _createInternshipHandler = createInternshipHandler;
+        _addMedicalShiftHandler = addMedicalShiftHandler;
+        _addProcedureHandler = addProcedureHandler;
+        _createCourseHandler = createCourseHandler;
+        _createSelfEducationHandler = createSelfEducationHandler;
+        _addAdditionalDaysHandler = addAdditionalDaysHandler;
         _userContextService = userContextService;
     }
 
@@ -92,8 +110,7 @@ public class ModulesController : BaseController
         int moduleId, 
         [FromBody] CreateModuleInternshipRequest request)
     {
-        // Forward to internships controller with module context
-        var internshipRequest = new CreateInternship(
+        var command = new CreateInternship(
             request.SpecializationId,
             request.Name,
             request.InstitutionName,
@@ -105,12 +122,13 @@ public class ModulesController : BaseController
             null, // SupervisorName
             null, // SupervisorPwz
             moduleId);
-
-        // Note: This would typically be handled by the InternshipController
-        // For now, return a placeholder response
-        return Ok(new CreateInternshipResponse { 
-            InternshipId = 0, 
-            Message = "Please use /api/internships endpoint with moduleId parameter" 
+            
+        var internshipId = await _createInternshipHandler.HandleAsync(command);
+        
+        return Ok(new CreateInternshipResponse 
+        { 
+            InternshipId = internshipId, 
+            Message = "Internship created successfully" 
         });
     }
 
@@ -122,10 +140,26 @@ public class ModulesController : BaseController
         int moduleId, 
         [FromBody] AddModuleMedicalShiftRequest request)
     {
-        // Forward to medical shifts controller with module context
-        return Ok(new AddMedicalShiftResponse { 
-            ShiftId = 0, 
-            Message = "Please use /api/medical-shifts endpoint with moduleId parameter" 
+        if (!request.InternshipId.HasValue)
+        {
+            return BadRequest("InternshipId is required");
+        }
+        
+        var command = new AddMedicalShift(
+            request.InternshipId.Value,
+            request.Date,
+            request.Hours,
+            request.Minutes,
+            request.Location ?? string.Empty,
+            request.Date.Year
+        );
+        
+        await _addMedicalShiftHandler.HandleAsync(command);
+        
+        return Ok(new AddMedicalShiftResponse 
+        { 
+            ShiftId = 0, // Handler doesn't return ID yet
+            Message = "Medical shift added successfully" 
         });
     }
 
@@ -137,10 +171,40 @@ public class ModulesController : BaseController
         int moduleId, 
         [FromBody] AddModuleProcedureRequest request)
     {
-        // Forward to procedures controller with module context
-        return Ok(new AddProcedureResponse { 
-            ProcedureId = 0, 
-            Message = "Please use /api/procedures endpoint with moduleId parameter" 
+        var command = new AddProcedure(
+            request.InternshipId,
+            request.Date,
+            Year: request.Date.Year,
+            request.Code,
+            request.Name,
+            request.Location,
+            Status: "Pending", // Default status
+            request.ExecutionType,
+            request.SupervisorName,
+            SupervisorPwz: null,
+            PerformingPerson: null,
+            PatientInfo: null,
+            PatientInitials: null,
+            PatientGender: null,
+            ProcedureRequirementId: null,
+            ProcedureGroup: null,
+            AssistantData: null,
+            InternshipName: null,
+            ModuleId: moduleId,
+            ProcedureName: request.Name,
+            CountA: null,
+            CountB: null,
+            Supervisor: request.SupervisorName,
+            Institution: null,
+            Comments: null
+        );
+        
+        var procedureId = await _addProcedureHandler.HandleAsync(command);
+        
+        return Ok(new AddProcedureResponse 
+        { 
+            ProcedureId = procedureId, 
+            Message = "Procedure added successfully" 
         });
     }
 
@@ -152,10 +216,26 @@ public class ModulesController : BaseController
         int moduleId, 
         [FromBody] CreateModuleCourseRequest request)
     {
-        // Forward to courses controller with module context
-        return Ok(new CreateCourseResponse { 
-            CourseId = 0, 
-            Message = "Please use /api/courses endpoint with moduleId parameter" 
+        // Need to get specialization ID from module
+        var module = await _getModuleByIdHandler.HandleAsync(new GetModuleById(moduleId));
+        
+        var command = new CreateCourse(
+            module.SpecializationId,
+            "Specialization", // CourseType
+            request.CourseName,
+            request.InstitutionName,
+            request.EndDate, // CompletionDate
+            request.CourseNumber,
+            request.CmkpCertificateNumber,
+            moduleId
+        );
+        
+        var courseId = await _createCourseHandler.HandleAsync(command);
+        
+        return Ok(new CreateCourseResponse 
+        { 
+            CourseId = courseId, 
+            Message = "Course created successfully" 
         });
     }
 
@@ -167,10 +247,37 @@ public class ModulesController : BaseController
         int moduleId, 
         [FromBody] AddModuleSelfEducationRequest request)
     {
-        // Forward to self-education controller with module context
-        return Ok(new AddSelfEducationResponse { 
-            SelfEducationId = 0, 
-            Message = "Please use /api/self-education endpoint with moduleId parameter" 
+        // Need to get specialization ID from module
+        var module = await _getModuleByIdHandler.HandleAsync(new GetModuleById(moduleId));
+        
+        // Parse the self-education type
+        var selfEducationType = request.Type switch
+        {
+            "Conference" => Core.ValueObjects.SelfEducationType.Conference,
+            "Workshop" => Core.ValueObjects.SelfEducationType.Workshop,
+            "Publication" => Core.ValueObjects.SelfEducationType.Publication,
+            "LiteratureStudy" => Core.ValueObjects.SelfEducationType.LiteratureStudy,
+            "ScientificMeeting" => Core.ValueObjects.SelfEducationType.ScientificMeeting,
+            _ => Core.ValueObjects.SelfEducationType.Conference // Default to conference
+        };
+        
+        var command = new CreateSelfEducation(
+            new Core.ValueObjects.SpecializationId(module.SpecializationId),
+            new Core.ValueObjects.UserId(_userContextService.GetUserId()),
+            selfEducationType,
+            request.Date.Year,
+            request.Description,
+            request.Hours,
+            request.Description,
+            null // Provider
+        );
+        
+        await _createSelfEducationHandler.HandleAsync(command);
+        
+        return Ok(new AddSelfEducationResponse 
+        { 
+            SelfEducationId = 0, // Handler doesn't return ID yet
+            Message = "Self-education activity added successfully" 
         });
     }
 
@@ -182,10 +289,22 @@ public class ModulesController : BaseController
         int moduleId, 
         [FromBody] AddModuleAdditionalDaysRequest request)
     {
-        // Forward to additional days controller with module context
-        return Ok(new AddAdditionalDaysResponse { 
-            AdditionalDaysId = 0, 
-            Message = "Please use /api/additional-self-education-days endpoint with moduleId parameter" 
+        // Need to get specialization ID from module
+        var module = await _getModuleByIdHandler.HandleAsync(new GetModuleById(moduleId));
+        
+        var command = new AddAdditionalSelfEducationDays(
+            module.SpecializationId,
+            request.StartDate.Year,
+            request.NumberOfDays,
+            request.Purpose
+        );
+        
+        var additionalDaysId = await _addAdditionalDaysHandler.HandleAsync(command);
+        
+        return Ok(new AddAdditionalDaysResponse 
+        { 
+            AdditionalDaysId = additionalDaysId, 
+            Message = "Additional self-education days added successfully" 
         });
     }
 }

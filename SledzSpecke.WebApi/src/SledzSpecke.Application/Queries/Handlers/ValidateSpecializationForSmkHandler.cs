@@ -66,7 +66,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
         var procedures = new List<ProcedureBase>();
         var courses = new List<Course>();
         var selfEducation = new List<SelfEducation>();
-        var additionalDays = new List<AdditionalSelfEducationDays>();
+        var additionalDays = new List<Core.Entities.AdditionalSelfEducationDays>();
         
         // Get data for each module
         foreach (var moduleId in moduleIds)
