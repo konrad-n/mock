@@ -18,7 +18,7 @@ internal sealed class MedicalShiftConfiguration : IEntityTypeConfiguration<Medic
 
         builder.Property(x => x.ModuleId)
             .HasConversion(
-                x => x.HasValue ? x.Value.Value : (int?)null,
+                x => x != null ? x.Value : (int?)null,
                 x => x.HasValue ? new Core.ValueObjects.ModuleId(x.Value) : null);
 
         builder.Property(x => x.Type)
