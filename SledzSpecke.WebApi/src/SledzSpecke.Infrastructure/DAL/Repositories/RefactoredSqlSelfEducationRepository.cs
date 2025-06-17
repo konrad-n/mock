@@ -32,13 +32,15 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
 
     public async Task<IEnumerable<SelfEducation>> GetByUserIdAsync(UserId userId)
     {
-        // Note: In the new model, SelfEducation is linked to Module, not directly to User
-        // This would require joining through Module -> Specialization -> User
-        // We need to use a complex query here
+        // Join through Module to get user's self educations
         var selfEducations = await _context.SelfEducations
             .Include(se => se.Module)
-            .ThenInclude(m => m.Specialization)
-            .Where(se => se.Module.Specialization.UserId == userId)
+            .Join(_context.Specializations,
+                se => se.Module.SpecializationId,
+                s => s.Id,
+                (se, s) => new { SelfEducation = se, Specialization = s })
+            .Where(x => x.Specialization.UserId == userId)
+            .Select(x => x.SelfEducation)
             .OrderByDescending(se => se.Date)
             .ToListAsync();
 
@@ -59,24 +61,34 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
 
     public async Task<IEnumerable<SelfEducation>> GetByUserAndSpecializationAsync(UserId userId, SpecializationId specializationId)
     {
-        // Need complex joins
+        // Since SelfEducation is linked through Module->Specialization->User, we need to use a query
+        // We can't use simple specifications here due to the complex relationship
         var selfEducations = await _context.SelfEducations
             .Include(se => se.Module)
-            .ThenInclude(m => m.Specialization)
-            .Where(se => se.Module.SpecializationId == specializationId && 
-                        se.Module.Specialization.UserId == userId)
+            .Where(se => se.Module.SpecializationId == specializationId)
+            .Join(_context.Specializations,
+                se => se.Module.SpecializationId,
+                s => s.Id,
+                (se, s) => new { SelfEducation = se, Specialization = s })
+            .Where(x => x.Specialization.Id == specializationId && x.Specialization.UserId == userId)
+            .Select(x => x.SelfEducation)
             .OrderByDescending(se => se.Date)
             .ToListAsync();
-
+            
         return selfEducations;
     }
 
     public async Task<IEnumerable<SelfEducation>> GetByYearAsync(UserId userId, int year)
     {
+        // Join through Module and Specialization to get user's self educations by year
         var selfEducations = await _context.SelfEducations
             .Include(se => se.Module)
-            .ThenInclude(m => m.Specialization)
-            .Where(se => se.Module.Specialization.UserId == userId && se.Date.Year == year)
+            .Join(_context.Specializations,
+                se => se.Module.SpecializationId,
+                s => s.Id,
+                (se, s) => new { SelfEducation = se, Specialization = s })
+            .Where(x => x.Specialization.UserId == userId && x.SelfEducation.Date.Year == year)
+            .Select(x => x.SelfEducation)
             .OrderByDescending(se => se.Date)
             .ToListAsync();
 
@@ -87,7 +99,7 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
     {
         var specification = new SelfEducationByTypeSpecification(type);
         return await GetBySpecificationAsync(specification,
-            orderBy: se => se.Date, ascending: false);
+            se => se.Date, false);
     }
 
     public async Task<IEnumerable<SelfEducation>> GetCompletedActivitiesAsync(UserId userId, SpecializationId specializationId)
@@ -114,10 +126,14 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
         // Return activities that might have certificates (workshops, conferences)
         var selfEducations = await _context.SelfEducations
             .Include(se => se.Module)
-            .ThenInclude(m => m.Specialization)
-            .Where(se => se.Module.Specialization.UserId == userId && 
-                        (se.Type == SelfEducationType.Workshop || 
-                         se.Type == SelfEducationType.Conference))
+            .Join(_context.Specializations,
+                se => se.Module.SpecializationId,
+                s => s.Id,
+                (se, s) => new { SelfEducation = se, Specialization = s })
+            .Where(x => x.Specialization.UserId == userId && 
+                        (x.SelfEducation.Type == SelfEducationType.Workshop || 
+                         x.SelfEducation.Type == SelfEducationType.Conference))
+            .Select(x => x.SelfEducation)
             .OrderByDescending(se => se.Date)
             .ToListAsync();
 
@@ -162,14 +178,14 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
     {
         var specification = SelfEducationSpecificationExtensions.GetSelfEducationForModule(moduleId);
         return await GetBySpecificationAsync(specification,
-            orderBy: se => se.Date, ascending: false);
+            se => se.Date, false);
     }
 
     public async Task<IEnumerable<SelfEducation>> GetPublicationsForModuleAsync(ModuleId moduleId)
     {
         var specification = SelfEducationSpecificationExtensions.GetPublicationsForModule(moduleId);
         return await GetBySpecificationAsync(specification,
-            orderBy: se => se.Date, ascending: false);
+            se => se.Date, false);
     }
 
     public async Task<IEnumerable<SelfEducation>> GetPeerReviewedPublicationsAsync(ModuleId moduleId)
@@ -211,7 +227,7 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
     {
         var specification = SelfEducationSpecificationExtensions.GetSelfEducationForModule(moduleId);
         return await GetPagedAsync(specification, pageNumber, pageSize, 
-            orderBy: se => se.Date, ascending: false);
+            se => se.Date, false);
     }
 
     // Private helper methods

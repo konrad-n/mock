@@ -22,7 +22,7 @@ internal sealed class RefactoredSqlAdditionalSelfEducationDaysRepository : BaseR
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<AdditionalSelfEducationDays?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public override async Task<AdditionalSelfEducationDays?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var specification = new AdditionalSelfEducationDaysByIdSpecification(id);
         return await GetSingleBySpecificationAsync(specification, cancellationToken);
@@ -32,9 +32,9 @@ internal sealed class RefactoredSqlAdditionalSelfEducationDaysRepository : BaseR
     {
         var specification = AdditionalSelfEducationDaysSpecificationExtensions.GetDaysForModule(new ModuleId(moduleId));
         var result = await GetBySpecificationAsync(specification, 
-            orderBy: d => d.StartDate, 
-            ascending: true, 
-            cancellationToken: cancellationToken);
+            d => d.StartDate, 
+            true, 
+            cancellationToken);
         return result.ToList();
     }
 
@@ -42,9 +42,9 @@ internal sealed class RefactoredSqlAdditionalSelfEducationDaysRepository : BaseR
     {
         var specification = AdditionalSelfEducationDaysSpecificationExtensions.GetDaysForInternship(new InternshipId(internshipId));
         var result = await GetBySpecificationAsync(specification,
-            orderBy: d => d.StartDate,
-            ascending: true,
-            cancellationToken: cancellationToken);
+            d => d.StartDate,
+            true,
+            cancellationToken);
         return result.ToList();
     }
 
@@ -52,18 +52,21 @@ internal sealed class RefactoredSqlAdditionalSelfEducationDaysRepository : BaseR
     {
         var specification = new AdditionalSelfEducationDaysInYearSpecification(year);
         var result = await GetBySpecificationAsync(specification,
-            orderBy: d => d.StartDate,
-            ascending: true,
-            cancellationToken: cancellationToken);
+            d => d.StartDate,
+            true,
+            cancellationToken);
         return result.ToList();
     }
 
     public async Task<int> GetTotalDaysInYearAsync(int moduleId, int year, CancellationToken cancellationToken = default)
     {
-        var specification = AdditionalSelfEducationDaysSpecificationExtensions.GetDaysInYear(new ModuleId(moduleId), year)
+        // GetDaysInYear already returns the specification with year filter
+        // We need to combine it with approved filter
+        var specification = new AdditionalSelfEducationDaysByModuleSpecification(new ModuleId(moduleId))
+            .And(new AdditionalSelfEducationDaysInYearSpecification(year))
             .And(new ApprovedAdditionalSelfEducationDaysSpecification());
             
-        var educationDays = await GetBySpecificationAsync(specification, cancellationToken: cancellationToken);
+        var educationDays = await GetBySpecificationAsync(specification, cancellationToken);
 
         // Calculate total days, accounting for events that span multiple years
         var totalDays = 0;
@@ -83,7 +86,7 @@ internal sealed class RefactoredSqlAdditionalSelfEducationDaysRepository : BaseR
 
     public async Task AddAsync(AdditionalSelfEducationDays additionalSelfEducationDays, CancellationToken cancellationToken = default)
     {
-        await AddAsync(additionalSelfEducationDays, cancellationToken);
+        await base.AddAsync(additionalSelfEducationDays, cancellationToken);
         // Note: SaveChangesAsync should be called by Unit of Work, not here
         // But the interface doesn't return Task, so we need to save here for backward compatibility
         await _unitOfWork.SaveChangesAsync(cancellationToken);

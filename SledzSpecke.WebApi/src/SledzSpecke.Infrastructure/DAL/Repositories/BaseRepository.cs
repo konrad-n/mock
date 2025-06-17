@@ -35,6 +35,21 @@ internal abstract class BaseRepository<TEntity> : IGenericRepository<TEntity> wh
             .ToListAsync(cancellationToken);
     }
 
+    public virtual async Task<IEnumerable<TEntity>> GetBySpecificationAsync<TKey>(
+        ISpecification<TEntity> specification,
+        Expression<Func<TEntity, TKey>> orderBy,
+        bool ascending = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.Where(specification.ToExpression());
+        
+        query = ascending
+            ? query.OrderBy(orderBy)
+            : query.OrderByDescending(orderBy);
+            
+        return await query.ToListAsync(cancellationToken);
+    }
+
     public virtual async Task<TEntity?> GetSingleBySpecificationAsync(
         ISpecification<TEntity> specification,
         CancellationToken cancellationToken = default)

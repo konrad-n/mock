@@ -33,34 +33,38 @@ internal sealed class RefactoredSqlRecognitionRepository : BaseRepository<Recogn
     {
         var specification = new RecognitionByUserSpecification(userId);
         return await GetBySpecificationAsync(specification, 
-            orderBy: r => r.CreatedAt, ascending: false);
+            r => r.CreatedAt, false);
     }
 
     public async Task<IEnumerable<Recognition>> GetBySpecializationIdAsync(SpecializationId specializationId)
     {
         var specification = new RecognitionBySpecializationSpecification(specializationId);
         return await GetBySpecificationAsync(specification,
-            orderBy: r => r.CreatedAt, ascending: false);
+            r => r.CreatedAt, false);
     }
 
     public async Task<IEnumerable<Recognition>> GetByUserAndSpecializationAsync(UserId userId, SpecializationId specializationId)
     {
         var specification = RecognitionSpecificationExtensions.GetRecognitionsForUserAndSpecialization(userId, specializationId);
         return await GetBySpecificationAsync(specification,
-            orderBy: r => r.CreatedAt, ascending: false);
+            r => r.CreatedAt, false);
     }
 
     public async Task<IEnumerable<Recognition>> GetApprovedRecognitionsAsync(UserId userId, SpecializationId specializationId)
     {
-        var specification = RecognitionSpecificationExtensions.GetRecognitionsForUserAndSpecialization(userId, specializationId)
+        // Reconstruct the specification to use And() properly
+        var specification = new RecognitionByUserSpecification(userId)
+            .And(new RecognitionBySpecializationSpecification(specializationId))
             .And(new ApprovedRecognitionSpecification());
         return await GetBySpecificationAsync(specification,
-            orderBy: r => r.ApprovedAt ?? r.CreatedAt, ascending: false);
+            r => r.ApprovedAt ?? r.CreatedAt, false);
     }
 
     public async Task<int> GetTotalReductionDaysAsync(UserId userId, SpecializationId specializationId)
     {
-        var specification = RecognitionSpecificationExtensions.GetRecognitionsForUserAndSpecialization(userId, specializationId)
+        // Reconstruct the specification to use And() properly
+        var specification = new RecognitionByUserSpecification(userId)
+            .And(new RecognitionBySpecializationSpecification(specializationId))
             .And(new ApprovedRecognitionSpecification());
         var recognitions = await GetBySpecificationAsync(specification);
         
@@ -72,7 +76,7 @@ internal sealed class RefactoredSqlRecognitionRepository : BaseRepository<Recogn
     {
         var specification = new RecognitionByTypeSpecification(type);
         return await GetBySpecificationAsync(specification,
-            orderBy: r => r.CreatedAt, ascending: false);
+            r => r.CreatedAt, false);
     }
 
     public async Task AddAsync(Recognition recognition)
@@ -113,14 +117,14 @@ internal sealed class RefactoredSqlRecognitionRepository : BaseRepository<Recogn
     {
         var specification = RecognitionSpecificationExtensions.GetPendingRecognitionsForUser(userId);
         return await GetBySpecificationAsync(specification,
-            orderBy: r => r.CreatedAt, ascending: false);
+            r => r.CreatedAt, false);
     }
 
     public async Task<IEnumerable<Recognition>> GetRecognitionsWithReductionAsync(UserId userId)
     {
         var specification = RecognitionSpecificationExtensions.GetApprovedRecognitionsWithReduction(userId);
         return await GetBySpecificationAsync(specification,
-            orderBy: r => r.DaysReduction, ascending: false);
+            r => r.DaysReduction, false);
     }
 
     public async Task<bool> HasOverlappingRecognitionsAsync(UserId userId, DateTime startDate, DateTime endDate, RecognitionId? excludeId = null)
@@ -154,7 +158,7 @@ internal sealed class RefactoredSqlRecognitionRepository : BaseRepository<Recogn
     {
         var specification = new RecognitionByUserSpecification(userId);
         return await GetPagedAsync(specification, pageNumber, pageSize, 
-            orderBy: r => r.CreatedAt, ascending: false);
+            r => r.CreatedAt, false);
     }
 
     public async Task<IEnumerable<Recognition>> GetRecognitionsRequiringDocumentAsync()
