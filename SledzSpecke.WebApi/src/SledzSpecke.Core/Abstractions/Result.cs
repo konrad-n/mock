@@ -40,8 +40,8 @@ public class Result<T> : Result
         ? _value!
         : throw new InvalidOperationException("Cannot access value of a failed result");
 
-    public static new Result<T> Success(T value) => new(value, true, string.Empty);
-    public static new Result<T> Failure(string error, string? errorCode = null) => new(default, false, error, errorCode);
+    public static Result<T> Success(T value) => new(value, true, string.Empty);
+    public static Result<T> Failure(string error, string? errorCode = null) => new(default, false, error, errorCode);
 
     public static implicit operator Result<T>(T value) => Success(value);
 }

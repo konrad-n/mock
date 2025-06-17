@@ -103,7 +103,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         return Result<Duration>.Success(Duration.FromMinutes(totalMinutes));
     }
 
-    public async Task<Result<bool>> CheckOverlappingShiftsAsync(
+    public Result<bool> CheckOverlappingShifts(
         MedicalShift newShift,
         IEnumerable<MedicalShift> existingShifts)
     {

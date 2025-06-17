@@ -20,7 +20,7 @@ public class EntityByIdSpecification<TEntity, TId> : Specification<TEntity>
 
     public override Expression<Func<TEntity, bool>> ToExpression()
     {
-        return entity => _idSelector(entity) != null && _idSelector(entity).Equals(_id);
+        return entity => entity != null && _idSelector(entity) != null && _idSelector(entity).Equals(_id);
     }
 }
 

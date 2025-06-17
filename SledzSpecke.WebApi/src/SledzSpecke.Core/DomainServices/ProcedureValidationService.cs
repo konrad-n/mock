@@ -74,7 +74,7 @@ public class ProcedureValidationService : IProcedureValidationService
         _policyFactory = policyFactory;
     }
 
-    public async Task<Result> ValidateProcedureAsync(
+    public Result ValidateProcedure(
         ProcedureBase procedure,
         UserId userId,
         Specialization specialization,
@@ -113,7 +113,7 @@ public class ProcedureValidationService : IProcedureValidationService
         return Result.Success();
     }
 
-    public async Task<Result<ProcedureProgress>> CalculateProcedureProgressAsync(
+    public Result<ProcedureProgress> CalculateProcedureProgress(
         ProcedureRequirement requirement,
         IEnumerable<ProcedureBase> completedProcedures)
     {

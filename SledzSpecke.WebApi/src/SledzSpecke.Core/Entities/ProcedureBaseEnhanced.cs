@@ -77,7 +77,11 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
         string code,
         string location,
         ProcedureStatus status,
-        SmkVersion smkVersion)
+        SmkVersion smkVersion,
+        string? operatorCode = null,
+        string? assistantData = null,
+        string? procedureGroup = null,
+        string? additionalFields = null)
     {
         // Guard clauses
         if (string.IsNullOrWhiteSpace(code))
@@ -100,6 +104,10 @@ public abstract class ProcedureBaseEnhanced : AggregateRoot
         _createdAt = DateTime.UtcNow;
         _updatedAt = DateTime.UtcNow;
         _smkVersion = smkVersion;
+        _operatorCode = operatorCode;
+        _assistantData = assistantData;
+        _procedureGroup = procedureGroup;
+        _additionalFields = additionalFields;
 
         // TODO: Raise domain event when ProcedureCreatedEvent is fixed
         // AddDomainEvent(new ProcedureCreatedEvent(...));
