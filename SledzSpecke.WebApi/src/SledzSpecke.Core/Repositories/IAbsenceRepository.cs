@@ -12,6 +12,8 @@ public interface IAbsenceRepository
     Task<IEnumerable<Absence>> GetActiveAbsencesAsync(UserId userId);
     Task<IEnumerable<Absence>> GetOverlappingAbsencesAsync(UserId userId, DateTime startDate, DateTime endDate);
     Task<bool> HasOverlappingAbsencesAsync(UserId userId, DateTime startDate, DateTime endDate, AbsenceId? excludeId = null);
+    Task<IEnumerable<Absence>> GetByInternshipIdAsync(InternshipId internshipId);
+    Task<IEnumerable<Absence>> GetByDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate);
     Task AddAsync(Absence absence);
     Task UpdateAsync(Absence absence);
     Task DeleteAsync(AbsenceId id);

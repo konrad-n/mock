@@ -72,6 +72,7 @@ public class CourseRequirement
     public bool IsMandatory { get; set; }
     public CourseType Type { get; set; }
     public string Description { get; set; } = string.Empty;
+    public ModuleType? ModuleType { get; set; } // For New SMK: Basic or Specialistic module
 }
 
 public class CourseProgress
@@ -123,6 +124,9 @@ public enum CourseType
     Workshop,
     Seminar,
     Conference,
-    OnlineTraining
+    OnlineTraining,
+    Specialization,
+    Improvement,
+    Certification
 }
 

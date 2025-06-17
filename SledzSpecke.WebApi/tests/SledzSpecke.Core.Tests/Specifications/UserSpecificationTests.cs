@@ -2,6 +2,7 @@ using FluentAssertions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Specifications;
 using System;
 using Xunit;
 
@@ -160,7 +161,7 @@ public class UserSpecificationTests
             null, // SecondName
             new LastName(lastName),
             new Pesel("44051401458"), // Valid PESEL with correct checksum
-            new PwzNumber("5425127"), // Valid PWZ with correct checksum
+            new PwzNumber(PwzNumber.GenerateValidPwz(_testUserId)), // Valid PWZ with correct checksum
             new PhoneNumber("+48123456789"), // Valid phone number
             new DateTime(1944, 5, 14), // Date of birth matching PESEL 44051401458
             new Address("Test Street", "1", null, "00-000", "Warsaw", "Mazowieckie", "Poland"),
@@ -180,7 +181,7 @@ public class UserSpecificationTests
             null,
             new LastName("User"),
             new Pesel("44051401458"),
-            new PwzNumber("5425127"), // Valid PWZ with correct checksum
+            new PwzNumber(PwzNumber.GenerateValidPwz(_testUserId)), // Valid PWZ with correct checksum
             new PhoneNumber("+48123456789"),
             new DateTime(1944, 5, 14),
             new Address("Test Street", "1", null, "00-000", city, province, "Poland"),

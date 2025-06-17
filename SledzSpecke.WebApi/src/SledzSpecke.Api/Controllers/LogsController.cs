@@ -29,12 +29,10 @@ public class LogsController : ControllerBase
         [FromQuery] string? level = null,
         [FromQuery] string? correlationId = null)
     {
-        // Temporarily enabled in production - REMOVE BEFORE CUSTOMER RELEASE
-        // TODO: Remove this comment and uncomment the check below before going live
-        // if (!_environment.IsDevelopment())
-        // {
-        //     return Forbid("Logs are only available in development environment");
-        // }
+        if (!_environment.IsDevelopment())
+        {
+            return Forbid("Logs are only available in development environment");
+        }
         
         var logPath = "/var/log/sledzspecke";
         var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
@@ -101,12 +99,10 @@ public class LogsController : ControllerBase
     [HttpGet("errors")]
     public async Task<IActionResult> GetErrorLogs([FromQuery] int hours = 24)
     {
-        // Temporarily enabled in production - REMOVE BEFORE CUSTOMER RELEASE
-        // TODO: Remove this comment and uncomment the check below before going live
-        // if (!_environment.IsDevelopment())
-        // {
-        //     return Forbid("Logs are only available in development environment");
-        // }
+        if (!_environment.IsDevelopment())
+        {
+            return Forbid("Logs are only available in development environment");
+        }
         
         var errors = new List<object>();
         var logPath = "/var/log/sledzspecke";

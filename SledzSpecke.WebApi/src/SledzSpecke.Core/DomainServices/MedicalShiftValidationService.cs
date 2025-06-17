@@ -50,7 +50,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         }
 
         // Check for overlapping shifts
-        var overlapResult = CheckOverlappingShifts(shift, existingShifts);
+        var overlapResult = await CheckOverlappingShiftsAsync(shift, existingShifts);
         if (!overlapResult.IsSuccess || overlapResult.Value)
         {
             return Result.Failure("Dyżur nakłada się z istniejącym dyżurem");
@@ -103,7 +103,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         return Result<Duration>.Success(Duration.FromMinutes(totalMinutes));
     }
 
-    public Result<bool> CheckOverlappingShifts(
+    public async Task<Result<bool>> CheckOverlappingShiftsAsync(
         MedicalShift newShift,
         IEnumerable<MedicalShift> existingShifts)
     {
@@ -119,11 +119,11 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
             // Check for overlap
             if (newShift.Date < existingShiftEnd && newShiftEnd > existingShift.Date)
             {
-                return Result<bool>.Success(true); // Overlap found
+                return await Task.FromResult(Result<bool>.Success(true)); // Overlap found
             }
         }
 
-        return Result<bool>.Success(false); // No overlap
+        return await Task.FromResult(Result<bool>.Success(false)); // No overlap
     }
 
     public async Task<Result<MedicalShiftValidationSummary>> GetValidationSummaryAsync(

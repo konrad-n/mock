@@ -113,6 +113,22 @@ internal sealed class RefactoredSqlAbsenceRepository : BaseRepository<Absence>, 
         return await GetBySpecificationAsync(specification);
     }
 
+    public async Task<IEnumerable<Absence>> GetByDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)
+    {
+        // This method satisfies the IAbsenceRepository interface requirement
+        return await GetAbsencesInDateRangeAsync(userId, startDate, endDate);
+    }
+
+    public async Task<IEnumerable<Absence>> GetByInternshipIdAsync(InternshipId internshipId)
+    {
+        // Since absences are not directly linked to internships, we need to:
+        // 1. Get the internship details to find the user and date range
+        // 2. Then get absences for that user within the internship period
+        // This requires InternshipRepository access, which should be done at service level
+        // For now, return empty collection - the actual logic should be in the service layer
+        return Enumerable.Empty<Absence>();
+    }
+
     public async Task<IEnumerable<Absence>> GetAbsencesByTypeAsync(UserId userId, AbsenceType type)
     {
         var specification = new AbsenceByUserSpecification(userId)

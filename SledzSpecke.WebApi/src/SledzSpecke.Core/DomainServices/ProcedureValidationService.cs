@@ -74,7 +74,7 @@ public class ProcedureValidationService : IProcedureValidationService
         _policyFactory = policyFactory;
     }
 
-    public Result ValidateProcedure(
+    public async Task<Result> ValidateProcedureAsync(
         ProcedureBase procedure,
         UserId userId,
         Specialization specialization,
@@ -110,10 +110,10 @@ public class ProcedureValidationService : IProcedureValidationService
             return Result.Failure("Procedura musi być przypisana do stażu");
         }
 
-        return Result.Success();
+        return await Task.FromResult(Result.Success());
     }
 
-    public Result<ProcedureProgress> CalculateProcedureProgress(
+    public async Task<Result<ProcedureProgress>> CalculateProcedureProgressAsync(
         ProcedureRequirement requirement,
         IEnumerable<ProcedureBase> completedProcedures)
     {
@@ -176,14 +176,14 @@ public class ProcedureValidationService : IProcedureValidationService
             progress.ValidationMessages.Add($"Brakuje {requirement.MinimumCountB - progress.CompletedCountB} procedur jako asystent (B)");
         }
 
-        return Result<ProcedureProgress>.Success(progress);
+        return await Task.FromResult(Result<ProcedureProgress>.Success(progress));
     }
 
     public async Task<Result<bool>> IsProcedureRequirementMetAsync(
         ProcedureRequirement requirement,
         IEnumerable<ProcedureBase> procedures)
     {
-        var progressResult = CalculateProcedureProgress(requirement, procedures);
+        var progressResult = await CalculateProcedureProgressAsync(requirement, procedures);
         return progressResult.IsSuccess 
             ? Result<bool>.Success(progressResult.Value.IsRequirementMet)
             : Result<bool>.Failure(progressResult.Error);
@@ -215,7 +215,7 @@ public class ProcedureValidationService : IProcedureValidationService
         // Calculate progress for each requirement
         foreach (var requirement in requirements)
         {
-            var progressResult = CalculateProcedureProgress(requirement, userProcedures);
+            var progressResult = await CalculateProcedureProgressAsync(requirement, userProcedures);
             if (progressResult.IsSuccess)
             {
                 summary.RequirementProgress.Add(progressResult.Value);

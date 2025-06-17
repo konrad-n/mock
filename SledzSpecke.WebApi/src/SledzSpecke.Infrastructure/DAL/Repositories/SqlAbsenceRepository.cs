@@ -82,4 +82,22 @@ internal sealed class SqlAbsenceRepository : IAbsenceRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<IEnumerable<Absence>> GetByInternshipIdAsync(InternshipId internshipId)
+    {
+        // Since absences are not directly linked to internships, return empty collection
+        // The actual logic should be implemented at the service level
+        return Enumerable.Empty<Absence>();
+    }
+
+    public async Task<IEnumerable<Absence>> GetByDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)
+    {
+        return await _absences
+            .Where(a => a.UserId == userId && 
+                       ((a.StartDate >= startDate && a.StartDate <= endDate) ||
+                        (a.EndDate >= startDate && a.EndDate <= endDate) ||
+                        (a.StartDate <= startDate && a.EndDate >= endDate)))
+            .OrderByDescending(a => a.StartDate)
+            .ToListAsync();
+    }
 }

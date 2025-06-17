@@ -6,13 +6,13 @@ namespace SledzSpecke.Core.DomainServices;
 
 public interface IProcedureValidationService
 {
-    Result ValidateProcedure(
+    Task<Result> ValidateProcedureAsync(
         ProcedureBase procedure,
         UserId userId,
         Specialization specialization,
         Module? currentModule = null);
     
-    Result<ProcedureProgress> CalculateProcedureProgress(
+    Task<Result<ProcedureProgress>> CalculateProcedureProgressAsync(
         ProcedureRequirement requirement,
         IEnumerable<ProcedureBase> completedProcedures);
     

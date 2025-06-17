@@ -20,6 +20,12 @@ internal sealed class SqlModuleRepository : IModuleRepository
             .FirstOrDefaultAsync(m => m.Id == id);
     }
 
+    public async Task<Module?> GetByIdAsync(int id)
+    {
+        var moduleId = new ModuleId(id);
+        return await GetByIdAsync(moduleId);
+    }
+
     public async Task<IEnumerable<Module>> GetBySpecializationIdAsync(SpecializationId specializationId)
     {
         return await _context.Modules
@@ -53,5 +59,14 @@ internal sealed class SqlModuleRepository : IModuleRepository
             _context.Modules.Remove(module);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<Module?> GetActiveModuleForSpecializationAsync(int specializationId)
+    {
+        var specId = new SpecializationId(specializationId);
+        var modules = await GetBySpecializationIdAsync(specId);
+        
+        // Find the module that is in progress (not completed)
+        return modules.FirstOrDefault(m => !m.IsCompleted());
     }
 }

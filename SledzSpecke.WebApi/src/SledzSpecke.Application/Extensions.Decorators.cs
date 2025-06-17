@@ -25,6 +25,11 @@ public static partial class ApplicationExtensions
         services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationCommandHandlerDecorator<,>));
         services.Decorate(typeof(ICommandHandler<,>), typeof(TransactionCommandHandlerDecorator<,>));
 
+        // Decorate IQueryHandler<TQuery, TResult>
+        // services.Decorate(typeof(IQueryHandler<,>), typeof(LoggingQueryHandlerDecorator<,>)); // TODO: Implement LoggingQueryHandlerDecorator
+        services.Decorate(typeof(IQueryHandler<,>), typeof(PerformanceQueryHandlerDecorator<,>));
+        services.Decorate(typeof(IQueryHandler<,>), typeof(CachingQueryHandlerDecorator<,>));
+
         // If you have IResultCommandHandler decorators, add them here too
         // services.Decorate(typeof(IResultCommandHandler<>), typeof(LoggingResultCommandHandlerDecorator<>));
         // services.Decorate(typeof(IResultCommandHandler<,>), typeof(LoggingResultCommandHandlerDecorator<,>));

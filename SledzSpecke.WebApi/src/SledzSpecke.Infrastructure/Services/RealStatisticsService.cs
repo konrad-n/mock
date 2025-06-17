@@ -59,7 +59,7 @@ public class RealStatisticsService : IStatisticsService
             var monthStart = new DateTime(year, month, 1);
             var monthEnd = monthStart.AddMonths(1).AddDays(-1);
             
-            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId, cancellationToken);
+            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId.Value);
             var monthlyShifts = shifts
                 .Where(s => s.Date >= monthStart && s.Date <= monthEnd)
                 .ToList();
@@ -71,17 +71,17 @@ public class RealStatisticsService : IStatisticsService
                 Year = year,
                 Month = month,
                 TotalHours = monthlyShifts.Sum(s => s.Duration.Hours),
-                ApprovedHours = monthlyShifts.Where(s => s.Status == MedicalShiftStatus.Approved).Sum(s => s.Duration.Hours),
-                PendingHours = monthlyShifts.Where(s => s.Status == MedicalShiftStatus.Pending).Sum(s => s.Duration.Hours),
-                RejectedHours = monthlyShifts.Where(s => s.Status == MedicalShiftStatus.Rejected).Sum(s => s.Duration.Hours),
+                ApprovedHours = monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours),
+                PendingHours = monthlyShifts.Where(s => !s.IsApproved && s.SyncStatus != SyncStatus.SyncError).Sum(s => s.Duration.Hours),
+                RejectedHours = monthlyShifts.Where(s => s.SyncStatus == SyncStatus.SyncError || s.SyncStatus == SyncStatus.SyncFailed).Sum(s => s.Duration.Hours),
                 ShiftCount = monthlyShifts.Count,
                 AverageHoursPerShift = monthlyShifts.Any() ? (decimal)monthlyShifts.Average(s => s.Duration.Hours) : 0,
                 WeekendShifts = monthlyShifts.Count(s => s.Date.DayOfWeek == DayOfWeek.Saturday || s.Date.DayOfWeek == DayOfWeek.Sunday),
-                NightShifts = monthlyShifts.Count(s => s.Duration.IsNightShift),
+                NightShifts = monthlyShifts.Count(s => IsNightShift(s)),
                 LastUpdated = DateTime.UtcNow,
                 RequiredHours = MONTHLY_HOURS_MINIMUM,
-                MeetsMonthlyMinimum = monthlyShifts.Where(s => s.Status == MedicalShiftStatus.Approved).Sum(s => s.Duration.Hours) >= MONTHLY_HOURS_MINIMUM,
-                HoursDeficit = Math.Max(0, MONTHLY_HOURS_MINIMUM - monthlyShifts.Where(s => s.Status == MedicalShiftStatus.Approved).Sum(s => s.Duration.Hours)),
+                MeetsMonthlyMinimum = monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours) >= MONTHLY_HOURS_MINIMUM,
+                HoursDeficit = Math.Max(0, MONTHLY_HOURS_MINIMUM - monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours)),
                 WeeklyBreakdown = CalculateWeeklyBreakdown(monthlyShifts)
             };
             
@@ -103,56 +103,52 @@ public class RealStatisticsService : IStatisticsService
         }
     }
 
-    public async Task UpdateApprovedHoursStatisticsAsync(
+
+    public async Task UpdateWeeklyStatisticsAsync(
         InternshipId internshipId, 
-        DateTime shiftDate, 
+        DateTime weekStartDate, 
         CancellationToken cancellationToken = default)
     {
         try
         {
-            // Get internship details
-            var internship = await _internshipRepository.GetByIdAsync(internshipId, cancellationToken);
-            if (internship == null) return;
+            var weekEndDate = weekStartDate.AddDays(6);
+            var cacheKey = $"weekly_stats:{internshipId.Value}:{weekStartDate:yyyy-MM-dd}";
             
-            // Calculate total approved hours from start to current date
-            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId, cancellationToken);
-            var approvedShifts = shifts
-                .Where(s => s.Status == MedicalShiftStatus.Approved && s.Date <= shiftDate)
+            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId.Value);
+            var weeklyShifts = shifts
+                .Where(s => s.Date >= weekStartDate && s.Date <= weekEndDate)
                 .ToList();
             
-            var totalApprovedHours = approvedShifts.Sum(s => s.Duration.Hours);
-            var monthsElapsed = CalculateMonthsElapsed(internship.StartDate, shiftDate);
-            var expectedHours = monthsElapsed * MONTHLY_HOURS_MINIMUM;
-            var hoursDeficit = Math.Max(0, expectedHours - totalApprovedHours);
+            var totalHours = weeklyShifts.Sum(s => s.Duration.Hours);
+            var approvedHours = weeklyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours);
             
-            // Update internship statistics
-            var cacheKey = $"approved_hours_stats:{internshipId.Value}";
-            var stats = new
+            var statistics = new WeeklyStatistics
             {
-                InternshipId = internshipId,
-                TotalApprovedHours = totalApprovedHours,
-                ExpectedHours = expectedHours,
-                HoursDeficit = hoursDeficit,
-                IsOnTrack = hoursDeficit == 0,
-                AverageHoursPerMonth = monthsElapsed > 0 ? totalApprovedHours / monthsElapsed : 0,
-                LastUpdated = DateTime.UtcNow
+                WeekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
+                    weekStartDate, CalendarWeekRule.FirstDay, DayOfWeek.Monday),
+                Hours = totalHours,
+                ExceedsWeeklyLimit = totalHours > WEEKLY_HOURS_MAXIMUM,
+                MaxAllowedHours = WEEKLY_HOURS_MAXIMUM
             };
             
-            await _cacheService.SetAsync(cacheKey, stats, TimeSpan.FromHours(1), cancellationToken);
+            await _cacheService.SetAsync(cacheKey, statistics, TimeSpan.FromDays(1), cancellationToken);
             
-            _logger.LogInformation(
-                "Updated approved hours statistics for InternshipId={InternshipId}. " +
-                "Total approved: {TotalHours}, Expected: {ExpectedHours}, Deficit: {Deficit}",
-                internshipId.Value, totalApprovedHours, expectedHours, hoursDeficit);
+            if (statistics.ExceedsWeeklyLimit)
+            {
+                _logger.LogWarning(
+                    "Weekly hour limit exceeded for InternshipId={InternshipId}, Week={Week}. " +
+                    "Total hours: {TotalHours}, Limit: {Limit}",
+                    internshipId.Value, statistics.WeekNumber, totalHours, WEEKLY_HOURS_MAXIMUM);
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating approved hours statistics for InternshipId={InternshipId}", internshipId.Value);
+            _logger.LogError(ex, "Error updating weekly statistics for InternshipId={InternshipId}", internshipId.Value);
             throw;
         }
     }
 
-    public async Task TrackDuplicateProcedureAsync(
+    public async Task UpdateWeeklyStatisticsAsync(
         InternshipId internshipId, 
         string procedureCode, 
         DateTime date, 
@@ -160,133 +156,23 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var cacheKey = $"duplicate_procedures:{internshipId.Value}:{date:yyyy-MM-dd}";
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var duplicates = procedures
+                .Where(p => p.Code == procedureCode && p.Date.Date == date.Date)
+                .ToList();
             
-            // Get existing duplicates for the day
-            var duplicates = await _cacheService.GetAsync<List<string>>(cacheKey, cancellationToken) ?? new List<string>();
-            
-            if (!duplicates.Contains(procedureCode))
+            if (duplicates.Count() > 3)
             {
-                duplicates.Add(procedureCode);
-                await _cacheService.SetAsync(cacheKey, duplicates, TimeSpan.FromDays(7), cancellationToken);
+                await NotifyDuplicateProcedureAsync(internshipId, procedureCode, date, cancellationToken);
                 
                 _logger.LogWarning(
-                    "Duplicate procedure tracked: InternshipId={InternshipId}, Code={Code}, Date={Date}",
-                    internshipId.Value, procedureCode, date);
-                
-                // Send notification if this is a critical procedure
-                await NotifyDuplicateProcedureAsync(internshipId, procedureCode, date, cancellationToken);
+                    "Duplicate procedures detected: InternshipId={InternshipId}, Code={Code}, Date={Date}, Count={Count}",
+                    internshipId.Value, procedureCode, date.Date, duplicates.Count);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error tracking duplicate procedure for InternshipId={InternshipId}", internshipId.Value);
-            throw;
-        }
-    }
-
-    public async Task UpdateDailyProcedureCountAsync(
-        InternshipId internshipId, 
-        DateTime date, 
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId, cancellationToken);
-            var dailyProcedures = procedures
-                .Where(p => p.Date.Date == date.Date)
-                .ToList();
-            
-            var statistics = new DailyProcedureStatistics
-            {
-                InternshipId = internshipId,
-                Date = date.Date,
-                TotalProcedures = dailyProcedures.Count,
-                UniqueProcedureTypes = dailyProcedures.Select(p => p.Code.Value).Distinct().Count(),
-                ProcedureCounts = dailyProcedures
-                    .GroupBy(p => p.Code.Value)
-                    .ToDictionary(g => g.Key, g => g.Count()),
-                Locations = dailyProcedures.Select(p => p.Location.Value).Distinct().ToList(),
-                HasDuplicates = dailyProcedures
-                    .GroupBy(p => p.Code.Value)
-                    .Any(g => g.Count() > 1),
-                DuplicatedProcedures = dailyProcedures
-                    .GroupBy(p => p.Code.Value)
-                    .Where(g => g.Count() > 1)
-                    .Select(g => g.Key)
-                    .ToList()
-            };
-            
-            var cacheKey = $"daily_procedure_stats:{internshipId.Value}:{date:yyyy-MM-dd}";
-            await _cacheService.SetAsync(cacheKey, statistics, TimeSpan.FromDays(30), cancellationToken);
-            
-            _logger.LogInformation(
-                "Updated daily procedure count for InternshipId={InternshipId}, Date={Date}. " +
-                "Total: {Total}, Unique types: {UniqueTypes}, Has duplicates: {HasDuplicates}",
-                internshipId.Value, date, statistics.TotalProcedures, statistics.UniqueProcedureTypes, statistics.HasDuplicates);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating daily procedure count for InternshipId={InternshipId}", internshipId.Value);
-            throw;
-        }
-    }
-
-    public async Task TrackNewProcedureTypeAsync(
-        InternshipId internshipId, 
-        string procedureCode, 
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var cacheKey = $"new_procedure_types:{internshipId.Value}";
-            var newTypes = await _cacheService.GetAsync<HashSet<string>>(cacheKey, cancellationToken) ?? new HashSet<string>();
-            
-            if (newTypes.Add(procedureCode))
-            {
-                await _cacheService.SetAsync(cacheKey, newTypes, TimeSpan.FromDays(365), cancellationToken);
-                
-                // Calculate achievement metrics
-                var totalUniqueTypes = newTypes.Count;
-                await UpdateAchievementMetricsAsync(internshipId, "unique_procedures", totalUniqueTypes, cancellationToken);
-                
-                _logger.LogInformation(
-                    "New procedure type tracked: InternshipId={InternshipId}, Code={Code}. Total unique types: {Total}",
-                    internshipId.Value, procedureCode, totalUniqueTypes);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error tracking new procedure type for InternshipId={InternshipId}", internshipId.Value);
-            throw;
-        }
-    }
-
-    public async Task UpdateLocationStatisticsAsync(
-        string location, 
-        string procedureCode, 
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var cacheKey = $"location_stats:{location}";
-            var stats = await _cacheService.GetAsync<Dictionary<string, int>>(cacheKey, cancellationToken) 
-                ?? new Dictionary<string, int>();
-            
-            if (stats.ContainsKey(procedureCode))
-                stats[procedureCode]++;
-            else
-                stats[procedureCode] = 1;
-            
-            await _cacheService.SetAsync(cacheKey, stats, TimeSpan.FromDays(30), cancellationToken);
-            
-            _logger.LogDebug(
-                "Updated location statistics: Location={Location}, Code={Code}, Count={Count}",
-                location, procedureCode, stats[procedureCode]);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating location statistics for Location={Location}", location);
+            _logger.LogError(ex, "Error checking duplicate procedures for InternshipId={InternshipId}", internshipId.Value);
             throw;
         }
     }
@@ -299,19 +185,19 @@ public class RealStatisticsService : IStatisticsService
         try
         {
             // Analyze procedure patterns for learning insights
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId, cancellationToken);
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
             
             var procedurePatterns = new
             {
                 MostFrequentProcedures = procedures
-                    .GroupBy(p => p.Code.Value)
+                    .GroupBy(p => p.Code)
                     .OrderByDescending(g => g.Count())
                     .Take(10)
                     .Select(g => new { Code = g.Key, Count = g.Count() })
                     .ToList(),
                 
                 PreferredLocations = procedures
-                    .GroupBy(p => p.Location.Value)
+                    .GroupBy(p => p.Location)
                     .OrderByDescending(g => g.Count())
                     .Select(g => new { Location = g.Key, Count = g.Count() })
                     .ToList(),
@@ -398,16 +284,16 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var internship = await _internshipRepository.GetByIdAsync(internshipId, cancellationToken);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
             if (internship == null) return;
             
-            var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId, cancellationToken);
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId, cancellationToken);
-            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId, cancellationToken);
+            var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId);
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId.Value);
             
             var moduleProgressList = new List<ModuleProgressStatistics>();
             
-            foreach (var module in modules.Where(m => m.Year == internship.Year))
+            foreach (var module in modules)
             {
                 var moduleStats = await CalculateModuleProgressAsync(
                     internship, module, procedures.ToList(), shifts.ToList(), cancellationToken);
@@ -435,23 +321,164 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var internship = await _internshipRepository.GetByIdAsync(internshipId, cancellationToken);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
             if (internship == null) return;
             
             var yearStats = await CalculateYearProgressAsync(internship, cancellationToken);
             
-            var cacheKey = $"year_progress:{internshipId.Value}:{internship.Year}";
+            var cacheKey = $"year_progress:{internshipId.Value}:{internship.DaysCount}";
             await _cacheService.SetAsync(cacheKey, yearStats, TimeSpan.FromHours(4), cancellationToken);
             
             _logger.LogInformation(
-                "Updated year progress for InternshipId={InternshipId}, Year={Year}. " +
+                "Updated year progress for InternshipId={InternshipId}. " +
                 "Overall progress: {Progress}%, Meets requirements: {MeetsRequirements}",
-                internshipId.Value, internship.Year, 
+                internshipId.Value, 
                 yearStats.OverallProgressPercentage, yearStats.MeetsYearRequirements);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating year progress for InternshipId={InternshipId}", internshipId.Value);
+            throw;
+        }
+    }
+
+    public async Task UpdateApprovedHoursStatisticsAsync(
+        InternshipId internshipId,
+        DateTime shiftDate,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId.Value);
+            var approvedShifts = shifts.Where(s => s.IsApproved).ToList();
+            
+            var monthlyApproved = approvedShifts
+                .Where(s => s.Date.Year == shiftDate.Year && s.Date.Month == shiftDate.Month)
+                .Sum(s => s.Duration.Hours);
+                
+            var cacheKey = $"approved_hours:{internshipId.Value}:{shiftDate:yyyy-MM}";
+            await _cacheService.SetAsync(cacheKey, (object)monthlyApproved, TimeSpan.FromHours(2), cancellationToken);
+            
+            _logger.LogInformation(
+                "Updated approved hours for InternshipId={InternshipId}, Month={Month}. Hours: {Hours}",
+                internshipId.Value, shiftDate.ToString("yyyy-MM"), monthlyApproved);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating approved hours for InternshipId={InternshipId}", internshipId.Value);
+            throw;
+        }
+    }
+
+    public async Task TrackDuplicateProcedureAsync(
+        InternshipId internshipId,
+        string procedureCode,
+        DateTime date,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var duplicatesCount = procedures
+                .Count(p => p.Code == procedureCode && p.Date.Date == date.Date);
+                
+            if (duplicatesCount > 1)
+            {
+                var cacheKey = $"duplicate_procedures:{internshipId.Value}:{date:yyyy-MM-dd}";
+                var duplicates = await _cacheService.GetAsync<Dictionary<string, int>>(cacheKey, cancellationToken) 
+                    ?? new Dictionary<string, int>();
+                    
+                duplicates[procedureCode] = duplicatesCount;
+                await _cacheService.SetAsync(cacheKey, duplicates, TimeSpan.FromDays(7), cancellationToken);
+                
+                _logger.LogWarning(
+                    "Duplicate procedure tracked: InternshipId={InternshipId}, Code={Code}, Date={Date}, Count={Count}",
+                    internshipId.Value, procedureCode, date.Date, duplicatesCount);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error tracking duplicate procedure for InternshipId={InternshipId}", internshipId.Value);
+            throw;
+        }
+    }
+
+    public async Task UpdateDailyProcedureCountAsync(
+        InternshipId internshipId,
+        DateTime date,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var dailyCount = procedures.Count(p => p.Date.Date == date.Date);
+            
+            var cacheKey = $"daily_procedure_count:{internshipId.Value}:{date:yyyy-MM-dd}";
+            await _cacheService.SetAsync(cacheKey, (object)dailyCount, TimeSpan.FromDays(1), cancellationToken);
+            
+            _logger.LogDebug(
+                "Updated daily procedure count for InternshipId={InternshipId}, Date={Date}. Count: {Count}",
+                internshipId.Value, date.Date, dailyCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating daily procedure count for InternshipId={InternshipId}", internshipId.Value);
+            throw;
+        }
+    }
+
+    public async Task TrackNewProcedureTypeAsync(
+        InternshipId internshipId,
+        string procedureCode,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var cacheKey = $"procedure_types:{internshipId.Value}";
+            var procedureTypes = await _cacheService.GetAsync<HashSet<string>>(cacheKey, cancellationToken) 
+                ?? new HashSet<string>();
+                
+            if (procedureTypes.Add(procedureCode))
+            {
+                await _cacheService.SetAsync(cacheKey, procedureTypes, TimeSpan.FromDays(30), cancellationToken);
+                
+                _logger.LogInformation(
+                    "New procedure type tracked: InternshipId={InternshipId}, Code={Code}. Total types: {Count}",
+                    internshipId.Value, procedureCode, procedureTypes.Count);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error tracking new procedure type for InternshipId={InternshipId}", internshipId.Value);
+            throw;
+        }
+    }
+
+    public async Task UpdateLocationStatisticsAsync(
+        string location,
+        string procedureCode,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var cacheKey = $"location_stats:{location}";
+            var stats = await _cacheService.GetAsync<Dictionary<string, int>>(cacheKey, cancellationToken) 
+                ?? new Dictionary<string, int>();
+                
+            if (stats.ContainsKey(procedureCode))
+                stats[procedureCode]++;
+            else
+                stats[procedureCode] = 1;
+                
+            await _cacheService.SetAsync(cacheKey, stats, TimeSpan.FromDays(7), cancellationToken);
+            
+            _logger.LogDebug(
+                "Updated location statistics: Location={Location}, Code={Code}, Count={Count}",
+                location, procedureCode, stats[procedureCode]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating location statistics for Location={Location}", location);
             throw;
         }
     }
@@ -514,7 +541,7 @@ public class RealStatisticsService : IStatisticsService
         await Task.CompletedTask;
     }
     
-    private object CalculateCompletionTrends(IEnumerable<Procedure> procedures)
+    private object CalculateCompletionTrends(IEnumerable<ProcedureBase> procedures)
     {
         var procedureList = procedures.ToList();
         if (!procedureList.Any()) return new { };
@@ -527,7 +554,7 @@ public class RealStatisticsService : IStatisticsService
                 Year = g.Key.Year,
                 Month = g.Key.Month,
                 Count = g.Count(),
-                UniqueTypes = g.Select(p => p.Code.Value).Distinct().Count()
+                UniqueTypes = g.Select(p => p.Code).Distinct().Count()
             })
             .ToList();
         
@@ -560,39 +587,40 @@ public class RealStatisticsService : IStatisticsService
     private async Task<ModuleProgressStatistics> CalculateModuleProgressAsync(
         Internship internship,
         Module module,
-        List<Procedure> procedures,
+        List<ProcedureBase> procedures,
         List<MedicalShift> shifts,
         CancellationToken cancellationToken)
     {
-        var moduleStartDate = CalculateModuleStartDate(internship.StartDate, module);
-        var moduleEndDate = moduleStartDate.AddMonths(module.Duration);
+        var moduleStartDate = module.StartDate;
+        var moduleEndDate = module.EndDate;
         var now = DateTime.UtcNow;
         
         var moduleProcedures = procedures
-            .Where(p => p.ModuleId == module.Id && p.Date >= moduleStartDate)
+            .Where(p => p.ModuleId != null && p.ModuleId.Value == module.Id.Value && p.Date >= moduleStartDate)
             .ToList();
             
         var moduleShifts = shifts
             .Where(s => s.Date >= moduleStartDate && s.Date <= moduleEndDate)
             .ToList();
         
-        var requiredProcedures = 100; // This would come from module requirements
-        var requiredHours = module.Duration * MONTHLY_HOURS_MINIMUM;
+        var requiredProcedures = module.TotalProceduresA + module.TotalProceduresB;
+        var requiredHours = module.RequiredShiftHours;
         var completedHours = moduleShifts.Sum(s => s.Duration.Hours);
-        var approvedHours = moduleShifts.Where(s => s.Status == MedicalShiftStatus.Approved).Sum(s => s.Duration.Hours);
+        var approvedHours = moduleShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours);
         
         var elapsedMonths = CalculateMonthsElapsed(moduleStartDate, now);
-        var progressPercentage = module.Duration > 0 ? (decimal)elapsedMonths / module.Duration * 100 : 0;
+        var totalMonths = CalculateMonthsElapsed(moduleStartDate, moduleEndDate);
+        var progressPercentage = totalMonths > 0 ? (decimal)elapsedMonths / totalMonths * 100 : 0;
         
         return new ModuleProgressStatistics
         {
-            InternshipId = internship.Id,
+            InternshipId = internship.InternshipId,
             ModuleId = module.Id,
-            ModuleName = module.Name.Value,
+            ModuleName = module.Name,
             ModuleType = module.Type,
             StartDate = moduleStartDate,
             CompletionDate = now >= moduleEndDate ? moduleEndDate : null,
-            DurationInMonths = module.Duration,
+            DurationInMonths = totalMonths,
             ElapsedMonths = elapsedMonths,
             ProgressPercentage = Math.Min(100, progressPercentage),
             TotalProceduresRequired = requiredProcedures,
@@ -601,13 +629,13 @@ public class RealStatisticsService : IStatisticsService
             RequiredHours = requiredHours,
             CompletedHours = completedHours,
             ApprovedHours = approvedHours,
-            RequiredCourses = 0, // Would be calculated from course requirements
-            CompletedCourses = 0,
+            RequiredCourses = module.TotalCourses,
+            CompletedCourses = module.CompletedCourses,
             PendingCourses = new List<string>(),
             Status = DetermineModuleStatus(progressPercentage, approvedHours, requiredHours),
             IsOnTrack = approvedHours >= (requiredHours * progressPercentage / 100),
             EstimatedDaysToCompletion = CalculateEstimatedDaysToCompletion(
-                approvedHours, requiredHours, elapsedMonths, module.Duration)
+                approvedHours, requiredHours, elapsedMonths, totalMonths)
         };
     }
     
@@ -615,52 +643,51 @@ public class RealStatisticsService : IStatisticsService
         Internship internship,
         CancellationToken cancellationToken)
     {
-        var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId, cancellationToken);
-        var yearModules = modules.Where(m => m.Year == internship.Year).ToList();
+        var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId);
+        var yearModules = modules.ToList();
         
-        var procedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id, cancellationToken);
-        var shifts = await _shiftRepository.GetByInternshipIdAsync(internship.Id, cancellationToken);
+        var procedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
+        var shifts = await _shiftRepository.GetByInternshipIdAsync(internship.Id);
         
         var moduleProgressList = new List<ModuleProgressStatistics>();
         foreach (var module in yearModules)
         {
             var progress = await CalculateModuleProgressAsync(
-                internship, module, procedures.ToList(), shifts.ToList(), cancellationToken);
+                internship, module, procedures.Cast<ProcedureBase>().ToList(), shifts.ToList(), cancellationToken);
             moduleProgressList.Add(progress);
         }
         
-        var totalRequiredHours = internship.Year * 12 * MONTHLY_HOURS_MINIMUM;
+        var totalRequiredHours = internship.PlannedDays * 8; // 8 hours per day
         var totalCompletedHours = shifts.Sum(s => s.Duration.Hours);
-        var totalApprovedHours = shifts.Where(s => s.Status == MedicalShiftStatus.Approved).Sum(s => s.Duration.Hours);
+        var totalApprovedHours = shifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours);
         
         var overallProgress = CalculateOverallYearProgress(moduleProgressList);
         
         return new YearProgressStatistics
         {
-            InternshipId = internship.Id,
-            Year = internship.Year,
+            InternshipId = internship.InternshipId,
+            Year = 1, // Default year since not available on Internship
             YearStartDate = internship.StartDate,
-            YearEndDate = internship.StartDate.AddYears(1),
+            YearEndDate = internship.EndDate,
             OverallProgressPercentage = overallProgress,
             ModulesProgress = moduleProgressList,
             TotalHoursCompleted = totalCompletedHours,
             TotalHoursRequired = totalRequiredHours,
             TotalProceduresCompleted = procedures.Count(),
-            TotalProceduresRequired = yearModules.Count * 100, // Simplified calculation
-            CoursesCompleted = 0,
-            CoursesRequired = 0,
+            TotalProceduresRequired = yearModules.Sum(m => m.TotalProceduresA + m.TotalProceduresB),
+            CoursesCompleted = yearModules.Sum(m => m.CompletedCourses),
+            CoursesRequired = yearModules.Sum(m => m.TotalCourses),
             MeetsYearRequirements = totalApprovedHours >= totalRequiredHours && overallProgress >= 100,
             DeficientAreas = IdentifyDeficientAreas(moduleProgressList, totalApprovedHours, totalRequiredHours),
             ProjectedCompletionDate = CalculateProjectedCompletionDate(
-                overallProgress, internship.StartDate, internship.Year)
+                overallProgress, internship.StartDate, internship.EndDate)
         };
     }
     
     private DateTime CalculateModuleStartDate(DateTime internshipStart, Module module)
     {
-        // Calculate when this module should start based on the internship start date
-        // This is simplified - real implementation would consider module sequencing
-        return internshipStart.AddMonths((module.Year - 1) * 12);
+        // Use the module's actual start date
+        return module.StartDate;
     }
     
     private ModuleStatus DetermineModuleStatus(decimal progressPercentage, int approvedHours, int requiredHours)
@@ -699,50 +726,60 @@ public class RealStatisticsService : IStatisticsService
     {
         var deficientAreas = new List<string>();
         
-        if (totalApprovedHours < totalRequiredHours)
-            deficientAreas.Add($"Hours deficit: {totalRequiredHours - totalApprovedHours} hours");
+        if (totalApprovedHours < totalRequiredHours * 0.8)
+        {
+            deficientAreas.Add($"Total approved hours ({totalApprovedHours}) below 80% of required ({totalRequiredHours})");
+        }
         
         foreach (var module in modules.Where(m => !m.IsOnTrack))
         {
-            deficientAreas.Add($"Module '{module.ModuleName}' behind schedule");
-        }
-        
-        var incompleteProcedureModules = modules
-            .Where(m => m.ProcedureCompletionRate < 80 && m.ProgressPercentage > 80)
-            .ToList();
-            
-        foreach (var module in incompleteProcedureModules)
-        {
-            deficientAreas.Add($"Module '{module.ModuleName}' procedures incomplete");
+            deficientAreas.Add($"Module '{module.ModuleName}' is behind schedule");
         }
         
         return deficientAreas;
     }
     
-    private DateTime? CalculateProjectedCompletionDate(
-        decimal currentProgress, 
-        DateTime startDate, 
-        int yearNumber)
+    private DateTime CalculateProjectedCompletionDate(decimal overallProgress, DateTime startDate, DateTime plannedEndDate)
     {
-        if (currentProgress >= 100) return null;
-        if (currentProgress == 0) return startDate.AddYears(yearNumber);
+        if (overallProgress >= 100) return plannedEndDate;
+        if (overallProgress == 0) return plannedEndDate.AddMonths(6); // Add buffer
         
-        var elapsedDays = (DateTime.UtcNow - startDate).TotalDays;
-        var totalRequiredDays = yearNumber * 365;
-        var projectedTotalDays = elapsedDays / ((double)currentProgress / 100);
+        var totalDuration = (plannedEndDate - startDate).TotalDays;
+        var elapsedDuration = (DateTime.UtcNow - startDate).TotalDays;
+        var projectedTotalDuration = elapsedDuration / (double)(overallProgress / 100);
         
-        return projectedTotalDays <= totalRequiredDays * 1.5 
-            ? startDate.AddDays(projectedTotalDays) 
-            : startDate.AddYears(yearNumber).AddMonths(6);
+        return startDate.AddDays(projectedTotalDuration);
     }
     
-    private class ProcedureDepartmentStats
+    private decimal CalculateExpectedProgress(DateTime startDate, DateTime endDate)
     {
-        public string ProcedureCode { get; set; } = string.Empty;
-        public string Department { get; set; } = string.Empty;
-        public int TotalCount { get; set; }
-        public DateTime FirstRecorded { get; set; }
-        public DateTime LastUpdated { get; set; }
-        public double DailyAverage { get; set; }
+        var totalDuration = (endDate - startDate).TotalDays;
+        var elapsedDuration = (DateTime.UtcNow - startDate).TotalDays;
+        
+        if (totalDuration <= 0) return 100;
+        if (elapsedDuration <= 0) return 0;
+        
+        return Math.Min(100, (decimal)(elapsedDuration / totalDuration));
+    }
+    
+    private DateTime CalculateEstimatedCompletionDate(int currentHours, int requiredHours, DateTime startDate, DateTime endDate)
+    {
+        if (currentHours >= requiredHours) return DateTime.UtcNow;
+        
+        var elapsedDays = (DateTime.UtcNow - startDate).TotalDays;
+        if (elapsedDays <= 0 || currentHours <= 0) return endDate.AddMonths(3); // Add buffer
+        
+        var dailyRate = currentHours / elapsedDays;
+        var remainingHours = requiredHours - currentHours;
+        var daysToComplete = remainingHours / dailyRate;
+        
+        return DateTime.UtcNow.AddDays(daysToComplete);
+    }
+    
+    private bool IsNightShift(MedicalShift shift)
+    {
+        // Night shift is typically between 22:00 and 06:00
+        var shiftHour = shift.Date.Hour;
+        return shiftHour >= 22 || shiftHour < 6;
     }
 }

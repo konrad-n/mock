@@ -73,8 +73,7 @@ public class EnhancedExceptionHandlingMiddleware : IMiddleware
         var options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            // Temporarily pretty-print JSON in production - REMOVE BEFORE CUSTOMER RELEASE
-            WriteIndented = true // was: _environment.IsDevelopment()
+            WriteIndented = _environment.IsDevelopment()
         };
 
         var json = JsonSerializer.Serialize(problemDetails, options);
@@ -298,7 +297,7 @@ public class EnhancedExceptionHandlingMiddleware : IMiddleware
                 StatusCodes.Status500InternalServerError,
                 "Internal Server Error",
                 // Temporarily show detailed errors in production - REMOVE BEFORE CUSTOMER RELEASE
-                exception.Message, // was: _environment.IsDevelopment() ? exception.Message : "An unexpected error occurred",
+                _environment.IsDevelopment() ? exception.Message : "An unexpected error occurred",
                 "internal-error",
                 baseDetails)
         };
@@ -316,12 +315,11 @@ public class EnhancedExceptionHandlingMiddleware : IMiddleware
             }
         };
 
-        // Temporarily show extra details in production - REMOVE BEFORE CUSTOMER RELEASE
-        // if (_environment.IsDevelopment())
-        // {
+        if (_environment.IsDevelopment())
+        {
             problemDetails.Extensions["requestId"] = context.Connection.Id;
             problemDetails.Extensions["method"] = context.Request.Method;
-        // }
+        }
 
         return problemDetails;
     }

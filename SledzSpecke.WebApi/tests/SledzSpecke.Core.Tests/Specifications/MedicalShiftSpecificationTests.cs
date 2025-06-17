@@ -2,6 +2,7 @@ using FluentAssertions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Specifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;

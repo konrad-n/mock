@@ -21,7 +21,7 @@ public interface IMedicalShiftValidationService
         UserId userId,
         Week week);
     
-    Result<bool> CheckOverlappingShifts(
+    Task<Result<bool>> CheckOverlappingShiftsAsync(
         MedicalShift newShift,
         IEnumerable<MedicalShift> existingShifts);
     

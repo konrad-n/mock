@@ -228,13 +228,13 @@ public class CourseRequirementServiceTests
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
 
-        // Record all required courses
+        // Record all required courses - Use Anesthesiology Basic module courses for Old SMK
         await _service.RecordCourseParticipationAsync(
-            user.Id, new CourseId(1), DateTime.UtcNow.AddDays(-30), 40, true);
+            user.Id, new CourseId(37), DateTime.UtcNow.AddDays(-30), 40, true); // Podstawy anestezjologii
         await _service.RecordCourseParticipationAsync(
-            user.Id, new CourseId(2), DateTime.UtcNow.AddDays(-20), 60, true);
+            user.Id, new CourseId(38), DateTime.UtcNow.AddDays(-20), 60, true); // Intensywna terapia
         await _service.RecordCourseParticipationAsync(
-            user.Id, new CourseId(3), DateTime.UtcNow.AddDays(-10), 30, true);
+            user.Id, new CourseId(39), DateTime.UtcNow.AddDays(-10), 16, true); // Diagnostyka obrazowa
 
         // Act
         var result = await _service.ValidateCourseCompletionAsync(
@@ -357,7 +357,7 @@ public class CourseRequirementServiceTests
             null, // SecondName
             new LastName("User"),
             new Pesel("44051401458"), // Valid PESEL with correct checksum
-            new PwzNumber("5425127"), // Valid PWZ with correct checksum
+            new PwzNumber(PwzNumber.GenerateValidPwz(_testUserId)), // Valid PWZ with correct checksum
             new PhoneNumber("+48123456789"), // Valid phone
             new DateTime(1944, 5, 14), // Date of birth matching PESEL 44051401458
             new Address("Test Street", "1", null, "00-000", "Warsaw", "Mazowieckie", "Poland"),

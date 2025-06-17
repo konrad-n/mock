@@ -28,6 +28,12 @@ internal sealed class RefactoredSqlModuleRepository : BaseRepository<Module>, IM
         return await GetSingleBySpecificationAsync(specification);
     }
 
+    public async Task<Module?> GetByIdAsync(int id)
+    {
+        var moduleId = new ModuleId(id);
+        return await GetByIdAsync(moduleId);
+    }
+
     public async Task<IEnumerable<Module>> GetBySpecializationIdAsync(SpecializationId specializationId)
     {
         var specification = new ModuleBySpecializationSpecification(specializationId);
@@ -96,6 +102,15 @@ internal sealed class RefactoredSqlModuleRepository : BaseRepository<Module>, IM
     {
         var specification = new ModuleByIdSpecification(id);
         return await CountBySpecificationAsync(specification) > 0;
+    }
+
+    public async Task<Module?> GetActiveModuleForSpecializationAsync(int specializationId)
+    {
+        var specId = new SpecializationId(specializationId);
+        var modules = await GetBySpecializationIdAsync(specId);
+        
+        // Find the module that is in progress (not completed)
+        return modules.FirstOrDefault(m => !m.IsCompleted());
     }
 
     // Private helper methods

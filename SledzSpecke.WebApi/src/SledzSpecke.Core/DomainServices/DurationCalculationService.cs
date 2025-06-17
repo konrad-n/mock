@@ -40,17 +40,20 @@ public class DurationCalculationService : IDurationCalculationService
     private readonly IInternshipRepository _internshipRepository;
     private readonly IAdditionalSelfEducationDaysRepository _selfEducationRepository;
     private readonly IAbsenceRepository _absenceRepository;
+    private readonly ISpecializationRepository _specializationRepository;
 
     public DurationCalculationService(
         IMedicalShiftRepository medicalShiftRepository,
         IInternshipRepository internshipRepository,
         IAdditionalSelfEducationDaysRepository selfEducationRepository,
-        IAbsenceRepository absenceRepository)
+        IAbsenceRepository absenceRepository,
+        ISpecializationRepository specializationRepository)
     {
         _medicalShiftRepository = medicalShiftRepository;
         _internshipRepository = internshipRepository;
         _selfEducationRepository = selfEducationRepository;
         _absenceRepository = absenceRepository;
+        _specializationRepository = specializationRepository;
     }
 
     public async Task<Result<DurationSummary>> CalculateInternshipDurationAsync(
@@ -94,21 +97,41 @@ public class DurationCalculationService : IDurationCalculationService
             summary.SelfEducationDays += edu.NumberOfDays;
         }
 
-        // TODO: Get absences when GetByInternshipIdAsync is implemented
-        // Currently absences are tracked by user/specialization, not internship
-        // var absences = await _absenceRepository.GetByInternshipIdAsync(
-        //     internshipId, cancellationToken);
-        //     
-        // foreach (var absence in absences)
-        // {
-        //     var absenceDays = (absence.EndDate - absence.StartDate).Days + 1;
-        //     summary.AbsenceDays += absenceDays;
-        //     
-        //     if (absence.Type == AbsenceType.Sick)
-        //         summary.SickLeaveDays += absenceDays;
-        //     else if (absence.Type == AbsenceType.Vacation)
-        //         summary.VacationDays += absenceDays;
-        // }
+        // Get absences that overlap with internship period
+        // We need to get the user ID from the specialization
+        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+        if (specialization == null)
+        {
+            // If we can't find the specialization, skip absence calculation
+            summary.AbsenceDays = 0;
+            summary.SickLeaveDays = 0;
+            summary.VacationDays = 0;
+        }
+        else
+        {
+            var absences = await _absenceRepository.GetByDateRangeAsync(
+                specialization.UserId, 
+                internship.StartDate, 
+                internship.EndDate);
+            
+            foreach (var absence in absences.Where(a => a.IsApproved))
+            {
+                // Calculate the actual overlap with internship period
+                var overlapStart = absence.StartDate > internship.StartDate ? absence.StartDate : internship.StartDate;
+                var overlapEnd = absence.EndDate < internship.EndDate ? absence.EndDate : internship.EndDate;
+                
+                if (overlapStart <= overlapEnd)
+                {
+                    var absenceDays = (overlapEnd - overlapStart).Days + 1;
+                    summary.AbsenceDays += absenceDays;
+                    
+                    if (absence.Type == ValueObjects.AbsenceType.Sick)
+                        summary.SickLeaveDays += absenceDays;
+                    else if (absence.Type == ValueObjects.AbsenceType.Vacation)
+                        summary.VacationDays += absenceDays;
+                }
+            }
+        }
 
         // Calculate effective days
         summary.EffectiveDays = summary.PlannedDays - summary.AbsenceDays + summary.SelfEducationDays;
