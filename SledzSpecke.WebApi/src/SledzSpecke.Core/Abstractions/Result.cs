@@ -25,6 +25,11 @@ public class Result
 
     public static Result<T> Success<T>(T value) => new(value, true, string.Empty);
     public static Result<T> Failure<T>(string error, string? errorCode = null) => new(default, false, error, errorCode);
+    
+    public TResult Match<TResult>(
+        Func<TResult> onSuccess,
+        Func<string, string?, TResult> onFailure) =>
+        IsSuccess ? onSuccess() : onFailure(Error, ErrorCode);
 }
 
 public class Result<T> : Result
@@ -44,4 +49,14 @@ public class Result<T> : Result
     public static new Result<T> Failure(string error, string? errorCode = null) => new(default, false, error, errorCode);
 
     public static implicit operator Result<T>(T value) => Success(value);
+    
+    public TResult Match<TResult>(
+        Func<T, TResult> onSuccess,
+        Func<string, string?, TResult> onFailure) =>
+        IsSuccess ? onSuccess(Value) : onFailure(Error, ErrorCode);
+    
+    public async Task<TResult> MatchAsync<TResult>(
+        Func<T, Task<TResult>> onSuccess,
+        Func<string, string?, Task<TResult>> onFailure) =>
+        IsSuccess ? await onSuccess(Value) : await onFailure(Error, ErrorCode);
 }
