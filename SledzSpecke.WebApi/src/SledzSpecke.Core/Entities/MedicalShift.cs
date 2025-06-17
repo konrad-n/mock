@@ -1,15 +1,18 @@
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Entities.Base;
+using SledzSpecke.Core.DomainEvents;
+using SledzSpecke.Core.DomainEvents.Base;
 
 namespace SledzSpecke.Core.Entities;
 
-public class MedicalShift
+public class MedicalShift : Entity
 {
     public MedicalShiftId Id { get; private set; }
     public InternshipId InternshipId { get; private set; }
     public ModuleId? ModuleId { get; private set; }
     public DateTime Date { get; private set; }
-    public Duration Duration { get; private set; }
+    public ShiftDuration Duration { get; private set; }
     public ShiftType Type { get; private set; }
     public string Location { get; private set; }
     public string? SupervisorName { get; private set; }
@@ -36,7 +39,7 @@ public class MedicalShift
     private MedicalShift() { }
 
     private MedicalShift(MedicalShiftId id, InternshipId internshipId, ModuleId? moduleId,
-        DateTime date, Duration duration, ShiftType type, string location, string? supervisorName, int year)
+        DateTime date, ShiftDuration duration, ShiftType type, string location, string? supervisorName, int year)
     {
         Id = id;
         InternshipId = internshipId;
@@ -61,10 +64,21 @@ public class MedicalShift
             throw new ArgumentException("Location cannot be empty.", nameof(location));
 
         // No future date validation - MAUI app allows future dates
-        var duration = new Duration(hours, minutes);
+        var duration = new ShiftDuration(hours, minutes);
 
-        return new MedicalShift(id, internshipId, moduleId, date, duration, type, 
+        var shift = new MedicalShift(id, internshipId, moduleId, date, duration, type, 
             location, supervisorName, year);
+        
+        // Raise domain event
+        shift.AddDomainEvent(new MedicalShiftCreated(
+            shift.Id,
+            shift.InternshipId,
+            shift.Date,
+            shift.Duration,
+            shift.Type,
+            shift.Location));
+            
+        return shift;
     }
 
     /// <summary>
@@ -79,9 +93,19 @@ public class MedicalShift
     {
         EnsureCanModify();
 
-        Duration = new Duration(hours, minutes);
+        var oldDuration = Duration;
+        Duration = new ShiftDuration(hours, minutes);
         Location = location ?? throw new ArgumentNullException(nameof(location));
         UpdatedAt = DateTime.UtcNow;
+        
+        // Raise domain event if duration changed
+        if (oldDuration.TotalMinutes != Duration.TotalMinutes)
+        {
+            AddDomainEvent(new MedicalShiftDurationChanged(
+                Id,
+                oldDuration,
+                Duration));
+        }
 
         // AI HINT: This is a KEY CHANGE from original MAUI implementation!
         // Original: Synced items were read-only (CanBeModified => SyncStatus != SyncStatus.Synced)
@@ -114,6 +138,15 @@ public class MedicalShift
         ApproverName = approverName ?? throw new ArgumentNullException(nameof(approverName));
         ApproverRole = approverRole ?? throw new ArgumentNullException(nameof(approverRole));
         UpdatedAt = DateTime.UtcNow;
+        
+        // Raise domain event
+        AddDomainEvent(new MedicalShiftCompleted(
+            Id,
+            InternshipId,
+            Date,
+            Duration,
+            Type,
+            ApprovalDate.Value));
     }
 
     public void SetAdditionalFields(string? additionalFields)

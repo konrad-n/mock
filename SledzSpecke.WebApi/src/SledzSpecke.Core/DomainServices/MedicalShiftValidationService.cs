@@ -73,7 +73,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         return Result.Success();
     }
 
-    public async Task<Result<Duration>> CalculateMonthlyTotalAsync(
+    public async Task<Result<ShiftDuration>> CalculateMonthlyTotalAsync(
         UserId userId,
         YearMonth yearMonth)
     {
@@ -84,11 +84,11 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
 
         var totalMinutes = shifts.Sum(s => s.Duration.TotalMinutes);
         if (totalMinutes == 0)
-            return Result<Duration>.Success(new Duration(0, 1)); // Minimum duration
-        return Result<Duration>.Success(Duration.FromMinutes(totalMinutes));
+            return Result<ShiftDuration>.Success(new ShiftDuration(1, 0)); // Minimum 60 minutes
+        return Result<ShiftDuration>.Success(ShiftDuration.FromMinutes(totalMinutes));
     }
 
-    public async Task<Result<Duration>> CalculateWeeklyTotalAsync(
+    public async Task<Result<ShiftDuration>> CalculateWeeklyTotalAsync(
         UserId userId,
         Week week)
     {
@@ -99,8 +99,8 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
 
         var totalMinutes = shifts.Sum(s => s.Duration.TotalMinutes);
         if (totalMinutes == 0)
-            return Result<Duration>.Success(new Duration(0, 1)); // Minimum duration
-        return Result<Duration>.Success(Duration.FromMinutes(totalMinutes));
+            return Result<ShiftDuration>.Success(new ShiftDuration(1, 0)); // Minimum 60 minutes
+        return Result<ShiftDuration>.Success(ShiftDuration.FromMinutes(totalMinutes));
     }
 
     public async Task<Result<bool>> CheckOverlappingShiftsAsync(

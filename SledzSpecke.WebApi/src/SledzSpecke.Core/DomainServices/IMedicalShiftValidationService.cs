@@ -13,11 +13,11 @@ public interface IMedicalShiftValidationService
         ModuleId? moduleId,
         IEnumerable<MedicalShift> existingShifts);
     
-    Task<Result<Duration>> CalculateMonthlyTotalAsync(
+    Task<Result<ShiftDuration>> CalculateMonthlyTotalAsync(
         UserId userId,
         YearMonth yearMonth);
     
-    Task<Result<Duration>> CalculateWeeklyTotalAsync(
+    Task<Result<ShiftDuration>> CalculateWeeklyTotalAsync(
         UserId userId,
         Week week);
     
@@ -68,8 +68,8 @@ public class Week
 
 public class MedicalShiftValidationSummary
 {
-    public Duration WeeklyTotal { get; set; }
-    public Duration MonthlyTotal { get; set; }
+    public ShiftDuration WeeklyTotal { get; set; }
+    public ShiftDuration MonthlyTotal { get; set; }
     public int WeeklyHoursLimit { get; set; }
     public int MonthlyHoursMinimum { get; set; }
     public bool ExceedsWeeklyLimit { get; set; }
