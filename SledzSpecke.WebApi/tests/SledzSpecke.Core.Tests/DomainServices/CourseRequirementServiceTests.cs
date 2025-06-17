@@ -357,7 +357,7 @@ public class CourseRequirementServiceTests
             null, // SecondName
             new LastName("User"),
             new Pesel("44051401458"), // Valid PESEL with correct checksum
-            new PwzNumber("1234567"), // Valid PWZ
+            new PwzNumber("5425127"), // Valid PWZ with correct checksum
             new PhoneNumber("+48123456789"), // Valid phone
             new DateTime(1944, 5, 14), // Date of birth matching PESEL 44051401458
             new Address("Test Street", "1", null, "00-000", "Warsaw", "Mazowieckie", "Poland"),
@@ -390,7 +390,7 @@ public class CourseRequirementServiceTests
         // Update user to have matching SMK version
         var userWithNewSmk = CreateTestUser(specializationId, SmkVersion.New);
 
-        _userRepositoryMock.Setup(r => r.GetByIdAsync(user.Id, It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(r => r.GetByIdAsync(userWithNewSmk.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(userWithNewSmk);
         _specializationRepositoryMock.Setup(r => r.GetByIdAsync(specializationId))
             .ReturnsAsync(specialization);
