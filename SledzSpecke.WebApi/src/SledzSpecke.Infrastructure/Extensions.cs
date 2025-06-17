@@ -81,15 +81,15 @@ public static class Extensions
 
         // Using refactored repository with Specification pattern
         services.AddScoped<IUserRepository, RefactoredSqlUserRepository>();
-        services.AddScoped<ISpecializationRepository, SqlSpecializationRepository>();
+        services.AddScoped<ISpecializationRepository, RefactoredSqlSpecializationRepository>();
         services.AddScoped<IModuleRepository, RefactoredSqlModuleRepository>();
         services.AddScoped<IInternshipRepository, RefactoredSqlInternshipRepository>();
         services.AddScoped<IProcedureRepository, RefactoredSqlProcedureRepository>();
         services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepositoryEnhanced>();
         services.AddScoped<ICourseRepository, RefactoredSqlCourseRepository>();
-        services.AddScoped<IAbsenceRepository, SqlAbsenceRepository>();
+        services.AddScoped<IAbsenceRepository, RefactoredSqlAbsenceRepository>();
         services.AddScoped<IRecognitionRepository, SqlRecognitionRepository>();
-        services.AddScoped<IPublicationRepository, SqlPublicationRepository>();
+        services.AddScoped<IPublicationRepository, RefactoredSqlPublicationRepository>();
         services.AddScoped<ISelfEducationRepository, SqlSelfEducationRepository>();
         services.AddScoped<IEducationalActivityRepository, EducationalActivityRepository>();
         services.AddScoped<IFileMetadataRepository, FileMetadataRepository>();
