@@ -50,7 +50,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         }
 
         // Check for overlapping shifts
-        var overlapResult = await CheckOverlappingShiftsAsync(shift, existingShifts);
+        var overlapResult = CheckOverlappingShifts(shift, existingShifts);
         if (!overlapResult.IsSuccess || overlapResult.Value)
         {
             return Result.Failure("Dyżur nakłada się z istniejącym dyżurem");

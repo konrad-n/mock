@@ -183,7 +183,7 @@ public class ProcedureValidationService : IProcedureValidationService
         ProcedureRequirement requirement,
         IEnumerable<ProcedureBase> procedures)
     {
-        var progressResult = await CalculateProcedureProgressAsync(requirement, procedures);
+        var progressResult = CalculateProcedureProgress(requirement, procedures);
         return progressResult.IsSuccess 
             ? Result<bool>.Success(progressResult.Value.IsRequirementMet)
             : Result<bool>.Failure(progressResult.Error);
@@ -215,7 +215,7 @@ public class ProcedureValidationService : IProcedureValidationService
         // Calculate progress for each requirement
         foreach (var requirement in requirements)
         {
-            var progressResult = await CalculateProcedureProgressAsync(requirement, userProcedures);
+            var progressResult = CalculateProcedureProgress(requirement, userProcedures);
             if (progressResult.IsSuccess)
             {
                 summary.RequirementProgress.Add(progressResult.Value);
