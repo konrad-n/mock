@@ -114,6 +114,21 @@ public class UserByCitySpecification : Specification<User>
     }
 }
 
+public class UserByPartialEmailSpecification : Specification<User>
+{
+    private readonly string _emailPart;
+
+    public UserByPartialEmailSpecification(string emailPart)
+    {
+        _emailPart = emailPart.ToLower();
+    }
+
+    public override Expression<Func<User, bool>> ToExpression()
+    {
+        return user => user.Email.Value.ToLower().Contains(_emailPart);
+    }
+}
+
 // Composite specifications for common scenarios
 public static class UserSpecificationExtensions
 {
@@ -137,16 +152,10 @@ public static class UserSpecificationExtensions
         // Search by full name
         Specification<User> fullNameSpec = new UserByFullNameSpecification(searchTerm);
         
-        // Try to search by email if it's a valid email format
-        try
-        {
-            var emailSpec = new UserByEmailSpecification(new Email(searchTerm));
-            return fullNameSpec.Or(emailSpec);
-        }
-        catch
-        {
-            // If not a valid email, just search by name
-            return fullNameSpec;
-        }
+        // Search by partial email
+        Specification<User> emailSpec = new UserByPartialEmailSpecification(searchTerm);
+        
+        // Combine both specifications
+        return fullNameSpec.Or(emailSpec);
     }
 }
