@@ -5,6 +5,7 @@ using SledzSpecke.Application.Services;
 using SledzSpecke.Application.DomainServices;
 using SledzSpecke.Core.DomainServices;
 using System.Reflection;
+using FluentValidation;
 
 namespace SledzSpecke.Application;
 
@@ -66,6 +67,9 @@ public static partial class ApplicationExtensions
         
         // Add validation
         services.AddValidation();
+        
+        // Register FluentValidation validators
+        services.AddValidatorsFromAssembly(applicationAssembly);
         
         // Add decorators for cross-cutting concerns
         services.AddDecorators();

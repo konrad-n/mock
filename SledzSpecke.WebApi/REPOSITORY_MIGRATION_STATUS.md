@@ -10,16 +10,16 @@ This document tracks the status of repository migrations from direct EF Core imp
 2. **RefactoredSqlUserRepository** - Full implementation with specifications  
 3. **RefactoredSqlProcedureRepository** - Full implementation with specifications
 4. **RefactoredSqlInternshipRepository** - Full implementation with specifications
+5. **RefactoredSqlSpecializationRepository** - Full implementation with specifications
+6. **RefactoredSqlCourseRepository** - Full implementation with specifications and extension methods
 
 ### ❌ Needs Migration (Direct EF Core Implementation)
-1. **SqlCourseRepository** - Direct DbContext access, no specifications
-2. **SqlRecognitionRepository** - Direct DbContext access, no specifications
-3. **SqlPublicationRepository** - Direct DbContext access, no specifications
-4. **SqlAbsenceRepository** - Direct DbContext access, no specifications
-5. **SqlModuleRepository** - Direct DbContext access, no specifications
-6. **SqlSpecializationRepository** - Direct DbContext access, no specifications
-7. **SqlSelfEducationRepository** - Direct DbContext access, no specifications
-8. **SqlAdditionalSelfEducationDaysRepository** - Direct DbContext access, no specifications
+1. **SqlRecognitionRepository** - Direct DbContext access, no specifications
+2. **SqlPublicationRepository** - Direct DbContext access, no specifications
+3. **SqlAbsenceRepository** - Direct DbContext access, no specifications
+4. **SqlModuleRepository** - Direct DbContext access, no specifications
+5. **SqlSelfEducationRepository** - Direct DbContext access, no specifications
+6. **SqlAdditionalSelfEducationDaysRepository** - Direct DbContext access, no specifications
 
 ### ⚠️ Other Implementations (Check Status)
 1. **EducationalActivityRepository** - Need to verify implementation

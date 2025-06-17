@@ -1,6 +1,9 @@
+using FluentValidation;
+using FluentValidation.Results;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using SledzSpecke.Api.Extensions;
 
 namespace SledzSpecke.Application.Decorators;
 
@@ -23,15 +26,17 @@ public class EnhancedValidationDecorator<TCommand> : IResultCommandHandler<TComm
 
     public async Task<Result> HandleAsync(TCommand command)
     {
-        // Try to get custom validator first
+        // Try to get FluentValidation validator first
         var validator = _serviceProvider.GetService<IValidator<TCommand>>();
         
         if (validator != null)
         {
-            var validationResult = validator.Validate(command);
-            if (validationResult.IsFailure)
+            var validationResult = await validator.ValidateAsync(command);
+            if (!validationResult.IsValid)
             {
-                return validationResult;
+                var errors = FormatValidationErrors(validationResult.Errors);
+                var errorCode = GetPrimaryErrorCode(validationResult.Errors);
+                return Result.Failure(errors, errorCode);
             }
         }
         else
@@ -44,12 +49,31 @@ public class EnhancedValidationDecorator<TCommand> : IResultCommandHandler<TComm
                 command, context, validationResults, validateAllProperties: true))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Validation error");
-                return Result.Failure($"Validation failed: {string.Join("; ", errors)}");
+                return Result.Failure($"Validation failed: {string.Join("; ", errors)}", ErrorCodes.VALIDATION_ERROR);
             }
         }
 
         // If validation passes, execute the handler
         return await _handler.HandleAsync(command);
+    }
+
+    private static string FormatValidationErrors(List<ValidationFailure> errors)
+    {
+        var groupedErrors = errors
+            .GroupBy(e => e.PropertyName)
+            .Select(g => $"{g.Key}: {string.Join(", ", g.Select(e => e.ErrorMessage))}")
+            .ToList();
+
+        return string.Join("; ", groupedErrors);
+    }
+
+    private static string GetPrimaryErrorCode(List<ValidationFailure> errors)
+    {
+        var specificError = errors.FirstOrDefault(e => 
+            e.ErrorCode != null && 
+            e.ErrorCode != ErrorCodes.VALIDATION_ERROR);
+        
+        return specificError?.ErrorCode ?? ErrorCodes.VALIDATION_ERROR;
     }
 }
 
@@ -72,15 +96,17 @@ public class EnhancedValidationDecorator<TCommand, TResult> : IResultCommandHand
 
     public async Task<Result<TResult>> HandleAsync(TCommand command)
     {
-        // Try to get custom validator first
+        // Try to get FluentValidation validator first
         var validator = _serviceProvider.GetService<IValidator<TCommand>>();
         
         if (validator != null)
         {
-            var validationResult = validator.Validate(command);
-            if (validationResult.IsFailure)
+            var validationResult = await validator.ValidateAsync(command);
+            if (!validationResult.IsValid)
             {
-                return Result.Failure<TResult>(validationResult.Error);
+                var errors = FormatValidationErrors(validationResult.Errors);
+                var errorCode = GetPrimaryErrorCode(validationResult.Errors);
+                return Result.Failure<TResult>(errors, errorCode);
             }
         }
         else
@@ -93,11 +119,30 @@ public class EnhancedValidationDecorator<TCommand, TResult> : IResultCommandHand
                 command, context, validationResults, validateAllProperties: true))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Validation error");
-                return Result.Failure<TResult>($"Validation failed: {string.Join("; ", errors)}");
+                return Result.Failure<TResult>($"Validation failed: {string.Join("; ", errors)}", ErrorCodes.VALIDATION_ERROR);
             }
         }
 
         // If validation passes, execute the handler
         return await _handler.HandleAsync(command);
+    }
+
+    private static string FormatValidationErrors(List<ValidationFailure> errors)
+    {
+        var groupedErrors = errors
+            .GroupBy(e => e.PropertyName)
+            .Select(g => $"{g.Key}: {string.Join(", ", g.Select(e => e.ErrorMessage))}")
+            .ToList();
+
+        return string.Join("; ", groupedErrors);
+    }
+
+    private static string GetPrimaryErrorCode(List<ValidationFailure> errors)
+    {
+        var specificError = errors.FirstOrDefault(e => 
+            e.ErrorCode != null && 
+            e.ErrorCode != ErrorCodes.VALIDATION_ERROR);
+        
+        return specificError?.ErrorCode ?? ErrorCodes.VALIDATION_ERROR;
     }
 }
