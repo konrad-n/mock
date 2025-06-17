@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Core.Specifications.CourseSpecifications;
 

@@ -1,6 +1,6 @@
 using FluentAssertions;
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.Specifications;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.ValueObjects;
 using System;
 using Xunit;

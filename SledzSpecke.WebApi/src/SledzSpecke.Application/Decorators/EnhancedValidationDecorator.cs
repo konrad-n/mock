@@ -3,7 +3,6 @@ using FluentValidation.Results;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using SledzSpecke.Api.Extensions;
 
 namespace SledzSpecke.Application.Decorators;
 

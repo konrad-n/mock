@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Core.Specifications.Common;
 

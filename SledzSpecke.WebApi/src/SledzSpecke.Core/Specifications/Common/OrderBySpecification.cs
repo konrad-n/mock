@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Core.Specifications.Common;
 

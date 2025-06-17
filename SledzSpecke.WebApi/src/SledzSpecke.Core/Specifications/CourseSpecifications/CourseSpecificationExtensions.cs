@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Core.Specifications.CourseSpecifications;
 
@@ -47,7 +48,7 @@ public sealed class MandatoryCourseSpecification : Specification<Course>
 {
     public override Expression<Func<Course, bool>> ToExpression()
     {
-        return course => course.IsMandatory;
+        return course => course.IsMandatory();
     }
 }
 
@@ -88,8 +89,9 @@ public sealed class CoursesNeedingSyncSpecification : Specification<Course>
 {
     public override Expression<Func<Course, bool>> ToExpression()
     {
-        // Courses modified in the last 24 hours or marked for sync
-        var cutoffDate = DateTime.UtcNow.AddDays(-1);
-        return course => course.ModifiedAt > cutoffDate || course.NeedsSync;
+        // Courses that have been modified or failed sync
+        return course => course.SyncStatus == SyncStatus.Modified || 
+                        course.SyncStatus == SyncStatus.SyncFailed ||
+                        course.SyncStatus == SyncStatus.NotSynced;
     }
 }
