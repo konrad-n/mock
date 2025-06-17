@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SledzSpecke.Application;
+using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Api.Extensions;
 

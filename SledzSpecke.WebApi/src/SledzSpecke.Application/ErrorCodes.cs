@@ -19,6 +19,9 @@ public static class ErrorCodes
     // Domain-specific error codes
     public const string USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
     public const string INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+    public const string EMAIL_ALREADY_IN_USE = "EMAIL_ALREADY_IN_USE";
+    public const string PESEL_ALREADY_IN_USE = "PESEL_ALREADY_IN_USE";
+    public const string PWZ_ALREADY_IN_USE = "PWZ_ALREADY_IN_USE";
     public const string SHIFT_OUTSIDE_INTERNSHIP = "SHIFT_OUTSIDE_INTERNSHIP";
     public const string WEEKLY_HOURS_EXCEEDED = "WEEKLY_HOURS_EXCEEDED";
     public const string MONTHLY_HOURS_INSUFFICIENT = "MONTHLY_HOURS_INSUFFICIENT";

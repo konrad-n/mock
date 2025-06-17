@@ -85,14 +85,14 @@ public static class Extensions
         services.AddScoped<IModuleRepository, RefactoredSqlModuleRepository>();
         services.AddScoped<IInternshipRepository, RefactoredSqlInternshipRepository>();
         services.AddScoped<IProcedureRepository, RefactoredSqlProcedureRepository>();
-        services.AddScoped<IMedicalShiftRepository, SqlMedicalShiftRepositoryEnhanced>();
+        services.AddScoped<IMedicalShiftRepository, RefactoredSqlMedicalShiftRepository>();
         services.AddScoped<ICourseRepository, RefactoredSqlCourseRepository>();
         services.AddScoped<IAbsenceRepository, RefactoredSqlAbsenceRepository>();
         services.AddScoped<IRecognitionRepository, RefactoredSqlRecognitionRepository>();
         services.AddScoped<IPublicationRepository, RefactoredSqlPublicationRepository>();
         services.AddScoped<ISelfEducationRepository, RefactoredSqlSelfEducationRepository>();
-        services.AddScoped<IEducationalActivityRepository, EducationalActivityRepository>();
-        services.AddScoped<IFileMetadataRepository, FileMetadataRepository>();
+        services.AddScoped<IEducationalActivityRepository, RefactoredEducationalActivityRepository>();
+        services.AddScoped<IFileMetadataRepository, RefactoredFileMetadataRepository>();
         services.AddScoped<IAdditionalSelfEducationDaysRepository, RefactoredSqlAdditionalSelfEducationDaysRepository>();
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IDataSeeder, DataSeeder>();

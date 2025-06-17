@@ -26,7 +26,7 @@ public class EnhancedValidationDecorator<TCommand> : IResultCommandHandler<TComm
     public async Task<Result> HandleAsync(TCommand command)
     {
         // Try to get FluentValidation validator first
-        var validator = _serviceProvider.GetService<IValidator<TCommand>>();
+        var validator = _serviceProvider.GetService<FluentValidation.IValidator<TCommand>>();
         
         if (validator != null)
         {
@@ -96,7 +96,7 @@ public class EnhancedValidationDecorator<TCommand, TResult> : IResultCommandHand
     public async Task<Result<TResult>> HandleAsync(TCommand command)
     {
         // Try to get FluentValidation validator first
-        var validator = _serviceProvider.GetService<IValidator<TCommand>>();
+        var validator = _serviceProvider.GetService<FluentValidation.IValidator<TCommand>>();
         
         if (validator != null)
         {
