@@ -2,7 +2,7 @@ using SledzSpecke.Core.Exceptions;
 
 namespace SledzSpecke.Core.ValueObjects;
 
-public sealed record Pesel
+public sealed partial record Pesel
 {
     public string Value { get; }
 
