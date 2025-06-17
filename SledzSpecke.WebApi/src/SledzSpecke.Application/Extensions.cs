@@ -48,6 +48,13 @@ public static partial class ApplicationExtensions
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
+        // Auto-register all Result-based query handlers
+        services.Scan(s => s.FromAssemblies(applicationAssembly)
+            .AddClasses(c => c.AssignableTo(typeof(IResultQueryHandler<,>))
+                .Where(t => !t.Name.Contains("Decorator")))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
         // Register specific services
         services.AddScoped<ISpecializationValidationService, SpecializationValidationService>();
         services.AddScoped<IYearCalculationService, YearCalculationService>();
@@ -73,6 +80,9 @@ public static partial class ApplicationExtensions
         
         // Add decorators for cross-cutting concerns
         services.AddDecorators();
+        
+        // Add decorators for Result-based handlers
+        services.AddResultDecorators();
 
         // Override specific handlers if needed (enhanced versions)
         // Commented out - using Result-based handlers now

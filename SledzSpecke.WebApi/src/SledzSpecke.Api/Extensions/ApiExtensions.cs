@@ -1,4 +1,5 @@
 using SledzSpecke.Api.Middleware;
+using SledzSpecke.Api.Endpoints;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.StaticFiles;
 
@@ -74,7 +75,12 @@ public static class ApiExtensions
         
         app.UseAuthentication();
         app.UseAuthorization();
+        
+        // Map controllers (existing API v1)
         app.MapControllers();
+        
+        // Map minimal API endpoints (new API v2)
+        app.MapMedicalShiftEndpoints();
 
         return app;
     }

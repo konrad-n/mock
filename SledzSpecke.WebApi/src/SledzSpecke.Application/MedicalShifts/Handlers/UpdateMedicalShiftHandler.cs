@@ -32,13 +32,13 @@ public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedi
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(UpdateMedicalShift command)
+    public async Task<Result> HandleAsync(UpdateMedicalShift command, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = _userContextService.GetUserId();
             var medicalShiftId = new MedicalShiftId(command.ShiftId);
-            var shift = await _medicalShiftRepository.GetByIdAsync(medicalShiftId);
+            var shift = await _medicalShiftRepository.GetByIdAsync(medicalShiftId, cancellationToken);
 
             if (shift == null)
             {
@@ -46,14 +46,14 @@ public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedi
             }
 
             // Get internship to check ownership
-            var internship = await _internshipRepository.GetByIdAsync(shift.InternshipId);
+            var internship = await _internshipRepository.GetByIdAsync(shift.InternshipId, cancellationToken);
             if (internship == null)
             {
                 return Result.Failure($"Internship with ID {shift.InternshipId.Value} not found.");
             }
 
             // Get user to verify ownership through specialization
-            var user = await _userRepository.GetByIdAsync(new UserId(userId));
+            var user = await _userRepository.GetByIdAsync(new UserId(userId), cancellationToken);
             // TODO: User-Specialization relationship needs to be redesigned
             // if (user == null || user.SpecializationId.Value != internship.SpecializationId.Value)
             // {
@@ -89,8 +89,8 @@ public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedi
                 return Result.Failure("Medical shift duration must be greater than zero.");
             }
 
-            await _medicalShiftRepository.UpdateAsync(shift);
-            await _unitOfWork.SaveChangesAsync();
+            await _medicalShiftRepository.UpdateAsync(shift, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             return Result.Success();
         }

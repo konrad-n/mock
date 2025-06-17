@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SledzSpecke.Application;
 using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Constants;
 
 namespace SledzSpecke.Api.Extensions;
 
@@ -136,5 +137,73 @@ public static class ResultExtensions
             _ => new BadRequestObjectResult(errorResponse)
         };
     }
+
+    #region Minimal API Extensions
+
+    /// <summary>
+    /// Converts a Result to an appropriate IResult for minimal APIs
+    /// </summary>
+    public static IResult ToApiResult<T>(this Result<T> result, string? resourceLocation = null)
+    {
+        if (result.IsSuccess)
+        {
+            return resourceLocation is not null
+                ? Results.Created(resourceLocation, new { value = result.Value })
+                : Results.Ok(result.Value);
+        }
+
+        return ToApiError(result);
+    }
+    
+    /// <summary>
+    /// Converts a Result (without value) to an appropriate IResult
+    /// </summary>
+    public static IResult ToApiResult(this Result result)
+    {
+        return result.IsSuccess
+            ? Results.NoContent()
+            : ToApiError(result);
+    }
+    
+    private static IResult ToApiError<T>(Result<T> result)
+    {
+        if (result.ValidationErrors is not null)
+        {
+            return Results.ValidationProblem(result.ValidationErrors);
+        }
+
+        var problemDetails = new ProblemDetails
+        {
+            Title = "Request Failed",
+            Detail = result.Error,
+            Extensions = { ["errorCode"] = result.ErrorCode },
+        };
+
+        return result.ErrorCode switch
+        {
+            ErrorCodes.NOT_FOUND or 
+            ErrorCodes.USER_NOT_FOUND or
+            ErrorCodes.INTERNSHIP_NOT_FOUND or
+            ErrorCodes.SHIFT_NOT_FOUND => Results.Problem(problemDetails with { Status = 404 }),
+            
+            ErrorCodes.ALREADY_EXISTS or
+            ErrorCodes.SHIFT_ALREADY_EXISTS => Results.Problem(problemDetails with { Status = 409 }),
+            
+            ErrorCodes.UNAUTHORIZED or
+            ErrorCodes.INVALID_CREDENTIALS => Results.Problem(problemDetails with { Status = 401 }),
+            
+            ErrorCodes.FORBIDDEN => Results.Problem(problemDetails with { Status = 403 }),
+            
+            ErrorCodes.VALIDATION_ERROR or
+            ErrorCodes.INVALID_OPERATION => Results.Problem(problemDetails with { Status = 400 }),
+            
+            _ => Results.Problem(problemDetails with { Status = 500 }),
+        };
+    }
+    
+    private static IResult ToApiError(Result result)
+        => ToApiError(Result<object>.Failure(result.Error!, result.ErrorCode!));
+
+    #endregion
 }
 

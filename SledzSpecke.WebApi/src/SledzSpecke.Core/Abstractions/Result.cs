@@ -36,17 +36,21 @@ public class Result<T> : Result
 {
     private readonly T? _value;
 
-    protected internal Result(T? value, bool isSuccess, string error, string? errorCode = null) : base(isSuccess, error, errorCode)
+    protected internal Result(T? value, bool isSuccess, string error, string? errorCode = null, Dictionary<string, string[]>? validationErrors = null) : base(isSuccess, error, errorCode)
     {
         _value = value;
+        ValidationErrors = validationErrors;
     }
 
     public T Value => IsSuccess
         ? _value!
         : throw new InvalidOperationException("Cannot access value of a failed result");
 
+    public Dictionary<string, string[]>? ValidationErrors { get; }
+
     public static new Result<T> Success(T value) => new(value, true, string.Empty);
     public static new Result<T> Failure(string error, string? errorCode = null) => new(default, false, error, errorCode);
+    public static Result<T> ValidationFailure(Dictionary<string, string[]> errors) => new(default, false, "Validation failed", "VALIDATION_ERROR", errors);
 
     public static implicit operator Result<T>(T value) => Success(value);
     

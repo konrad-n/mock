@@ -4,7 +4,7 @@ using SledzSpecke.Core.Policies;
 
 namespace SledzSpecke.Core;
 
-public static class Extensions
+public static class CoreExtensions
 {
     public static IServiceCollection AddCore(this IServiceCollection services)
     {

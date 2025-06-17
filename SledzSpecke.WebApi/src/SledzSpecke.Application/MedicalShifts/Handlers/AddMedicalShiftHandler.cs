@@ -1,6 +1,7 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Commands;
 using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Constants;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
@@ -33,23 +34,23 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<int>> HandleAsync(AddMedicalShift command)
+    public async Task<Result<int>> HandleAsync(AddMedicalShift command, CancellationToken cancellationToken = default)
     {
         try
         {
             // Validate internship exists
             var internshipId = new InternshipId(command.InternshipId);
-            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId, cancellationToken);
             if (internship is null)
             {
-                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.", "INTERN_NOT_FOUND");
+                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.", ErrorCodes.INTERNSHIP_NOT_FOUND);
             }
 
             // Validate specialization exists
-            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId, cancellationToken);
             if (specialization is null)
             {
-                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.", "SPEC_NOT_FOUND");
+                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.", ErrorCodes.SPECIALIZATION_NOT_FOUND);
             }
 
             // Get available years for validation
@@ -80,24 +81,24 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
 
             if (!validationResult.IsValid)
             {
-                return Result.Failure<int>($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}", "VAL_FAILED");
+                return Result.Failure<int>($"Medical shift validation failed: {string.Join(", ", validationResult.Errors)}", ErrorCodes.VALIDATION_ERROR);
             }
 
             // Update the internship (with the new shift already added)
-            await _internshipRepository.UpdateAsync(internship);
+            await _internshipRepository.UpdateAsync(internship, cancellationToken);
             
             // Save changes and dispatch domain events
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success(medicalShift.Id.Value);
         }
         catch (Exception ex) when (ex is CustomException)
         {
-            return Result.Failure<int>(ex.Message, "DOMAIN_ERROR");
+            return Result.Failure<int>(ex.Message, ErrorCodes.VALIDATION_ERROR);
         }
         catch (Exception)
         {
-            return Result.Failure<int>("An error occurred while adding the medical shift.", "INTERNAL_ERROR");
+            return Result.Failure<int>("An error occurred while adding the medical shift.", ErrorCodes.INTERNAL_ERROR);
         }
     }
 }
