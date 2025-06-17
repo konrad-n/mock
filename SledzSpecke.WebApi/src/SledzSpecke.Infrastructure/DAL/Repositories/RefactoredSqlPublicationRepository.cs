@@ -55,19 +55,19 @@ internal sealed class RefactoredSqlPublicationRepository : BaseRepository<Public
 
     public async Task<IEnumerable<Publication>> GetPeerReviewedPublicationsAsync(UserId userId)
     {
-        var specification = PublicationSpecificationExtensions.GetPeerReviewedPublications(userId);
+        var specification = PublicationSpecificationExtensions.GetPeerReviewedPublicationsForUser(userId);
         return await GetBySpecificationAsync(specification);
     }
 
     public async Task<IEnumerable<Publication>> GetFirstAuthorPublicationsAsync(UserId userId)
     {
-        var specification = PublicationSpecificationExtensions.GetFirstAuthorPublications(userId);
+        var specification = PublicationSpecificationExtensions.GetFirstAuthorPublicationsForUser(userId);
         return await GetBySpecificationAsync(specification);
     }
 
     public async Task<IEnumerable<Publication>> GetRecentPublicationsAsync(UserId userId, int years = 5)
     {
-        var specification = PublicationSpecificationExtensions.GetRecentPublications(userId, years);
+        var specification = PublicationSpecificationExtensions.GetRecentPublicationsForUser(userId, years);
         return await GetBySpecificationAsync(specification);
     }
 
@@ -92,7 +92,7 @@ internal sealed class RefactoredSqlPublicationRepository : BaseRepository<Public
     {
         // ID generation should be handled by database or a dedicated service
         // For now, keeping the existing logic but moving it to a private method
-        if (publication.Id.Value == 0)
+        if (publication.Id.Value == Guid.Empty)
         {
             await GenerateIdForEntity(publication);
         }
@@ -124,7 +124,7 @@ internal sealed class RefactoredSqlPublicationRepository : BaseRepository<Public
     // Additional methods using specifications
     public async Task<IEnumerable<Publication>> GetHighImpactPublicationsAsync(UserId userId, decimal minImpactFactor)
     {
-        var specification = PublicationSpecificationExtensions.GetHighImpactPublications(userId, minImpactFactor);
+        var specification = PublicationSpecificationExtensions.GetHighImpactPublications(userId);
         return await GetBySpecificationAsync(specification);
     }
 
@@ -171,22 +171,15 @@ internal sealed class RefactoredSqlPublicationRepository : BaseRepository<Public
     }
 
     // Private helper methods
-    private async Task GenerateIdForEntity(Publication publication)
+    private Task GenerateIdForEntity(Publication publication)
     {
         // This should ideally be in a separate ID generation service
-        var connection = Context.Database.GetDbConnection();
-        await connection.OpenAsync();
-
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Publications\"";
-        var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
-
-        var newId = new PublicationId(maxId + 1);
+        var newId = PublicationId.New();
 
         // Use reflection to set the ID since it's private
         var idProperty = publication.GetType().GetProperty("Id");
         idProperty?.SetValue(publication, newId);
 
-        await connection.CloseAsync();
+        return Task.CompletedTask;
     }
 }

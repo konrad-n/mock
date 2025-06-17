@@ -49,25 +49,19 @@ internal sealed class RefactoredSqlAbsenceRepository : BaseRepository<Absence>, 
 
     public async Task<IEnumerable<Absence>> GetActiveAbsencesAsync(UserId userId)
     {
-        var specification = AbsenceSpecificationExtensions.GetActiveAbsences(userId);
+        var specification = AbsenceSpecificationExtensions.GetActiveAbsencesForUser(userId);
         return await GetBySpecificationAsync(specification);
     }
 
     public async Task<IEnumerable<Absence>> GetOverlappingAbsencesAsync(UserId userId, DateTime startDate, DateTime endDate)
     {
-        var specification = AbsenceSpecificationExtensions.GetOverlappingAbsences(userId, startDate, endDate);
+        var specification = AbsenceSpecificationExtensions.GetOverlappingAbsencesForUser(userId, startDate, endDate);
         return await GetBySpecificationAsync(specification);
     }
 
     public async Task<bool> HasOverlappingAbsencesAsync(UserId userId, DateTime startDate, DateTime endDate, AbsenceId? excludeId = null)
     {
-        var specification = AbsenceSpecificationExtensions.GetOverlappingAbsences(userId, startDate, endDate);
-        
-        if (excludeId != null)
-        {
-            specification = specification.And(new NotSpecification<Absence>(new AbsenceByIdSpecification(excludeId)));
-        }
-
+        var specification = AbsenceSpecificationExtensions.GetOverlappingAbsencesForUser(userId, startDate, endDate, excludeId);
         return await CountBySpecificationAsync(specification) > 0;
     }
 
@@ -75,7 +69,7 @@ internal sealed class RefactoredSqlAbsenceRepository : BaseRepository<Absence>, 
     {
         // ID generation should be handled by database or a dedicated service
         // For now, keeping the existing logic but moving it to a private method
-        if (absence.Id.Value == 0)
+        if (absence.Id.Value == Guid.Empty)
         {
             await GenerateIdForEntity(absence);
         }
@@ -107,13 +101,15 @@ internal sealed class RefactoredSqlAbsenceRepository : BaseRepository<Absence>, 
     // Additional methods using specifications
     public async Task<IEnumerable<Absence>> GetPendingAbsencesAsync(UserId userId)
     {
-        var specification = AbsenceSpecificationExtensions.GetPendingAbsences(userId);
+        var specification = new AbsenceByUserSpecification(userId)
+            .And(AbsenceSpecificationExtensions.GetPendingAbsences());
         return await GetBySpecificationAsync(specification);
     }
 
     public async Task<IEnumerable<Absence>> GetAbsencesInDateRangeAsync(UserId userId, DateTime startDate, DateTime endDate)
     {
-        var specification = AbsenceSpecificationExtensions.GetAbsencesInDateRange(userId, startDate, endDate);
+        var specification = new AbsenceByUserSpecification(userId)
+            .And(AbsenceSpecificationExtensions.GetAbsencesInDateRange(startDate, endDate));
         return await GetBySpecificationAsync(specification);
     }
 
@@ -148,22 +144,15 @@ internal sealed class RefactoredSqlAbsenceRepository : BaseRepository<Absence>, 
     }
 
     // Private helper methods
-    private async Task GenerateIdForEntity(Absence absence)
+    private Task GenerateIdForEntity(Absence absence)
     {
         // This should ideally be in a separate ID generation service
-        var connection = Context.Database.GetDbConnection();
-        await connection.OpenAsync();
-
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Absences\"";
-        var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
-
-        var newId = new AbsenceId(maxId + 1);
+        var newId = AbsenceId.New();
 
         // Use reflection to set the ID since it's private
         var idProperty = absence.GetType().GetProperty("Id");
         idProperty?.SetValue(absence, newId);
 
-        await connection.CloseAsync();
+        return Task.CompletedTask;
     }
 }

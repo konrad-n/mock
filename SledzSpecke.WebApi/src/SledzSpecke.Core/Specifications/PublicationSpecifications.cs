@@ -128,6 +128,29 @@ public sealed class PublicationBeforeDateSpecification : Specification<Publicati
     }
 }
 
+public sealed class PublicationByJournalSpecification : Specification<Publication>
+{
+    private readonly string _journalName;
+
+    public PublicationByJournalSpecification(string journalName)
+    {
+        _journalName = journalName;
+    }
+
+    public override Expression<Func<Publication, bool>> ToExpression()
+    {
+        return publication => publication.Journal == _journalName;
+    }
+}
+
+public sealed class PublicationWithCoAuthorsSpecification : Specification<Publication>
+{
+    public override Expression<Func<Publication, bool>> ToExpression()
+    {
+        return publication => !string.IsNullOrWhiteSpace(publication.Authors) && publication.Authors.Contains(",");
+    }
+}
+
 public static class PublicationSpecificationExtensions
 {
     public static ISpecification<Publication> GetPeerReviewedPublicationsForUser(UserId userId)

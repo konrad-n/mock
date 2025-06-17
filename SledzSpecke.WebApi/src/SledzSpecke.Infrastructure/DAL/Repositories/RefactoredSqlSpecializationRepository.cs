@@ -47,7 +47,7 @@ internal sealed class RefactoredSqlSpecializationRepository : BaseRepository<Spe
     {
         // ID generation should be handled by database or a dedicated service
         // For now, keeping the existing logic but moving it to a private method
-        if (specialization.Id.Value == 0)
+        if (specialization.Id.Value <= 0)
         {
             await GenerateIdForEntity(specialization);
         }

@@ -35,11 +35,33 @@ public sealed class SpecializationByUserSpecification : Specification<Specializa
     }
 }
 
+public sealed class ActiveSpecializationSpecification : Specification<Specialization>
+{
+    private readonly DateTime _currentDate;
+
+    public ActiveSpecializationSpecification(DateTime currentDate)
+    {
+        _currentDate = currentDate;
+    }
+
+    public override Expression<Func<Specialization, bool>> ToExpression()
+    {
+        return specialization => specialization.Status == SpecializationStatus.Active && 
+            (specialization.ActualEndDate == null || specialization.ActualEndDate > _currentDate);
+    }
+}
+
 public static class SpecializationSpecificationExtensions
 {
     public static ISpecification<Specialization> GetSpecializationForUser(SpecializationId id, UserId userId)
     {
         return new SpecializationByIdSpecification(id)
             .And(new SpecializationByUserSpecification(userId));
+    }
+
+    public static ISpecification<Specialization> GetActiveSpecializations(UserId userId)
+    {
+        return new SpecializationByUserSpecification(userId)
+            .And(new ActiveSpecializationSpecification(DateTime.UtcNow));
     }
 }
