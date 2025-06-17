@@ -12,7 +12,7 @@ namespace SledzSpecke.Core.DomainServices;
 public sealed class CmkpValidationService : ICmkpValidationService
 {
     // CMKP certificate number format: CMKP/[YEAR]/[NUMBER]
-    private static readonly Regex CertificateNumberRegex = new(@"^CMKP\/\d{4}\/\d+$", RegexOptions.Compiled);
+    private static readonly Regex CertificateNumberRegex = new(@"^CMKP\/\d{4}\/\d+$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     // Allowed course types that require CMKP certification
     private static readonly HashSet<ValueObjects.CourseType> CmkpRequiredCourseTypes = new()

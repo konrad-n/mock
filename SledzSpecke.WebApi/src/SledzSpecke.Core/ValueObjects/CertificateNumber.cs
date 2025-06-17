@@ -7,7 +7,7 @@ public sealed record CertificateNumber
 {
     // Certificate numbers typically have specific formats
     // Examples: CERT-2023-001234, ABC123456, 2023/CERT/00123
-    private static readonly Regex CertificatePattern = new(@"^[A-Z0-9\-\/.]{4,100}$", RegexOptions.Compiled);
+    private static readonly Regex CertificatePattern = new(@"^[A-Z0-9\-\/.]{4,100}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
 

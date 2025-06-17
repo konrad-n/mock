@@ -7,7 +7,7 @@ public sealed record PhoneNumber
 {
     // Supports international format with optional country code
     // Examples: +48123456789, 123456789, +1-555-123-4567
-    private static readonly Regex PhonePattern = new(@"^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,5}[-\s\.]?[0-9]{1,5}$", RegexOptions.Compiled);
+    private static readonly Regex PhonePattern = new(@"^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,5}[-\s\.]?[0-9]{1,5}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
 

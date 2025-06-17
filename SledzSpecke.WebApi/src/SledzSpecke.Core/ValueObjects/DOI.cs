@@ -6,7 +6,7 @@ namespace SledzSpecke.Core.ValueObjects;
 public sealed record DOI
 {
     // DOI format: 10.xxxx/yyyy where xxxx is the registrant code
-    private static readonly Regex DoiPattern = new(@"^10\.\d{4,}\/[-._;()\/:a-zA-Z0-9]+$", RegexOptions.Compiled);
+    private static readonly Regex DoiPattern = new(@"^10\.\d{4,}\/[-._;()\/:a-zA-Z0-9]+$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
 

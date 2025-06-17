@@ -5,7 +5,7 @@ namespace SledzSpecke.Core.ValueObjects;
 
 public sealed record FileName
 {
-    private static readonly Regex SafeFileNameRegex = new(@"^[a-zA-Z0-9_\-\.\s]+$", RegexOptions.Compiled);
+    private static readonly Regex SafeFileNameRegex = new(@"^[a-zA-Z0-9_\-\.\s]+$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     private const int MaxLength = 255;
     
     public string Value { get; }

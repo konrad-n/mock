@@ -6,7 +6,7 @@ namespace SledzSpecke.Core.ValueObjects;
 public sealed record PMID
 {
     // PMID format: numeric identifier from PubMed
-    private static readonly Regex PmidPattern = new(@"^\d{1,8}$", RegexOptions.Compiled);
+    private static readonly Regex PmidPattern = new(@"^\d{1,8}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
 

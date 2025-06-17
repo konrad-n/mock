@@ -7,7 +7,7 @@ public sealed record ProcedureCode
 {
     // Medical procedure codes typically follow specific formats
     // e.g., ICD-10-PCS format or institution-specific formats
-    private static readonly Regex CodePattern = new(@"^[A-Z0-9\.\-]{2,20}$", RegexOptions.Compiled);
+    private static readonly Regex CodePattern = new(@"^[A-Z0-9\.\-]{2,20}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
 

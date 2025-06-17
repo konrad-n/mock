@@ -7,7 +7,7 @@ public sealed record Username
 {
     private const int MinLength = 3;
     private const int MaxLength = 50;
-    private static readonly Regex UsernameRegex = new(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+    private static readonly Regex UsernameRegex = new(@"^[a-zA-Z0-9_-]+$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     public string Value { get; }
 

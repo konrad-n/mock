@@ -7,7 +7,7 @@ public sealed record CourseNumber
 {
     // Course numbers often follow institution-specific formats
     // Common patterns: XXXX-YYYY, CS101, MED-2023-001
-    private static readonly Regex CourseNumberPattern = new(@"^[A-Z0-9\-\.\/]{2,50}$", RegexOptions.Compiled);
+    private static readonly Regex CourseNumberPattern = new(@"^[A-Z0-9\-\.\/]{2,50}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
 

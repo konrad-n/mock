@@ -11,7 +11,7 @@ public sealed record HashedPassword
 {
     private const int MinHashLength = 32; // Minimum length for most hash algorithms
     // Support both legacy (base64 only) and new format (base64.base64)
-    private static readonly Regex HashFormatRegex = new(@"^[a-zA-Z0-9+/]+={0,2}(\.[a-zA-Z0-9+/]+={0,2})?$", RegexOptions.Compiled);
+    private static readonly Regex HashFormatRegex = new(@"^[a-zA-Z0-9+/]+={0,2}(\.[a-zA-Z0-9+/]+={0,2})?$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     public string Value { get; }
 

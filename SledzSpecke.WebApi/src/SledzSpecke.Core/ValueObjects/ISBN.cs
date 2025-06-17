@@ -7,8 +7,8 @@ public sealed record ISBN
 {
     // ISBN-10: 10 digits (last can be X)
     // ISBN-13: 13 digits starting with 978 or 979
-    private static readonly Regex Isbn10Pattern = new(@"^[0-9]{9}[0-9X]$", RegexOptions.Compiled);
-    private static readonly Regex Isbn13Pattern = new(@"^97[89][0-9]{10}$", RegexOptions.Compiled);
+    private static readonly Regex Isbn10Pattern = new(@"^[0-9]{9}[0-9X]$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static readonly Regex Isbn13Pattern = new(@"^97[89][0-9]{10}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     
     public string Value { get; }
     public bool IsISBN13 { get; }
