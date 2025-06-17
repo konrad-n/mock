@@ -96,7 +96,7 @@ jobs:
           /o:"konrad-n" \
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+          /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.cobertura.xml" \
           /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/*.Designer.cs"
     
     - name: Restore dependencies
@@ -112,9 +112,8 @@ jobs:
       run: |
         dotnet test --no-build --verbosity normal -c Release \
           --filter "FullyQualifiedName!~E2E" \
-          /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=opencover \
-          /p:CoverletOutput=./coverage.opencover.xml
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults
       working-directory: ${{ env.BACKEND_PATH }}
       env:
         ConnectionStrings__DefaultConnection: "Host=localhost;Database=sledzspecke_test;Username=postgres;Password=postgres"
@@ -125,6 +124,12 @@ jobs:
       run: |
         echo "Backend tests failed!"
         exit 1
+    
+    - name: List coverage files
+      run: |
+        echo "=== Finding coverage files ==="
+        find . -name "*.xml" -path "*/TestResults/*" -type f | head -20
+      working-directory: ${{ env.BACKEND_PATH }}
     
     - name: End SonarCloud analysis
       env:
