@@ -80,13 +80,6 @@ public static partial class ApplicationExtensions
         // services.AddScoped<ICommandHandler<Commands.AddMedicalShift, int>, MedicalShifts.Handlers.AddMedicalShiftHandlerEnhanced>();
         // services.AddScoped<ICommandHandler<Commands.UpdateMedicalShift>, MedicalShifts.Handlers.UpdateMedicalShiftHandlerEnhanced>();
         // services.AddScoped<ICommandHandler<Commands.DeleteMedicalShift>, MedicalShifts.Handlers.DeleteMedicalShiftHandlerEnhanced>();
-        
-        // Register Result-based handlers (temporary override until all handlers are migrated)
-        services.AddScoped<IResultCommandHandler<Commands.CreateCourse, int>, Commands.Handlers.CreateCourseHandler>();
-        services.AddScoped<IResultCommandHandler<Commands.ChangePassword>, Commands.Handlers.ChangePasswordHandler>();
-        services.AddScoped<IResultCommandHandler<Commands.UpdateUserProfile>, Commands.Handlers.UpdateUserProfileHandler>();
-        services.AddScoped<IResultCommandHandler<Commands.DeleteCourse>, Commands.Handlers.DeleteCourseHandler>();
-        services.AddScoped<IResultCommandHandler<Commands.UpdateCourse>, Commands.Handlers.UpdateCourseHandler>();
 
         return services;
     }

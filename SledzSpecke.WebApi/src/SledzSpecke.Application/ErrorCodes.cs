@@ -30,4 +30,5 @@ public static class ErrorCodes
     public const string SPECIALIZATION_NOT_ACTIVE = "SPECIALIZATION_NOT_ACTIVE";
     public const string COURSE_NOT_APPROVED = "COURSE_NOT_APPROVED";
     public const string INVALID_SMK_VERSION = "INVALID_SMK_VERSION";
+    public const string ABSENCE_NOT_FOUND = "ABSENCE_NOT_FOUND";
 }

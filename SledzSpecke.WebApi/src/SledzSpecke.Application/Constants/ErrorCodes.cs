@@ -55,6 +55,12 @@ public static class ErrorCodes
     public const string COURSE_INVALID_DATES = "COURSE_INVALID_DATES";
     public const string COURSE_CANNOT_MODIFY = "COURSE_CANNOT_MODIFY";
     
+    // Absences
+    public const string ABSENCE_NOT_FOUND = "ABSENCE_NOT_FOUND";
+    public const string ABSENCE_OVERLAP = "ABSENCE_OVERLAP";
+    public const string ABSENCE_INVALID_DATES = "ABSENCE_INVALID_DATES";
+    public const string ABSENCE_CANNOT_MODIFY = "ABSENCE_CANNOT_MODIFY";
+    
     // Sync Status
     public const string CANNOT_MODIFY_SYNCED = "SYNC_CANNOT_MODIFY_SYNCED";
     public const string CANNOT_MODIFY_APPROVED = "SYNC_CANNOT_MODIFY_APPROVED";
