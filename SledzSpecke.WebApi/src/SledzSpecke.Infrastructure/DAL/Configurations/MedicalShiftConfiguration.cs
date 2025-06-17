@@ -16,6 +16,15 @@ internal sealed class MedicalShiftConfiguration : IEntityTypeConfiguration<Medic
         builder.Property(x => x.InternshipId)
             .HasConversion(x => x.Value, x => new Core.ValueObjects.InternshipId(x));
 
+        builder.Property(x => x.ModuleId)
+            .HasConversion(
+                x => x.HasValue ? x.Value.Value : (int?)null,
+                x => x.HasValue ? new Core.ValueObjects.ModuleId(x.Value) : null);
+
+        builder.Property(x => x.Type)
+            .HasConversion<int>()
+            .IsRequired();
+
         builder.Property(x => x.Location)
             .HasMaxLength(100)
             .IsRequired();

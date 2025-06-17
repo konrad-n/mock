@@ -44,6 +44,10 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
         builder.Property(x => x.DaysCount)
             .IsRequired();
 
+        builder.Property(x => x.Status)
+            .HasConversion<int>()
+            .IsRequired();
+
         builder.Property(x => x.IsCompleted)
             .IsRequired();
 
