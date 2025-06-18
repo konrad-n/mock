@@ -49,8 +49,8 @@ public class UserProfileControllerTests : IntegrationTestBase
         var profile = await response.Content.ReadFromJsonAsync<UserProfileDto>();
         profile.Should().NotBeNull();
         profile!.Email.Should().Be("test@example.com");
-        profile.FullName.Should().Be("Test User");
-        profile.Username.Should().Be("testuser");
+        profile.FirstName.Should().Be("Test");
+        profile.LastName.Should().Be("User");
     }
 
     [Fact]
@@ -85,11 +85,12 @@ public class UserProfileControllerTests : IntegrationTestBase
         // Verify in database
         var user = await DbContext.Users.FindAsync(new UserId(1));
         user.Should().NotBeNull();
-        user!.FullName.Value.Should().Be("Updated Name");
+        user!.FirstName.Value.Should().Be("Updated");
+        user.LastName.Value.Should().Be("Name");
         user.Email.Value.Should().Be("updated@example.com");
         user.PhoneNumber?.Value.Should().Be("+48123456789");
         user.DateOfBirth.Should().Be(new DateTime(1990, 1, 1));
-        user.Bio.Value.Should().Be("Updated bio");
+        // Bio is not part of User entity
     }
 
     [Fact]
@@ -205,8 +206,6 @@ public class UserProfileControllerTests : IntegrationTestBase
         await SeedTestData();
         
         var command = new UpdateUserPreferences(
-            Language: "pl",
-            Theme: "dark",
             NotificationsEnabled: false,
             EmailNotificationsEnabled: true);
 
@@ -219,29 +218,8 @@ public class UserProfileControllerTests : IntegrationTestBase
         // Verify in database
         var user = await DbContext.Users.FindAsync(new UserId(1));
         user.Should().NotBeNull();
-        user!.PreferredLanguage.Value.Should().Be("pl");
-        user.PreferredTheme.Value.Should().Be("dark");
         user.NotificationsEnabled.Should().BeFalse();
         user.EmailNotificationsEnabled.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task UpdatePreferences_WithInvalidTheme_ShouldReturnBadRequest()
-    {
-        // Arrange
-        await SeedTestData();
-        
-        var command = new UpdateUserPreferences(
-            Language: "en",
-            Theme: "invalid-theme",
-            NotificationsEnabled: true,
-            EmailNotificationsEnabled: true);
-
-        // Act
-        var response = await _authenticatedClient.PutAsJsonAsync("/api/users/preferences", command);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -249,8 +227,6 @@ public class UserProfileControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new UpdateUserPreferences(
-            Language: "en",
-            Theme: "dark",
             NotificationsEnabled: true,
             EmailNotificationsEnabled: true);
 
@@ -263,26 +239,32 @@ public class UserProfileControllerTests : IntegrationTestBase
 
     private async Task SeedTestData()
     {
-        var specialization = new Specialization
-        {
-            Id = new SpecializationId(1),
-            Name = "Test Specialization",
-            Code = "TST",
-            Years = 5,
-            IsActive = true
-        };
+        var specialization = TestDataFactory.CreateSpecialization(userId: 1);
         
         await DbContext.Specializations.AddAsync(specialization);
         
-        var user = User.Create(
+        var user = User.CreateWithId(
             new UserId(1),
             new Email("test@example.com"),
-            new Username("testuser"),
-            new Password("TestPassword123!"), // In real app this would be hashed
-            new FullName("Test User"),
-            new SmkVersion("new"),
-            new SpecializationId(1),
-            DateTime.UtcNow);
+            new HashedPassword("$2a$10$hashedpassword123"), // Hashed password
+            new FirstName("Test"),
+            null, // SecondName
+            new LastName("User"),
+            new Pesel("90010112345"),
+            new PwzNumber("1234567"),
+            new PhoneNumber("+48123456789"),
+            new DateTime(1990, 1, 1),
+            new Address(
+                "Test Street",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            ),
+            DateTime.UtcNow,
+            true,
+            true);
             
         await DbContext.Users.AddAsync(user);
         await DbContext.SaveChangesAsync();

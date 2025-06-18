@@ -106,7 +106,7 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
         _capturedEvents.Should().HaveCount(3);
         _capturedEvents.Select(e => e.ProcedureId).Should().BeEquivalentTo(procedureIds);
         _capturedEvents.Select(e => e.InternshipId).Should().AllBeEquivalentTo(internshipId);
-        _capturedEvents.Select(e => e.ProcedureCode).Should().BeEquivalentTo(procedures.Select(p => p.Item1));
+        _capturedEvents.Select(e => e.Code).Should().BeEquivalentTo(procedures.Select(p => p.Item1));
     }
 
     [Fact]

@@ -162,18 +162,11 @@ public class ProceduresControllerTests : IntegrationTestBase
             Date: DateTime.Today,
             Year: 3,
             Code: "PROC001",
+            Name: "Test Procedure",
             Location: "Hospital A",
             Status: "Pending",
-            OperatorCode: null,
-            PerformingPerson: null,
-            PatientInitials: null,
-            PatientGender: null,
-            ProcedureGroup: null,
-            AssistantData: null,
-            ProcedureRequirementId: null,
-            ModuleId: null,
-            ProcedureName: null,
-            Supervisor: null);
+            ExecutionType: "CodeA",
+            SupervisorName: "Dr. Smith");
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/procedures", command);
@@ -325,22 +318,17 @@ public class ProceduresControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var command = new UpdateProcedure(
-            Id: procedure.Id.Value,
+            ProcedureId: procedure.Id.Value,
             Date: DateTime.Today.AddDays(1),
-            Year: 4,
             Code: "UPDATED001",
             Location: "Updated Hospital",
             Status: "Completed",
-            OperatorCode: "OP999",
+            ExecutionType: "CodeB",
             PerformingPerson: "Dr. Updated",
-            PatientInitials: "XY",
-            PatientGender: "M",
+            PatientGender: 'M',
             ProcedureGroup: "Updated Group",
             AssistantData: "Updated Assistant",
-            ProcedureRequirementId: 10,
-            ModuleId: null,
-            ProcedureName: null,
-            Supervisor: null);
+            ProcedureRequirementId: 10);
 
         // Act
         var response = await _authenticatedClient.PutAsJsonAsync($"/procedures/{procedure.Id.Value}", command);
