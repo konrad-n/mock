@@ -394,3 +394,27 @@ FodyWeavers.xsd
 
 /SledzSpecke.Core/Models/SmkExportOptions.cs
 /.idea/.idea.SledzSpecke/.idea
+
+# Additional ignore patterns
+# Log files
+*.log
+api.log
+app.log
+dev.log
+test-results.log
+
+# Temporary and test files
+test.txt
+test-*.json
+*.tmp
+
+# FileListAbsolute.txt files
+*.FileListAbsolute.txt
+
+# E2E test reports and logs
+**/Reports/Logs/
+**/test-results/
+
+# Backup files
+*.bak
+*.backup
