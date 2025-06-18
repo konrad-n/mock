@@ -2,7 +2,7 @@ using SledzSpecke.Application.DTO;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.ValueObjects;
 
-namespace SledzSpecke.Application.Procedures.Extensions;
+namespace SledzSpecke.Application.Features.Procedures.Extensions;
 
 internal static class ProcedureMappingExtensions
 {

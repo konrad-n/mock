@@ -1,12 +1,12 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.DTO;
 using SledzSpecke.Application.Exceptions;
-using SledzSpecke.Application.Procedures.Extensions;
+using SledzSpecke.Application.Features.Procedures.Extensions;
 using SledzSpecke.Application.Queries;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
-namespace SledzSpecke.Application.Procedures.Handlers;
+namespace SledzSpecke.Application.Features.Procedures.Handlers;
 
 public class GetProcedureByIdHandler : IQueryHandler<GetProcedureById, ProcedureDto>
 {

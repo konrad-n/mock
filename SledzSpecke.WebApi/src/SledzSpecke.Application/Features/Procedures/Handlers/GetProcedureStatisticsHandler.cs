@@ -5,7 +5,7 @@ using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Core.Entities;
 
-namespace SledzSpecke.Application.Procedures.Handlers;
+namespace SledzSpecke.Application.Features.Procedures.Handlers;
 
 public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistics, ProcedureSummaryDto>
 {

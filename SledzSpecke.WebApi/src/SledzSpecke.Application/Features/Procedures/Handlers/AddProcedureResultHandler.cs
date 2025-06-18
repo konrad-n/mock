@@ -6,7 +6,7 @@ using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
-namespace SledzSpecke.Application.Procedures.Handlers;
+namespace SledzSpecke.Application.Features.Procedures.Handlers;
 
 public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedure, int>
 {

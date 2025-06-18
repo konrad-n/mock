@@ -4,7 +4,7 @@ using SledzSpecke.Application.Exceptions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
-namespace SledzSpecke.Application.Procedures.Handlers;
+namespace SledzSpecke.Application.Features.Procedures.Handlers;
 
 public class UpdateProcedureHandler : ICommandHandler<UpdateProcedure>
 {
