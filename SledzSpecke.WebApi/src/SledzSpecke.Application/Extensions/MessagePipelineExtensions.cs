@@ -15,6 +15,7 @@ public static class MessagePipelineExtensions
         services.AddScoped<IMessageExecutionStep, ValidationExecutionStep>();
         services.AddScoped<IMessageExecutionStep, LoggingExecutionStep>();
         services.AddScoped<IMessageExecutionStep, TimingExecutionStep>();
+        services.AddScoped<IMessageExecutionStep, OutboxExecutionStep>();
         
         return services;
     }

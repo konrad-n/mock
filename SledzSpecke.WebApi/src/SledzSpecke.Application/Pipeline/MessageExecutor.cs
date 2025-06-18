@@ -88,6 +88,7 @@ public sealed class MessageExecutor : IMessageExecutor
             nameof(LoggingExecutionStep) => 2,
             "TransactionExecutionStep" => 3,
             nameof(TimingExecutionStep) => 4,
+            nameof(OutboxExecutionStep) => 5,
             _ => 99
         };
     }

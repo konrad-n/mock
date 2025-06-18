@@ -24,6 +24,9 @@ using SledzSpecke.Infrastructure.Options;
 using SledzSpecke.Infrastructure.Events;
 using SledzSpecke.Infrastructure.Export;
 using SledzSpecke.Core.DomainServices;
+using SledzSpecke.Core.Outbox;
+using SledzSpecke.Infrastructure.Outbox;
+using SledzSpecke.Application.Services;
 using System.Text;
 
 namespace SledzSpecke.Infrastructure;
@@ -152,6 +155,14 @@ public static class Extensions
         
         // Export services
         services.AddScoped<ISpecializationExportService, SmkExportService>();
+        
+        // Outbox pattern
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
+        services.AddScoped<IOutboxService, OutboxService>();
+        services.AddHostedService<OutboxProcessor>();
+        
+        // Event publishing
+        services.AddScoped<IEventPublisher, EventPublisher>();
         services.AddScoped<Export.ISmkExcelGenerator, Export.SmkExcelGenerator>();
         services.AddScoped<ISmkValidator, SmkValidator>();
         

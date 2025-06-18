@@ -4,6 +4,7 @@ using SledzSpecke.Application.Validation;
 using SledzSpecke.Application.Services;
 using SledzSpecke.Application.DomainServices;
 using SledzSpecke.Core.DomainServices;
+using SledzSpecke.Application.Extensions;
 using System.Reflection;
 using FluentValidation;
 
@@ -83,6 +84,9 @@ public static partial class ApplicationExtensions
         
         // Add decorators for Result-based handlers
         services.AddResultDecorators();
+        
+        // Add message pipeline
+        services.AddMessagePipeline();
 
         // Override specific handlers if needed (enhanced versions)
         // Commented out - using Result-based handlers now

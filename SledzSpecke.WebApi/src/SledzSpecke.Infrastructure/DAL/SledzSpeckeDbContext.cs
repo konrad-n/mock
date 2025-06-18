@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Outbox;
 using SledzSpecke.Infrastructure.DAL.Configurations;
+using SledzSpecke.Infrastructure.Outbox.Data;
 using SledzSpecke.Infrastructure.Persistence.EntityTypeConfigurations;
 using System.Linq;
 
@@ -24,6 +26,7 @@ public sealed class SledzSpeckeDbContext : DbContext
     public DbSet<EducationalActivity> EducationalActivities => Set<EducationalActivity>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<AdditionalSelfEducationDays> AdditionalSelfEducationDays => Set<AdditionalSelfEducationDays>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     public SledzSpeckeDbContext(DbContextOptions<SledzSpeckeDbContext> options) : base(options)
     {
@@ -58,5 +61,12 @@ public sealed class SledzSpeckeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new EducationalActivityConfiguration());
         modelBuilder.ApplyConfiguration(new FileMetadataConfiguration());
         modelBuilder.ApplyConfiguration(new AdditionalSelfEducationDaysConfiguration());
+        
+        // Add Outbox configuration
+        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
+        
+        // Create schema if not exists
+        modelBuilder.HasDefaultSchema("public");
+        modelBuilder.Entity<OutboxMessage>().ToTable("OutboxMessages", "outbox");
     }
 }
