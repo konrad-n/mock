@@ -5,6 +5,7 @@ using SledzSpecke.Application.Services;
 using SledzSpecke.Application.DomainServices;
 using SledzSpecke.Core.DomainServices;
 using SledzSpecke.Application.Extensions;
+using SledzSpecke.Application.Pipeline;
 using System.Reflection;
 using FluentValidation;
 
@@ -87,6 +88,7 @@ public static partial class ApplicationExtensions
         
         // Add message pipeline
         services.AddMessagePipeline();
+        services.AddEnhancedMessagePipeline();
 
         // Override specific handlers if needed (enhanced versions)
         // Commented out - using Result-based handlers now

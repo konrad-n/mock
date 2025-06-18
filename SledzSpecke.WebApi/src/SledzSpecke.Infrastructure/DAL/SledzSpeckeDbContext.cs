@@ -4,6 +4,7 @@ using SledzSpecke.Core.Outbox;
 using SledzSpecke.Infrastructure.DAL.Configurations;
 using SledzSpecke.Infrastructure.Outbox.Data;
 using SledzSpecke.Infrastructure.Persistence.EntityTypeConfigurations;
+using SledzSpecke.Infrastructure.Sagas;
 using System.Linq;
 
 namespace SledzSpecke.Infrastructure.DAL;
@@ -27,6 +28,8 @@ public sealed class SledzSpeckeDbContext : DbContext
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<AdditionalSelfEducationDays> AdditionalSelfEducationDays => Set<AdditionalSelfEducationDays>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<SagaStateEntity> SagaStates => Set<SagaStateEntity>();
+    public DbSet<SagaStepEntity> SagaSteps => Set<SagaStepEntity>();
 
     public SledzSpeckeDbContext(DbContextOptions<SledzSpeckeDbContext> options) : base(options)
     {
@@ -64,5 +67,9 @@ public sealed class SledzSpeckeDbContext : DbContext
         
         // Add Outbox configuration
         modelBuilder.ApplyConfiguration(new Configurations.OutboxMessageConfiguration());
+        
+        // Add Saga configurations
+        modelBuilder.ApplyConfiguration(new SagaStateConfiguration());
+        modelBuilder.ApplyConfiguration(new SagaStepConfiguration());
     }
 }

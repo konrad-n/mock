@@ -35,6 +35,11 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
         builder.Property(x => x.RetryCount)
             .HasDefaultValue(0);
 
+        // Configure Metadata as JSONB
+        builder.Property(x => x.Metadata)
+            .HasColumnType("jsonb")
+            .IsRequired(false);
+
         // Index for unprocessed messages
         builder.HasIndex(x => x.ProcessedAt)
             .HasFilter("\"ProcessedAt\" IS NULL");

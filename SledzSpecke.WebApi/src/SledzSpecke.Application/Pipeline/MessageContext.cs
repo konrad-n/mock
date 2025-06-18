@@ -1,25 +1,24 @@
+using System;
+using System.Collections.Generic;
+
 namespace SledzSpecke.Application.Pipeline;
 
 public class MessageContext
 {
-    public object Message { get; }
-    public Type MessageType { get; }
-    public Dictionary<string, object> Metadata { get; }
-    public Guid CorrelationId { get; }
-    public DateTime Timestamp { get; }
+    public Guid MessageId { get; set; }
+    public string MessageType { get; set; } = string.Empty;
+    public object Payload { get; set; } = null!;
+    public Dictionary<string, object> Headers { get; set; } = new();
+    public DateTime CreatedAt { get; set; }
+    public int RetryCount { get; set; }
+    public List<string> ExecutionLog { get; set; } = new();
+    public bool IsProcessed { get; set; }
+    public string? ErrorMessage { get; set; }
     
-    public MessageContext(object message)
-    {
-        Message = message ?? throw new ArgumentNullException(nameof(message));
-        MessageType = message.GetType();
-        Metadata = new Dictionary<string, object>();
-        CorrelationId = Guid.NewGuid();
-        Timestamp = DateTime.UtcNow;
-    }
+    public T GetPayload<T>() => (T)Payload;
     
-    public T GetMessage<T>() where T : class
+    public void Log(string message)
     {
-        return Message as T 
-            ?? throw new InvalidOperationException($"Message is not of type {typeof(T).Name}");
+        ExecutionLog.Add($"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff} - {message}");
     }
 }

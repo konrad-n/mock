@@ -27,6 +27,9 @@ using SledzSpecke.Core.DomainServices;
 using SledzSpecke.Core.Outbox;
 using SledzSpecke.Infrastructure.Outbox;
 using SledzSpecke.Application.Services;
+using SledzSpecke.Core.Sagas;
+using SledzSpecke.Infrastructure.Sagas;
+using SledzSpecke.Application.Sagas;
 using System.Text;
 
 namespace SledzSpecke.Infrastructure;
@@ -160,6 +163,17 @@ public static class Extensions
         services.AddScoped<Core.Outbox.IOutboxRepository, SqlOutboxRepository>();
         services.AddScoped<IOutboxService, OutboxService>();
         services.AddHostedService<OutboxProcessor>();
+        
+        // Saga pattern
+        services.AddScoped<ISagaRepository, SagaRepository>();
+        services.AddScoped(typeof(ISagaOrchestrator<,>), typeof(SagaOrchestrator<,>));
+        
+        // Register saga steps
+        services.AddScoped<ValidateMonthlyHoursStep>();
+        services.AddScoped<ValidateProceduresStep>();
+        services.AddScoped<GenerateMonthlyReportStep>();
+        services.AddScoped<NotifySupervisorStep>();
+        services.AddScoped<ArchiveMonthlyDataStep>();
         
         // Event publishing
         services.AddScoped<IEventPublisher, EventPublisher>();
