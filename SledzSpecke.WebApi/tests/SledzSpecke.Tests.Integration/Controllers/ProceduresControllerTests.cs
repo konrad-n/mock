@@ -65,18 +65,18 @@ public class ProceduresControllerTests : IntegrationTestBase
             Date: DateTime.Today,
             Year: 3,
             Code: "PROC001",
+            Name: "Appendectomy",
             Location: "Hospital A",
             Status: "Pending",
-            OperatorCode: "OP001",
+            ExecutionType: "Primary",
+            SupervisorName: "Dr. Smith",
+            SupervisorPwz: "1234567",
             PerformingPerson: "Dr. Smith",
             PatientInitials: "JD",
-            PatientGender: "M",
+            PatientGender: 'M',
             ProcedureGroup: "Surgery",
             AssistantData: "Nurse Johnson",
-            ProcedureRequirementId: 1,
-            ModuleId: null,
-            ProcedureName: null,
-            Supervisor: null);
+            ProcedureRequirementId: 1);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/procedures", command);
@@ -87,7 +87,7 @@ public class ProceduresControllerTests : IntegrationTestBase
         var procedureId = await response.Content.ReadFromJsonAsync<int>();
         procedureId.Should().BeGreaterThan(0);
         
-        var procedure = await _procedureRepository.GetByIdAsync(procedureId);
+        var procedure = await _procedureRepository.GetByIdAsync(new ProcedureId(procedureId));
         procedure.Should().NotBeNull();
         procedure.Should().BeOfType<ProcedureOldSmk>();
         
@@ -120,14 +120,15 @@ public class ProceduresControllerTests : IntegrationTestBase
             Date: DateTime.Today,
             Year: 0, // Not used in new SMK
             Code: "PROC002",
+            Name: "Cholecystectomy",
             Location: "Hospital B",
             Status: "Pending",
-            OperatorCode: "OP002",
+            ExecutionType: "Primary",
+            SupervisorName: "Dr. Senior",
+            SupervisorPwz: "7654321",
             PerformingPerson: "Dr. Jones",
             PatientInitials: "AB",
-            PatientGender: "F",
-            ProcedureGroup: null,
-            AssistantData: null,
+            PatientGender: 'F',
             ProcedureRequirementId: 5,
             ModuleId: module.Id.Value,
             ProcedureName: "Complex Procedure",
@@ -142,7 +143,7 @@ public class ProceduresControllerTests : IntegrationTestBase
         var procedureId = await response.Content.ReadFromJsonAsync<int>();
         procedureId.Should().BeGreaterThan(0);
         
-        var procedure = await _procedureRepository.GetByIdAsync(procedureId);
+        var procedure = await _procedureRepository.GetByIdAsync(new ProcedureId(procedureId));
         procedure.Should().NotBeNull();
         procedure.Should().BeOfType<ProcedureNewSmk>();
         
@@ -197,18 +198,15 @@ public class ProceduresControllerTests : IntegrationTestBase
             Date: DateTime.Today, // Today is after internship end
             Year: 3,
             Code: "PROC001",
+            Name: "Test Procedure",
             Location: "Hospital A",
             Status: "Pending",
-            OperatorCode: null,
+            ExecutionType: "Primary",
+            SupervisorName: "Dr. Test",
+            SupervisorPwz: null,
             PerformingPerson: null,
             PatientInitials: null,
-            PatientGender: null,
-            ProcedureGroup: null,
-            AssistantData: null,
-            ProcedureRequirementId: null,
-            ModuleId: null,
-            ProcedureName: null,
-            Supervisor: null);
+            PatientGender: null);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/procedures", command);
@@ -336,7 +334,7 @@ public class ProceduresControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
-        var updatedProcedure = await _procedureRepository.GetByIdAsync(procedure.Id.Value);
+        var updatedProcedure = await _procedureRepository.GetByIdAsync(new ProcedureId(procedure.Id.Value));
         updatedProcedure.Should().NotBeNull();
         updatedProcedure!.Code.Should().Be(command.Code);
         updatedProcedure.Location.Should().Be(command.Location);

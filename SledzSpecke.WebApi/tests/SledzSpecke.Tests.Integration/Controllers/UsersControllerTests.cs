@@ -160,7 +160,7 @@ public class UsersControllerTests : IntegrationTestBase
         await SignUpUser("testuser@example.com", "TestPassword123!", "Test User");
         
         var command = new SignIn(
-            Email: "testuser@example.com",
+            Username: "testuser",
             Password: "WrongPassword!");
 
         // Act
@@ -178,7 +178,7 @@ public class UsersControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Email: "nonexistent@example.com",
+            Username: "nonexistent",
             Password: "Password123!");
 
         // Act
@@ -217,11 +217,15 @@ public class UsersControllerTests : IntegrationTestBase
 
     private async Task SignUpUser(string email, string password, string fullName)
     {
-        var command = new SignUp(
-            Email: email,
-            Password: password,
-            FullName: fullName,
-            Role: "User");
+        var nameParts = fullName.Split(' ', 2);
+        var firstName = nameParts.Length > 0 ? nameParts[0] : "Test";
+        var lastName = nameParts.Length > 1 ? nameParts[1] : "User";
+        
+        var command = TestDataFactoryExtensions.CreateSignUpCommand(
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName);
             
         await Client.PostAsJsonAsync("/users", command);
     }

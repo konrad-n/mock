@@ -98,7 +98,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
                 currentMonth.AddDays(i),
                 8, // hours
                 0, // minutes
-                ShiftType.Regular,
+                ShiftType.Accompanying,
                 "Department",
                 "Dr. Supervisor",
                 currentMonth.Year
@@ -107,7 +107,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         }
 
         // Act - Approve the last shift
-        var lastShift = (await medicalShiftRepository.GetByInternshipIdAsync(internship.Id.Value)).Last();
+        var lastShift = (await medicalShiftRepository.GetByInternshipIdAsync(internship.Id)).Last();
         var approvedEvent = new MedicalShiftApprovedEvent(
             lastShift.Id,
             DateTime.UtcNow,
@@ -193,7 +193,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         }
 
         // Act - Complete the 10th procedure (milestone)
-        var completedProcedure = (await procedureRepository.GetByInternshipIdAsync(internship.Id.Value)).First();
+        var completedProcedure = (await procedureRepository.GetByInternshipIdAsync(internship.Id)).First();
         var completedEvent = new Core.Events.ProcedureCompletedEvent(
             completedProcedure.Id,
             completedProcedure.InternshipId,

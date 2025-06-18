@@ -70,11 +70,18 @@ public class UserProfileControllerTests : IntegrationTestBase
         await SeedTestData();
         
         var command = new UpdateUserProfile(
-            FullName: "Updated Name",
+            FirstName: "Updated",
+            LastName: "Name",
             Email: "updated@example.com",
             PhoneNumber: "+48123456789",
-            DateOfBirth: new DateTime(1990, 1, 1),
-            Bio: "Updated bio");
+            CorrespondenceAddress: new AddressDto(
+                Street: "Test Street",
+                HouseNumber: "1",
+                ApartmentNumber: null,
+                PostalCode: "00-001",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await _authenticatedClient.PutAsJsonAsync("/api/users/profile", command);
@@ -100,11 +107,18 @@ public class UserProfileControllerTests : IntegrationTestBase
         await SeedTestData();
         
         var command = new UpdateUserProfile(
-            FullName: "Updated Name",
+            FirstName: "Updated",
+            LastName: "Name",
             Email: "invalid-email",
-            PhoneNumber: null,
-            DateOfBirth: null,
-            Bio: null);
+            PhoneNumber: "+48123456789",
+            CorrespondenceAddress: new AddressDto(
+                Street: "Test Street",
+                HouseNumber: "1",
+                ApartmentNumber: null,
+                PostalCode: "00-001",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await _authenticatedClient.PutAsJsonAsync("/api/users/profile", command);
@@ -118,11 +132,18 @@ public class UserProfileControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new UpdateUserProfile(
-            FullName: "Updated Name",
+            FirstName: "Updated",
+            LastName: "Name",
             Email: "updated@example.com",
-            PhoneNumber: null,
-            DateOfBirth: null,
-            Bio: null);
+            PhoneNumber: "+48123456789",
+            CorrespondenceAddress: new AddressDto(
+                Street: "Test Street",
+                HouseNumber: "1",
+                ApartmentNumber: null,
+                PostalCode: "00-001",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PutAsJsonAsync("/api/users/profile", command);

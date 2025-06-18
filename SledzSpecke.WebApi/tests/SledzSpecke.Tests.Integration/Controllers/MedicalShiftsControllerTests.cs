@@ -81,7 +81,10 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         var command = new AddMedicalShift(
             InternshipId: internship.Id.Value,
             Date: DateTime.Today.AddDays(-1),
-            Hours: 8);
+            Hours: 8,
+            Minutes: 0,
+            Location: "Test Hospital",
+            Year: 3);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/medical-shifts", command);
@@ -109,7 +112,10 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         var command = new AddMedicalShift(
             InternshipId: internship.Id.Value,
             Date: DateTime.Today.AddDays(1),
-            Hours: -8); // This should be invalid (negative hours)
+            Hours: -8, // This should be invalid (negative hours)
+            Minutes: 0,
+            Location: "Test Hospital",
+            Year: 3);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/medical-shifts", command);
@@ -128,7 +134,10 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         var command = new AddMedicalShift(
             InternshipId: 1,
             Date: DateTime.Today.AddDays(1),
-            Hours: 8);
+            Hours: 8,
+            Minutes: 0,
+            Location: "Test Hospital",
+            Year: 3);
 
         // Act
         var response = await Client.PostAsJsonAsync("/medical-shifts", command);

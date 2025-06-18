@@ -126,16 +126,20 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
             _capturedEvents.Clear();
             
             var command = new AddProcedure(
-                internshipId,
-                $"P{category}01",
-                $"Test Procedure {category}",
-                category,
-                PatientType.Child,
-                PatientGender.Male,
-                "12312312312",
-                SupervisorType.Resident,
-                DateTime.UtcNow.Date,
-                "Pediatrics");
+                InternshipId: internshipId,
+                Date: DateTime.UtcNow.Date,
+                Year: 3,
+                Code: $"P{category}01",
+                Name: $"Test Procedure {category}",
+                Location: "Pediatrics",
+                Status: "Completed",
+                ExecutionType: "Primary",
+                SupervisorName: "Dr. Supervisor",
+                SupervisorPwz: "1234567",
+                PerformingPerson: "Resident",
+                PatientInfo: "Child",
+                PatientInitials: "JD",
+                PatientGender: 'M');
                 
             var result = await Mediator.Send(command);
             var procedureId = (int)result;
@@ -143,7 +147,7 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
             await Task.Delay(50);
             
             _capturedEvents.Should().ContainSingle();
-            _capturedEvents.First().Category.Should().Be(category);
+            _capturedEvents.First().Code.Should().Be($"P{category}01");
         }
     }
 

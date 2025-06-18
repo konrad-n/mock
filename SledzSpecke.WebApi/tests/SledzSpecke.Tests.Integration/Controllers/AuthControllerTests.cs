@@ -195,7 +195,7 @@ public class AuthControllerTests : IntegrationTestBase
         await SeedUser();
         
         var command = new SignIn(
-            Email: "test@example.com",
+            Username: "test@example.com",
             Password: "TestPassword123!");
 
         // Act
@@ -217,7 +217,7 @@ public class AuthControllerTests : IntegrationTestBase
         await SeedUser();
         
         var command = new SignIn(
-            Email: "test@example.com",
+            Username: "test@example.com",
             Password: "WrongPassword!");
 
         // Act
@@ -234,7 +234,7 @@ public class AuthControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Email: "nonexistent@example.com",
+            Username: "nonexistent@example.com",
             Password: "Password123!");
 
         // Act
@@ -251,7 +251,7 @@ public class AuthControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Email: "invalid-email",
+            Username: "invalid-email",
             Password: "Password123!");
 
         // Act
@@ -274,7 +274,7 @@ public class AuthControllerTests : IntegrationTestBase
         var user = User.CreateWithId(
             new UserId(1),
             new Email("test@example.com"),
-            new HashedPassword(BCrypt.Net.BCrypt.HashPassword("TestPassword123!")), // Properly hashed
+            HashedPassword.FromPlainText("TestPassword123!"), // Properly hashed
             new FirstName("Test"),
             null,
             new LastName("User"),
