@@ -100,7 +100,7 @@ public class MedicalShiftsController : BaseController
         [FromQuery] int year,
         [FromQuery] int? month = null)
     {
-        var userId = GetCurrentUserId();
+        var userId = _userContextService.GetUserId();
         var query = new GetMedicalShiftStatistics { UserId = userId, Year = year, Month = month };
         return await HandleAsync(query, _getMedicalShiftStatisticsHandler);
     }
