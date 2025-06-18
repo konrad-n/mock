@@ -7,7 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using SledzSpecke.E2E.Tests.Fixtures;
 using SledzSpecke.E2E.Tests.PageObjects;
-using SledzSpecke.Tests.Common.Builders.Domain;
+using SledzSpecke.E2E.Tests.Infrastructure;
 using Serilog;
 
 namespace SledzSpecke.E2E.Tests.Scenarios;
@@ -18,7 +18,7 @@ public class PerformanceScenarios : E2ETestBase
     private readonly ITestOutputHelper _output;
     private readonly ILogger _logger;
     
-    public PerformanceScenarios(E2ETestFixture fixture, ITestOutputHelper output) : base(fixture)
+    public PerformanceScenarios(ITestOutputHelper output)
     {
         _output = output;
         _logger = Log.ForContext<PerformanceScenarios>();
@@ -128,7 +128,7 @@ public class PerformanceScenarios : E2ETestBase
             var userId = i;
             userTasks.Add(Task.Run(async () =>
             {
-                var context = await Browser.NewContextAsync();
+                var context = await BrowserFactory.CreateBrowserContextAsync();
                 var page = await context.NewPageAsync();
                 
                 var stopwatch = Stopwatch.StartNew();
@@ -224,9 +224,14 @@ public class PerformanceScenarios : E2ETestBase
     
     private async Task AddShiftViaApiAsync(int index)
     {
-        var shift = new MedicalShiftBuilder()
-            .WithDate(DateTime.Today.AddDays(-index))
-            .Build();
+        var shift = new ShiftData
+        {
+            Date = DateTime.Today.AddDays(-index),
+            Hours = 8,
+            Minutes = 0,
+            Location = "Test Location",
+            ShiftType = "regular"
+        };
             
         await Page.EvaluateAsync(@"
             async (shift) => {
@@ -246,7 +251,7 @@ public class PerformanceScenarios : E2ETestBase
             date = shift.Date.ToString("yyyy-MM-dd"),
             hours = shift.Hours,
             minutes = shift.Minutes,
-            type = shift.Type
+            type = shift.ShiftType
         });
     }
     
@@ -289,9 +294,15 @@ public class PerformanceScenarios : E2ETestBase
     
     private async Task AddProcedureViaApiAsync(int index, string name = "Test Procedure")
     {
-        var procedure = new MedicalProcedureBuilder()
-            .OnDate(DateTime.Today.AddDays(-index))
-            .Build();
+        var procedure = new ProcedureTestData
+        {
+            Date = DateTime.Today.AddDays(-index),
+            Name = name,
+            Category = "Test Category",
+            IcdCode = "00.00",
+            ExecutionType = "Performed",
+            Supervisor = ""
+        };
             
         await Page.EvaluateAsync(@"
             async (procedure) => {
@@ -309,10 +320,10 @@ public class PerformanceScenarios : E2ETestBase
         {
             internshipId = 1,
             date = procedure.Date.ToString("yyyy-MM-dd"),
-            name = name,
+            name = procedure.Name,
             category = procedure.Category,
             icdCode = procedure.IcdCode,
-            supervised = procedure.Supervised
+            supervised = procedure.Supervisor != ""
         });
     }
     

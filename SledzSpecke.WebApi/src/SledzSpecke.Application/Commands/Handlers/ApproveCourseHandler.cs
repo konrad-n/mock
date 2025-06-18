@@ -1,10 +1,11 @@
 using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-public sealed class ApproveCourseHandler : ICommandHandler<ApproveCourse>
+public sealed class ApproveCourseHandler : IResultCommandHandler<ApproveCourse>
 {
     private readonly ICourseRepository _courseRepository;
 
@@ -13,15 +14,24 @@ public sealed class ApproveCourseHandler : ICommandHandler<ApproveCourse>
         _courseRepository = courseRepository;
     }
 
-    public async Task HandleAsync(ApproveCourse command)
+    public async Task<Result> HandleAsync(ApproveCourse command, CancellationToken cancellationToken = default)
     {
-        var course = await _courseRepository.GetByIdAsync(new CourseId(command.CourseId));
-        if (course is null)
+        try
         {
-            throw new InvalidOperationException($"Course with ID {command.CourseId} not found.");
-        }
+            var course = await _courseRepository.GetByIdAsync(new CourseId(command.CourseId));
+            if (course is null)
+            {
+                return Result.Failure($"Course with ID {command.CourseId} not found.");
+            }
 
-        course.Approve(command.ApproverName);
-        await _courseRepository.UpdateAsync(course);
+            course.Approve(command.ApproverName);
+            await _courseRepository.UpdateAsync(course);
+            
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"Failed to approve course: {ex.Message}");
+        }
     }
 }

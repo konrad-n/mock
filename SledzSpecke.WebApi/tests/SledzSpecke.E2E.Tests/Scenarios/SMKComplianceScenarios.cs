@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Playwright;
 using SledzSpecke.E2E.Tests.Fixtures;
 using SledzSpecke.E2E.Tests.PageObjects;
-using SledzSpecke.Tests.Common.Builders.Domain;
+using SledzSpecke.E2E.Tests.Infrastructure;
 using Xunit;
 using Serilog;
 
@@ -14,7 +14,7 @@ public class SMKComplianceScenarios : E2ETestBase
 {
     private readonly ILogger _logger;
     
-    public SMKComplianceScenarios(E2ETestFixture fixture) : base(fixture)
+    public SMKComplianceScenarios()
     {
         _logger = Log.ForContext<SMKComplianceScenarios>();
     }

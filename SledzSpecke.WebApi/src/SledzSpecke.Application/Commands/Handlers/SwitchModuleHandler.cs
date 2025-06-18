@@ -1,11 +1,12 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Exceptions;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
-public sealed class SwitchModuleHandler : ICommandHandler<SwitchModule>
+public sealed class SwitchModuleHandler : IResultCommandHandler<SwitchModule>
 {
     private readonly ISpecializationRepository _specializationRepository;
     private readonly IModuleRepository _moduleRepository;
@@ -24,45 +25,54 @@ public sealed class SwitchModuleHandler : ICommandHandler<SwitchModule>
         _userRepository = userRepository;
     }
 
-    public async Task HandleAsync(SwitchModule command)
+    public async Task<Result> HandleAsync(SwitchModule command, CancellationToken cancellationToken = default)
     {
-        // Get current user
-        var userId = _userContextService.GetUserId();
-        var user = await _userRepository.GetByIdAsync(new UserId(userId));
-        if (user is null)
+        try
         {
-            throw new NotFoundException("User not found.");
+            // Get current user
+            var userId = _userContextService.GetUserId();
+            var user = await _userRepository.GetByIdAsync(new UserId(userId));
+            if (user is null)
+            {
+                return Result.Failure("User not found.");
+            }
+
+            // TODO: User-Specialization relationship needs to be redesigned
+            // // Verify user owns this specialization
+            // if (user.SpecializationId.Value != command.SpecializationId)
+            // {
+            //     return Result.Failure("You can only switch modules in your own specialization.");
+            // }
+
+            // Get specialization
+            var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(command.SpecializationId));
+            if (specialization is null)
+            {
+                return Result.Failure($"Specialization with ID {command.SpecializationId} not found.");
+            }
+
+            // Get and verify module
+            var module = await _moduleRepository.GetByIdAsync(new ModuleId(command.ModuleId));
+            if (module is null)
+            {
+                return Result.Failure($"Module with ID {command.ModuleId} not found.");
+            }
+
+            // Verify module belongs to specialization
+            if (module.SpecializationId != specialization.Id)
+            {
+                return Result.Failure("Module does not belong to the specified specialization.");
+            }
+
+            // Update current module
+            specialization.SetCurrentModule(new ModuleId(command.ModuleId));
+            await _specializationRepository.UpdateAsync(specialization);
+            
+            return Result.Success();
         }
-
-        // TODO: User-Specialization relationship needs to be redesigned
-        // // Verify user owns this specialization
-        // if (user.SpecializationId.Value != command.SpecializationId)
-        // {
-        //     throw new UnauthorizedAccessException("You can only switch modules in your own specialization.");
-        // }
-
-        // Get specialization
-        var specialization = await _specializationRepository.GetByIdAsync(new SpecializationId(command.SpecializationId));
-        if (specialization is null)
+        catch (Exception ex)
         {
-            throw new NotFoundException($"Specialization with ID {command.SpecializationId} not found.");
+            return Result.Failure($"Failed to switch module: {ex.Message}");
         }
-
-        // Get and verify module
-        var module = await _moduleRepository.GetByIdAsync(new ModuleId(command.ModuleId));
-        if (module is null)
-        {
-            throw new NotFoundException($"Module with ID {command.ModuleId} not found.");
-        }
-
-        // Verify module belongs to specialization
-        if (module.SpecializationId != specialization.Id)
-        {
-            throw new InvalidOperationException("Module does not belong to the specified specialization.");
-        }
-
-        // Update current module
-        specialization.SetCurrentModule(new ModuleId(command.ModuleId));
-        await _specializationRepository.UpdateAsync(specialization);
     }
 }
