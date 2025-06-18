@@ -10,17 +10,22 @@ public static class TestDataFactory
 {
     private static readonly Faker Faker = new();
 
-    public static User CreateUser(string? email = null, string? role = null)
+    public static User CreateUser(
+        string? email = null, 
+        string? firstName = null,
+        string? lastName = null,
+        string? pesel = null,
+        string? pwzNumber = null)
     {
         email ??= Faker.Internet.Email();
         var password = new HashedPassword("$2a$10$abcdefghijklmnopqrstuvwxyz123456789012345678901234567890"); // BCrypt hash format
-        var firstName = new FirstName(Faker.Name.FirstName());
+        var firstNameValue = new FirstName(firstName ?? Faker.Name.FirstName());
         var secondName = Faker.Random.Bool() ? new SecondName(Faker.Name.FirstName()) : null;
-        var lastName = new LastName(Faker.Name.LastName());
+        var lastNameValue = new LastName(lastName ?? Faker.Name.LastName());
         var dateOfBirth = new DateTime(1970 + Faker.Random.Int(0, 29), Faker.Random.Int(1, 12), Faker.Random.Int(1, 28));
         var gender = Faker.Random.Bool() ? Gender.Male : Gender.Female;
-        var pesel = new Pesel(Pesel.GenerateValidPesel(dateOfBirth, gender, Faker.Random.Int(0, 999)));
-        var pwzNumber = new PwzNumber(PwzNumber.GenerateValidPwz(Faker.Random.Int(0, 999999)));
+        var peselValue = new Pesel(pesel ?? Pesel.GenerateValidPesel(dateOfBirth, gender, Faker.Random.Int(0, 999)));
+        var pwzNumberValue = new PwzNumber(pwzNumber ?? PwzNumber.GenerateValidPwz(Faker.Random.Int(0, 999999)));
         var phoneNumber = new PhoneNumber($"+48{Faker.Random.Int(100000000, 999999999):D9}");
         var address = new Address(
             Faker.Address.StreetName(),
@@ -28,18 +33,17 @@ public static class TestDataFactory
             Faker.Random.Bool() ? Faker.Random.Int(1, 100).ToString() : null,
             $"{Faker.Random.Int(10, 99):D2}-{Faker.Random.Int(100, 999):D3}",
             Faker.Address.City(),
-            Faker.PickRandom("Mazowieckie", "Małopolskie", "Śląskie", "Wielkopolskie", "Dolnośląskie"),
-            "Polska"
+            Faker.PickRandom("Mazowieckie", "Małopolskie", "Śląskie", "Wielkopolskie", "Dolnośląskie")
         );
         
         return User.Create(
             new Email(email),
             password,
-            firstName,
+            firstNameValue,
             secondName,
-            lastName,
-            pesel,
-            pwzNumber,
+            lastNameValue,
+            peselValue,
+            pwzNumberValue,
             phoneNumber,
             dateOfBirth,
             address);

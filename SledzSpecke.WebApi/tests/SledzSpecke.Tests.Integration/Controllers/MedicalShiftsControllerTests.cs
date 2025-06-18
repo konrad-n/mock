@@ -51,9 +51,12 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
         
         var command = new AddMedicalShift(
-            InternshipId: internship.Id.Value,
+            InternshipId: internship.Id,
             Date: DateTime.Today.AddDays(1),
-            Hours: 8);
+            Hours: 8,
+            Minutes: 0,
+            Location: "Test Hospital",
+            Year: 3);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/medical-shifts", command);
@@ -79,7 +82,7 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
         
         var command = new AddMedicalShift(
-            InternshipId: internship.Id.Value,
+            InternshipId: internship.Id,
             Date: DateTime.Today.AddDays(-1),
             Hours: 8,
             Minutes: 0,
@@ -110,7 +113,7 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
         
         var command = new AddMedicalShift(
-            InternshipId: internship.Id.Value,
+            InternshipId: internship.Id,
             Date: DateTime.Today.AddDays(1),
             Hours: -8, // This should be invalid (negative hours)
             Minutes: 0,
@@ -218,7 +221,7 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain(shift.Location.Value);
+        content.Should().Contain(shift.Location);
         // Description is not exposed in the API response
     }
 

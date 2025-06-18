@@ -1,4 +1,5 @@
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.ValueObjects;
 using System;
 using System.Linq;
 
@@ -127,20 +128,18 @@ public class MedicalProcedureBuilder : TestDataBuilder<Procedure>
     
     public override Procedure Build()
     {
-        return new Procedure
-        {
-            Id = _id,
-            InternshipId = _internshipId,
-            Date = _date,
-            Name = _name,
-            Category = _category,
-            IcdCode = _icdCode,
-            Description = _description,
-            Supervised = _supervised,
-            SupervisorName = _supervisorName,
-            SupervisorPwz = _supervisorPwz,
-            PatientAge = _patientAge ?? Faker.Random.Int(1, 95),
-            CreatedAt = DateTime.UtcNow
-        };
+        return Procedure.Create(
+            id: new ProcedureId(_id),
+            moduleId: new ModuleId(1), // Default module ID
+            internshipId: new InternshipId(_internshipId),
+            date: _date,
+            code: _icdCode,
+            name: _name,
+            location: "Szpital Uniwersytecki", // Default location
+            executionType: _supervised ? ProcedureExecutionType.CodeA : ProcedureExecutionType.CodeB,
+            supervisorName: _supervisorName,
+            year: _date.Year,
+            smkVersion: SmkVersion.New // Default to new SMK version
+        );
     }
 }

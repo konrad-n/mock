@@ -138,28 +138,55 @@ public class UserBuilder : TestDataBuilder<User>
     
     public override User Build()
     {
-        var user = new User
-        {
-            Id = _id,
-            Email = new Email(_email),
-            FirstName = _firstName,
-            LastName = _lastName,
-            Pesel = new Pesel(_pesel),
-            Pwz = new Pwz(_pwz),
-            PasswordHash = _passwordHash,
-            Address = new Address(
-                _street,
-                _houseNumber,
-                _apartmentNumber,
-                _postalCode,
-                _city
-            ),
-            PhoneNumber = _phoneNumber,
-            University = _university,
-            GraduationYear = _graduationYear,
-            CreatedAt = DateTime.UtcNow,
-            IsActive = true
-        };
+        // Ensure we have a valid date of birth that matches the PESEL
+        var pesel = new Pesel(_pesel);
+        var dateOfBirth = pesel.GetDateOfBirth();
+        
+        var user = _id > 0
+            ? User.CreateWithId(
+                id: new UserId(_id),
+                email: new Email(_email),
+                password: new HashedPassword(_passwordHash),
+                firstName: new FirstName(_firstName),
+                secondName: null,
+                lastName: new LastName(_lastName),
+                pesel: pesel,
+                pwzNumber: new PwzNumber(_pwz),
+                phoneNumber: new PhoneNumber(_phoneNumber),
+                dateOfBirth: dateOfBirth,
+                correspondenceAddress: new Address(
+                    street: _street,
+                    houseNumber: _houseNumber,
+                    apartmentNumber: _apartmentNumber,
+                    postalCode: _postalCode,
+                    city: _city,
+                    province: "Mazowieckie",
+                    country: "Polska"
+                ),
+                registrationDate: DateTime.UtcNow
+            )
+            : User.Create(
+                email: new Email(_email),
+                password: new HashedPassword(_passwordHash),
+                firstName: new FirstName(_firstName),
+                secondName: null,
+                lastName: new LastName(_lastName),
+                pesel: pesel,
+                pwzNumber: new PwzNumber(_pwz),
+                phoneNumber: new PhoneNumber(_phoneNumber),
+                dateOfBirth: dateOfBirth,
+                correspondenceAddress: new Address(
+                    street: _street,
+                    houseNumber: _houseNumber,
+                    apartmentNumber: _apartmentNumber,
+                    postalCode: _postalCode,
+                    city: _city,
+                    province: "Mazowieckie",
+                    country: "Polska"
+                )
+            );
+
+        // ID will be set by repository when saving if it's 0
         
         return user;
     }

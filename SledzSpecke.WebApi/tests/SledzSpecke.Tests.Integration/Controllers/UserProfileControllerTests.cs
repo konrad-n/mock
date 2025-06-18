@@ -74,7 +74,7 @@ public class UserProfileControllerTests : IntegrationTestBase
             LastName: "Name",
             Email: "updated@example.com",
             PhoneNumber: "+48123456789",
-            CorrespondenceAddress: new AddressDto(
+            CorrespondenceAddress: new SledzSpecke.Application.Commands.AddressDto(
                 Street: "Test Street",
                 HouseNumber: "1",
                 ApartmentNumber: null,
@@ -111,7 +111,7 @@ public class UserProfileControllerTests : IntegrationTestBase
             LastName: "Name",
             Email: "invalid-email",
             PhoneNumber: "+48123456789",
-            CorrespondenceAddress: new AddressDto(
+            CorrespondenceAddress: new SledzSpecke.Application.Commands.AddressDto(
                 Street: "Test Street",
                 HouseNumber: "1",
                 ApartmentNumber: null,
@@ -136,7 +136,7 @@ public class UserProfileControllerTests : IntegrationTestBase
             LastName: "Name",
             Email: "updated@example.com",
             PhoneNumber: "+48123456789",
-            CorrespondenceAddress: new AddressDto(
+            CorrespondenceAddress: new SledzSpecke.Application.Commands.AddressDto(
                 Street: "Test Street",
                 HouseNumber: "1",
                 ApartmentNumber: null,
@@ -283,9 +283,7 @@ public class UserProfileControllerTests : IntegrationTestBase
                 "Warsaw",
                 "Mazowieckie"
             ),
-            DateTime.UtcNow,
-            true,
-            true);
+            DateTime.UtcNow);
             
         await DbContext.Users.AddAsync(user);
         await DbContext.SaveChangesAsync();

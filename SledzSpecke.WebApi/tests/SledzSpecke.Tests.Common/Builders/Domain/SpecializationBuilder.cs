@@ -1,4 +1,5 @@
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.ValueObjects;
 using System;
 
 namespace SledzSpecke.Tests.Common.Builders.Domain;
@@ -80,17 +81,33 @@ public class SpecializationBuilder : TestDataBuilder<Specialization>
     
     public override Specialization Build()
     {
-        return new Specialization
-        {
-            Id = _id,
-            UserId = _userId,
-            Name = _name,
-            SmkVersion = _smkVersion,
-            StartDate = _startDate,
-            PlannedEndDate = _plannedEndDate,
-            SupervisorName = _supervisorName,
-            CreatedAt = DateTime.UtcNow,
-            IsActive = true
-        };
+        var specialization = _id > 0
+            ? new Specialization(
+                id: new SpecializationId(_id),
+                userId: new UserId(_userId),
+                name: _name,
+                programCode: $"CODE-{_name.ToUpper().Replace(" ", "")}",
+                smkVersion: SmkVersion.New,
+                programVariant: "standard",
+                startDate: _startDate,
+                plannedEndDate: _plannedEndDate,
+                plannedPesYear: _startDate.Year,
+                programStructure: "5-letnia specjalizacja",
+                durationYears: 5
+            )
+            : new Specialization(
+                userId: new UserId(_userId),
+                name: _name,
+                programCode: $"CODE-{_name.ToUpper().Replace(" ", "")}",
+                smkVersion: SmkVersion.New,
+                programVariant: "standard",
+                startDate: _startDate,
+                plannedEndDate: _plannedEndDate,
+                plannedPesYear: _startDate.Year,
+                programStructure: "5-letnia specjalizacja",
+                durationYears: 5
+            );
+            
+        return specialization;
     }
 }

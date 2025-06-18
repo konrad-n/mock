@@ -1,4 +1,5 @@
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.ValueObjects;
 using System;
 
 namespace SledzSpecke.Tests.Common.Builders.Domain;
@@ -6,6 +7,7 @@ namespace SledzSpecke.Tests.Common.Builders.Domain;
 public class InternshipBuilder : TestDataBuilder<Internship>
 {
     private int _id = 1;
+    private int _specializationId = 1;
     private int _moduleId = 1;
     private string _name = "Oddział Chorób Wewnętrznych";
     private string _hospital;
@@ -28,6 +30,12 @@ public class InternshipBuilder : TestDataBuilder<Internship>
     public InternshipBuilder ForModule(int moduleId)
     {
         _moduleId = moduleId;
+        return this;
+    }
+    
+    public InternshipBuilder ForSpecialization(int specializationId)
+    {
+        _specializationId = specializationId;
         return this;
     }
     
@@ -78,18 +86,24 @@ public class InternshipBuilder : TestDataBuilder<Internship>
     
     public override Internship Build()
     {
-        return new Internship
+        var internship = Internship.Create(
+            id: new InternshipId(_id),
+            specializationId: new SpecializationId(_specializationId),
+            name: _name,
+            institutionName: _hospital,
+            departmentName: _department,
+            startDate: _startDate,
+            endDate: _plannedEndDate ?? _startDate.AddMonths(3),
+            plannedWeeks: _plannedWeeks,
+            plannedDays: _plannedWeeks * 5 // Assuming 5 days per week
+        );
+
+        // Assign to module if provided
+        if (_moduleId > 0)
         {
-            Id = _id,
-            ModuleId = _moduleId,
-            Name = _name,
-            Hospital = _hospital,
-            Department = _department,
-            StartDate = _startDate,
-            PlannedEndDate = _plannedEndDate,
-            PlannedWeeks = _plannedWeeks,
-            CreatedAt = DateTime.UtcNow,
-            IsActive = true
-        };
+            internship.AssignToModule(new ModuleId(_moduleId));
+        }
+
+        return internship;
     }
 }

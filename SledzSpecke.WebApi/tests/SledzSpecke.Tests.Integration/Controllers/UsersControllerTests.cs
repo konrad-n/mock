@@ -139,7 +139,7 @@ public class UsersControllerTests : IntegrationTestBase
         await SignUpUser("testuser@example.com", "TestPassword123!", "Test User");
         
         var command = new SignIn(
-            Username: "testuser",
+            Username: "testuser@example.com",
             Password: "TestPassword123!");
 
         // Act

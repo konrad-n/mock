@@ -61,7 +61,7 @@ public class ProceduresControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var command = new AddProcedure(
-            InternshipId: internship.Id.Value,
+            InternshipId: internship.Id,
             Date: DateTime.Today,
             Year: 3,
             Code: "PROC001",
@@ -116,7 +116,7 @@ public class ProceduresControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var command = new AddProcedure(
-            InternshipId: internship.Id.Value,
+            InternshipId: internship.Id,
             Date: DateTime.Today,
             Year: 0, // Not used in new SMK
             Code: "PROC002",
@@ -194,7 +194,7 @@ public class ProceduresControllerTests : IntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var command = new AddProcedure(
-            InternshipId: internship.Id.Value,
+            InternshipId: internship.Id,
             Date: DateTime.Today, // Today is after internship end
             Year: 3,
             Code: "PROC001",

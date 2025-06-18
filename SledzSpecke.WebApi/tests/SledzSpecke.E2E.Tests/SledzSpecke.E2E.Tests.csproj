@@ -35,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SledzSpecke.Core\SledzSpecke.Core.csproj" />
     <ProjectReference Include="..\..\src\SledzSpecke.Infrastructure\SledzSpecke.Infrastructure.csproj" />
+    <ProjectReference Include="..\SledzSpecke.Tests.Common\SledzSpecke.Tests.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

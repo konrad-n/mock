@@ -12,7 +12,7 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
     private DateTime _date = DateTime.Today;
     private int _hours = 8;
     private int _minutes = 0;
-    private string _type = "Oddział";
+    private ShiftType _type = ShiftType.Accompanying;
     private string _location = "Szpital Uniwersytecki w Krakowie";
     private bool _isNightShift = false;
     
@@ -46,20 +46,20 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
         _isNightShift = true;
         _hours = 12;
         _minutes = 0;
-        _type = "Dyżur nocny";
+        _type = ShiftType.Independent;
         return this;
     }
     
     public MedicalShiftBuilder AsICUShift()
     {
-        _type = "Intensywna terapia";
+        _type = ShiftType.Independent;
         _location = "Oddział Intensywnej Terapii";
         return this;
     }
     
     public MedicalShiftBuilder AsERShift()
     {
-        _type = "SOR";
+        _type = ShiftType.Independent;
         _location = "Szpitalny Oddział Ratunkowy";
         _hours = 10;
         _minutes = 0;
@@ -85,18 +85,18 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
     
     public override MedicalShift Build()
     {
-        var shift = new MedicalShift
-        {
-            Id = _id,
-            InternshipId = _internshipId,
-            Date = _date,
-            Hours = _hours,
-            Minutes = _minutes,
-            Type = _type,
-            Location = _location,
-            IsNightShift = _isNightShift,
-            CreatedAt = DateTime.UtcNow
-        };
+        var shift = MedicalShift.Create(
+            id: new MedicalShiftId(_id),
+            internshipId: new InternshipId(_internshipId),
+            moduleId: null, // Optional module ID
+            date: _date,
+            hours: _hours,
+            minutes: _minutes,
+            type: _type,
+            location: _location,
+            supervisorName: null, // Optional supervisor name
+            year: _date.Year
+        );
         
         return shift;
     }

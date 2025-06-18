@@ -32,10 +32,12 @@ public static class TestDataFactory
             new PhoneNumber(phoneNumber ?? "+48123456789"),
             dateOfBirth ?? new DateTime(1990, 1, 1),
             address ?? new Address(
-                "Test Street 1",
+                "Test Street",
+                "1",
+                null,
                 "00-001",
                 "Warsaw",
-                "Poland"
+                "Mazowieckie"
             )
         );
         

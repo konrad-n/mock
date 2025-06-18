@@ -1,55 +1,168 @@
 #!/bin/bash
-echo "🔧 SledzSpecke Integration Test Fix Script"
-echo "=========================================="
 
-echo "📊 Step 1: Analyzing compilation errors..."
-mkdir -p test-fix-reports
-dotnet build tests/SledzSpecke.Tests.Integration/SledzSpecke.Tests.Integration.csproj 2>&1 | grep -E "error CS" > test-fix-reports/errors.txt
+# SledzSpecke Integration Tests - Automated Fix Script
+# This script fixes common patterns that are causing compilation errors
 
-echo "Found $(wc -l < test-fix-reports/errors.txt) compilation errors"
+echo "========================================="
+echo "SledzSpecke Integration Tests Fix Script"
+echo "========================================="
 echo ""
 
-echo "📈 Step 2: Categorizing errors by type..."
-echo "Error types:"
-cat test-fix-reports/errors.txt | sed -E 's/.*error (CS[0-9]+):.*/\1/' | sort | uniq -c | sort -nr | head -10
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Base directory for tests
+TEST_DIR="/home/ubuntu/projects/mock/SledzSpecke.WebApi/tests"
+
+# Counter for changes
+TOTAL_CHANGES=0
+
+# Function to count changes
+count_changes() {
+    local changes=$1
+    TOTAL_CHANGES=$((TOTAL_CHANGES + changes))
+}
+
+echo -e "${YELLOW}Step 1: Fixing SignIn command usage (Email → Username)${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    # Fix SignIn command constructor
+    changes=$(grep -c "new SignIn(Email:" "$file" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        sed -i 's/new SignIn(Email:/new SignIn(Username:/g' "$file"
+        echo -e "${GREEN}✓${NC} Fixed $changes occurrences in: $(basename "$file")"
+        count_changes $changes
+    fi
+    
+    # Fix SignIn parameter names
+    changes=$(grep -c "SignIn(\s*Email:" "$file" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        sed -i 's/SignIn(\s*Email:/SignIn(Username:/g' "$file"
+        count_changes $changes
+    fi
+done
+
 echo ""
-
-echo "📁 Step 3: Files with most errors:"
-cat test-fix-reports/errors.txt | cut -d'(' -f1 | sed 's/.*\///' | sort | uniq -c | sort -nr | head -10
-echo ""
-
-echo "🔄 Step 4: Applying automated fixes..."
-
-echo "  - Replacing builder patterns..."
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new UserBuilder()/TestDataFactory.CreateTestUser(/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new InternshipBuilder()/TestDataFactory.CreateTestInternship(/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new MedicalShiftBuilder()/TestDataFactory.CreateTestMedicalShift(/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new ProcedureBuilder()/TestDataFactory.CreateTestProcedure(/g' {} \;
-
-echo "  - Fixing value object access..."
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/\.Email\.Should()/\.Email.Value.Should()/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new Duration(/new ShiftDuration(/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/SpecializationType\.Medical/"Medical"/g' {} \;
-
-echo "  - Fixing command constructors..."
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new SignUp\s*{/new SignUp(/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new SignIn\s*{/new SignIn(/g' {} \;
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/new AddMedicalShift\s*{/new AddMedicalShift(/g' {} \;
-
-echo "  - Fixing DTO references..."
-find tests/SledzSpecke.Tests.Integration -name "*.cs" -type f -exec sed -i 's/AccessTokenDto/JwtDto/g' {} \;
+echo -e "${YELLOW}Step 2: Updating AccessTokenDto to JwtDto${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    changes=$(grep -c "AccessTokenDto" "$file" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        sed -i 's/AccessTokenDto/JwtDto/g' "$file"
+        echo -e "${GREEN}✓${NC} Updated $changes references in: $(basename "$file")"
+        count_changes $changes
+    fi
+done
 
 echo ""
-echo "✅ Automated fixes applied"
-echo ""
+echo -e "${YELLOW}Step 3: Removing PatientType references${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    # Replace PatientType enum values with strings
+    changes=$(grep -c "PatientType\." "$file" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        sed -i 's/PatientType\.Adult/"Adult"/g' "$file"
+        sed -i 's/PatientType\.Child/"Child"/g' "$file"
+        sed -i 's/PatientType\.Infant/"Infant"/g' "$file"
+        sed -i 's/PatientType\.[A-Za-z]*/"Adult"/g' "$file"
+        echo -e "${GREEN}✓${NC} Replaced $changes PatientType references in: $(basename "$file")"
+        count_changes $changes
+    fi
+    
+    # Remove PatientType type declarations
+    sed -i 's/PatientType patientType/string patientType/g' "$file"
+done
 
-echo "🔨 Building again to check progress..."
-ERRORS_AFTER=$(dotnet build tests/SledzSpecke.Tests.Integration/SledzSpecke.Tests.Integration.csproj 2>&1 | grep -c "error CS")
-echo "Remaining errors: $ERRORS_AFTER"
+echo ""
+echo -e "${YELLOW}Step 4: Fixing PatientGender references${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    changes=$(grep -c "PatientGender" "$file" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        sed -i 's/PatientGender\./Gender\./g' "$file"
+        sed -i 's/PatientGender /Gender /g' "$file"
+        echo -e "${GREEN}✓${NC} Fixed $changes PatientGender references in: $(basename "$file")"
+        count_changes $changes
+    fi
+done
 
 echo ""
-echo "🎯 Next Steps:"
-echo "1. Review test-fix-reports/errors.txt for specific errors"
-echo "2. Fix remaining errors manually"
-echo "3. Run individual test files as you fix them"
+echo -e "${YELLOW}Step 5: Updating Duration to ShiftDuration${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    changes=$(grep -c "new Duration(" "$file" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        sed -i 's/new Duration(/new ShiftDuration(/g' "$file"
+        sed -i 's/Duration duration/ShiftDuration duration/g' "$file"
+        sed -i 's/Duration\./ShiftDuration\./g' "$file"
+        echo -e "${GREEN}✓${NC} Updated $changes Duration references in: $(basename "$file")"
+        count_changes $changes
+    fi
+done
+
 echo ""
+echo -e "${YELLOW}Step 6: Fixing command parameter syntax${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    # Fix positional parameters to named parameters
+    # AddMedicalShift pattern
+    sed -i 's/new AddMedicalShift(\([0-9]*\), /new AddMedicalShift(InternshipId: \1, /g' "$file"
+    
+    # CreateInternship pattern
+    sed -i 's/new CreateInternship(\([0-9]*\), /new CreateInternship(SpecializationId: \1, /g' "$file"
+    
+    # Other common patterns
+    sed -i 's/new UpdateMedicalShift(\([0-9]*\), /new UpdateMedicalShift(ShiftId: \1, /g' "$file"
+    sed -i 's/new DeleteMedicalShift(\([0-9]*\))/new DeleteMedicalShift(ShiftId: \1)/g' "$file"
+done
+
+echo ""
+echo -e "${YELLOW}Step 7: Fixing ShiftType references${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    # Ensure ShiftType enum values are correct
+    sed -i 's/ShiftType\.DayShift/ShiftType.Accompanying/g' "$file"
+    sed -i 's/ShiftType\.NightShift/ShiftType.Independent/g' "$file"
+done
+
+echo ""
+echo -e "${YELLOW}Step 8: Adding missing using statements${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    # Check if file uses JwtDto but doesn't have the using statement
+    if grep -q "JwtDto" "$file" && ! grep -q "using SledzSpecke.Application.DTO;" "$file"; then
+        # Add using statement after the last using statement
+        sed -i '/^using /h;${g;s/$/\nusing SledzSpecke.Application.DTO;/;}' "$file"
+        echo -e "${GREEN}✓${NC} Added DTO using statement to: $(basename "$file")"
+    fi
+done
+
+echo ""
+echo -e "${YELLOW}Step 9: Fixing SignUp commands - Remove Username parameter${NC}"
+echo "---------------------------------------------"
+find "$TEST_DIR" -name "*.cs" -type f | while read file; do
+    # SignUp doesn't have Username parameter in current implementation
+    changes=$(grep -c "Username:" "$file" | grep -v "SignIn" 2>/dev/null || echo 0)
+    if [ $changes -gt 0 ]; then
+        # Remove Username parameter from SignUp commands
+        sed -i '/new SignUp(/,/)/{/Username:/d;}' "$file"
+        echo -e "${GREEN}✓${NC} Fixed SignUp commands in: $(basename "$file")"
+    fi
+done
+
+echo ""
+echo "========================================="
+echo -e "${GREEN}Fix script completed!${NC}"
+echo "========================================="
+echo -e "Total changes made: ${GREEN}$TOTAL_CHANGES${NC}"
+echo ""
+echo -e "${YELLOW}Next steps:${NC}"
+echo "1. Run 'dotnet build' to check remaining compilation errors"
+echo "2. Fix any SignUp commands manually (they need full parameter list)"
+echo "3. Update specific test assertions as needed"
+echo "4. Run 'dotnet test' to verify functionality"
+echo ""
+echo -e "${YELLOW}Tip:${NC} Use the TestDataFactoryExtensions for creating test commands!"
