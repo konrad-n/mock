@@ -2,7 +2,7 @@ using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Features.MedicalShifts.DTOs;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
-using SledzSpecke.Core.Specifications;
+using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Core.Entities;
 
 namespace SledzSpecke.Application.Features.MedicalShifts.Queries.GetMedicalShiftStatistics;
@@ -20,15 +20,6 @@ public sealed class GetMedicalShiftStatisticsHandler : IResultQueryHandler<GetMe
     {
         try
         {
-            // Build specification based on query parameters
-            var spec = new BaseSpecification<MedicalShift>();
-
-            // Filter by user if specified
-            if (query.UserId.HasValue)
-            {
-                spec = spec.And(new UserOwnershipSpecification<MedicalShift>(query.UserId.Value));
-            }
-
             // Filter by year and month
             DateTime startDate, endDate;
             
@@ -43,10 +34,18 @@ public sealed class GetMedicalShiftStatisticsHandler : IResultQueryHandler<GetMe
                 endDate = new DateTime(query.Year, 12, 31);
             }
 
-            spec = spec.And(new DateRangeSpecification<MedicalShift>(startDate, endDate));
-
             // Get medical shifts
-            var medicalShifts = await _medicalShiftRepository.GetBySpecificationAsync(spec);
+            IEnumerable<MedicalShift> medicalShifts;
+            if (query.UserId.HasValue)
+            {
+                medicalShifts = await _medicalShiftRepository.GetByUserIdAndDateRangeAsync(
+                    new UserId(query.UserId.Value), startDate, endDate);
+            }
+            else
+            {
+                medicalShifts = await _medicalShiftRepository.GetByDateRangeAsync(startDate, endDate, 0);
+            }
+            
             var shiftsList = medicalShifts.ToList();
 
             if (!shiftsList.Any())
@@ -64,7 +63,7 @@ public sealed class GetMedicalShiftStatisticsHandler : IResultQueryHandler<GetMe
 
             // Calculate statistics
             var totalShifts = shiftsList.Count;
-            var totalMinutes = shiftsList.Sum(s => s.Duration.TotalMinutes);
+            var totalMinutes = shiftsList.Sum(s => s.TotalMinutes);
             var totalHours = totalMinutes / 60;
             var remainingMinutes = totalMinutes % 60;
             var averageShiftDuration = totalMinutes / (double)totalShifts;

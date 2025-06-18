@@ -157,7 +157,7 @@ public static class Extensions
         services.AddScoped<ISpecializationExportService, SmkExportService>();
         
         // Outbox pattern
-        services.AddScoped<IOutboxRepository, SqlOutboxRepository>();
+        services.AddScoped<Core.Outbox.IOutboxRepository, SqlOutboxRepository>();
         services.AddScoped<IOutboxService, OutboxService>();
         services.AddHostedService<OutboxProcessor>();
         

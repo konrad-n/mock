@@ -19,7 +19,6 @@ public class ModulesController : BaseController
     private readonly IQueryHandler<GetModuleProgress, SpecializationStatisticsDto> _getModuleProgressHandler;
     private readonly ICommandHandler<CompleteModule> _completeModuleHandler;
     private readonly ICommandHandler<CreateInternship, int> _createInternshipHandler;
-    private readonly ICommandHandler<AddMedicalShift> _addMedicalShiftHandler;
     private readonly ICommandHandler<AddProcedure, int> _addProcedureHandler;
     private readonly ICommandHandler<CreateCourse, int> _createCourseHandler;
     private readonly ICommandHandler<CreateSelfEducation> _createSelfEducationHandler;
@@ -33,7 +32,6 @@ public class ModulesController : BaseController
         IQueryHandler<GetModuleProgress, SpecializationStatisticsDto> getModuleProgressHandler,
         ICommandHandler<CompleteModule> completeModuleHandler,
         ICommandHandler<CreateInternship, int> createInternshipHandler,
-        ICommandHandler<AddMedicalShift> addMedicalShiftHandler,
         ICommandHandler<AddProcedure, int> addProcedureHandler,
         ICommandHandler<CreateCourse, int> createCourseHandler,
         ICommandHandler<CreateSelfEducation> createSelfEducationHandler,
@@ -46,7 +44,6 @@ public class ModulesController : BaseController
         _getModuleProgressHandler = getModuleProgressHandler;
         _completeModuleHandler = completeModuleHandler;
         _createInternshipHandler = createInternshipHandler;
-        _addMedicalShiftHandler = addMedicalShiftHandler;
         _addProcedureHandler = addProcedureHandler;
         _createCourseHandler = createCourseHandler;
         _createSelfEducationHandler = createSelfEducationHandler;
@@ -129,37 +126,6 @@ public class ModulesController : BaseController
         { 
             InternshipId = internshipId, 
             Message = "Internship created successfully" 
-        });
-    }
-
-    /// <summary>
-    /// Adds a medical shift to a module
-    /// </summary>
-    [HttpPost("{moduleId:int}/medical-shifts")]
-    public async Task<ActionResult<AddMedicalShiftResponse>> AddMedicalShift(
-        int moduleId, 
-        [FromBody] AddModuleMedicalShiftRequest request)
-    {
-        if (!request.InternshipId.HasValue)
-        {
-            return BadRequest("InternshipId is required");
-        }
-        
-        var command = new AddMedicalShift(
-            request.InternshipId.Value,
-            request.Date,
-            request.Hours,
-            request.Minutes,
-            request.Location ?? string.Empty,
-            request.Date.Year
-        );
-        
-        await _addMedicalShiftHandler.HandleAsync(command);
-        
-        return Ok(new AddMedicalShiftResponse 
-        { 
-            ShiftId = 0, // Handler doesn't return ID yet
-            Message = "Medical shift added successfully" 
         });
     }
 
@@ -328,14 +294,6 @@ public class CreateModuleInternshipRequest
     public int PlannedDays { get; set; }
 }
 
-public class AddModuleMedicalShiftRequest
-{
-    public int? InternshipId { get; set; }
-    public DateTime Date { get; set; }
-    public int Hours { get; set; }
-    public int Minutes { get; set; }
-    public string? Location { get; set; }
-}
 
 public class AddModuleProcedureRequest  
 {
@@ -385,11 +343,6 @@ public class CreateInternshipResponse
     public string Message { get; set; } = string.Empty;
 }
 
-public class AddMedicalShiftResponse
-{
-    public int ShiftId { get; set; }
-    public string Message { get; set; } = string.Empty;
-}
 
 public class AddProcedureResponse
 {

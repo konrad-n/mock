@@ -48,7 +48,7 @@ public sealed class OutboxProcessor : BackgroundService
     private async Task ProcessOutboxMessages(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<Core.Outbox.IOutboxRepository>();
         var eventPublisher = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         

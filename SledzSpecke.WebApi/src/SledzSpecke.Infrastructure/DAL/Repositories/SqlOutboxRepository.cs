@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Core.Outbox;
-using SledzSpecke.Core.Repositories;
 
 namespace SledzSpecke.Infrastructure.DAL.Repositories;
 
-internal sealed class SqlOutboxRepository : IOutboxRepository
+internal sealed class SqlOutboxRepository : Core.Outbox.IOutboxRepository
 {
     private readonly SledzSpeckeDbContext _context;
     private readonly DbSet<OutboxMessage> _outboxMessages;
@@ -15,30 +14,36 @@ internal sealed class SqlOutboxRepository : IOutboxRepository
         _outboxMessages = context.OutboxMessages;
     }
 
-    public async Task AddAsync(OutboxMessage message)
+    public async Task AddAsync(OutboxMessage message, CancellationToken cancellationToken = default)
     {
-        await _outboxMessages.AddAsync(message);
-        await _context.SaveChangesAsync();
+        await _outboxMessages.AddAsync(message, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<OutboxMessage>> GetUnprocessedAsync(int batchSize = 100)
+    public async Task<IReadOnlyList<OutboxMessage>> GetUnprocessedAsync(int batchSize = 100, CancellationToken cancellationToken = default)
     {
         return await _outboxMessages
             .Where(m => m.ProcessedAt == null)
             .OrderBy(m => m.OccurredAt)
             .Take(batchSize)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(OutboxMessage message)
+    public async Task<OutboxMessage?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _outboxMessages
+            .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+    }
+
+    public async Task UpdateAsync(OutboxMessage message, CancellationToken cancellationToken = default)
     {
         _outboxMessages.Update(message);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<int> GetUnprocessedCountAsync()
+    public async Task<int> GetUnprocessedCountAsync(CancellationToken cancellationToken = default)
     {
-        return await _outboxMessages.CountAsync(m => m.ProcessedAt == null);
+        return await _outboxMessages.CountAsync(m => m.ProcessedAt == null, cancellationToken);
     }
 
     public async Task DeleteOldProcessedAsync(DateTime before)

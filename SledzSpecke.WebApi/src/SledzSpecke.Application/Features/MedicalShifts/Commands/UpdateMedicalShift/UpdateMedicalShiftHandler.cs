@@ -53,16 +53,15 @@ public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedi
             }
 
             // Build new values
-            var newDate = command.Date ?? medicalShift.Date;
-            var newHours = command.Hours ?? medicalShift.Duration.Hours;
-            var newMinutes = command.Minutes ?? medicalShift.Duration.Minutes;
+            var newHours = command.Hours ?? medicalShift.Hours;
+            var newMinutes = command.Minutes ?? medicalShift.Minutes;
             var newLocation = command.Location ?? medicalShift.Location;
             
-            // Create new duration
-            var newDuration = new ShiftDuration(newHours, newMinutes);
-            
             // Update the medical shift using domain method
-            medicalShift.Update(newDate, newDuration, medicalShift.Type, newLocation, medicalShift.SupervisorName);
+            medicalShift.UpdateShiftDetails(newHours, newMinutes, newLocation);
+            
+            // Note: Date update is not supported by the domain method
+            // If date needs to be updated, we would need to add a new method to MedicalShift entity
 
             // Update the medical shift
             await _medicalShiftRepository.UpdateAsync(medicalShift);

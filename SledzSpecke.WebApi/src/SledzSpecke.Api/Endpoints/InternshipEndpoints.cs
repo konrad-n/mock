@@ -42,27 +42,34 @@ public static class InternshipEndpoints
         group.MapGet("/{id:int}/progress", GetInternshipProgress)
             .WithName("GetInternshipProgressV2")
             .WithSummary("Get internship progress including shifts and procedures")
-            .Produces<InternshipProgressDto>()
+            .Produces<SledzSpecke.Application.Queries.InternshipProgressDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> CreateInternship(
         [FromBody] CreateInternshipRequest request,
         [FromServices] IResultCommandHandler<CreateInternship, int> handler,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
+        var userId = GetCurrentUserId(httpContext);
+        // For now, we'll hardcode a specialization ID - in production this would come from the request or user context
+        var specializationId = 1; // TODO: Get from user's active specialization
+        
         // Example data from SMK PDFs
-        var command = new CreateInternship
-        {
-            ModuleId = request.ModuleId,
-            Name = request.Name ?? "Staż podstawowy w zakresie chorób wewnętrznych",
-            InstitutionName = request.InstitutionName,
-            DepartmentName = request.DepartmentName ?? "Oddział Chorób Wewnętrznych",
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            PlannedWeeks = request.PlannedWeeks ?? 67, // From PDF
-            PlannedDays = request.PlannedDays ?? 335 // From PDF
-        };
+        var command = new CreateInternship(
+            SpecializationId: specializationId,
+            Name: request.Name ?? "Staż podstawowy w zakresie chorób wewnętrznych",
+            InstitutionName: request.InstitutionName,
+            DepartmentName: request.DepartmentName ?? "Oddział Chorób Wewnętrznych",
+            StartDate: request.StartDate,
+            EndDate: request.EndDate,
+            PlannedWeeks: request.PlannedWeeks ?? 67, // From PDF
+            PlannedDays: request.PlannedDays ?? 335, // From PDF
+            SupervisorName: null,
+            SupervisorPwz: null,
+            ModuleId: request.ModuleId
+        );
 
         var result = await handler.HandleAsync(command, cancellationToken);
         return result.ToApiResult($"/api/v2/internships/{result.Value}");
@@ -103,7 +110,7 @@ public static class InternshipEndpoints
 
     private static async Task<IResult> GetInternshipProgress(
         [FromRoute] int id,
-        [FromServices] IResultQueryHandler<GetInternshipProgress, InternshipProgressDto> handler,
+        [FromServices] IResultQueryHandler<GetInternshipProgress, SledzSpecke.Application.Queries.InternshipProgressDto> handler,
         CancellationToken cancellationToken)
     {
         var query = new GetInternshipProgress(id);
@@ -133,16 +140,3 @@ public record CreateInternshipRequest(
 
 public record InternshipCreatedResponse(int Id);
 
-public record InternshipProgressDto(
-    int InternshipId,
-    string InternshipName,
-    int TotalShifts,
-    int TotalHours,
-    int TotalMinutes,
-    int ApprovedShifts,
-    int TotalProcedures,
-    int CompletedProcedures,
-    double CompletionPercentage,
-    DateTime StartDate,
-    DateTime EndDate,
-    bool IsCompleted);

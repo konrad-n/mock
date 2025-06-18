@@ -63,6 +63,6 @@ public sealed class SledzSpeckeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new AdditionalSelfEducationDaysConfiguration());
         
         // Add Outbox configuration
-        modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.OutboxMessageConfiguration());
     }
 }

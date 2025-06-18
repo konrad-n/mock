@@ -12,6 +12,7 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
 {
     private readonly IMedicalShiftRepository _medicalShiftRepository;
     private readonly IInternshipRepository _internshipRepository;
+    private readonly ISpecializationRepository _specializationRepository;
     private readonly IMedicalShiftValidationService _validationService;
     private readonly IDurationCalculationService _durationCalculationService;
     private readonly IUnitOfWork _unitOfWork;
@@ -19,12 +20,14 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
     public AddMedicalShiftHandler(
         IMedicalShiftRepository medicalShiftRepository,
         IInternshipRepository internshipRepository,
+        ISpecializationRepository specializationRepository,
         IMedicalShiftValidationService validationService,
         IDurationCalculationService durationCalculationService,
         IUnitOfWork unitOfWork)
     {
         _medicalShiftRepository = medicalShiftRepository;
         _internshipRepository = internshipRepository;
+        _specializationRepository = specializationRepository;
         _validationService = validationService;
         _durationCalculationService = durationCalculationService;
         _unitOfWork = unitOfWork;
@@ -50,14 +53,26 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
             // Create duration value object
             var duration = new ShiftDuration(command.Hours, command.Minutes);
 
+            // Get the specialization to access SMK version
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId.Value);
+            if (specialization is null)
+            {
+                return Result<int>.Failure($"Specialization with ID {internship.SpecializationId.Value} not found.", "SPECIALIZATION_NOT_FOUND");
+            }
+            
+            // Get SMK version and available years from specialization
+            var smkVersion = specialization.SmkVersion;
+            var availableYears = new[] { 1, 2, 3, 4, 5, 6 }; // Standard medical education years
+            
             // Use domain method to add medical shift
-            var shiftId = MedicalShiftId.New();
             var addResult = internship.AddMedicalShift(
-                shiftId,
                 command.Date,
-                duration,
+                command.Hours,
+                command.Minutes,
                 command.Location,
-                command.Year);
+                command.Year,
+                smkVersion,
+                availableYears);
 
             if (addResult.IsFailure)
             {

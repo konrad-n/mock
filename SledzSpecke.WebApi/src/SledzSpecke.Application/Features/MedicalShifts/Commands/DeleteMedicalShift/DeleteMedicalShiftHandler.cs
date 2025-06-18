@@ -31,25 +31,14 @@ public sealed class DeleteMedicalShiftHandler : IResultCommandHandler<DeleteMedi
                 return Result.Failure($"Medical shift with ID {command.Id} not found.", "SHIFT_NOT_FOUND");
             }
 
-            // Get the internship to remove the shift from its collection
-            var internship = await _internshipRepository.GetByIdAsync(medicalShift.InternshipId.Value);
-            if (internship is null)
+            // Check if shift can be deleted
+            if (!medicalShift.CanBeDeleted)
             {
-                return Result.Failure($"Internship with ID {medicalShift.InternshipId.Value} not found.", "INTERNSHIP_NOT_FOUND");
+                return Result.Failure("Cannot delete an approved medical shift.", "SHIFT_ALREADY_APPROVED");
             }
 
-            // Use domain method to remove medical shift
-            var removeResult = internship.RemoveMedicalShift(medicalShift.Id);
-            if (removeResult.IsFailure)
-            {
-                return Result.Failure(removeResult.Error, removeResult.ErrorCode);
-            }
-
-            // Update internship (already modified by domain method)
-            await _internshipRepository.UpdateAsync(internship);
-            
             // Delete the medical shift
-            await _medicalShiftRepository.DeleteAsync(medicalShift);
+            await _medicalShiftRepository.DeleteAsync(command.Id);
             
             // Save changes
             await _unitOfWork.SaveChangesAsync(cancellationToken);

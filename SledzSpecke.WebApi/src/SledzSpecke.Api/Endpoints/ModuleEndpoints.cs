@@ -50,7 +50,7 @@ public static class ModuleEndpoints
 
     private static async Task<IResult> GetModuleProgress(
         [FromRoute] int id,
-        [FromServices] IResultQueryHandler<GetModuleProgress, ModuleProgressDto> handler,
+        [FromServices] IResultQueryHandler<GetModuleProgress, SpecializationStatisticsDto> handler,
         HttpContext httpContext,
         CancellationToken cancellationToken)
     {
@@ -108,24 +108,4 @@ public record ModuleProgressDto(
     DateTime? EndDate,
     bool IsCompleted);
 
-public record ModuleWithProgressDto(
-    int ModuleId,
-    string ModuleName,
-    string ModuleType,
-    int OrderNumber,
-    int RequiredDurationWeeks,
-    ModuleProgressDto Progress);
 
-public record ModuleRequirementsDto(
-    int ModuleId,
-    string ModuleName,
-    int RequiredWeeks,
-    int RequiredProcedures,
-    List<ProcedureRequirementDto> ProcedureRequirements,
-    List<string> AvailableLocations);
-
-public record ProcedureRequirementDto(
-    string Code,
-    string Name,
-    int RequiredCount,
-    string Category);

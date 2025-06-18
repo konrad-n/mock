@@ -1,7 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.Commands;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.AddMedicalShift;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.UpdateMedicalShift;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.DeleteMedicalShift;
+using SledzSpecke.Application.Features.MedicalShifts.Queries.GetMedicalShiftById;
+using SledzSpecke.Application.Features.MedicalShifts.Queries.GetMedicalShiftStatistics;
+using SledzSpecke.Application.Features.MedicalShifts.DTOs;
 using SledzSpecke.Application.DTO;
 using SledzSpecke.Application.Queries;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +21,7 @@ public class MedicalShiftsController : BaseController
     private readonly ICommandHandler<DeleteMedicalShift> _deleteMedicalShiftHandler;
     private readonly IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> _getUserMedicalShiftsHandler;
     private readonly IQueryHandler<GetMedicalShiftById, MedicalShiftDto> _getMedicalShiftByIdHandler;
-    private readonly IQueryHandler<GetMedicalShiftStatistics, MedicalShiftSummaryDto> _getMedicalShiftStatisticsHandler;
+    private readonly IQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> _getMedicalShiftStatisticsHandler;
     private readonly IUserContextService _userContextService;
 
     public MedicalShiftsController(
@@ -25,7 +30,7 @@ public class MedicalShiftsController : BaseController
         ICommandHandler<DeleteMedicalShift> deleteMedicalShiftHandler,
         IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> getUserMedicalShiftsHandler,
         IQueryHandler<GetMedicalShiftById, MedicalShiftDto> getMedicalShiftByIdHandler,
-        IQueryHandler<GetMedicalShiftStatistics, MedicalShiftSummaryDto> getMedicalShiftStatisticsHandler,
+        IQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> getMedicalShiftStatisticsHandler,
         IUserContextService userContextService)
     {
         _addMedicalShiftHandler = addMedicalShiftHandler;
@@ -91,11 +96,12 @@ public class MedicalShiftsController : BaseController
     }
 
     [HttpGet("statistics")]
-    public async Task<ActionResult<MedicalShiftSummaryDto>> GetMedicalShiftStatistics(
-        [FromQuery] int? year = null,
-        [FromQuery] int? internshipRequirementId = null)
+    public async Task<ActionResult<MedicalShiftStatisticsDto>> GetMedicalShiftStatistics(
+        [FromQuery] int year,
+        [FromQuery] int? month = null)
     {
-        var query = new GetMedicalShiftStatistics(year, internshipRequirementId);
+        var userId = GetCurrentUserId();
+        var query = new GetMedicalShiftStatistics { UserId = userId, Year = year, Month = month };
         return await HandleAsync(query, _getMedicalShiftStatisticsHandler);
     }
 }
