@@ -189,8 +189,20 @@ public static class Extensions
         // Register background services
         services.AddHostedService<FileCleanupService>();
 
-        services.AddDbContext<SledzSpeckeDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+        // Register CurrentUserService for audit trail
+        services.AddScoped<Core.Services.ICurrentUserService, CurrentUserService>();
+        
+        services.AddDbContext<SledzSpeckeDbContext>((serviceProvider, options) =>
+        {
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+            
+            // Add audit interceptor
+            var currentUserService = serviceProvider.GetService<Core.Services.ICurrentUserService>();
+            if (currentUserService != null)
+            {
+                options.AddInterceptors(new Auditing.AuditInterceptor(currentUserService));
+            }
+        });
 
         var authOptions = configuration.GetSection("auth").Get<AuthOptions>();
         services.Configure<AuthOptions>(configuration.GetSection("auth"));
