@@ -22,7 +22,7 @@ public class DomainEventIntegrationTests : IntegrationTestBase
     private readonly INotificationService _notificationService;
     private readonly IStatisticsService _statisticsService;
     
-    public DomainEventIntegrationTests() : base()
+    public DomainEventIntegrationTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _mediator = Scope.ServiceProvider.GetRequiredService<IMediator>();
         _notificationService = Scope.ServiceProvider.GetRequiredService<INotificationService>();
@@ -39,11 +39,16 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         
         var medicalShiftRepository = Scope.ServiceProvider.GetRequiredService<IMedicalShiftRepository>();
         var shift = MedicalShift.Create(
+            MedicalShiftId.New(),
             internship.Id,
+            null, // moduleId
             DateTime.UtcNow.AddDays(1),
-            new Duration(8, 30),
+            8, // hours
+            30, // minutes
+            ShiftType.Accompanying,
             "Emergency Department",
-            2024
+            "Dr. Supervisor",
+            2 // year
         );
 
         // Act

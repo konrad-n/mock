@@ -47,10 +47,11 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
             PatientGender: 'M');
 
         // Act
-        var procedureId = await Mediator.Send(command);
+        var result = await Mediator.Send(command);
+        var procedureId = (int)result;
 
         // Assert
-        ((int)procedureId).Should().BeGreaterThan(0);
+        procedureId.Should().BeGreaterThan(0);
         
         // Wait for async event processing
         await Task.Delay(100);
@@ -96,7 +97,8 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
                 SupervisorName: "Dr. Smith",
                 SupervisorPwz: "1234567");
                 
-            var procedureId = await Mediator.Send(command);
+            var result = await Mediator.Send(command);
+            var procedureId = (int)result;
             procedureIds.Add(procedureId);
         }
 
@@ -135,7 +137,8 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
                 DateTime.UtcNow.Date,
                 "Pediatrics");
                 
-            var procedureId = await Mediator.Send(command);
+            var result = await Mediator.Send(command);
+            var procedureId = (int)result;
             
             await Task.Delay(50);
             

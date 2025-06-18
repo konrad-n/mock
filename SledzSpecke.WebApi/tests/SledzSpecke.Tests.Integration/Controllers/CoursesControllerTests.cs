@@ -304,7 +304,7 @@ public class CoursesControllerTests : IntegrationTestBase
         var course1 = Course.Create(
             new CourseId(1),
             new SpecializationId(1),
-            CourseType.Mandatory,
+            CourseType.Specialization,
             "Test Course 1",
             "Test Institution",
             DateTime.UtcNow.AddDays(-30));
@@ -313,7 +313,7 @@ public class CoursesControllerTests : IntegrationTestBase
         var course2 = Course.Create(
             new CourseId(2),
             new SpecializationId(1),
-            CourseType.Optional,
+            CourseType.Improvement,
             "Test Course 2",
             "Test Institution 2",
             DateTime.UtcNow.AddDays(-20));

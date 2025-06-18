@@ -16,10 +16,10 @@ public class InternshipRepositoryTests : IntegrationTestBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly SledzSpeckeDbContext _dbContext;
 
-    public InternshipRepositoryTests() : base()
+    public InternshipRepositoryTests(SledzSpeckeApiFactory factory) : base(factory)
     {
-        _repository = GetServiceAsync<IInternshipRepository>().Result;
-        _unitOfWork = GetServiceAsync<IUnitOfWork>().Result;
+        _repository = Scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
+        _unitOfWork = Scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         _dbContext = DbContext;
     }
 
@@ -31,10 +31,13 @@ public class InternshipRepositoryTests : IntegrationTestBase
         var internship = Internship.Create(
             InternshipId.New(),
             specializationId,
+            "Test Internship",
             "Test Hospital",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         // Act
@@ -66,10 +69,8 @@ public class InternshipRepositoryTests : IntegrationTestBase
         await _unitOfWork.SaveChangesAsync();
 
         // Act
-        var updateResult = internship.UpdateDetails(
-            "Updated Hospital",
-            "Updated Department",
-            "Dr. Smith",
+        internship.UpdateInstitution("Updated Hospital", "Updated Department");
+        var updateResult = internship.UpdateDates(
             DateTime.UtcNow.Date.AddDays(5),
             DateTime.UtcNow.Date.AddDays(35)
         );
@@ -97,28 +98,34 @@ public class InternshipRepositoryTests : IntegrationTestBase
         var internship1 = Internship.Create(
             InternshipId.New(),
             specializationId,
+            "Internship 1",
             "Hospital 1",
             "Department 1",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, 20
         );
 
         var internship2 = Internship.Create(
             InternshipId.New(),
             specializationId,
+            "Internship 2",
             "Hospital 2",
             "Department 2",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(60)
+            DateTime.UtcNow.Date.AddDays(60),
+            8, 40
         );
 
         var internship3 = Internship.Create(
             InternshipId.New(),
             otherSpecializationId,
+            "Internship 3",
             "Hospital 3",
             "Department 3",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(90)
+            DateTime.UtcNow.Date.AddDays(90),
+            12, 60
         );
 
         await _repository.AddAsync(internship1);
@@ -143,10 +150,12 @@ public class InternshipRepositoryTests : IntegrationTestBase
         var internship = Internship.Create(
             InternshipId.New(),
             new SpecializationId(1),
+            "Test Internship",
             "Test Hospital",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, 20
         );
 
         await _repository.AddAsync(internship);
@@ -168,10 +177,12 @@ public class InternshipRepositoryTests : IntegrationTestBase
         var internship = Internship.Create(
             InternshipId.New(),
             new SpecializationId(1),
+            "Test Internship",
             "Test Hospital",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, 20
         );
 
         await _repository.AddAsync(internship);
@@ -179,12 +190,13 @@ public class InternshipRepositoryTests : IntegrationTestBase
 
         // Act
         var result = internship.AddMedicalShift(
-            MedicalShiftId.New(),
             DateTime.UtcNow.Date.AddDays(5),
             8,
             30,
             "Emergency Room",
-            2024
+            2,
+            SmkVersion.New,
+            new[] { 1, 2, 3, 4, 5 }
         );
 
         result.IsSuccess.Should().BeTrue();

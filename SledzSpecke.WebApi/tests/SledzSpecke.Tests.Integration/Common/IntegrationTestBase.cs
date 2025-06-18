@@ -92,7 +92,8 @@ public abstract class IntegrationTestBase : IClassFixture<SledzSpeckeApiFactory>
             "Test Supervisor",
             "1234567"); // PWZ
 
-        return await Mediator.Send(command);
+        var result = await Mediator.Send(command);
+        return (int)result;
     }
 
     protected async Task<int> CreateTestMedicalShiftAsync(int internshipId)
@@ -105,7 +106,8 @@ public abstract class IntegrationTestBase : IClassFixture<SledzSpeckeApiFactory>
             "Hospital Ward",
             1); // Year 1
 
-        return await Mediator.Send(command);
+        var result = await Mediator.Send(command);
+        return (int)result;
     }
 
     protected async Task ClearDatabaseAsync()

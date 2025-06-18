@@ -15,7 +15,7 @@ namespace SledzSpecke.Tests.Integration.Repositories;
 
 public class SpecificationPatternTests : IntegrationTestBase
 {
-    public SpecificationPatternTests() : base()
+    public SpecificationPatternTests(SledzSpeckeApiFactory factory) : base(factory)
     {
     }
 

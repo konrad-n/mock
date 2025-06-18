@@ -17,15 +17,13 @@ public class DomainEventTests : IntegrationTestBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly TestEventHandler _testEventHandler;
 
-    public DomainEventTests() : base()
+    public DomainEventTests(SledzSpeckeApiFactory factory) : base(factory)
     {
-        _repository = GetServiceAsync<IInternshipRepository>().Result;
-        _unitOfWork = GetServiceAsync<IUnitOfWork>().Result;
+        _repository = Scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
+        _unitOfWork = Scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         
         // Register test event handler
         _testEventHandler = new TestEventHandler();
-        var services = new ServiceCollection();
-        services.AddSingleton<INotificationHandler<MedicalShiftCreatedEvent>>(_testEventHandler);
     }
 
     [Fact]
@@ -36,9 +34,12 @@ public class DomainEventTests : IntegrationTestBase
             InternshipId.New(),
             new SpecializationId(1),
             "Test Hospital",
+            "Test Institution",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         await _repository.AddAsync(internship);
@@ -50,12 +51,13 @@ public class DomainEventTests : IntegrationTestBase
         // Act
         var shiftId = MedicalShiftId.New();
         var result = internship.AddMedicalShift(
-            shiftId,
             DateTime.UtcNow.Date.AddDays(5),
             8,
             30,
             "Emergency Room",
-            2024
+            2,
+            SmkVersion.New,
+            new[] { 1, 2, 3, 4, 5 } // availableYears
         );
 
         result.IsSuccess.Should().BeTrue();
@@ -86,19 +88,23 @@ public class DomainEventTests : IntegrationTestBase
             InternshipId.New(),
             new SpecializationId(1),
             "Test Hospital",
+            "Test Institution",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         // Act
         var result = internship.AddMedicalShift(
-            MedicalShiftId.New(),
             DateTime.UtcNow.Date.AddDays(5),
             8,
             0,
             "ICU",
-            2024
+            2,
+            SmkVersion.New,
+            new[] { 1, 2, 3, 4, 5 } // availableYears
         );
 
         // Add internship with event
