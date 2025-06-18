@@ -18,7 +18,7 @@ public class UsersControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public UsersControllerTests()
+    public UsersControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {
@@ -73,8 +73,20 @@ public class UsersControllerTests : IntegrationTestBase
         var command = new SignUp(
             Email: "invalid-email",
             Password: "SecurePassword123!",
-            FullName: "John Doe",
-            Role: "User");
+            FirstName: "John",
+            LastName: "Doe",
+            Pesel: "92010112345",
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1992, 1, 1),
+            CorrespondenceAddress: new AddressDto(
+                "ul. Testowa",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/users", command);
@@ -94,8 +106,20 @@ public class UsersControllerTests : IntegrationTestBase
         var command = new SignUp(
             Email: "newuser@example.com",
             Password: "SecurePassword123!",
-            FullName: "",
-            Role: "User");
+            FirstName: "",  // Empty first name
+            LastName: "Doe",
+            Pesel: "92010112345",
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1992, 1, 1),
+            CorrespondenceAddress: new AddressDto(
+                "ul. Testowa",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/users", command);

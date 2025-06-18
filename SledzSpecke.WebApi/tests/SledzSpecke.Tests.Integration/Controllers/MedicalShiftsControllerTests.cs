@@ -19,7 +19,7 @@ public class MedicalShiftsControllerTests : IntegrationTestBase
     private readonly HttpClient _authenticatedClient;
     private readonly ISpecializationRepository _specializationRepository;
 
-    public MedicalShiftsControllerTests()
+    public MedicalShiftsControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {

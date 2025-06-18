@@ -25,7 +25,7 @@ public class ProceduresControllerTests : IntegrationTestBase
     private readonly IModuleRepository _moduleRepository;
     private readonly IProcedureRepository _procedureRepository;
 
-    public ProceduresControllerTests()
+    public ProceduresControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {

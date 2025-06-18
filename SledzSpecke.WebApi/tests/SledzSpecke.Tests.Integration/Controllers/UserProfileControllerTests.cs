@@ -18,7 +18,7 @@ public class UserProfileControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public UserProfileControllerTests()
+    public UserProfileControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {

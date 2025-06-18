@@ -18,7 +18,7 @@ public class CoursesControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public CoursesControllerTests()
+    public CoursesControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {

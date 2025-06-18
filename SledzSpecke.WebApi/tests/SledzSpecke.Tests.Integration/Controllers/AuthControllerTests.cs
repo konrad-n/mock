@@ -14,6 +14,10 @@ namespace SledzSpecke.Tests.Integration.Controllers;
 
 public class AuthControllerTests : IntegrationTestBase
 {
+    public AuthControllerTests(SledzSpeckeApiFactory factory) : base(factory)
+    {
+    }
+
     [Fact]
     public async Task SignUp_WithValidData_ShouldReturnOk()
     {

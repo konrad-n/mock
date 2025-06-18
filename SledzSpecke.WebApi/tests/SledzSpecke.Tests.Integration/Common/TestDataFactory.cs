@@ -223,7 +223,7 @@ public static class TestDataFactory
         return Course.Create(
             courseId,
             new SpecializationId(1), // default specialization
-            CourseType.Mandatory,
+            CourseType.Specialization,
             name,
             "Test Organizer", // organizerName
             "Test Institution", // institutionName
@@ -247,7 +247,7 @@ public static class TestDataFactory
             recognitionId,
             new SpecializationId(1), // default specialization
             new UserId(1), // default user
-            RecognitionType.Award,
+            RecognitionType.PreviousEducation,
             title,
             date.Value,
             date.Value.AddDays(1), // endDate
@@ -296,7 +296,7 @@ public static class TestDataFactory
         return SelfEducation.Create(
             selfEducationId,
             new ModuleId(1), // default module
-            SelfEducationType.Literature,
+            SelfEducationType.LiteratureStudy,
             topic,
             date.Value,
             hoursSpent);

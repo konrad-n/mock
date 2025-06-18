@@ -17,7 +17,7 @@ public class DashboardControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public DashboardControllerTests()
+    public DashboardControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {
