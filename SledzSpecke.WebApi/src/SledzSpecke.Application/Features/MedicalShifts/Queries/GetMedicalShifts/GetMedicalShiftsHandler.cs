@@ -1,12 +1,12 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.DTO;
+using SledzSpecke.Application.Features.MedicalShifts.DTOs;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Constants;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
-namespace SledzSpecke.Application.Queries.Handlers;
+namespace SledzSpecke.Application.Features.MedicalShifts.Queries.GetMedicalShifts;
 
 public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShifts, IEnumerable<MedicalShiftDto>>
 {
@@ -59,8 +59,8 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
             Id: shift.Id.Value,
             InternshipId: shift.InternshipId.Value,
             Date: shift.Date,
-            Hours: shift.Hours,
-            Minutes: shift.Minutes,
+            Hours: shift.Duration.Hours,
+            Minutes: shift.Duration.Minutes,
             Location: shift.Location,
             Year: shift.Year,
             SyncStatus: shift.SyncStatus,
@@ -70,7 +70,7 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
             ApproverRole: null,
             IsApproved: shift.IsApproved,
             CanBeDeleted: !shift.IsApproved && shift.SyncStatus != SyncStatus.Synced,
-            Duration: TimeSpan.FromHours(shift.Hours) + TimeSpan.FromMinutes(shift.Minutes)
+            Duration: TimeSpan.FromHours(shift.Duration.Hours) + TimeSpan.FromMinutes(shift.Duration.Minutes)
         ));
 
         return Result<IEnumerable<MedicalShiftDto>>.Success(shiftDtos);

@@ -1,5 +1,5 @@
 using FluentValidation;
-using SledzSpecke.Application.Commands;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.AddMedicalShift;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;

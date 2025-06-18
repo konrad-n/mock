@@ -1,7 +1,7 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.DTO;
+using SledzSpecke.Application.Features.MedicalShifts.DTOs;
 
-namespace SledzSpecke.Application.Queries;
+namespace SledzSpecke.Application.Features.MedicalShifts.Queries.GetMedicalShifts;
 
 public class GetMedicalShifts : IQuery<IEnumerable<MedicalShiftDto>>
 {

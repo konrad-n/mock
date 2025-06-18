@@ -1,5 +1,5 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.Commands;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.AddMedicalShift;
 using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Application.Validation.Validators;

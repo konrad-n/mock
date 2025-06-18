@@ -2,9 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Abstractions;
+using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Outbox;
+using SledzSpecke.Core.Repositories;
 using System.Text.Json;
-using System.Diagnostics;
 
 namespace SledzSpecke.Infrastructure.Outbox;
 
@@ -12,9 +13,12 @@ public sealed class OutboxProcessor : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<OutboxProcessor> _logger;
-    private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(10);
+    private readonly TimeSpan _interval = TimeSpan.FromSeconds(10);
+    private readonly int _batchSize = 50;
     
-    public OutboxProcessor(IServiceProvider serviceProvider, ILogger<OutboxProcessor> logger)
+    public OutboxProcessor(
+        IServiceProvider serviceProvider,
+        ILogger<OutboxProcessor> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -35,7 +39,7 @@ public sealed class OutboxProcessor : BackgroundService
                 _logger.LogError(ex, "Error processing outbox messages");
             }
             
-            await Task.Delay(_checkInterval, stoppingToken);
+            await Task.Delay(_interval, stoppingToken);
         }
         
         _logger.LogInformation("Outbox processor stopped");
@@ -44,16 +48,16 @@ public sealed class OutboxProcessor : BackgroundService
     private async Task ProcessOutboxMessages(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var repository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
         var eventPublisher = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         
-        var messages = await repository.GetUnprocessedAsync(50, cancellationToken);
+        var messages = await repository.GetUnprocessedAsync(_batchSize);
         
-        if (messages.Count == 0)
+        if (!messages.Any())
             return;
             
-        _logger.LogInformation("Processing {Count} outbox messages", messages.Count);
+        _logger.LogInformation("Processing {Count} outbox messages", messages.Count());
         
         foreach (var message in messages)
         {
@@ -73,12 +77,12 @@ public sealed class OutboxProcessor : BackgroundService
                 message.MarkAsFailed(ex.Message);
             }
             
-            await repository.UpdateAsync(message, cancellationToken);
+            await repository.UpdateAsync(message);
         }
         
         await unitOfWork.SaveChangesAsync(cancellationToken);
         
-        _logger.LogInformation("Processed {Count} outbox messages", messages.Count);
+        _logger.LogInformation("Processed {Count} outbox messages", messages.Count());
     }
     
     private async Task ProcessMessage(

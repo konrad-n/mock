@@ -1,9 +1,9 @@
 using SledzSpecke.Application.Abstractions;
 
-namespace SledzSpecke.Application.Commands;
+namespace SledzSpecke.Application.Features.MedicalShifts.Commands.UpdateMedicalShift;
 
 public record UpdateMedicalShift(
-    int ShiftId,
+    int Id,
     DateTime? Date,
     int? Hours,
     int? Minutes,

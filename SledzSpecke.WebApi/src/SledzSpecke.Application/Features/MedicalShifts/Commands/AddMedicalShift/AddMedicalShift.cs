@@ -1,6 +1,6 @@
 using SledzSpecke.Application.Abstractions;
 
-namespace SledzSpecke.Application.Commands;
+namespace SledzSpecke.Application.Features.MedicalShifts.Commands.AddMedicalShift;
 
 public record AddMedicalShift(
     int InternshipId,

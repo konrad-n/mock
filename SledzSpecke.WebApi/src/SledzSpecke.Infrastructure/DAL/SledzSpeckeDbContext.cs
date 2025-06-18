@@ -64,9 +64,5 @@ public sealed class SledzSpeckeDbContext : DbContext
         
         // Add Outbox configuration
         modelBuilder.ApplyConfiguration(new OutboxMessageConfiguration());
-        
-        // Create schema if not exists
-        modelBuilder.HasDefaultSchema("public");
-        modelBuilder.Entity<OutboxMessage>().ToTable("OutboxMessages", "outbox");
     }
 }

@@ -1,4 +1,4 @@
-namespace SledzSpecke.Application.DTO;
+namespace SledzSpecke.Application.Features.MedicalShifts.DTOs;
 
 public class MedicalShiftSummaryDto
 {

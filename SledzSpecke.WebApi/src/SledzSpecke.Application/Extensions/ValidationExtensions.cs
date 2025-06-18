@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Commands;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.AddMedicalShift;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.UpdateMedicalShift;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.DeleteMedicalShift;
 using SledzSpecke.Application.Decorators;
 using SledzSpecke.Application.Validation;
 using SledzSpecke.Application.Validation.Validators;

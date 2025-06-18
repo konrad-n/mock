@@ -1,5 +1,5 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.DTO;
+using SledzSpecke.Application.Features.MedicalShifts.DTOs;
 
 namespace SledzSpecke.Application.Queries;
 

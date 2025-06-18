@@ -25,7 +25,7 @@ internal sealed class CachingQueryHandlerDecorator<TQuery, TResult> : IQueryHand
     private static readonly Dictionary<Type, TimeSpan> CacheDurations = new()
     {
         { typeof(Queries.GetSpecializationTemplates), TimeSpan.FromHours(24) }, // Templates rarely change
-        { typeof(Queries.GetMedicalShiftStatistics), TimeSpan.FromMinutes(1) }, // Statistics need to be fresh
+        { typeof(Features.MedicalShifts.Queries.GetMedicalShiftStatistics.GetMedicalShiftStatistics), TimeSpan.FromMinutes(1) }, // Statistics need to be fresh
         { typeof(Queries.GetUserMedicalShifts), TimeSpan.FromMinutes(5) }, // Standard duration
         { typeof(Queries.GetInternshipById), TimeSpan.FromMinutes(10) }, // Internship data is relatively stable
         { typeof(Queries.GetSpecializationSmkDetails), TimeSpan.FromHours(1) }, // SMK details change infrequently

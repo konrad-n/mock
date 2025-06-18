@@ -1,5 +1,5 @@
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.Commands;
+using SledzSpecke.Application.Features.MedicalShifts.Commands.UpdateMedicalShift;
 using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Application.Validation.Validators;
@@ -8,7 +8,7 @@ public sealed class UpdateMedicalShiftValidator : IValidator<UpdateMedicalShift>
 {
     public Result Validate(UpdateMedicalShift command)
     {
-        if (command.ShiftId <= 0)
+        if (command.Id <= 0)
         {
             return Result.Failure("Shift ID must be greater than zero.");
         }

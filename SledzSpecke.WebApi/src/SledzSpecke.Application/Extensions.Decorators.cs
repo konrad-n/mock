@@ -43,8 +43,7 @@ public static partial class ApplicationExtensions
     public static IServiceCollection AddSelectiveDecorators(this IServiceCollection services)
     {
         // Example: Only decorate specific critical handlers
-        services.Decorate<ICommandHandler<Commands.AddMedicalShift, int>, LoggingCommandHandlerDecorator<Commands.AddMedicalShift, int>>();
-        services.Decorate<ICommandHandler<Commands.AddMedicalShift, int>, PerformanceCommandHandlerDecorator<Commands.AddMedicalShift, int>>();
+        // Medical shift decorators are now handled by Result-based decorators
         
         return services;
     }

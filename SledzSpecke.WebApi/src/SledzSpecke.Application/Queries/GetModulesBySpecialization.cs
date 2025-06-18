@@ -3,4 +3,4 @@ using SledzSpecke.Application.DTO;
 
 namespace SledzSpecke.Application.Queries;
 
-public record GetMedicalShiftById(int ShiftId) : IQuery<MedicalShiftDto>;
+public record GetModulesBySpecialization(int SpecializationId) : IQuery<IEnumerable<ModuleDto>>;

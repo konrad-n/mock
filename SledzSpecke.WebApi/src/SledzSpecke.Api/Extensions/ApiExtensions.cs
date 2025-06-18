@@ -81,6 +81,8 @@ public static class ApiExtensions
         
         // Map minimal API endpoints (new API v2)
         app.MapMedicalShiftEndpoints();
+        app.MapInternshipEndpoints();
+        app.MapModuleEndpoints();
 
         return app;
     }

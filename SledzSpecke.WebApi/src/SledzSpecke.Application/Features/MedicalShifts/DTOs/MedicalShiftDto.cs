@@ -1,7 +1,7 @@
 using SledzSpecke.Application.Helpers;
 using SledzSpecke.Core.ValueObjects;
 
-namespace SledzSpecke.Application.DTO;
+namespace SledzSpecke.Application.Features.MedicalShifts.DTOs;
 
 public record MedicalShiftDto(
     int Id,
