@@ -16,11 +16,11 @@ public class ResultPatternTests : IntegrationTestBase
     private readonly IInternshipRepository _internshipRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public ResultPatternTests() : base()
+    public ResultPatternTests(SledzSpeckeApiFactory factory) : base(factory)
     {
-        _markAsCompletedHandler = GetServiceAsync<IResultCommandHandler<MarkInternshipAsCompleted>>().Result;
-        _internshipRepository = GetServiceAsync<IInternshipRepository>().Result;
-        _unitOfWork = GetServiceAsync<IUnitOfWork>().Result;
+        _markAsCompletedHandler = Scope.ServiceProvider.GetRequiredService<IResultCommandHandler<MarkInternshipAsCompleted>>();
+        _internshipRepository = Scope.ServiceProvider.GetRequiredService<IInternshipRepository>();
+        _unitOfWork = Scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
     }
 
     [Fact]
@@ -31,9 +31,12 @@ public class ResultPatternTests : IntegrationTestBase
             InternshipId.New(),
             new SpecializationId(1),
             "Test Hospital",
+            "Test Institution",
             "Test Department",
             DateTime.UtcNow.Date.AddDays(-30),
-            DateTime.UtcNow.Date.AddDays(-1) // Ended yesterday
+            DateTime.UtcNow.Date.AddDays(-1), // Ended yesterday
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         await _internshipRepository.AddAsync(internship);
@@ -77,9 +80,12 @@ public class ResultPatternTests : IntegrationTestBase
             InternshipId.New(),
             new SpecializationId(1),
             "Test Hospital",
+            "Test Institution",
             "Test Department",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30) // Ends in the future
+            DateTime.UtcNow.Date.AddDays(30), // Ends in the future
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         await _internshipRepository.AddAsync(internship);
@@ -104,9 +110,12 @@ public class ResultPatternTests : IntegrationTestBase
             InternshipId.New(),
             new SpecializationId(1),
             "Test Hospital",
+            "Test Institution",
             "Test Department",
             DateTime.UtcNow.Date.AddDays(-30),
-            DateTime.UtcNow.Date.AddDays(-1)
+            DateTime.UtcNow.Date.AddDays(-1),
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         await _internshipRepository.AddAsync(internship);
@@ -137,9 +146,12 @@ public class ResultPatternTests : IntegrationTestBase
             InternshipId.New(),
             new SpecializationId(1),
             "Test Hospital",
+            "Test Institution",
             "Test Department",
             DateTime.UtcNow.Date.AddDays(-30),
-            DateTime.UtcNow.Date.AddDays(-1)
+            DateTime.UtcNow.Date.AddDays(-1),
+            4, // plannedWeeks
+            20 // plannedDays
         );
 
         await _internshipRepository.AddAsync(internship);
