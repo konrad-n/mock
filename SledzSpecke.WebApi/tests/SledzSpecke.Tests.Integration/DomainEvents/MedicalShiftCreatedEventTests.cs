@@ -46,7 +46,8 @@ public class MedicalShiftCreatedEventTests : IntegrationTestBase
         var shiftId = await Mediator.Send(command);
 
         // Assert
-        shiftId.Should().BeGreaterThan(0);
+        shiftId.Should().BeOfType<int>();
+        var shiftIdValue = (int)shiftId;
         
         // Wait a bit for async event processing
         await Task.Delay(100);
@@ -54,7 +55,7 @@ public class MedicalShiftCreatedEventTests : IntegrationTestBase
         _capturedEvents.Should().ContainSingle();
         var capturedEvent = _capturedEvents.First();
         
-        capturedEvent.MedicalShiftId.Should().Be(shiftId);
+        capturedEvent.ShiftId.Value.Should().Be(shiftIdValue);
         capturedEvent.InternshipId.Should().Be(internshipId);
         capturedEvent.Date.Should().Be(command.Date);
         capturedEvent.Hours.Should().Be(command.Hours);

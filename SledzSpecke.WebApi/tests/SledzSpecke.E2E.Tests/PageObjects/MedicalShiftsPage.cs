@@ -1,6 +1,7 @@
 using Microsoft.Playwright;
 using Serilog;
 using SledzSpecke.E2E.Tests.Core;
+using SledzSpecke.E2E.Tests.Infrastructure;
 
 namespace SledzSpecke.E2E.Tests.PageObjects;
 
@@ -234,6 +235,72 @@ public class MedicalShiftsPage : PageObjectBase, IMedicalShiftsPage
         await download.SaveAsAsync(Path.Combine("Reports", "Downloads", fileName));
         
         Logger.Information("Shifts exported to: {FileName}", fileName);
+    }
+
+    /// <summary>
+    /// Helper method to add a shift using ShiftData
+    /// </summary>
+    public async Task AddShiftAsync(ShiftData shiftData)
+    {
+        Logger.Information("Adding shift via helper method");
+        
+        await ClickAddShiftButtonAsync();
+        
+        var medicalShiftData = new MedicalShiftData
+        {
+            Date = shiftData.Date,
+            StartTime = "08:00", // Default start time
+            EndTime = CalculateEndTime(shiftData.Hours, shiftData.Minutes),
+            Type = MapShiftType(shiftData.ShiftType ?? shiftData.Type ?? "regular"),
+            Place = shiftData.Location,
+            Description = ""
+        };
+        
+        await FillShiftFormAsync(medicalShiftData);
+        await SubmitShiftFormAsync();
+        await IsShiftSavedSuccessfullyAsync();
+    }
+
+    /// <summary>
+    /// Get the total count of shifts displayed
+    /// </summary>
+    public async Task<int> GetShiftCountAsync()
+    {
+        try
+        {
+            var rows = await Page.QuerySelectorAllAsync(ShiftRow);
+            return rows.Count;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private string CalculateEndTime(int hours, int minutes)
+    {
+        var startTime = TimeSpan.Parse("08:00");
+        var duration = new TimeSpan(hours, minutes, 0);
+        var endTime = startTime + duration;
+        
+        // Handle overnight shifts
+        if (endTime.TotalHours >= 24)
+        {
+            endTime = endTime.Subtract(TimeSpan.FromHours(24));
+        }
+        
+        return endTime.ToString(@"hh\:mm");
+    }
+
+    private string MapShiftType(string type)
+    {
+        return type?.ToLower() switch
+        {
+            "oddział" => "regular",
+            "dyżur" => "on-call",
+            "ambulatorium" => "outpatient",
+            _ => "regular"
+        };
     }
 }
 

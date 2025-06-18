@@ -58,17 +58,18 @@ public abstract class IntegrationTestBase : IClassFixture<SledzSpeckeApiFactory>
             "John",
             "Doe",
             pesel ?? "92010112345", // Valid PESEL
-            Gender.Male,
             "1234567", // PWZ
-            "Warsaw Medical University",
-            3,
-            "Cardiology",
-            "old",
-            "12-345",
-            "ul. Testowa 1",
-            "Warsaw",
-            "Mazowieckie",
-            "+48123456789");
+            "+48123456789",
+            new DateTime(1992, 1, 1), // Date matching PESEL
+            new AddressDto(
+                "ul. Testowa",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            )
+        );
 
         await Mediator.Send(command);
         
@@ -77,19 +78,22 @@ public abstract class IntegrationTestBase : IClassFixture<SledzSpeckeApiFactory>
         return user?.Id.Value ?? throw new InvalidOperationException("User not created");
     }
 
-    protected async Task<int> CreateTestInternshipAsync(int userId)
+    protected async Task<int> CreateTestInternshipAsync(int specializationId)
     {
         var command = new CreateInternship(
-            userId,
+            specializationId,
+            "Test Internship",
             "Test Hospital",
             "Cardiology Ward",
             DateTime.UtcNow.Date,
             DateTime.UtcNow.Date.AddMonths(3),
+            12, // 12 weeks
+            60, // 60 days
             "Test Supervisor",
-            "supervisor@hospital.com",
-            "+48987654321");
+            "1234567"); // PWZ
 
-        return await Mediator.Send(command);
+        var result = await Mediator.Send(command);
+        return (int)result;
     }
 
     protected async Task<int> CreateTestMedicalShiftAsync(int internshipId)
@@ -100,9 +104,10 @@ public abstract class IntegrationTestBase : IClassFixture<SledzSpeckeApiFactory>
             8,
             0,
             "Hospital Ward",
-            3);
+            1); // Year 1
 
-        return await Mediator.Send(command);
+        var result = await Mediator.Send(command);
+        return (int)result;
     }
 
     protected async Task ClearDatabaseAsync()

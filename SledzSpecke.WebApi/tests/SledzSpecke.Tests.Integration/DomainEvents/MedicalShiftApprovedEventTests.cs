@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Commands;
 using SledzSpecke.Application.Events.Handlers;
 using SledzSpecke.Core.Events;
+using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Tests.Integration.Common;
@@ -44,18 +45,15 @@ public class MedicalShiftApprovedEventTests : IntegrationTestBase
         shift.Should().NotBeNull();
 
         // Act - Approve the shift (this would typically be done through a command)
-        shift!.Approve(userId);
+        shift!.Approve("Test Supervisor", "Head of Department");
         await shiftRepository.UpdateAsync(shift);
 
         // Simulate event publishing (in a real scenario, this would be done by the domain)
         var mediator = ServiceProvider.GetRequiredService<IMediator>();
         await mediator.Publish(new MedicalShiftApprovedEvent(
-            shiftId,
-            internshipId,
-            shift.Date,
-            shift.Duration.Hours,
-            shift.Duration.Minutes,
-            DateTime.UtcNow));
+            new MedicalShiftId(shiftId),
+            DateTime.UtcNow,
+            "Test Supervisor"));
 
         // Assert
         await Task.Delay(100); // Wait for async event processing
@@ -63,10 +61,9 @@ public class MedicalShiftApprovedEventTests : IntegrationTestBase
         _capturedEvents.Should().ContainSingle();
         var capturedEvent = _capturedEvents.First();
         
-        capturedEvent.MedicalShiftId.Should().Be(shiftId);
-        capturedEvent.InternshipId.Should().Be(internshipId);
-        capturedEvent.Date.Should().Be(shift.Date);
-        capturedEvent.ApprovedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        capturedEvent.ShiftId.Value.Should().Be(shiftId);
+        capturedEvent.ApprovedOn.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        capturedEvent.ApprovedBy.Should().Be("Test Supervisor");
     }
 
     [Fact]
@@ -158,14 +155,11 @@ public class MedicalShiftApprovedEventTests : IntegrationTestBase
         {
             _capturedEvents.Add(notification);
             
-            _logger.LogInformation($"Medical shift approved - Shift ID: {notification.MedicalShiftId}");
+            _logger.LogInformation($"Medical shift approved - Shift ID: {notification.ShiftId}");
             
-            // Simulate checking monthly threshold
-            if (notification.Hours >= 8)
-            {
-                _logger.LogInformation("Monthly hours threshold reached");
-                _logger.LogInformation("Generating monthly report");
-            }
+            // Log approval details
+            _logger.LogInformation($"Approved by: {notification.ApprovedBy}");
+            _logger.LogInformation($"Approved on: {notification.ApprovedOn}");
             
             return Task.CompletedTask;
         }

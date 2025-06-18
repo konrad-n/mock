@@ -18,7 +18,7 @@ public class CoursesControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public CoursesControllerTests()
+    public CoursesControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {
@@ -89,14 +89,13 @@ public class CoursesControllerTests : IntegrationTestBase
         
         var command = new CreateCourse(
             SpecializationId: 1,
-            ModuleId: 1,
             CourseType: "Mandatory",
             CourseName: "New Course",
-            CourseNumber: "COURSE001",
             InstitutionName: "Test Institution",
             CompletionDate: DateTime.UtcNow.AddDays(-10),
-            HasCertificate: true,
-            CertificateNumber: "CERT001");
+            CourseNumber: "COURSE001",
+            CertificateNumber: "CERT001",
+            ModuleId: 1);
 
         // Act
         var response = await _authenticatedClient.PostAsJsonAsync("/api/courses", command);
@@ -174,11 +173,11 @@ public class CoursesControllerTests : IntegrationTestBase
         await SeedTestData();
         
         var command = new UpdateCourse(
+            CourseId: 1,
             CourseName: "Updated Course Name",
             CourseNumber: "UPDATED001",
             InstitutionName: "Updated Institution",
             CompletionDate: DateTime.UtcNow.AddDays(-5),
-            HasCertificate: true,
             CertificateNumber: "UPDATED-CERT");
 
         // Act
@@ -204,6 +203,7 @@ public class CoursesControllerTests : IntegrationTestBase
         await SeedTestData();
         
         var command = new UpdateCourse(
+            CourseId: 999,
             CourseName: "Updated Course Name",
             CourseNumber: null,
             InstitutionName: "Updated Institution",
@@ -304,7 +304,7 @@ public class CoursesControllerTests : IntegrationTestBase
         var course1 = Course.Create(
             new CourseId(1),
             new SpecializationId(1),
-            CourseType.Mandatory,
+            CourseType.Specialization,
             "Test Course 1",
             "Test Institution",
             DateTime.UtcNow.AddDays(-30));
@@ -313,7 +313,7 @@ public class CoursesControllerTests : IntegrationTestBase
         var course2 = Course.Create(
             new CourseId(2),
             new SpecializationId(1),
-            CourseType.Optional,
+            CourseType.Improvement,
             "Test Course 2",
             "Test Institution 2",
             DateTime.UtcNow.AddDays(-20));

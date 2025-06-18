@@ -75,7 +75,7 @@ public sealed class DeleteProcedureHandler : IResultCommandHandler<DeleteProcedu
 
             // Delete the procedure
             await _procedureRepository.DeleteAsync(procedure);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             return Result.Success();
         }

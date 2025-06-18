@@ -34,19 +34,21 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
         var internshipId = await CreateTestInternshipAsync(userId);
         
         var command = new AddProcedure(
-            internshipId,
-            "P001",
-            "Appendectomy",
-            "A",
-            PatientType.Adult,
-            PatientGender.Male,
-            "12345678901", // PESEL
-            SupervisorType.Specialist,
-            DateTime.UtcNow.Date,
-            "General Surgery");
+            InternshipId: internshipId,
+            Date: DateTime.UtcNow.Date,
+            Year: 1,
+            Code: "P001",
+            Name: "Appendectomy",
+            Location: "Operating Room 1",
+            Status: "Completed",
+            ExecutionType: "Performed",
+            SupervisorName: "Dr. Smith",
+            SupervisorPwz: "1234567",
+            PatientGender: 'M');
 
         // Act
-        var procedureId = await Mediator.Send(command);
+        var result = await Mediator.Send(command);
+        var procedureId = (int)result;
 
         // Assert
         procedureId.Should().BeGreaterThan(0);
@@ -57,13 +59,12 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
         _capturedEvents.Should().ContainSingle();
         var capturedEvent = _capturedEvents.First();
         
-        capturedEvent.ProcedureId.Should().Be(procedureId);
-        capturedEvent.InternshipId.Should().Be(internshipId);
-        capturedEvent.ProcedureCode.Should().Be(command.Code);
-        capturedEvent.ProcedureName.Should().Be(command.Name);
-        capturedEvent.Category.Should().Be(command.Category);
-        capturedEvent.PerformedAt.Should().Be(command.Date);
-        capturedEvent.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        capturedEvent.ProcedureId.Value.Should().Be(procedureId);
+        capturedEvent.InternshipId.Value.Should().Be(internshipId);
+        capturedEvent.Code.Should().Be(command.Code);
+        capturedEvent.Date.Should().Be(command.Date);
+        capturedEvent.Location.Should().Be(command.Location);
+        capturedEvent.OccurredAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -85,18 +86,19 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
         foreach (var (code, name, category) in procedures)
         {
             var command = new AddProcedure(
-                internshipId,
-                code,
-                name,
-                category,
-                PatientType.Adult,
-                PatientGender.Female,
-                "98765432109",
-                SupervisorType.Specialist,
-                DateTime.UtcNow.Date,
-                "Surgery Department");
+                InternshipId: internshipId,
+                Date: DateTime.UtcNow.Date,
+                Year: 1,
+                Code: code,
+                Name: name,
+                Location: "Operating Room",
+                Status: "Completed",
+                ExecutionType: category == "A" ? "Performed" : "Assisted",
+                SupervisorName: "Dr. Smith",
+                SupervisorPwz: "1234567");
                 
-            var procedureId = await Mediator.Send(command);
+            var result = await Mediator.Send(command);
+            var procedureId = (int)result;
             procedureIds.Add(procedureId);
         }
 
@@ -106,7 +108,7 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
         _capturedEvents.Should().HaveCount(3);
         _capturedEvents.Select(e => e.ProcedureId).Should().BeEquivalentTo(procedureIds);
         _capturedEvents.Select(e => e.InternshipId).Should().AllBeEquivalentTo(internshipId);
-        _capturedEvents.Select(e => e.ProcedureCode).Should().BeEquivalentTo(procedures.Select(p => p.Item1));
+        _capturedEvents.Select(e => e.Code).Should().BeEquivalentTo(procedures.Select(p => p.Item1));
     }
 
     [Fact]
@@ -124,23 +126,28 @@ public class ProcedureCreatedEventTests : IntegrationTestBase
             _capturedEvents.Clear();
             
             var command = new AddProcedure(
-                internshipId,
-                $"P{category}01",
-                $"Test Procedure {category}",
-                category,
-                PatientType.Child,
-                PatientGender.Male,
-                "12312312312",
-                SupervisorType.Resident,
-                DateTime.UtcNow.Date,
-                "Pediatrics");
+                InternshipId: internshipId,
+                Date: DateTime.UtcNow.Date,
+                Year: 3,
+                Code: $"P{category}01",
+                Name: $"Test Procedure {category}",
+                Location: "Pediatrics",
+                Status: "Completed",
+                ExecutionType: "Primary",
+                SupervisorName: "Dr. Supervisor",
+                SupervisorPwz: "1234567",
+                PerformingPerson: "Resident",
+                PatientInfo: "Child",
+                PatientInitials: "JD",
+                PatientGender: 'M');
                 
-            var procedureId = await Mediator.Send(command);
+            var result = await Mediator.Send(command);
+            var procedureId = (int)result;
             
             await Task.Delay(50);
             
             _capturedEvents.Should().ContainSingle();
-            _capturedEvents.First().Category.Should().Be(category);
+            _capturedEvents.First().Code.Should().Be($"P{category}01");
         }
     }
 

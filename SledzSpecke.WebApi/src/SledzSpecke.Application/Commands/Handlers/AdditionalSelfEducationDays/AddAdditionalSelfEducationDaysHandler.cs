@@ -32,11 +32,6 @@ public sealed class AddAdditionalSelfEducationDaysHandler : ICommandHandler<AddA
 
     public async Task<int> HandleAsync(AddAdditionalSelfEducationDays command)
     {
-        return await HandleAsync(command, CancellationToken.None);
-    }
-    
-    public async Task<int> HandleAsync(AddAdditionalSelfEducationDays command, CancellationToken cancellationToken)
-    {
         _logger.LogInformation("Adding additional self-education days for specialization {SpecializationId}", 
             command.SpecializationId);
 
@@ -99,7 +94,7 @@ public sealed class AddAdditionalSelfEducationDaysHandler : ICommandHandler<AddA
         }
 
         await _repository.AddAsync(result.Value);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Successfully added {Days} additional self-education days", command.DaysUsed);
         

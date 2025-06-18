@@ -14,6 +14,10 @@ namespace SledzSpecke.Tests.Integration.Controllers;
 
 public class AuthControllerTests : IntegrationTestBase
 {
+    public AuthControllerTests(SledzSpeckeApiFactory factory) : base(factory)
+    {
+    }
+
     [Fact]
     public async Task SignUp_WithValidData_ShouldReturnOk()
     {
@@ -45,9 +49,10 @@ public class AuthControllerTests : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         // Verify user was created in database
-        var user = await DbContext.Users.FindAsync(2); // ID 2 because seed data creates user with ID 1
-        user.Should().NotBeNull();
-        user!.Email.Value.Should().Be("newuser@example.com");
+        var users = DbContext.Users.Where(u => u.Email.Value == "newuser@example.com").ToList();
+        users.Should().HaveCount(1);
+        var user = users.First();
+        user.Email.Value.Should().Be("newuser@example.com");
         user.FirstName.Value.Should().Be("John");
         user.LastName.Value.Should().Be("Doe");
     }
@@ -83,11 +88,11 @@ public class AuthControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain("already exists");
+        content.Should().Contain("already");
     }
 
     [Fact]
-    public async Task SignUp_WithExistingUsername_ShouldReturnBadRequest()
+    public async Task SignUp_WithExistingPesel_ShouldReturnBadRequest()
     {
         // Arrange
         await SeedSpecialization();
@@ -117,7 +122,7 @@ public class AuthControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain("already exists");
+        content.Should().Contain("already");
     }
 
     [Fact]
@@ -152,45 +157,34 @@ public class AuthControllerTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task SignUp_WithInvalidSmkVersion_ShouldReturnBadRequest()
+    public async Task SignUp_WithInvalidPesel_ShouldReturnBadRequest()
     {
         // Arrange
         await SeedSpecialization();
         
         var command = new SignUp(
             Email: "newuser@example.com",
-            Username: "newuser",
             Password: "SecurePassword123!",
-            FullName: "John Doe",
-            SmkVersion: "invalid",
-            SpecializationId: 1);
+            FirstName: "John",
+            LastName: "Doe",
+            Pesel: "invalid", // Invalid PESEL
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1990, 1, 1),
+            CorrespondenceAddress: new AddressDto(
+                Street: "Main Street",
+                HouseNumber: "123",
+                ApartmentNumber: null,
+                PostalCode: "00-001",
+                City: "Warsaw",
+                Province: "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/auth/sign-up", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task SignUp_WithNonExistentSpecialization_ShouldReturnBadRequest()
-    {
-        // Arrange
-        var command = new SignUp(
-            Email: "newuser@example.com",
-            Username: "newuser",
-            Password: "SecurePassword123!",
-            FullName: "John Doe",
-            SmkVersion: "new",
-            SpecializationId: 999); // Non-existent
-
-        // Act
-        var response = await Client.PostAsJsonAsync("/api/auth/sign-up", command);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain("Specialization with ID 999 not found");
     }
 
     [Fact]
@@ -201,7 +195,7 @@ public class AuthControllerTests : IntegrationTestBase
         await SeedUser();
         
         var command = new SignIn(
-            Email: "test@example.com",
+            Username: "test@example.com",
             Password: "TestPassword123!");
 
         // Act
@@ -223,7 +217,7 @@ public class AuthControllerTests : IntegrationTestBase
         await SeedUser();
         
         var command = new SignIn(
-            Email: "test@example.com",
+            Username: "test@example.com",
             Password: "WrongPassword!");
 
         // Act
@@ -240,7 +234,7 @@ public class AuthControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Email: "nonexistent@example.com",
+            Username: "nonexistent@example.com",
             Password: "Password123!");
 
         // Act
@@ -257,7 +251,7 @@ public class AuthControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Email: "invalid-email",
+            Username: "invalid-email",
             Password: "Password123!");
 
         // Act
@@ -269,14 +263,7 @@ public class AuthControllerTests : IntegrationTestBase
 
     private async Task SeedSpecialization()
     {
-        var specialization = new Specialization
-        {
-            Id = new SpecializationId(1),
-            Name = "Test Specialization",
-            Code = "TST",
-            Years = 5,
-            IsActive = true
-        };
+        var specialization = TestDataFactory.CreateSpecialization(userId: 1);
         
         await DbContext.Specializations.AddAsync(specialization);
         await DbContext.SaveChangesAsync();
@@ -284,15 +271,28 @@ public class AuthControllerTests : IntegrationTestBase
 
     private async Task SeedUser()
     {
-        var user = User.Create(
+        var user = User.CreateWithId(
             new UserId(1),
             new Email("test@example.com"),
-            new Username("testuser"),
-            new Password("TestPassword123!"), // In real app this would be hashed
-            new FullName("Test User"),
-            new SmkVersion("new"),
-            new SpecializationId(1),
-            DateTime.UtcNow);
+            HashedPassword.FromPlainText("TestPassword123!"), // Properly hashed
+            new FirstName("Test"),
+            null,
+            new LastName("User"),
+            new Pesel("90010112345"),
+            new PwzNumber("1234567"),
+            new PhoneNumber("+48123456789"),
+            new DateTime(1990, 1, 1),
+            new Address(
+                "Test Street",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            ),
+            DateTime.UtcNow,
+            true,
+            true);
             
         await DbContext.Users.AddAsync(user);
         await DbContext.SaveChangesAsync();

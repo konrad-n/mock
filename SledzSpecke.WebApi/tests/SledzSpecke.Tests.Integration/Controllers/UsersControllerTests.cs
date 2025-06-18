@@ -18,7 +18,7 @@ public class UsersControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public UsersControllerTests()
+    public UsersControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {
@@ -73,8 +73,20 @@ public class UsersControllerTests : IntegrationTestBase
         var command = new SignUp(
             Email: "invalid-email",
             Password: "SecurePassword123!",
-            FullName: "John Doe",
-            Role: "User");
+            FirstName: "John",
+            LastName: "Doe",
+            Pesel: "92010112345",
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1992, 1, 1),
+            CorrespondenceAddress: new AddressDto(
+                "ul. Testowa",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/users", command);
@@ -94,8 +106,20 @@ public class UsersControllerTests : IntegrationTestBase
         var command = new SignUp(
             Email: "newuser@example.com",
             Password: "SecurePassword123!",
-            FullName: "",
-            Role: "User");
+            FirstName: "",  // Empty first name
+            LastName: "Doe",
+            Pesel: "92010112345",
+            PwzNumber: "1234567",
+            PhoneNumber: "+48123456789",
+            DateOfBirth: new DateTime(1992, 1, 1),
+            CorrespondenceAddress: new AddressDto(
+                "ul. Testowa",
+                "1",
+                null,
+                "00-001",
+                "Warsaw",
+                "Mazowieckie"
+            ));
 
         // Act
         var response = await Client.PostAsJsonAsync("/users", command);
@@ -115,7 +139,7 @@ public class UsersControllerTests : IntegrationTestBase
         await SignUpUser("testuser@example.com", "TestPassword123!", "Test User");
         
         var command = new SignIn(
-            Email: "testuser@example.com",
+            Username: "testuser@example.com",
             Password: "TestPassword123!");
 
         // Act
@@ -124,7 +148,7 @@ public class UsersControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
-        var token = await response.Content.ReadFromJsonAsync<AccessTokenDto>();
+        var token = await response.Content.ReadFromJsonAsync<JwtDto>();
         token.Should().NotBeNull();
         token!.AccessToken.Should().NotBeNullOrWhiteSpace();
     }
@@ -136,7 +160,7 @@ public class UsersControllerTests : IntegrationTestBase
         await SignUpUser("testuser@example.com", "TestPassword123!", "Test User");
         
         var command = new SignIn(
-            Email: "testuser@example.com",
+            Username: "testuser",
             Password: "WrongPassword!");
 
         // Act
@@ -154,7 +178,7 @@ public class UsersControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Email: "nonexistent@example.com",
+            Username: "nonexistent",
             Password: "Password123!");
 
         // Act
@@ -193,11 +217,15 @@ public class UsersControllerTests : IntegrationTestBase
 
     private async Task SignUpUser(string email, string password, string fullName)
     {
-        var command = new SignUp(
-            Email: email,
-            Password: password,
-            FullName: fullName,
-            Role: "User");
+        var nameParts = fullName.Split(' ', 2);
+        var firstName = nameParts.Length > 0 ? nameParts[0] : "Test";
+        var lastName = nameParts.Length > 1 ? nameParts[1] : "User";
+        
+        var command = TestDataFactoryExtensions.CreateSignUpCommand(
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName);
             
         await Client.PostAsJsonAsync("/users", command);
     }

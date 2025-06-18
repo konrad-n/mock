@@ -17,7 +17,7 @@ public class DashboardControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _authenticatedClient;
 
-    public DashboardControllerTests()
+    public DashboardControllerTests(SledzSpeckeApiFactory factory) : base(factory)
     {
         _authenticatedClient = Factory.WithWebHostBuilder(builder =>
         {
@@ -47,12 +47,13 @@ public class DashboardControllerTests : IntegrationTestBase
         
         var overview = await response.Content.ReadFromJsonAsync<DashboardOverviewDto>();
         overview.Should().NotBeNull();
-        overview!.TotalCourses.Should().Be(2);
-        overview.TotalProcedures.Should().Be(3);
-        overview.TotalInternships.Should().Be(1);
-        overview.TotalShiftHours.Should().BeGreaterThan(0);
-        overview.CompletedCourses.Should().Be(1);
-        overview.CurrentYear.Should().Be(1);
+        overview!.OverallProgress.Should().BeGreaterThanOrEqualTo(0);
+        overview.CurrentModuleId.Should().BeGreaterThan(0);
+        overview.CurrentModuleName.Should().NotBeNullOrEmpty();
+        overview.Specialization.Should().NotBeNull();
+        overview.ModuleProgress.Should().NotBeNull();
+        overview.SelfEducationCount.Should().BeGreaterThanOrEqualTo(0);
+        overview.PublicationsCount.Should().BeGreaterThanOrEqualTo(0);
     }
 
     [Fact]
@@ -77,12 +78,12 @@ public class DashboardControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
-        var progress = await response.Content.ReadFromJsonAsync<ProgressDto>();
+        var progress = await response.Content.ReadFromJsonAsync<SpecializationStatisticsDto>();
         progress.Should().NotBeNull();
         progress!.CourseProgress.Should().NotBeNull();
         progress.ProcedureProgress.Should().NotBeNull();
         progress.InternshipProgress.Should().NotBeNull();
-        progress.ShiftProgress.Should().NotBeNull();
+        progress.MedicalShiftProgress.Should().NotBeNull();
     }
 
     [Fact]

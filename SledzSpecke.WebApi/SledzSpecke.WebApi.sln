@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{91535CA4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.E2E.Tests", "tests\SledzSpecke.E2E.Tests\SledzSpecke.E2E.Tests.csproj", "{74E681A4-F003-4D30-97F0-52A992C71DC6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SledzSpecke.Tests.Common", "tests\SledzSpecke.Tests.Common\SledzSpecke.Tests.Common.csproj", "{DF1725B1-42C5-4F54-AA9A-3765B3081511}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,8 +42,13 @@ Global
 		{74E681A4-F003-4D30-97F0-52A992C71DC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74E681A4-F003-4D30-97F0-52A992C71DC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74E681A4-F003-4D30-97F0-52A992C71DC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF1725B1-42C5-4F54-AA9A-3765B3081511}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF1725B1-42C5-4F54-AA9A-3765B3081511}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF1725B1-42C5-4F54-AA9A-3765B3081511}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF1725B1-42C5-4F54-AA9A-3765B3081511}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{74E681A4-F003-4D30-97F0-52A992C71DC6} = {91535CA4-824C-4AAD-87E9-F520D307A0F8}
+		{DF1725B1-42C5-4F54-AA9A-3765B3081511} = {91535CA4-824C-4AAD-87E9-F520D307A0F8}
 	EndGlobalSection
 EndGlobal
