@@ -22,6 +22,11 @@ public sealed class CompleteSelfEducationHandler : ICommandHandler<CompleteSelfE
 
     public async Task HandleAsync(CompleteSelfEducation command)
     {
+        await HandleAsync(command, CancellationToken.None);
+    }
+    
+    public async Task HandleAsync(CompleteSelfEducation command, CancellationToken cancellationToken)
+    {
         var selfEducation = await _selfEducationRepository.GetByIdAsync(command.SelfEducationId);
         if (selfEducation is null)
         {

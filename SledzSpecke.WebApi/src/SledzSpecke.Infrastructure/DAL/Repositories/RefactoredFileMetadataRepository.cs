@@ -16,7 +16,7 @@ internal sealed class RefactoredFileMetadataRepository : BaseRepository<FileMeta
     {
     }
 
-    public async Task<FileMetadata?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public override async Task<FileMetadata?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var spec = new FileMetadataByIdSpecification(id);
         return await GetSingleBySpecificationAsync(spec, cancellationToken);
@@ -44,7 +44,7 @@ internal sealed class RefactoredFileMetadataRepository : BaseRepository<FileMeta
         return await GetBySpecificationAsync(spec, f => f.UploadedAt, ascending: false, cancellationToken);
     }
 
-    public async Task AddAsync(FileMetadata fileMetadata, CancellationToken cancellationToken = default)
+    public override async Task AddAsync(FileMetadata fileMetadata, CancellationToken cancellationToken = default)
     {
         await base.AddAsync(fileMetadata, cancellationToken);
     }

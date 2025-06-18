@@ -21,15 +21,13 @@ public sealed class GetMedicalShiftByIdHandler : IResultQueryHandler<GetMedicalS
         GetMedicalShiftById query, 
         CancellationToken cancellationToken = default)
     {
-        var shift = await _medicalShiftRepository.GetByIdAsync(
-            new MedicalShiftId(query.Id), 
-            cancellationToken);
+        var shift = await _medicalShiftRepository.GetByIdAsync(query.ShiftId);
             
         if (shift is null)
         {
             return Result<MedicalShiftDto>.Failure(
-                $"Medical shift with ID {query.Id} not found",
-                ErrorCodes.SHIFT_NOT_FOUND);
+                $"Medical shift with ID {query.ShiftId} not found",
+                Core.Constants.ErrorCodes.SHIFT_NOT_FOUND);
         }
 
         var dto = new MedicalShiftDto(

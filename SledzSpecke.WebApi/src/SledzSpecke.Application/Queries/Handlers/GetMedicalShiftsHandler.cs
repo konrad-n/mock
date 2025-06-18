@@ -2,6 +2,7 @@ using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.DTO;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Constants;
+using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
@@ -30,16 +31,28 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
         {
             return Result<IEnumerable<MedicalShiftDto>>.Failure(
                 $"User with ID {query.UserId} not found",
-                ErrorCodes.USER_NOT_FOUND);
+                Core.Constants.ErrorCodes.USER_NOT_FOUND);
         }
 
         // Get medical shifts
-        var shifts = await _medicalShiftRepository.GetByUserIdAsync(
-            new UserId(query.UserId),
-            query.FromDate,
-            query.ToDate,
-            query.InternshipId.HasValue ? new InternshipId(query.InternshipId.Value) : null,
-            cancellationToken);
+        IEnumerable<MedicalShift> shifts;
+        if (query.FromDate != default && query.ToDate != default)
+        {
+            shifts = await _medicalShiftRepository.GetByUserIdAndDateRangeAsync(
+                new UserId(query.UserId),
+                query.FromDate,
+                query.ToDate);
+        }
+        else
+        {
+            shifts = await _medicalShiftRepository.GetByUserIdAsync(query.UserId);
+        }
+        
+        // Filter by internship if specified
+        if (query.InternshipId.HasValue)
+        {
+            shifts = shifts.Where(s => s.InternshipId.Value == query.InternshipId.Value);
+        }
 
         // Map to DTOs
         var shiftDtos = shifts.Select(shift => new MedicalShiftDto(

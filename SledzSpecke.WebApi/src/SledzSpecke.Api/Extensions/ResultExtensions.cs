@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SledzSpecke.Application;
 using SledzSpecke.Core.Abstractions;
-using SledzSpecke.Core.Constants;
 
 namespace SledzSpecke.Api.Extensions;
 
@@ -124,16 +123,16 @@ public static class ResultExtensions
 
         return errorCode switch
         {
-            ErrorCodes.NOT_FOUND => new NotFoundObjectResult(errorResponse),
-            ErrorCodes.UNAUTHORIZED => new UnauthorizedObjectResult(errorResponse),
-            ErrorCodes.FORBIDDEN => new ObjectResult(errorResponse) { StatusCode = 403 },
-            ErrorCodes.CONFLICT => new ConflictObjectResult(errorResponse),
-            ErrorCodes.VALIDATION_ERROR => new BadRequestObjectResult(errorResponse),
-            ErrorCodes.DOMAIN_ERROR => new BadRequestObjectResult(errorResponse),
-            ErrorCodes.BUSINESS_RULE_VIOLATION => new BadRequestObjectResult(errorResponse),
-            ErrorCodes.EXTERNAL_SERVICE_ERROR => new ObjectResult(errorResponse) { StatusCode = 503 },
-            ErrorCodes.TIMEOUT => new ObjectResult(errorResponse) { StatusCode = 504 },
-            ErrorCodes.INTERNAL_ERROR => new ObjectResult(errorResponse) { StatusCode = 500 },
+            Application.ErrorCodes.NOT_FOUND => new NotFoundObjectResult(errorResponse),
+            Application.ErrorCodes.UNAUTHORIZED => new UnauthorizedObjectResult(errorResponse),
+            Application.ErrorCodes.FORBIDDEN => new ObjectResult(errorResponse) { StatusCode = 403 },
+            Application.ErrorCodes.CONFLICT => new ConflictObjectResult(errorResponse),
+            Application.ErrorCodes.VALIDATION_ERROR => new BadRequestObjectResult(errorResponse),
+            Application.ErrorCodes.DOMAIN_ERROR => new BadRequestObjectResult(errorResponse),
+            Application.ErrorCodes.BUSINESS_RULE_VIOLATION => new BadRequestObjectResult(errorResponse),
+            Application.ErrorCodes.EXTERNAL_SERVICE_ERROR => new ObjectResult(errorResponse) { StatusCode = 503 },
+            Application.ErrorCodes.TIMEOUT => new ObjectResult(errorResponse) { StatusCode = 504 },
+            Application.ErrorCodes.INTERNAL_ERROR => new ObjectResult(errorResponse) { StatusCode = 500 },
             _ => new BadRequestObjectResult(errorResponse)
         };
     }
@@ -179,26 +178,42 @@ public static class ResultExtensions
             Extensions = { ["errorCode"] = result.ErrorCode },
         };
 
-        return result.ErrorCode switch
+        problemDetails.Status = result.ErrorCode switch
         {
-            ErrorCodes.NOT_FOUND or 
-            ErrorCodes.USER_NOT_FOUND or
-            ErrorCodes.INTERNSHIP_NOT_FOUND or
-            ErrorCodes.SHIFT_NOT_FOUND => Results.Problem(problemDetails with { Status = 404 }),
+            Application.ErrorCodes.NOT_FOUND or 
+            Application.ErrorCodes.ABSENCE_NOT_FOUND => 404,
             
-            ErrorCodes.ALREADY_EXISTS or
-            ErrorCodes.SHIFT_ALREADY_EXISTS => Results.Problem(problemDetails with { Status = 409 }),
+            Application.ErrorCodes.CONFLICT or
+            Application.ErrorCodes.USER_ALREADY_EXISTS or
+            Application.ErrorCodes.EMAIL_ALREADY_IN_USE or
+            Application.ErrorCodes.PESEL_ALREADY_IN_USE or
+            Application.ErrorCodes.PWZ_ALREADY_IN_USE or
+            Application.ErrorCodes.DUPLICATE_PROCEDURE => 409,
             
-            ErrorCodes.UNAUTHORIZED or
-            ErrorCodes.INVALID_CREDENTIALS => Results.Problem(problemDetails with { Status = 401 }),
+            Application.ErrorCodes.UNAUTHORIZED or
+            Application.ErrorCodes.INVALID_CREDENTIALS => 401,
             
-            ErrorCodes.FORBIDDEN => Results.Problem(problemDetails with { Status = 403 }),
+            Application.ErrorCodes.FORBIDDEN => 403,
             
-            ErrorCodes.VALIDATION_ERROR or
-            ErrorCodes.INVALID_OPERATION => Results.Problem(problemDetails with { Status = 400 }),
+            Application.ErrorCodes.VALIDATION_ERROR or
+            Application.ErrorCodes.DOMAIN_ERROR or
+            Application.ErrorCodes.BUSINESS_RULE_VIOLATION or
+            Application.ErrorCodes.SHIFT_OUTSIDE_INTERNSHIP or
+            Application.ErrorCodes.WEEKLY_HOURS_EXCEEDED or
+            Application.ErrorCodes.MONTHLY_HOURS_INSUFFICIENT or
+            Application.ErrorCodes.INVALID_MODULE_PROGRESSION or
+            Application.ErrorCodes.SPECIALIZATION_NOT_ACTIVE or
+            Application.ErrorCodes.COURSE_NOT_APPROVED or
+            Application.ErrorCodes.INVALID_SMK_VERSION => 400,
             
-            _ => Results.Problem(problemDetails with { Status = 500 }),
+            Application.ErrorCodes.EXTERNAL_SERVICE_ERROR => 503,
+            
+            Application.ErrorCodes.TIMEOUT => 504,
+            
+            _ => 500,
         };
+        
+        return Results.Problem(problemDetails);
     }
     
     private static IResult ToApiError(Result result)

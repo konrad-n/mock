@@ -84,7 +84,7 @@ internal sealed class RefactoredSqlAdditionalSelfEducationDaysRepository : BaseR
         return totalDays;
     }
 
-    public async Task AddAsync(AdditionalSelfEducationDays additionalSelfEducationDays, CancellationToken cancellationToken = default)
+    public override async Task AddAsync(AdditionalSelfEducationDays additionalSelfEducationDays, CancellationToken cancellationToken = default)
     {
         await base.AddAsync(additionalSelfEducationDays, cancellationToken);
         // Note: SaveChangesAsync should be called by Unit of Work, not here

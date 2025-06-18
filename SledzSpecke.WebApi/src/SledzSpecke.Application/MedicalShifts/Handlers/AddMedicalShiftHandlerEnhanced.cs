@@ -40,6 +40,11 @@ public class AddMedicalShiftHandlerEnhanced : ICommandHandler<AddMedicalShift, i
 
     public async Task<int> HandleAsync(AddMedicalShift command)
     {
+        return await HandleAsync(command, CancellationToken.None);
+    }
+    
+    public async Task<int> HandleAsync(AddMedicalShift command, CancellationToken cancellationToken)
+    {
         // Step 1: Validate and load entities
         var loadResult = await LoadRequiredEntitiesAsync(command);
         if (loadResult.IsFailure)

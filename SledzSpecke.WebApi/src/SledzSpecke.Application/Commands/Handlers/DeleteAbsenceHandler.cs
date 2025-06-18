@@ -22,6 +22,11 @@ public sealed class DeleteAbsenceHandler : ICommandHandler<DeleteAbsence>
 
     public async Task HandleAsync(DeleteAbsence command)
     {
+        await HandleAsync(command, CancellationToken.None);
+    }
+    
+    public async Task HandleAsync(DeleteAbsence command, CancellationToken cancellationToken)
+    {
         var absence = await _absenceRepository.GetByIdAsync(command.AbsenceId);
         if (absence is null)
         {

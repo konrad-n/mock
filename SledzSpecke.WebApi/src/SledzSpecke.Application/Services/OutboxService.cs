@@ -4,7 +4,7 @@ using SledzSpecke.Core.Outbox;
 
 namespace SledzSpecke.Application.Services;
 
-internal sealed class OutboxService : IOutboxService
+public sealed class OutboxService : IOutboxService
 {
     private readonly IOutboxRepository _repository;
     private readonly ILogger<OutboxService> _logger;

@@ -35,6 +35,11 @@ public class DeleteMedicalShiftHandlerEnhanced : ICommandHandler<DeleteMedicalSh
 
     public async Task HandleAsync(DeleteMedicalShift command)
     {
+        await HandleAsync(command, CancellationToken.None);
+    }
+    
+    public async Task HandleAsync(DeleteMedicalShift command, CancellationToken cancellationToken)
+    {
         // Step 1: Load and validate entities
         var loadResult = await LoadAndValidateEntitiesAsync(command);
         if (loadResult.IsFailure)

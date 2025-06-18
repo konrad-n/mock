@@ -22,6 +22,11 @@ public sealed class UpdateRecognitionHandler : ICommandHandler<UpdateRecognition
 
     public async Task HandleAsync(UpdateRecognition command)
     {
+        await HandleAsync(command, CancellationToken.None);
+    }
+    
+    public async Task HandleAsync(UpdateRecognition command, CancellationToken cancellationToken)
+    {
         var recognition = await _recognitionRepository.GetByIdAsync(command.RecognitionId);
         if (recognition is null)
         {

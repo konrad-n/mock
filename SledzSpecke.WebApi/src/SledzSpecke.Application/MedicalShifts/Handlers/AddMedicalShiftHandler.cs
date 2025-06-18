@@ -40,17 +40,17 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
         {
             // Validate internship exists
             var internshipId = new InternshipId(command.InternshipId);
-            var internship = await _internshipRepository.GetByIdAsync(internshipId, cancellationToken);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
             if (internship is null)
             {
-                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.", ErrorCodes.INTERNSHIP_NOT_FOUND);
+                return Result.Failure<int>($"Internship with ID {command.InternshipId} not found.", Core.Constants.ErrorCodes.INTERNSHIP_NOT_FOUND);
             }
 
             // Validate specialization exists
-            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId, cancellationToken);
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
             if (specialization is null)
             {
-                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.", ErrorCodes.SPECIALIZATION_NOT_FOUND);
+                return Result.Failure<int>($"Specialization with ID {internship.SpecializationId.Value} not found.", Core.Constants.ErrorCodes.SPECIALIZATION_NOT_FOUND);
             }
 
             // Get available years for validation
@@ -85,7 +85,7 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
             }
 
             // Update the internship (with the new shift already added)
-            await _internshipRepository.UpdateAsync(internship, cancellationToken);
+            await _internshipRepository.UpdateAsync(internship);
             
             // Save changes and dispatch domain events
             await _unitOfWork.SaveChangesAsync(cancellationToken);

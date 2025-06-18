@@ -22,6 +22,11 @@ public sealed class ApproveRecognitionHandler : ICommandHandler<ApproveRecogniti
 
     public async Task HandleAsync(ApproveRecognition command)
     {
+        await HandleAsync(command, CancellationToken.None);
+    }
+    
+    public async Task HandleAsync(ApproveRecognition command, CancellationToken cancellationToken)
+    {
         var recognition = await _recognitionRepository.GetByIdAsync(command.RecognitionId);
         if (recognition is null)
         {
