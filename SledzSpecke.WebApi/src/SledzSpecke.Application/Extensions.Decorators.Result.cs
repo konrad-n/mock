@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using SledzSpecke.Application.Abstractions;
-using SledzSpecke.Application.Decorators.Result;
+using SledzSpecke.Application.Decorators.ResultDecorators;
 
 namespace SledzSpecke.Application;
 

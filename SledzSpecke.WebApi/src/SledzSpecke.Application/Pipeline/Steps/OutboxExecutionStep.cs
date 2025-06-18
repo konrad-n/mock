@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Services;
+using SledzSpecke.Application.Abstractions;
 
 namespace SledzSpecke.Application.Pipeline.Steps;
 

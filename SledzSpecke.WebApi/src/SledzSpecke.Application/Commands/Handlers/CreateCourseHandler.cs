@@ -22,7 +22,7 @@ public sealed class CreateCourseHandler : IResultCommandHandler<CreateCourse, in
         _moduleRepository = moduleRepository;
     }
 
-    public async Task<Result<int>> HandleAsync(CreateCourse command)
+    public async Task<Result<int>> HandleAsync(CreateCourse command, CancellationToken cancellationToken = default)
     {
         var specialization = await _specializationRepository.GetByIdAsync(command.SpecializationId);
         if (specialization is null)

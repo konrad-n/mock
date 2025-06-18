@@ -27,7 +27,7 @@ public sealed class UploadFileHandler : IResultCommandHandler<UploadFile, FileMe
         _userContext = userContext;
     }
     
-    public async Task<Result<FileMetadataDto>> HandleAsync(UploadFile command)
+    public async Task<Result<FileMetadataDto>> HandleAsync(UploadFile command, CancellationToken cancellationToken = default)
     {
         var userId = _userContext.UserId;
         if (userId is null)
@@ -78,7 +78,7 @@ public sealed class UploadFileHandler : IResultCommandHandler<UploadFile, FileMe
             
             // Save metadata
             await _fileMetadataRepository.AddAsync(fileMetadata);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             // Return DTO
             var dto = new FileMetadataDto

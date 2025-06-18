@@ -91,7 +91,7 @@ public class AddMedicalShiftHandlerEnhanced : ICommandHandler<AddMedicalShift, i
 
         // Step 7: Save the medical shift using Unit of Work
         var shiftId = await _medicalShiftRepository.AddAsync(medicalShift);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return shiftId;
     }

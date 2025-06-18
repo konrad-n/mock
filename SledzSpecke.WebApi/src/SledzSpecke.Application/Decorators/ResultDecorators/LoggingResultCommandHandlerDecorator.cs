@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Abstractions;
 
-namespace SledzSpecke.Application.Decorators.Result;
+namespace SledzSpecke.Application.Decorators.ResultDecorators;
 
 internal sealed class LoggingResultCommandHandlerDecorator<TCommand, TResult> 
     : IResultCommandHandler<TCommand, TResult>
@@ -26,7 +26,7 @@ internal sealed class LoggingResultCommandHandlerDecorator<TCommand, TResult>
         _logger = logger;
     }
 
-    public async Task<Result<TResult>> HandleAsync(
+    public async Task<Core.Abstractions.Result<TResult>> HandleAsync(
         TCommand command, 
         CancellationToken cancellationToken = default)
     {
@@ -100,7 +100,7 @@ internal sealed class LoggingResultCommandHandlerDecorator<TCommand>
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(
+    public async Task<Core.Abstractions.Result> HandleAsync(
         TCommand command, 
         CancellationToken cancellationToken = default)
     {

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Abstractions;
 
-namespace SledzSpecke.Application.Decorators.Result;
+namespace SledzSpecke.Application.Decorators.ResultDecorators;
 
 internal sealed class PerformanceResultCommandHandlerDecorator<TCommand, TResult> 
     : IResultCommandHandler<TCommand, TResult>
@@ -21,13 +21,13 @@ internal sealed class PerformanceResultCommandHandlerDecorator<TCommand, TResult
         _logger = logger;
     }
 
-    public async Task<Result<TResult>> HandleAsync(
+    public async Task<Core.Abstractions.Result<TResult>> HandleAsync(
         TCommand command, 
         CancellationToken cancellationToken = default)
     {
         var commandName = typeof(TCommand).Name;
         
-        using var activity = Activity.StartActivity($"Command: {commandName}");
+        using var activity = Activity.Current?.Source.StartActivity($"Command: {commandName}");
         activity?.SetTag("command.type", commandName);
         
         var stopwatch = Stopwatch.StartNew();
@@ -66,13 +66,13 @@ internal sealed class PerformanceResultCommandHandlerDecorator<TCommand>
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(
+    public async Task<Core.Abstractions.Result> HandleAsync(
         TCommand command, 
         CancellationToken cancellationToken = default)
     {
         var commandName = typeof(TCommand).Name;
         
-        using var activity = Activity.StartActivity($"Command: {commandName}");
+        using var activity = Activity.Current?.Source.StartActivity($"Command: {commandName}");
         activity?.SetTag("command.type", commandName);
         
         var stopwatch = Stopwatch.StartNew();

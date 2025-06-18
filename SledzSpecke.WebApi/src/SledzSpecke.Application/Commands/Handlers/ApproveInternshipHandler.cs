@@ -19,7 +19,7 @@ public sealed class ApproveInternshipHandler : IResultCommandHandler<ApproveInte
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(ApproveInternship command)
+    public async Task<Result> HandleAsync(ApproveInternship command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -39,7 +39,7 @@ public sealed class ApproveInternshipHandler : IResultCommandHandler<ApproveInte
             internship.Approve(approverName);
             
             await _internshipRepository.UpdateAsync(internship);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             return Result.Success();
         }

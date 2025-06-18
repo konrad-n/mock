@@ -18,7 +18,7 @@ public sealed class UpdateEducationalActivityHandler : IResultCommandHandler<Upd
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(UpdateEducationalActivity command)
+    public async Task<Result> HandleAsync(UpdateEducationalActivity command, CancellationToken cancellationToken = default)
     {
         var activity = await _repository.GetByIdAsync(new EducationalActivityId(command.Id));
         if (activity is null)
@@ -42,7 +42,7 @@ public sealed class UpdateEducationalActivityHandler : IResultCommandHandler<Upd
                 command.EndDate);
 
             await _repository.UpdateAsync(activity);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

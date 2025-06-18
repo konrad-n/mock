@@ -40,6 +40,6 @@ public sealed class DeleteAbsenceHandler : ICommandHandler<DeleteAbsence>
         }
 
         await _absenceRepository.DeleteAsync(absence.Id);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

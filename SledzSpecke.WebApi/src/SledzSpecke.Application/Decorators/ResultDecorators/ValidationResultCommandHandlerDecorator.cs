@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Abstractions;
 
-namespace SledzSpecke.Application.Decorators.Result;
+namespace SledzSpecke.Application.Decorators.ResultDecorators;
 
 internal sealed class ValidationResultCommandHandlerDecorator<TCommand, TResult> 
     : IResultCommandHandler<TCommand, TResult>
@@ -20,12 +20,12 @@ internal sealed class ValidationResultCommandHandlerDecorator<TCommand, TResult>
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result<TResult>> HandleAsync(
+    public async Task<Core.Abstractions.Result<TResult>> HandleAsync(
         TCommand command, 
         CancellationToken cancellationToken = default)
     {
         // Try to find a FluentValidation validator
-        var validator = _serviceProvider.GetService<IValidator<TCommand>>();
+        var validator = _serviceProvider.GetService<FluentValidation.IValidator<TCommand>>();
         
         if (validator is not null)
         {
@@ -39,7 +39,7 @@ internal sealed class ValidationResultCommandHandlerDecorator<TCommand, TResult>
                         g => g.Key,
                         g => g.Select(e => e.ErrorMessage).ToArray());
                         
-                return Result<TResult>.ValidationFailure(errors);
+                return Core.Abstractions.Result<TResult>.ValidationFailure(errors);
             }
         }
         
@@ -62,12 +62,12 @@ internal sealed class ValidationResultCommandHandlerDecorator<TCommand>
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result> HandleAsync(
+    public async Task<Core.Abstractions.Result> HandleAsync(
         TCommand command, 
         CancellationToken cancellationToken = default)
     {
         // Try to find a FluentValidation validator
-        var validator = _serviceProvider.GetService<IValidator<TCommand>>();
+        var validator = _serviceProvider.GetService<FluentValidation.IValidator<TCommand>>();
         
         if (validator is not null)
         {
@@ -82,7 +82,7 @@ internal sealed class ValidationResultCommandHandlerDecorator<TCommand>
                         g => g.Select(e => e.ErrorMessage).ToArray());
                 
                 // Convert to Result (non-generic) with validation error
-                return Result.Failure(
+                return Core.Abstractions.Result.Failure(
                     $"Validation failed: {string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage))}", 
                     "VALIDATION_ERROR");
             }

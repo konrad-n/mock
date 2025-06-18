@@ -44,6 +44,6 @@ public sealed class UpdateRecognitionHandler : ICommandHandler<UpdateRecognition
             command.DaysReduction);
 
         await _recognitionRepository.UpdateAsync(recognition);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

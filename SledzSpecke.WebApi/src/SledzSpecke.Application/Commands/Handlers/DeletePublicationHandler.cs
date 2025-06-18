@@ -23,7 +23,7 @@ public sealed class DeletePublicationHandler : IResultCommandHandler<DeletePubli
         _userContextService = userContextService;
     }
 
-    public async Task<Result> HandleAsync(DeletePublication command)
+    public async Task<Result> HandleAsync(DeletePublication command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -52,7 +52,7 @@ public sealed class DeletePublicationHandler : IResultCommandHandler<DeletePubli
             }
 
             await _publicationRepository.DeleteAsync(publication.Id);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

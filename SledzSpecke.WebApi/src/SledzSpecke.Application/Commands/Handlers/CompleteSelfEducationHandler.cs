@@ -36,6 +36,6 @@ public sealed class CompleteSelfEducationHandler : ICommandHandler<CompleteSelfE
         // Just update the repository to trigger any necessary updates
 
         await _selfEducationRepository.UpdateAsync(selfEducation);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

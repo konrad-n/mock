@@ -21,7 +21,7 @@ public sealed class UpdateAdditionalSelfEducationDaysHandler : IResultCommandHan
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(UpdateAdditionalSelfEducationDays command)
+    public async Task<Result> HandleAsync(UpdateAdditionalSelfEducationDays command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -91,7 +91,7 @@ public sealed class UpdateAdditionalSelfEducationDaysHandler : IResultCommandHan
 
             // Update in repository
             await _repository.UpdateAsync(existingDays);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated additional self-education days {Id} to {DaysUsed} days",

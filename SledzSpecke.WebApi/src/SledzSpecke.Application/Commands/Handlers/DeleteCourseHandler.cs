@@ -22,7 +22,7 @@ public sealed class DeleteCourseHandler : IResultCommandHandler<DeleteCourse>
         _userRepository = userRepository;
     }
 
-    public async Task<Result> HandleAsync(DeleteCourse command)
+    public async Task<Result> HandleAsync(DeleteCourse command, CancellationToken cancellationToken = default)
     {
         try
         {

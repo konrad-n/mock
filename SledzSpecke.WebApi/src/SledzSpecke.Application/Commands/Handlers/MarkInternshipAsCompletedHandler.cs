@@ -28,7 +28,7 @@ public sealed class MarkInternshipAsCompletedHandler : IResultCommandHandler<Mar
         _clock = clock;
     }
 
-    public async Task<Result> HandleAsync(MarkInternshipAsCompleted command)
+    public async Task<Result> HandleAsync(MarkInternshipAsCompleted command, CancellationToken cancellationToken = default)
     {
         try
         {

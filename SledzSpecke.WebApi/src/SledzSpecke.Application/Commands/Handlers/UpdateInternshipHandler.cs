@@ -31,7 +31,7 @@ public sealed class UpdateInternshipHandlerRefactored : IResultCommandHandler<Up
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(UpdateInternship command)
+    public async Task<Result> HandleAsync(UpdateInternship command, CancellationToken cancellationToken = default)
     {
         try
         {

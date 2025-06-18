@@ -25,7 +25,7 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
         _authenticator = authenticator;
     }
 
-    public async Task<Result<JwtDto>> HandleAsync(SignIn command)
+    public async Task<Result<JwtDto>> HandleAsync(SignIn command, CancellationToken cancellationToken = default)
     {
         try
         {

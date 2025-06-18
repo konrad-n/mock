@@ -89,7 +89,7 @@ public class UpdateMedicalShiftHandlerEnhanced : ICommandHandler<UpdateMedicalSh
 
         // Step 7: Persist changes using Unit of Work
         await _medicalShiftRepository.UpdateAsync(shift);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<Result<(Core.Entities.MedicalShift shift, Core.Entities.Internship internship,

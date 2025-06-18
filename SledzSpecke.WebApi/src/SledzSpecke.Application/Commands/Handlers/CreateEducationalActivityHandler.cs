@@ -25,7 +25,7 @@ public sealed class CreateEducationalActivityHandler : IResultCommandHandler<Cre
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<int>> HandleAsync(CreateEducationalActivity command)
+    public async Task<Result<int>> HandleAsync(CreateEducationalActivity command, CancellationToken cancellationToken = default)
     {
         // Validate specialization exists
         var specialization = await _specializationRepository.GetByIdAsync(command.SpecializationId);

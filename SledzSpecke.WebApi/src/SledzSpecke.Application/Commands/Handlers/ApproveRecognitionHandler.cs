@@ -35,6 +35,6 @@ public sealed class ApproveRecognitionHandler : ICommandHandler<ApproveRecogniti
         recognition.Approve(new Core.ValueObjects.UserId(command.ApprovedBy));
 
         await _recognitionRepository.UpdateAsync(recognition);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

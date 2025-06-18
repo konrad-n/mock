@@ -60,7 +60,7 @@ public class DeleteMedicalShiftHandlerEnhanced : ICommandHandler<DeleteMedicalSh
 
         // Step 4: Delete the shift using Unit of Work
         await _medicalShiftRepository.DeleteAsync(shift.Id.Value);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<Result<(Core.Entities.MedicalShift shift, Core.Entities.Internship internship, Core.Entities.User user)>>

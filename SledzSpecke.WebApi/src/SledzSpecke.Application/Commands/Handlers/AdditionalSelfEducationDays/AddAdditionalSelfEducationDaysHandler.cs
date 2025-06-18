@@ -94,7 +94,7 @@ public sealed class AddAdditionalSelfEducationDaysHandler : ICommandHandler<AddA
         }
 
         await _repository.AddAsync(result.Value);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Successfully added {Days} additional self-education days", command.DaysUsed);
         

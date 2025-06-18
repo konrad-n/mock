@@ -33,7 +33,7 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(SignUp command)
+    public async Task<Result> HandleAsync(SignUp command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -99,7 +99,7 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
             _logger.LogInformation("User entity created with ID: {UserId}", user.Id?.Value ?? 0);
 
             await _userRepository.AddAsync(user);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             _logger.LogInformation("User saved successfully");
             

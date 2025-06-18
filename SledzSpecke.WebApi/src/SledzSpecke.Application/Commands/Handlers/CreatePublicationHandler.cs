@@ -27,7 +27,7 @@ public sealed class CreatePublicationHandler : IResultCommandHandler<CreatePubli
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(CreatePublication command)
+    public async Task<Result> HandleAsync(CreatePublication command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -90,7 +90,7 @@ public sealed class CreatePublicationHandler : IResultCommandHandler<CreatePubli
 
             // Save the publication
             await _publicationRepository.AddAsync(publication);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

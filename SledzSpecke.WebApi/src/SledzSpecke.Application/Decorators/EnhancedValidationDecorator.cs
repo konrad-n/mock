@@ -23,7 +23,7 @@ public class EnhancedValidationDecorator<TCommand> : IResultCommandHandler<TComm
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result> HandleAsync(TCommand command)
+    public async Task<Core.Abstractions.Result> HandleAsync(TCommand command, CancellationToken cancellationToken = default)
     {
         // Try to get FluentValidation validator first
         var validator = _serviceProvider.GetService<FluentValidation.IValidator<TCommand>>();
@@ -35,7 +35,7 @@ public class EnhancedValidationDecorator<TCommand> : IResultCommandHandler<TComm
             {
                 var errors = FormatValidationErrors(validationResult.Errors);
                 var errorCode = GetPrimaryErrorCode(validationResult.Errors);
-                return Result.Failure(errors, errorCode);
+                return Core.Abstractions.Result.Failure(errors, errorCode);
             }
         }
         else
@@ -48,12 +48,12 @@ public class EnhancedValidationDecorator<TCommand> : IResultCommandHandler<TComm
                 command, context, validationResults, validateAllProperties: true))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Validation error");
-                return Result.Failure($"Validation failed: {string.Join("; ", errors)}", ErrorCodes.VALIDATION_ERROR);
+                return Core.Abstractions.Result.Failure($"Validation failed: {string.Join("; ", errors)}", ErrorCodes.VALIDATION_ERROR);
             }
         }
 
         // If validation passes, execute the handler
-        return await _handler.HandleAsync(command);
+        return await _handler.HandleAsync(command, cancellationToken);
     }
 
     private static string FormatValidationErrors(List<ValidationFailure> errors)
@@ -93,7 +93,7 @@ public class EnhancedValidationDecorator<TCommand, TResult> : IResultCommandHand
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result<TResult>> HandleAsync(TCommand command)
+    public async Task<Core.Abstractions.Result<TResult>> HandleAsync(TCommand command, CancellationToken cancellationToken = default)
     {
         // Try to get FluentValidation validator first
         var validator = _serviceProvider.GetService<FluentValidation.IValidator<TCommand>>();
@@ -105,7 +105,7 @@ public class EnhancedValidationDecorator<TCommand, TResult> : IResultCommandHand
             {
                 var errors = FormatValidationErrors(validationResult.Errors);
                 var errorCode = GetPrimaryErrorCode(validationResult.Errors);
-                return Result.Failure<TResult>(errors, errorCode);
+                return Core.Abstractions.Result.Failure<TResult>(errors, errorCode);
             }
         }
         else
@@ -118,12 +118,12 @@ public class EnhancedValidationDecorator<TCommand, TResult> : IResultCommandHand
                 command, context, validationResults, validateAllProperties: true))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Validation error");
-                return Result.Failure<TResult>($"Validation failed: {string.Join("; ", errors)}", ErrorCodes.VALIDATION_ERROR);
+                return Core.Abstractions.Result.Failure<TResult>($"Validation failed: {string.Join("; ", errors)}", ErrorCodes.VALIDATION_ERROR);
             }
         }
 
         // If validation passes, execute the handler
-        return await _handler.HandleAsync(command);
+        return await _handler.HandleAsync(command, cancellationToken);
     }
 
     private static string FormatValidationErrors(List<ValidationFailure> errors)

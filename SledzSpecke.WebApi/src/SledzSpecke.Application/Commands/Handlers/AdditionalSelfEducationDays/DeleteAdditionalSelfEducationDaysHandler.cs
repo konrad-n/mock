@@ -21,7 +21,7 @@ public sealed class DeleteAdditionalSelfEducationDaysHandler : IResultCommandHan
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(DeleteAdditionalSelfEducationDays command)
+    public async Task<Result> HandleAsync(DeleteAdditionalSelfEducationDays command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -40,7 +40,7 @@ public sealed class DeleteAdditionalSelfEducationDaysHandler : IResultCommandHan
 
             // Delete from repository
             await _repository.DeleteAsync(existingDays);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Deleted additional self-education days {Id} for module {ModuleId}",

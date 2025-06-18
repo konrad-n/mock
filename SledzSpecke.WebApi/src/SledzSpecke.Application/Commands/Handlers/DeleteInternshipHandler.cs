@@ -25,7 +25,7 @@ public sealed class DeleteInternshipHandler : IResultCommandHandler<DeleteIntern
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(DeleteInternship command)
+    public async Task<Result> HandleAsync(DeleteInternship command, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -56,7 +56,7 @@ public sealed class DeleteInternshipHandler : IResultCommandHandler<DeleteIntern
             }
 
             await _internshipRepository.DeleteAsync(internshipId);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             
             return Result.Success();
         }

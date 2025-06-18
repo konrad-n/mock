@@ -21,7 +21,7 @@ public sealed class ApproveAbsenceHandler : IResultCommandHandler<ApproveAbsence
         _userContextService = userContextService;
     }
 
-    public async Task<Result> HandleAsync(ApproveAbsence command)
+    public async Task<Result> HandleAsync(ApproveAbsence command, CancellationToken cancellationToken = default)
     {
         var absence = await _absenceRepository.GetByIdAsync(command.AbsenceId);
         if (absence is null)
@@ -38,7 +38,7 @@ public sealed class ApproveAbsenceHandler : IResultCommandHandler<ApproveAbsence
             absence.Approve(new Core.ValueObjects.UserId(command.ApprovedBy));
 
             await _absenceRepository.UpdateAsync(absence);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

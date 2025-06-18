@@ -33,7 +33,7 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<int>> HandleAsync(AddProcedure command)
+    public async Task<Result<int>> HandleAsync(AddProcedure command, CancellationToken cancellationToken = default)
     {
         try
         {

@@ -15,7 +15,7 @@ public sealed class CreateAbsenceHandler : IResultCommandHandler<CreateAbsence>
         _absenceRepository = absenceRepository;
     }
 
-    public async Task<Result> HandleAsync(CreateAbsence command)
+    public async Task<Result> HandleAsync(CreateAbsence command, CancellationToken cancellationToken = default)
     {
         // Get existing absences for overlap check
         var existingAbsences = await _absenceRepository.GetByUserIdAsync(command.UserId);

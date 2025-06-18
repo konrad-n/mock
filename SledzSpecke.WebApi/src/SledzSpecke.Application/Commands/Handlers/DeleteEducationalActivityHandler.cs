@@ -18,7 +18,7 @@ public sealed class DeleteEducationalActivityHandler : IResultCommandHandler<Del
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(DeleteEducationalActivity command)
+    public async Task<Result> HandleAsync(DeleteEducationalActivity command, CancellationToken cancellationToken = default)
     {
         var activity = await _repository.GetByIdAsync(new EducationalActivityId(command.Id));
         if (activity is null)
@@ -34,7 +34,7 @@ public sealed class DeleteEducationalActivityHandler : IResultCommandHandler<Del
         try
         {
             await _repository.DeleteAsync(activity);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

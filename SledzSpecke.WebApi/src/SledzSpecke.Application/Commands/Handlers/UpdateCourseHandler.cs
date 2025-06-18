@@ -25,7 +25,7 @@ public sealed class UpdateCourseHandler : IResultCommandHandler<UpdateCourse>
         _moduleRepository = moduleRepository;
     }
 
-    public async Task<Result> HandleAsync(UpdateCourse command)
+    public async Task<Result> HandleAsync(UpdateCourse command, CancellationToken cancellationToken = default)
     {
         try
         {

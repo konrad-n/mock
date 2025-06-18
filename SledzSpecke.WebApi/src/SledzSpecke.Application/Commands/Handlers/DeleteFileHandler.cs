@@ -24,7 +24,7 @@ public sealed class DeleteFileHandler : IResultCommandHandler<DeleteFile>
         _userContext = userContext;
     }
     
-    public async Task<Result> HandleAsync(DeleteFile command)
+    public async Task<Result> HandleAsync(DeleteFile command, CancellationToken cancellationToken = default)
     {
         var userId = _userContext.UserId;
         if (userId is null)
@@ -61,7 +61,7 @@ public sealed class DeleteFileHandler : IResultCommandHandler<DeleteFile>
             // File is already marked as deleted in database
         }
         
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result.Success();
     }

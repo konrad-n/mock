@@ -22,7 +22,7 @@ public sealed class UpdateUserProfileHandler : IResultCommandHandler<UpdateUserP
         _userContextService = userContextService;
     }
 
-    public async Task<Result> HandleAsync(UpdateUserProfile command)
+    public async Task<Result> HandleAsync(UpdateUserProfile command, CancellationToken cancellationToken = default)
     {
         try
         {

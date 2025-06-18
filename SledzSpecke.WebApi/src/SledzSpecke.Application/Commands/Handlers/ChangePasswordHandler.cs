@@ -26,7 +26,7 @@ public sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword
         _passwordManager = passwordManager;
     }
 
-    public async Task<Result> HandleAsync(ChangePassword command)
+    public async Task<Result> HandleAsync(ChangePassword command, CancellationToken cancellationToken = default)
     {
         try
         {

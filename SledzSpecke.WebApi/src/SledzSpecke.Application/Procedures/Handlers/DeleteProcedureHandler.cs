@@ -29,7 +29,7 @@ public sealed class DeleteProcedureHandler : IResultCommandHandler<DeleteProcedu
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> HandleAsync(DeleteProcedure command)
+    public async Task<Result> HandleAsync(DeleteProcedure command, CancellationToken cancellationToken = default)
     {
         try
         {

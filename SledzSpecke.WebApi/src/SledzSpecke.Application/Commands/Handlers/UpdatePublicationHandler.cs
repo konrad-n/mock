@@ -23,7 +23,7 @@ public sealed class UpdatePublicationHandler : IResultCommandHandler<UpdatePubli
         _userContextService = userContextService;
     }
 
-    public async Task<Result> HandleAsync(UpdatePublication command)
+    public async Task<Result> HandleAsync(UpdatePublication command, CancellationToken cancellationToken = default)
     {
         try
         {
