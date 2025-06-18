@@ -61,8 +61,11 @@ public class InternshipRepositoryTests : IntegrationTestBase
             new SpecializationId(1),
             "Original Hospital",
             "Original Department",
+            "Dr. Supervisor",
             DateTime.UtcNow.Date,
-            DateTime.UtcNow.Date.AddDays(30)
+            DateTime.UtcNow.Date.AddDays(30),
+            1,
+            2024
         );
 
         await _repository.AddAsync(internship);

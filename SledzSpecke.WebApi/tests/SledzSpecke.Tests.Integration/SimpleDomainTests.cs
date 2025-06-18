@@ -80,8 +80,8 @@ public class SimpleDomainTests : IntegrationTestBase
     [Fact]
     public async Task Value_Objects_Should_Work_Correctly()
     {
-        // Test Duration
-        var duration = new Duration(8, 30);
+        // Test ShiftDuration
+        var duration = new ShiftDuration(8, 30);
         duration.Hours.Should().Be(8);
         duration.Minutes.Should().Be(30);
         duration.TotalMinutes.Should().Be(510);

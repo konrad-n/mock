@@ -139,7 +139,7 @@ public class UsersControllerTests : IntegrationTestBase
         await SignUpUser("testuser@example.com", "TestPassword123!", "Test User");
         
         var command = new SignIn(
-            Email: "testuser@example.com",
+            Username: "testuser",
             Password: "TestPassword123!");
 
         // Act
@@ -148,7 +148,7 @@ public class UsersControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
-        var token = await response.Content.ReadFromJsonAsync<AccessTokenDto>();
+        var token = await response.Content.ReadFromJsonAsync<JwtDto>();
         token.Should().NotBeNull();
         token!.AccessToken.Should().NotBeNullOrWhiteSpace();
     }

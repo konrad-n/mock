@@ -13,6 +13,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using SledzSpecke.Tests.Integration.Helpers;
 
 namespace SledzSpecke.Tests.Integration.Events;
 
@@ -60,7 +61,9 @@ public class DomainEventIntegrationTests : IntegrationTestBase
             shift.InternshipId,
             shift.Date,
             shift.Hours,
-            shift.Minutes
+            shift.Minutes,
+            shift.Location,
+            shift.Year
         );
         await _mediator.Publish(domainEvent);
 
@@ -89,10 +92,15 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         for (int i = 0; i < 20; i++) // 20 shifts of 8 hours = 160 hours
         {
             var shift = MedicalShift.Create(
+                MedicalShiftId.New(),
                 internship.Id,
+                null, // moduleId
                 currentMonth.AddDays(i),
-                new Duration(8, 0),
+                8, // hours
+                0, // minutes
+                ShiftType.Regular,
                 "Department",
+                "Dr. Supervisor",
                 currentMonth.Year
             );
             await medicalShiftRepository.AddAsync(shift);
@@ -102,9 +110,8 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var lastShift = (await medicalShiftRepository.GetByInternshipIdAsync(internship.Id.Value)).Last();
         var approvedEvent = new MedicalShiftApprovedEvent(
             lastShift.Id,
-            lastShift.InternshipId,
-            "Dr. Supervisor",
-            DateTime.UtcNow
+            DateTime.UtcNow,
+            "Dr. Supervisor"
         );
         
         await _mediator.Publish(approvedEvent);
@@ -125,14 +132,17 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         
         var procedureRepository = Scope.ServiceProvider.GetRequiredService<IProcedureRepository>();
         var procedure = Procedure.Create(
+            ProcedureId.New(),
+            new ModuleId(1),
             internship.Id,
+            DateTime.UtcNow,
             "Test Procedure",
             "P001",
-            DateTime.UtcNow,
-            60,
-            "Dr. Operator",
+            "Dr. Supervisor",
+            ProcedureExecutionType.CodeA,
+            "Test Hospital",
             2024,
-            ProcedureStatus.Pending
+            new SmkVersion("new")
         );
 
         // Act
@@ -141,9 +151,10 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         var domainEvent = new Core.Events.ProcedureCreatedEvent(
             procedure.Id,
             procedure.InternshipId,
-            procedure.Name,
+            procedure.Date,
             procedure.Code,
-            procedure.Date
+            procedure.Location,
+            procedure.SmkVersion
         );
         await _mediator.Publish(domainEvent);
 
@@ -166,14 +177,17 @@ public class DomainEventIntegrationTests : IntegrationTestBase
         for (int i = 1; i <= 10; i++)
         {
             var procedure = Procedure.Create(
+                ProcedureId.New(),
+                new ModuleId(1),
                 internship.Id,
+                DateTime.UtcNow.AddDays(-i),
                 $"Procedure {i}",
                 $"P{i:000}",
-                DateTime.UtcNow.AddDays(-i),
-                30 + i * 5,
-                "Dr. Operator",
+                "Dr. Supervisor",
+                ProcedureExecutionType.CodeA,
+                "Test Hospital",
                 2024,
-                ProcedureStatus.Completed
+                new SmkVersion("new")
             );
             await procedureRepository.AddAsync(procedure);
         }
@@ -184,6 +198,8 @@ public class DomainEventIntegrationTests : IntegrationTestBase
             completedProcedure.Id,
             completedProcedure.InternshipId,
             completedProcedure.Name,
+            completedProcedure.Code,
+            10, // count
             DateTime.UtcNow
         );
         
@@ -209,20 +225,22 @@ public class DomainEventIntegrationTests : IntegrationTestBase
                 internship.Id,
                 DateTime.UtcNow,
                 8,
-                0
+                0,
+                "Emergency Department",
+                DateTime.UtcNow.Year
             ),
             new Core.Events.ProcedureCreatedEvent(
                 new ProcedureId(1),
                 internship.Id,
-                "Procedure 1",
+                DateTime.UtcNow,
                 "P001",
-                DateTime.UtcNow
+                "Test Hospital",
+                new SmkVersion("new")
             ),
             new MedicalShiftApprovedEvent(
                 new MedicalShiftId(1),
-                internship.Id,
-                "Supervisor",
-                DateTime.UtcNow
+                DateTime.UtcNow,
+                "Supervisor"
             )
         };
 
