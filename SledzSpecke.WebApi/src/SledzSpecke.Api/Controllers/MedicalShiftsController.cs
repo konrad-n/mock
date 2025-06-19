@@ -19,18 +19,18 @@ public class MedicalShiftsController : BaseController
     private readonly ICommandHandler<AddMedicalShift, int> _addMedicalShiftHandler;
     private readonly ICommandHandler<UpdateMedicalShift> _updateMedicalShiftHandler;
     private readonly ICommandHandler<DeleteMedicalShift> _deleteMedicalShiftHandler;
-    private readonly IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> _getUserMedicalShiftsHandler;
-    private readonly IQueryHandler<GetMedicalShiftById, MedicalShiftDto> _getMedicalShiftByIdHandler;
-    private readonly IQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> _getMedicalShiftStatisticsHandler;
+    private readonly IResultQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> _getUserMedicalShiftsHandler;
+    private readonly IResultQueryHandler<GetMedicalShiftById, MedicalShiftDto> _getMedicalShiftByIdHandler;
+    private readonly IResultQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> _getMedicalShiftStatisticsHandler;
     private readonly IUserContextService _userContextService;
 
     public MedicalShiftsController(
         ICommandHandler<AddMedicalShift, int> addMedicalShiftHandler,
         ICommandHandler<UpdateMedicalShift> updateMedicalShiftHandler,
         ICommandHandler<DeleteMedicalShift> deleteMedicalShiftHandler,
-        IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> getUserMedicalShiftsHandler,
-        IQueryHandler<GetMedicalShiftById, MedicalShiftDto> getMedicalShiftByIdHandler,
-        IQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> getMedicalShiftStatisticsHandler,
+        IResultQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> getUserMedicalShiftsHandler,
+        IResultQueryHandler<GetMedicalShiftById, MedicalShiftDto> getMedicalShiftByIdHandler,
+        IResultQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> getMedicalShiftStatisticsHandler,
         IUserContextService userContextService)
     {
         _addMedicalShiftHandler = addMedicalShiftHandler;
@@ -50,14 +50,24 @@ public class MedicalShiftsController : BaseController
     {
         var userId = _userContextService.GetUserId();
         var query = new GetUserMedicalShifts(userId, internshipId, startDate, endDate);
-        return await HandleAsync(query, _getUserMedicalShiftsHandler);
+        var result = await _getUserMedicalShiftsHandler.HandleAsync(query);
+        
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+            
+        return Ok(result.Value);
     }
 
     [HttpGet("{shiftId:int}")]
     public async Task<ActionResult<MedicalShiftDto>> GetMedicalShiftById(int shiftId)
     {
         var query = new GetMedicalShiftById(shiftId);
-        return await HandleAsync(query, _getMedicalShiftByIdHandler);
+        var result = await _getMedicalShiftByIdHandler.HandleAsync(query);
+        
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+            
+        return Ok(result.Value);
     }
 
     [HttpPost]
@@ -102,7 +112,12 @@ public class MedicalShiftsController : BaseController
     {
         var userId = _userContextService.GetUserId();
         var query = new GetMedicalShiftStatistics { UserId = userId, Year = year, Month = month };
-        return await HandleAsync(query, _getMedicalShiftStatisticsHandler);
+        var result = await _getMedicalShiftStatisticsHandler.HandleAsync(query);
+        
+        if (result.IsFailure)
+            return BadRequest(new { error = result.Error });
+            
+        return Ok(result.Value);
     }
 }
 
