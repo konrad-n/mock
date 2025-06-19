@@ -397,6 +397,166 @@ Returns XLSX file with sheets:
 4. Courses - Completed courses
 5. Internships - All internships
 
+## CMKP Specialization Templates
+
+### Overview
+The CMKP template system manages all 77 medical specializations defined by Centrum Medyczne Kształcenia Podyplomowego.
+
+### Admin Endpoints (Requires AdminOnly Policy)
+
+#### List All Templates
+```bash
+GET /api/admin/specialization-templates
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+Response: 200 OK
+[
+  {
+    "id": 1,
+    "code": "cardiology",
+    "name": "Kardiologia",
+    "version": "CMKP 2023",
+    "isActive": true,
+    "createdAt": "2024-12-19T00:00:00Z",
+    "modules": [...]
+  }
+]
+```
+
+#### Get Specific Template
+```bash
+GET /api/admin/specialization-templates/cardiology/CMKP%202023
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+Response: 200 OK
+{
+  "id": 1,
+  "code": "cardiology",
+  "name": "Kardiologia",
+  "version": "CMKP 2023",
+  "totalDuration": {
+    "years": 5,
+    "months": 0,
+    "days": 0
+  },
+  "modules": [...]
+}
+```
+
+#### Import Single Template
+```bash
+POST /api/admin/specialization-templates/import
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+{
+  "code": "anestezjologia",
+  "name": "Anestezjologia i intensywna terapia",
+  "version": "CMKP 2023",
+  "totalDuration": {
+    "years": 5,
+    "months": 0,
+    "days": 0
+  },
+  "modules": [...]
+}
+
+Response: 200 OK
+{
+  "templateId": 2,
+  "message": "Template imported successfully"
+}
+```
+
+#### Bulk Import Templates
+```bash
+POST /api/admin/specialization-templates/import-bulk
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+{
+  "directoryPath": "/path/to/templates"
+}
+
+Response: 200 OK
+{
+  "importedCount": 77,
+  "errors": [],
+  "message": "Successfully imported 77 templates"
+}
+```
+
+#### Import from CMKP Website
+```bash
+POST /api/admin/specialization-templates/import-cmkp/new
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+Response: 200 OK
+{
+  "importedCount": 77,
+  "message": "Successfully imported 77 templates from CMKP website"
+}
+```
+
+#### Update Template
+```bash
+PUT /api/admin/specialization-templates/cardiology/CMKP%202023
+Authorization: Bearer YOUR_ADMIN_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Kardiologia - Updated",
+  "modules": [...]
+}
+
+Response: 200 OK
+{
+  "message": "Template updated successfully"
+}
+```
+
+#### Delete Template
+```bash
+DELETE /api/admin/specialization-templates/cardiology/CMKP%202023
+Authorization: Bearer YOUR_ADMIN_TOKEN
+
+Response: 200 OK
+{
+  "message": "Template deactivated successfully"
+}
+```
+
+### Regular User Endpoints
+
+#### Get Available Templates
+```bash
+GET /api/specialization-templates
+Authorization: Bearer YOUR_TOKEN
+
+Response: 200 OK
+[
+  {
+    "code": "cardiology",
+    "name": "Kardiologia",
+    "versions": ["CMKP 2014", "CMKP 2023"]
+  }
+]
+```
+
+#### Get Template Details
+```bash
+GET /api/specialization-templates/cardiology/new
+Authorization: Bearer YOUR_TOKEN
+
+Response: 200 OK
+{
+  "code": "cardiology",
+  "name": "Kardiologia",
+  "modules": [...],
+  "totalDuration": {...}
+}
+```
+
 ## External Monitoring Services
 
 ### Seq (Log Aggregation)

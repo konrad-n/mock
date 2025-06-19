@@ -32,6 +32,7 @@ SledzSpecke is a comprehensive web application that allows resident physicians i
 - ✅ **Database**: PostgreSQL with migrations and seeding
 - ✅ **Authentication**: JWT-based auth system
 - ✅ **Deployment**: Automated CI/CD pipeline
+- ✅ **CMKP Import**: Dynamic import system for 77 medical specializations
 - 🔄 **Export**: Mock implementation (real SMK export coming soon)
 - 📱 **Mobile App**: Planned for future release
 
@@ -182,6 +183,29 @@ mock/
 - **Export Functionality** - Generate reports for SMK system
 - **Multi-Module Support** - Basic and specialist modules
 - **Approval Workflow** - Supervisor approval for activities
+- **CMKP Specialization Import** - Import and manage 77 medical specializations from CMKP
+
+## 🎓 CMKP Specialization Management
+
+SledzSpecke supports all 77 medical specializations defined by CMKP (Centrum Medyczne Kształcenia Podyplomowego):
+
+### Features
+- **Dynamic Template System** - Import specialization requirements from CMKP website
+- **Version Support** - Both old SMK (2014) and new SMK (2023) programs
+- **Admin API** - Full CRUD operations for specialization templates
+- **Automatic Seeding** - 4 core specializations pre-loaded (Cardiology, Psychiatry)
+- **Bulk Import** - Import all 77 specializations with helper scripts
+
+### Admin Endpoints
+- `GET /api/admin/specialization-templates` - List all templates
+- `POST /api/admin/specialization-templates/import` - Import single template
+- `POST /api/admin/specialization-templates/import-bulk` - Bulk import
+- `PUT /api/admin/specialization-templates/{code}/{version}` - Update template
+- `DELETE /api/admin/specialization-templates/{code}/{version}` - Remove template
+
+### Helper Scripts
+- `cmkp-specialization-helper.sh` - Download and parse CMKP PDFs
+- `mcp-cmkp-config.json` - MCP configuration for CMKP import
 
 ## API Endpoints
 
@@ -194,6 +218,7 @@ Main endpoint groups:
 - `/api/self-education` - Self-education activities
 - `/api/publications` - Scientific publications
 - `/api/export` - Data export (PDF, Excel, JSON)
+- `/api/admin/specialization-templates` - CMKP template management
 
 ### Monitoring & Logging Endpoints
 - `/monitoring/dashboard` - Web-based monitoring dashboard (HTML)
