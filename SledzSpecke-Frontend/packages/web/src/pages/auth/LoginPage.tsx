@@ -46,7 +46,6 @@ export const LoginPage = () => {
       const user = {
         id: response.UserId,
         email: email,
-        username: email.split('@')[0], // Temporary
         fullName: fullName,
         smkVersion: SmkVersion.New, // This should come from backend
         createdAt: new Date().toISOString(),
@@ -93,13 +92,13 @@ export const LoginPage = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField
           {...register('email')}
-          label="Nazwa użytkownika lub email"
-          type="text"
+          label="Adres email"
+          type="email"
           fullWidth
           margin="normal"
           error={!!errors.email}
-          helperText={errors.email?.message || "Test: użyj 'testuser' hasło 'Test123!'"}
-          autoComplete="username"
+          helperText={errors.email?.message || "Test: użyj email i hasło 'Test123!'"}
+          autoComplete="email"
           autoFocus
         />
 

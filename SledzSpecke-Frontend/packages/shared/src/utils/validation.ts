@@ -11,32 +11,13 @@ export const passwordSchema = z.string()
   .regex(/[0-9]/, 'Hasło musi zawierać przynajmniej jedną cyfrę')
   .regex(/[^A-Za-z0-9]/, 'Hasło musi zawierać przynajmniej jeden znak specjalny');
 
-// Login identifier can be either email or username
-export const loginIdentifierSchema = z.string()
-  .min(3, 'Nazwa użytkownika lub email musi mieć minimum 3 znaki')
-  .max(100, 'Nazwa użytkownika lub email może mieć maksymalnie 100 znaków')
-  .refine((value) => {
-    // Check if it's a valid email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(value)) {
-      return true;
-    }
-    // Check if it's a valid username (letters, numbers, underscores)
-    const usernameRegex = /^[a-zA-Z0-9_]+$/;
-    return usernameRegex.test(value);
-  }, 'Wprowadź prawidłowy email lub nazwę użytkownika');
-
 export const signInSchema = z.object({
-  email: loginIdentifierSchema, // Field name remains 'email' for backward compatibility
+  email: emailSchema,
   password: z.string().min(1, 'Hasło jest wymagane')
 });
 
 export const signUpSchema = z.object({
   email: emailSchema,
-  username: z.string()
-    .min(3, 'Nazwa użytkownika musi mieć minimum 3 znaki')
-    .max(50, 'Nazwa użytkownika może mieć maksymalnie 50 znaków')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Nazwa użytkownika może zawierać tylko litery, cyfry i podkreślenia'),
   password: passwordSchema,
   confirmPassword: z.string(),
   fullName: z.string()

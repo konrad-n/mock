@@ -5,7 +5,6 @@ export interface SignInRequest {
 
 export interface SignUpRequest {
   email: string;
-  username: string;
   password: string;
   fullName: string;
   smkVersion: 'old' | 'new';

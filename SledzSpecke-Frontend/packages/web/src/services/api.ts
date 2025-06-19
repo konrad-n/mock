@@ -41,7 +41,7 @@ class ApiClient {
   async signIn(data: SignInRequest): Promise<AuthResponse> {
     // Transform to match API expectations
     const response = await this.instance.post<AuthResponse>('/auth/sign-in', {
-      Username: data.email,
+      Email: data.email,
       Password: data.password
     });
     return response.data;
@@ -50,7 +50,6 @@ class ApiClient {
   async signUp(data: SignUpRequest): Promise<AuthResponse> {
     // Transform to match API expectations
     const response = await this.instance.post<AuthResponse>('/auth/sign-up', {
-      Username: data.email,
       Password: data.password,
       Email: data.email,
       FullName: data.fullName,

@@ -57,7 +57,6 @@ export const RegisterPage = () => {
       const user = {
         id: response.UserId,
         email: email,
-        username: email.split('@')[0], // Temporary
         fullName: fullName,
         smkVersion: SmkVersion.New,
         createdAt: new Date().toISOString(),
@@ -123,16 +122,6 @@ export const RegisterPage = () => {
           error={!!errors.email}
           helperText={errors.email?.message}
           autoComplete="email"
-        />
-
-        <TextField
-          {...register('username')}
-          label="Nazwa użytkownika"
-          fullWidth
-          margin="normal"
-          error={!!errors.username}
-          helperText={errors.username?.message}
-          autoComplete="username"
         />
 
         <FormControl fullWidth margin="normal" error={!!errors.smkVersion}>
