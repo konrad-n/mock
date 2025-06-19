@@ -23,6 +23,7 @@ using SledzSpecke.Infrastructure.Exceptions;
 using SledzSpecke.Infrastructure.Options;
 using SledzSpecke.Infrastructure.Events;
 using SledzSpecke.Infrastructure.Export;
+using SledzSpecke.Infrastructure.JsonConverters;
 using SledzSpecke.Core.DomainServices;
 using SledzSpecke.Core.Outbox;
 using SledzSpecke.Infrastructure.Outbox;
@@ -44,6 +45,9 @@ public static class Extensions
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.WriteIndented = true;
+                // Add custom converters to handle DateTime as UTC
+                options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+                options.JsonSerializerOptions.Converters.Add(new NullableUtcDateTimeConverter());
             });
 
         services.AddHttpContextAccessor();
