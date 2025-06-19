@@ -19,6 +19,7 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
+    [HttpHead]
     public async Task<IActionResult> Get()
     {
         try
@@ -61,6 +62,13 @@ public class HealthController : ControllerBase
         }
     }
 
+    [HttpOptions]
+    public IActionResult Options()
+    {
+        // Return 204 No Content for OPTIONS requests (CORS preflight)
+        return NoContent();
+    }
+    
     private string GetUptime()
     {
         var uptime = DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();

@@ -12,6 +12,35 @@ public static class ApiExtensions
     /// </summary>
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
+        // Configure CORS - CRITICAL for production
+        services.AddCors(options =>
+        {
+            options.AddPolicy("Production", builder =>
+            {
+                builder
+                    .WithOrigins(
+                        "https://sledzspecke.pl",
+                        "https://www.sledzspecke.pl",
+                        "http://localhost:3000",
+                        "http://localhost:3001",
+                        "http://localhost:5173"
+                    )
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains();
+            });
+            
+            // Add a more permissive policy for development
+            options.AddPolicy("Development", builder =>
+            {
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+        
         // Add custom middleware
         services.AddCustomMiddleware();
         
@@ -25,6 +54,24 @@ public static class ApiExtensions
     /// </summary>
     public static WebApplication UseApiMiddleware(this WebApplication app)
     {
+        // SECURITY HEADERS - CRITICAL FOR PRODUCTION
+        app.Use(async (context, next) =>
+        {
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+            context.Response.Headers.Append("X-Frame-Options", "DENY");
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+            context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+            context.Response.Headers.Append("Permissions-Policy", "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()");
+            
+            // Only add HSTS in production
+            if (app.Environment.IsProduction())
+            {
+                context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+            }
+            
+            await next();
+        });
+        
         // Override the infrastructure middleware configuration
         // Enable Swagger in both Development and Production for easier testing
         app.UseSwagger();
@@ -36,6 +83,16 @@ public static class ApiExtensions
         });
 
         app.UseHttpsRedirection();
+        
+        // CORS - MUST be before Authentication/Authorization
+        if (app.Environment.IsProduction())
+        {
+            app.UseCors("Production");
+        }
+        else
+        {
+            app.UseCors("Development");
+        }
         
         // Enable static files serving with proper content types
         var provider = new FileExtensionContentTypeProvider();
@@ -65,7 +122,7 @@ public static class ApiExtensions
                 RequestPath = "/e2e-results",
                 OnPrepareResponse = ctx =>
                 {
-                    ctx.Context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
+                    ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
                 }
             });
         }
