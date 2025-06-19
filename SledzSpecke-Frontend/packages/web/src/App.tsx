@@ -25,6 +25,10 @@ import { InternshipsPage } from './pages/internships/InternshipsPage';
 import { CoursesPage } from './pages/courses/CoursesPage';
 import { SelfEducationPage } from './pages/self-education/SelfEducationPage';
 import { ExportPage } from './pages/export/ExportPage';
+import { PublicationsPage } from './pages/publications/PublicationsPage';
+import { AbsencesPage } from './pages/absences/AbsencesPage';
+import { SettingsPage } from './pages/settings/SettingsPage';
+import { ProfilePage } from './pages/profile/ProfilePage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -80,7 +84,11 @@ function App() {
                 <Route path="/internships" element={<InternshipsPage />} />
                 <Route path="/courses" element={<CoursesPage />} />
                 <Route path="/self-education" element={<SelfEducationPage />} />
+                <Route path="/publications" element={<PublicationsPage />} />
+                <Route path="/absences" element={<AbsencesPage />} />
                 <Route path="/export" element={<ExportPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Route>
             </Routes>
           </BrowserRouter>

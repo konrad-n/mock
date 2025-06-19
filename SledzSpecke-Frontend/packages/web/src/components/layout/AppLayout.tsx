@@ -25,6 +25,7 @@ import {
   Assignment,
   Book,
   Description,
+  Article,
   EventBusy,
   GetApp,
   Settings,
@@ -42,7 +43,7 @@ const menuItems = [
   { text: 'Procedury', icon: <Description />, path: '/procedures' },
   { text: 'Kursy', icon: <School />, path: '/courses' },
   { text: 'Samokształcenie', icon: <Book />, path: '/self-education' },
-  { text: 'Publikacje', icon: <Description />, path: '/publications' },
+  { text: 'Publikacje', icon: <Article />, path: '/publications' },
   { text: 'Nieobecności', icon: <EventBusy />, path: '/absences' },
   { text: 'Eksport', icon: <GetApp />, path: '/export' },
   { text: 'Ustawienia', icon: <Settings />, path: '/settings' }
