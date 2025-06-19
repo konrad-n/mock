@@ -69,7 +69,7 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         // Keeping it here for backward compatibility with existing implementation
         await _unitOfWork.SaveChangesAsync();
         
-        return user.Id;
+        return user.Id!; // ID is guaranteed to be set after AddAsync
     }
 
     public async Task UpdateAsync(User user)

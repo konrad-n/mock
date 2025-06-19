@@ -11,8 +11,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id)
-            .HasConversion(x => x.Value, x => new UserId(x))
-            .ValueGeneratedNever();
+            .HasConversion(x => x!.Value, x => new UserId(x))
+            .ValueGeneratedNever()
+            .IsRequired();
 
         builder.Property(x => x.Email)
             .HasConversion(x => x.Value, x => new Email(x))

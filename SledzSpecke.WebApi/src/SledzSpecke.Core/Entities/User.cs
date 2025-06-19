@@ -5,7 +5,7 @@ namespace SledzSpecke.Core.Entities;
 
 public sealed class User
 {
-    public UserId Id { get; private set; }
+    public UserId? Id { get; private set; }
     public Email Email { get; private set; }
     public HashedPassword Password { get; private set; }
     public FirstName FirstName { get; private set; }
@@ -45,7 +45,7 @@ public sealed class User
 
         return new User
         {
-            Id = new UserId(0), // Will be set by repository
+            // Id will be set by repository using SetId method
             Email = email,
             Password = password,
             FirstName = firstName,
@@ -101,7 +101,7 @@ public sealed class User
     // Internal method for repository to set ID after creation
     internal void SetId(UserId id)
     {
-        if (Id != null && Id.Value != 0)
+        if (Id != null)
             throw new InvalidOperationException("Cannot change ID once it's set");
         Id = id;
     }
