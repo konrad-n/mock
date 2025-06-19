@@ -6,6 +6,7 @@ namespace SledzSpecke.Application.Abstractions;
 public interface ISpecializationTemplateService
 {
     Task<SpecializationTemplate?> GetTemplateAsync(string specializationCode, SmkVersion smkVersion);
+    Task<SpecializationTemplate?> GetTemplateByIdAsync(int templateId);
     Task<IEnumerable<SpecializationTemplate>> GetAllTemplatesAsync();
     Task<ModuleTemplate?> GetModuleTemplateAsync(string specializationCode, SmkVersion smkVersion, int moduleId);
     Task<ProcedureTemplate?> GetProcedureTemplateAsync(string specializationCode, SmkVersion smkVersion, int procedureId);

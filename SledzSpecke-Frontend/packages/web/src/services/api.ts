@@ -47,7 +47,7 @@ class ApiClient {
     return response.data;
   }
 
-  async signUp(data: SignUpRequest): Promise<AuthResponse> {
+  async signUp(data: SignUpRequest & { specializationTemplateId?: number }): Promise<AuthResponse> {
     // Transform to match API expectations
     // Split fullName into firstName and lastName
     const nameParts = data.fullName.trim().split(' ');
@@ -68,7 +68,9 @@ class ApiClient {
         postalCode: '00-000',
         city: 'Warsaw',
         province: 'Mazowieckie'
-      }
+      },
+      specializationTemplateId: data.specializationTemplateId || 1,
+      smkVersion: data.smkVersion || 'new'
     });
     return response.data;
   }

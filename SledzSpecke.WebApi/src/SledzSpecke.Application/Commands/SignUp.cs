@@ -9,7 +9,9 @@ public record SignUp(
     string LastName,
     string PhoneNumber,
     DateTime DateOfBirth,
-    AddressDto CorrespondenceAddress
+    AddressDto CorrespondenceAddress,
+    int SpecializationTemplateId,
+    string SmkVersion
 ) : ICommand;
 
 public record AddressDto(

@@ -25,6 +25,22 @@ public class SpecializationTemplatesController : BaseController
         return Ok(templates);
     }
 
+    [HttpGet("public")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPublicTemplates()
+    {
+        var templates = await _templateService.GetAllTemplatesAsync();
+        // Return simplified data for registration
+        var publicTemplates = templates.Select(t => new
+        {
+            t.Id,
+            t.Name,
+            t.Code,
+            t.Version
+        });
+        return Ok(publicTemplates);
+    }
+
     [HttpGet("{specializationCode}/{smkVersion}")]
     public async Task<IActionResult> GetTemplate(string specializationCode, string smkVersion)
     {

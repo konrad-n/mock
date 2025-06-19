@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +18,7 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { signUpSchema } from '@shared/utils/validation';
 import { SignUpRequest } from '@shared/types';
 import { SmkVersion } from '@shared/domain/value-objects';
@@ -27,6 +27,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 interface FormData extends SignUpRequest {
   confirmPassword: string;
+  specializationTemplateId: number;
 }
 
 export const RegisterPage = () => {
@@ -42,7 +43,18 @@ export const RegisterPage = () => {
   } = useForm<FormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      smkVersion: 'new'
+      smkVersion: 'new',
+      specializationTemplateId: 1
+    }
+  });
+
+  // Fetch available specializations
+  const { data: specializations = [] } = useQuery({
+    queryKey: ['specialization-templates'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/specialization-templates/public`);
+      if (!response.ok) throw new Error('Failed to fetch specializations');
+      return response.json();
     }
   });
 
@@ -69,8 +81,11 @@ export const RegisterPage = () => {
   });
 
   const onSubmit = (data: FormData) => {
-    const { confirmPassword, ...signUpData } = data;
-    registerMutation.mutate(signUpData);
+    const { confirmPassword, specializationTemplateId, ...signUpData } = data;
+    registerMutation.mutate({
+      ...signUpData,
+      specializationTemplateId
+    } as any);
   };
 
   return (
@@ -136,6 +151,28 @@ export const RegisterPage = () => {
           </Select>
           {errors.smkVersion && (
             <FormHelperText>{errors.smkVersion.message}</FormHelperText>
+          )}
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" error={!!errors.specializationTemplateId}>
+          <InputLabel>Specjalizacja</InputLabel>
+          <Select
+            {...register('specializationTemplateId', { valueAsNumber: true })}
+            label="Specjalizacja"
+            defaultValue={1}
+          >
+            {specializations.length === 0 ? (
+              <MenuItem value={1}>Kardiologia</MenuItem>
+            ) : (
+              specializations.map((spec: any) => (
+                <MenuItem key={spec.id} value={spec.id}>
+                  {spec.name}
+                </MenuItem>
+              ))
+            )}
+          </Select>
+          {errors.specializationTemplateId && (
+            <FormHelperText>{errors.specializationTemplateId?.message}</FormHelperText>
           )}
         </FormControl>
 

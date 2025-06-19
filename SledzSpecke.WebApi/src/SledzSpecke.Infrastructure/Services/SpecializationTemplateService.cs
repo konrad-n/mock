@@ -45,6 +45,27 @@ public class SpecializationTemplateService : ISpecializationTemplateService
         }
     }
 
+    public async Task<SpecializationTemplate?> GetTemplateByIdAsync(int templateId)
+    {
+        // For now, return a hardcoded template
+        // TODO: Implement proper database lookup
+        if (templateId == 1)
+        {
+            return new SpecializationTemplate
+            {
+                Id = 1,
+                Name = "Kardiologia",
+                Code = "cardiology",
+                Version = "CMKP 2023",
+                DurationYears = 5,
+                DurationMonths = 0,
+                DurationDays = 0,
+                Modules = new List<ModuleTemplate>()
+            };
+        }
+        return null;
+    }
+
     public async Task<IEnumerable<SpecializationTemplate>> GetAllTemplatesAsync()
     {
         var templates = new List<SpecializationTemplate>();
