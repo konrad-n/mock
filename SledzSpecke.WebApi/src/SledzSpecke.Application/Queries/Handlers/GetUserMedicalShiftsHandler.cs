@@ -45,7 +45,7 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
             foreach (var spec in specializations)
             {
                 var internships = await _internshipRepository.GetBySpecializationIdAsync(spec.Id);
-                internshipIds.AddRange(internships.Select(i => i.Id));
+                internshipIds.AddRange(internships.Select(i => i.InternshipId));
             }
 
             if (query.InternshipId.HasValue)
