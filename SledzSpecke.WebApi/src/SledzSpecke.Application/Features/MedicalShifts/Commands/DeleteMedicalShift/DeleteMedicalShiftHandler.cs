@@ -40,8 +40,8 @@ public sealed class DeleteMedicalShiftHandler : IResultCommandHandler<DeleteMedi
             // Delete the medical shift
             await _medicalShiftRepository.DeleteAsync(command.Id);
             
-            // Save changes
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            // Note: Save changes is already called in the repository DeleteAsync method
+            // await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

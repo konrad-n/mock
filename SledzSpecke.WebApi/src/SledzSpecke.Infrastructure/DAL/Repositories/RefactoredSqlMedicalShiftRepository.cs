@@ -27,7 +27,9 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
 
     public async Task<MedicalShift?> GetByIdAsync(int id)
     {
-        return await GetByIdAsync(id, default);
+        // Need to convert int to MedicalShiftId for EF Core to properly find the entity
+        var medicalShiftId = new MedicalShiftId(id);
+        return await Context.MedicalShifts.FirstOrDefaultAsync(ms => ms.Id == medicalShiftId);
     }
 
     public async Task<IEnumerable<MedicalShift>> GetByInternshipIdAsync(int internshipId)
