@@ -15,8 +15,6 @@ public sealed class SpecializationExportDto
 
 public sealed class BasicInfoExportDto
 {
-    public string Pesel { get; init; }
-    public string PwzNumber { get; init; }
     public string FirstName { get; init; }
     public string LastName { get; init; }
     public string Email { get; init; }
@@ -41,7 +39,6 @@ public sealed class InternshipExportDto
     public string EndDate { get; init; } // DD.MM.YYYY
     public int DurationDays { get; init; }
     public string SupervisorName { get; init; }
-    public string SupervisorPwz { get; init; }
     public string ModuleName { get; init; }
     public string Status { get; init; } // "W trakcie", "Zakończony", "Zatwierdzony"
 }

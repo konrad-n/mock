@@ -117,7 +117,6 @@ public class ModulesController : BaseController
             request.PlannedWeeks,
             request.PlannedDays,
             null, // SupervisorName
-            null, // SupervisorPwz
             moduleId);
             
         var internshipId = await _createInternshipHandler.HandleAsync(command);

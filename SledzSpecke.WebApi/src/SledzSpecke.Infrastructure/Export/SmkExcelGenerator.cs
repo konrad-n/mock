@@ -55,50 +55,44 @@ public sealed class SmkExcelGenerator : ISmkExcelGenerator
         var sheet = workbook.Worksheets.Add("Informacje podstawowe");
         
         // Set headers and values
-        sheet.Cell(1, 1).Value = "PESEL";
-        sheet.Cell(1, 2).Value = basicInfo.Pesel;
+        sheet.Cell(1, 1).Value = "Imię";
+        sheet.Cell(1, 2).Value = basicInfo.FirstName;
         
-        sheet.Cell(2, 1).Value = "Numer PWZ";
-        sheet.Cell(2, 2).Value = basicInfo.PwzNumber;
+        sheet.Cell(2, 1).Value = "Nazwisko";
+        sheet.Cell(2, 2).Value = basicInfo.LastName;
         
-        sheet.Cell(3, 1).Value = "Imię";
-        sheet.Cell(3, 2).Value = basicInfo.FirstName;
+        sheet.Cell(3, 1).Value = "Email";
+        sheet.Cell(3, 2).Value = basicInfo.Email;
         
-        sheet.Cell(4, 1).Value = "Nazwisko";
-        sheet.Cell(4, 2).Value = basicInfo.LastName;
+        sheet.Cell(4, 1).Value = "Telefon";
+        sheet.Cell(4, 2).Value = basicInfo.PhoneNumber;
         
-        sheet.Cell(5, 1).Value = "Email";
-        sheet.Cell(5, 2).Value = basicInfo.Email;
+        sheet.Cell(5, 1).Value = "Nazwa specjalizacji";
+        sheet.Cell(5, 2).Value = basicInfo.SpecializationName;
         
-        sheet.Cell(6, 1).Value = "Telefon";
-        sheet.Cell(6, 2).Value = basicInfo.PhoneNumber;
+        sheet.Cell(6, 1).Value = "Wersja SMK";
+        sheet.Cell(6, 2).Value = basicInfo.SmkVersion;
         
-        sheet.Cell(7, 1).Value = "Nazwa specjalizacji";
-        sheet.Cell(7, 2).Value = basicInfo.SpecializationName;
+        sheet.Cell(7, 1).Value = "Wariant programu";
+        sheet.Cell(7, 2).Value = basicInfo.ProgramVariant;
         
-        sheet.Cell(8, 1).Value = "Wersja SMK";
-        sheet.Cell(8, 2).Value = basicInfo.SmkVersion;
+        sheet.Cell(8, 1).Value = "Planowany rok PES";
+        sheet.Cell(8, 2).Value = basicInfo.PlannedPesYear;
         
-        sheet.Cell(9, 1).Value = "Wariant programu";
-        sheet.Cell(9, 2).Value = basicInfo.ProgramVariant;
+        sheet.Cell(9, 1).Value = "Data rozpoczęcia specjalizacji";
+        sheet.Cell(9, 2).Value = basicInfo.SpecializationStartDate;
         
-        sheet.Cell(10, 1).Value = "Planowany rok PES";
-        sheet.Cell(10, 2).Value = basicInfo.PlannedPesYear;
+        sheet.Cell(10, 1).Value = "Data zakończenia specjalizacji";
+        sheet.Cell(10, 2).Value = basicInfo.SpecializationEndDate;
         
-        sheet.Cell(11, 1).Value = "Data rozpoczęcia specjalizacji";
-        sheet.Cell(11, 2).Value = basicInfo.SpecializationStartDate;
+        sheet.Cell(11, 1).Value = "Aktualny moduł";
+        sheet.Cell(11, 2).Value = basicInfo.CurrentModuleName;
         
-        sheet.Cell(12, 1).Value = "Data zakończenia specjalizacji";
-        sheet.Cell(12, 2).Value = basicInfo.SpecializationEndDate;
+        sheet.Cell(12, 1).Value = "Data rozpoczęcia modułu";
+        sheet.Cell(12, 2).Value = basicInfo.CurrentModuleStartDate;
         
-        sheet.Cell(13, 1).Value = "Aktualny moduł";
-        sheet.Cell(13, 2).Value = basicInfo.CurrentModuleName;
-        
-        sheet.Cell(14, 1).Value = "Data rozpoczęcia modułu";
-        sheet.Cell(14, 2).Value = basicInfo.CurrentModuleStartDate;
-        
-        sheet.Cell(15, 1).Value = "Adres korespondencyjny";
-        sheet.Cell(15, 2).Value = basicInfo.CorrespondenceAddress;
+        sheet.Cell(13, 1).Value = "Adres korespondencyjny";
+        sheet.Cell(13, 2).Value = basicInfo.CorrespondenceAddress;
         
         // Format the sheet
         sheet.Column(1).Width = 30;
@@ -119,9 +113,8 @@ public sealed class SmkExcelGenerator : ISmkExcelGenerator
         sheet.Cell(1, 5).Value = "Data zakończenia";
         sheet.Cell(1, 6).Value = "Czas trwania (dni)";
         sheet.Cell(1, 7).Value = "Kierownik stażu";
-        sheet.Cell(1, 8).Value = "PWZ kierownika";
-        sheet.Cell(1, 9).Value = "Moduł";
-        sheet.Cell(1, 10).Value = "Status";
+        sheet.Cell(1, 8).Value = "Moduł";
+        sheet.Cell(1, 9).Value = "Status";
         
         // Data
         int row = 2;
@@ -134,9 +127,8 @@ public sealed class SmkExcelGenerator : ISmkExcelGenerator
             sheet.Cell(row, 5).Value = internship.EndDate;
             sheet.Cell(row, 6).Value = internship.DurationDays;
             sheet.Cell(row, 7).Value = internship.SupervisorName;
-            sheet.Cell(row, 8).Value = internship.SupervisorPwz;
-            sheet.Cell(row, 9).Value = internship.ModuleName;
-            sheet.Cell(row, 10).Value = internship.Status;
+            sheet.Cell(row, 8).Value = internship.ModuleName;
+            sheet.Cell(row, 9).Value = internship.Status;
             row++;
         }
         

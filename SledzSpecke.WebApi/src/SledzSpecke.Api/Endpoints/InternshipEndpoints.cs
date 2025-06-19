@@ -67,7 +67,6 @@ public static class InternshipEndpoints
             PlannedWeeks: request.PlannedWeeks ?? 67, // From PDF
             PlannedDays: request.PlannedDays ?? 335, // From PDF
             SupervisorName: null,
-            SupervisorPwz: null,
             ModuleId: request.ModuleId
         );
 

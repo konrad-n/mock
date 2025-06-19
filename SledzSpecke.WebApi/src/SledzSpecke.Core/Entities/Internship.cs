@@ -16,7 +16,6 @@ public class Internship : AggregateRoot
     public string InstitutionName { get; private set; }
     public string DepartmentName { get; private set; }
     public string? SupervisorName { get; private set; }
-    public string? SupervisorPwz { get; private set; }
     public DateTime StartDate { get; private set; }
     public DateTime EndDate { get; private set; }
     public int DaysCount { get; private set; }
@@ -101,14 +100,13 @@ public class Internship : AggregateRoot
         }
     }
 
-    public void SetSupervisor(string supervisorName, string? supervisorPwz = null)
+    public void SetSupervisor(string supervisorName)
     {
         EnsureCanModify();
         if (string.IsNullOrWhiteSpace(supervisorName))
             throw new ArgumentException("Supervisor name cannot be empty.", nameof(supervisorName));
 
         SupervisorName = supervisorName;
-        SupervisorPwz = supervisorPwz;
         UpdatedAt = DateTime.UtcNow;
 
         // Automatically transition from Synced to Modified

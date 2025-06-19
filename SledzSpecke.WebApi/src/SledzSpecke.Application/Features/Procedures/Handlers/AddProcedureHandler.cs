@@ -172,12 +172,6 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
                 command.PatientGender ?? ' ');
         }
         
-        // Set supervisor PWZ if provided
-        if (!string.IsNullOrEmpty(command.SupervisorPwz))
-        {
-            procedure.SetSupervisorPwz(command.SupervisorPwz);
-        }
-
         // Set SMK-specific fields
         if (specialization.SmkVersion == SmkVersion.Old)
         {

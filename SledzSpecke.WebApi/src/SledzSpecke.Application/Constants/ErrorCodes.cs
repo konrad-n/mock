@@ -18,8 +18,6 @@ public static class ErrorCodes
     public const string USER_REGISTRATION_FAILED = "USER_REGISTRATION_FAILED";
     public const string USER_UPDATE_FAILED = "USER_UPDATE_FAILED";
     public const string INVALID_PASSWORD = "USER_INVALID_PASSWORD";
-    public const string PESEL_ALREADY_IN_USE = "USER_PESEL_IN_USE";
-    public const string PWZ_ALREADY_IN_USE = "USER_PWZ_IN_USE";
     
     // Specialization
     public const string SPECIALIZATION_NOT_FOUND = "SPEC_NOT_FOUND";

@@ -183,12 +183,6 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
                     command.PatientGender ?? ' ');
             }
             
-            // Set supervisor PWZ if provided
-            if (!string.IsNullOrEmpty(command.SupervisorPwz))
-            {
-                createdProcedure.SetSupervisorPwz(command.SupervisorPwz);
-            }
-
             // Validate before changing status to completed
             if (procedureStatus == ProcedureStatus.Completed)
             {

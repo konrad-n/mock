@@ -18,7 +18,6 @@ public abstract class ProcedureBase
     public string? PatientInfo { get; protected set; }
     public ProcedureExecutionType ExecutionType { get; protected set; }
     public string SupervisorName { get; protected set; }
-    public string? SupervisorPwz { get; protected set; }
     public string? PerformingPerson { get; protected set; }
     public string? PatientInitials { get; protected set; }
     public char? PatientGender { get; protected set; }
@@ -172,24 +171,10 @@ public abstract class ProcedureBase
         }
     }
 
-    public virtual void SetSupervisorPwz(string? supervisorPwz)
-    {
-        EnsureCanModify();
-        SupervisorPwz = supervisorPwz;
-        UpdatedAt = DateTime.UtcNow;
-
-        // Automatically transition from Synced to Modified
-        if (SyncStatus == SyncStatus.Synced)
-        {
-            SyncStatus = SyncStatus.Modified;
-        }
-    }
-
-    public virtual void UpdateSupervisor(string supervisorName, string? supervisorPwz)
+    public virtual void UpdateSupervisor(string supervisorName)
     {
         EnsureCanModify();
         SupervisorName = supervisorName;
-        SupervisorPwz = supervisorPwz;
         UpdatedAt = DateTime.UtcNow;
 
         // Automatically transition from Synced to Modified

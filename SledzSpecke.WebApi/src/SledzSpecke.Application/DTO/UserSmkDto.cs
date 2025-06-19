@@ -5,8 +5,6 @@ public record UserSmkDto(
     string Email,
     string FirstName,
     string LastName,
-    string Pesel,
-    string PwzNumber,
     string PhoneNumber,
     DateTime DateOfBirth,
     AddressDto CorrespondenceAddress,

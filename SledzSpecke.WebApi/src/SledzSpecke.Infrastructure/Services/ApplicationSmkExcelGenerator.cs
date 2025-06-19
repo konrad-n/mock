@@ -32,8 +32,6 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
         {
             BasicInfo = new BasicInfoExportDto
             {
-                Pesel = data.User.Pesel.Value,
-                PwzNumber = data.User.PwzNumber.Value,
                 FirstName = data.User.FirstName.Value,
                 LastName = data.User.LastName.Value,
                 Email = data.User.Email.Value,
@@ -58,7 +56,6 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
                 EndDate = i.EndDate.ToString("dd.MM.yyyy"),
                 DurationDays = i.DaysCount,
                 SupervisorName = i.SupervisorName ?? "",
-                SupervisorPwz = i.SupervisorPwz ?? "",
                 ModuleName = data.Modules.FirstOrDefault(m => m.Id == i.ModuleId)?.Name ?? "",
                 Status = i.Status.ToString()
             }).ToList(),

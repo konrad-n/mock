@@ -20,36 +20,6 @@ public class UserByEmailSpecification : Specification<User>
     }
 }
 
-public class UserByPeselSpecification : Specification<User>
-{
-    private readonly Pesel _pesel;
-
-    public UserByPeselSpecification(Pesel pesel)
-    {
-        _pesel = pesel;
-    }
-
-    public override Expression<Func<User, bool>> ToExpression()
-    {
-        return user => user.Pesel == _pesel;
-    }
-}
-
-public class UserByPwzNumberSpecification : Specification<User>
-{
-    private readonly PwzNumber _pwzNumber;
-
-    public UserByPwzNumberSpecification(PwzNumber pwzNumber)
-    {
-        _pwzNumber = pwzNumber;
-    }
-
-    public override Expression<Func<User, bool>> ToExpression()
-    {
-        return user => user.PwzNumber == _pwzNumber;
-    }
-}
-
 public class UserByRecentActivitySpecification : Specification<User>
 {
     private readonly int _daysThreshold;

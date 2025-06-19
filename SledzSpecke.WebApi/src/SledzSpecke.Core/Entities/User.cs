@@ -11,8 +11,6 @@ public sealed class User
     public FirstName FirstName { get; private set; }
     public SecondName? SecondName { get; private set; }
     public LastName LastName { get; private set; }
-    public Pesel Pesel { get; private set; }
-    public PwzNumber PwzNumber { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
     public DateTime DateOfBirth { get; private set; }
     public Address CorrespondenceAddress { get; private set; }
@@ -32,17 +30,10 @@ public sealed class User
         FirstName firstName,
         SecondName? secondName,
         LastName lastName,
-        Pesel pesel,
-        PwzNumber pwzNumber,
         PhoneNumber phoneNumber,
         DateTime dateOfBirth,
         Address correspondenceAddress)
     {
-        // Validate that date of birth matches PESEL
-        var peselDateOfBirth = pesel.GetDateOfBirth();
-        if (peselDateOfBirth.Date != dateOfBirth.Date)
-            throw new DomainException("Date of birth does not match PESEL.");
-
         return new User
         {
             // Id will be set by repository using SetId method
@@ -51,8 +42,6 @@ public sealed class User
             FirstName = firstName,
             SecondName = secondName,
             LastName = lastName,
-            Pesel = pesel,
-            PwzNumber = pwzNumber,
             PhoneNumber = phoneNumber,
             DateOfBirth = DateTime.SpecifyKind(dateOfBirth, DateTimeKind.Utc),
             CorrespondenceAddress = correspondenceAddress,
@@ -71,8 +60,6 @@ public sealed class User
         FirstName firstName,
         SecondName? secondName,
         LastName lastName,
-        Pesel pesel,
-        PwzNumber pwzNumber,
         PhoneNumber phoneNumber,
         DateTime dateOfBirth,
         Address correspondenceAddress,
@@ -86,8 +73,6 @@ public sealed class User
             FirstName = firstName,
             SecondName = secondName,
             LastName = lastName,
-            Pesel = pesel,
-            PwzNumber = pwzNumber,
             PhoneNumber = phoneNumber,
             DateOfBirth = DateTime.SpecifyKind(dateOfBirth, DateTimeKind.Utc),
             CorrespondenceAddress = correspondenceAddress,

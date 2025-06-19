@@ -7,8 +7,6 @@ public class UserProfileDto
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string FullName => $"{FirstName} {LastName}";
-    public string Pesel { get; set; } = string.Empty;
-    public string PwzNumber { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
     public AddressDto CorrespondenceAddress { get; set; } = new();

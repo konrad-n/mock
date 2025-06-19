@@ -38,16 +38,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(x => x != null ? x.Value : null, x => x != null ? new SecondName(x) : null)
             .HasMaxLength(100);
 
-        builder.Property(x => x.Pesel)
-            .HasConversion(x => x.Value, x => new Pesel(x))
-            .HasMaxLength(11)
-            .IsRequired();
-
-        builder.Property(x => x.PwzNumber)
-            .HasConversion(x => x.Value, x => new PwzNumber(x))
-            .HasMaxLength(7)
-            .IsRequired();
-
         builder.Property(x => x.PhoneNumber)
             .HasConversion(x => x.Value, x => new PhoneNumber(x))
             .HasMaxLength(20)
@@ -82,7 +72,5 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.LastLoginAt);
 
         builder.HasIndex(x => x.Email).IsUnique();
-        builder.HasIndex(x => x.Pesel).IsUnique();
-        builder.HasIndex(x => x.PwzNumber).IsUnique();
     }
 }

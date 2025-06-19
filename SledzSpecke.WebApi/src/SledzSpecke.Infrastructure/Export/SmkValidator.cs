@@ -66,47 +66,6 @@ public sealed class SmkValidator : ISmkValidator
     private void ValidateBasicInfo(BasicInfoExportDto basicInfo, List<ValidationError> errors, List<ValidationWarning> warnings)
     {
         // Required fields
-        if (string.IsNullOrWhiteSpace(basicInfo.Pesel))
-        {
-            errors.Add(new ValidationError
-            {
-                Field = "PESEL",
-                Message = "PESEL is required",
-                ErrorCode = "PESEL_REQUIRED",
-                Severity = ValidationSeverity.Critical
-            });
-        }
-        else if (basicInfo.Pesel.Length != 11)
-        {
-            errors.Add(new ValidationError
-            {
-                Field = "PESEL",
-                Message = "PESEL must be 11 digits",
-                ErrorCode = "PESEL_INVALID_LENGTH",
-                Severity = ValidationSeverity.Critical
-            });
-        }
-
-        if (string.IsNullOrWhiteSpace(basicInfo.PwzNumber))
-        {
-            errors.Add(new ValidationError
-            {
-                Field = "PWZ",
-                Message = "PWZ number is required",
-                ErrorCode = "PWZ_REQUIRED",
-                Severity = ValidationSeverity.Critical
-            });
-        }
-        else if (basicInfo.PwzNumber.Length != 7)
-        {
-            errors.Add(new ValidationError
-            {
-                Field = "PWZ",
-                Message = "PWZ must be 7 digits",
-                ErrorCode = "PWZ_INVALID_LENGTH",
-                Severity = ValidationSeverity.Critical
-            });
-        }
 
         if (string.IsNullOrWhiteSpace(basicInfo.FirstName))
         {

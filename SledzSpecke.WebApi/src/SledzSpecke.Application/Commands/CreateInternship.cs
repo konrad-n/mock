@@ -12,6 +12,5 @@ public record CreateInternship(
     int PlannedWeeks,
     int PlannedDays,
     string? SupervisorName = null,
-    string? SupervisorPwz = null,
     int? ModuleId = null
 ) : ICommand<int>;

@@ -53,7 +53,7 @@ public sealed class CreateInternshipHandler : ICommandHandler<CreateInternship, 
 
         if (!string.IsNullOrWhiteSpace(command.SupervisorName))
         {
-            internship.SetSupervisor(command.SupervisorName, command.SupervisorPwz);
+            internship.SetSupervisor(command.SupervisorName);
         }
 
         if (command.ModuleId.HasValue)

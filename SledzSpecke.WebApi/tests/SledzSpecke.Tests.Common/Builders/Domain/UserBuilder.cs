@@ -10,8 +10,6 @@ public class UserBuilder : TestDataBuilder<User>
     private string _email;
     private string _firstName;
     private string _lastName;
-    private string _pesel;
-    private string _pwz;
     private string _street;
     private string _houseNumber;
     private string _apartmentNumber;
@@ -42,8 +40,6 @@ public class UserBuilder : TestDataBuilder<User>
         _email = Faker.Internet.Email();
         _firstName = Faker.Name.FirstName();
         _lastName = Faker.Name.LastName();
-        _pesel = GenerateValidPesel();
-        _pwz = GenerateValidPwz();
         
         // Polish address
         _street = Faker.PickRandom(new[] 
@@ -108,39 +104,11 @@ public class UserBuilder : TestDataBuilder<User>
         return this;
     }
     
-    private string GenerateValidPesel()
-    {
-        // Generate valid PESEL (Polish national ID)
-        var year = Faker.Random.Int(85, 99);
-        var month = Faker.Random.Int(1, 12);
-        var day = Faker.Random.Int(1, 28);
-        var serial = Faker.Random.Int(100, 999);
-        var sex = Faker.Random.Int(1, 9);
-        
-        var peselWithoutChecksum = $"{year:D2}{month:D2}{day:D2}{serial:D3}{sex}";
-        var weights = new[] { 1, 3, 7, 9, 1, 3, 7, 9, 1, 3 };
-        var sum = 0;
-        
-        for (int i = 0; i < 10; i++)
-        {
-            sum += int.Parse(peselWithoutChecksum[i].ToString()) * weights[i];
-        }
-        
-        var checksum = (10 - (sum % 10)) % 10;
-        return peselWithoutChecksum + checksum;
-    }
-    
-    private string GenerateValidPwz()
-    {
-        // Generate valid PWZ (Polish medical license)
-        return Faker.Random.Replace("#######");
-    }
     
     public override User Build()
     {
-        // Ensure we have a valid date of birth that matches the PESEL
-        var pesel = new Pesel(_pesel);
-        var dateOfBirth = pesel.GetDateOfBirth();
+        // Generate a date of birth based on graduation year (assuming graduation at age 25)
+        var dateOfBirth = new DateTime(_graduationYear - 25, Faker.Random.Int(1, 12), Faker.Random.Int(1, 28));
         
         var user = _id > 0
             ? User.CreateWithId(
@@ -150,8 +118,6 @@ public class UserBuilder : TestDataBuilder<User>
                 firstName: new FirstName(_firstName),
                 secondName: null,
                 lastName: new LastName(_lastName),
-                pesel: pesel,
-                pwzNumber: new PwzNumber(_pwz),
                 phoneNumber: new PhoneNumber(_phoneNumber),
                 dateOfBirth: dateOfBirth,
                 correspondenceAddress: new Address(
@@ -171,8 +137,6 @@ public class UserBuilder : TestDataBuilder<User>
                 firstName: new FirstName(_firstName),
                 secondName: null,
                 lastName: new LastName(_lastName),
-                pesel: pesel,
-                pwzNumber: new PwzNumber(_pwz),
                 phoneNumber: new PhoneNumber(_phoneNumber),
                 dateOfBirth: dateOfBirth,
                 correspondenceAddress: new Address(

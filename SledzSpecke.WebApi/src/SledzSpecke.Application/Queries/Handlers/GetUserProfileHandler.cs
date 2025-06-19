@@ -35,8 +35,6 @@ public sealed class GetUserProfileHandler : IQueryHandler<GetUserProfile, UserPr
             Email = user.Email.Value,
             FirstName = user.FirstName.Value,
             LastName = user.LastName.Value,
-            Pesel = user.Pesel.Value,
-            PwzNumber = user.PwzNumber.Value,
             PhoneNumber = user.PhoneNumber.Value,
             DateOfBirth = user.DateOfBirth,
             CorrespondenceAddress = new AddressDto

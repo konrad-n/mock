@@ -37,15 +37,13 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
     {
         try
         {
-            _logger.LogInformation("Starting sign up for email: {Email}, PESEL: {Pesel}", 
-                command.Email, command.Pesel);
+            _logger.LogInformation("Starting sign up for email: {Email}", 
+                command.Email);
                 
             var email = new Email(command.Email);
             var password = new Password(command.Password);
             var firstName = new FirstName(command.FirstName);
             var lastName = new LastName(command.LastName);
-            var pesel = new Pesel(command.Pesel);
-            var pwzNumber = new PwzNumber(command.PwzNumber);
             var phoneNumber = new PhoneNumber(command.PhoneNumber);
             var address = new Address(
                 command.CorrespondenceAddress.Street,
@@ -64,22 +62,6 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
                 return Result.Failure($"Email '{command.Email}' is already in use.", ErrorCodes.EMAIL_ALREADY_IN_USE);
             }
 
-            // Check if PESEL already exists
-            var existingUserByPesel = await _userRepository.GetSingleBySpecificationAsync(new UserByPeselSpecification(pesel));
-            if (existingUserByPesel != null)
-            {
-                _logger.LogWarning("Registration failed: PESEL already registered");
-                return Result.Failure("User with this PESEL already exists.", ErrorCodes.PESEL_ALREADY_IN_USE);
-            }
-
-            // Check if PWZ already exists
-            var existingUserByPwz = await _userRepository.GetSingleBySpecificationAsync(new UserByPwzNumberSpecification(pwzNumber));
-            if (existingUserByPwz != null)
-            {
-                _logger.LogWarning("Registration failed: PWZ number already registered");
-                return Result.Failure("User with this PWZ number already exists.", ErrorCodes.PWZ_ALREADY_IN_USE);
-            }
-
             var securedPassword = _passwordManager.Secure(password);
             var hashedPassword = new HashedPassword(securedPassword);
             
@@ -90,8 +72,6 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
                 firstName,
                 null, // SecondName - optional
                 lastName,
-                pesel,
-                pwzNumber,
                 phoneNumber,
                 command.DateOfBirth,
                 address);

@@ -160,10 +160,8 @@ public class UserSpecificationTests
             new FirstName(firstName),
             null, // SecondName
             new LastName(lastName),
-            new Pesel("44051401458"), // Valid PESEL with correct checksum
-            new PwzNumber(PwzNumber.GenerateValidPwz(_testUserId)), // Valid PWZ with correct checksum
             new PhoneNumber("+48123456789"), // Valid phone number
-            new DateTime(1944, 5, 14), // Date of birth matching PESEL 44051401458
+            new DateTime(1990, 1, 1), // Date of birth
             new Address("Test Street", "1", null, "00-000", "Warsaw", "Mazowieckie", "Poland"),
             DateTime.UtcNow
         );
@@ -180,10 +178,8 @@ public class UserSpecificationTests
             new FirstName("Test"),
             null,
             new LastName("User"),
-            new Pesel("44051401458"),
-            new PwzNumber(PwzNumber.GenerateValidPwz(_testUserId)), // Valid PWZ with correct checksum
             new PhoneNumber("+48123456789"),
-            new DateTime(1944, 5, 14),
+            new DateTime(1990, 1, 1),
             new Address("Test Street", "1", null, "00-000", city, province, "Poland"),
             DateTime.UtcNow
         );

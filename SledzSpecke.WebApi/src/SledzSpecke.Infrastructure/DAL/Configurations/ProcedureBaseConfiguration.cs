@@ -44,9 +44,6 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
             .HasMaxLength(200)
             .IsRequired();
             
-        builder.Property(x => x.SupervisorPwz)
-            .HasMaxLength(20);
-            
         builder.Property(x => x.PatientInfo)
             .HasMaxLength(500);
 

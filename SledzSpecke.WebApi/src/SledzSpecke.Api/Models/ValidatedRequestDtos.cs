@@ -19,14 +19,6 @@ public class CreateUserRequest
     public string LastName { get; set; }
 
     [Required]
-    [Pesel]
-    public string Pesel { get; set; }
-
-    [Required]
-    [Pwz]
-    public string PwzNumber { get; set; }
-
-    [Required]
     public AddressDto CorrespondenceAddress { get; set; }
 
     [PolishPhoneNumber]
@@ -78,9 +70,6 @@ public class AddProcedureRequest
     public string ExecutionType { get; set; }
 
     public string? SupervisorName { get; set; }
-
-    [Pwz]
-    public string? SupervisorPwz { get; set; }
 }
 
 public class CreateSpecializationRequest
@@ -143,9 +132,6 @@ public class CreateInternshipRequest
     public DateTime PlannedEndDate { get; set; }
 
     public string? SupervisorName { get; set; }
-
-    [Pwz]
-    public string? SupervisorPwz { get; set; }
 }
 
 public class CreateCourseRequest
@@ -184,12 +170,6 @@ public class UpdateUserProfileRequest
 
     [MinLength(2)]
     public string? LastName { get; set; }
-
-    [Pesel]
-    public string? Pesel { get; set; }
-
-    [Pwz]
-    public string? PwzNumber { get; set; }
 
     [PolishPhoneNumber]
     public string? Phone { get; set; }

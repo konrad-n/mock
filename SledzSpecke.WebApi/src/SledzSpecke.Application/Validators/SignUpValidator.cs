@@ -39,20 +39,6 @@ public class SignUpValidator : AbstractValidator<SignUp>
             .WithMessage("Last name contains invalid characters")
             .WithErrorCode("INVALID_LAST_NAME");
             
-        RuleFor(x => x.Pesel)
-            .NotEmpty().WithMessage("PESEL is required")
-            .Length(11).WithMessage("PESEL must be exactly 11 digits")
-            .Matches(@"^\d{11}$").WithMessage("PESEL must contain only digits")
-            .Must(BeValidPesel).WithMessage("Invalid PESEL checksum")
-            .WithErrorCode("INVALID_PESEL");
-            
-        RuleFor(x => x.PwzNumber)
-            .NotEmpty().WithMessage("PWZ number is required")
-            .Length(7).WithMessage("PWZ number must be exactly 7 digits")
-            .Matches(@"^\d{7}$").WithMessage("PWZ number must contain only digits")
-            .Must(BeValidPwz).WithMessage("Invalid PWZ checksum")
-            .WithErrorCode("INVALID_PWZ");
-            
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Phone number is required")
             .Matches(@"^(\+48)?[\s-]?(\d{3}[\s-]?\d{3}[\s-]?\d{3}|\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2})$")
@@ -67,92 +53,9 @@ public class SignUpValidator : AbstractValidator<SignUp>
             .WithMessage("Invalid date of birth")
             .WithErrorCode("INVALID_DATE_OF_BIRTH");
             
-        RuleFor(x => x.DateOfBirth)
-            .Must((command, dateOfBirth) => ValidatePeselDateMatch(command.Pesel, dateOfBirth))
-            .WithMessage("Date of birth doesn't match PESEL")
-            .WithErrorCode("PESEL_DATE_MISMATCH")
-            .When(x => !string.IsNullOrEmpty(x.Pesel) && x.Pesel.Length == 11);
-            
         RuleFor(x => x.CorrespondenceAddress)
             .NotNull().WithMessage("Correspondence address is required")
             .SetValidator(new AddressValidator());
-    }
-    
-    private bool BeValidPesel(string pesel)
-    {
-        if (string.IsNullOrEmpty(pesel) || pesel.Length != 11 || !Regex.IsMatch(pesel, @"^\d{11}$"))
-            return false;
-            
-        int[] weights = { 1, 3, 7, 9, 1, 3, 7, 9, 1, 3 };
-        int sum = 0;
-        
-        for (int i = 0; i < 10; i++)
-        {
-            sum += (pesel[i] - '0') * weights[i];
-        }
-        
-        int checkDigit = (10 - (sum % 10)) % 10;
-        return checkDigit == (pesel[10] - '0');
-    }
-    
-    private bool BeValidPwz(string pwz)
-    {
-        if (string.IsNullOrEmpty(pwz) || pwz.Length != 7 || !Regex.IsMatch(pwz, @"^\d{7}$"))
-            return false;
-        
-        // First digit must be > 0
-        if (pwz[0] == '0')
-            return false;
-            
-        // Use the same algorithm as PwzNumber.cs
-        int[] weights = { 1, 2, 3, 4, 5, 6 };
-        int sum = 0;
-        
-        for (int i = 0; i < 6; i++)
-        {
-            sum += (pwz[i] - '0') * weights[i];
-        }
-        
-        int checksum = sum % 11;
-        return checksum == (pwz[6] - '0');
-    }
-    
-    private bool ValidatePeselDateMatch(string pesel, DateTime dateOfBirth)
-    {
-        if (pesel.Length != 11) return false;
-        
-        int year = int.Parse(pesel.Substring(0, 2));
-        int month = int.Parse(pesel.Substring(2, 2));
-        int day = int.Parse(pesel.Substring(4, 2));
-        
-        // Handle century encoding in PESEL
-        int century = 1900;
-        if (month > 80)
-        {
-            century = 1800;
-            month -= 80;
-        }
-        else if (month > 60)
-        {
-            century = 2200;
-            month -= 60;
-        }
-        else if (month > 40)
-        {
-            century = 2100;
-            month -= 40;
-        }
-        else if (month > 20)
-        {
-            century = 2000;
-            month -= 20;
-        }
-        
-        year += century;
-        
-        return dateOfBirth.Year == year && 
-               dateOfBirth.Month == month && 
-               dateOfBirth.Day == day;
     }
 }
 

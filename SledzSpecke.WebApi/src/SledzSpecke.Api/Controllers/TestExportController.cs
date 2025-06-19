@@ -20,8 +20,6 @@ public class TestExportController : ControllerBase
         {
             BasicInfo = new BasicInfoExportDto
             {
-                Pesel = "91010112345",
-                PwzNumber = "1234567",
                 FirstName = "Jan",
                 LastName = "Kowalski",
                 Email = "jan.kowalski@example.com",
@@ -48,7 +46,6 @@ public class TestExportController : ControllerBase
                     EndDate = "31.08.2022",
                     DurationDays = 183,
                     SupervisorName = "prof. dr hab. Jan Nowak",
-                    SupervisorPwz = "7654321",
                     ModuleName = "Podstawowy",
                     Status = "Zakończony"
                 }
@@ -138,8 +135,6 @@ public class TestExportController : ControllerBase
         {
             BasicInfo = new BasicInfoExportDto
             {
-                Pesel = "91010112345",
-                PwzNumber = "1234567",
                 FirstName = "Jan",
                 LastName = "Kowalski",
                 Email = "jan.kowalski@example.com",
@@ -166,7 +161,6 @@ public class TestExportController : ControllerBase
                     EndDate = "31.08.2022",
                     DurationDays = 183,
                     SupervisorName = "prof. dr hab. Jan Nowak",
-                    SupervisorPwz = "7654321",
                     ModuleName = "Podstawowy",
                     Status = "Zakończony"
                 }

@@ -38,8 +38,6 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
         builder.Property(x => x.SupervisorName)
             .HasMaxLength(200);
 
-        builder.Property(x => x.SupervisorPwz);
-
         builder.Property(x => x.StartDate)
             .IsRequired();
 

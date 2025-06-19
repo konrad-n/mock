@@ -13,9 +13,7 @@ public static class TestDataFactory
     public static User CreateUser(
         string? email = null, 
         string? firstName = null,
-        string? lastName = null,
-        string? pesel = null,
-        string? pwzNumber = null)
+        string? lastName = null)
     {
         email ??= Faker.Internet.Email();
         var password = new HashedPassword("$2a$10$abcdefghijklmnopqrstuvwxyz123456789012345678901234567890"); // BCrypt hash format
@@ -23,9 +21,6 @@ public static class TestDataFactory
         var secondName = Faker.Random.Bool() ? new SecondName(Faker.Name.FirstName()) : null;
         var lastNameValue = new LastName(lastName ?? Faker.Name.LastName());
         var dateOfBirth = new DateTime(1970 + Faker.Random.Int(0, 29), Faker.Random.Int(1, 12), Faker.Random.Int(1, 28));
-        var gender = Faker.Random.Bool() ? Gender.Male : Gender.Female;
-        var peselValue = new Pesel(pesel ?? Pesel.GenerateValidPesel(dateOfBirth, gender, Faker.Random.Int(0, 999)));
-        var pwzNumberValue = new PwzNumber(pwzNumber ?? PwzNumber.GenerateValidPwz(Faker.Random.Int(0, 999999)));
         var phoneNumber = new PhoneNumber($"+48{Faker.Random.Int(100000000, 999999999):D9}");
         var address = new Address(
             Faker.Address.StreetName(),
@@ -42,8 +37,6 @@ public static class TestDataFactory
             firstNameValue,
             secondName,
             lastNameValue,
-            peselValue,
-            pwzNumberValue,
             phoneNumber,
             dateOfBirth,
             address);

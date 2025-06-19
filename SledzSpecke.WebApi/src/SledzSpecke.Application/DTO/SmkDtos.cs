@@ -27,8 +27,6 @@ public class SmkExportPreviewDto
 {
     public int SpecializationId { get; set; }
     public string UserName { get; set; } = string.Empty;
-    public string Pesel { get; set; } = string.Empty;
-    public string PwzNumber { get; set; } = string.Empty;
     public string SpecializationName { get; set; } = string.Empty;
     public string SmkVersion { get; set; } = string.Empty;
     public int TotalInternships { get; set; }

@@ -67,10 +67,8 @@ internal sealed class DataSeeder : IDataSeeder
             new FirstName("Jan"),
             null, // SecondName - optional
             new LastName("Kowalski"),
-            new Pesel("90010112345"), // Valid PESEL for DOB 1990-01-01
-            new PwzNumber("1234567"),
             new PhoneNumber("+48123456789"),
-            new DateTime(1990, 1, 1), // Date of birth matching PESEL
+            new DateTime(1990, 1, 1), // Date of birth
             new Address(
                 "Marszałkowska",
                 "100",

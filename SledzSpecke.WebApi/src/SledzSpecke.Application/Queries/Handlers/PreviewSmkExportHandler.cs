@@ -136,8 +136,6 @@ public sealed class PreviewSmkExportHandler : IQueryHandler<PreviewSmkExport, Sm
         {
             SpecializationId = query.SpecializationId,
             UserName = $"{user.FirstName.Value} {user.LastName.Value}",
-            Pesel = user.Pesel.Value,
-            PwzNumber = user.PwzNumber.Value,
             SpecializationName = specialization.Name,
             SmkVersion = specialization.SmkVersion == SmkVersion.Old ? "old" : "new",
             TotalInternships = internships.Count(),

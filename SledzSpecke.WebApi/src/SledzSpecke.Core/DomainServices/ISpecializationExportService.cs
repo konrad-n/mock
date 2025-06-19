@@ -14,8 +14,6 @@ public sealed class ExportPreview
 {
     public int SpecializationId { get; init; }
     public string UserName { get; init; }
-    public string Pesel { get; init; }
-    public string PwzNumber { get; init; }
     public string SpecializationName { get; init; }
     public string SmkVersion { get; init; }
     public int TotalInternships { get; init; }

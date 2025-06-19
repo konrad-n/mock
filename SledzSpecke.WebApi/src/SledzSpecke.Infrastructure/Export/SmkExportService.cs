@@ -86,8 +86,6 @@ public sealed class SmkExportService : ISpecializationExportService
             {
                 SpecializationId = specializationId,
                 UserName = $"{exportData.BasicInfo.FirstName} {exportData.BasicInfo.LastName}",
-                Pesel = exportData.BasicInfo.Pesel,
-                PwzNumber = exportData.BasicInfo.PwzNumber,
                 SpecializationName = exportData.BasicInfo.SpecializationName,
                 SmkVersion = exportData.BasicInfo.SmkVersion,
                 TotalInternships = exportData.Internships.Count,
@@ -180,8 +178,6 @@ public sealed class SmkExportService : ISpecializationExportService
         {
             BasicInfo = new BasicInfoExportDto
             {
-                Pesel = user.Pesel?.Value ?? "",
-                PwzNumber = user.PwzNumber?.Value ?? "",
                 FirstName = user.FirstName?.Value ?? "",
                 LastName = user.LastName?.Value ?? "",
                 Email = user.Email?.Value ?? "",
@@ -213,7 +209,6 @@ public sealed class SmkExportService : ISpecializationExportService
                     EndDate = internship.EndDate.ToString("dd.MM.yyyy"),
                     DurationDays = (internship.EndDate - internship.StartDate).Days + 1,
                     SupervisorName = internship.SupervisorName ?? "",
-                    SupervisorPwz = "", // PWZ not stored separately
                     ModuleName = module.Name,
                     Status = internship.IsCompleted ? "Zakończony" : "W trakcie"
                 });
