@@ -54,7 +54,7 @@ public sealed class User
             Pesel = pesel,
             PwzNumber = pwzNumber,
             PhoneNumber = phoneNumber,
-            DateOfBirth = dateOfBirth,
+            DateOfBirth = DateTime.SpecifyKind(dateOfBirth, DateTimeKind.Utc),
             CorrespondenceAddress = correspondenceAddress,
             RegistrationDate = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
@@ -89,10 +89,10 @@ public sealed class User
             Pesel = pesel,
             PwzNumber = pwzNumber,
             PhoneNumber = phoneNumber,
-            DateOfBirth = dateOfBirth,
+            DateOfBirth = DateTime.SpecifyKind(dateOfBirth, DateTimeKind.Utc),
             CorrespondenceAddress = correspondenceAddress,
-            RegistrationDate = registrationDate,
-            CreatedAt = registrationDate,
+            RegistrationDate = DateTime.SpecifyKind(registrationDate, DateTimeKind.Utc),
+            CreatedAt = DateTime.SpecifyKind(registrationDate, DateTimeKind.Utc),
             NotificationsEnabled = true,
             EmailNotificationsEnabled = true
         };
