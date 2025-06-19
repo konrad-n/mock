@@ -99,7 +99,7 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
             _logger.LogInformation("User entity created with ID: {UserId}", user.Id?.Value ?? 0);
 
             await _userRepository.AddAsync(user);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            // SaveChangesAsync is already called in the repository's AddAsync method
             
             _logger.LogInformation("User saved successfully");
             
