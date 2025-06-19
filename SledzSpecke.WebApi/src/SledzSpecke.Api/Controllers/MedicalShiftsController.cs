@@ -19,7 +19,7 @@ public class MedicalShiftsController : BaseController
     private readonly ICommandHandler<AddMedicalShift, int> _addMedicalShiftHandler;
     private readonly ICommandHandler<UpdateMedicalShift> _updateMedicalShiftHandler;
     private readonly ICommandHandler<DeleteMedicalShift> _deleteMedicalShiftHandler;
-    private readonly IResultQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> _getUserMedicalShiftsHandler;
+    private readonly IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> _getUserMedicalShiftsHandler;
     private readonly IResultQueryHandler<GetMedicalShiftById, MedicalShiftDto> _getMedicalShiftByIdHandler;
     private readonly IResultQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> _getMedicalShiftStatisticsHandler;
     private readonly IUserContextService _userContextService;
@@ -28,7 +28,7 @@ public class MedicalShiftsController : BaseController
         ICommandHandler<AddMedicalShift, int> addMedicalShiftHandler,
         ICommandHandler<UpdateMedicalShift> updateMedicalShiftHandler,
         ICommandHandler<DeleteMedicalShift> deleteMedicalShiftHandler,
-        IResultQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> getUserMedicalShiftsHandler,
+        IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>> getUserMedicalShiftsHandler,
         IResultQueryHandler<GetMedicalShiftById, MedicalShiftDto> getMedicalShiftByIdHandler,
         IResultQueryHandler<GetMedicalShiftStatistics, MedicalShiftStatisticsDto> getMedicalShiftStatisticsHandler,
         IUserContextService userContextService)
@@ -51,11 +51,7 @@ public class MedicalShiftsController : BaseController
         var userId = _userContextService.GetUserId();
         var query = new GetUserMedicalShifts(userId, internshipId, startDate, endDate);
         var result = await _getUserMedicalShiftsHandler.HandleAsync(query);
-        
-        if (result.IsFailure)
-            return BadRequest(new { error = result.Error });
-            
-        return Ok(result.Value);
+        return Ok(result);
     }
 
     [HttpGet("{shiftId:int}")]
