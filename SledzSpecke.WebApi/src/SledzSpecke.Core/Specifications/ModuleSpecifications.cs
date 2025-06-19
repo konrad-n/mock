@@ -75,10 +75,10 @@ public static class ModuleSpecificationExtensions
             .And(new ModuleByTypeSpecification(ModuleType.Basic));
     }
 
-    public static ISpecification<Module> GetSpecialisticModulesForSpecialization(SpecializationId specializationId)
+    public static ISpecification<Module> GetSpecialistModulesForSpecialization(SpecializationId specializationId)
     {
         return new ModuleBySpecializationSpecification(specializationId)
-            .And(new ModuleByTypeSpecification(ModuleType.Specialistic));
+            .And(new ModuleByTypeSpecification(ModuleType.Specialist));
     }
 
     public static ISpecification<Module> GetModulesInDateRange(SpecializationId specializationId, DateTime startDate, DateTime endDate)

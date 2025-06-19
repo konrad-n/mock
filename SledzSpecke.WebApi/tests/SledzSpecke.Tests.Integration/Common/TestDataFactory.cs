@@ -74,7 +74,7 @@ public static class TestDataFactory
         var moduleName = $"Module {moduleNumber}";
         var startDate = Faker.Date.Recent(30);
         var endDate = startDate.AddMonths(3);
-        var moduleType = moduleNumber == 1 ? ModuleType.Basic : ModuleType.Specialistic;
+        var moduleType = moduleNumber == 1 ? ModuleType.Basic : ModuleType.Specialist;
         
         return new Module(
             moduleId,

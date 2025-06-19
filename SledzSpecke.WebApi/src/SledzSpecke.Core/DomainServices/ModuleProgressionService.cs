@@ -69,7 +69,7 @@ public class ModuleProgressionService : IModuleProgressionService
         }
 
         // Validate progression rules
-        if (targetType == ModuleType.Specialistic)
+        if (targetType == ModuleType.Specialist)
         {
             // Must complete Basic module before Specialist
             var basicModule = specialization.Modules
@@ -200,7 +200,7 @@ public class ModuleProgressionService : IModuleProgressionService
 
         // Check for Specialist module
         var specialistModule = specialization.Modules
-            .FirstOrDefault(m => m.Type.Equals(ModuleType.Specialistic));
+            .FirstOrDefault(m => m.Type.Equals(ModuleType.Specialist));
             
         if (specialistModule != null)
         {

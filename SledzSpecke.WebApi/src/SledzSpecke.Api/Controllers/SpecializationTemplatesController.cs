@@ -33,7 +33,6 @@ public class SpecializationTemplatesController : BaseController
         // Return simplified data for registration
         var publicTemplates = templates.Select(t => new
         {
-            t.Id,
             t.Name,
             t.Code,
             t.Version

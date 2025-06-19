@@ -34,5 +34,5 @@ public class ModuleProgressDto
 public enum DashboardModuleType
 {
     Basic = 0,
-    Specialistic = 1
+    Specialist = 1
 }

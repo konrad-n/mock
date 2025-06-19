@@ -38,11 +38,11 @@
 - [x] Create value objects (ProcedureRole, IDs)
 - [x] Update MedicalShift entity (kept compatible)
 
-### Phase 2: Database Layer 🔄 IN PROGRESS
+### Phase 2: Database Layer ✅ COMPLETED
 - [x] Add DbSet for ProcedureRequirement
 - [x] Add DbSet for ProcedureRealization
 - [x] Create EF configurations
-- [ ] Generate and run migration
+- [x] Generate and run migration
 - [ ] Migrate existing procedure data
 
 ### Phase 3: Repository Layer ⏳ PENDING

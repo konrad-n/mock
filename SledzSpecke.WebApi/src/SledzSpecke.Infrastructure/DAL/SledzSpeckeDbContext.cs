@@ -21,6 +21,8 @@ public sealed class SledzSpeckeDbContext : DbContext
     public DbSet<ProcedureBase> Procedures => Set<ProcedureBase>();
     public DbSet<ProcedureOldSmk> ProceduresOldSmk => Set<ProcedureOldSmk>();
     public DbSet<ProcedureNewSmk> ProceduresNewSmk => Set<ProcedureNewSmk>();
+    public DbSet<ProcedureRequirement> ProcedureRequirements => Set<ProcedureRequirement>();
+    public DbSet<ProcedureRealization> ProcedureRealizations => Set<ProcedureRealization>();
     public DbSet<Internship> Internships => Set<Internship>();
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Absence> Absences => Set<Absence>();
@@ -60,6 +62,8 @@ public sealed class SledzSpeckeDbContext : DbContext
         modelBuilder.ApplyConfiguration(new ProcedureBaseConfiguration());
         modelBuilder.ApplyConfiguration(new ProcedureOldSmkConfiguration());
         modelBuilder.ApplyConfiguration(new ProcedureNewSmkConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcedureRequirementConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcedureRealizationConfiguration());
         modelBuilder.ApplyConfiguration(new InternshipConfiguration());
         modelBuilder.ApplyConfiguration(new CourseConfiguration());
         modelBuilder.ApplyConfiguration(new AbsenceConfiguration());

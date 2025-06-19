@@ -93,7 +93,7 @@ public sealed class GetDashboardOverviewHandler : IQueryHandler<GetDashboardOver
             CurrentModuleName = currentModule?.Name ?? "Module not started",
             ModuleType = currentModule != null && currentModule.Name.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)
                 ? DashboardModuleType.Basic 
-                : DashboardModuleType.Specialistic,
+                : DashboardModuleType.Specialist,
             Specialization = new SpecializationInfoDto
             {
                 Id = specialization.Id.Value,

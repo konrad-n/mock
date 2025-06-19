@@ -545,20 +545,8 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("ExemptionEndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ExemptionReason")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ExemptionStartDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("InternshipId")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsExempt")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -785,6 +773,104 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("ProcedureBase");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureRealization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("RequirementId")
+                        .HasColumnType("integer")
+                        .HasColumnName("RequirementId");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("UserId");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date");
+
+                    b.HasIndex("RequirementId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "RequirementId", "Date");
+
+                    b.ToTable("ProcedureRealizations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ProcedureRealizations_Year", "\"Year\" IS NULL OR (\"Year\" >= 1 AND \"Year\" <= 6)");
+                        });
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureRequirement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ModuleId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("RequiredAsAssistant")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("RequiredAsOperator")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleId");
+
+                    b.HasIndex("ModuleId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("ProcedureRequirements", (string)null);
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Publication", b =>
@@ -1510,6 +1596,36 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Navigation("Module");
                 });
 
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureRealization", b =>
+                {
+                    b.HasOne("SledzSpecke.Core.Entities.ProcedureRequirement", "Requirement")
+                        .WithMany("Realizations")
+                        .HasForeignKey("RequirementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SledzSpecke.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Requirement");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureRequirement", b =>
+                {
+                    b.HasOne("SledzSpecke.Core.Entities.Module", "Module")
+                        .WithMany()
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Module");
+                });
+
             modelBuilder.Entity("SledzSpecke.Core.Entities.SelfEducation", b =>
                 {
                     b.HasOne("SledzSpecke.Core.Entities.Module", "Module")
@@ -1603,6 +1719,11 @@ namespace SledzSpecke.Infrastructure.Migrations
                     b.Navigation("Procedures");
 
                     b.Navigation("SelfEducations");
+                });
+
+            modelBuilder.Entity("SledzSpecke.Core.Entities.ProcedureRequirement", b =>
+                {
+                    b.Navigation("Realizations");
                 });
 
             modelBuilder.Entity("SledzSpecke.Core.Entities.Specialization", b =>

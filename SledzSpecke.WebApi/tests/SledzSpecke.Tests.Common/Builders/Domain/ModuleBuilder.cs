@@ -35,7 +35,7 @@ public class ModuleBuilder : TestDataBuilder<Module>
     public ModuleBuilder AsSpecialisticModule(string name)
     {
         _name = name;
-        _type = ModuleType.Specialistic;
+        _type = ModuleType.Specialist;
         return this;
     }
     

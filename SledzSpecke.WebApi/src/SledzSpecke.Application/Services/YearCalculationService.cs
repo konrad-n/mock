@@ -59,7 +59,7 @@ public class YearCalculationService : IYearCalculationService
         {
             return (1, 2);
         }
-        else if (module.Type == ModuleType.Specialistic)
+        else if (module.Type == ModuleType.Specialist)
         {
             if (hasBasicModule)
             {

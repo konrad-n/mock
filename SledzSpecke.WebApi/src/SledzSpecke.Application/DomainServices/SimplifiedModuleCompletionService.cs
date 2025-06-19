@@ -299,9 +299,9 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
                 return Result.Failure("Cannot transition from basic module to another basic module");
             }
 
-            if (currentModule.Type == Core.ValueObjects.ModuleType.Specialistic && nextModule.Type == Core.ValueObjects.ModuleType.Basic)
+            if (currentModule.Type == Core.ValueObjects.ModuleType.Specialist && nextModule.Type == Core.ValueObjects.ModuleType.Basic)
             {
-                return Result.Failure("Cannot transition from specialistic module back to basic module");
+                return Result.Failure("Cannot transition from specialist module back to basic module");
             }
 
             // Validate dates
@@ -438,8 +438,8 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
             switch (currentModule.Type)
             {
                 case Core.ValueObjects.ModuleType.Basic:
-                    // Can only switch from Basic to Specialistic
-                    if (targetType == Core.DomainServices.ModuleType.Specialistic)
+                    // Can only switch from Basic to Specialist
+                    if (targetType == Core.DomainServices.ModuleType.Specialist)
                     {
                         // Must have completed at least 50% of basic module
                         var progress = await CalculateWeightedProgressAsync(internshipId, currentModule.Id, cancellationToken);
@@ -453,7 +453,7 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
                         if (canSwitch)
                         {
                             _logger.LogInformation(
-                                "Module type switch allowed for internship {InternshipId}: Basic -> Specialistic (Progress: {Progress:F1}%)",
+                                "Module type switch allowed for internship {InternshipId}: Basic -> Specialist (Progress: {Progress:F1}%)",
                                 internshipId.Value,
                                 progress.Value.WeightedTotal);
                         }
@@ -469,17 +469,17 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
                     }
                     return Result<bool>.Success(false);
 
-                case Core.ValueObjects.ModuleType.Specialistic:
-                    // Cannot switch back to Basic from Specialistic
+                case Core.ValueObjects.ModuleType.Specialist:
+                    // Cannot switch back to Basic from Specialist
                     if (targetType == Core.DomainServices.ModuleType.Basic)
                     {
                         _logger.LogWarning(
-                            "Module type switch denied for internship {InternshipId}: Cannot revert from Specialistic to Basic",
+                            "Module type switch denied for internship {InternshipId}: Cannot revert from Specialist to Basic",
                             internshipId.Value);
                         return Result<bool>.Success(false);
                     }
-                    // Can switch between different specialistic modules if completed
-                    if (targetType == Core.DomainServices.ModuleType.Specialistic)
+                    // Can switch between different specialist modules if completed
+                    if (targetType == Core.DomainServices.ModuleType.Specialist)
                     {
                         var completionStatus = await ValidateModuleCompletionAsync(internshipId, currentModule.Id, cancellationToken);
                         if (!completionStatus.IsSuccess)
@@ -492,13 +492,13 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
                         if (canSwitch)
                         {
                             _logger.LogInformation(
-                                "Module type switch allowed for internship {InternshipId}: Specialistic -> Specialistic (Module completed)",
+                                "Module type switch allowed for internship {InternshipId}: Specialist -> Specialist (Module completed)",
                                 internshipId.Value);
                         }
                         else
                         {
                             _logger.LogWarning(
-                                "Module type switch denied for internship {InternshipId}: Current specialistic module not completed",
+                                "Module type switch denied for internship {InternshipId}: Current specialist module not completed",
                                 internshipId.Value);
                         }
                         

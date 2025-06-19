@@ -108,5 +108,5 @@ public record ModuleRequirementId(int Value);
 public enum ModuleType
 {
     Basic,
-    Specialistic
+    Specialist
 }

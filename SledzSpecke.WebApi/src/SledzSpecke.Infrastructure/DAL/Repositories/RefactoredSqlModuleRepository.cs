@@ -86,9 +86,9 @@ internal sealed class RefactoredSqlModuleRepository : BaseRepository<Module>, IM
         return await GetBySpecificationAsync(specification);
     }
 
-    public async Task<IEnumerable<Module>> GetSpecialisticModulesAsync(SpecializationId specializationId)
+    public async Task<IEnumerable<Module>> GetSpecialistModulesAsync(SpecializationId specializationId)
     {
-        var specification = ModuleSpecificationExtensions.GetSpecialisticModulesForSpecialization(specializationId);
+        var specification = ModuleSpecificationExtensions.GetSpecialistModulesForSpecialization(specializationId);
         return await GetBySpecificationAsync(specification);
     }
 

@@ -53,13 +53,10 @@ public class SpecializationTemplateService : ISpecializationTemplateService
         {
             return new SpecializationTemplate
             {
-                Id = 1,
                 Name = "Kardiologia",
                 Code = "cardiology",
                 Version = "CMKP 2023",
-                DurationYears = 5,
-                DurationMonths = 0,
-                DurationDays = 0,
+                TotalDuration = new TotalDuration { Years = 5, Months = 0, Days = 0 },
                 Modules = new List<ModuleTemplate>()
             };
         }

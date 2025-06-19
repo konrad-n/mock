@@ -3,6 +3,7 @@ using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Core.Entities.Base;
 using SledzSpecke.Core.DomainEvents;
 using SledzSpecke.Core.DomainEvents.Base;
+using SledzSpecke.Core.Abstractions;
 
 namespace SledzSpecke.Core.Entities;
 
@@ -16,17 +17,15 @@ public class MedicalShift : Entity
     public ShiftType Type { get; private set; }
     public string Location { get; private set; }
     public string? SupervisorName { get; private set; }
-    public int Year { get; private set; }
-    public bool IsExempt { get; private set; }
-    public string? ExemptionReason { get; private set; }
-    public DateTime? ExemptionStartDate { get; private set; }
-    public DateTime? ExemptionEndDate { get; private set; }
+    public int Year { get; private set; } // For Stary SMK (1-6)
+    public SmkVersion SmkVersion { get; private set; }
     public SyncStatus SyncStatus { get; private set; }
-    public string? AdditionalFields { get; private set; }
     public DateTime? ApprovalDate { get; private set; }
     public string? ApproverName { get; private set; }
     public string? ApproverRole { get; private set; }
-
+    public string? AdditionalFields { get; private set; }
+    
+    // Properties for compatibility
     public bool IsApproved => SyncStatus == SyncStatus.Synced && ApprovalDate.HasValue;
     public bool CanBeDeleted => !IsApproved;
     public int Hours => Duration.Hours;
@@ -50,8 +49,8 @@ public class MedicalShift : Entity
         Location = location ?? throw new ArgumentNullException(nameof(location));
         SupervisorName = supervisorName;
         Year = year;
-        IsExempt = false;
         SyncStatus = SyncStatus.NotSynced;
+        SmkVersion = SmkVersion.New; // Default to new
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -81,14 +80,6 @@ public class MedicalShift : Entity
         return shift;
     }
 
-    /// <summary>
-    /// Updates the medical shift details. If the shift is currently synced with SMK,
-    /// it will automatically transition to Modified status to track the change.
-    /// This allows synced data to be edited while maintaining audit trail.
-    /// </summary>
-    /// <param name="hours">Hours worked (0-23)</param>
-    /// <param name="minutes">Minutes worked (0-59)</param>
-    /// <param name="location">Location where the shift was performed</param>
     public void UpdateShiftDetails(int hours, int minutes, string location)
     {
         EnsureCanModify();
@@ -107,26 +98,19 @@ public class MedicalShift : Entity
                 Duration));
         }
 
-        // AI HINT: This is a KEY CHANGE from original MAUI implementation!
-        // Original: Synced items were read-only (CanBeModified => SyncStatus != SyncStatus.Synced)
-        // New: Synced items CAN be modified and auto-transition to Modified status
-        // This change was specifically requested to allow editing of previously synced data
-        // IMPORTANT: Sync Status Management
         // When a synced item is modified, we automatically transition it to Modified status.
-        // This allows users to edit synced data while maintaining traceability.
-        // The item remains linked to SMK but is marked as having local changes.
         if (SyncStatus == SyncStatus.Synced)
         {
             SyncStatus = SyncStatus.Modified;
         }
     }
-
+    
     public void SetSyncStatus(SyncStatus status)
     {
         SyncStatus = status;
         UpdatedAt = DateTime.UtcNow;
     }
-
+    
     public void Approve(string approverName, string approverRole)
     {
         if (SyncStatus != SyncStatus.Synced)
@@ -148,95 +132,11 @@ public class MedicalShift : Entity
             Type,
             ApprovalDate.Value));
     }
-
-    public void SetAdditionalFields(string? additionalFields)
-    {
-        AdditionalFields = additionalFields;
-        UpdatedAt = DateTime.UtcNow;
-    }
     
-    public void SetExemption(string reason, DateTime startDate, DateTime endDate)
-    {
-        EnsureCanModify();
-        
-        if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Exemption reason cannot be empty.", nameof(reason));
-            
-        if (endDate < startDate)
-            throw new ArgumentException("Exemption end date must be after start date.");
-            
-        IsExempt = true;
-        ExemptionReason = reason;
-        ExemptionStartDate = EnsureUtc(startDate);
-        ExemptionEndDate = EnsureUtc(endDate);
-        UpdatedAt = DateTime.UtcNow;
-        
-        // Automatically transition from Synced to Modified
-        if (SyncStatus == SyncStatus.Synced)
-        {
-            SyncStatus = SyncStatus.Modified;
-        }
-    }
-    
-    public void RemoveExemption()
-    {
-        EnsureCanModify();
-        
-        IsExempt = false;
-        ExemptionReason = null;
-        ExemptionStartDate = null;
-        ExemptionEndDate = null;
-        UpdatedAt = DateTime.UtcNow;
-        
-        // Automatically transition from Synced to Modified
-        if (SyncStatus == SyncStatus.Synced)
-        {
-            SyncStatus = SyncStatus.Modified;
-        }
-    }
-    
-    public void AssignToModule(ModuleId moduleId)
-    {
-        EnsureCanModify();
-        ModuleId = moduleId;
-        UpdatedAt = DateTime.UtcNow;
-        
-        // Automatically transition from Synced to Modified
-        if (SyncStatus == SyncStatus.Synced)
-        {
-            SyncStatus = SyncStatus.Modified;
-        }
-    }
-    
-    public void SetSupervisor(string? supervisorName)
-    {
-        EnsureCanModify();
-        SupervisorName = supervisorName;
-        UpdatedAt = DateTime.UtcNow;
-        
-        // Automatically transition from Synced to Modified
-        if (SyncStatus == SyncStatus.Synced)
-        {
-            SyncStatus = SyncStatus.Modified;
-        }
-    }
-
-    /// <summary>
-    /// Ensures the medical shift can be modified. 
-    /// Only approved shifts cannot be modified (they are locked).
-    /// Synced shifts CAN be modified - they will automatically transition to Modified status.
-    /// This is a key change from the original design where synced items were read-only.
-    /// </summary>
     private void EnsureCanModify()
     {
         if (IsApproved)
             throw new InvalidOperationException("Cannot modify approved medical shift.");
-
-        // IMPORTANT: Design Decision
-        // Previously, synced items could not be modified at all (threw CannotModifySyncedDataException).
-        // Now, synced items CAN be modified - they automatically transition to Modified status.
-        // This allows users to correct/update synced data while maintaining the audit trail.
-        // Only APPROVED items are truly read-only.
     }
 
     private static DateTime EnsureUtc(DateTime dateTime)

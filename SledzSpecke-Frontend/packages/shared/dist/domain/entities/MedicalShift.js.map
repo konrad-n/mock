@@ -1,0 +1,1 @@
+{"version":3,"file":"MedicalShift.js","sourceRoot":"","sources":["../../../src/domain/entities/MedicalShift.ts"],"names":[],"mappings":"AAAA,OAAO,EAAY,UAAU,EAAE,MAAM,kBAAkB,CAAC;AAcxD,MAAM,CAAC,MAAM,mBAAmB,GAAG,CAAC,KAAmB,EAAW,EAAE;IAClE,OAAO,KAAK,CAAC,UAAU,KAAK,UAAU,CAAC,QAAQ,CAAC;AAClD,CAAC,CAAC"}
