@@ -31,13 +31,13 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
     public async Task<User?> GetByIdAsync(UserId id)
     {
         // Use the base repository method with conversion
-        return await GetByIdAsync(id.Value, default);
+        return await base.GetByIdAsync(id.Value, default);
     }
 
     public async Task<User?> GetByIdAsync(UserId id, CancellationToken cancellationToken = default)
     {
         // Use the base repository method with conversion
-        return await GetByIdAsync(id.Value, cancellationToken);
+        return await base.GetByIdAsync(id.Value, cancellationToken);
     }
 
     public async Task<User?> GetByUsernameAsync(Username username)
