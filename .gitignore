@@ -418,3 +418,6 @@ test-*.json
 # Backup files
 *.bak
 *.backup
+# Frontend packages should not be ignored
+!SledzSpecke-Frontend/packages/
+!SledzSpecke-Frontend/packages/**
