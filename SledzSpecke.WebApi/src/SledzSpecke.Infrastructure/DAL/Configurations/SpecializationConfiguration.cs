@@ -13,6 +13,10 @@ internal sealed class SpecializationConfiguration : IEntityTypeConfiguration<Spe
         builder.Property(x => x.Id)
             .HasConversion(x => x.Value, x => new SpecializationId(x));
 
+        builder.Property(x => x.UserId)
+            .HasConversion(x => x.Value, x => new UserId(x))
+            .IsRequired();
+
         builder.Property(x => x.Name)
             .HasMaxLength(100)
             .IsRequired();

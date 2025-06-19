@@ -45,7 +45,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddCore()
-    .AddApplication()
+    .AddApplicationFixed()  // Use the fixed version without circular dependencies
     .AddInfrastructure(builder.Configuration)
     .AddApiServices();
 

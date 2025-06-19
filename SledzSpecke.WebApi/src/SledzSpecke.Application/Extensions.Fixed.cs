@@ -17,21 +17,23 @@ namespace SledzSpecke.Application;
 
 public static partial class ApplicationExtensions
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplicationFixed(this IServiceCollection services)
     {
         var applicationAssembly = typeof(ICommandHandler<>).Assembly;
         
         // Register MediatR for domain events
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
 
-        // Auto-register all command handlers using Scrutor
+        // Auto-register all command handlers using Scrutor - EXCLUDING decorators
         services.Scan(s => s.FromAssemblies(applicationAssembly)
-            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)))
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>))
+                .Where(t => !t.Name.Contains("Decorator")))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
         services.Scan(s => s.FromAssemblies(applicationAssembly)
-            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)))
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>))
+                .Where(t => !t.Name.Contains("Decorator")))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
@@ -48,9 +50,10 @@ public static partial class ApplicationExtensions
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-        // Auto-register all query handlers
+        // Auto-register all query handlers - EXCLUDING decorators and Simple handlers to avoid conflicts
         services.Scan(s => s.FromAssemblies(applicationAssembly)
-            .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)))
+            .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>))
+                .Where(t => !t.Name.Contains("Decorator") && !t.Name.Contains("Simple")))
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
@@ -72,10 +75,6 @@ public static partial class ApplicationExtensions
         services.AddScoped<IDurationCalculationService, DurationCalculationService>();
         services.AddScoped<IMedicalShiftValidationService, MedicalShiftValidationService>();
         services.AddScoped<IProcedureValidationService, ProcedureValidationService>();
-        // TODO: Add implementations for remaining domain services
-        // services.AddScoped<ISpecializationDurationService, SpecializationDurationService>();
-        // services.AddScoped<IProcedureAllocationService, ProcedureAllocationService>();
-        // services.AddScoped<IMedicalEducationComplianceService, MedicalEducationComplianceService>();
         services.AddScoped<IProgressCalculationService, ProgressCalculationService>();
         
         // Add validation
@@ -84,8 +83,8 @@ public static partial class ApplicationExtensions
         // Register FluentValidation validators
         services.AddValidatorsFromAssembly(applicationAssembly);
         
-        // Add decorators for cross-cutting concerns
-        services.AddDecorators();
+        // SKIP DECORATORS FOR NOW - they're causing circular dependencies
+        // services.AddDecorators();
         
         // Add decorators for Result-based handlers
         services.AddResultDecorators();
@@ -95,10 +94,9 @@ public static partial class ApplicationExtensions
         services.AddEnhancedMessagePipeline();
 
         // Register adapters for Result-based handlers to work with ICommandHandler interface
-        // This bridges the gap between controllers expecting ICommandHandler and handlers implementing IResultCommandHandler
         services.AddResultToCommandHandlerAdapters();
 
-        // Override specific query handlers with simple implementations
+        // Register our simple handlers explicitly AFTER everything else
         services.AddScoped<IQueryHandler<GetDashboardOverview, DashboardOverviewDto>, GetDashboardOverviewHandlerSimple>();
         services.AddScoped<IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>>, GetUserMedicalShiftsHandlerSimple>();
 
