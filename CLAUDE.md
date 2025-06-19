@@ -22,6 +22,13 @@ You MUST write production-ready code that is:
 
 # SledzSpecke - Essential Claude Code Documentation
 
+## 📚 Quick Documentation Access
+- **API Reference**: [`docs/api/API_DOCUMENTATION.md`](/home/ubuntu/projects/mock/docs/api/API_DOCUMENTATION.md)
+- **Architecture Guide**: [`docs/architecture/COMPLETE_ARCHITECTURE.md`](/home/ubuntu/projects/mock/docs/architecture/COMPLETE_ARCHITECTURE.md)
+- **Testing Strategy**: [`docs/architecture/TESTING_STRATEGY.md`](/home/ubuntu/projects/mock/docs/architecture/TESTING_STRATEGY.md)
+- **Business Logic**: [`docs/compliance/sledzspecke-business-logic.md`](/home/ubuntu/projects/mock/docs/compliance/sledzspecke-business-logic.md)
+- **Deployment Guide**: [`docs/deployment/`](/home/ubuntu/projects/mock/docs/deployment/)
+
 ## Critical Environment Information
 
 ### You Are Running On Production VPS
@@ -463,13 +470,34 @@ When refactoring repositories, follow this order:
 
 ## 📝 Documentation State
 
-### Comprehensive Docs Available
-- `SledzSpecke Complete Architecture Documentation.md` - Full architecture guide
-- E2E test documentation in test project
-- SMK government requirements (Polish PDFs)
+### 📁 Organized Documentation Structure
+```
+docs/
+├── api/
+│   └── API_DOCUMENTATION.md         # Complete API reference (endpoints, auth, monitoring)
+├── architecture/
+│   ├── COMPLETE_ARCHITECTURE.md     # Full system architecture & patterns
+│   └── TESTING_STRATEGY.md          # Comprehensive testing guide (unit/integration/E2E)
+├── compliance/
+│   ├── sledzspecke-business-logic.md     # Core SMK business rules
+│   ├── sledzspecke-compliance-roadmap.md # Implementation roadmap
+│   ├── sledzspecke-compliance-status.md  # Current compliance status
+│   └── smk-testing-validation.md         # SMK validation requirements
+└── deployment/
+    ├── DEPLOYMENT-OPTIONS.md        # Deployment strategies & options
+    ├── monitoring-plan.md           # Monitoring & observability
+    └── monitoring-runbook.md        # Operations runbook
+```
+
+### 🔍 Finding Documentation
+- **API Details**: `docs/api/API_DOCUMENTATION.md`
+- **Architecture**: `docs/architecture/COMPLETE_ARCHITECTURE.md`
+- **Testing Guide**: `docs/architecture/TESTING_STRATEGY.md`
+- **Business Logic**: `docs/compliance/sledzspecke-business-logic.md`
+- **Deployment**: `docs/deployment/`
 
 ### When Making Changes
-1. Update the consolidated documentation
+1. Update the relevant documentation in `docs/`
 2. Add ADR (Architecture Decision Record) for significant changes
 3. Update E2E tests if behavior changes
 4. Document any new business rules discovered
