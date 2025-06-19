@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -27,18 +27,42 @@ import { MedicalShiftForm } from '@/components/forms/MedicalShiftForm';
 import { formatDate } from '@shared/utils';
 import { MedicalShift } from '@shared/domain/entities';
 import { SyncStatus } from '@shared/domain/value-objects';
+import { useModule } from '@/contexts/ModuleContext';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/services/api';
 
 export const MedicalShiftsPage = () => {
+  const { currentModule } = useModule();
   const [selectedTrainingYear, setSelectedTrainingYear] = useState<number>(1);
   const [formOpen, setFormOpen] = useState(false);
   const [selectedShift, setSelectedShift] = useState<MedicalShift | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [shiftToDelete, setShiftToDelete] = useState<number | null>(null);
+  const [currentInternshipId, setCurrentInternshipId] = useState<number | null>(null);
 
-  // For now, using mock internshipId - in real app, get from context or route
-  const internshipId = 1;
+  // Fetch internships for current module
+  const { data: internships = [] } = useQuery({
+    queryKey: ['internships', currentModule?.id],
+    queryFn: async () => {
+      if (!currentModule) return [];
+      try {
+        const response = await apiClient.get(`/api/modules/${currentModule.id}/internships`);
+        return response;
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!currentModule
+  });
+
+  // Set current internship when internships load
+  useEffect(() => {
+    if (internships.length > 0 && !currentInternshipId) {
+      setCurrentInternshipId(internships[0].id);
+    }
+  }, [internships, currentInternshipId]);
   
-  const { data: shifts = [], isLoading, error } = useMedicalShifts(internshipId);
+  const { data: shifts = [], isLoading, error } = useMedicalShifts(currentInternshipId || 0);
   const deleteMutation = useDeleteMedicalShift();
 
   const handleAdd = () => {
@@ -258,7 +282,7 @@ export const MedicalShiftsPage = () => {
         <DialogContent>
           <MedicalShiftForm
             shift={selectedShift}
-            internshipId={internshipId}
+            internshipId={currentInternshipId || 1}
             onSuccess={() => setFormOpen(false)}
           />
         </DialogContent>

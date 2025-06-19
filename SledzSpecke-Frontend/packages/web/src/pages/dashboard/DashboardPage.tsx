@@ -1,10 +1,12 @@
 import { Grid, Box, Typography, Tabs, Tab, Button } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DashboardOverview } from '@shared/types';
 import { ModuleType, getModuleLabel } from '@shared/domain/value-objects';
 import { ProgressCard } from '@/components/dashboard/ProgressCard';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { useModule } from '@/contexts/ModuleContext';
+import { apiClient } from '@/services/api';
 import {
   LocalHospital,
   Assignment,
@@ -55,22 +57,48 @@ const mockDashboardData: DashboardOverview = {
 };
 
 export const DashboardPage = () => {
-  const [currentModule, setCurrentModule] = useState<ModuleType>(ModuleType.Basic);
+  const { currentModule, modules, setCurrentModule, isLoading: modulesLoading } = useModule();
+  const [selectedModuleType, setSelectedModuleType] = useState<ModuleType>(ModuleType.Basic);
   
-  const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ['dashboard', currentModule],
-    queryFn: async () => {
-      // For now, return mock data
-      // In real app: return apiClient.get<DashboardOverview>('/dashboard/overview');
-      return mockDashboardData;
+  // Update selected module type when current module changes
+  useEffect(() => {
+    if (currentModule) {
+      setSelectedModuleType(currentModule.type === 'Basic' ? ModuleType.Basic : ModuleType.Specialist);
     }
+  }, [currentModule]);
+
+  const { data: dashboardData, isLoading } = useQuery({
+    queryKey: ['dashboard', currentModule?.id],
+    queryFn: async () => {
+      if (!currentModule) return mockDashboardData;
+      
+      try {
+        // Get module-specific progress
+        const response = await apiClient.get<DashboardOverview>(
+          `/api/dashboard/progress/${currentModule.specializationId}?moduleId=${currentModule.id}`
+        );
+        return response;
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        return mockDashboardData;
+      }
+    },
+    enabled: !!currentModule
   });
 
   const handleModuleChange = (_: React.SyntheticEvent, newValue: ModuleType) => {
-    setCurrentModule(newValue);
+    setSelectedModuleType(newValue);
+    // Find and set the module of this type
+    const module = modules.find(m => 
+      (m.type === 'Basic' && newValue === ModuleType.Basic) ||
+      (m.type === 'Specialist' && newValue === ModuleType.Specialist)
+    );
+    if (module) {
+      setCurrentModule(module);
+    }
   };
 
-  if (isLoading || !dashboardData) {
+  if (isLoading || modulesLoading || !dashboardData) {
     return <Box>Ładowanie...</Box>;
   }
 
@@ -88,7 +116,7 @@ export const DashboardPage = () => {
 
       {/* Module Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={currentModule} onChange={handleModuleChange}>
+        <Tabs value={selectedModuleType} onChange={handleModuleChange}>
           <Tab label={getModuleLabel(ModuleType.Basic)} value={ModuleType.Basic} />
           <Tab label={getModuleLabel(ModuleType.Specialist)} value={ModuleType.Specialist} />
         </Tabs>

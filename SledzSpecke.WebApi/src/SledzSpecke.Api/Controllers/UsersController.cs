@@ -27,6 +27,25 @@ public class UsersController : BaseController
     public async Task<ActionResult<IEnumerable<UserDto>>> Get()
         => await HandleAsync(new GetUsers(), _getUsersHandler);
 
+    [HttpGet("{userId:int}/specializations")]
+    public async Task<ActionResult> GetUserSpecializations(int userId)
+    {
+        // For now, return mock data with modules
+        // TODO: Implement proper query handler
+        var specialization = new
+        {
+            id = 1,
+            name = "Kardiologia",
+            modules = new[]
+            {
+                new { id = 1, name = "Moduł Podstawowy", type = "Basic", specializationId = 1 },
+                new { id = 2, name = "Moduł Specjalistyczny", type = "Specialist", specializationId = 1 }
+            }
+        };
+        
+        return Ok(specialization);
+    }
+
     // TODO: Implement once GetUserSmkDetails handler is created
     /*
     [HttpGet("{userId:int}/smk-details")]

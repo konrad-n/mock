@@ -100,6 +100,23 @@ public class ModulesController : BaseController
     }
 
     /// <summary>
+    /// Gets all internships for a module
+    /// </summary>
+    [HttpGet("{moduleId:int}/internships")]
+    public async Task<ActionResult> GetModuleInternships(int moduleId)
+    {
+        // For now, return mock data
+        // TODO: Implement proper query handler
+        var internships = new[]
+        {
+            new { id = 1, name = "Oddział Kardiologii", moduleId = moduleId },
+            new { id = 2, name = "Oddział Intensywnej Terapii Kardiologicznej", moduleId = moduleId }
+        };
+        
+        return Ok(internships);
+    }
+
+    /// <summary>
     /// Creates an internship within a module
     /// </summary>
     [HttpPost("{moduleId:int}/internships")]

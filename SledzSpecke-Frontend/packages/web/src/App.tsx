@@ -9,6 +9,7 @@ import { pl } from 'date-fns/locale';
 
 import { theme } from './theme/theme';
 import { useAuthStore } from './stores/authStore';
+import { ModuleProvider } from './contexts/ModuleContext';
 
 // Layout components
 import { AppLayout } from './components/layout/AppLayout';
@@ -66,7 +67,9 @@ function App() {
               <Route
                 element={
                   <ProtectedRoute>
-                    <AppLayout />
+                    <ModuleProvider>
+                      <AppLayout />
+                    </ModuleProvider>
                   </ProtectedRoute>
                 }
               >
