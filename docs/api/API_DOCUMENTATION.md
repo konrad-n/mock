@@ -21,8 +21,14 @@ All endpoints require JWT Bearer token authentication except for:
 ```bash
 curl -X POST https://api.sledzspecke.pl/api/auth/sign-in \
   -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "password"}'
+  -d '{"Username": "user@example.com", "Password": "YourPassword"}'
 ```
+
+**Important Notes:**
+- The sign-in endpoint uses `Username` field (not `email`) which accepts email addresses
+- Password field is case-sensitive (`Password` not `password`)
+- Passwords are currently stored as SHA256 hashes in Base64 format
+- JWT tokens may have configuration issues in production - check signature key
 
 ### Using the Token
 ```bash
@@ -67,25 +73,18 @@ curl -X GET https://api.sledzspecke.pl/api/modules/1 \
 |--------|----------|-------------|
 | POST | `/api/auth/sign-up` | Register new user |
 | POST | `/api/auth/sign-in` | Login user |
-| POST | `/api/auth/refresh` | Refresh JWT token |
-| POST | `/api/auth/change-password` | Change user password |
+| ~~POST~~ | ~~/api/auth/refresh~~ | ~~Refresh JWT token~~ (Not implemented) |
+| ~~POST~~ | ~~/api/auth/change-password~~ | ~~Change user password~~ (Use `/api/users/change-password`)
 
 ### User Management
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/users/me` | Get current user profile |
-| GET | `/api/users/profile` | Get current user profile (alternative) |
-| PUT | `/api/users/me` | Update user profile |
-| PUT | `/api/users/profile` | Update user profile (alternative) |
+| GET | `/api/users/profile` | Get current user profile |
+| PUT | `/api/users/profile` | Update user profile |
 | PUT | `/api/users/change-password` | Change password |
-| GET | `/api/users/me/preferences` | Get user preferences |
-| GET | `/api/users/preferences` | Get user preferences (alternative) |
-| PUT | `/api/users/me/preferences` | Update user preferences |
-| PUT | `/api/users/preferences` | Update user preferences (alternative) |
-| GET | `/api/Users` | List all users |
-| GET | `/api/Users/{userId}` | Get specific user |
-| PUT | `/api/Users/{userId}` | Update user |
-| DELETE | `/api/Users/{userId}` | Delete user |
+| PUT | `/api/users/preferences` | Update user preferences |
+| GET | `/api/users` | List users (UsersController - details TBD) |
+| GET | `/api/users/{userId}` | Get specific user (UsersController - details TBD) |
 
 ### Specializations
 | Method | Endpoint | Description |
@@ -126,72 +125,70 @@ curl -X GET https://api.sledzspecke.pl/api/modules/1 \
 ### Internships
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Internships` | List all internships |
-| GET | `/api/Internships/{internshipId}` | Get specific internship |
-| POST | `/api/Internships` | Create new internship |
-| PUT | `/api/Internships/{internshipId}` | Update internship |
-| DELETE | `/api/Internships/{internshipId}` | Delete internship |
-| POST | `/api/Internships/{internshipId}/approve` | Approve internship |
-| POST | `/api/Internships/{internshipId}/complete` | Complete internship |
+| GET | `/api/internships` | List internships (with filters: specializationId, moduleId) |
+| GET | `/api/internships/{internshipId}` | Get specific internship |
+| POST | `/api/internships` | Create new internship |
+| PUT | `/api/internships/{internshipId}` | Update internship |
+| DELETE | `/api/internships/{internshipId}` | Delete internship |
+| POST | `/api/internships/{internshipId}/approve` | Approve internship |
+| POST | `/api/internships/{internshipId}/complete` | Complete internship |
 
 ### Medical Shifts
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/MedicalShifts` | List all shifts |
-| GET | `/api/MedicalShifts/{shiftId}` | Get specific shift |
-| POST | `/api/MedicalShifts` | Add new shift |
-| PUT | `/api/MedicalShifts/{shiftId}` | Update shift |
-| DELETE | `/api/MedicalShifts/{shiftId}` | Delete shift |
-| GET | `/api/MedicalShifts/statistics` | Get shift statistics |
-| POST | `/api/medical-shifts/bulk` | Add multiple shifts |
+| GET | `/api/medical-shifts` | List user's shifts (with filters: specializationId, moduleId, internshipId, startDate, endDate) |
+| GET | `/api/medical-shifts/{shiftId}` | Get specific shift |
+| POST | `/api/medical-shifts` | Add new shift |
+| PUT | `/api/medical-shifts/{shiftId}` | Update shift |
+| DELETE | `/api/medical-shifts/{shiftId}` | Delete shift |
+| GET | `/api/medical-shifts/statistics` | Get shift statistics |
 
 ### Procedures
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Procedures` | List all procedures |
-| GET | `/api/Procedures/{procedureId}` | Get specific procedure |
-| POST | `/api/Procedures` | Add new procedure |
-| PUT | `/api/Procedures/{procedureId}` | Update procedure |
-| DELETE | `/api/Procedures/{procedureId}` | Delete procedure |
-| GET | `/api/Procedures/statistics` | Get procedure statistics |
-| GET | `/api/procedures/search` | Search procedures by code/name |
+| GET | `/api/procedures` | List user's procedures (with filters: specializationId, moduleId, internshipId, startDate, endDate) |
+| GET | `/api/procedures/{procedureId}` | Get specific procedure |
+| POST | `/api/procedures` | Add new procedure |
+| PUT | `/api/procedures/{procedureId}` | Update procedure |
+| DELETE | `/api/procedures/{procedureId}` | Delete procedure |
+| GET | `/api/procedures/statistics` | Get procedure statistics |
 
 ### Courses
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Courses` | List all courses |
-| GET | `/api/Courses/{courseId}` | Get specific course |
-| POST | `/api/Courses` | Create new course |
-| PUT | `/api/Courses/{courseId}` | Update course |
-| DELETE | `/api/Courses/{courseId}` | Delete course |
-| POST | `/api/Courses/{courseId}/complete` | Mark course as completed |
-| POST | `/api/Courses/{courseId}/approve` | Approve course |
+| GET | `/api/courses` | List courses (with filters: specializationId, moduleId, courseType) |
+| GET | `/api/courses/{courseId}` | Get specific course |
+| POST | `/api/courses` | Create new course |
+| PUT | `/api/courses/{courseId}` | Update course |
+| DELETE | `/api/courses/{courseId}` | Delete course |
+| POST | `/api/courses/{courseId}/complete` | Mark course as completed |
+| POST | `/api/courses/{courseId}/approve` | Approve course |
 
 ### Educational Activities
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/EducationalActivities` | List all activities |
-| GET | `/api/EducationalActivities/specialization/{specializationId}` | Get by specialization |
-| GET | `/api/EducationalActivities/specialization/{specializationId}/type/{type}` | Get by type |
-| GET | `/api/EducationalActivities/{id}` | Get specific activity |
-| POST | `/api/EducationalActivities` | Create new activity |
-| PUT | `/api/EducationalActivities/{id}` | Update activity |
-| DELETE | `/api/EducationalActivities/{id}` | Delete activity |
+| GET | `/api/educational-activities` | List all activities |
+| GET | `/api/educational-activities/specialization/{specializationId}` | Get by specialization |
+| GET | `/api/educational-activities/specialization/{specializationId}/type/{type}` | Get by type |
+| GET | `/api/educational-activities/{id}` | Get specific activity |
+| POST | `/api/educational-activities` | Create new activity |
+| PUT | `/api/educational-activities/{id}` | Update activity |
+| DELETE | `/api/educational-activities/{id}` | Delete activity |
 
 ### Self Education
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/SelfEducation` | List all self education |
-| GET | `/api/SelfEducation/{id}` | Get specific self education |
-| POST | `/api/SelfEducation` | Create new self education |
-| PUT | `/api/SelfEducation/{id}` | Update self education |
-| DELETE | `/api/SelfEducation/{id}` | Delete self education |
-| POST | `/api/SelfEducation/{id}/complete` | Complete self education |
-| GET | `/api/SelfEducation/user/{userId}` | Get user's self education |
-| GET | `/api/SelfEducation/user/{userId}/year/{year}` | Get by year |
-| GET | `/api/SelfEducation/user/{userId}/specialization/{specializationId}/completed` | Get completed |
-| GET | `/api/SelfEducation/user/{userId}/specialization/{specializationId}/credit-hours` | Get credit hours |
-| GET | `/api/SelfEducation/user/{userId}/specialization/{specializationId}/quality-score` | Get quality score |
+| GET | `/api/self-education` | List all self education |
+| GET | `/api/self-education/{id}` | Get specific self education |
+| POST | `/api/self-education` | Create new self education |
+| PUT | `/api/self-education/{id}` | Update self education |
+| DELETE | `/api/self-education/{id}` | Delete self education |
+| POST | `/api/self-education/{id}/complete` | Complete self education |
+| GET | `/api/self-education/user/{userId}` | Get user's self education |
+| GET | `/api/self-education/user/{userId}/year/{year}` | Get by year |
+| GET | `/api/self-education/user/{userId}/specialization/{specializationId}/completed` | Get completed |
+| GET | `/api/self-education/user/{userId}/specialization/{specializationId}/credit-hours` | Get credit hours |
+| GET | `/api/self-education/user/{userId}/specialization/{specializationId}/quality-score` | Get quality score |
 
 ### Additional Self-Education Days
 Manage additional educational days (max 6 per year per SMK regulations)
@@ -208,52 +205,52 @@ Manage additional educational days (max 6 per year per SMK regulations)
 ### Absences
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Absences` | List all absences |
-| GET | `/api/Absences/user/{userId}` | Get user's absences |
-| GET | `/api/Absences/{id}` | Get specific absence |
-| POST | `/api/Absences` | Create new absence |
-| PUT | `/api/Absences/{id}` | Update absence |
-| DELETE | `/api/Absences/{id}` | Delete absence |
-| POST | `/api/Absences/{id}/approve` | Approve absence |
+| GET | `/api/absences` | List all absences |
+| GET | `/api/absences/user/{userId}` | Get user's absences |
+| GET | `/api/absences/{id}` | Get specific absence |
+| POST | `/api/absences` | Create new absence |
+| PUT | `/api/absences/{id}` | Update absence |
+| DELETE | `/api/absences/{id}` | Delete absence |
+| POST | `/api/absences/{id}/approve` | Approve absence |
 
 ### Dashboard
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Dashboard/overview` | Get dashboard overview |
-| GET | `/api/Dashboard/progress/{specializationId}` | Get progress by specialization |
-| GET | `/api/Dashboard/statistics/{specializationId}` | Get statistics |
+| GET | `/api/dashboard/overview` | Get dashboard overview |
+| GET | `/api/dashboard/progress/{specializationId}` | Get progress by specialization |
+| GET | `/api/dashboard/statistics/{specializationId}` | Get statistics |
 
 ### Calculations
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/Calculations/internship-days` | Calculate internship days |
-| POST | `/api/Calculations/normalize-time` | Normalize time format |
-| POST | `/api/Calculations/required-shift-hours` | Calculate required hours |
+| POST | `/api/calculations/internship-days` | Calculate internship days |
+| POST | `/api/calculations/normalize-time` | Normalize time format |
+| POST | `/api/calculations/required-shift-hours` | Calculate required hours |
 
 ### Publications
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Publications` | List all publications |
-| GET | `/api/Publications/{id}` | Get specific publication |
-| POST | `/api/Publications` | Create new publication |
-| PUT | `/api/Publications/{id}` | Update publication |
-| DELETE | `/api/Publications/{id}` | Delete publication |
-| GET | `/api/Publications/user/{userId}` | Get user's publications |
-| GET | `/api/Publications/user/{userId}/first-author` | Get first-author publications |
-| GET | `/api/Publications/user/{userId}/peer-reviewed` | Get peer-reviewed publications |
-| GET | `/api/Publications/user/{userId}/specialization/{specializationId}/impact-score` | Get impact score |
+| GET | `/api/publications` | List all publications |
+| GET | `/api/publications/{id}` | Get specific publication |
+| POST | `/api/publications` | Create new publication |
+| PUT | `/api/publications/{id}` | Update publication |
+| DELETE | `/api/publications/{id}` | Delete publication |
+| GET | `/api/publications/user/{userId}` | Get user's publications |
+| GET | `/api/publications/user/{userId}/first-author` | Get first-author publications |
+| GET | `/api/publications/user/{userId}/peer-reviewed` | Get peer-reviewed publications |
+| GET | `/api/publications/user/{userId}/specialization/{specializationId}/impact-score` | Get impact score |
 
 ### Recognitions
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/Recognitions` | List all recognitions |
-| GET | `/api/Recognitions/{id}` | Get specific recognition |
-| POST | `/api/Recognitions` | Create new recognition |
-| PUT | `/api/Recognitions/{id}` | Update recognition |
-| DELETE | `/api/Recognitions/{id}` | Delete recognition |
-| POST | `/api/Recognitions/{id}/approve` | Approve recognition |
-| GET | `/api/Recognitions/user/{userId}` | Get user's recognitions |
-| GET | `/api/Recognitions/user/{userId}/specialization/{specializationId}/total-reduction` | Get total reduction |
+| GET | `/api/recognitions` | List all recognitions |
+| GET | `/api/recognitions/{id}` | Get specific recognition |
+| POST | `/api/recognitions` | Create new recognition |
+| PUT | `/api/recognitions/{id}` | Update recognition |
+| DELETE | `/api/recognitions/{id}` | Delete recognition |
+| POST | `/api/recognitions/{id}/approve` | Approve recognition |
+| GET | `/api/recognitions/user/{userId}` | Get user's recognitions |
+| GET | `/api/recognitions/user/{userId}/specialization/{specializationId}/total-reduction` | Get total reduction |
 
 ### File Management
 | Method | Endpoint | Description |
@@ -384,13 +381,20 @@ All errors follow RFC 7807 Problem Details format:
 
 ## Data Export
 
-### SMK Export Format
-```bash
-GET /api/specializations/1/export
-Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-```
+### Export Controller
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/export/specialization/{id}/xlsx` | Export specialization to Excel (SMK format) |
+| GET | `/api/export/specialization/{id}/preview` | Preview export data before download |
+| POST | `/api/export/specialization/{id}/validate` | Validate data for SMK compliance |
 
-Returns XLSX file with sheets:
+### Test Export Controller
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| Various | `/api/test-export/*` | Test export endpoints (development) |
+
+### SMK Export Format
+The XLSX export includes sheets:
 1. Summary - Overview statistics
 2. Medical Shifts - All shifts with hours
 3. Procedures - All procedures with counts
@@ -557,6 +561,89 @@ Response: 200 OK
 }
 ```
 
+## System & Monitoring Endpoints
+
+### Health Check
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | System health check (returns status) |
+
+### Monitoring Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/monitoring/health` | Monitoring health check |
+| GET | `/monitoring/dashboard` | HTML monitoring dashboard (Development only) |
+
+### Logs API
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/logs/recent` | Get recent logs |
+| GET | `/api/logs/errors` | Get error logs only |
+| GET | `/api/logs/stats` | Get log statistics |
+
+### Performance Metrics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| Various | `/api/performance-metrics/*` | Performance monitoring endpoints |
+
+### E2E Test Results
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/e2e/results` | E2E test results (Development only) |
+
+## Known Issues & Validation Requirements
+
+### Registration Validation
+
+#### PESEL (Polish National ID)
+- Must be exactly 11 digits
+- Must have valid checksum
+- Date of birth in request must match PESEL
+- Example valid PESEL: `90010110019` (Male, born 1990-01-01)
+
+#### PWZ (Medical License Number)
+- Must be exactly 7 digits
+- First digit cannot be 0
+- Last digit must equal: (sum of first 6 digits × position) % 11
+- Valid examples: `1000001`, `1000002`, `1000003`
+
+#### Password Requirements
+- Minimum 8 characters
+- At least one uppercase letter (A-Z)
+- At least one lowercase letter (a-z)
+- At least one digit (0-9)
+- At least one special character (@$!%*?&)
+- Current storage: SHA256 hash in Base64 format
+
+#### Address Validation
+- All fields required except ApartmentNumber
+- Province must be valid Polish province (lowercase)
+- Postal code format: XX-XXX (e.g., `00-001`)
+- Province must match postal code prefix
+
+### Common Issues
+
+1. **JWT Token Errors**
+   - Error: "The signature key was not found"
+   - Solution: Ensure JWT signing key is configured in production
+
+2. **Registration Failures**
+   - Most common: Invalid PESEL or PWZ checksum
+   - Solution: Use provided valid examples or calculate correct checksums
+
+3. **Password Special Characters**
+   - Some special characters may cause JSON parsing errors
+   - Use `@` or other simple special characters
+
+4. **Empty API Responses**
+   - Many endpoints return empty when no data exists
+   - Check if user has associated specialization data
+
+### SMK Integration
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| Various | `/api/smk/*` | SMK system integration endpoints (SmkController) |
+
 ## External Monitoring Services
 
 ### Seq (Log Aggregation)
@@ -715,5 +802,29 @@ When running locally:
 
 ---
 
-Last Updated: 2025-06-18
+Last Updated: 2025-06-19
 Status: Development/Testing Phase
+
+## Summary of Changes (December 2024)
+
+### API Structure Updates
+- All endpoints now use **lowercase kebab-case** URLs (e.g., `/api/medical-shifts` instead of `/api/MedicalShifts`)
+- **No Minimal API endpoints** - all endpoints use traditional controllers
+- **29 controllers** total, all inheriting from BaseController or BaseResultController
+- Most endpoints require **JWT authentication**
+- Admin endpoints require **AdminOnly** policy
+
+### Key Differences from Original Documentation
+1. **Authentication**: No refresh token endpoint implemented (use sign-in to get new tokens)
+2. **User Management**: Simplified endpoints through UserProfileController
+3. **URL Convention**: All URLs now follow kebab-case convention
+4. **Export**: Dedicated ExportController for SMK Excel exports
+5. **Monitoring**: Comprehensive monitoring endpoints added
+6. **E2E Testing**: Dedicated endpoints for test results
+
+### Missing Features (Not Yet Implemented)
+- JWT token refresh endpoint
+- Some user management endpoints in UsersController
+- Webhook system
+- Some module-specific endpoints
+- Bulk medical shift import

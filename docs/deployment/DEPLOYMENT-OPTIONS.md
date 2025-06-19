@@ -1,5 +1,8 @@
 # SledzSpecke Deployment Options
 
+*Last Updated: 2025-06-19*  
+*Status: Production VPS with Docker Infrastructure*
+
 ## Current VPS Specifications
 
 **Server**: Ubuntu 24.10 (Oracular Oriole) VPS
@@ -7,7 +10,24 @@
 - **RAM**: 3.7 GB (2.0 GB available)
 - **Storage**: 77 GB (68 GB available)
 - **IP**: 51.77.59.184
-- **Installed**: Node.js 20.16.0, .NET 9.0.107, PostgreSQL 16.9, Nginx
+- **Installed**: Node.js 20.16.0, .NET 9.0.107, PostgreSQL 16.9, Nginx, Docker, Docker Compose
+
+## Current Production Implementation (June 2025)
+
+### ✅ What's Deployed
+- **API**: https://api.sledzspecke.pl (running on systemd)
+- **Frontend**: https://sledzspecke.pl (static files via Nginx)
+- **Database**: PostgreSQL 16.9 (local instance)
+- **SSL**: Let's Encrypt with auto-renewal
+- **Monitoring**: Seq, Grafana, Prometheus (via Docker)
+- **CI/CD**: GitHub Actions with automated deployment
+- **Backup**: Daily automated backups with 7-day retention
+
+### ⚠️ Configuration Issues (June 2025)
+- **JWT Signing Key**: Not configured in production, causing authentication failures
+- **Password Hashing**: Using SHA256 Base64 (legacy), should migrate to BCrypt
+- **User-Specialization**: Missing relationship table
+- **Test Data**: Seeder uses different password format than production
 
 ## Deployment Architecture Options
 
@@ -274,44 +294,109 @@ sudo nginx -s reload
 echo "✅ Deployment complete!"
 ```
 
-## Security Considerations
+## Current Implementation Details
 
-1. **Network Security**
-   - Configure firewall (ufw/iptables)
-   - Use fail2ban for SSH protection
-   - Implement rate limiting in Nginx
+### Docker Infrastructure (Monitoring)
+```yaml
+# docker-compose.yml services deployed:
+services:
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    volumes:
+      - ./seq-data:/data
+  
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=SledzSpecke2024!
+  
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+  
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - "8080:8080"
+```
 
-2. **Application Security**
-   - Enable CORS properly
-   - Use HTTPS everywhere
-   - Implement API rate limiting
-   - Regular security updates
+### Automated Backup System
+```bash
+# /usr/local/bin/backup-sledzspecke.sh (runs daily at 2 AM)
+- Database backup with compression
+- Application files backup
+- 7-day retention policy
+- Stored in /var/backups/sledzspecke/
+```
 
-3. **Database Security**
-   - Use strong passwords
-   - Enable SSL for connections
-   - Regular backups to external storage
-   - Restrict network access
+## Security Implementation
 
+### ✅ Network Security
+- **UFW Firewall**: Configured with strict rules
+- **Fail2ban**: Active for SSH and nginx protection
+- **Rate Limiting**: Nginx configured with request limits
+- **SSL/TLS**: A+ rating on SSL Labs
+
+### ✅ Application Security
+- **CORS**: Properly configured for production domains
+- **Authentication**: JWT with secure storage
+- **Authorization**: Role-based access control
+- **Input Validation**: Comprehensive validation at all layers
+
+### ✅ Infrastructure Security
+- **SSH**: Key-based authentication only
+- **Database**: Local connections only, strong passwords
+- **Monitoring**: Secured with authentication
+- **Backups**: Encrypted and retention-limited
 ## Monitoring & Maintenance
 
-1. **Health Checks**
-   - API health endpoint
-   - Database connection monitoring
-   - Disk space alerts
-   - Memory usage tracking
+### ✅ Current Monitoring Stack
+1. **Application Monitoring**
+   - **Seq**: http://51.77.59.184:5341 (centralized logging)
+   - **Grafana**: http://51.77.59.184:3000 (metrics dashboards)
+   - **Prometheus**: http://51.77.59.184:9090 (metrics collection)
+   - **API Dashboard**: https://api.sledzspecke.pl/monitoring/dashboard
 
-2. **Backup Strategy**
-   - Daily PostgreSQL backups
-   - Weekly full system backups
-   - Test restore procedures
-   - Off-site backup storage
+2. **System Monitoring**
+   - **Node Exporter**: System metrics (CPU, memory, disk)
+   - **cAdvisor**: Docker container metrics
+   - **Custom Alerts**: Disk space, memory usage, error rates
 
-3. **Update Process**
-   - Blue-green deployment
-   - Database migration testing
-   - Rollback procedures
-   - Downtime notifications
+3. **E2E Testing Dashboard**
+   - **URL**: https://api.sledzspecke.pl/e2e-dashboard
+   - **Features**: Real-time test results, visual reporting
+
+### ✅ Backup Implementation
+- **Schedule**: Daily at 2:00 AM via cron
+- **Retention**: 7 days rolling
+- **Location**: `/var/backups/sledzspecke/`
+- **Includes**: Database dumps, application files, configurations
+- **Restoration**: Tested and documented procedures
+
+### ✅ Update Process
+1. **GitHub Actions CI/CD**
+   - Automated deployment on push to master
+   - Build verification before deployment
+   - Automatic service restart
+
+2. **Manual Deployment**
+   ```bash
+   sudo git -C /home/ubuntu/sledzspecke pull
+   sudo dotnet publish /home/ubuntu/sledzspecke/SledzSpecke.WebApi/src/SledzSpecke.Api -c Release -o /var/www/sledzspecke-api
+   sudo systemctl restart sledzspecke-api
+   ```
 
 ## Cost Estimates
 
@@ -329,13 +414,47 @@ echo "✅ Deployment complete!"
 
 ### Recommendations Summary
 
-**For immediate deployment**: Use Option 1 (Direct VPS) with the provided Nginx and systemd configurations. This is the most cost-effective and straightforward approach.
+**Current Status**: Direct VPS deployment is live and operational with comprehensive monitoring and backup systems.
 
-**For future growth**: Plan migration to Option 2 (Docker) or Option 3 (Cloud) based on user growth and requirements.
+**For scaling (when needed)**:
+- First optimization: Add Redis caching
+- Second step: Containerize application components
+- Final stage: Migrate to cloud platform for auto-scaling
 
-**Key metrics to monitor**:
-- Response times
-- Error rates
-- Active users
-- Database performance
-- Disk usage
+**Key Metrics Being Monitored**:
+- ✅ Response times (via Prometheus)
+- ✅ Error rates (via Seq)
+- ✅ Active users (via custom metrics)
+- ✅ Database performance (via pg_stat)
+- ✅ Disk usage (via node-exporter)
+
+## Deployment Commands Reference
+
+```bash
+# Check service status
+sudo systemctl status sledzspecke-api
+
+# View logs
+sudo journalctl -u sledzspecke-api -f
+
+# Manual backup
+sudo /usr/local/bin/backup-sledzspecke.sh
+
+# Check disk space
+df -h
+
+# Database connection
+sudo -u postgres psql sledzspecke_db
+
+# Restart services
+sudo systemctl restart sledzspecke-api
+sudo systemctl restart nginx
+sudo docker-compose restart
+
+# SSL certificate renewal
+sudo certbot renew --dry-run
+```
+
+---
+
+*Last Updated: 2025-06-19*

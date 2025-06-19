@@ -99,16 +99,22 @@ public class SignUpValidator : AbstractValidator<SignUp>
     {
         if (string.IsNullOrEmpty(pwz) || pwz.Length != 7 || !Regex.IsMatch(pwz, @"^\d{7}$"))
             return false;
+        
+        // First digit must be > 0
+        if (pwz[0] == '0')
+            return false;
             
-        int checkDigit = pwz[0] - '0';
+        // Use the same algorithm as PwzNumber.cs
+        int[] weights = { 1, 2, 3, 4, 5, 6 };
         int sum = 0;
         
-        for (int i = 1; i < 7; i++)
+        for (int i = 0; i < 6; i++)
         {
-            sum += (pwz[i] - '0') * i;
+            sum += (pwz[i] - '0') * weights[i];
         }
         
-        return (sum % 11) == checkDigit;
+        int checksum = sum % 11;
+        return checksum == (pwz[6] - '0');
     }
     
     private bool ValidatePeselDateMatch(string pesel, DateTime dateOfBirth)
