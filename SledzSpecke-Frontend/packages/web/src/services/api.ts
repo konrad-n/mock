@@ -41,22 +41,34 @@ class ApiClient {
   async signIn(data: SignInRequest): Promise<AuthResponse> {
     // Transform to match API expectations
     const response = await this.instance.post<AuthResponse>('/auth/sign-in', {
-      Email: data.email,
-      Password: data.password
+      email: data.email,
+      password: data.password
     });
     return response.data;
   }
 
   async signUp(data: SignUpRequest): Promise<AuthResponse> {
     // Transform to match API expectations
+    // Split fullName into firstName and lastName
+    const nameParts = data.fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || nameParts[0] || '';
+    
     const response = await this.instance.post<AuthResponse>('/auth/sign-up', {
-      Password: data.password,
-      Email: data.email,
-      FullName: data.fullName,
-      SmkVersion: {
-        Value: data.smkVersion === 'new' ? 'New' : 'Old'
-      },
-      SpecializationId: 1 // TODO: This should be selectable
+      email: data.email,
+      password: data.password,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: '000000000', // Default phone number since it's not in the form
+      dateOfBirth: '1990-01-01', // Default date since it's not in the form
+      correspondenceAddress: {
+        street: 'Default Street',
+        houseNumber: '1',
+        apartmentNumber: null,
+        postalCode: '00-000',
+        city: 'Warsaw',
+        province: 'Mazowieckie'
+      }
     });
     return response.data;
   }
