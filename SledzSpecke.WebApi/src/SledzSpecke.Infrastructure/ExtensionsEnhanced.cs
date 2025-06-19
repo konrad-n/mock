@@ -5,13 +5,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Security;
+using SledzSpecke.Application.SpecializationTemplates.Services;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
+using SledzSpecke.Core.SpecializationTemplates;
 using SledzSpecke.Infrastructure.Auth;
 using SledzSpecke.Infrastructure.DAL;
 using SledzSpecke.Infrastructure.DAL.Repositories;
 using SledzSpecke.Infrastructure.DAL.Seeding;
 using SledzSpecke.Infrastructure.Decorators;
+using SledzSpecke.Infrastructure.Repositories;
 using SledzSpecke.Infrastructure.Security;
 using SledzSpecke.Infrastructure.Services;
 using SledzSpecke.Infrastructure.Time;
@@ -66,7 +69,11 @@ public static class ExtensionsEnhanced
         services.AddScoped<IRecognitionRepository, SqlRecognitionRepository>();
         services.AddScoped<IPublicationRepository, SqlPublicationRepository>();
         services.AddScoped<ISelfEducationRepository, SqlSelfEducationRepository>();
+        services.AddScoped<ISpecializationTemplateRepository, SpecializationTemplateRepository>();
         services.AddScoped<IDataSeeder, DataSeeder>();
+        
+        // Specialization Template Services
+        services.AddScoped<ISpecializationTemplateImportService, SpecializationTemplateImportService>();
 
         return services;
     }
@@ -133,6 +140,7 @@ public static class ExtensionsEnhanced
             options.AddPolicy("RequireUser", policy => policy.RequireRole("user"));
             options.AddPolicy("RequireAdmin", policy => policy.RequireRole("admin"));
             options.AddPolicy("RequireSupervisor", policy => policy.RequireRole("supervisor"));
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
         });
 
         return services;

@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "cmkp-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Api/Data/SpecializationTemplates",
+        "/home/ubuntu/projects/mock/docs/cmkp-pdfs",
+        "/home/ubuntu/projects/mock/SledzSpecke.WebApi/src/SledzSpecke.Application/Features/Specializations"
+      ],
+      "description": "Access to CMKP specialization templates and PDFs"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://sledzspecke_user@localhost/sledzspecke_db"
+      },
+      "description": "Database access for importing specialization data"
+    },
+    "web-scraper": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "description": "Web scraping for CMKP specialization PDFs"
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "description": "Store specialization parsing rules and mappings"
+    }
+  }
+}

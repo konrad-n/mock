@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Outbox;
 using SledzSpecke.Core.Auditing;
+using SledzSpecke.Core.SpecializationTemplates;
 using SledzSpecke.Infrastructure.DAL.Configurations;
+using SledzSpecke.Infrastructure.EntityConfigurations;
 using SledzSpecke.Infrastructure.Outbox.Data;
 using SledzSpecke.Infrastructure.Persistence.EntityTypeConfigurations;
 using SledzSpecke.Infrastructure.Sagas;
@@ -32,6 +34,7 @@ public sealed class SledzSpeckeDbContext : DbContext
     public DbSet<SagaStateEntity> SagaStates => Set<SagaStateEntity>();
     public DbSet<SagaStepEntity> SagaSteps => Set<SagaStepEntity>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<SpecializationTemplateDefinition> SpecializationTemplates => Set<SpecializationTemplateDefinition>();
 
     public SledzSpeckeDbContext(DbContextOptions<SledzSpeckeDbContext> options) : base(options)
     {
@@ -76,5 +79,8 @@ public sealed class SledzSpeckeDbContext : DbContext
         
         // Add Audit configuration
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+        
+        // Add SpecializationTemplate configuration
+        modelBuilder.ApplyConfiguration(new SpecializationTemplateConfiguration());
     }
 }

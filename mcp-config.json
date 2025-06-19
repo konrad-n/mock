@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/ubuntu/projects/mock",
+        "/var/log/sledzspecke",
+        "/var/www/sledzspecke-api",
+        "/home/ubuntu/sledzspecke"
+      ],
+      "description": "Access to SledzSpecke codebase and logs"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://www-data@localhost/sledzspecke_db"
+      },
+      "description": "Direct access to SledzSpecke database"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub integration for SledzSpecke repository"
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "description": "Persistent memory for SMK business rules and project context"
+    }
+  }
+}

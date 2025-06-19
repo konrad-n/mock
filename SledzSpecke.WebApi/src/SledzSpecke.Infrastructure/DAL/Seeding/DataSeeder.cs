@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.SpecializationTemplates;
+using SledzSpecke.Infrastructure.Repositories;
 using System.Text.Json;
 
 namespace SledzSpecke.Infrastructure.DAL.Seeding;
@@ -10,11 +12,13 @@ internal sealed class DataSeeder : IDataSeeder
 {
     private readonly SledzSpeckeDbContext _context;
     private readonly ILogger<DataSeeder> _logger;
+    private readonly ISpecializationTemplateRepository _templateRepository;
 
     public DataSeeder(SledzSpeckeDbContext context, ILogger<DataSeeder> logger)
     {
         _context = context;
         _logger = logger;
+        _templateRepository = new SpecializationTemplateRepository(context);
     }
 
     public async Task SeedSpecializationTemplatesAsync()
@@ -29,10 +33,11 @@ internal sealed class DataSeeder : IDataSeeder
 
         try
         {
-            await SeedCardiologyNewAsync();
-            await SeedCardiologyOldAsync();
-            await SeedPsychiatryNewAsync();
-            await SeedPsychiatryOldAsync();
+            // First, ensure SpecializationTemplate definitions are in database
+            await SeedSpecializationTemplateDefinitionsAsync();
+
+            // Then, create specializations from the templates in database
+            await CreateSpecializationsFromTemplatesAsync();
 
             await _context.SaveChangesAsync();
             _logger.LogInformation("Specialization template seeding completed successfully.");
@@ -89,65 +94,95 @@ internal sealed class DataSeeder : IDataSeeder
         _logger.LogInformation("Basic data seeding completed.");
     }
 
-    private async Task SeedCardiologyNewAsync()
+    private async Task SeedSpecializationTemplateDefinitionsAsync()
     {
-        var cardiologyTemplate = await LoadSpecializationTemplateAsync("cardiology_new.json");
-        if (cardiologyTemplate == null) return;
-
-        var specialization = await CreateSpecializationFromTemplateAsync(cardiologyTemplate, SmkVersion.New);
-        _context.Specializations.Add(specialization);
-
-        // Add modules explicitly since navigation property is ignored
-        foreach (var module in specialization.Modules)
+        // Check if we already have templates in the database
+        var existingTemplates = await _templateRepository.GetAllAsync();
+        if (existingTemplates.Any())
         {
-            _context.Modules.Add(module);
+            _logger.LogInformation("SpecializationTemplate definitions already exist in database.");
+            return;
+        }
+
+        _logger.LogInformation("Seeding initial SpecializationTemplate definitions...");
+
+        // Load and save the initial 4 templates to the database
+        var templateFiles = new[]
+        {
+            "cardiology_new.json",
+            "cardiology_old.json",
+            "psychiatry_new.json",
+            "psychiatry_old.json"
+        };
+
+        foreach (var fileName in templateFiles)
+        {
+            var template = await LoadSpecializationTemplateAsync(fileName);
+            if (template == null) continue;
+
+            var version = fileName.Contains("_new") ? "CMKP 2023" : "CMKP 2014";
+            var jsonContent = JsonSerializer.Serialize(template, new JsonSerializerOptions 
+            { 
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            var templateDefinition = SpecializationTemplateDefinition.Create(
+                template.Code,
+                template.Name,
+                version,
+                jsonContent);
+
+            if (templateDefinition.IsSuccess)
+            {
+                await _templateRepository.CreateAsync(templateDefinition.Value!);
+                _logger.LogInformation("Created template definition: {Code} v{Version}", 
+                    template.Code, version);
+            }
         }
     }
 
-    private async Task SeedCardiologyOldAsync()
+    private async Task CreateSpecializationsFromTemplatesAsync()
     {
-        var cardiologyTemplate = await LoadSpecializationTemplateAsync("cardiology_old.json");
-        if (cardiologyTemplate == null) return;
-
-        var specialization = await CreateSpecializationFromTemplateAsync(cardiologyTemplate, SmkVersion.Old);
-        _context.Specializations.Add(specialization);
-
-        // Add modules explicitly since navigation property is ignored
-        foreach (var module in specialization.Modules)
+        // Get all active templates from database
+        var templates = await _templateRepository.GetAllActiveAsync();
+        
+        foreach (var templateDef in templates)
         {
-            _context.Modules.Add(module);
+            try
+            {
+                // Deserialize the JSON content to SpecializationTemplate
+                var template = JsonSerializer.Deserialize<SpecializationTemplate>(
+                    templateDef.JsonContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                
+                if (template == null) continue;
+
+                // Determine SMK version from template version string
+                var smkVersion = templateDef.Version.Contains("2023") ? SmkVersion.New : SmkVersion.Old;
+                
+                // Create specialization from template
+                var specialization = await CreateSpecializationFromTemplateAsync(template, smkVersion);
+                _context.Specializations.Add(specialization);
+
+                // Add modules explicitly since navigation property is ignored
+                foreach (var module in specialization.Modules)
+                {
+                    _context.Modules.Add(module);
+                }
+
+                _logger.LogInformation("Created specialization from template: {Code} v{Version}", 
+                    templateDef.Code, templateDef.Version);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating specialization from template: {Code} v{Version}", 
+                    templateDef.Code, templateDef.Version);
+            }
         }
     }
 
-    private async Task SeedPsychiatryNewAsync()
-    {
-        var psychiatryTemplate = await LoadSpecializationTemplateAsync("psychiatry_new.json");
-        if (psychiatryTemplate == null) return;
-
-        var specialization = await CreateSpecializationFromTemplateAsync(psychiatryTemplate, SmkVersion.New);
-        _context.Specializations.Add(specialization);
-
-        // Add modules explicitly since navigation property is ignored
-        foreach (var module in specialization.Modules)
-        {
-            _context.Modules.Add(module);
-        }
-    }
-
-    private async Task SeedPsychiatryOldAsync()
-    {
-        var psychiatryTemplate = await LoadSpecializationTemplateAsync("psychiatry_old.json");
-        if (psychiatryTemplate == null) return;
-
-        var specialization = await CreateSpecializationFromTemplateAsync(psychiatryTemplate, SmkVersion.Old);
-        _context.Specializations.Add(specialization);
-
-        // Add modules explicitly since navigation property is ignored
-        foreach (var module in specialization.Modules)
-        {
-            _context.Modules.Add(module);
-        }
-    }
+    // Old individual seeding methods removed - now using dynamic loading from database
 
     private async Task<SpecializationTemplate?> LoadSpecializationTemplateAsync(string fileName)
     {
@@ -179,12 +214,13 @@ internal sealed class DataSeeder : IDataSeeder
 
     private async Task<Specialization> CreateSpecializationFromTemplateAsync(SpecializationTemplate template, SmkVersion smkVersion)
     {
-        // Use hardcoded IDs for now (1-4 for the 4 specializations)
-        // Old: Cardiology=1, Psychiatry=2
-        // New: Cardiology=3, Psychiatry=4
-        var specializationId = smkVersion == SmkVersion.Old
-            ? (template.Code == "cardiology" ? 1 : 2)
-            : (template.Code == "cardiology" ? 3 : 4);
+        // Generate dynamic ID based on existing specializations
+        var maxId = await _context.Specializations
+            .Select(s => s.Id.Value)
+            .DefaultIfEmpty(0)
+            .MaxAsync();
+        
+        var specializationId = maxId + 1;
 
         var startDate = DateTime.UtcNow.Date;
         var plannedEndDate = startDate.AddYears(template.TotalDuration.Years)
