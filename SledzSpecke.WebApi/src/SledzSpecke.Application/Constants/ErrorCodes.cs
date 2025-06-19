@@ -15,7 +15,6 @@ public static class ErrorCodes
     public const string USER_NOT_FOUND = "USER_NOT_FOUND";
     public const string USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
     public const string EMAIL_ALREADY_IN_USE = "USER_EMAIL_IN_USE";
-    public const string USERNAME_ALREADY_IN_USE = "USER_USERNAME_IN_USE";
     public const string USER_REGISTRATION_FAILED = "USER_REGISTRATION_FAILED";
     public const string USER_UPDATE_FAILED = "USER_UPDATE_FAILED";
     public const string INVALID_PASSWORD = "USER_INVALID_PASSWORD";

@@ -40,11 +40,6 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         return await base.GetByIdAsync(id.Value, cancellationToken);
     }
 
-    public async Task<User?> GetByUsernameAsync(Username username)
-    {
-        // TODO: Username no longer exists in User entity - this method should be removed
-        return null;
-    }
 
     public async Task<User?> GetByEmailAsync(Email email)
     {
@@ -92,11 +87,6 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         }
     }
 
-    public async Task<bool> ExistsByUsernameAsync(Username username)
-    {
-        // TODO: Username no longer exists in User entity - this method should be removed
-        return false;
-    }
 
     public async Task<bool> ExistsByEmailAsync(Email email)
     {

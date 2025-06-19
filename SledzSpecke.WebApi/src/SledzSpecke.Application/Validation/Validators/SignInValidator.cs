@@ -13,9 +13,9 @@ internal sealed class SignInValidator : IValidator<SignIn>
             return Result.Failure("Command cannot be null.");
         }
 
-        if (string.IsNullOrWhiteSpace(command.Username))
+        if (string.IsNullOrWhiteSpace(command.Email))
         {
-            return Result.Failure("Username is required.");
+            return Result.Failure("Email is required.");
         }
 
         if (string.IsNullOrWhiteSpace(command.Password))

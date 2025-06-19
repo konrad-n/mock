@@ -28,13 +28,7 @@ public sealed class GetUserHandler : IQueryHandler<GetUser, UserDto>
         return new UserDto(
             user.Id.Value,
             user.Email.Value,
-            // TODO: User-Specialization relationship needs to be redesigned
-            // user.Username,
-            // user.FullName,
-            // user.SmkVersion,
-            // user.SpecializationId,
-            string.Empty, // Username - temporary
-            string.Empty, // FullName - temporary
+            user.GetFullName(),
             Core.ValueObjects.SmkVersion.Old, // SmkVersion - temporary default
             0, // SpecializationId - temporary
             user.RegistrationDate

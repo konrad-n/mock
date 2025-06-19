@@ -9,7 +9,6 @@ public class UserEnhanced
 {
     public UserId Id { get; private set; }
     public Email Email { get; private set; }
-    public Username Username { get; private set; }
     public Password Password { get; private set; }
     public FullName FullName { get; private set; }
     public SmkVersion SmkVersion { get; private set; }
@@ -38,7 +37,6 @@ public class UserEnhanced
     public UserEnhanced(
         UserId id, 
         Email email, 
-        Username username, 
         Password password, 
         FullName fullName,
         SmkVersion smkVersion, 
@@ -47,7 +45,6 @@ public class UserEnhanced
     {
         Id = id;
         Email = email;
-        Username = username;
         Password = password;
         FullName = fullName;
         SmkVersion = smkVersion;
@@ -63,7 +60,6 @@ public class UserEnhanced
 
     public UserEnhanced(
         Email email, 
-        Username username, 
         Password password, 
         FullName fullName,
         SmkVersion smkVersion, 
@@ -71,7 +67,6 @@ public class UserEnhanced
         DateTime registrationDate)
     {
         Email = email;
-        Username = username;
         Password = password;
         FullName = fullName;
         SmkVersion = smkVersion;

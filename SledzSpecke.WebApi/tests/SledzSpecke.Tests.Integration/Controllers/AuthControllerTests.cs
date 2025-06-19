@@ -195,7 +195,7 @@ public class AuthControllerTests : IntegrationTestBase
         await SeedUser();
         
         var command = new SignIn(
-            Username: "test@example.com",
+            Email: "test@example.com",
             Password: "TestPassword123!");
 
         // Act
@@ -217,7 +217,7 @@ public class AuthControllerTests : IntegrationTestBase
         await SeedUser();
         
         var command = new SignIn(
-            Username: "test@example.com",
+            Email: "test@example.com",
             Password: "WrongPassword!");
 
         // Act
@@ -234,7 +234,7 @@ public class AuthControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Username: "nonexistent@example.com",
+            Email: "nonexistent@example.com",
             Password: "Password123!");
 
         // Act
@@ -251,7 +251,7 @@ public class AuthControllerTests : IntegrationTestBase
     {
         // Arrange
         var command = new SignIn(
-            Username: "invalid-email",
+            Email: "invalid-email",
             Password: "Password123!");
 
         // Act

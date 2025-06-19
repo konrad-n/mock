@@ -29,53 +29,32 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
     {
         try
         {
-            // Check if the input looks like an email
-            User? user = null;
-            var loginIdentifier = command.Username?.Trim();
-            
-            if (string.IsNullOrWhiteSpace(loginIdentifier))
+            if (string.IsNullOrWhiteSpace(command.Email))
             {
-                return Result.Failure<JwtDto>("Username or email is required.");
+                return Result.Failure<JwtDto>("Email is required.");
             }
 
-            // Simple email pattern check
-            if (loginIdentifier.Contains('@'))
+            // Try to parse as email
+            Email email;
+            try
             {
-                // Try to parse as email
-                try
-                {
-                    var email = new Email(loginIdentifier);
-                    user = await _userRepository.GetByEmailAsync(email);
-                }
-                catch (InvalidEmailException)
-                {
-                    // If it's not a valid email, user will remain null
-                }
+                email = new Email(command.Email.Trim());
             }
-            else
+            catch (InvalidEmailException)
             {
-                // TODO: User-Specialization relationship needs to be redesigned
-                // Username lookup is temporarily disabled
-                // // Try to parse as username
-                // try
-                // {
-                //     var username = new Username(loginIdentifier);
-                //     user = await _userRepository.GetByUsernameAsync(username);
-                // }
-                // catch (InvalidUsernameException)
-                // {
-                //     // If it's not a valid username, user will remain null
-                // }
+                return Result.Failure<JwtDto>("Invalid email format.");
             }
+
+            var user = await _userRepository.GetByEmailAsync(email);
 
             if (user is null)
             {
-                return Result.Failure<JwtDto>("Invalid username or password.");
+                return Result.Failure<JwtDto>("Invalid email or password.");
             }
 
             if (!_passwordManager.Verify(command.Password, user.Password.Value))
             {
-                return Result.Failure<JwtDto>("Invalid username or password.");
+                return Result.Failure<JwtDto>("Invalid email or password.");
             }
 
             // Update last login time
