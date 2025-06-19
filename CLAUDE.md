@@ -153,245 +153,66 @@ public async Task<Result<T>> HandleAsync(Command command)
 
 ## 🔌 MCP (Model Context Protocol) Integration
 
-### Overview
-MCP servers provide Claude Code with direct access to tools and data sources, enabling powerful integrations without manual context switching. For SledzSpecke, this means direct access to databases, logs, and GitHub - all from within Claude Code.
-
 ### ⚡ Quick Decision Guide: Which MCP Config to Use?
 
-#### Use `mcp-config.json` for:
-- General development and debugging
-- System health checks
-- Log analysis
-- GitHub integration
-- Database queries (general)
-
-#### Use `mcp-smk-config.json` for:
-- **Analyzing official SMK PDFs**
-- **Implementing Excel export features**
-- **Ensuring 1:1 compliance with government SMK systems**
-- **Extracting field mappings from PDFs**
-- **Validating Excel format requirements**
-- **Working with Chrome extension compatibility**
-
-#### Use `mcp-cmkp-config.json` for:
-- **Scraping CMKP specialization websites**
-- **Downloading specialization requirement PDFs**
-- **Converting PDFs to JSON templates**
-- **Importing specialization data to database**
-- **Managing all medical specializations (70+ types)**
-- **Comparing Old vs New SMK specialization requirements**
+| Use Case | Config File | When to Use |
+|----------|------------|-------------|
+| **General Development** | `mcp-config.json` | Debugging, logs, database queries, GitHub |
+| **SMK/Excel Export** | `mcp-smk-config.json` | SMK PDFs, Excel compliance, Chrome extension |
+| **CMKP Specializations** | `mcp-cmkp-config.json` | Medical specializations, PDFs to JSON |
 
 ### Configuration Files
-- **General MCP**: `/home/ubuntu/projects/mock/mcp-config.json`
-- **SMK Compliance**: `/home/ubuntu/projects/mock/mcp-smk-config.json`
-- **CMKP Specializations**: `/home/ubuntu/projects/mock/mcp-cmkp-config.json`
+- **General**: `/home/ubuntu/projects/mock/mcp-config.json`
+- **SMK**: `/home/ubuntu/projects/mock/mcp-smk-config.json`
+- **CMKP**: `/home/ubuntu/projects/mock/mcp-cmkp-config.json`
 
-### Available MCP Servers
+### Available MCP Tools
 
-#### 1. **Filesystem Server** - Direct file access
+#### 1. **Filesystem Server**
+- `mcp__filesystem__read_file` - Read files
+- `mcp__filesystem__write_file` - Write files
+- `mcp__filesystem__list_directory` - List directories
+- `mcp__filesystem__search_files` - Search content
+
+#### 2. **PostgreSQL Server**
+- `mcp__postgres__query` - SELECT queries
+- `mcp__postgres__analyze` - Query performance
+- `mcp__postgres__schema` - Table schemas
+
+#### 3. **GitHub Server**
+- `mcp__github__list_workflows` - GitHub Actions
+- `mcp__github__get_workflow_runs` - Build status
+- `mcp__github__list_pull_requests` - PRs
+- `mcp__github__create_issue` - Create issues
+
+#### 4. **Memory Server**
+- `mcp__memory__store` - Store context
+- `mcp__memory__recall` - Retrieve info
+- `mcp__memory__search` - Search memories
+
+### Quick Commands
 ```bash
-# Usage example - Read production logs directly
-claude --mcp-config mcp-config.json -p "Analyze today's error logs from /var/log/sledzspecke" \
-  --allowedTools "mcp__filesystem__read_file,mcp__filesystem__list_directory"
-
-# Search for specific patterns in logs
-claude --mcp-config mcp-config.json -p "Find all medical shift validation errors in logs" \
-  --allowedTools "mcp__filesystem__read_file,mcp__filesystem__search_files"
-```
-
-**Available tools:**
-- `mcp__filesystem__read_file` - Read any file content
-- `mcp__filesystem__write_file` - Write to files (use with caution)
-- `mcp__filesystem__list_directory` - List directory contents
-- `mcp__filesystem__search_files` - Search file contents
-
-#### 2. **PostgreSQL Server** - Database access
-```bash
-# Query the database directly
-claude --mcp-config mcp-config.json -p "Show me all users registered in the last 7 days" \
-  --allowedTools "mcp__postgres__query"
-
-# Analyze database performance
-claude --mcp-config mcp-config.json -p "Find slow queries affecting medical shifts" \
-  --allowedTools "mcp__postgres__query,mcp__postgres__analyze"
-
-# Debug specific user issues
-claude --mcp-config mcp-config.json -p "Debug why user with email test@wum.edu.pl cannot log in" \
-  --allowedTools "mcp__postgres__query"
-```
-
-**Available tools:**
-- `mcp__postgres__query` - Execute SELECT queries
-- `mcp__postgres__analyze` - Analyze query performance
-- `mcp__postgres__schema` - View table schemas
-
-#### 3. **GitHub Server** - Repository integration
-```bash
-# Check build status
-claude --mcp-config mcp-config.json -p "Show me the status of the latest GitHub Actions builds" \
-  --allowedTools "mcp__github__list_workflows,mcp__github__get_workflow_runs"
-
-# Review recent PRs
-claude --mcp-config mcp-config.json -p "Summarize open pull requests for SledzSpecke" \
-  --allowedTools "mcp__github__list_pull_requests,mcp__github__get_pull_request"
-
-# Create issues for bugs
-claude --mcp-config mcp-config.json -p "Create a GitHub issue for the medical shift validation bug" \
-  --allowedTools "mcp__github__create_issue"
-```
-
-**Available tools:**
-- `mcp__github__list_workflows` - List GitHub Actions workflows
-- `mcp__github__get_workflow_runs` - Get workflow run details
-- `mcp__github__list_pull_requests` - List PRs
-- `mcp__github__create_issue` - Create new issues
-- `mcp__github__get_file_content` - Read files from repo
-
-#### 4. **Memory Server** - Persistent context storage
-```bash
-# Store important SMK business rules
-claude --mcp-config mcp-config.json -p "Remember: Medical shifts must not exceed 48 hours per week" \
-  --allowedTools "mcp__memory__store"
-
-# Recall stored information
-claude --mcp-config mcp-config.json -p "What are the SMK weekly hour limits?" \
-  --allowedTools "mcp__memory__recall"
-
-# Store debugging context
-claude --mcp-config mcp-config.json -p "Remember this user registration bug pattern for future debugging" \
-  --allowedTools "mcp__memory__store"
-```
-
-**Available tools:**
-- `mcp__memory__store` - Store information
-- `mcp__memory__recall` - Retrieve stored information
-- `mcp__memory__search` - Search stored memories
-- `mcp__memory__list` - List all stored items
-
-### Common MCP Workflows
-
-#### 🔍 Production Debugging Workflow
-```bash
-# 1. Check application status and recent errors
-claude --mcp-config mcp-config.json -p "Check SledzSpecke API health and find recent errors" \
+# General debugging
+claude --mcp-config mcp-config.json -p "Check API health and recent errors" \
   --allowedTools "mcp__filesystem__read_file,mcp__postgres__query"
 
-# 2. Deep dive into specific error
-claude --mcp-config mcp-config.json -p "Investigate the 'Invalid SMK version' error from user 12345" \
-  --allowedTools "mcp__filesystem__search_files,mcp__postgres__query,mcp__memory__store"
+# SMK compliance work
+claude --mcp-config mcp-smk-config.json -p "Analyze SMK PDFs for Excel export" \
+  --allowedTools "mcp__smk-docs__read_file,mcp__memory__store"
 
-# 3. Fix and verify
-claude --mcp-config mcp-config.json -p "Fix the SMK version validation and verify with test data" \
-  --allowedTools "mcp__filesystem__write_file,mcp__postgres__query"
+# CMKP specializations
+claude --mcp-config mcp-cmkp-config.json -p "Import cardiology specialization" \
+  --allowedTools "mcp__cmkp-docs__read_file,mcp__postgres__query"
 ```
 
-#### 📊 Daily Operations Workflow
+### Setup
 ```bash
-# Morning health check
-claude --mcp-config mcp-config.json -p "Perform morning health check: API status, error count, new registrations" \
-  --allowedTools "mcp__filesystem__read_file,mcp__postgres__query,mcp__github__get_workflow_runs"
-
-# User support
-claude --mcp-config mcp-config.json -p "Help user jan.kowalski@uj.edu.pl who reports missing medical shifts" \
-  --allowedTools "mcp__postgres__query,mcp__memory__recall"
-
-# Performance monitoring
-claude --mcp-config mcp-config.json -p "Analyze API performance for the last 24 hours" \
-  --allowedTools "mcp__filesystem__read_file,mcp__postgres__analyze"
-```
-
-#### 🚀 Development Workflow
-```bash
-# Feature development with context
-claude --mcp-config mcp-config.json -p "Implement the new SMK module progression feature based on stored requirements" \
-  --allowedTools "mcp__memory__recall,mcp__filesystem__write_file,mcp__postgres__schema"
-
-# Code review with production data
-claude --mcp-config mcp-config.json -p "Review the medical shift calculation logic against real production data" \
-  --allowedTools "mcp__postgres__query,mcp__filesystem__read_file,mcp__github__get_file_content"
-
-# Deployment verification
-claude --mcp-config mcp-config.json -p "Verify the latest deployment succeeded and all services are healthy" \
-  --allowedTools "mcp__github__get_workflow_runs,mcp__filesystem__read_file,mcp__postgres__query"
-```
-
-### Security & Best Practices
-
-#### Tool Permissions
-```bash
-# ALWAYS specify exact tools needed
---allowedTools "mcp__postgres__query,mcp__filesystem__read_file"
-
-# NEVER use write tools in production without careful consideration
---disallowedTools "mcp__filesystem__write_file,mcp__postgres__execute"
-
-# For read-only operations
---allowedTools "mcp__postgres__query,mcp__filesystem__read_file,mcp__github__list*"
-```
-
-#### Environment Setup
-```bash
-# Set GitHub token for GitHub MCP server (required for GitHub integration)
+# GitHub token (required)
 export GITHUB_TOKEN="your-github-token"
-
-# Add to ~/.bashrc for persistence
 echo 'export GITHUB_TOKEN="your-github-token"' >> ~/.bashrc
 
-# For SledzSpecke, create a token with these permissions:
-# - repo (Full control of private repositories)
-# - workflow (Update GitHub Action workflows)
-# - read:org (Read org and team membership)
-
-# Verify MCP configuration
-claude --mcp-config mcp-config.json -p "List available MCP tools" --verbose
-
-# Quick setup script
-./setup-mcp.sh
-
-# Use the helper script for common operations
-./mcp-sledzspecke.sh health
-```
-
-### Troubleshooting MCP
-
-#### Check MCP server status
-```bash
+# Test connection
 claude --mcp-config mcp-config.json -p "Test MCP connections" --verbose
-```
-
-#### Common issues:
-1. **"Tool not found"** - Ensure tool is in --allowedTools
-2. **"Connection failed"** - Check server configuration in mcp-config.json
-3. **"Permission denied"** - Verify file paths and database permissions
-4. **"GitHub rate limit"** - Check GITHUB_TOKEN is set correctly
-
-### Advanced MCP Usage
-
-#### Batch Operations
-```bash
-# Analyze multiple aspects at once
-claude --mcp-config mcp-config.json -p "Full system analysis: check logs, database health, GitHub builds, and stored issues" \
-  --allowedTools "mcp__filesystem__read_file,mcp__postgres__query,mcp__github__get_workflow_runs,mcp__memory__recall" \
-  --max-turns 5
-```
-
-#### Custom Workflows
-```bash
-# Create a custom debugging session
-claude --mcp-config mcp-config.json -p "Start debugging session for medical shift calculations" \
-  --allowedTools "mcp__*" \
-  --system-prompt "You are debugging the SledzSpecke medical shift system. Use all available MCP tools to investigate issues."
-```
-
-### MCP Integration with E2E Tests
-```bash
-# Run E2E tests and analyze results
-claude --mcp-config mcp-config.json -p "Run E2E tests and analyze any failures using logs and database state" \
-  --allowedTools "mcp__filesystem__read_file,mcp__postgres__query,mcp__memory__store"
-
-# Debug specific E2E test failures
-claude --mcp-config mcp-config.json -p "Debug why the SMKWorkflow E2E test is failing" \
-  --allowedTools "mcp__filesystem__read_file,mcp__postgres__query,mcp__github__get_workflow_runs"
 ```
 
 ### 📋 SMK Compliance MCP Integration
@@ -1075,39 +896,25 @@ https://api.sledzspecke.pl/monitoring/dashboard
 
 ---
 
-## 📝 Documentation State
+## 📝 Documentation Structure
 
-### 📁 Organized Documentation Structure
 ```
 docs/
 ├── api/
-│   └── API_DOCUMENTATION.md         # Complete API reference (endpoints, auth, monitoring)
+│   └── API_DOCUMENTATION.md         # Complete API reference
 ├── architecture/
-│   ├── COMPLETE_ARCHITECTURE.md     # Full system architecture & patterns
-│   └── TESTING_STRATEGY.md          # Comprehensive testing guide (unit/integration/E2E)
+│   ├── COMPLETE_ARCHITECTURE.md     # System architecture & patterns
+│   └── TESTING_STRATEGY.md          # Testing guide (unit/integration/E2E)
 ├── compliance/
 │   ├── sledzspecke-business-logic.md     # Core SMK business rules
 │   ├── sledzspecke-compliance-roadmap.md # Implementation roadmap
 │   ├── sledzspecke-compliance-status.md  # Current compliance status
 │   └── smk-testing-validation.md         # SMK validation requirements
 └── deployment/
-    ├── DEPLOYMENT-OPTIONS.md        # Deployment strategies & options
+    ├── DEPLOYMENT-OPTIONS.md        # Deployment strategies
     ├── monitoring-plan.md           # Monitoring & observability
     └── monitoring-runbook.md        # Operations runbook
 ```
-
-### 🔍 Finding Documentation
-- **API Details**: `docs/api/API_DOCUMENTATION.md`
-- **Architecture**: `docs/architecture/COMPLETE_ARCHITECTURE.md`
-- **Testing Guide**: `docs/architecture/TESTING_STRATEGY.md`
-- **Business Logic**: `docs/compliance/sledzspecke-business-logic.md`
-- **Deployment**: `docs/deployment/`
-
-### When Making Changes
-1. Update the relevant documentation in `docs/`
-2. Add ADR (Architecture Decision Record) for significant changes
-3. Update E2E tests if behavior changes
-4. Document any new business rules discovered
 
 ---
 
