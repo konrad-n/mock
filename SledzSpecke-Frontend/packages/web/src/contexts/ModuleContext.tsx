@@ -31,10 +31,32 @@ interface ModuleProviderProps {
   children: ReactNode;
 }
 
+// Mock modules for development
+const mockModules: Module[] = [
+  {
+    id: 1,
+    name: 'Moduł podstawowy w zakresie chorób wewnętrznych',
+    type: 'Basic',
+    specializationId: 1,
+  },
+  {
+    id: 2,
+    name: 'Moduł specjalistyczny w zakresie kardiologii',
+    type: 'Specialist',
+    specializationId: 1,
+  },
+];
+
 export const ModuleProvider: React.FC<ModuleProviderProps> = ({ children }) => {
   const user = useAuthStore(state => state.user);
-  const [currentModule, setCurrentModule] = useState<Module | null>(null);
+  const [currentModule, setCurrentModule] = useState<Module | null>(mockModules[0]);
 
+  // Use mock data for now
+  const modules = mockModules;
+  const isLoading = false;
+
+  // Uncomment this when API is ready
+  /*
   // Fetch user's specialization and modules
   const { data: userSpecialization, isLoading } = useQuery({
     queryKey: ['user-specialization', user?.id],
@@ -57,6 +79,7 @@ export const ModuleProvider: React.FC<ModuleProviderProps> = ({ children }) => {
       setCurrentModule(basicModule);
     }
   }, [modules, currentModule]);
+  */
 
   return (
     <ModuleContext.Provider value={{

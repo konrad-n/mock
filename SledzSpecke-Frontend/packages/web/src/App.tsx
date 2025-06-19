@@ -12,17 +12,17 @@ import { useAuthStore } from './stores/authStore';
 import { ModuleProvider } from './contexts/ModuleContext';
 
 // Layout components
-import { AppLayout } from './components/layout/AppLayout';
+import { AppLayoutMAUI } from './components/layout/AppLayoutMAUI';
 import { AuthLayout } from './components/layout/AuthLayout';
 
 // Page components
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
-import { DashboardPage } from './pages/dashboard/DashboardPage';
-import { MedicalShiftsPage } from './pages/medical-shifts/MedicalShiftsPage';
-import { ProceduresPage } from './pages/procedures/ProceduresPage';
-import { InternshipsPage } from './pages/internships/InternshipsPage';
-import { CoursesPage } from './pages/courses/CoursesPage';
+import { DashboardPageMAUI } from './pages/dashboard/DashboardPageMAUI';
+import { MedicalShiftsPageMAUI } from './pages/medical-shifts/MedicalShiftsPageMAUI';
+import { ProceduresPageMAUI } from './pages/procedures/ProceduresPageMAUI';
+import { InternshipsPageMAUI } from './pages/internships/InternshipsPageMAUI';
+import { CoursesPageMAUI } from './pages/courses/CoursesPageMAUI';
 import { SelfEducationPage } from './pages/self-education/SelfEducationPage';
 import { ExportPage } from './pages/export/ExportPage';
 import { PublicationsPage } from './pages/publications/PublicationsPage';
@@ -72,17 +72,17 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ModuleProvider>
-                      <AppLayout />
+                      <AppLayoutMAUI />
                     </ModuleProvider>
                   </ProtectedRoute>
                 }
               >
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/medical-shifts" element={<MedicalShiftsPage />} />
-                <Route path="/procedures" element={<ProceduresPage />} />
-                <Route path="/internships" element={<InternshipsPage />} />
-                <Route path="/courses" element={<CoursesPage />} />
+                <Route path="/dashboard" element={<DashboardPageMAUI />} />
+                <Route path="/medical-shifts" element={<MedicalShiftsPageMAUI />} />
+                <Route path="/procedures" element={<ProceduresPageMAUI />} />
+                <Route path="/internships" element={<InternshipsPageMAUI />} />
+                <Route path="/courses" element={<CoursesPageMAUI />} />
                 <Route path="/self-education" element={<SelfEducationPage />} />
                 <Route path="/publications" element={<PublicationsPage />} />
                 <Route path="/absences" element={<AbsencesPage />} />
