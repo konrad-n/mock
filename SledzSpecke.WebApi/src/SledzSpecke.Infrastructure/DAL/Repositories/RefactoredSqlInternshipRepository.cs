@@ -35,7 +35,7 @@ internal sealed class RefactoredSqlInternshipRepository : BaseRepository<Interns
         return await Context.Internships
             .Include(i => i.MedicalShifts)
             .Include(i => i.Procedures)
-            .SingleOrDefaultAsync(i => i.Id == id);
+            .SingleOrDefaultAsync(i => i.InternshipId == id);
     }
 
     public async Task<IEnumerable<Internship>> GetBySpecializationIdAsync(SpecializationId specializationId)
