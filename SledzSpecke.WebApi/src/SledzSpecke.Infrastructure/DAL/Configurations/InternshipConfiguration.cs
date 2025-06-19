@@ -24,6 +24,9 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
             .HasConversion(x => x != null ? x.Value : (int?)null,
                            x => x.HasValue ? new ModuleId(x.Value) : null);
 
+        builder.Property(x => x.Name)
+            .IsRequired();
+
         builder.Property(x => x.InstitutionName)
             .HasMaxLength(200)
             .IsRequired();
@@ -35,6 +38,8 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
         builder.Property(x => x.SupervisorName)
             .HasMaxLength(200);
 
+        builder.Property(x => x.SupervisorPwz);
+
         builder.Property(x => x.StartDate)
             .IsRequired();
 
@@ -42,6 +47,15 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
             .IsRequired();
 
         builder.Property(x => x.DaysCount)
+            .IsRequired();
+
+        builder.Property(x => x.PlannedWeeks)
+            .IsRequired();
+
+        builder.Property(x => x.PlannedDays)
+            .IsRequired();
+
+        builder.Property(x => x.CompletedDays)
             .IsRequired();
 
         builder.Property(x => x.Status)
