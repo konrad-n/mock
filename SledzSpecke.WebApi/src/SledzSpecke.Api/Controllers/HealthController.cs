@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SledzSpecke.Infrastructure.DAL;
+using System.Reflection;
 
 namespace SledzSpecke.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/health")]
 public class HealthController : ControllerBase
 {
     private readonly SledzSpeckeDbContext _dbContext;
@@ -27,15 +28,16 @@ public class HealthController : ControllerBase
             
             var health = new
             {
-                status = canConnect ? "Healthy" : "Unhealthy",
+                status = canConnect ? "healthy" : "unhealthy",
                 timestamp = DateTime.UtcNow,
                 services = new
                 {
-                    database = canConnect ? "Connected" : "Disconnected",
-                    api = "Running"
+                    database = canConnect ? "connected" : "disconnected",
+                    api = "running"
                 },
-                version = "1.0.0",
-                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
+                version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0",
+                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+                uptime = GetUptime()
             };
 
             if (!canConnect)
@@ -51,10 +53,17 @@ public class HealthController : ControllerBase
             _logger.LogError(ex, "Health check failed with exception");
             return StatusCode(503, new
             {
-                status = "Unhealthy",
+                status = "unhealthy",
                 timestamp = DateTime.UtcNow,
-                error = ex.Message
+                error = "Health check failed",
+                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
             });
         }
+    }
+
+    private string GetUptime()
+    {
+        var uptime = DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
+        return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
     }
 }
