@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Typography, Paper, Button, Chip } from '@mui/material';
 import { Add, EventBusy } from '@mui/icons-material';
 
 export const AbsencesPage = () => {

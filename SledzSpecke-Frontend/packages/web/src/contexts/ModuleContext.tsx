@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/services/api';
-import { useAuthStore } from '@/stores/authStore';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import { apiClient } from '@/services/api';
+// import { useAuthStore } from '@/stores/authStore';
 
 interface Module {
   id: number;
@@ -48,7 +48,7 @@ const mockModules: Module[] = [
 ];
 
 export const ModuleProvider: React.FC<ModuleProviderProps> = ({ children }) => {
-  const user = useAuthStore(state => state.user);
+  // const user = useAuthStore(state => state.user);
   const [currentModule, setCurrentModule] = useState<Module | null>(mockModules[0]);
 
   // Use mock data for now

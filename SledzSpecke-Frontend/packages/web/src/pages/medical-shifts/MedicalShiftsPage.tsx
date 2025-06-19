@@ -41,12 +41,12 @@ export const MedicalShiftsPage = () => {
   const [currentInternshipId, setCurrentInternshipId] = useState<number | null>(null);
 
   // Fetch internships for current module
-  const { data: internships = [] } = useQuery({
+  const { data: internships = [] } = useQuery<Array<{id: number; name: string}>>({
     queryKey: ['internships', currentModule?.id],
     queryFn: async () => {
       if (!currentModule) return [];
       try {
-        const response = await apiClient.get(`/api/modules/${currentModule.id}/internships`);
+        const response = await apiClient.get<Array<{id: number; name: string}>>(`/api/modules/${currentModule.id}/internships`);
         return response;
       } catch {
         return [];

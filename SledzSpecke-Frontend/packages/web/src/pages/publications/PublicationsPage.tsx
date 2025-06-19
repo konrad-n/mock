@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Alert } from '@mui/material';
+import { Box, Typography, Paper, Button } from '@mui/material';
 import { Add } from '@mui/icons-material';
 
 export const PublicationsPage = () => {
