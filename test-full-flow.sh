@@ -41,8 +41,10 @@ checksum=$(( (10 - (sum % 10)) % 10 ))
 VALID_PESEL="${PESEL_BASE}${checksum}"
 
 # Generate unique valid PWZ based on timestamp
-# Use last 6 digits of timestamp, ensure first digit is not 0
+# Generate a 6-digit number that doesn't start with 0
 PWZ_BASE=$(( (TIMESTAMP % 900000) + 100000 ))
+# Ensure it's exactly 6 digits
+PWZ_BASE=$(printf "%06d" $PWZ_BASE)
 # Calculate PWZ checksum
 pwz_sum=0
 pwz_weights=(1 2 3 4 5 6)

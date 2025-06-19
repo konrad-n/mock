@@ -18,6 +18,19 @@ internal abstract class BaseRepository<TEntity> : IGenericRepository<TEntity> wh
 
     public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        // For entities with value object IDs (like User with UserId), we need to use the value object
+        // Check if the entity has an Id property that is a value object
+        var entityType = Context.Model.FindEntityType(typeof(TEntity));
+        var keyProperty = entityType?.FindPrimaryKey()?.Properties.FirstOrDefault();
+        
+        if (keyProperty != null && keyProperty.ClrType != typeof(int))
+        {
+            // The key is a value object, create an instance
+            var keyInstance = Activator.CreateInstance(keyProperty.ClrType, id);
+            return await DbSet.FindAsync(new object[] { keyInstance! }, cancellationToken);
+        }
+        
+        // Standard int key
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
