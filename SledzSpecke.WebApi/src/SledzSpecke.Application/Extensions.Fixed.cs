@@ -104,6 +104,10 @@ public static partial class ApplicationExtensions
         services.AddScoped<ICommandHandler<Commands.AddProcedureRealizationCommand>, Commands.Handlers.AddProcedureRealizationHandler>();
         services.AddScoped<ICommandHandler<Commands.UpdateProcedureRealizationCommand>, Commands.Handlers.UpdateProcedureRealizationHandler>();
         services.AddScoped<ICommandHandler<Commands.DeleteProcedureRealizationCommand>, Commands.Handlers.DeleteProcedureRealizationHandler>();
+        
+        // Explicitly register procedure query handlers
+        services.AddScoped<IQueryHandler<GetModuleProceduresQuery, ModuleProceduresDto>, GetModuleProceduresHandler>();
+        services.AddScoped<IQueryHandler<GetUserProceduresQuery, UserProceduresDto>, GetUserProceduresHandler>();
 
         return services;
     }
