@@ -231,7 +231,13 @@ public static class Extensions
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            // Add AdminOnly policy
+            options.AddPolicy("AdminOnly", policy => 
+                policy.RequireAuthenticatedUser()
+                      .RequireRole("Admin"));
+        });
 
         return services;
     }

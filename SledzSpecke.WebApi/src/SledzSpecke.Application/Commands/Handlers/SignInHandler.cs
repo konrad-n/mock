@@ -61,12 +61,15 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
             user.RecordLogin();
             await _userRepository.UpdateAsync(user);
 
+            // Determine role based on email (temporary solution)
+            var role = user.Email.Value == "admin@sledzspecke.pl" ? "Admin" : "user";
+            
             var claims = new Dictionary<string, IEnumerable<string>>
             {
                 ["permissions"] = new[] { "users" }
             };
 
-            var jwt = _authenticator.CreateToken(user.Id, "user", claims);
+            var jwt = _authenticator.CreateToken(user.Id, role, claims);
             return Result.Success(jwt);
         }
         catch (Exception ex) when (ex is CustomException)
