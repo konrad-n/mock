@@ -24,6 +24,7 @@ public class ModulesController : BaseController
     private readonly ICommandHandler<CreateSelfEducation> _createSelfEducationHandler;
     private readonly ICommandHandler<AddAdditionalSelfEducationDays, int> _addAdditionalDaysHandler;
     private readonly IUserContextService _userContextService;
+    private readonly IQueryHandler<GetModuleProceduresQuery, ModuleProceduresDto> _getModuleProceduresHandler;
 
     public ModulesController(
         ICommandHandler<SwitchModule> switchModuleHandler,
@@ -36,7 +37,8 @@ public class ModulesController : BaseController
         ICommandHandler<CreateCourse, int> createCourseHandler,
         ICommandHandler<CreateSelfEducation> createSelfEducationHandler,
         ICommandHandler<AddAdditionalSelfEducationDays, int> addAdditionalDaysHandler,
-        IUserContextService userContextService)
+        IUserContextService userContextService,
+        IQueryHandler<GetModuleProceduresQuery, ModuleProceduresDto> getModuleProceduresHandler)
     {
         _switchModuleHandler = switchModuleHandler;
         _getAvailableModulesHandler = getAvailableModulesHandler;
@@ -49,6 +51,7 @@ public class ModulesController : BaseController
         _createSelfEducationHandler = createSelfEducationHandler;
         _addAdditionalDaysHandler = addAdditionalDaysHandler;
         _userContextService = userContextService;
+        _getModuleProceduresHandler = getModuleProceduresHandler;
     }
 
     /// <summary>
@@ -146,9 +149,22 @@ public class ModulesController : BaseController
     }
 
     /// <summary>
-    /// Adds a procedure to a module
+    /// Gets all procedures for a module with user progress
+    /// </summary>
+    [HttpGet("{moduleId:int}/procedures")]
+    public async Task<ActionResult<ModuleProceduresDto>> GetModuleProcedures(int moduleId)
+    {
+        var userId = new Core.ValueObjects.UserId(_userContextService.GetUserId());
+        var query = new GetModuleProceduresQuery(userId, new Core.ValueObjects.ModuleId(moduleId));
+        
+        return await HandleAsync(query, _getModuleProceduresHandler);
+    }
+
+    /// <summary>
+    /// Adds a procedure to a module (DEPRECATED - use /api/procedures/realizations)
     /// </summary>
     [HttpPost("{moduleId:int}/procedures")]
+    [Obsolete("Use POST /api/procedures/realizations instead")]
     public async Task<ActionResult<AddProcedureResponse>> AddProcedure(
         int moduleId, 
         [FromBody] AddModuleProcedureRequest request)

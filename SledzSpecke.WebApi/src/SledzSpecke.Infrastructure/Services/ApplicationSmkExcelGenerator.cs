@@ -1,6 +1,7 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Export.DTO;
 using SledzSpecke.Core.DomainServices;
+using SledzSpecke.Core.Entities;
 
 namespace SledzSpecke.Infrastructure.Services;
 
@@ -87,25 +88,7 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
                 Notes = ""
             }).ToList(),
             
-            Procedures = data.Procedures.Select(p => new ProcedureExportDto
-            {
-                ProcedureCode = p.Code,
-                ProcedureName = p.Name,
-                Date = p.PerformedDate.ToString("dd.MM.yyyy"),
-                Location = p.Location,
-                PatientInitials = p.PatientInitials ?? "",
-                PatientGender = p.PatientGender?.ToString() ?? "",
-                YearOfTraining = p.Year.ToString(),
-                InternshipName = data.Internships.FirstOrDefault(i => i.InternshipId == p.InternshipId)?.Name ?? "",
-                FirstAssistantData = p.AssistantData ?? "",
-                SecondAssistantData = "",
-                Role = p.ExecutionType == Core.ValueObjects.ProcedureExecutionType.CodeA ? "Operator" : "Asystent",
-                ModuleName = data.Modules.FirstOrDefault(m => m.Id == p.ModuleId)?.Name ?? "",
-                Supervisor = p.SupervisorName,
-                ProcedureRequirementId = p is Core.Entities.ProcedureNewSmk newSmk ? newSmk.ProcedureRequirementId : null,
-                CountA = p.ExecutionType == Core.ValueObjects.ProcedureExecutionType.CodeA ? 1 : 0,
-                CountB = p.ExecutionType == Core.ValueObjects.ProcedureExecutionType.CodeB ? 1 : 0
-            }).ToList(),
+            Procedures = MapProcedures(data),
             
             AdditionalSelfEducationDays = data.AdditionalDays.Select(d => new AdditionalSelfEducationExportDto
             {
@@ -135,5 +118,74 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
         var endHours = totalMinutes / 60;
         var endMinutes = totalMinutes % 60;
         return $"{endHours:00}:{endMinutes:00}";
+    }
+    
+    private List<ProcedureExportDto> MapProcedures(SmkExportData data)
+    {
+        var procedures = new List<ProcedureExportDto>();
+        
+        // Group realizations by requirement to get module information
+        var requirementMap = data.ProcedureRequirements.ToDictionary(r => r.Id, r => r);
+        
+        foreach (var realization in data.ProcedureRealizations)
+        {
+            ProcedureRequirement? requirement = null;
+            if (requirementMap.TryGetValue(realization.RequirementId, out var req))
+            {
+                requirement = req;
+            }
+            
+            var moduleName = "";
+            if (requirement != null)
+            {
+                var module = data.Modules.FirstOrDefault(m => m.Id == requirement.ModuleId);
+                moduleName = module?.Name ?? "";
+            }
+            
+            ProcedureExportDto procedureDto;
+            
+            // For old SMK
+            if (data.SmkVersion.Value == "old")
+            {
+                procedureDto = new ProcedureExportDto
+                {
+                    ProcedureCode = requirement?.Code ?? "",
+                    ProcedureName = requirement?.Name ?? "",
+                    Date = realization.Date.ToString("dd.MM.yyyy"),
+                    Location = realization.Location ?? "",
+                    ModuleName = moduleName,
+                    Role = realization.Role == Core.ValueObjects.ProcedureRole.Operator ? "A" : "B",
+                    ProcedureRequirementId = realization.RequirementId.Value,
+                    YearOfTraining = realization.Year?.ToString() ?? "",
+                    // Note: PatientInitials, PatientGender, InternshipName, AssistantData are not available
+                    PatientInitials = "",
+                    PatientGender = "",
+                    InternshipName = "",
+                    FirstAssistantData = "",
+                    SecondAssistantData = ""
+                };
+            }
+            else // new SMK
+            {
+                procedureDto = new ProcedureExportDto
+                {
+                    ProcedureCode = requirement?.Code ?? "",
+                    ProcedureName = requirement?.Name ?? "",
+                    Date = realization.Date.ToString("dd.MM.yyyy"),
+                    Location = realization.Location ?? "",
+                    ModuleName = moduleName,
+                    Role = realization.Role == Core.ValueObjects.ProcedureRole.Operator ? "A" : "B",
+                    ProcedureRequirementId = realization.RequirementId.Value,
+                    // For new SMK, we export individual realizations
+                    CountA = realization.Role == Core.ValueObjects.ProcedureRole.Operator ? 1 : 0,
+                    CountB = realization.Role == Core.ValueObjects.ProcedureRole.Assistant ? 1 : 0,
+                    Supervisor = ""
+                };
+            }
+            
+            procedures.Add(procedureDto);
+        }
+        
+        return procedures;
     }
 }

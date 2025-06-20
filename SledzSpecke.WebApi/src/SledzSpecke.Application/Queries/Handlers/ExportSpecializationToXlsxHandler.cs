@@ -14,7 +14,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
     private readonly IModuleRepository _moduleRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly IMedicalShiftRepository _medicalShiftRepository;
-    private readonly IProcedureRepository _procedureRepository;
+    private readonly IProcedureRealizationRepository _procedureRealizationRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ISelfEducationRepository _selfEducationRepository;
     private readonly IAdditionalSelfEducationDaysRepository _additionalDaysRepository;
@@ -28,7 +28,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
         IModuleRepository moduleRepository,
         IInternshipRepository internshipRepository,
         IMedicalShiftRepository medicalShiftRepository,
-        IProcedureRepository procedureRepository,
+        IProcedureRealizationRepository procedureRealizationRepository,
         ICourseRepository courseRepository,
         ISelfEducationRepository selfEducationRepository,
         IAdditionalSelfEducationDaysRepository additionalDaysRepository,
@@ -41,7 +41,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
         _moduleRepository = moduleRepository;
         _internshipRepository = internshipRepository;
         _medicalShiftRepository = medicalShiftRepository;
-        _procedureRepository = procedureRepository;
+        _procedureRealizationRepository = procedureRealizationRepository;
         _courseRepository = courseRepository;
         _selfEducationRepository = selfEducationRepository;
         _additionalDaysRepository = additionalDaysRepository;
@@ -74,10 +74,18 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
         
         var internships = await _internshipRepository.GetBySpecializationIdAsync(query.SpecializationId);
         var medicalShifts = new List<MedicalShift>();
-        var procedures = new List<ProcedureBase>();
+        var procedures = new List<ProcedureRealization>();
         var courses = new List<Course>();
         var selfEducation = new List<SelfEducation>();
         var additionalDays = new List<Core.Entities.AdditionalSelfEducationDays>();
+        
+        // Get all procedures for the user (procedures are user-based, not internship-based)
+        var userProcedures = await _procedureRealizationRepository.GetByUserIdAsync(user.Id);
+        procedures.AddRange(userProcedures);
+        
+        // Get procedure requirements for the modules
+        var procedureRequirements = new List<ProcedureRequirement>();
+        // TODO: Add IProcedureRequirementRepository and load requirements for the modules
         
         // Get data for each module
         foreach (var moduleId in moduleIds)
@@ -90,11 +98,6 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
                 medicalShifts.AddRange(internshipShifts);
             }
             
-            foreach (var internship in moduleInternships)
-            {
-                var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
-                procedures.AddRange(internshipProcedures);
-            }
             
             var moduleCourses = await _courseRepository.GetBySpecializationIdAsync(query.SpecializationId);
             courses.AddRange(moduleCourses.Where(c => c.ModuleId == moduleId));
@@ -126,7 +129,8 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
             Modules = modules,
             Internships = internships,
             MedicalShifts = medicalShifts,
-            Procedures = procedures,
+            ProcedureRealizations = procedures,
+            ProcedureRequirements = procedureRequirements, // TODO: Load from repository when available
             Courses = courses,
             SelfEducation = selfEducation,
             AdditionalDays = additionalDays,

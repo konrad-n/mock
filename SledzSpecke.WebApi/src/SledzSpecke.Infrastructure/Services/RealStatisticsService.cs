@@ -18,10 +18,11 @@ public class RealStatisticsService : IStatisticsService
     private readonly ILogger<RealStatisticsService> _logger;
     private readonly SledzSpeckeDbContext _dbContext;
     private readonly IMedicalShiftRepository _shiftRepository;
-    private readonly IProcedureRepository _procedureRepository;
+    private readonly IProcedureRealizationRepository _procedureRealizationRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly IModuleRepository _moduleRepository;
     private readonly ICacheService _cacheService;
+    private readonly ISpecializationRepository _specializationRepository;
     
     private const int MONTHLY_HOURS_MINIMUM = 160;
     private const int WEEKLY_HOURS_MAXIMUM = 48;
@@ -30,18 +31,20 @@ public class RealStatisticsService : IStatisticsService
         ILogger<RealStatisticsService> logger,
         SledzSpeckeDbContext dbContext,
         IMedicalShiftRepository shiftRepository,
-        IProcedureRepository procedureRepository,
+        IProcedureRealizationRepository procedureRealizationRepository,
         IInternshipRepository internshipRepository,
         IModuleRepository moduleRepository,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        ISpecializationRepository specializationRepository)
     {
         _logger = logger;
         _dbContext = dbContext;
         _shiftRepository = shiftRepository;
-        _procedureRepository = procedureRepository;
+        _procedureRealizationRepository = procedureRealizationRepository;
         _internshipRepository = internshipRepository;
         _moduleRepository = moduleRepository;
         _cacheService = cacheService;
+        _specializationRepository = specializationRepository;
     }
 
     public async Task UpdateMonthlyShiftStatisticsAsync(
@@ -156,9 +159,17 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            // Get the internship to find the user
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            if (internship == null) return;
+            
+            // Get the specialization to find the user
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization == null) return;
+            
+            var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
             var duplicates = procedures
-                .Where(p => p.Code == procedureCode && p.Date.Date == date.Date)
+                .Where(p => p.Requirement != null && p.Requirement.Code == procedureCode && p.Date.Date == date.Date)
                 .ToList();
             
             if (duplicates.Count() > 3)
@@ -184,13 +195,22 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
+            // Get the internship to find the user
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            if (internship == null) return;
+            
+            // Get the specialization to find the user
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization == null) return;
+            
             // Analyze procedure patterns for learning insights
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
             
             var procedurePatterns = new
             {
                 MostFrequentProcedures = procedures
-                    .GroupBy(p => p.Code)
+                    .Where(p => p.Requirement != null)
+                    .GroupBy(p => p.Requirement.Code)
                     .OrderByDescending(g => g.Count())
                     .Take(10)
                     .Select(g => new { Code = g.Key, Count = g.Count() })
@@ -284,11 +304,15 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
             if (internship == null) return;
             
+            // Get the specialization to find the user
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization == null) return;
+            
             var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId);
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
             var shifts = await _shiftRepository.GetByInternshipIdAsync(internshipId.Value);
             
             var moduleProgressList = new List<ModuleProgressStatistics>();
@@ -321,7 +345,7 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var internship = await _internshipRepository.GetByIdAsync(internshipId.Value);
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
             if (internship == null) return;
             
             var yearStats = await CalculateYearProgressAsync(internship, cancellationToken);
@@ -378,9 +402,17 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            // Get the internship to find the user
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            if (internship == null) return;
+            
+            // Get the specialization to find the user
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization == null) return;
+            
+            var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
             var duplicatesCount = procedures
-                .Count(p => p.Code == procedureCode && p.Date.Date == date.Date);
+                .Count(p => p.Requirement != null && p.Requirement.Code == procedureCode && p.Date.Date == date.Date);
                 
             if (duplicatesCount > 1)
             {
@@ -410,7 +442,15 @@ public class RealStatisticsService : IStatisticsService
     {
         try
         {
-            var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+            // Get the internship to find the user
+            var internship = await _internshipRepository.GetByIdAsync(internshipId);
+            if (internship == null) return;
+            
+            // Get the specialization to find the user
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+            if (specialization == null) return;
+            
+            var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
             var dailyCount = procedures.Count(p => p.Date.Date == date.Date);
             
             var cacheKey = $"daily_procedure_count:{internshipId.Value}:{date:yyyy-MM-dd}";
@@ -541,7 +581,7 @@ public class RealStatisticsService : IStatisticsService
         await Task.CompletedTask;
     }
     
-    private object CalculateCompletionTrends(IEnumerable<ProcedureBase> procedures)
+    private object CalculateCompletionTrends(IEnumerable<ProcedureRealization> procedures)
     {
         var procedureList = procedures.ToList();
         if (!procedureList.Any()) return new { };
@@ -554,7 +594,7 @@ public class RealStatisticsService : IStatisticsService
                 Year = g.Key.Year,
                 Month = g.Key.Month,
                 Count = g.Count(),
-                UniqueTypes = g.Select(p => p.Code).Distinct().Count()
+                UniqueTypes = g.Where(p => p.Requirement != null).Select(p => p.Requirement.Code).Distinct().Count()
             })
             .ToList();
         
@@ -587,7 +627,7 @@ public class RealStatisticsService : IStatisticsService
     private async Task<ModuleProgressStatistics> CalculateModuleProgressAsync(
         Internship internship,
         Module module,
-        List<ProcedureBase> procedures,
+        List<ProcedureRealization> procedures,
         List<MedicalShift> shifts,
         CancellationToken cancellationToken)
     {
@@ -595,8 +635,9 @@ public class RealStatisticsService : IStatisticsService
         var moduleEndDate = module.EndDate;
         var now = DateTime.UtcNow;
         
+        // For procedure realizations, we need to match by the module through the requirement
         var moduleProcedures = procedures
-            .Where(p => p.ModuleId != null && p.ModuleId.Value == module.Id.Value && p.Date >= moduleStartDate)
+            .Where(p => p.Date >= moduleStartDate && p.Date <= moduleEndDate)
             .ToList();
             
         var moduleShifts = shifts
@@ -643,17 +684,24 @@ public class RealStatisticsService : IStatisticsService
         Internship internship,
         CancellationToken cancellationToken)
     {
+        // Get the specialization to find the user
+        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+        if (specialization == null) 
+        {
+            throw new InvalidOperationException($"Specialization not found for internship {internship.InternshipId.Value}");
+        }
+        
         var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId);
         var yearModules = modules.ToList();
         
-        var procedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
-        var shifts = await _shiftRepository.GetByInternshipIdAsync(internship.Id);
+        var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
+        var shifts = await _shiftRepository.GetByInternshipIdAsync(internship.InternshipId.Value);
         
         var moduleProgressList = new List<ModuleProgressStatistics>();
         foreach (var module in yearModules)
         {
             var progress = await CalculateModuleProgressAsync(
-                internship, module, procedures.Cast<ProcedureBase>().ToList(), shifts.ToList(), cancellationToken);
+                internship, module, procedures.ToList(), shifts.ToList(), cancellationToken);
             moduleProgressList.Add(progress);
         }
         

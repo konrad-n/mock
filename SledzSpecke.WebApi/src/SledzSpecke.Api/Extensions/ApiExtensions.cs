@@ -2,6 +2,7 @@ using SledzSpecke.Api.Middleware;
 using SledzSpecke.Api.Endpoints;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.AspNetCore.Routing;
 
 namespace SledzSpecke.Api.Extensions;
 
@@ -12,6 +13,13 @@ public static class ApiExtensions
     /// </summary>
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
+        // Configure routing to be case-insensitive
+        services.Configure<RouteOptions>(options =>
+        {
+            options.LowercaseUrls = false;
+            options.LowercaseQueryStrings = false;
+        });
+        
         // Configure CORS - CRITICAL for production
         services.AddCors(options =>
         {

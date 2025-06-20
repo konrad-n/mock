@@ -100,6 +100,11 @@ public static partial class ApplicationExtensions
         services.AddScoped<IQueryHandler<GetDashboardOverview, DashboardOverviewDto>, GetDashboardOverviewHandlerSimple>();
         services.AddScoped<IQueryHandler<GetUserMedicalShifts, IEnumerable<MedicalShiftDto>>, GetUserMedicalShiftsHandlerSimple>();
 
+        // Explicitly register procedure realization handlers since they don't have Result adapters
+        services.AddScoped<ICommandHandler<Commands.AddProcedureRealizationCommand>, Commands.Handlers.AddProcedureRealizationHandler>();
+        services.AddScoped<ICommandHandler<Commands.UpdateProcedureRealizationCommand>, Commands.Handlers.UpdateProcedureRealizationHandler>();
+        services.AddScoped<ICommandHandler<Commands.DeleteProcedureRealizationCommand>, Commands.Handlers.DeleteProcedureRealizationHandler>();
+
         return services;
     }
 }

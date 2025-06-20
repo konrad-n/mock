@@ -10,7 +10,7 @@ public class InternshipCompletionService : IInternshipCompletionService
 {
     private readonly IInternshipRepository _internshipRepository;
     private readonly IMedicalShiftRepository _medicalShiftRepository;
-    private readonly IProcedureRepository _procedureRepository;
+    private readonly IProcedureRealizationRepository _procedureRealizationRepository;
     private readonly ISpecializationRepository _specializationRepository;
     private readonly IDomainEventDispatcher _eventDispatcher;
     
@@ -20,13 +20,13 @@ public class InternshipCompletionService : IInternshipCompletionService
     public InternshipCompletionService(
         IInternshipRepository internshipRepository,
         IMedicalShiftRepository medicalShiftRepository,
-        IProcedureRepository procedureRepository,
+        IProcedureRealizationRepository procedureRealizationRepository,
         ISpecializationRepository specializationRepository,
         IDomainEventDispatcher eventDispatcher)
     {
         _internshipRepository = internshipRepository;
         _medicalShiftRepository = medicalShiftRepository;
-        _procedureRepository = procedureRepository;
+        _procedureRealizationRepository = procedureRealizationRepository;
         _specializationRepository = specializationRepository;
         _eventDispatcher = eventDispatcher;
     }
@@ -34,7 +34,7 @@ public class InternshipCompletionService : IInternshipCompletionService
     public async Task<Result<InternshipProgress>> CalculateProgressAsync(
         Internship internship,
         IEnumerable<MedicalShift> shifts,
-        IEnumerable<ProcedureBase> procedures)
+        IEnumerable<ProcedureRealization> procedures)
     {
         var progress = new InternshipProgress
         {
@@ -67,10 +67,9 @@ public class InternshipCompletionService : IInternshipCompletionService
             ? Math.Min(100, (progress.CompletedShiftHours * 100.0) / progress.RequiredShiftHours)
             : 100;
 
-        // Calculate procedures
-        var internshipProcedures = procedures.Where(p => 
-            p.InternshipId == internship.InternshipId && p.IsCompleted);
-        progress.CompletedProcedures = internshipProcedures.Count();
+        // Calculate procedures (procedures are module-based, not internship-based)
+        // Count all procedures as they contribute to the overall module/specialization progress
+        progress.CompletedProcedures = procedures.Count();
         progress.RequiredProcedures = requirements.MinimumProcedures;
         progress.ProcedureProgressPercentage = progress.RequiredProcedures > 0
             ? Math.Min(100, (progress.CompletedProcedures * 100.0) / progress.RequiredProcedures)
@@ -116,7 +115,7 @@ public class InternshipCompletionService : IInternshipCompletionService
     public async Task<Result<bool>> CanCompleteAsync(
         Internship internship,
         IEnumerable<MedicalShift> shifts,
-        IEnumerable<ProcedureBase> procedures)
+        IEnumerable<ProcedureRealization> procedures)
     {
         var progressResult = await CalculateProgressAsync(internship, shifts, procedures);
         if (!progressResult.IsSuccess)
@@ -160,7 +159,14 @@ public class InternshipCompletionService : IInternshipCompletionService
 
         // Get related data
         var shifts = await _medicalShiftRepository.GetByInternshipIdAsync(internshipId.Value);
-        var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+        // For procedures, get all procedures for this user (module-based, not internship-based)
+        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+        if (specialization == null)
+        {
+            return Result.Failure("Nie znaleziono specjalizacji");
+        }
+        var userId = specialization.UserId;
+        var procedures = await _procedureRealizationRepository.GetByUserIdAsync(userId);
 
         // Check if can complete
         var canCompleteResult = await CanCompleteAsync(internship, shifts, procedures);
@@ -246,7 +252,14 @@ public class InternshipCompletionService : IInternshipCompletionService
         }
 
         var shifts = await _medicalShiftRepository.GetByInternshipIdAsync(internshipId.Value);
-        var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
+        // Get user's procedures (module-based, not internship-based)
+        var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
+        if (specialization == null)
+        {
+            return Result<IEnumerable<InternshipMilestone>>.Failure("Nie znaleziono specjalizacji");
+        }
+        var userId = specialization.UserId;
+        var procedures = await _procedureRealizationRepository.GetByUserIdAsync(userId);
         
         var progressResult = await CalculateProgressAsync(internship, shifts, procedures);
         if (!progressResult.IsSuccess)

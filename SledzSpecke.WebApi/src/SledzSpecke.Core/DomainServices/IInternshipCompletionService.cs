@@ -9,12 +9,12 @@ public interface IInternshipCompletionService
     Task<Result<InternshipProgress>> CalculateProgressAsync(
         Internship internship,
         IEnumerable<MedicalShift> shifts,
-        IEnumerable<ProcedureBase> procedures);
+        IEnumerable<ProcedureRealization> procedures);
     
     Task<Result<bool>> CanCompleteAsync(
         Internship internship,
         IEnumerable<MedicalShift> shifts,
-        IEnumerable<ProcedureBase> procedures);
+        IEnumerable<ProcedureRealization> procedures);
     
     Task<Result> CompleteInternshipAsync(
         InternshipId internshipId,

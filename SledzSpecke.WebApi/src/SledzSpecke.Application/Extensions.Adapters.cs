@@ -62,7 +62,11 @@ public static partial class ApplicationExtensions
             return new ResultToCommandHandlerAdapter<UpdateUserProfile>(resultHandler);
         });
 
-        // Add more adapters as needed for other commands...
+        // Remove adapters for procedure realization commands since they implement ICommandHandler directly
+        // The following commands don't need adapters:
+        // - AddProcedureRealizationCommand
+        // - UpdateProcedureRealizationCommand  
+        // - DeleteProcedureRealizationCommand
 
         return services;
     }

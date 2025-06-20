@@ -30,18 +30,15 @@ public class ModuleProgressionService : IModuleProgressionService
     private readonly IInternshipRepository _internshipRepository;
     private readonly IMedicalShiftRepository _medicalShiftRepository;
     private readonly ICourseRepository _courseRepository;
-    private readonly IProcedureRepository _procedureRepository;
 
     public ModuleProgressionService(
         IInternshipRepository internshipRepository,
         IMedicalShiftRepository medicalShiftRepository,
-        ICourseRepository courseRepository,
-        IProcedureRepository procedureRepository)
+        ICourseRepository courseRepository)
     {
         _internshipRepository = internshipRepository;
         _medicalShiftRepository = medicalShiftRepository;
         _courseRepository = courseRepository;
-        _procedureRepository = procedureRepository;
     }
 
     public async Task<Result<Module>> CanProgressToModuleAsync(

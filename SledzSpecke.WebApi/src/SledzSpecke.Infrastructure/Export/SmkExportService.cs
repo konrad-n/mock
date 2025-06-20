@@ -160,9 +160,10 @@ public sealed class SmkExportService : ISpecializationExportService
             .Where(c => moduleIds.Contains(c.ModuleId))
             .ToListAsync();
 
-        // Load procedures
-        var procedures = await _context.Procedures
-            .Where(p => internships.Select(i => i.Id).Contains(p.InternshipId))
+        // Load procedure realizations for the user
+        var procedureRealizations = await _context.ProcedureRealizations
+            .Include(pr => pr.Requirement)
+            .Where(pr => pr.UserId == user.Id)
             .ToListAsync();
 
         // Load additional self-education days
@@ -255,58 +256,57 @@ public sealed class SmkExportService : ISpecializationExportService
                 });
             }
 
-            // Map procedures
-            var moduleInternshipIds = moduleInternships.Select(i => i.Id).ToList();
-            var moduleProcedures = procedures.Where(p => moduleInternshipIds.Contains(p.InternshipId)).ToList();
-            foreach (var procedure in moduleProcedures)
+            // Map procedure realizations for this module
+            // Filter procedure realizations that belong to this module (through requirement)
+            var moduleProcedureRealizations = procedureRealizations
+                .Where(pr => pr.Requirement != null && pr.Requirement.ModuleId == module.Id)
+                .ToList();
+                
+            foreach (var realization in moduleProcedureRealizations)
             {
                 ProcedureExportDto procedureDto;
 
-                // Handle old vs new SMK procedures
-                if (procedure is ProcedureOldSmk oldProc)
+                // For old SMK
+                if (specialization.SmkVersion?.Value == "old")
                 {
                     procedureDto = new ProcedureExportDto
                     {
-                        ProcedureCode = procedure.Code ?? "",
-                        Date = procedure.Date.ToString("dd.MM.yyyy"),
-                        Location = procedure.Location ?? "",
+                        ProcedureCode = realization.Requirement?.Code ?? "",
+                        ProcedureName = realization.Requirement?.Name ?? "",
+                        Date = realization.Date.ToString("dd.MM.yyyy"),
+                        Location = realization.Location ?? "",
                         ModuleName = module.Name,
-                        ProcedureName = procedure.ProcedureGroup ?? procedure.Code, // Use ProcedureGroup or Code as name
-                        PatientInitials = oldProc.PatientInitials ?? "",
-                        PatientGender = oldProc.PatientGender.HasValue 
-                            ? (oldProc.PatientGender.Value == 'M' ? "M" : "K") 
-                            : "",
-                        YearOfTraining = oldProc.Year.ToString(),
-                        InternshipName = oldProc.InternshipName ?? "",
-                        FirstAssistantData = oldProc.AssistantData ?? "", // AssistantData holds assistant info
-                        SecondAssistantData = "", // Not available in current model
-                        Role = oldProc.ExecutionType == ProcedureExecutionType.CodeA ? "A" : "B"
+                        Role = realization.Role == ProcedureRole.Operator ? "A" : "B",
+                        ProcedureRequirementId = realization.RequirementId.Value,
+                        YearOfTraining = realization.Year?.ToString() ?? "",
+                        // Note: PatientInitials, PatientGender, InternshipName, AssistantData are not 
+                        // available in the new ProcedureRealization model - these would need to be added
+                        // if they are required for export
+                        PatientInitials = "",
+                        PatientGender = "",
+                        InternshipName = "",
+                        FirstAssistantData = "",
+                        SecondAssistantData = ""
                     };
                 }
-                else if (procedure is ProcedureNewSmk newProc)
+                else // new SMK
                 {
                     procedureDto = new ProcedureExportDto
                     {
-                        ProcedureCode = procedure.Code ?? "",
-                        Date = procedure.Date.ToString("dd.MM.yyyy"),
-                        Location = procedure.Location ?? "",
+                        ProcedureCode = realization.Requirement?.Code ?? "",
+                        ProcedureName = realization.Requirement?.Name ?? "",
+                        Date = realization.Date.ToString("dd.MM.yyyy"),
+                        Location = realization.Location ?? "",
                         ModuleName = module.Name,
-                        ProcedureName = newProc.ProcedureName ?? "",
-                        CountA = newProc.CountA,
-                        CountB = newProc.CountB,
-                        Supervisor = newProc.Supervisor ?? "",
-                        ProcedureRequirementId = newProc.ProcedureRequirementId
-                    };
-                }
-                else
-                {
-                    // Default case for base procedure
-                    procedureDto = new ProcedureExportDto
-                    {
-                        ProcedureCode = procedure.Code ?? "",
-                        Date = procedure.Date.ToString("dd.MM.yyyy"),
-                        Location = procedure.Location ?? "",
-                        ModuleName = module.Name
+                        Role = realization.Role == ProcedureRole.Operator ? "A" : "B",
+                        ProcedureRequirementId = realization.RequirementId.Value,
+                        // For new SMK, we need to count procedures by role
+                        // This would require aggregating realizations by requirement and role
+                        // For now, we'll just export individual realizations
+                        CountA = realization.Role == ProcedureRole.Operator ? 1 : 0,
+                        CountB = realization.Role == ProcedureRole.Assistant ? 1 : 0,
+                        // Note: Supervisor field is not available in ProcedureRealization
+                        Supervisor = ""
                     };
                 }
 

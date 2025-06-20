@@ -6,43 +6,27 @@ namespace SledzSpecke.Core.DomainServices;
 
 public interface IProcedureValidationService
 {
-    Task<Result> ValidateProcedureAsync(
-        ProcedureBase procedure,
+    Task<Result> ValidateProcedureRealizationAsync(
+        ProcedureRealization realization,
+        ProcedureRequirement requirement,
         UserId userId,
-        Specialization specialization,
-        Module? currentModule = null);
+        Module currentModule);
     
     Task<Result<ProcedureProgress>> CalculateProcedureProgressAsync(
         ProcedureRequirement requirement,
-        IEnumerable<ProcedureBase> completedProcedures);
+        IEnumerable<ProcedureRealization> realizations);
     
     Task<Result<bool>> IsProcedureRequirementMetAsync(
         ProcedureRequirement requirement,
-        IEnumerable<ProcedureBase> procedures);
+        IEnumerable<ProcedureRealization> realizations);
     
     Task<Result<ProcedureValidationSummary>> GetValidationSummaryAsync(
         UserId userId,
-        SpecializationId specializationId,
-        ModuleId? moduleId = null);
+        ModuleId moduleId);
     
     Task<Result<IEnumerable<ProcedureRequirement>>> GetUnmetRequirementsAsync(
         UserId userId,
-        SpecializationId specializationId,
-        ModuleId? moduleId = null);
-}
-
-public class ProcedureRequirement
-{
-    public int Id { get; set; }
-    public string Code { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public int MinimumCountA { get; set; }
-    public int MinimumCountB { get; set; }
-    public int MinimumTotal { get; set; }
-    public ModuleId? ModuleId { get; set; }
-    public int? Year { get; set; }
-    public SmkVersion SmkVersion { get; set; }
-    public bool IsOptional { get; set; }
+        ModuleId moduleId);
 }
 
 public class ProcedureProgress

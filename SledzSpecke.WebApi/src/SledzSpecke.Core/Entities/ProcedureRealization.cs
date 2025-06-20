@@ -46,4 +46,16 @@ public sealed class ProcedureRealization : Entity
 
         return Result<ProcedureRealization>.Success(realization);
     }
+
+    public Result Update(DateTime date, string location, ProcedureRole role)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+            return Result.Failure("Location is required");
+
+        Date = date.Date;
+        Location = location;
+        Role = role;
+
+        return Result.Success();
+    }
 }

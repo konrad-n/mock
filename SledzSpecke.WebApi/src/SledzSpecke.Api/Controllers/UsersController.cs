@@ -11,17 +11,27 @@ public class UsersController : BaseController
 {
     private readonly IQueryHandler<GetUser, UserDto> _getUserHandler;
     private readonly IQueryHandler<GetUsers, IEnumerable<UserDto>> _getUsersHandler;
+    private readonly IUserContextService _userContextService;
 
     public UsersController(IQueryHandler<GetUser, UserDto> getUserHandler,
-        IQueryHandler<GetUsers, IEnumerable<UserDto>> getUsersHandler)
+        IQueryHandler<GetUsers, IEnumerable<UserDto>> getUsersHandler,
+        IUserContextService userContextService)
     {
         _getUserHandler = getUserHandler;
         _getUsersHandler = getUsersHandler;
+        _userContextService = userContextService;
     }
 
     [HttpGet("{userId:int}")]
     public async Task<ActionResult<UserDto>> Get(int userId)
         => await HandleAsync(new GetUser(userId), _getUserHandler);
+
+    [HttpGet("me")]
+    public async Task<ActionResult<UserDto>> GetCurrentUser()
+    {
+        var userId = _userContextService.GetUserId();
+        return await HandleAsync(new GetUser(userId), _getUserHandler);
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> Get()

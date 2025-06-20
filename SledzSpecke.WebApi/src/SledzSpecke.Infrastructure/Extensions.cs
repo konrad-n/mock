@@ -157,6 +157,11 @@ public static class Extensions
         services.AddScoped<IEducationalActivityRepository, RefactoredEducationalActivityRepository>();
         services.AddScoped<IFileMetadataRepository, RefactoredFileMetadataRepository>();
         services.AddScoped<IAdditionalSelfEducationDaysRepository, RefactoredSqlAdditionalSelfEducationDaysRepository>();
+        
+        // New procedure repositories
+        services.AddScoped<IProcedureRequirementRepository, SqlProcedureRequirementRepository>();
+        services.AddScoped<IProcedureRealizationRepository, SqlProcedureRealizationRepository>();
+        
         services.AddScoped<IFileStorageService, FileStorageService>();
         services.AddScoped<IDataSeeder, DataSeeder>();
         

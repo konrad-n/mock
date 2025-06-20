@@ -15,7 +15,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
     private readonly IModuleRepository _moduleRepository;
     private readonly IInternshipRepository _internshipRepository;
     private readonly IMedicalShiftRepository _medicalShiftRepository;
-    private readonly IProcedureRepository _procedureRepository;
+    private readonly IProcedureRealizationRepository _procedureRealizationRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ISelfEducationRepository _selfEducationRepository;
     private readonly IAdditionalSelfEducationDaysRepository _additionalDaysRepository;
@@ -27,7 +27,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
         IModuleRepository moduleRepository,
         IInternshipRepository internshipRepository,
         IMedicalShiftRepository medicalShiftRepository,
-        IProcedureRepository procedureRepository,
+        IProcedureRealizationRepository procedureRealizationRepository,
         ICourseRepository courseRepository,
         ISelfEducationRepository selfEducationRepository,
         IAdditionalSelfEducationDaysRepository additionalDaysRepository,
@@ -38,7 +38,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
         _moduleRepository = moduleRepository;
         _internshipRepository = internshipRepository;
         _medicalShiftRepository = medicalShiftRepository;
-        _procedureRepository = procedureRepository;
+        _procedureRealizationRepository = procedureRealizationRepository;
         _courseRepository = courseRepository;
         _selfEducationRepository = selfEducationRepository;
         _additionalDaysRepository = additionalDaysRepository;
@@ -63,10 +63,14 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
         
         var internships = await _internshipRepository.GetBySpecializationIdAsync(query.SpecializationId);
         var medicalShifts = new List<MedicalShift>();
-        var procedures = new List<ProcedureBase>();
+        var procedures = new List<ProcedureRealization>();
         var courses = new List<Course>();
         var selfEducation = new List<SelfEducation>();
         var additionalDays = new List<Core.Entities.AdditionalSelfEducationDays>();
+        
+        // Get all procedures for the user (procedures are user-based, not internship-based)
+        var userProcedures = await _procedureRealizationRepository.GetByUserIdAsync(new UserId(userId));
+        procedures.AddRange(userProcedures);
         
         // Get data for each module
         foreach (var moduleId in moduleIds)
@@ -79,11 +83,6 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
                 medicalShifts.AddRange(internshipShifts);
             }
             
-            foreach (var internship in moduleInternships)
-            {
-                var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
-                procedures.AddRange(internshipProcedures);
-            }
             
             var moduleCourses = await _courseRepository.GetBySpecializationIdAsync(query.SpecializationId);
             courses.AddRange(moduleCourses.Where(c => c.ModuleId == moduleId));
@@ -101,7 +100,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
             modules,
             internships,
             medicalShifts,
-            procedures,
+            procedures, // Now using ProcedureRealization
             courses,
             selfEducation,
             additionalDays);

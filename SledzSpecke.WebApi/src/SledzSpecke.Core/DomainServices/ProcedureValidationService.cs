@@ -1,6 +1,5 @@
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.Policies;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
@@ -8,114 +7,57 @@ namespace SledzSpecke.Core.DomainServices;
 
 public class ProcedureValidationService : IProcedureValidationService
 {
-    private readonly IProcedureRepository _procedureRepository;
-    private readonly ISpecializationRepository _specializationRepository;
-    private readonly ISmkPolicyFactory _policyFactory;
-    
-    // Mock procedure requirements for demonstration
-    // In real implementation, these would come from a repository
-    private readonly List<ProcedureRequirement> _mockRequirements = new()
-    {
-        // Old SMK requirements (year-based)
-        new ProcedureRequirement 
-        { 
-            Id = 1, 
-            Code = "PROC001", 
-            Name = "Badanie fizykalne", 
-            MinimumCountA = 10, 
-            MinimumCountB = 5, 
-            MinimumTotal = 15, 
-            Year = 1, 
-            SmkVersion = SmkVersion.Old 
-        },
-        new ProcedureRequirement 
-        { 
-            Id = 2, 
-            Code = "PROC002", 
-            Name = "EKG", 
-            MinimumCountA = 5, 
-            MinimumCountB = 10, 
-            MinimumTotal = 15, 
-            Year = 2, 
-            SmkVersion = SmkVersion.Old 
-        },
-        // New SMK requirements (module-based)
-        new ProcedureRequirement 
-        { 
-            Id = 3, 
-            Code = "PROC001", 
-            Name = "Badanie fizykalne", 
-            MinimumCountA = 20, 
-            MinimumCountB = 10, 
-            MinimumTotal = 30, 
-            ModuleId = new ModuleId(1), 
-            SmkVersion = SmkVersion.New 
-        },
-        new ProcedureRequirement 
-        { 
-            Id = 4, 
-            Code = "PROC002", 
-            Name = "EKG", 
-            MinimumCountA = 10, 
-            MinimumCountB = 20, 
-            MinimumTotal = 30, 
-            ModuleId = new ModuleId(1), 
-            SmkVersion = SmkVersion.New 
-        }
-    };
-
+    private readonly IProcedureRealizationRepository _procedureRealizationRepository;
+    private readonly IProcedureRequirementRepository _procedureRequirementRepository;
+    private readonly IModuleRepository _moduleRepository;
     public ProcedureValidationService(
-        IProcedureRepository procedureRepository,
-        ISpecializationRepository specializationRepository,
-        ISmkPolicyFactory policyFactory)
+        IProcedureRealizationRepository procedureRealizationRepository,
+        IProcedureRequirementRepository procedureRequirementRepository,
+        IModuleRepository moduleRepository)
     {
-        _procedureRepository = procedureRepository;
-        _specializationRepository = specializationRepository;
-        _policyFactory = policyFactory;
+        _procedureRealizationRepository = procedureRealizationRepository;
+        _procedureRequirementRepository = procedureRequirementRepository;
+        _moduleRepository = moduleRepository;
     }
 
-    public async Task<Result> ValidateProcedureAsync(
-        ProcedureBase procedure,
+    public async Task<Result> ValidateProcedureRealizationAsync(
+        ProcedureRealization realization,
+        ProcedureRequirement requirement,
         UserId userId,
-        Specialization specialization,
-        Module? currentModule = null)
+        Module currentModule)
     {
-        // Create context for policy validation
-        var context = new SpecializationContext(
-            specialization.Id,
-            userId,
-            specialization.SmkVersion,
-            currentModule?.Id,
-            procedure.Date);
-
-        // Apply version-specific policy
-        var policy = _policyFactory.GetPolicy<ProcedureBase>(specialization.SmkVersion);
-        var policyResult = policy.Validate(procedure, context);
-        
-        if (!policyResult.IsSuccess)
+        // Validate that realization belongs to the user
+        if (realization.UserId != userId)
         {
-            return policyResult;
+            return Result.Failure("Realizacja procedury nie należy do użytkownika");
         }
 
-        // Additional validation for procedure code
-        var requirement = GetRequirementByCode(procedure.Code, specialization.SmkVersion, currentModule?.Id);
-        if (requirement == null)
+        // Validate that requirement belongs to the module
+        if (requirement.ModuleId != currentModule.Id)
         {
-            return Result.Failure($"Kod procedury '{procedure.Code}' nie jest zdefiniowany w szablonie specjalizacji");
+            return Result.Failure("Wymaganie procedury nie należy do tego modułu");
         }
 
-        // Validate procedure is performed within valid internship
-        if (procedure.InternshipId == null)
+        // Validate date is not in the future
+        if (realization.Date > DateTime.UtcNow)
         {
-            return Result.Failure("Procedura musi być przypisana do stażu");
+            return Result.Failure("Data realizacji procedury nie może być w przyszłości");
         }
+
+        // Validate location is provided
+        if (string.IsNullOrWhiteSpace(realization.Location))
+        {
+            return Result.Failure("Lokalizacja realizacji procedury jest wymagana");
+        }
+
+        // Additional validation can be added here based on business rules
 
         return await Task.FromResult(Result.Success());
     }
 
     public async Task<Result<ProcedureProgress>> CalculateProcedureProgressAsync(
         ProcedureRequirement requirement,
-        IEnumerable<ProcedureBase> completedProcedures)
+        IEnumerable<ProcedureRealization> realizations)
     {
         var progress = new ProcedureProgress
         {
@@ -125,55 +67,44 @@ public class ProcedureValidationService : IProcedureValidationService
             TotalCompleted = 0
         };
 
-        foreach (var procedure in completedProcedures.Where(p => p.Code == requirement.Code && p.IsCompleted))
+        // Count realizations by role
+        foreach (var realization in realizations.Where(r => r.RequirementId == requirement.Id))
         {
-            if (requirement.SmkVersion == SmkVersion.Old)
+            if (realization.Role == ProcedureRole.Operator)
             {
-                // Old SMK: count individual procedures by operator code
-                if (procedure is ProcedureOldSmk oldSmkProc)
-                {
-                    if (oldSmkProc.ExecutionType == ProcedureExecutionType.CodeA)
-                        progress.CompletedCountA++;
-                    else if (oldSmkProc.ExecutionType == ProcedureExecutionType.CodeB)
-                        progress.CompletedCountB++;
-                    else
-                        progress.TotalCompleted++; // No execution type specified
-                }
+                progress.CompletedCountA++;
             }
-            else if (requirement.SmkVersion == SmkVersion.New)
+            else if (realization.Role == ProcedureRole.Assistant)
             {
-                // New SMK: aggregate counts
-                if (procedure is ProcedureNewSmk newSmkProc)
-                {
-                    progress.CompletedCountA += newSmkProc.CountA;
-                    progress.CompletedCountB += newSmkProc.CountB;
-                }
+                progress.CompletedCountB++;
             }
         }
 
         progress.TotalCompleted = progress.CompletedCountA + progress.CompletedCountB;
 
         // Calculate progress percentage
-        var requiredTotal = Math.Max(requirement.MinimumTotal, requirement.MinimumCountA + requirement.MinimumCountB);
+        var requiredTotal = Math.Max(
+            requirement.RequiredAsOperator + requirement.RequiredAsAssistant,
+            requirement.RequiredAsOperator + requirement.RequiredAsAssistant);
+        
         progress.ProgressPercentage = requiredTotal > 0 
             ? Math.Min(100, (progress.TotalCompleted * 100.0) / requiredTotal)
             : 100;
 
         // Check if requirement is met
         progress.IsRequirementMet = 
-            progress.CompletedCountA >= requirement.MinimumCountA &&
-            progress.CompletedCountB >= requirement.MinimumCountB &&
-            progress.TotalCompleted >= requirement.MinimumTotal;
+            progress.CompletedCountA >= requirement.RequiredAsOperator &&
+            progress.CompletedCountB >= requirement.RequiredAsAssistant;
 
         // Add validation messages
-        if (progress.CompletedCountA < requirement.MinimumCountA)
+        if (progress.CompletedCountA < requirement.RequiredAsOperator)
         {
-            progress.ValidationMessages.Add($"Brakuje {requirement.MinimumCountA - progress.CompletedCountA} procedur jako operator (A)");
+            progress.ValidationMessages.Add($"Brakuje {requirement.RequiredAsOperator - progress.CompletedCountA} procedur jako operator");
         }
         
-        if (progress.CompletedCountB < requirement.MinimumCountB)
+        if (progress.CompletedCountB < requirement.RequiredAsAssistant)
         {
-            progress.ValidationMessages.Add($"Brakuje {requirement.MinimumCountB - progress.CompletedCountB} procedur jako asystent (B)");
+            progress.ValidationMessages.Add($"Brakuje {requirement.RequiredAsAssistant - progress.CompletedCountB} procedur jako asystent");
         }
 
         return await Task.FromResult(Result<ProcedureProgress>.Success(progress));
@@ -181,9 +112,9 @@ public class ProcedureValidationService : IProcedureValidationService
 
     public async Task<Result<bool>> IsProcedureRequirementMetAsync(
         ProcedureRequirement requirement,
-        IEnumerable<ProcedureBase> procedures)
+        IEnumerable<ProcedureRealization> realizations)
     {
-        var progressResult = await CalculateProcedureProgressAsync(requirement, procedures);
+        var progressResult = await CalculateProcedureProgressAsync(requirement, realizations);
         return progressResult.IsSuccess 
             ? Result<bool>.Success(progressResult.Value.IsRequirementMet)
             : Result<bool>.Failure(progressResult.Error);
@@ -191,31 +122,31 @@ public class ProcedureValidationService : IProcedureValidationService
 
     public async Task<Result<ProcedureValidationSummary>> GetValidationSummaryAsync(
         UserId userId,
-        SpecializationId specializationId,
-        ModuleId? moduleId = null)
+        ModuleId moduleId)
     {
         var summary = new ProcedureValidationSummary();
 
-        // Get user's specialization
-        var specialization = await _specializationRepository.GetByIdAsync(specializationId);
-        if (specialization == null)
+        // Get module to determine SMK version
+        var module = await _moduleRepository.GetByIdAsync(moduleId);
+        if (module == null)
         {
-            return Result<ProcedureValidationSummary>.Failure("Nie znaleziono specjalizacji");
+            return Result<ProcedureValidationSummary>.Failure("Nie znaleziono modułu");
         }
 
-        summary.SmkVersion = specialization.SmkVersion;
+        // For now, use New SMK as default (will be determined from specialization later)
+        summary.SmkVersion = SmkVersion.New;
 
-        // Get all user's procedures
-        var userProcedures = await _procedureRepository.GetByUserAsync(userId);
+        // Get all requirements for this module
+        var requirements = await _procedureRequirementRepository.GetByModuleIdAsync(moduleId);
+        summary.TotalRequirements = requirements.Count();
 
-        // Get requirements based on SMK version and module
-        var requirements = GetRequirementsForContext(specialization.SmkVersion, moduleId);
-        summary.TotalRequirements = requirements.Count;
+        // Get all user's realizations
+        var userRealizations = await _procedureRealizationRepository.GetByUserIdAsync(userId);
 
         // Calculate progress for each requirement
         foreach (var requirement in requirements)
         {
-            var progressResult = await CalculateProcedureProgressAsync(requirement, userProcedures);
+            var progressResult = await CalculateProcedureProgressAsync(requirement, userRealizations);
             if (progressResult.IsSuccess)
             {
                 summary.RequirementProgress.Add(progressResult.Value);
@@ -227,7 +158,7 @@ public class ProcedureValidationService : IProcedureValidationService
         }
 
         // Calculate totals
-        summary.TotalProceduresCompleted = userProcedures.Count(p => p.IsCompleted);
+        summary.TotalProceduresCompleted = userRealizations.Count();
         summary.OverallProgressPercentage = summary.TotalRequirements > 0
             ? (summary.CompletedRequirements * 100.0) / summary.TotalRequirements
             : 0;
@@ -238,26 +169,14 @@ public class ProcedureValidationService : IProcedureValidationService
             summary.ValidationWarnings.Add("Postęp w procedurach jest poniżej 25%");
         }
 
-        // Check for expired procedures (Old SMK)
-        if (specialization.SmkVersion == SmkVersion.Old)
-        {
-            var expiredCount = userProcedures.Count(p => 
-                p.Date < DateTime.UtcNow.AddYears(-2) && !p.IsApproved);
-            if (expiredCount > 0)
-            {
-                summary.ValidationWarnings.Add($"{expiredCount} procedur może wymagać ponownego wykonania (starsze niż 2 lata)");
-            }
-        }
-
         return Result<ProcedureValidationSummary>.Success(summary);
     }
 
     public async Task<Result<IEnumerable<ProcedureRequirement>>> GetUnmetRequirementsAsync(
         UserId userId,
-        SpecializationId specializationId,
-        ModuleId? moduleId = null)
+        ModuleId moduleId)
     {
-        var summaryResult = await GetValidationSummaryAsync(userId, specializationId, moduleId);
+        var summaryResult = await GetValidationSummaryAsync(userId, moduleId);
         if (!summaryResult.IsSuccess)
         {
             return Result<IEnumerable<ProcedureRequirement>>.Failure(summaryResult.Error);
@@ -268,31 +187,5 @@ public class ProcedureValidationService : IProcedureValidationService
             .Select(p => p.Requirement);
 
         return Result<IEnumerable<ProcedureRequirement>>.Success(unmetRequirements);
-    }
-
-    private ProcedureRequirement? GetRequirementByCode(string code, SmkVersion smkVersion, ModuleId? moduleId)
-    {
-        return _mockRequirements.FirstOrDefault(r => 
-            r.Code == code && 
-            r.SmkVersion == smkVersion &&
-            (moduleId == null || r.ModuleId == moduleId));
-    }
-
-    private List<ProcedureRequirement> GetRequirementsForContext(SmkVersion smkVersion, ModuleId? moduleId)
-    {
-        if (moduleId != null)
-        {
-            // New SMK - get requirements for specific module
-            return _mockRequirements.Where(r => 
-                r.SmkVersion == smkVersion && 
-                r.ModuleId == moduleId).ToList();
-        }
-        else
-        {
-            // Old SMK - get all year-based requirements
-            return _mockRequirements.Where(r => 
-                r.SmkVersion == smkVersion && 
-                r.Year != null).ToList();
-        }
     }
 }
