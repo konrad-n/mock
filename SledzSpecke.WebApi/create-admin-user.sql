@@ -28,7 +28,7 @@ BEGIN
         ) VALUES (
             (SELECT COALESCE(MAX("Id"), 0) + 1 FROM "Users"),
             'admin@sledzspecke.pl',
-            '2PbrCYP8iJbtmRt1NHP09w==.9FYBD3Hk5TkaN4MxURrc85Im1pLVWeKY+rVfYLNWTEk=',  -- Admin123!
+            'PJCMBBji5Q1GIszD/mPMuQ==.+5QPko0AqtuwA8H956QOsRtPdFh0YQDujFPunocJ0NQ=',  -- Test123
             'Admin',
             'System',
             '+48123456789',

@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
     // Login with admin credentials
     console.log('Filling login form with admin@sledzspecke.pl...');
     await page.fill('[name="email"]', 'admin@sledzspecke.pl');
-    await page.fill('[name="password"]', 'Test123!');
+    await page.fill('[name="password"]', 'Test123');
     
     console.log('Clicking login button...');
     await page.click('button[type="submit"]');

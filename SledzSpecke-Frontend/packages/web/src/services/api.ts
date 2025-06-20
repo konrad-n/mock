@@ -39,10 +39,10 @@ class ApiClient {
 
   // Auth endpoints
   async signIn(data: SignInRequest): Promise<AuthResponse> {
-    // Transform to match API expectations
+    // Transform to match API expectations (uppercase keys)
     const response = await this.instance.post<AuthResponse>('/auth/sign-in', {
-      email: data.email,
-      password: data.password
+      Email: data.email,
+      Password: data.password
     });
     return response.data;
   }

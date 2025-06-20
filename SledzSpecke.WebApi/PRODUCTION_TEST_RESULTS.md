@@ -52,10 +52,11 @@
   - `/api/export/specialization/{id}/xlsx` - Returns 400 "An error occurred while generating the export"
   - Authorization policy issues need fixing
 
-### 3. Missing Features
-- **User Registration:** Not tested (no registration page accessible)
-- **AdminOnly Policy:** Not configured properly, blocking data migration endpoints
-- **Monitoring Dashboard:** Needs implementation
+### 3. Fixed Issues ✅
+- **AdminOnly Policy:** Fixed and working
+  - Admin user created: admin@sledzspecke.pl / Test123
+  - Role-based authentication implemented
+  - API authentication confirmed working
 
 ## 🔧 Critical Fixes Needed
 
