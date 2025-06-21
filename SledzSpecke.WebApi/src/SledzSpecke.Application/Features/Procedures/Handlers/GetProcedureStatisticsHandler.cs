@@ -127,11 +127,11 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
 
             // Get internships for this module
             var moduleInternshipIds = allProcedures
-                .Where(p => p.InternshipId.Value > 0) // TODO: Need to join with internships to filter by module
-                .Select(p => p.InternshipId.Value)
+                .Where(p => p.InternshipId > 0) // TODO: Need to join with internships to filter by module
+                .Select(p => p.InternshipId)
                 .Distinct();
 
-            return allProcedures.Where(p => moduleInternshipIds.Contains(p.InternshipId.Value));
+            return allProcedures.Where(p => moduleInternshipIds.Contains(p.InternshipId));
         }
     }
 }

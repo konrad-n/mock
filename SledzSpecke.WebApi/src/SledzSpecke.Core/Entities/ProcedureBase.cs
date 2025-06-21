@@ -6,9 +6,9 @@ namespace SledzSpecke.Core.Entities;
 public abstract class ProcedureBase
 {
     public ProcedureId Id { get; protected set; }
-    public ModuleId ModuleId { get; protected set; }
+    public int ModuleId { get; protected set; }
     public Module Module { get; protected set; }
-    public InternshipId InternshipId { get; protected set; }
+    public int InternshipId { get; protected set; }
     public DateTime Date { get; protected set; }
     public int Year { get; protected set; }
     public string Code { get; protected set; }
@@ -36,7 +36,7 @@ public abstract class ProcedureBase
     public bool IsCodeA => ExecutionType == ProcedureExecutionType.CodeA;
     public bool IsCodeB => ExecutionType == ProcedureExecutionType.CodeB;
 
-    protected ProcedureBase(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date, int year,
+    protected ProcedureBase(ProcedureId id, int moduleId, int internshipId, DateTime date, int year,
         string code, string name, string location, ProcedureExecutionType executionType, 
         string supervisorName, ProcedureStatus status, SmkVersion smkVersion)
     {

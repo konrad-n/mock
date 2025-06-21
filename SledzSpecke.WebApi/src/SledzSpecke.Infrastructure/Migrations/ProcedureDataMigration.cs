@@ -80,7 +80,7 @@ public class ProcedureDataMigration
                 try
                 {
                     var requirement = new ProcedureRequirement(
-                        new ModuleId(group.Key.ModuleId.Value),
+                        new ModuleId(group.Key.ModuleId),
                         group.Key.Code,
                         firstProcedure.ProcedureGroup ?? group.Key.Code,
                         requiredAsOperator,

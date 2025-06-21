@@ -46,7 +46,7 @@ public sealed class DeleteProcedureHandler : IResultCommandHandler<DeleteProcedu
             var internship = await _internshipRepository.GetByIdAsync(procedure.InternshipId);
             if (internship is null)
             {
-                return Result.Failure($"Internship with ID {procedure.InternshipId.Value} not found.");
+                return Result.Failure($"Internship with ID {procedure.InternshipId} not found.");
             }
 
             // Verify user has access to this procedure through specialization

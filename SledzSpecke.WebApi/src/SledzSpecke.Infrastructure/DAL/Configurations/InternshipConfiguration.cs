@@ -81,7 +81,7 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
 
         builder.HasMany(x => x.Procedures)
             .WithOne()
-            .HasForeignKey("InternshipId")
+            .HasForeignKey(p => p.InternshipId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(x => x.SpecializationId);

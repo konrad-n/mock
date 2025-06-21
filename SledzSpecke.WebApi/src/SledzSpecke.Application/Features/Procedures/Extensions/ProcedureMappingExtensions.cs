@@ -28,7 +28,7 @@ internal static class ProcedureMappingExtensions
         }
         else if (procedure is ProcedureNewSmk newSmk)
         {
-            moduleId = newSmk.ModuleId?.Value;
+            moduleId = newSmk.ModuleId;
             procedureName = newSmk.ProcedureName;
             countA = newSmk.CountA;
             countB = newSmk.CountB;
@@ -39,7 +39,7 @@ internal static class ProcedureMappingExtensions
 
         return new ProcedureDto(
             procedure.Id.Value,
-            procedure.InternshipId.Value,
+            procedure.InternshipId,
             procedure.Date,
             procedure.Year,
             procedure.Code,

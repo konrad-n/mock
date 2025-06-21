@@ -22,7 +22,7 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
             .HasConversion(x => x.Value, x => new ProcedureId(x));
 
         builder.Property(x => x.InternshipId)
-            .HasConversion(x => x.Value, x => new InternshipId(x));
+            .HasColumnName("InternshipId");
 
         builder.Property(x => x.Code)
             .HasMaxLength(50)
@@ -92,10 +92,13 @@ internal sealed class ProcedureBaseConfiguration : IEntityTypeConfiguration<Proc
         
         // Add ModuleId property
         builder.Property(x => x.ModuleId)
-            .HasConversion(x => x.Value, x => new ModuleId(x))
             .IsRequired();
             
         builder.HasIndex(x => x.ModuleId);
+        
+        // Configure relationship with Internship
+        // The InternshipId property is already configured with value conversion
+        // EF Core will handle the foreign key mapping through the converted value
         
         // Note: The navigation property is configured from the Module side in ModuleConfiguration
     }

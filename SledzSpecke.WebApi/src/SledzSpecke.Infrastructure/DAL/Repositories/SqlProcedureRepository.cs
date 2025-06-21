@@ -23,7 +23,7 @@ internal sealed class SqlProcedureRepository : IProcedureRepository
     public async Task<IEnumerable<ProcedureBase>> GetByInternshipIdAsync(int internshipId)
     {
         return await _context.Procedures
-            .Where(p => p.InternshipId.Value == internshipId)
+            .Where(p => p.InternshipId == internshipId)
             .ToListAsync();
     }
 

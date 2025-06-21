@@ -27,7 +27,7 @@ public class ProcedureOldSmk : ProcedureBase
     /// </summary>
     public string? InternshipName { get; private set; }
 
-    private ProcedureOldSmk(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date, int year,
+    private ProcedureOldSmk(ProcedureId id, int moduleId, int internshipId, DateTime date, int year,
         string code, string name, string location, ProcedureExecutionType executionType,
         string supervisorName, ProcedureStatus status)
         : base(id, moduleId, internshipId, date, year, code, name, location, executionType, 
@@ -35,7 +35,7 @@ public class ProcedureOldSmk : ProcedureBase
     {
     }
 
-    public static ProcedureOldSmk Create(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+    public static ProcedureOldSmk Create(ProcedureId id, int moduleId, int internshipId, DateTime date,
         int year, string code, string name, string location, ProcedureExecutionType executionType,
         string supervisorName)
     {

@@ -5,7 +5,7 @@ namespace SledzSpecke.Core.Entities;
 
 public class Procedure : ProcedureBase
 {
-    private Procedure(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date, int year, string code,
+    private Procedure(ProcedureId id, int moduleId, int internshipId, DateTime date, int year, string code,
         string name, string location, ProcedureExecutionType executionType, string supervisorName,
         ProcedureStatus status, SmkVersion smkVersion)
         : base(id, moduleId, internshipId, date, year, code, name, location, executionType, 
@@ -13,12 +13,12 @@ public class Procedure : ProcedureBase
     {
     }
 
-    public static Procedure Create(ProcedureId id, InternshipId internshipId, DateTime date,
+    public static Procedure Create(ProcedureId id, int internshipId, DateTime date,
         string code, string location, int year, SmkVersion smkVersion)
     {
         // This overload is for backward compatibility with tests
         // Using reasonable defaults for new required fields
-        var moduleId = new ModuleId(1); // Default module ID for tests
+        var moduleId = 1; // Default module ID for tests
         var name = code; // Use code as name for backward compatibility
         var executionType = ProcedureExecutionType.CodeA; // Default to Code A
         var supervisorName = "Test Supervisor"; // Default supervisor for tests
@@ -27,7 +27,7 @@ public class Procedure : ProcedureBase
                      executionType, supervisorName, year, smkVersion);
     }
     
-    public static Procedure Create(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+    public static Procedure Create(ProcedureId id, int moduleId, int internshipId, DateTime date,
         string code, string name, string location, ProcedureExecutionType executionType, 
         string supervisorName, int year, SmkVersion smkVersion)
     {

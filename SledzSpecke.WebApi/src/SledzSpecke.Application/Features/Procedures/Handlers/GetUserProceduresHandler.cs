@@ -34,7 +34,7 @@ public sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures, 
         // Filter by internship ID if provided
         if (query.InternshipId.HasValue)
         {
-            procedures = procedures.Where(p => p.InternshipId.Value == query.InternshipId.Value);
+            procedures = procedures.Where(p => p.InternshipId == query.InternshipId.Value);
         }
 
         // Filter by status if provided

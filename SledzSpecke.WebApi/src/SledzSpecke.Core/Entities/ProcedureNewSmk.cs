@@ -56,7 +56,7 @@ public class ProcedureNewSmk : ProcedureBase
     /// </summary>
     public string? Comments { get; private set; }
 
-    private ProcedureNewSmk(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+    private ProcedureNewSmk(ProcedureId id, int moduleId, int internshipId, DateTime date,
         string code, string name, string location, ProcedureExecutionType executionType,
         string supervisorName, ProcedureStatus status, int procedureRequirementId)
         : base(id, moduleId, internshipId, date, date.Year, code, name, location, executionType,
@@ -68,7 +68,7 @@ public class ProcedureNewSmk : ProcedureBase
         CountB = 0;
     }
 
-    public static ProcedureNewSmk Create(ProcedureId id, ModuleId moduleId, InternshipId internshipId, DateTime date,
+    public static ProcedureNewSmk Create(ProcedureId id, int moduleId, int internshipId, DateTime date,
         string code, string procedureName, string location, ProcedureExecutionType executionType,
         string supervisorName, int procedureRequirementId)
     {
