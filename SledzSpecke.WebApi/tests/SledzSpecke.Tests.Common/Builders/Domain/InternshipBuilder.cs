@@ -1,5 +1,5 @@
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 using System;
 
 namespace SledzSpecke.Tests.Common.Builders.Domain;
@@ -87,8 +87,7 @@ public class InternshipBuilder : TestDataBuilder<Internship>
     public override Internship Build()
     {
         var internship = Internship.Create(
-            id: new InternshipId(_id),
-            specializationId: new SpecializationId(_specializationId),
+            specializationId: _specializationId,
             name: _name,
             institutionName: _hospital,
             departmentName: _department,
@@ -98,10 +97,17 @@ public class InternshipBuilder : TestDataBuilder<Internship>
             plannedDays: _plannedWeeks * 5 // Assuming 5 days per week
         );
 
+        // Set the ID if needed (using reflection since EF Core needs it)
+        if (_id != 0)
+        {
+            var idProperty = internship.GetType().GetProperty("InternshipId");
+            idProperty?.SetValue(internship, _id);
+        }
+
         // Assign to module if provided
         if (_moduleId > 0)
         {
-            internship.AssignToModule(new ModuleId(_moduleId));
+            internship.AssignToModule(_moduleId);
         }
 
         return internship;

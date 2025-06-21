@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SledzSpecke.Application.Security;
 using SledzSpecke.Core.Repositories;
-using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Api.Controllers;
 
@@ -23,24 +22,23 @@ public class DebugController : ControllerBase
     {
         try
         {
-            var emailVO = new Email(email);
-            var user = await _userRepository.GetByEmailAsync(emailVO);
+            var user = await _userRepository.GetByEmailAsync(email);
             
             if (user == null)
             {
                 return Ok(new { found = false, message = "User not found" });
             }
             
-            var isValid = _passwordManager.Verify(password, user.Password.Value);
+            var isValid = _passwordManager.Verify(password, user.Password);
             
             return Ok(new 
             { 
                 found = true,
-                email = user.Email.Value,
-                storedHash = user.Password.Value,
+                email = user.Email,
+                storedHash = user.Password,
                 passwordProvided = password,
                 isValid = isValid,
-                userId = user.Id?.Value
+                userId = user.UserId
             });
         }
         catch (Exception ex)

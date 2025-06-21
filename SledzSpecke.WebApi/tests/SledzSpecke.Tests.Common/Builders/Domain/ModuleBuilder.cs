@@ -1,5 +1,5 @@
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 using System;
 
 namespace SledzSpecke.Tests.Common.Builders.Domain;
@@ -54,9 +54,8 @@ public class ModuleBuilder : TestDataBuilder<Module>
     
     public override Module Build()
     {
-        return new Module(
-            id: new ModuleId(_id),
-            specializationId: new SpecializationId(_specializationId),
+        var module = Module.Create(
+            specializationId: _specializationId,
             type: _type,
             smkVersion: SmkVersion.New,
             version: "1.0",
@@ -65,5 +64,14 @@ public class ModuleBuilder : TestDataBuilder<Module>
             endDate: _plannedEndDate ?? _startDate.AddMonths(24),
             structure: "Standardowa struktura modułu"
         );
+        
+        // Set the ID if needed (using reflection since EF Core needs it)
+        if (_id != 0)
+        {
+            var idProperty = module.GetType().GetProperty("ModuleId");
+            idProperty?.SetValue(module, _id);
+        }
+        
+        return module;
     }
 }

@@ -1,5 +1,5 @@
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 using System;
 
 namespace SledzSpecke.Tests.Common.Builders.Domain;
@@ -110,44 +110,33 @@ public class UserBuilder : TestDataBuilder<User>
         // Generate a date of birth based on graduation year (assuming graduation at age 25)
         var dateOfBirth = new DateTime(_graduationYear - 25, Faker.Random.Int(1, 12), Faker.Random.Int(1, 28));
         
+        // Combine first and last name into full name
+        var fullName = $"{_firstName} {_lastName}";
+        
+        // Combine address parts into single string
+        var addressParts = new[] { _street, _houseNumber };
+        if (!string.IsNullOrEmpty(_apartmentNumber))
+            addressParts = new[] { _street, _houseNumber, $"m. {_apartmentNumber}" };
+        var fullAddress = $"{string.Join(" ", addressParts)}, {_postalCode} {_city}";
+        
         var user = _id > 0
             ? User.CreateWithId(
-                id: new UserId(_id),
-                email: new Email(_email),
-                password: new HashedPassword(_passwordHash),
-                firstName: new FirstName(_firstName),
-                secondName: null,
-                lastName: new LastName(_lastName),
-                phoneNumber: new PhoneNumber(_phoneNumber),
+                id: _id,
+                email: _email,
+                password: _passwordHash,
+                name: fullName,
+                phoneNumber: _phoneNumber,
                 dateOfBirth: dateOfBirth,
-                correspondenceAddress: new Address(
-                    street: _street,
-                    houseNumber: _houseNumber,
-                    apartmentNumber: _apartmentNumber,
-                    postalCode: _postalCode,
-                    city: _city,
-                    province: "Mazowieckie",
-                    country: "Polska"
-                ),
+                correspondenceAddress: fullAddress,
                 registrationDate: DateTime.UtcNow
             )
             : User.Create(
-                email: new Email(_email),
-                password: new HashedPassword(_passwordHash),
-                firstName: new FirstName(_firstName),
-                secondName: null,
-                lastName: new LastName(_lastName),
-                phoneNumber: new PhoneNumber(_phoneNumber),
+                email: _email,
+                password: _passwordHash,
+                name: fullName,
+                phoneNumber: _phoneNumber,
                 dateOfBirth: dateOfBirth,
-                correspondenceAddress: new Address(
-                    street: _street,
-                    houseNumber: _houseNumber,
-                    apartmentNumber: _apartmentNumber,
-                    postalCode: _postalCode,
-                    city: _city,
-                    province: "Mazowieckie",
-                    country: "Polska"
-                )
+                correspondenceAddress: fullAddress
             );
 
         // ID will be set by repository when saving if it's 0

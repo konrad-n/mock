@@ -1,5 +1,5 @@
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +12,7 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
     private DateTime _date = DateTime.Today;
     private int _hours = 8;
     private int _minutes = 0;
-    private ShiftType _type = ShiftType.Accompanying;
+    private string _type = "Towarzyszący";
     private string _location = "Szpital Uniwersytecki w Krakowie";
     private bool _isNightShift = false;
     
@@ -46,20 +46,20 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
         _isNightShift = true;
         _hours = 12;
         _minutes = 0;
-        _type = ShiftType.Independent;
+        _type = "Samodzielny";
         return this;
     }
     
     public MedicalShiftBuilder AsICUShift()
     {
-        _type = ShiftType.Independent;
+        _type = "Samodzielny";
         _location = "Oddział Intensywnej Terapii";
         return this;
     }
     
     public MedicalShiftBuilder AsERShift()
     {
-        _type = ShiftType.Independent;
+        _type = "Samodzielny";
         _location = "Szpitalny Oddział Ratunkowy";
         _hours = 10;
         _minutes = 0;
@@ -86,8 +86,7 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
     public override MedicalShift Build()
     {
         var shift = MedicalShift.Create(
-            id: new MedicalShiftId(_id),
-            internshipId: new InternshipId(_internshipId),
+            internshipId: _internshipId,
             moduleId: null, // Optional module ID
             date: _date,
             hours: _hours,
@@ -97,6 +96,13 @@ public class MedicalShiftBuilder : TestDataBuilder<MedicalShift>
             supervisorName: null, // Optional supervisor name
             year: _date.Year
         );
+        
+        // Set the ID if needed (using reflection since EF Core needs it)
+        if (_id != 0)
+        {
+            var idProperty = shift.GetType().GetProperty("ShiftId");
+            idProperty?.SetValue(shift, _id);
+        }
         
         return shift;
     }
