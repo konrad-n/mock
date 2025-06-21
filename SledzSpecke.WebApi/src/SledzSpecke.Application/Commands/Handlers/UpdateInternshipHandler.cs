@@ -106,7 +106,7 @@ public sealed class UpdateInternshipHandlerRefactored : IResultCommandHandler<Up
             var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
             if (specialization != null)
             {
-                var validationResult = await _validationService.ValidateInternshipAsync(internship, specialization.Id.Value);
+                var validationResult = await _validationService.ValidateInternshipAsync(internship, specialization.SpecializationId);
                 if (!validationResult.IsValid)
                 {
                     return Result.Failure($"Internship validation failed: {string.Join(", ", validationResult.Errors)}");

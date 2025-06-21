@@ -49,7 +49,7 @@ internal sealed class RefactoredSqlModuleRepository : BaseRepository<Module>, IM
     {
         // ID generation should be handled by database or a dedicated service
         // For now, keeping the existing logic but moving it to a private method
-        if (module.Id.Value == 0)
+        if (module.ModuleId == 0)
         {
             await GenerateIdForEntity(module);
         }
@@ -58,7 +58,7 @@ internal sealed class RefactoredSqlModuleRepository : BaseRepository<Module>, IM
         // Note: SaveChangesAsync should be called by Unit of Work, not here
         // But keeping it for backward compatibility
         await _unitOfWork.SaveChangesAsync();
-        return module.Id;
+        return new ModuleId(module.ModuleId);
     }
 
     public async Task UpdateAsync(Module module)
@@ -121,13 +121,13 @@ internal sealed class RefactoredSqlModuleRepository : BaseRepository<Module>, IM
         await connection.OpenAsync();
 
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Modules\"";
+        command.CommandText = "SELECT COALESCE(MAX(\"ModuleId\"), 0) FROM \"Modules\"";
         var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
 
-        var newId = new ModuleId(maxId + 1);
+        var newId = maxId + 1;
 
         // Use reflection to set the ID since it's private
-        var idProperty = module.GetType().GetProperty("Id");
+        var idProperty = module.GetType().GetProperty("ModuleId");
         idProperty?.SetValue(module, newId);
 
         await connection.CloseAsync();

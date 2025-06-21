@@ -11,18 +11,12 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
     {
         builder.HasKey(x => x.InternshipId);
         builder.Property(x => x.InternshipId)
-            .HasConversion(x => x.Value, x => new InternshipId(x))
             .HasColumnName("Id");
-        
-        builder.Ignore(x => x.Id);
 
         builder.Property(x => x.SpecializationId)
-            .HasConversion(x => x.Value, x => new SpecializationId(x))
             .IsRequired();
 
-        builder.Property(x => x.ModuleId)
-            .HasConversion(x => x != null ? x.Value : (int?)null,
-                           x => x.HasValue ? new ModuleId(x.Value) : null);
+        builder.Property(x => x.ModuleId);
 
         builder.Property(x => x.Name)
             .IsRequired();
@@ -93,8 +87,5 @@ internal sealed class InternshipConfiguration : IEntityTypeConfiguration<Interns
         builder.HasIndex(x => x.SpecializationId);
         builder.HasIndex(x => x.ModuleId);
         builder.HasIndex(x => new { x.StartDate, x.EndDate });
-        
-        // Ignore DomainEvents from AggregateRoot
-        builder.Ignore(x => x.DomainEvents);
     }
 }

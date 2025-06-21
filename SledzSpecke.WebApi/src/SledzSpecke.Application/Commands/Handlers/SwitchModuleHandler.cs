@@ -59,7 +59,7 @@ public sealed class SwitchModuleHandler : IResultCommandHandler<SwitchModule>
             }
 
             // Verify module belongs to specialization
-            if (module.SpecializationId != specialization.Id)
+            if (module.SpecializationId != specialization.SpecializationId)
             {
                 return Result.Failure("Module does not belong to the specified specialization.");
             }

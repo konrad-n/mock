@@ -132,7 +132,7 @@ public sealed class SmkExportService : ISpecializationExportService
     {
         var specialization = await _context.Specializations
             .Include(s => s.Modules)
-            .FirstOrDefaultAsync(s => s.Id.Value == specializationId);
+            .FirstOrDefaultAsync(s => s.SpecializationId == specializationId);
 
         if (specialization == null)
         {
@@ -141,7 +141,7 @@ public sealed class SmkExportService : ISpecializationExportService
 
         // Load the user separately
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == specialization.UserId);
+            .FirstOrDefaultAsync(u => u.UserId == specialization.UserId);
 
         if (user == null)
         {
@@ -149,10 +149,10 @@ public sealed class SmkExportService : ISpecializationExportService
         }
 
         // Load internships with medical shifts
-        var moduleIds = specialization.Modules.Select(m => m.Id).ToList();
+        var moduleIds = specialization.Modules.Select(m => m.ModuleId).ToList();
         var internships = await _context.Internships
             .Include(i => i.MedicalShifts)
-            .Where(i => moduleIds.Contains(i.ModuleId))
+            .Where(i => i.ModuleId.HasValue && moduleIds.Contains(i.ModuleId.Value))
             .ToListAsync();
 
         // Load courses
@@ -163,12 +163,12 @@ public sealed class SmkExportService : ISpecializationExportService
         // Load procedure realizations for the user
         var procedureRealizations = await _context.ProcedureRealizations
             .Include(pr => pr.Requirement)
-            .Where(pr => pr.UserId == user.Id)
+            .Where(pr => pr.UserId == user.UserId)
             .ToListAsync();
 
         // Load additional self-education days
         var selfEducationDays = await _context.Set<AdditionalSelfEducationDays>()
-            .Where(d => moduleIds.Select(m => m.Value).Contains(d.ModuleId.Value))
+            .Where(d => moduleIds.Contains(d.ModuleId))
             .ToListAsync();
 
         var currentModule = specialization.Modules
@@ -179,12 +179,12 @@ public sealed class SmkExportService : ISpecializationExportService
         {
             BasicInfo = new BasicInfoExportDto
             {
-                FirstName = user.FirstName?.Value ?? "",
-                LastName = user.LastName?.Value ?? "",
-                Email = user.Email?.Value ?? "",
-                PhoneNumber = user.PhoneNumber?.Value ?? "",
+                FirstName = user.Name ?? "",
+                LastName = "", // User now has single Name property
+                Email = user.Email ?? "",
+                PhoneNumber = user.PhoneNumber ?? "",
                 SpecializationName = specialization.Name,
-                SmkVersion = specialization.SmkVersion?.Value ?? "old",
+                SmkVersion = specialization.SmkVersion.ToString().ToLower(),
                 ProgramVariant = specialization.ProgramVariant ?? "",
                 PlannedPesYear = specialization.PlannedPesYear.ToString(),
                 SpecializationStartDate = specialization.StartDate.ToString("dd.MM.yyyy"),
@@ -198,7 +198,7 @@ public sealed class SmkExportService : ISpecializationExportService
         // Map internships
         foreach (var module in specialization.Modules)
         {
-            var moduleInternships = internships.Where(i => i.ModuleId.Value == module.Id.Value).ToList();
+            var moduleInternships = internships.Where(i => i.ModuleId == module.ModuleId).ToList();
             foreach (var internship in moduleInternships)
             {
                 exportDto.Internships.Add(new InternshipExportDto
@@ -217,8 +217,7 @@ public sealed class SmkExportService : ISpecializationExportService
                 // Map medical shifts
                 foreach (var shift in internship.MedicalShifts)
                 {
-                    var duration = shift.Duration;
-                    var totalMinutes = duration.TotalMinutes;
+                    var totalMinutes = shift.Hours * 60 + shift.Minutes;
                     var hours = totalMinutes / 60;
                     var minutes = totalMinutes % 60;
                     
@@ -238,7 +237,7 @@ public sealed class SmkExportService : ISpecializationExportService
             }
 
             // Map courses
-            var moduleCourses = courses.Where(c => c.ModuleId.Value == module.Id.Value).ToList();
+            var moduleCourses = courses.Where(c => c.ModuleId == module.ModuleId).ToList();
             foreach (var course in moduleCourses)
             {
                 exportDto.Courses.Add(new CourseExportDto
@@ -259,7 +258,7 @@ public sealed class SmkExportService : ISpecializationExportService
             // Map procedure realizations for this module
             // Filter procedure realizations that belong to this module (through requirement)
             var moduleProcedureRealizations = procedureRealizations
-                .Where(pr => pr.Requirement != null && pr.Requirement.ModuleId == module.Id)
+                .Where(pr => pr.Requirement != null && pr.Requirement.ModuleId == module.ModuleId)
                 .ToList();
                 
             foreach (var realization in moduleProcedureRealizations)
@@ -267,7 +266,7 @@ public sealed class SmkExportService : ISpecializationExportService
                 ProcedureExportDto procedureDto;
 
                 // For old SMK
-                if (specialization.SmkVersion?.Value == "old")
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
                 {
                     procedureDto = new ProcedureExportDto
                     {
@@ -315,12 +314,12 @@ public sealed class SmkExportService : ISpecializationExportService
 
             // Map self-education days for this module
             var moduleSelfEducation = selfEducationDays
-                .Where(d => d.ModuleId.Value == module.Id.Value)
+                .Where(d => d.ModuleId == module.ModuleId)
                 .ToList();
 
             foreach (var selfEdu in moduleSelfEducation)
             {
-                var internship = moduleInternships.FirstOrDefault(i => i.Id == selfEdu.InternshipId);
+                var internship = moduleInternships.FirstOrDefault(i => i.InternshipId == selfEdu.InternshipId);
                 
                 exportDto.AdditionalSelfEducationDays.Add(new AdditionalSelfEducationExportDto
                 {

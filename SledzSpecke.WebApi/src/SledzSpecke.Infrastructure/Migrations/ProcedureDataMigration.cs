@@ -143,7 +143,7 @@ public class ProcedureDataMigration
                 }
                 
                 var specialization = await _context.Specializations
-                    .Where(s => s.Id == internshipWithSpec.SpecializationId)
+                    .Where(s => s.SpecializationId == internshipWithSpec.SpecializationId)
                     .Select(s => new { s.UserId })
                     .FirstOrDefaultAsync(cancellationToken);
                     

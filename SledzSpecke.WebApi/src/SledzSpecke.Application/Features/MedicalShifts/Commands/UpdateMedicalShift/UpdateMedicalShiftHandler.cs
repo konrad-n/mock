@@ -37,10 +37,10 @@ public sealed class UpdateMedicalShiftHandler : IResultCommandHandler<UpdateMedi
             }
 
             // Get the internship to validate date range if date is being updated
-            var internship = await _internshipRepository.GetByIdAsync(medicalShift.InternshipId.Value);
+            var internship = await _internshipRepository.GetByIdAsync(medicalShift.InternshipId);
             if (internship is null)
             {
-                return Result.Failure($"Internship with ID {medicalShift.InternshipId.Value} not found.", "INTERNSHIP_NOT_FOUND");
+                return Result.Failure($"Internship with ID {medicalShift.InternshipId} not found.", "INTERNSHIP_NOT_FOUND");
             }
 
             // Validate date if provided

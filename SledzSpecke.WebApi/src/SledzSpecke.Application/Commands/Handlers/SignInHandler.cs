@@ -3,9 +3,7 @@ using SledzSpecke.Application.DTO;
 using SledzSpecke.Application.Security;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
-using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
@@ -34,13 +32,10 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
                 return Result.Failure<JwtDto>("Email is required.");
             }
 
-            // Try to parse as email
-            Email email;
-            try
-            {
-                email = new Email(command.Email.Trim());
-            }
-            catch (InvalidEmailException)
+            var email = command.Email.Trim();
+            
+            // Basic email validation
+            if (!email.Contains("@"))
             {
                 return Result.Failure<JwtDto>("Invalid email format.");
             }
@@ -52,7 +47,7 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
                 return Result.Failure<JwtDto>("Invalid email or password.");
             }
 
-            if (!_passwordManager.Verify(command.Password, user.Password.Value))
+            if (!_passwordManager.Verify(command.Password, user.Password))
             {
                 return Result.Failure<JwtDto>("Invalid email or password.");
             }
@@ -62,23 +57,19 @@ public sealed class SignInHandler : IResultCommandHandler<SignIn, JwtDto>
             await _userRepository.UpdateAsync(user);
 
             // Determine role based on email (temporary solution)
-            var role = user.Email.Value == "admin@sledzspecke.pl" ? "Admin" : "user";
+            var role = user.Email == "admin@sledzspecke.pl" ? "Admin" : "user";
             
             var claims = new Dictionary<string, IEnumerable<string>>
             {
                 ["permissions"] = new[] { "users" }
             };
 
-            var jwt = _authenticator.CreateToken(user.Id, role, claims);
+            var jwt = _authenticator.CreateToken(user.UserId, role, claims);
             return Result.Success(jwt);
         }
-        catch (Exception ex) when (ex is CustomException)
+        catch (Exception ex)
         {
             return Result.Failure<JwtDto>(ex.Message);
-        }
-        catch (Exception)
-        {
-            return Result.Failure<JwtDto>("An error occurred during sign in.");
         }
     }
 }

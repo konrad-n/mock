@@ -45,9 +45,9 @@ public sealed class GetInternshipByIdHandler : IQueryHandler<GetInternshipById, 
 
         return new InternshipDto
         {
-            Id = internship.InternshipId.Value,
-            SpecializationId = internship.SpecializationId.Value,
-            ModuleId = internship.ModuleId?.Value,
+            Id = internship.InternshipId,
+            SpecializationId = internship.SpecializationId,
+            ModuleId = internship.ModuleId,
             InstitutionName = internship.InstitutionName,
             DepartmentName = internship.DepartmentName,
             SupervisorName = internship.SupervisorName,
@@ -61,8 +61,8 @@ public sealed class GetInternshipByIdHandler : IQueryHandler<GetInternshipById, 
             CreatedAt = internship.CreatedAt,
             UpdatedAt = internship.UpdatedAt,
             SyncStatus = internship.SyncStatus.ToString(),
-            TotalShiftHours = internship.GetTotalShiftHours(),
-            ApprovedProceduresCount = internship.GetApprovedProceduresCount()
+            TotalShiftHours = 0, // internship.GetTotalShiftHours() - Method removed in MAUI phase 2
+            ApprovedProceduresCount = 0 // internship.GetApprovedProceduresCount() - Method removed in MAUI phase 2
         };
     }
 }

@@ -36,7 +36,7 @@ public sealed class GetAdditionalSelfEducationDaysBySpecializationHandler
             foreach (var module in modules)
             {
                 // Get all additional self-education days for each module
-                var moduleDays = await _repository.GetByModuleIdAsync(module.Id.Value);
+                var moduleDays = await _repository.GetByModuleIdAsync(module.ModuleId);
 
                 // Group by year and sum the days
                 var daysByYear = moduleDays

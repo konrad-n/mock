@@ -70,7 +70,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
         
         // Get all related data
         var modules = await _moduleRepository.GetBySpecializationIdAsync(query.SpecializationId);
-        var moduleIds = modules.Select(m => m.Id).ToList();
+        var moduleIds = modules.Select(m => m.ModuleId).ToList();
         
         var internships = await _internshipRepository.GetBySpecializationIdAsync(query.SpecializationId);
         var medicalShifts = new List<MedicalShift>();
@@ -80,7 +80,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
         var additionalDays = new List<Core.Entities.AdditionalSelfEducationDays>();
         
         // Get all procedures for the user (procedures are user-based, not internship-based)
-        var userProcedures = await _procedureRealizationRepository.GetByUserIdAsync(user.Id);
+        var userProcedures = await _procedureRealizationRepository.GetByUserIdAsync(user.UserId);
         procedures.AddRange(userProcedures);
         
         // Get procedure requirements for the modules
@@ -94,7 +94,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
             var moduleInternships = internships.Where(i => i.ModuleId == moduleId);
             foreach (var internship in moduleInternships)
             {
-                var internshipShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internship.Id);
+                var internshipShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internship.InternshipId);
                 medicalShifts.AddRange(internshipShifts);
             }
             
@@ -125,7 +125,7 @@ public sealed class ExportSpecializationToXlsxHandler : IQueryHandler<ExportSpec
         {
             User = user,
             Specialization = specialization,
-            SmkVersion = specialization.SmkVersion,
+            SmkVersion = specialization.SmkVersion == Core.Enums.SmkVersion.Old ? Core.ValueObjects.SmkVersion.Old : Core.ValueObjects.SmkVersion.New,
             Modules = modules,
             Internships = internships,
             MedicalShifts = medicalShifts,

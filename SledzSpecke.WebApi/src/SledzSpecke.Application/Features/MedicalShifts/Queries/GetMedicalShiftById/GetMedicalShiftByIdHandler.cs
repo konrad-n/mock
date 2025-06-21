@@ -30,11 +30,11 @@ public sealed class GetMedicalShiftByIdHandler : IResultQueryHandler<GetMedicalS
         }
 
         var dto = new MedicalShiftDto(
-            Id: shift.Id.Value,
-            InternshipId: shift.InternshipId.Value,
+            Id: shift.ShiftId,
+            InternshipId: shift.InternshipId,
             Date: shift.Date,
-            Hours: shift.Duration.Hours,
-            Minutes: shift.Duration.Minutes,
+            Hours: shift.Hours,
+            Minutes: shift.Minutes,
             Location: shift.Location,
             Year: shift.Year,
             SyncStatus: shift.SyncStatus,
@@ -43,8 +43,8 @@ public sealed class GetMedicalShiftByIdHandler : IResultQueryHandler<GetMedicalS
             ApproverName: null,
             ApproverRole: null,
             IsApproved: shift.IsApproved,
-            CanBeDeleted: !shift.IsApproved && shift.SyncStatus != SyncStatus.Synced,
-            Duration: TimeSpan.FromHours(shift.Duration.Hours) + TimeSpan.FromMinutes(shift.Duration.Minutes)
+            CanBeDeleted: !shift.IsApproved && shift.SyncStatus != Core.Enums.SyncStatus.Synced,
+            Duration: TimeSpan.FromHours(shift.Hours) + TimeSpan.FromMinutes(shift.Minutes)
         );
 
         return Result<MedicalShiftDto>.Success(dto);

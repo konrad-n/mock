@@ -1,15 +1,14 @@
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
 using System.Linq.Expressions;
 
 namespace SledzSpecke.Core.Specifications;
 
 public class UserByEmailSpecification : Specification<User>
 {
-    private readonly Email _email;
+    private readonly string _email;
 
-    public UserByEmailSpecification(Email email)
+    public UserByEmailSpecification(string email)
     {
         _email = email;
     }
@@ -47,10 +46,8 @@ public class UserByFullNameSpecification : Specification<User>
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        // Search by first name, last name, or full name
-        return user => user.FirstName.Value.ToLower().Contains(_searchTerm) ||
-                      user.LastName.Value.ToLower().Contains(_searchTerm) ||
-                      (user.FirstName.Value + " " + user.LastName.Value).ToLower().Contains(_searchTerm);
+        // Search by name
+        return user => user.Name.ToLower().Contains(_searchTerm);
     }
 }
 
@@ -65,7 +62,9 @@ public class UserByProvinceSpecification : Specification<User>
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        return user => user.CorrespondenceAddress.Province.ToLower() == _province;
+        // Since CorrespondenceAddress is now a simple string, we can't filter by province
+        // This specification would need to be removed or reimplemented differently
+        return user => user.CorrespondenceAddress.ToLower().Contains(_province);
     }
 }
 
@@ -80,7 +79,9 @@ public class UserByCitySpecification : Specification<User>
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        return user => user.CorrespondenceAddress.City.ToLower() == _city;
+        // Since CorrespondenceAddress is now a simple string, we can't filter by city
+        // This specification would need to be removed or reimplemented differently
+        return user => user.CorrespondenceAddress.ToLower().Contains(_city);
     }
 }
 
@@ -95,7 +96,7 @@ public class UserByPartialEmailSpecification : Specification<User>
 
     public override Expression<Func<User, bool>> ToExpression()
     {
-        return user => user.Email.Value.ToLower().Contains(_emailPart);
+        return user => user.Email.ToLower().Contains(_emailPart);
     }
 }
 

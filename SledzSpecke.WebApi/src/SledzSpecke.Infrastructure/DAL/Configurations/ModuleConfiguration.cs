@@ -9,18 +9,18 @@ internal sealed class ModuleConfiguration : IEntityTypeConfiguration<Module>
 {
     public void Configure(EntityTypeBuilder<Module> builder)
     {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id)
-            .HasConversion(x => x.Value, x => new ModuleId(x));
+        builder.HasKey(x => x.ModuleId);
+        builder.Property(x => x.ModuleId)
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.SpecializationId)
-            .HasConversion(x => x.Value, x => new SpecializationId(x));
+            .IsRequired();
 
         builder.Property(x => x.Type)
-            .HasConversion<int>();
+            .HasConversion<string>();
 
         builder.Property(x => x.SmkVersion)
-            .HasConversion(x => x.Value, x => new SmkVersion(x));
+            .HasConversion<string>();
 
         builder.Property(x => x.Version)
             .IsRequired();

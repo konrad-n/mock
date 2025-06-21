@@ -97,7 +97,7 @@ internal sealed class GetModuleProceduresHandler : IQueryHandler<GetModuleProced
 
             var result = new ModuleProceduresDto
             {
-                ModuleId = module.Id.Value,
+                ModuleId = module.ModuleId,
                 ModuleName = module.Name,
                 ModuleType = module.Type.ToString(),
                 Procedures = procedureDtos,

@@ -54,32 +54,30 @@ public sealed class AddMedicalShiftHandler : IResultCommandHandler<AddMedicalShi
             var duration = new ShiftDuration(command.Hours, command.Minutes);
 
             // Get the specialization to access SMK version
-            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId.Value);
+            var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
             if (specialization is null)
             {
-                return Result<int>.Failure($"Specialization with ID {internship.SpecializationId.Value} not found.", "SPECIALIZATION_NOT_FOUND");
+                return Result<int>.Failure($"Specialization with ID {internship.SpecializationId} not found.", "SPECIALIZATION_NOT_FOUND");
             }
             
             // Get SMK version and available years from specialization
             var smkVersion = specialization.SmkVersion;
             var availableYears = new[] { 1, 2, 3, 4, 5, 6 }; // Standard medical education years
             
-            // Use domain method to add medical shift
-            var addResult = internship.AddMedicalShift(
+            // Create medical shift using factory method
+            var medicalShift = MedicalShift.Create(
+                internship.InternshipId,
+                internship.ModuleId,
                 command.Date,
                 command.Hours,
                 command.Minutes,
+                "Standard", // default type
                 command.Location,
-                command.Year,
-                smkVersion,
-                availableYears);
-
-            if (addResult.IsFailure)
-            {
-                return Result<int>.Failure(addResult.Error, addResult.ErrorCode);
-            }
-
-            var medicalShift = addResult.Value;
+                null, // supervisorName
+                command.Year);
+            
+            // Add to internship's collection
+            internship.MedicalShifts.Add(medicalShift);
 
             // Update internship (already modified by domain method)
             await _internshipRepository.UpdateAsync(internship);

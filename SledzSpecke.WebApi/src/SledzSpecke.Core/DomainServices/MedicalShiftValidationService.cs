@@ -34,14 +34,15 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
     {
         // Create context for policy validation
         var context = new SpecializationContext(
-            specialization.Id,
+            new SpecializationId(specialization.SpecializationId),
             userId,
-            specialization.SmkVersion,
+            specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New,
             moduleId,
             shift.Date);
 
         // Apply version-specific policy
-        var policy = _policyFactory.GetPolicy<MedicalShift>(specialization.SmkVersion);
+        var smkVersion = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New;
+        var policy = _policyFactory.GetPolicy<MedicalShift>(smkVersion);
         var policyResult = policy.Validate(shift, context);
         
         if (!policyResult.IsSuccess)
@@ -62,7 +63,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         
         if (weeklyTotal.IsSuccess)
         {
-            var totalMinutesWithNewShift = weeklyTotal.Value.TotalMinutes + shift.Duration.TotalMinutes;
+            var totalMinutesWithNewShift = weeklyTotal.Value.TotalMinutes + (shift.Hours * 60 + shift.Minutes);
             
             if (totalMinutesWithNewShift > WeeklyHoursLimit * 60)
             {
@@ -82,7 +83,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
             yearMonth.StartDate,
             yearMonth.EndDate);
 
-        var totalMinutes = shifts.Sum(s => s.Duration.TotalMinutes);
+        var totalMinutes = shifts.Sum(s => s.Hours * 60 + s.Minutes);
         if (totalMinutes == 0)
             return Result<ShiftDuration>.Success(new ShiftDuration(1, 0)); // Minimum 60 minutes
         return Result<ShiftDuration>.Success(ShiftDuration.FromMinutes(totalMinutes));
@@ -97,7 +98,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
             week.StartDate,
             week.EndDate);
 
-        var totalMinutes = shifts.Sum(s => s.Duration.TotalMinutes);
+        var totalMinutes = shifts.Sum(s => s.Hours * 60 + s.Minutes);
         if (totalMinutes == 0)
             return Result<ShiftDuration>.Success(new ShiftDuration(1, 0)); // Minimum 60 minutes
         return Result<ShiftDuration>.Success(ShiftDuration.FromMinutes(totalMinutes));
@@ -107,14 +108,14 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         MedicalShift newShift,
         IEnumerable<MedicalShift> existingShifts)
     {
-        var newShiftEnd = newShift.Date.AddMinutes(newShift.Duration.TotalMinutes);
+        var newShiftEnd = newShift.Date.AddMinutes(newShift.Hours * 60 + newShift.Minutes);
 
         foreach (var existingShift in existingShifts)
         {
-            if (existingShift.Id == newShift.Id)
+            if (existingShift.ShiftId == newShift.ShiftId)
                 continue;
 
-            var existingShiftEnd = existingShift.Date.AddMinutes(existingShift.Duration.TotalMinutes);
+            var existingShiftEnd = existingShift.Date.AddMinutes(existingShift.Hours * 60 + existingShift.Minutes);
 
             // Check for overlap
             if (newShift.Date < existingShiftEnd && newShiftEnd > existingShift.Date)
@@ -145,7 +146,7 @@ public class MedicalShiftValidationService : IMedicalShiftValidationService
         }
 
         // Set monthly minimum based on SMK version
-        summary.MonthlyHoursMinimum = activeSpecialization.SmkVersion == SmkVersion.Old 
+        summary.MonthlyHoursMinimum = activeSpecialization.SmkVersion == Enums.SmkVersion.Old
             ? OldSmkMonthlyMinimum 
             : GetNewSmkMonthlyMinimum(activeSpecialization);
 

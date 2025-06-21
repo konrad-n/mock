@@ -29,22 +29,26 @@ public sealed class GetUserProfileHandler : IQueryHandler<GetUserProfile, UserPr
             throw new NotFoundException($"User with ID {currentUserId} not found.");
         }
         
+        var nameParts = user.Name.Split(' ');
+        var firstName = nameParts.FirstOrDefault() ?? "";
+        var lastName = nameParts.Skip(1).FirstOrDefault() ?? "";
+        
         return new UserProfileDto
         {
-            Id = user.Id.Value,
-            Email = user.Email.Value,
-            FirstName = user.FirstName.Value,
-            LastName = user.LastName.Value,
-            PhoneNumber = user.PhoneNumber.Value,
+            Id = user.UserId,
+            Email = user.Email,
+            FirstName = firstName,
+            LastName = lastName,
+            PhoneNumber = user.PhoneNumber,
             DateOfBirth = user.DateOfBirth,
             CorrespondenceAddress = new AddressDto
             {
-                Street = user.CorrespondenceAddress.Street,
-                HouseNumber = user.CorrespondenceAddress.HouseNumber,
-                ApartmentNumber = user.CorrespondenceAddress.ApartmentNumber,
-                PostalCode = user.CorrespondenceAddress.PostalCode,
-                City = user.CorrespondenceAddress.City,
-                Province = user.CorrespondenceAddress.Province
+                Street = user.CorrespondenceAddress,
+                HouseNumber = "",
+                ApartmentNumber = "",
+                PostalCode = "",
+                City = "",
+                Province = ""
             },
             Preferences = new UserPreferencesDto
             {

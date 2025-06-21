@@ -17,13 +17,13 @@ internal sealed class SqlMedicalShiftRepository : IMedicalShiftRepository
     public async Task<MedicalShift?> GetByIdAsync(int id)
     {
         return await _context.MedicalShifts
-            .FirstOrDefaultAsync(s => s.Id.Value == id);
+            .FirstOrDefaultAsync(s => s.ShiftId == id);
     }
 
     public async Task<IEnumerable<MedicalShift>> GetByInternshipIdAsync(int internshipId)
     {
         return await _context.MedicalShifts
-            .Where(s => s.InternshipId.Value == internshipId)
+            .Where(s => s.InternshipId == internshipId)
             .ToListAsync();
     }
 
@@ -145,7 +145,7 @@ internal sealed class SqlMedicalShiftRepository : IMedicalShiftRepository
     public async Task<int> AddAsync(MedicalShift shift)
     {
         // Generate new ID if it's 0
-        if (shift.Id.Value == 0)
+        if (shift.ShiftId == 0)
         {
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();
@@ -166,7 +166,7 @@ internal sealed class SqlMedicalShiftRepository : IMedicalShiftRepository
 
         await _context.MedicalShifts.AddAsync(shift);
         await _context.SaveChangesAsync();
-        return shift.Id.Value;
+        return shift.ShiftId;
     }
 
     public async Task UpdateAsync(MedicalShift shift)

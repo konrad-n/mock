@@ -104,7 +104,7 @@ public class ProgressCalculationService : IProgressCalculationService
         
         if (moduleId.HasValue)
         {
-            internships = internships.Where(i => i.ModuleId?.Value == moduleId.Value);
+            internships = internships.Where(i => i.ModuleId == moduleId.Value);
         }
 
         var completed = internships.Count(i => i.IsCompleted && i.IsApproved);
@@ -151,13 +151,13 @@ public class ProgressCalculationService : IProgressCalculationService
         
         if (moduleId.HasValue)
         {
-            internships = internships.Where(i => i.ModuleId?.Value == moduleId.Value);
+            internships = internships.Where(i => i.ModuleId == moduleId.Value);
         }
 
         var procedures = new List<Core.Entities.ProcedureBase>();
         foreach (var internship in internships)
         {
-            var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.InternshipId.Value);
+            var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.InternshipId);
             procedures.AddRange(internshipProcedures);
         }
 
@@ -189,7 +189,7 @@ public class ProgressCalculationService : IProgressCalculationService
         
         if (moduleId.HasValue)
         {
-            internships = internships.Where(i => i.ModuleId?.Value == moduleId.Value);
+            internships = internships.Where(i => i.ModuleId == moduleId.Value);
         }
 
         var shifts = new List<Core.Entities.MedicalShift>();
@@ -199,7 +199,7 @@ public class ProgressCalculationService : IProgressCalculationService
         }
         
         // Calculate total hours including minutes
-        var totalMinutes = shifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours * 60 + s.Duration.Minutes);
+        var totalMinutes = shifts.Where(s => s.IsApproved).Sum(s => s.Hours * 60 + s.Minutes);
         var completedHours = totalMinutes / 60; // Convert to hours
 
         // TODO: Get required hours from template service

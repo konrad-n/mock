@@ -172,7 +172,7 @@ public sealed class CmkpValidationService : ICmkpValidationService
     {
         var validation = new ModuleCmkpValidation
         {
-            ModuleId = module.Id,
+            ModuleId = module.ModuleId,
             ModuleName = module.Name,
             IsValid = true
         };

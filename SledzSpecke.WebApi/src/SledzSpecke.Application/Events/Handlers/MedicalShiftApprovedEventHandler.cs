@@ -167,7 +167,7 @@ public sealed class MedicalShiftApprovedEventHandler : INotificationHandler<Medi
         {
             var monthStart = new DateTime(shiftDate.Year, shiftDate.Month, 1);
             var reportPath = await _pdfService.GenerateMonthlyReportAsync(
-                new InternshipId(internship.Id),
+                new InternshipId(internship.InternshipId),
                 monthStart,
                 cancellationToken);
 
@@ -180,14 +180,14 @@ public sealed class MedicalShiftApprovedEventHandler : INotificationHandler<Medi
 
             _logger.LogInformation(
                 "Generated monthly report for InternshipId={InternshipId}, Month={Month}",
-                internship.Id,
+                internship.InternshipId,
                 monthStart.ToString("yyyy-MM"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "Failed to generate monthly report for InternshipId={InternshipId}",
-                internship.Id);
+                internship.InternshipId);
         }
     }
 

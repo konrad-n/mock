@@ -37,7 +37,7 @@ public class NotificationService : INotificationService
     public Task SendShiftApprovalConfirmationAsync(UserId userId, MedicalShift shift, string approvedBy, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Shift approval confirmation: UserId={UserId}, ShiftId={ShiftId}, ApprovedBy={ApprovedBy}", 
-            userId.Value, shift.Id, approvedBy);
+            userId.Value, shift.ShiftId, approvedBy);
         return Task.CompletedTask;
     }
 

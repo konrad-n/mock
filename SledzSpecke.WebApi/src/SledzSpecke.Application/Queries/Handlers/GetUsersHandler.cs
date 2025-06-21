@@ -18,10 +18,10 @@ public sealed class GetUsersHandler : IQueryHandler<GetUsers, IEnumerable<UserDt
         var users = await _userRepository.GetAllAsync();
 
         return users.Select(user => new UserDto(
-            user.Id.Value,
-            user.Email.Value,
-            user.GetFullName(),
-            Core.ValueObjects.SmkVersion.Old, // SmkVersion - temporary default
+            user.UserId,
+            user.Email,
+            user.Name,
+            user.SmkVersion == Core.Enums.SmkVersion.Old ? Core.ValueObjects.SmkVersion.Old : Core.ValueObjects.SmkVersion.New,
             0, // SpecializationId - temporary
             user.RegistrationDate
         ));

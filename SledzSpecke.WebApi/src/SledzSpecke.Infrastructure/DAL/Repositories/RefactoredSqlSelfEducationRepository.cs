@@ -37,7 +37,7 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
             .Include(se => se.Module)
             .Join(_context.Specializations,
                 se => se.Module.SpecializationId,
-                s => s.Id,
+                s => s.SpecializationId,
                 (se, s) => new { SelfEducation = se, Specialization = s })
             .Where(x => x.Specialization.UserId == userId)
             .Select(x => x.SelfEducation)
@@ -68,9 +68,9 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
             .Where(se => se.Module.SpecializationId == specializationId)
             .Join(_context.Specializations,
                 se => se.Module.SpecializationId,
-                s => s.Id,
+                s => s.SpecializationId,
                 (se, s) => new { SelfEducation = se, Specialization = s })
-            .Where(x => x.Specialization.Id == specializationId && x.Specialization.UserId == userId)
+            .Where(x => x.Specialization.SpecializationId == specializationId && x.Specialization.UserId == userId)
             .Select(x => x.SelfEducation)
             .OrderByDescending(se => se.Date)
             .ToListAsync();
@@ -85,7 +85,7 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
             .Include(se => se.Module)
             .Join(_context.Specializations,
                 se => se.Module.SpecializationId,
-                s => s.Id,
+                s => s.SpecializationId,
                 (se, s) => new { SelfEducation = se, Specialization = s })
             .Where(x => x.Specialization.UserId == userId && x.SelfEducation.Date.Year == year)
             .Select(x => x.SelfEducation)
@@ -128,7 +128,7 @@ internal sealed class RefactoredSqlSelfEducationRepository : BaseRepository<Self
             .Include(se => se.Module)
             .Join(_context.Specializations,
                 se => se.Module.SpecializationId,
-                s => s.Id,
+                s => s.SpecializationId,
                 (se, s) => new { SelfEducation = se, Specialization = s })
             .Where(x => x.Specialization.UserId == userId && 
                         (x.SelfEducation.Type == SelfEducationType.Workshop || 

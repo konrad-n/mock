@@ -89,11 +89,11 @@ public sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures, 
                 if (internships.TryGetValue(procedure.InternshipId, out var internship))
                 {
                     // Find the specialization this internship belongs to
-                    var specialization = userSpecializations.FirstOrDefault(s => s.Id == internship.SpecializationId);
+                    var specialization = userSpecializations.FirstOrDefault(s => s.SpecializationId == internship.SpecializationId);
                     if (specialization != null)
                     {
                         // Only include procedures that match the specialization's SMK version
-                        if (procedure.SmkVersion == specialization.SmkVersion)
+                        if (procedure.SmkVersion.Equals(specialization.SmkVersion))
                         {
                             filteredProcedures.Add(procedure);
                         }

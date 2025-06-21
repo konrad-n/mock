@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Core.SpecializationTemplates;
 using SledzSpecke.Infrastructure.Repositories;
@@ -61,23 +62,13 @@ internal sealed class DataSeeder : IDataSeeder
 
         // Seed a test user
         var testUser = User.CreateWithId(
-            new UserId(1),
-            new Email("test@example.com"),
-            new HashedPassword("$2a$10$abc123"), // BCrypt hash format
-            new FirstName("Jan"),
-            null, // SecondName - optional
-            new LastName("Kowalski"),
-            new PhoneNumber("+48123456789"),
+            1,
+            "test@example.com",
+            "$2a$10$abc123", // BCrypt hash format
+            "Jan Kowalski",
+            "+48123456789",
             new DateTime(1990, 1, 1), // Date of birth
-            new Address(
-                "Marszałkowska",
-                "100",
-                "5A",
-                "00-001",
-                "Warszawa",
-                "Mazowieckie",
-                "Polska"
-            ),
+            "ul. Marszałkowska 100 m. 5A, 00-001 Warszawa",
             DateTime.UtcNow
         );
 
@@ -157,7 +148,7 @@ internal sealed class DataSeeder : IDataSeeder
                 if (template == null) continue;
 
                 // Determine SMK version from template version string
-                var smkVersion = templateDef.Version.Contains("2023") ? SmkVersion.New : SmkVersion.Old;
+                var smkVersion = templateDef.Version.Contains("2023") ? Core.Enums.SmkVersion.New : Core.Enums.SmkVersion.Old;
                 
                 // Create specialization from template
                 var specialization = await CreateSpecializationFromTemplateAsync(template, smkVersion);
@@ -210,11 +201,11 @@ internal sealed class DataSeeder : IDataSeeder
         }
     }
 
-    private async Task<Specialization> CreateSpecializationFromTemplateAsync(SpecializationTemplate template, SmkVersion smkVersion)
+    private async Task<Specialization> CreateSpecializationFromTemplateAsync(SpecializationTemplate template, Core.Enums.SmkVersion smkVersion)
     {
         // Generate dynamic ID based on existing specializations
         var maxId = await _context.Specializations
-            .Select(s => s.Id.Value)
+            .Select(s => s.SpecializationId)
             .DefaultIfEmpty(0)
             .MaxAsync();
         
@@ -225,9 +216,8 @@ internal sealed class DataSeeder : IDataSeeder
             .AddMonths(template.TotalDuration.Months)
             .AddDays(template.TotalDuration.Days);
 
-        var specialization = new Specialization(
-            new SpecializationId(specializationId),
-            new UserId(1), // Default user ID for template specializations
+        var specialization = Specialization.Create(
+            1, // Default user ID for template specializations
             template.Name,
             template.Code,
             smkVersion,
@@ -237,21 +227,23 @@ internal sealed class DataSeeder : IDataSeeder
             1, // Default planned PES year
             JsonSerializer.Serialize(template),
             template.TotalDuration.Years);
+        
+        // Set the ID manually since we're seeding
+        specialization.GetType().GetProperty("SpecializationId")!.SetValue(specialization, specializationId);
 
         // Create modules
         foreach (var moduleTemplate in template.Modules)
         {
             // Generate unique module ID by combining specialization ID and module ID
             var moduleId = new ModuleId(specializationId * 100 + moduleTemplate.ModuleId);
-            var moduleType = Enum.Parse<ModuleType>(moduleTemplate.ModuleType);
+            var moduleType = Enum.Parse<Core.Enums.ModuleType>(moduleTemplate.ModuleType);
             var moduleStartDate = startDate;
             var moduleEndDate = moduleStartDate.AddYears(moduleTemplate.Duration.Years)
                 .AddMonths(moduleTemplate.Duration.Months)
                 .AddDays(moduleTemplate.Duration.Days);
 
-            var module = new Module(
-                moduleId,
-                new SpecializationId(specializationId),
+            var module = Module.Create(
+                specializationId,
                 moduleType,
                 smkVersion,
                 moduleTemplate.Version,
@@ -259,6 +251,9 @@ internal sealed class DataSeeder : IDataSeeder
                 moduleStartDate,
                 moduleEndDate,
                 JsonSerializer.Serialize(moduleTemplate));
+                
+            // Set the ID manually since we're seeding
+            module.GetType().GetProperty("ModuleId")!.SetValue(module, moduleId.Value);
 
             // Set totals from template with null checks
             module.UpdateProgress(

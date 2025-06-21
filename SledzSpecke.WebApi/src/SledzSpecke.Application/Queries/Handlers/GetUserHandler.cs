@@ -26,9 +26,9 @@ public sealed class GetUserHandler : IQueryHandler<GetUser, UserDto>
         }
 
         return new UserDto(
-            user.Id.Value,
-            user.Email.Value,
-            user.GetFullName(),
+            user.UserId,
+            user.Email,
+            user.Name,
             Core.ValueObjects.SmkVersion.Old, // SmkVersion - temporary default
             0, // SpecializationId - temporary
             user.RegistrationDate

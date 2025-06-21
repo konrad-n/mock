@@ -69,11 +69,11 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
             foreach (var module in modules)
             {
                 // Get procedure requirements for this module
-                var requirements = await _procedureRequirementRepository.GetByModuleIdAsync(module.Id);
+                var requirements = await _procedureRequirementRepository.GetByModuleIdAsync(module.ModuleId);
                 
                 // Get realizations for this module
-                var moduleRealizations = realizationsByModule.ContainsKey(module.Id)
-                    ? realizationsByModule[module.Id]
+                var moduleRealizations = realizationsByModule.ContainsKey(module.ModuleId)
+                    ? realizationsByModule[module.ModuleId]
                     : new List<Core.Entities.ProcedureRealization>();
 
                 // Group realizations by requirement
@@ -131,7 +131,7 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
 
                 var moduleDto = new ModuleProceduresDto
                 {
-                    ModuleId = module.Id.Value,
+                    ModuleId = module.ModuleId,
                     ModuleName = module.Name,
                     ModuleType = module.Type.ToString(),
                     Procedures = procedureDtos,
@@ -159,8 +159,8 @@ internal sealed class GetUserProceduresHandler : IQueryHandler<GetUserProcedures
 
             var result = new UserProceduresDto
             {
-                UserId = user.Id.Value,
-                UserName = $"{user.FirstName} {user.LastName}",
+                UserId = user.UserId,
+                UserName = user.Name,
                 Modules = moduleDtos,
                 OverallSummary = overallSummary
             };

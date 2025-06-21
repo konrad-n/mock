@@ -7,7 +7,7 @@ using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.Specifications;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
@@ -43,53 +43,52 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
             _logger.LogInformation("Starting sign up for email: {Email}", 
                 command.Email);
                 
-            var email = new Email(command.Email);
-            var password = new Password(command.Password);
-            var firstName = new FirstName(command.FirstName);
-            var lastName = new LastName(command.LastName);
-            var phoneNumber = new PhoneNumber(command.PhoneNumber);
-            var address = new Address(
-                command.CorrespondenceAddress.Street,
-                command.CorrespondenceAddress.HouseNumber,
-                command.CorrespondenceAddress.ApartmentNumber,
-                command.CorrespondenceAddress.PostalCode,
-                command.CorrespondenceAddress.City,
-                command.CorrespondenceAddress.Province
-            );
+            // Validate inputs
+            if (string.IsNullOrEmpty(command.Email) || !command.Email.Contains("@"))
+                return Result.Failure("Invalid email format.");
+            if (string.IsNullOrEmpty(command.Password) || command.Password.Length < 8)
+                return Result.Failure("Password must be at least 8 characters long.");
+            if (string.IsNullOrEmpty(command.FirstName) || string.IsNullOrEmpty(command.LastName))
+                return Result.Failure("First name and last name are required.");
+            if (string.IsNullOrEmpty(command.PhoneNumber))
+                return Result.Failure("Phone number is required.");
             
-            _logger.LogInformation("Value objects created successfully");
+            _logger.LogInformation("Input validation passed");
 
-            if (await _userRepository.ExistsByEmailAsync(email))
+            if (await _userRepository.ExistsByEmailAsync(command.Email))
             {
                 _logger.LogWarning("Registration failed: Email {Email} already in use", command.Email);
                 return Result.Failure($"Email '{command.Email}' is already in use.", ErrorCodes.EMAIL_ALREADY_IN_USE);
             }
 
-            var securedPassword = _passwordManager.Secure(password);
-            var hashedPassword = new HashedPassword(securedPassword);
+            var securedPassword = _passwordManager.Secure(command.Password);
+            
+            // Build full name and address
+            var fullName = $"{command.FirstName} {command.LastName}";
+            var address = $"{command.CorrespondenceAddress.Street} {command.CorrespondenceAddress.HouseNumber}" +
+                         (string.IsNullOrEmpty(command.CorrespondenceAddress.ApartmentNumber) ? "" : $"/{command.CorrespondenceAddress.ApartmentNumber}") +
+                         $", {command.CorrespondenceAddress.PostalCode} {command.CorrespondenceAddress.City}, {command.CorrespondenceAddress.Province}";
             
             _logger.LogInformation("Creating user entity...");
             var user = User.Create(
-                email, 
-                hashedPassword, 
-                firstName,
-                null, // SecondName - optional
-                lastName,
-                phoneNumber,
+                command.Email, 
+                securedPassword, 
+                fullName,
+                command.PhoneNumber,
                 command.DateOfBirth,
                 address);
             
-            _logger.LogInformation("User entity created with ID: {UserId}", user.Id?.Value ?? 0);
+            _logger.LogInformation("User entity created with ID: {UserId}", user.UserId);
 
             await _userRepository.AddAsync(user);
             // SaveChangesAsync is already called in the repository's AddAsync method
             
-            _logger.LogInformation("User saved successfully with ID: {UserId}", user.Id?.Value ?? 0);
+            _logger.LogInformation("User saved successfully with ID: {UserId}", user.UserId);
             
             // Create user's specialization from template
             try
             {
-                var smkVersion = new SmkVersion(command.SmkVersion);
+                var smkVersion = (SmkVersion)Enum.Parse(typeof(SmkVersion), command.SmkVersion, true);
                 var startDate = _clock.Current();
                 
                 // For now, use hardcoded values until we properly load from database
@@ -101,9 +100,8 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
                 // Calculate planned end date
                 var plannedEndDate = startDate.AddYears(durationYears);
                 
-                var specialization = new Specialization(
-                    new SpecializationId(0), // Will be generated by database
-                    user.Id!,
+                var specialization = Specialization.Create(
+                    user.UserId,
                     specializationName,
                     programCode,
                     smkVersion,
@@ -118,11 +116,11 @@ public sealed class SignUpHandler : IResultCommandHandler<SignUp>
                 await _specializationRepository.AddAsync(specialization);
                 await _unitOfWork.SaveChangesAsync();
                 
-                _logger.LogInformation("Specialization created successfully for user {UserId}", user.Id.Value);
+                _logger.LogInformation("Specialization created successfully for user {UserId}", user.UserId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create specialization for user {UserId}", user.Id?.Value ?? 0);
+                _logger.LogError(ex, "Failed to create specialization for user {UserId}", user.UserId);
                 return Result.Failure("User created but failed to create specialization. Please contact support.");
             }
             

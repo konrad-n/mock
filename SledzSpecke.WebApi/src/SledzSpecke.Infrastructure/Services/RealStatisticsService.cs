@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Models.Statistics;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Infrastructure.DAL;
@@ -73,18 +74,18 @@ public class RealStatisticsService : IStatisticsService
                 InternshipId = internshipId,
                 Year = year,
                 Month = month,
-                TotalHours = monthlyShifts.Sum(s => s.Duration.Hours),
-                ApprovedHours = monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours),
-                PendingHours = monthlyShifts.Where(s => !s.IsApproved && s.SyncStatus != SyncStatus.SyncError).Sum(s => s.Duration.Hours),
-                RejectedHours = monthlyShifts.Where(s => s.SyncStatus == SyncStatus.SyncError || s.SyncStatus == SyncStatus.SyncFailed).Sum(s => s.Duration.Hours),
+                TotalHours = monthlyShifts.Sum(s => s.Hours),
+                ApprovedHours = monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Hours),
+                PendingHours = monthlyShifts.Where(s => !s.IsApproved && s.SyncStatus != Core.Enums.SyncStatus.SyncError).Sum(s => s.Hours),
+                RejectedHours = monthlyShifts.Where(s => s.SyncStatus == Core.Enums.SyncStatus.SyncError || s.SyncStatus == Core.Enums.SyncStatus.SyncFailed).Sum(s => s.Hours),
                 ShiftCount = monthlyShifts.Count,
-                AverageHoursPerShift = monthlyShifts.Any() ? (decimal)monthlyShifts.Average(s => s.Duration.Hours) : 0,
+                AverageHoursPerShift = monthlyShifts.Any() ? (decimal)monthlyShifts.Average(s => s.Hours) : 0,
                 WeekendShifts = monthlyShifts.Count(s => s.Date.DayOfWeek == DayOfWeek.Saturday || s.Date.DayOfWeek == DayOfWeek.Sunday),
                 NightShifts = monthlyShifts.Count(s => IsNightShift(s)),
                 LastUpdated = DateTime.UtcNow,
                 RequiredHours = MONTHLY_HOURS_MINIMUM,
-                MeetsMonthlyMinimum = monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours) >= MONTHLY_HOURS_MINIMUM,
-                HoursDeficit = Math.Max(0, MONTHLY_HOURS_MINIMUM - monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours)),
+                MeetsMonthlyMinimum = monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Hours) >= MONTHLY_HOURS_MINIMUM,
+                HoursDeficit = Math.Max(0, MONTHLY_HOURS_MINIMUM - monthlyShifts.Where(s => s.IsApproved).Sum(s => s.Hours)),
                 WeeklyBreakdown = CalculateWeeklyBreakdown(monthlyShifts)
             };
             
@@ -122,8 +123,8 @@ public class RealStatisticsService : IStatisticsService
                 .Where(s => s.Date >= weekStartDate && s.Date <= weekEndDate)
                 .ToList();
             
-            var totalHours = weeklyShifts.Sum(s => s.Duration.Hours);
-            var approvedHours = weeklyShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours);
+            var totalHours = weeklyShifts.Sum(s => s.Hours);
+            var approvedHours = weeklyShifts.Where(s => s.IsApproved).Sum(s => s.Hours);
             
             var statistics = new WeeklyStatistics
             {
@@ -378,14 +379,14 @@ public class RealStatisticsService : IStatisticsService
             
             var monthlyApproved = approvedShifts
                 .Where(s => s.Date.Year == shiftDate.Year && s.Date.Month == shiftDate.Month)
-                .Sum(s => s.Duration.Hours);
+                .Sum(s => s.Hours);
                 
-            var cacheKey = $"approved_hours:{internshipId.Value}:{shiftDate:yyyy-MM}";
+            var cacheKey = $"approved_hours:{internshipId}:{shiftDate:yyyy-MM}";
             await _cacheService.SetAsync(cacheKey, (object)monthlyApproved, TimeSpan.FromHours(2), cancellationToken);
             
             _logger.LogInformation(
                 "Updated approved hours for InternshipId={InternshipId}, Month={Month}. Hours: {Hours}",
-                internshipId.Value, shiftDate.ToString("yyyy-MM"), monthlyApproved);
+                internshipId, shiftDate.ToString("yyyy-MM"), monthlyApproved);
         }
         catch (Exception ex)
         {
@@ -534,7 +535,7 @@ public class RealStatisticsService : IStatisticsService
         
         foreach (var weekGroup in weekGroups)
         {
-            var weekHours = weekGroup.Sum(s => s.Duration.Hours);
+            var weekHours = weekGroup.Sum(s => s.Hours);
             weeklyStats[weekGroup.Key] = new WeeklyStatistics
             {
                 WeekNumber = weekGroup.Key,
@@ -646,8 +647,8 @@ public class RealStatisticsService : IStatisticsService
         
         var requiredProcedures = module.TotalProceduresA + module.TotalProceduresB;
         var requiredHours = module.RequiredShiftHours;
-        var completedHours = moduleShifts.Sum(s => s.Duration.Hours);
-        var approvedHours = moduleShifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours);
+        var completedHours = moduleShifts.Sum(s => s.Hours);
+        var approvedHours = moduleShifts.Where(s => s.IsApproved).Sum(s => s.Hours);
         
         var elapsedMonths = CalculateMonthsElapsed(moduleStartDate, now);
         var totalMonths = CalculateMonthsElapsed(moduleStartDate, moduleEndDate);
@@ -656,9 +657,9 @@ public class RealStatisticsService : IStatisticsService
         return new ModuleProgressStatistics
         {
             InternshipId = internship.InternshipId,
-            ModuleId = module.Id,
+            ModuleId = module.ModuleId,
             ModuleName = module.Name,
-            ModuleType = module.Type,
+            ModuleType = (SledzSpecke.Core.ValueObjects.ModuleType)module.Type,
             StartDate = moduleStartDate,
             CompletionDate = now >= moduleEndDate ? moduleEndDate : null,
             DurationInMonths = totalMonths,
@@ -688,14 +689,14 @@ public class RealStatisticsService : IStatisticsService
         var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
         if (specialization == null) 
         {
-            throw new InvalidOperationException($"Specialization not found for internship {internship.InternshipId.Value}");
+            throw new InvalidOperationException($"Specialization not found for internship {internship.InternshipId}");
         }
         
         var modules = await _moduleRepository.GetBySpecializationIdAsync(internship.SpecializationId);
         var yearModules = modules.ToList();
         
         var procedures = await _procedureRealizationRepository.GetByUserIdAsync(specialization.UserId);
-        var shifts = await _shiftRepository.GetByInternshipIdAsync(internship.InternshipId.Value);
+        var shifts = await _shiftRepository.GetByInternshipIdAsync(internship.InternshipId);
         
         var moduleProgressList = new List<ModuleProgressStatistics>();
         foreach (var module in yearModules)
@@ -706,8 +707,8 @@ public class RealStatisticsService : IStatisticsService
         }
         
         var totalRequiredHours = internship.PlannedDays * 8; // 8 hours per day
-        var totalCompletedHours = shifts.Sum(s => s.Duration.Hours);
-        var totalApprovedHours = shifts.Where(s => s.IsApproved).Sum(s => s.Duration.Hours);
+        var totalCompletedHours = shifts.Sum(s => s.Hours);
+        var totalApprovedHours = shifts.Where(s => s.IsApproved).Sum(s => s.Hours);
         
         var overallProgress = CalculateOverallYearProgress(moduleProgressList);
         

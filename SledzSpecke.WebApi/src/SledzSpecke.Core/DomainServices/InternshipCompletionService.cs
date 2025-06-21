@@ -216,12 +216,12 @@ public class InternshipCompletionService : IInternshipCompletionService
         var requirements = new InternshipCompletionRequirements
         {
             MinimumDays = internship.DaysCount,
-            SmkVersion = specialization.SmkVersion,
-            RequiresSupervisorApproval = specialization.SmkVersion == SmkVersion.New
+            SmkVersion = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New,
+            RequiresSupervisorApproval = specialization.SmkVersion == Enums.SmkVersion.New
         };
 
         // Set shift hour requirements based on SMK version
-        if (specialization.SmkVersion == SmkVersion.Old)
+        if (specialization.SmkVersion == Enums.SmkVersion.Old)
         {
             requirements.MinimumShiftHours = CalculateOldSmkShiftHours(internship);
             requirements.MinimumProcedures = 10; // Example minimum

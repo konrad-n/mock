@@ -27,14 +27,12 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
 
     public async Task<MedicalShift?> GetByIdAsync(int id)
     {
-        // Need to convert int to MedicalShiftId for EF Core to properly find the entity
-        var medicalShiftId = new MedicalShiftId(id);
-        return await Context.MedicalShifts.FirstOrDefaultAsync(ms => ms.Id == medicalShiftId);
+        return await Context.MedicalShifts.FirstOrDefaultAsync(ms => ms.ShiftId == id);
     }
 
     public async Task<IEnumerable<MedicalShift>> GetByInternshipIdAsync(int internshipId)
     {
-        var specification = new MedicalShiftByInternshipSpecification(new InternshipId(internshipId));
+        var specification = new MedicalShiftByInternshipSpecification(internshipId);
         return await GetBySpecificationAsync(specification);
     }
 
@@ -44,7 +42,7 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
         var internshipIds = await GetInternshipIdsForUserAsync(userId);
         
         // Then use specification to get medical shifts
-        var specification = new MedicalShiftByInternshipIdsSpecification(internshipIds);
+        var specification = new MedicalShiftByInternshipIdsSpecification(internshipIds.Select(id => id.Value));
         return await GetBySpecificationAsync(specification);
     }
 
@@ -59,7 +57,7 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
         var internshipIds = await GetInternshipIdsForUserAsync(userId);
         
         // Combine specifications
-        var specification = new MedicalShiftByInternshipIdsSpecification(internshipIds)
+        var specification = new MedicalShiftByInternshipIdsSpecification(internshipIds.Select(id => id.Value))
             .And(new MedicalShiftByDateRangeSpecification(startDate, endDate));
             
         return await GetBySpecificationAsync(specification);
@@ -81,7 +79,7 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
     {
         // ID generation should be handled by database or a dedicated service
         // For now, keeping the existing logic but moving it to a private method
-        if (shift.Id.Value == 0)
+        if (shift.ShiftId == 0)
         {
             await GenerateIdForEntity(shift);
         }
@@ -90,7 +88,7 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
         // Note: SaveChangesAsync should be called by Unit of Work, not here
         // But keeping it for backward compatibility
         await _unitOfWork.SaveChangesAsync();
-        return shift.Id.Value;
+        return shift.ShiftId;
     }
 
     public async Task UpdateAsync(MedicalShift shift)
@@ -184,13 +182,13 @@ internal sealed class RefactoredSqlMedicalShiftRepository : BaseRepository<Medic
         await connection.OpenAsync();
 
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"MedicalShifts\"";
+        command.CommandText = "SELECT COALESCE(MAX(\"ShiftId\"), 0) FROM \"MedicalShifts\"";
         var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
 
-        var newId = new MedicalShiftId(maxId + 1);
+        var newId = maxId + 1;
 
         // Use reflection to set the ID since it's private
-        var idProperty = shift.GetType().GetProperty("Id");
+        var idProperty = shift.GetType().GetProperty("ShiftId");
         idProperty?.SetValue(shift, newId);
 
         await connection.CloseAsync();

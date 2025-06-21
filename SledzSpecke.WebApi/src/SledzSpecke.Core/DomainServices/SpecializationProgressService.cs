@@ -164,8 +164,8 @@ public class SpecializationProgressService : ISpecializationProgressService
 
         foreach (var module in specialization.Modules)
         {
-            var moduleInternships = await _internshipRepository.GetByModuleAsync(module.Id);
-            var moduleCourses = await _courseRepository.GetByModuleAsync(module.Id);
+            var moduleInternships = await _internshipRepository.GetByModuleAsync(module.ModuleId);
+            var moduleCourses = await _courseRepository.GetByModuleAsync(module.ModuleId);
 
             var completedInternships = moduleInternships.Count(i => i.IsCompleted);
             var completedCourses = moduleCourses.Count(c => c.IsApproved);
@@ -178,7 +178,7 @@ public class SpecializationProgressService : ISpecializationProgressService
 
             moduleProgress.Add(new ModuleProgressSummary
             {
-                ModuleId = module.Id,
+                ModuleId = module.ModuleId,
                 ModuleName = module.Name,
                 ProgressPercentage = progress,
                 CompletedInternships = completedInternships,

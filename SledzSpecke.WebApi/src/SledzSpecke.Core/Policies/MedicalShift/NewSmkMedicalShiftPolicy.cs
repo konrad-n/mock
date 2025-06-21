@@ -14,14 +14,17 @@ public class NewSmkMedicalShiftPolicy : ISmkPolicy<Entities.MedicalShift>
 
     public Result Validate(Entities.MedicalShift shift, SpecializationContext context)
     {
+        // Calculate total minutes from Hours and Minutes
+        var totalMinutes = shift.Hours * 60 + shift.Minutes;
+        
         // Validate minimum duration
-        if (shift.Duration.TotalMinutes < MinimumShiftDurationMinutes)
+        if (totalMinutes < MinimumShiftDurationMinutes)
         {
             return Result.Failure($"Dyżur musi trwać minimum {MinimumShiftDurationMinutes / 60} godzinę");
         }
 
         // Validate maximum daily duration
-        if ((shift.Duration.TotalMinutes / 60.0) > MaximumDailyHours)
+        if ((totalMinutes / 60.0) > MaximumDailyHours)
         {
             return Result.Failure($"Dyżur nie może przekraczać {MaximumDailyHours} godzin");
         }

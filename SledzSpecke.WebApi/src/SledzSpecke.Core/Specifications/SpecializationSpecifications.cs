@@ -16,7 +16,7 @@ public sealed class SpecializationByIdSpecification : Specification<Specializati
 
     public override Expression<Func<Specialization, bool>> ToExpression()
     {
-        return specialization => specialization.Id == _id;
+        return specialization => specialization.SpecializationId == _id.Value;
     }
 }
 
@@ -46,7 +46,7 @@ public sealed class ActiveSpecializationSpecification : Specification<Specializa
 
     public override Expression<Func<Specialization, bool>> ToExpression()
     {
-        return specialization => specialization.Status == SpecializationStatus.Active && 
+        return specialization => specialization.Status == "Active" && 
             (specialization.ActualEndDate == null || specialization.ActualEndDate > _currentDate);
     }
 }

@@ -26,7 +26,7 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
         CancellationToken cancellationToken = default)
     {
         // Verify user exists
-        var user = await _userRepository.GetByIdAsync(new UserId(query.UserId), cancellationToken);
+        var user = await _userRepository.GetByIdAsync(query.UserId);
         if (user is null)
         {
             return Result<IEnumerable<MedicalShiftDto>>.Failure(
@@ -39,7 +39,7 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
         if (query.FromDate != default && query.ToDate != default)
         {
             shifts = await _medicalShiftRepository.GetByUserIdAndDateRangeAsync(
-                new UserId(query.UserId),
+                new Core.ValueObjects.UserId(query.UserId),
                 query.FromDate,
                 query.ToDate);
         }
@@ -51,16 +51,16 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
         // Filter by internship if specified
         if (query.InternshipId.HasValue)
         {
-            shifts = shifts.Where(s => s.InternshipId.Value == query.InternshipId.Value);
+            shifts = shifts.Where(s => s.InternshipId == query.InternshipId.Value);
         }
 
         // Map to DTOs
         var shiftDtos = shifts.Select(shift => new MedicalShiftDto(
-            Id: shift.Id.Value,
-            InternshipId: shift.InternshipId.Value,
+            Id: shift.ShiftId,
+            InternshipId: shift.InternshipId,
             Date: shift.Date,
-            Hours: shift.Duration.Hours,
-            Minutes: shift.Duration.Minutes,
+            Hours: shift.Hours,
+            Minutes: shift.Minutes,
             Location: shift.Location,
             Year: shift.Year,
             SyncStatus: shift.SyncStatus,
@@ -69,8 +69,8 @@ public sealed class GetMedicalShiftsHandler : IResultQueryHandler<GetMedicalShif
             ApproverName: null,
             ApproverRole: null,
             IsApproved: shift.IsApproved,
-            CanBeDeleted: !shift.IsApproved && shift.SyncStatus != SyncStatus.Synced,
-            Duration: TimeSpan.FromHours(shift.Duration.Hours) + TimeSpan.FromMinutes(shift.Duration.Minutes)
+            CanBeDeleted: !shift.IsApproved && shift.SyncStatus != Core.Enums.SyncStatus.Synced,
+            Duration: TimeSpan.FromHours(shift.Hours) + TimeSpan.FromMinutes(shift.Minutes)
         ));
 
         return Result<IEnumerable<MedicalShiftDto>>.Success(shiftDtos);

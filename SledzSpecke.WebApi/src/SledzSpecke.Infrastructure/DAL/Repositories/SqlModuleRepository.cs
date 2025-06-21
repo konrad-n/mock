@@ -17,13 +17,13 @@ internal sealed class SqlModuleRepository : IModuleRepository
     public async Task<Module?> GetByIdAsync(ModuleId id)
     {
         return await _context.Modules
-            .FirstOrDefaultAsync(m => m.Id == id);
+            .FirstOrDefaultAsync(m => m.ModuleId == id.Value);
     }
 
     public async Task<Module?> GetByIdAsync(int id)
     {
-        var moduleId = new ModuleId(id);
-        return await GetByIdAsync(moduleId);
+        return await _context.Modules
+            .FirstOrDefaultAsync(m => m.ModuleId == id);
     }
 
     public async Task<IEnumerable<Module>> GetBySpecializationIdAsync(SpecializationId specializationId)
@@ -42,7 +42,7 @@ internal sealed class SqlModuleRepository : IModuleRepository
     {
         await _context.Modules.AddAsync(module);
         await _context.SaveChangesAsync();
-        return module.Id;
+        return new ModuleId(module.ModuleId);
     }
 
     public async Task UpdateAsync(Module module)

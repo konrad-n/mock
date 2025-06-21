@@ -5,6 +5,7 @@ using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.Specifications;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.DomainServices;
 
@@ -294,12 +295,12 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
             }
 
             // Check module type transition rules
-            if (currentModule.Type == Core.ValueObjects.ModuleType.Basic && nextModule.Type == Core.ValueObjects.ModuleType.Basic)
+            if (currentModule.Type == Core.Enums.ModuleType.Basic && nextModule.Type == Core.Enums.ModuleType.Basic)
             {
                 return Result.Failure("Cannot transition from basic module to another basic module");
             }
 
-            if (currentModule.Type == Core.ValueObjects.ModuleType.Specialist && nextModule.Type == Core.ValueObjects.ModuleType.Basic)
+            if (currentModule.Type == Core.Enums.ModuleType.Specialist && nextModule.Type == Core.Enums.ModuleType.Basic)
             {
                 return Result.Failure("Cannot transition from specialist module back to basic module");
             }
@@ -437,12 +438,12 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
             // SMK rules for module type switching
             switch (currentModule.Type)
             {
-                case Core.ValueObjects.ModuleType.Basic:
+                case Core.Enums.ModuleType.Basic:
                     // Can only switch from Basic to Specialist
                     if (targetType == Core.DomainServices.ModuleType.Specialist)
                     {
                         // Must have completed at least 50% of basic module
-                        var progress = await CalculateWeightedProgressAsync(internshipId, currentModule.Id, cancellationToken);
+                        var progress = await CalculateWeightedProgressAsync(internshipId, currentModule.ModuleId, cancellationToken);
                         if (!progress.IsSuccess)
                         {
                             return Result<bool>.Success(false);
@@ -469,7 +470,7 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
                     }
                     return Result<bool>.Success(false);
 
-                case Core.ValueObjects.ModuleType.Specialist:
+                case Core.Enums.ModuleType.Specialist:
                     // Cannot switch back to Basic from Specialist
                     if (targetType == Core.DomainServices.ModuleType.Basic)
                     {
@@ -481,7 +482,7 @@ public sealed class SimplifiedModuleCompletionService : IModuleCompletionService
                     // Can switch between different specialist modules if completed
                     if (targetType == Core.DomainServices.ModuleType.Specialist)
                     {
-                        var completionStatus = await ValidateModuleCompletionAsync(internshipId, currentModule.Id, cancellationToken);
+                        var completionStatus = await ValidateModuleCompletionAsync(internshipId, currentModule.ModuleId, cancellationToken);
                         if (!completionStatus.IsSuccess)
                         {
                             return Result<bool>.Success(false);

@@ -41,8 +41,8 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
     {
         var result = new SmkValidationResult
         {
-            SpecializationId = specialization.Id,
-            SmkVersion = specialization.SmkVersion,
+            SpecializationId = new SpecializationId(specialization.SpecializationId),
+            SmkVersion = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New,
             IsValid = true
         };
 
@@ -59,12 +59,12 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
         {
             var moduleValidation = await ValidateModuleAsync(
                 module, 
-                internships.Where(i => i.ModuleId == module.Id),
-                shifts.Where(s => s.ModuleId == module.Id),
+                internships.Where(i => i.ModuleId == module.ModuleId),
+                shifts.Where(s => s.ModuleId == module.ModuleId),
                 procedures, // Procedures are user-based, not module-based directly
-                courses.Where(c => c.ModuleId == module.Id),
-                selfEducation.Where(s => s.ModuleId == module.Id),
-                additionalDays.Where(d => d.ModuleId == module.Id));
+                courses.Where(c => c.ModuleId == module.ModuleId),
+                selfEducation.Where(s => s.ModuleId == module.ModuleId),
+                additionalDays.Where(d => d.ModuleId == module.ModuleId));
 
             if (moduleValidation.IsFailure)
             {
@@ -91,7 +91,8 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
         }
 
         // Validate procedure counts based on SMK version
-        var procedureValidation = ValidateProcedureCounts(procedures, specialization.SmkVersion);
+        var smkVersionForProc = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New;
+        var procedureValidation = ValidateProcedureCounts(procedures, smkVersionForProc);
         if (procedureValidation.IsFailure)
         {
             result.IsValid = false;
@@ -142,9 +143,9 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
     {
         var result = new ModuleValidationResult
         {
-            ModuleId = module.Id,
+            ModuleId = module.ModuleId,
             ModuleName = module.Name,
-            ModuleType = module.Type,
+            ModuleType = module.Type == Enums.ModuleType.Basic ? ValueObjects.ModuleType.Basic : ValueObjects.ModuleType.Specialist,
             IsValid = true
         };
 
@@ -152,7 +153,7 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
         var internshipsList = internships.ToList();
         foreach (var internship in internshipsList)
         {
-            if (internship.Status != InternshipStatus.Completed && internship.EndDate < DateTime.UtcNow)
+            if (internship.Status != "Completed" && internship.EndDate < DateTime.UtcNow)
             {
                 result.IsValid = false;
                 result.ValidationErrors.Add($"Internship {internship.Name} is past end date but not completed");
@@ -182,7 +183,7 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
         var shiftsList = shifts.ToList();
         foreach (var shift in shiftsList)
         {
-            if (shift.Duration.TotalMinutes <= 0)
+            if ((shift.Hours * 60 + shift.Minutes) <= 0)
             {
                 result.IsValid = false;
                 result.ValidationErrors.Add($"Medical shift on {shift.Date:yyyy-MM-dd} has invalid duration");
@@ -267,7 +268,7 @@ public sealed class SmkComplianceValidator : ISmkComplianceValidator
             totalWeeks = 1;
         }
 
-        var totalMinutes = shiftsList.Sum(s => s.Duration.TotalMinutes);
+        var totalMinutes = shiftsList.Sum(s => s.Hours * 60 + s.Minutes);
         var averageMinutesPerWeek = totalMinutes / totalWeeks;
         var expectedMinutesPerWeek = (WEEKLY_SHIFT_HOURS_AVERAGE * 60) + WEEKLY_SHIFT_MINUTES_AVERAGE;
 

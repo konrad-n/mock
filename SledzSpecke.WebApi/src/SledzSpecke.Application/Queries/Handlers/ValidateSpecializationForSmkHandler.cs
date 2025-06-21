@@ -6,6 +6,7 @@ using SledzSpecke.Core.DomainServices;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.Queries.Handlers;
 
@@ -59,7 +60,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
         
         // Get all related data
         var modules = await _moduleRepository.GetBySpecializationIdAsync(query.SpecializationId);
-        var moduleIds = modules.Select(m => m.Id).ToList();
+        var moduleIds = modules.Select(m => m.ModuleId).ToList();
         
         var internships = await _internshipRepository.GetBySpecializationIdAsync(query.SpecializationId);
         var medicalShifts = new List<MedicalShift>();
@@ -79,7 +80,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
             var moduleInternships = internships.Where(i => i.ModuleId == moduleId);
             foreach (var internship in moduleInternships)
             {
-                var internshipShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internship.Id);
+                var internshipShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internship.InternshipId);
                 medicalShifts.AddRange(internshipShifts);
             }
             
@@ -110,7 +111,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
             return new SmkValidationResultDto
             {
                 SpecializationId = query.SpecializationId,
-                SmkVersion = specialization.SmkVersion == SmkVersion.Old ? "old" : "new",
+                SmkVersion = specialization.SmkVersion == Core.Enums.SmkVersion.Old ? "old" : "new",
                 IsValid = false,
                 ValidationDate = DateTime.UtcNow,
                 TotalErrors = 1,
@@ -123,7 +124,7 @@ public sealed class ValidateSpecializationForSmkHandler : IQueryHandler<Validate
         return new SmkValidationResultDto
         {
             SpecializationId = query.SpecializationId,
-            SmkVersion = specialization.SmkVersion == SmkVersion.Old ? "old" : "new",
+            SmkVersion = specialization.SmkVersion == Core.Enums.SmkVersion.Old ? "old" : "new",
             IsValid = result.IsValid,
             ValidationDate = result.ValidationDate,
             TotalErrors = result.TotalErrors,

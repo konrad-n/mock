@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Infrastructure.DAL.Configurations;
 
@@ -9,53 +8,33 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id)
-            .HasConversion(x => x!.Value, x => new UserId(x))
+        builder.HasKey(x => x.UserId);
+        builder.Property(x => x.UserId)
+            .HasColumnName("UserId")
             .ValueGeneratedNever()
             .IsRequired();
 
         builder.Property(x => x.Email)
-            .HasConversion(x => x.Value, x => new Email(x))
             .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(x => x.Password)
-            .HasConversion(x => x.Value, x => new HashedPassword(x))
             .IsRequired();
 
-        builder.Property(x => x.FirstName)
-            .HasConversion(x => x.Value, x => new FirstName(x))
-            .HasMaxLength(100)
+        builder.Property(x => x.Name)
+            .HasMaxLength(200)
             .IsRequired();
-
-        builder.Property(x => x.LastName)
-            .HasConversion(x => x.Value, x => new LastName(x))
-            .HasMaxLength(100)
-            .IsRequired();
-
-        builder.Property(x => x.SecondName)
-            .HasConversion(x => x != null ? x.Value : null, x => x != null ? new SecondName(x) : null)
-            .HasMaxLength(100);
 
         builder.Property(x => x.PhoneNumber)
-            .HasConversion(x => x.Value, x => new PhoneNumber(x))
             .HasMaxLength(20)
             .IsRequired();
 
         builder.Property(x => x.DateOfBirth)
             .IsRequired();
 
-        builder.OwnsOne(x => x.CorrespondenceAddress, address =>
-        {
-            address.Property(a => a.Street).HasMaxLength(200).IsRequired();
-            address.Property(a => a.HouseNumber).HasMaxLength(50).IsRequired();
-            address.Property(a => a.ApartmentNumber).HasMaxLength(50);
-            address.Property(a => a.PostalCode).HasMaxLength(10).IsRequired();
-            address.Property(a => a.City).HasMaxLength(100).IsRequired();
-            address.Property(a => a.Province).HasMaxLength(100).IsRequired();
-            address.Property(a => a.Country).HasMaxLength(100).IsRequired();
-        });
+        builder.Property(x => x.CorrespondenceAddress)
+            .HasMaxLength(500)
+            .IsRequired();
 
         builder.Property(x => x.RegistrationDate)
             .IsRequired();
@@ -70,6 +49,15 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(x => x.LastLoginAt);
+
+        builder.Property(x => x.SmkVersion)
+            .HasConversion<string>()
+            .HasMaxLength(10)
+            .IsRequired();
+
+        builder.Property(x => x.SyncStatus)
+            .HasConversion<int>()
+            .IsRequired();
 
         builder.HasIndex(x => x.Email).IsUnique();
     }

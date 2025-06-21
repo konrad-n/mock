@@ -42,7 +42,7 @@ public class ValidateMonthlyHoursStep : ISagaStep<SMKMonthlyReportSagaData>
     public async Task<Result> ExecuteAsync(SMKMonthlyReportSagaData data, CancellationToken cancellationToken)
     {
         // Calculate total hours
-        data.TotalHours = data.Shifts.Sum(s => s.Duration.Hours + (s.Duration.Minutes / 60m));
+        data.TotalHours = data.Shifts.Sum(s => s.Hours + (s.Minutes / 60m));
         
         // Validate 160 hours minimum
         if (data.TotalHours < 160)
@@ -61,7 +61,7 @@ public class ValidateMonthlyHoursStep : ISagaStep<SMKMonthlyReportSagaData>
             if (!data.WeeklyHours.ContainsKey(weekOfYear))
                 data.WeeklyHours[weekOfYear] = 0;
                 
-            data.WeeklyHours[weekOfYear] += shift.Duration.Hours + (shift.Duration.Minutes / 60m);
+            data.WeeklyHours[weekOfYear] += shift.Hours + (shift.Minutes / 60m);
         }
         
         if (data.WeeklyHours.Any(kvp => kvp.Value > 48))

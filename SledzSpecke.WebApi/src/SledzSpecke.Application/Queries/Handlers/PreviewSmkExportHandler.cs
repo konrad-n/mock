@@ -68,7 +68,7 @@ public sealed class PreviewSmkExportHandler : IQueryHandler<PreviewSmkExport, Sm
         
         // Get all related data
         var modules = await _moduleRepository.GetBySpecializationIdAsync(query.SpecializationId);
-        var moduleIds = modules.Select(m => m.Id).ToList();
+        var moduleIds = modules.Select(m => m.ModuleId).ToList();
         
         var internships = await _internshipRepository.GetBySpecializationIdAsync(query.SpecializationId);
         var medicalShifts = 0;
@@ -83,13 +83,13 @@ public sealed class PreviewSmkExportHandler : IQueryHandler<PreviewSmkExport, Sm
             var moduleInternships = internships.Where(i => i.ModuleId == moduleId);
             foreach (var internship in moduleInternships)
             {
-                var internshipShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internship.Id);
+                var internshipShifts = await _medicalShiftRepository.GetByInternshipIdAsync(internship.InternshipId);
                 medicalShifts += internshipShifts.Count();
             }
             
             foreach (var internship in moduleInternships)
             {
-                var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
+                var internshipProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.InternshipId);
                 procedures += internshipProcedures.Count();
             }
             
@@ -135,9 +135,9 @@ public sealed class PreviewSmkExportHandler : IQueryHandler<PreviewSmkExport, Sm
         return new SmkExportPreviewDto
         {
             SpecializationId = query.SpecializationId,
-            UserName = $"{user.FirstName.Value} {user.LastName.Value}",
+            UserName = user.Name,
             SpecializationName = specialization.Name,
-            SmkVersion = specialization.SmkVersion == SmkVersion.Old ? "old" : "new",
+            SmkVersion = specialization.SmkVersion == Core.Enums.SmkVersion.Old ? "old" : "new",
             TotalInternships = internships.Count(),
             TotalCourses = courses,
             TotalMedicalShifts = medicalShifts,

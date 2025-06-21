@@ -49,15 +49,15 @@ public sealed class GetAvailableModulesHandler : IQueryHandler<GetAvailableModul
         // Map modules to DTOs
         return specialization.Modules.Select(module => new ModuleListDto
         {
-            Id = module.Id.Value,
-            SpecializationId = module.SpecializationId.Value,
+            Id = module.ModuleId,
+            SpecializationId = module.SpecializationId,
             Name = module.Name,
             Type = module.Type.ToString(),
-            SmkVersion = module.SmkVersion.Value,
+            SmkVersion = module.SmkVersion == Core.Enums.SmkVersion.Old ? "old" : "new",
             Version = module.Version,
             StartDate = module.StartDate,
             EndDate = module.EndDate,
-            IsActive = module.Id == specialization.CurrentModuleId
+            IsActive = module.ModuleId == specialization.CurrentModuleId
         }).ToList();
     }
 }

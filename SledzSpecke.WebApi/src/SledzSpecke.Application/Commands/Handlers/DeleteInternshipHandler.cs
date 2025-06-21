@@ -50,7 +50,7 @@ public sealed class DeleteInternshipHandler : IResultCommandHandler<DeleteIntern
             }
 
             // Check if internship can be deleted
-            if (!internship.CanBeDeleted())
+            if (internship.IsApproved || internship.SyncStatus == Core.Enums.SyncStatus.Synced)
             {
                 return Result.Failure("Cannot delete synced or approved internship.");
             }

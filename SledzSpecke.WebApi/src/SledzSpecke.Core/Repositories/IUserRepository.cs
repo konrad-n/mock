@@ -1,14 +1,14 @@
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Core.Repositories;
 
-public interface IUserRepository : IGenericRepository<User, UserId>
+public interface IUserRepository
 {
-    Task<User?> GetByEmailAsync(Email email);
+    Task<User?> GetByIdAsync(int userId);
+    Task<User?> GetByEmailAsync(string email);
     Task<IEnumerable<User>> GetAllAsync();
-    Task<UserId> AddAsync(User user);
+    Task<int> AddAsync(User user);
     Task UpdateAsync(User user);
-    Task DeleteAsync(UserId id);
-    Task<bool> ExistsByEmailAsync(Email email);
+    Task DeleteAsync(int userId);
+    Task<bool> ExistsByEmailAsync(string email);
 }

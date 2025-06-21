@@ -20,7 +20,7 @@ internal sealed class SqlInternshipRepository : IInternshipRepository
         => await _internships
             .Include(i => i.MedicalShifts)
             .Include(i => i.Procedures)
-            .SingleOrDefaultAsync(i => i.Id == id);
+            .SingleOrDefaultAsync(i => i.InternshipId == id.Value);
 
     public async Task<IEnumerable<Internship>> GetBySpecializationIdAsync(SpecializationId specializationId)
         => await _internships
@@ -60,7 +60,7 @@ internal sealed class SqlInternshipRepository : IInternshipRepository
     public async Task AddAsync(Internship internship)
     {
         // Generate new ID if it's 0
-        if (internship.InternshipId.Value == 0)
+        if (internship.InternshipId == 0)
         {
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();

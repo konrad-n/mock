@@ -296,9 +296,10 @@ public class CourseRequirementService : ICourseRequirementService
         }
 
         // Get requirements
+        var smkVersion = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New;
         var requirementsResult = await GetRequirementsAsync(
             specializationId, 
-            specialization.SmkVersion, 
+            smkVersion, 
             null, 
             null);
         
@@ -350,9 +351,10 @@ public class CourseRequirementService : ICourseRequirementService
             return Result<CourseCompletionStatus>.Failure("Nie znaleziono specjalizacji");
         }
 
+        var smkVersionStatus = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New;
         var requirementsResult = await GetRequirementsAsync(
             specializationId,
-            specialization.SmkVersion,
+            smkVersionStatus,
             year,
             moduleId);
         

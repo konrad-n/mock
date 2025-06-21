@@ -145,7 +145,7 @@ public class AddProcedureValidator : AbstractValidator<AddProcedure>
             .MustAsync(async (command, cancellation) =>
             {
                 var internship = await internshipRepository.GetByIdAsync(command.InternshipId);
-                return internship != null && internship.Status == InternshipStatus.InProgress;
+                return internship != null && internship.Status == "InProgress";
             })
             .WithMessage("Internship not found or is not active")
             .WithErrorCode("INTERNSHIP_NOT_ACTIVE");

@@ -84,7 +84,7 @@ public class DurationCalculationService : IDurationCalculationService
         // Calculate total shift hours
         foreach (var shift in shifts.Where(s => s.IsApproved))
         {
-            summary.TotalShiftMinutes += shift.Duration.TotalMinutes;
+            summary.TotalShiftMinutes += shift.Hours * 60 + shift.Minutes;
             summary.ShiftCount++;
         }
 
@@ -173,7 +173,7 @@ public class DurationCalculationService : IDurationCalculationService
         foreach (var internship in internships)
         {
             var internshipSummary = await CalculateInternshipDurationAsync(
-                internship.InternshipId.Value);
+                internship.InternshipId);
                 
             if (internshipSummary.IsSuccess)
             {
@@ -232,7 +232,7 @@ public class DurationCalculationService : IDurationCalculationService
 
         foreach (var shift in weekShifts)
         {
-            validation.TotalMinutes += shift.Duration.TotalMinutes;
+            validation.TotalMinutes += shift.Hours * 60 + shift.Minutes;
             validation.ShiftDates.Add(shift.Date);
         }
 
@@ -273,7 +273,7 @@ public class DurationCalculationService : IDurationCalculationService
         {
             // Get shifts for this month
             var allShifts = await _medicalShiftRepository.GetByInternshipIdAsync(
-                internship.InternshipId.Value);
+                internship.InternshipId);
                 
             var monthShifts = allShifts
                 .Where(s => s.Date >= monthStart && s.Date <= monthEnd)
@@ -282,7 +282,7 @@ public class DurationCalculationService : IDurationCalculationService
 
             foreach (var shift in monthShifts)
             {
-                validation.TotalMinutes += shift.Duration.TotalMinutes;
+                validation.TotalMinutes += shift.Hours * 60 + shift.Minutes;
                 validation.ShiftCount++;
             }
         }

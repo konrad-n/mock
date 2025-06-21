@@ -33,19 +33,19 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
         {
             BasicInfo = new BasicInfoExportDto
             {
-                FirstName = data.User.FirstName.Value,
-                LastName = data.User.LastName.Value,
-                Email = data.User.Email.Value,
-                PhoneNumber = data.User.PhoneNumber.Value,
+                FirstName = data.User.Name.Split(' ').FirstOrDefault() ?? "",
+                LastName = data.User.Name.Split(' ').Skip(1).FirstOrDefault() ?? "",
+                Email = data.User.Email,
+                PhoneNumber = data.User.PhoneNumber,
                 SpecializationName = data.Specialization.Name,
-                SmkVersion = data.SmkVersion.Value,
+                SmkVersion = data.SmkVersion.ToString(),
                 ProgramVariant = data.Specialization.ProgramVariant,
                 PlannedPesYear = data.Specialization.PlannedPesYear.ToString(),
                 SpecializationStartDate = data.Specialization.StartDate.ToString("dd.MM.yyyy"),
                 SpecializationEndDate = data.Specialization.PlannedEndDate.ToString("dd.MM.yyyy"),
-                CurrentModuleName = data.Modules.FirstOrDefault(m => m.Id == data.Specialization.CurrentModuleId)?.Name ?? "",
-                CurrentModuleStartDate = data.Modules.FirstOrDefault(m => m.Id == data.Specialization.CurrentModuleId)?.StartDate.ToString("dd.MM.yyyy") ?? "",
-                CorrespondenceAddress = FormatAddress(data.User.CorrespondenceAddress)
+                CurrentModuleName = data.Modules.FirstOrDefault(m => m.ModuleId == data.Specialization.CurrentModuleId)?.Name ?? "",
+                CurrentModuleStartDate = data.Modules.FirstOrDefault(m => m.ModuleId == data.Specialization.CurrentModuleId)?.StartDate.ToString("dd.MM.yyyy") ?? "",
+                CorrespondenceAddress = data.User.CorrespondenceAddress ?? ""
             },
             
             Internships = data.Internships.Select(i => new InternshipExportDto
@@ -57,7 +57,7 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
                 EndDate = i.EndDate.ToString("dd.MM.yyyy"),
                 DurationDays = i.DaysCount,
                 SupervisorName = i.SupervisorName ?? "",
-                ModuleName = data.Modules.FirstOrDefault(m => m.Id == i.ModuleId)?.Name ?? "",
+                ModuleName = data.Modules.FirstOrDefault(m => m.ModuleId == i.ModuleId)?.Name ?? "",
                 Status = i.Status.ToString()
             }).ToList(),
             
@@ -70,7 +70,7 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
                 EndDate = c.EndDate.ToString("dd.MM.yyyy"),
                 CreditHours = c.DurationHours,
                 CourseType = c.CourseType.ToString(),
-                ModuleName = data.Modules.FirstOrDefault(m => m.Id == c.ModuleId)?.Name ?? "",
+                ModuleName = data.Modules.FirstOrDefault(m => m.ModuleId == c.ModuleId)?.Name ?? "",
                 CertificateNumber = c.CmkpCertificateNumber ?? "",
                 Status = c.IsApproved ? "Zatwierdzony" : "Oczekujący"
             }).ToList(),
@@ -83,7 +83,7 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
                 Duration = $"{s.Hours}h {s.Minutes}min",
                 Location = s.Location,
                 InternshipName = data.Internships.FirstOrDefault(i => i.InternshipId == s.InternshipId)?.Name ?? "",
-                ModuleName = data.Modules.FirstOrDefault(m => m.Id == s.ModuleId)?.Name ?? "",
+                ModuleName = data.Modules.FirstOrDefault(m => m.ModuleId == s.ModuleId)?.Name ?? "",
                 SupervisorName = s.SupervisorName ?? "",
                 Notes = ""
             }).ToList(),
@@ -97,7 +97,7 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
                 NumberOfDays = d.NumberOfDays,
                 Purpose = d.Purpose,
                 EventName = d.EventName,
-                ModuleName = data.Modules.FirstOrDefault(m => m.Id == d.ModuleId)?.Name ?? "",
+                ModuleName = data.Modules.FirstOrDefault(m => m.ModuleId == d.ModuleId)?.Name ?? "",
                 InternshipName = data.Internships.FirstOrDefault(i => i.InternshipId == d.InternshipId)?.Name ?? ""
             }).ToList()
         };
@@ -138,7 +138,7 @@ public sealed class ApplicationSmkExcelGenerator : ISmkExcelGenerator
             var moduleName = "";
             if (requirement != null)
             {
-                var module = data.Modules.FirstOrDefault(m => m.Id == requirement.ModuleId);
+                var module = data.Modules.FirstOrDefault(m => m.ModuleId == requirement.ModuleId);
                 moduleName = module?.Name ?? "";
             }
             

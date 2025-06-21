@@ -9,12 +9,11 @@ internal sealed class SpecializationConfiguration : IEntityTypeConfiguration<Spe
 {
     public void Configure(EntityTypeBuilder<Specialization> builder)
     {
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id)
-            .HasConversion(x => x.Value, x => new SpecializationId(x));
+        builder.HasKey(x => x.SpecializationId);
+        builder.Property(x => x.SpecializationId)
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.UserId)
-            .HasConversion(x => x.Value, x => new UserId(x))
             .IsRequired();
 
         builder.Property(x => x.Name)
@@ -26,10 +25,9 @@ internal sealed class SpecializationConfiguration : IEntityTypeConfiguration<Spe
             .IsRequired();
 
         builder.Property(x => x.SmkVersion)
-            .HasConversion(x => x.Value, x => new SmkVersion(x));
+            .HasConversion<string>();
 
         builder.Property(x => x.CurrentModuleId)
-            .HasConversion(x => x!.Value, x => new ModuleId(x))
             .IsRequired(false);
 
         builder.Property(x => x.ProgramStructure)

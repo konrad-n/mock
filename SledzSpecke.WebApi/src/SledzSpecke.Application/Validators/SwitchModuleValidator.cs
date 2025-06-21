@@ -51,7 +51,7 @@ public class SwitchModuleValidator : AbstractValidator<SwitchModule>
                 var module = await moduleRepository.GetByIdAsync(command.ModuleId);
                 if (module == null) return true; // Will be caught by previous rule
                 
-                return module.SpecializationId.Value == command.SpecializationId;
+                return module.SpecializationId == command.SpecializationId;
             })
             .WithMessage("Module does not belong to the specified specialization")
             .WithErrorCode("MODULE_SPECIALIZATION_MISMATCH");

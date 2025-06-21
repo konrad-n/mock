@@ -4,6 +4,7 @@ using SledzSpecke.Application.Queries;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.Features.Procedures.Handlers;
 
@@ -55,7 +56,7 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
                 {
                     var procedureTemplate = await _templateService.GetProcedureTemplateAsync(
                         specialization.ProgramCode,
-                        specialization.SmkVersion,
+                        new Core.ValueObjects.SmkVersion(specialization.SmkVersion.ToString()),
                         query.ProcedureRequirementId.Value);
 
                     if (procedureTemplate != null)
@@ -80,7 +81,7 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
             if (procedure.IsCodeA)
             {
                 summary.CompletedCountA++;
-                if (procedure.Status == ProcedureStatus.Approved || procedure.SyncStatus == SyncStatus.Synced)
+                if (procedure.Status == ProcedureStatus.Approved || procedure.SyncStatus == Core.ValueObjects.SyncStatus.Synced)
                 {
                     summary.ApprovedCountA++;
                 }
@@ -88,7 +89,7 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
             else if (procedure.IsCodeB)
             {
                 summary.CompletedCountB++;
-                if (procedure.Status == ProcedureStatus.Approved || procedure.SyncStatus == SyncStatus.Synced)
+                if (procedure.Status == ProcedureStatus.Approved || procedure.SyncStatus == Core.ValueObjects.SyncStatus.Synced)
                 {
                     summary.ApprovedCountB++;
                 }
@@ -110,11 +111,11 @@ public class GetProcedureStatisticsHandler : IQueryHandler<GetProcedureStatistic
         }
 
         // For Old SMK, we need to filter by year ranges based on module type
-        if (module.SmkVersion == SmkVersion.Old)
+        if (module.SmkVersion == Core.Enums.SmkVersion.Old)
         {
             // Basic module: years 1-2, Specialist module: years 3-6
-            int startYear = module.Type == ModuleType.Basic ? 1 : 3;
-            int endYear = module.Type == ModuleType.Basic ? 2 : 6;
+            int startYear = module.Type == Core.Enums.ModuleType.Basic ? 1 : 3;
+            int endYear = module.Type == Core.Enums.ModuleType.Basic ? 2 : 6;
 
             var allProcedures = await _procedureRepository.GetByUserIdAsync(specializationId.Value);
             return allProcedures.Where(p => p.Year >= startYear && p.Year <= endYear);

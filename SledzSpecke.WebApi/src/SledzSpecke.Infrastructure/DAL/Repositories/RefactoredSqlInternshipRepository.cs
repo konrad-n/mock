@@ -76,7 +76,7 @@ internal sealed class RefactoredSqlInternshipRepository : BaseRepository<Interns
     public async Task AddAsync(Internship internship)
     {
         // Use PostgreSQL sequence for ID generation
-        if (internship.InternshipId.Value == 0)
+        if (internship.InternshipId == 0)
         {
             var newId = await GetNextInternshipIdAsync();
             

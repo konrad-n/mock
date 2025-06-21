@@ -41,17 +41,17 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
             }
 
             // Get all internships for all user's specializations
-            var internshipIds = new List<InternshipId>();
+            var internshipIds = new List<int>();
             foreach (var spec in specializations)
             {
-                var internships = await _internshipRepository.GetBySpecializationIdAsync(spec.Id);
+                var internships = await _internshipRepository.GetBySpecializationIdAsync(spec.SpecializationId);
                 internshipIds.AddRange(internships.Select(i => i.InternshipId));
             }
 
             if (query.InternshipId.HasValue)
             {
                 // Filter to specific internship if provided
-                internshipIds = internshipIds.Where(id => id.Value == query.InternshipId.Value).ToList();
+                internshipIds = internshipIds.Where(id => id == query.InternshipId.Value).ToList();
             }
 
             var allShifts = new List<MedicalShiftDto>();
@@ -72,11 +72,11 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
                 }
 
                 allShifts.AddRange(shifts.Select(shift => new MedicalShiftDto(
-                    Id: shift.Id.Value,
-                    InternshipId: shift.InternshipId.Value,
+                    Id: shift.ShiftId,
+                    InternshipId: shift.InternshipId,
                     Date: shift.Date,
-                    Hours: shift.Duration.Hours,
-                    Minutes: shift.Duration.Minutes,
+                    Hours: shift.Hours,
+                    Minutes: shift.Minutes,
                     Location: shift.Location,
                     Year: shift.Year,
                     SyncStatus: shift.SyncStatus,
@@ -86,7 +86,7 @@ public sealed class GetUserMedicalShiftsHandler : IQueryHandler<GetUserMedicalSh
                     ApproverRole: shift.ApproverRole,
                     IsApproved: shift.ApprovalDate.HasValue,
                     CanBeDeleted: true, // Business logic to determine this
-                    Duration: new TimeSpan(shift.Duration.Hours, shift.Duration.Minutes, 0)
+                    Duration: new TimeSpan(shift.Hours, shift.Minutes, 0)
                 )));
             }
 

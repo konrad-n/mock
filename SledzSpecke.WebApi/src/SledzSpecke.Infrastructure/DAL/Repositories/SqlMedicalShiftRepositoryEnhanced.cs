@@ -27,14 +27,14 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
     {
         return await _medicalShifts
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.Id.Value == id);
+            .FirstOrDefaultAsync(s => s.ShiftId == id);
     }
 
     public async Task<IEnumerable<MedicalShift>> GetByInternshipIdAsync(int internshipId)
     {
         return await _medicalShifts
             .AsNoTracking()
-            .Where(s => s.InternshipId.Value == internshipId)
+            .Where(s => s.InternshipId == internshipId)
             .OrderByDescending(s => s.Date)
             .ToListAsync();
     }
@@ -58,7 +58,7 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
     public async Task<int> AddAsync(MedicalShift shift)
     {
         // Generate new ID if it's 0
-        if (shift.Id.Value == 0)
+        if (shift.ShiftId == 0)
         {
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();
@@ -77,7 +77,7 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
 
         await _medicalShifts.AddAsync(shift);
         await _context.SaveChangesAsync();
-        return shift.Id.Value;
+        return shift.ShiftId;
     }
 
     public async Task UpdateAsync(MedicalShift shift)
@@ -121,7 +121,7 @@ internal sealed class SqlMedicalShiftRepositoryEnhanced : IMedicalShiftRepositor
     {
         var shifts = await _medicalShifts
             .AsNoTracking()
-            .Where(s => s.InternshipId.Value == internshipId)
+            .Where(s => s.InternshipId == internshipId)
             .ToListAsync();
 
         return shifts.Sum(s => s.Hours) + shifts.Sum(s => s.Minutes) / 60;

@@ -7,9 +7,9 @@ namespace SledzSpecke.Core.Specifications;
 
 public class MedicalShiftByInternshipSpecification : Specification<MedicalShift>
 {
-    private readonly InternshipId _internshipId;
+    private readonly int _internshipId;
 
-    public MedicalShiftByInternshipSpecification(InternshipId internshipId)
+    public MedicalShiftByInternshipSpecification(int internshipId)
     {
         _internshipId = internshipId;
     }
@@ -88,9 +88,9 @@ public class MedicalShiftByHoursRangeSpecification : Specification<MedicalShift>
 
 public class MedicalShiftByInternshipIdsSpecification : Specification<MedicalShift>
 {
-    private readonly List<InternshipId> _internshipIds;
+    private readonly List<int> _internshipIds;
 
-    public MedicalShiftByInternshipIdsSpecification(IEnumerable<InternshipId> internshipIds)
+    public MedicalShiftByInternshipIdsSpecification(IEnumerable<int> internshipIds)
     {
         _internshipIds = internshipIds.ToList();
     }
@@ -106,24 +106,24 @@ public static class MedicalShiftSpecificationExtensions
 {
     public static ISpecification<MedicalShift> GetApprovedShiftsForMonth(int internshipId, int year, int month)
     {
-        return new MedicalShiftByInternshipSpecification(new InternshipId(internshipId))
+        return new MedicalShiftByInternshipSpecification(internshipId)
             .And(new MedicalShiftByMonthSpecification(year, month))
             .And(new MedicalShiftByApprovalStatusSpecification(true));
     }
 
-    public static ISpecification<MedicalShift> GetPendingShiftsForInternship(InternshipId internshipId)
+    public static ISpecification<MedicalShift> GetPendingShiftsForInternship(int internshipId)
     {
         return new MedicalShiftByInternshipSpecification(internshipId)
             .And(new MedicalShiftByApprovalStatusSpecification(false));
     }
 
-    public static ISpecification<MedicalShift> GetShiftsForDateRange(InternshipId internshipId, DateTime startDate, DateTime endDate)
+    public static ISpecification<MedicalShift> GetShiftsForDateRange(int internshipId, DateTime startDate, DateTime endDate)
     {
         return new MedicalShiftByInternshipSpecification(internshipId)
             .And(new MedicalShiftByDateRangeSpecification(startDate, endDate));
     }
 
-    public static ISpecification<MedicalShift> GetShiftsForMultipleInternships(IEnumerable<InternshipId> internshipIds)
+    public static ISpecification<MedicalShift> GetShiftsForMultipleInternships(IEnumerable<int> internshipIds)
     {
         return new MedicalShiftByInternshipIdsSpecification(internshipIds);
     }

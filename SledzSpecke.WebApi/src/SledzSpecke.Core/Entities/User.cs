@@ -1,125 +1,108 @@
-using SledzSpecke.Core.ValueObjects;
-using SledzSpecke.Core.Exceptions;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Core.Entities;
 
 public sealed class User
 {
-    public UserId? Id { get; private set; }
-    public Email Email { get; private set; }
-    public HashedPassword Password { get; private set; }
-    public FirstName FirstName { get; private set; }
-    public SecondName? SecondName { get; private set; }
-    public LastName LastName { get; private set; }
-    public PhoneNumber PhoneNumber { get; private set; }
-    public DateTime DateOfBirth { get; private set; }
-    public Address CorrespondenceAddress { get; private set; }
-    public DateTime RegistrationDate { get; private set; }
-    public bool NotificationsEnabled { get; private set; }
-    public bool EmailNotificationsEnabled { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? LastLoginAt { get; private set; }
+    public int UserId { get; set; }
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public string Name { get; set; }
+    public string PhoneNumber { get; set; }
+    public DateTime DateOfBirth { get; set; }
+    public string CorrespondenceAddress { get; set; }
+    public DateTime RegistrationDate { get; set; }
+    public bool NotificationsEnabled { get; set; }
+    public bool EmailNotificationsEnabled { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? LastLoginAt { get; set; }
+    public SmkVersion SmkVersion { get; set; }
+    public SyncStatus SyncStatus { get; set; }
 
     // Private constructor for EF Core
     private User() { }
 
     // Factory method for creating a new user
     public static User Create(
-        Email email, 
-        HashedPassword password, 
-        FirstName firstName,
-        SecondName? secondName,
-        LastName lastName,
-        PhoneNumber phoneNumber,
+        string email, 
+        string password, 
+        string name,
+        string phoneNumber,
         DateTime dateOfBirth,
-        Address correspondenceAddress)
+        string correspondenceAddress)
     {
         return new User
         {
-            // Id will be set by repository using SetId method
             Email = email,
             Password = password,
-            FirstName = firstName,
-            SecondName = secondName,
-            LastName = lastName,
+            Name = name,
             PhoneNumber = phoneNumber,
-            DateOfBirth = DateTime.SpecifyKind(dateOfBirth, DateTimeKind.Utc),
+            DateOfBirth = dateOfBirth,
             CorrespondenceAddress = correspondenceAddress,
             RegistrationDate = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
             NotificationsEnabled = true,
-            EmailNotificationsEnabled = true
+            EmailNotificationsEnabled = true,
+            CreatedAt = DateTime.UtcNow,
+            LastLoginAt = null,
+            SmkVersion = SmkVersion.New,
+            SyncStatus = SyncStatus.Unsynced
         };
     }
 
     // Factory method for creating a user with known ID (e.g., from database)
     public static User CreateWithId(
-        UserId id,
-        Email email, 
-        HashedPassword password, 
-        FirstName firstName,
-        SecondName? secondName,
-        LastName lastName,
-        PhoneNumber phoneNumber,
+        int id,
+        string email, 
+        string password, 
+        string name,
+        string phoneNumber,
         DateTime dateOfBirth,
-        Address correspondenceAddress,
+        string correspondenceAddress,
         DateTime registrationDate)
     {
         return new User
         {
-            Id = id,
+            UserId = id,
             Email = email,
             Password = password,
-            FirstName = firstName,
-            SecondName = secondName,
-            LastName = lastName,
+            Name = name,
             PhoneNumber = phoneNumber,
-            DateOfBirth = DateTime.SpecifyKind(dateOfBirth, DateTimeKind.Utc),
+            DateOfBirth = dateOfBirth,
             CorrespondenceAddress = correspondenceAddress,
-            RegistrationDate = DateTime.SpecifyKind(registrationDate, DateTimeKind.Utc),
-            CreatedAt = DateTime.SpecifyKind(registrationDate, DateTimeKind.Utc),
+            RegistrationDate = registrationDate,
+            CreatedAt = registrationDate,
             NotificationsEnabled = true,
-            EmailNotificationsEnabled = true
+            EmailNotificationsEnabled = true,
+            SmkVersion = SmkVersion.New,
+            SyncStatus = SyncStatus.Unsynced
         };
     }
-    
-    // Internal method for repository to set ID after creation
-    internal void SetId(UserId id)
-    {
-        if (Id != null)
-            throw new InvalidOperationException("Cannot change ID once it's set");
-        Id = id;
-    }
 
-    public void ChangePassword(HashedPassword newPassword)
+    public void ChangePassword(string newPassword)
     {
-        if (newPassword == null)
+        if (string.IsNullOrEmpty(newPassword))
             throw new ArgumentNullException(nameof(newPassword));
             
         Password = newPassword;
     }
 
     public void UpdateProfile(
-        Email email, 
-        FirstName firstName, 
-        LastName lastName,
-        PhoneNumber phoneNumber,
-        Address correspondenceAddress)
+        string email, 
+        string name,
+        string phoneNumber,
+        string correspondenceAddress)
     {
-        if (email == null)
+        if (string.IsNullOrEmpty(email))
             throw new ArgumentNullException(nameof(email));
-        if (firstName == null)
-            throw new ArgumentNullException(nameof(firstName));
-        if (lastName == null)
-            throw new ArgumentNullException(nameof(lastName));
-        if (phoneNumber == null)
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentNullException(nameof(name));
+        if (string.IsNullOrEmpty(phoneNumber))
             throw new ArgumentNullException(nameof(phoneNumber));
-        if (correspondenceAddress == null)
+        if (string.IsNullOrEmpty(correspondenceAddress))
             throw new ArgumentNullException(nameof(correspondenceAddress));
             
         Email = email;
-        FirstName = firstName;
-        LastName = lastName;
+        Name = name;
         PhoneNumber = phoneNumber;
         CorrespondenceAddress = correspondenceAddress;
     }
@@ -136,16 +119,11 @@ public sealed class User
     }
     
     // Business logic methods
-    public string GetFullName()
-    {
-        if (SecondName != null && SecondName.HasValue)
-            return $"{FirstName} {SecondName} {LastName}";
-        return $"{FirstName} {LastName}";
-    }
-    
     public bool IsProfileComplete()
     {
-        return true; // All required fields are mandatory during registration
+        return !string.IsNullOrEmpty(Email) && 
+               !string.IsNullOrEmpty(Name) && 
+               !string.IsNullOrEmpty(PhoneNumber);
     }
     
     public bool HasRecentActivity(int daysThreshold = 30)

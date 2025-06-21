@@ -1,39 +1,39 @@
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Core.Entities;
 
 public class Specialization
 {
-    public SpecializationId Id { get; private set; }
-    public UserId UserId { get; private set; }
-    public string Name { get; private set; }
-    public string ProgramCode { get; private set; }
-    public SmkVersion SmkVersion { get; private set; }
-    public string ProgramVariant { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime PlannedEndDate { get; private set; }
-    public DateTime CalculatedEndDate { get; private set; }
-    public DateTime? ActualEndDate { get; private set; }
-    public int PlannedPesYear { get; private set; }
-    public SpecializationStatus Status { get; private set; }
-    public string ProgramStructure { get; private set; }
-    public ModuleId? CurrentModuleId { get; private set; }
-    public int DurationYears { get; private set; }
+    public int SpecializationId { get; set; }
+    public int UserId { get; set; }
+    public string Name { get; set; }
+    public string ProgramCode { get; set; }
+    public SmkVersion SmkVersion { get; set; }
+    public string ProgramVariant { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime PlannedEndDate { get; set; }
+    public DateTime CalculatedEndDate { get; set; }
+    public DateTime? ActualEndDate { get; set; }
+    public int PlannedPesYear { get; set; }
+    public string Status { get; set; }
+    public string ProgramStructure { get; set; }
+    public int? CurrentModuleId { get; set; }
+    public int DurationYears { get; set; }
     public int DurationInDays => DurationYears * 365;
     
     // Module tracking
-    public bool HasBasicModule { get; private set; }
-    public bool HasSpecializedModule { get; private set; }
-    public DateTime? BasicModuleCompletionDate { get; private set; }
+    public bool HasBasicModule { get; set; }
+    public bool HasSpecializedModule { get; set; }
+    public DateTime? BasicModuleCompletionDate { get; set; }
 
-    private readonly List<Module> _modules = new();
-    public IReadOnlyList<Module> Modules => _modules.AsReadOnly();
+    public ICollection<Module> Modules { get; set; } = new List<Module>();
 
+    // Parameterless constructor for EF Core
     private Specialization() { }
 
-    public Specialization(
-        SpecializationId id, 
-        UserId userId,
+    // Factory method for creating new specialization
+    public static Specialization Create(
+        int userId,
         string name, 
         string programCode, 
         SmkVersion smkVersion,
@@ -44,60 +44,45 @@ public class Specialization
         string programStructure, 
         int durationYears)
     {
-        Id = id;
-        UserId = userId ?? throw new ArgumentNullException(nameof(userId));
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        ProgramCode = programCode ?? throw new ArgumentNullException(nameof(programCode));
-        SmkVersion = smkVersion ?? throw new ArgumentNullException(nameof(smkVersion));
-        ProgramVariant = programVariant ?? throw new ArgumentNullException(nameof(programVariant));
-        StartDate = startDate;
-        PlannedEndDate = plannedEndDate;
-        PlannedPesYear = plannedPesYear;
-        ProgramStructure = programStructure ?? throw new ArgumentNullException(nameof(programStructure));
-        DurationYears = durationYears;
-        CalculatedEndDate = startDate.AddYears(durationYears);
-        Status = SpecializationStatus.Active;
-    }
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentNullException(nameof(name));
+        if (string.IsNullOrEmpty(programCode))
+            throw new ArgumentNullException(nameof(programCode));
+        if (string.IsNullOrEmpty(programVariant))
+            throw new ArgumentNullException(nameof(programVariant));
+        if (string.IsNullOrEmpty(programStructure))
+            throw new ArgumentNullException(nameof(programStructure));
 
-    public Specialization(
-        UserId userId,
-        string name, 
-        string programCode, 
-        SmkVersion smkVersion,
-        string programVariant,
-        DateTime startDate, 
-        DateTime plannedEndDate,
-        int plannedPesYear, 
-        string programStructure, 
-        int durationYears)
-    {
-        UserId = userId ?? throw new ArgumentNullException(nameof(userId));
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        ProgramCode = programCode ?? throw new ArgumentNullException(nameof(programCode));
-        SmkVersion = smkVersion ?? throw new ArgumentNullException(nameof(smkVersion));
-        ProgramVariant = programVariant ?? throw new ArgumentNullException(nameof(programVariant));
-        StartDate = startDate;
-        PlannedEndDate = plannedEndDate;
-        PlannedPesYear = plannedPesYear;
-        ProgramStructure = programStructure ?? throw new ArgumentNullException(nameof(programStructure));
-        DurationYears = durationYears;
-        CalculatedEndDate = startDate.AddYears(durationYears);
-        Status = SpecializationStatus.Active;
+        return new Specialization
+        {
+            UserId = userId,
+            Name = name,
+            ProgramCode = programCode,
+            SmkVersion = smkVersion,
+            ProgramVariant = programVariant,
+            StartDate = startDate,
+            PlannedEndDate = plannedEndDate,
+            PlannedPesYear = plannedPesYear,
+            ProgramStructure = programStructure,
+            DurationYears = durationYears,
+            CalculatedEndDate = startDate.AddYears(durationYears),
+            Status = "Active"
+        };
     }
 
     public void AddModule(Module module)
     {
-        if (_modules.Any(m => m.Id == module.Id))
+        if (Modules.Any(m => m.ModuleId == module.ModuleId))
         {
-            throw new InvalidOperationException($"Module with ID {module.Id} already exists.");
+            throw new InvalidOperationException($"Module with ID {module.ModuleId} already exists.");
         }
 
-        _modules.Add(module);
+        Modules.Add(module);
     }
 
-    public void SetCurrentModule(ModuleId moduleId)
+    public void SetCurrentModule(int moduleId)
     {
-        if (!_modules.Any(m => m.Id == moduleId))
+        if (!Modules.Any(m => m.ModuleId == moduleId))
         {
             throw new InvalidOperationException($"Module with ID {moduleId} does not exist in this specialization.");
         }
@@ -107,21 +92,21 @@ public class Specialization
 
     public (int Completed, int Total) GetInternshipProgress()
     {
-        var completed = _modules.Sum(m => m.CompletedInternships);
-        var total = _modules.Sum(m => m.TotalInternships);
+        var completed = Modules.Sum(m => m.CompletedInternships);
+        var total = Modules.Sum(m => m.TotalInternships);
         return (completed, total);
     }
 
     public (int Completed, int Total) GetCoursesProgress()
     {
-        var completed = _modules.Sum(m => m.CompletedCourses);
-        var total = _modules.Sum(m => m.TotalCourses);
+        var completed = Modules.Sum(m => m.CompletedCourses);
+        var total = Modules.Sum(m => m.TotalCourses);
         return (completed, total);
     }
 
     public void Complete(DateTime completionDate)
     {
-        if (Status == SpecializationStatus.Completed)
+        if (Status == "Completed")
         {
             throw new InvalidOperationException("Specialization is already completed.");
         }
@@ -132,42 +117,42 @@ public class Specialization
         }
 
         ActualEndDate = completionDate;
-        Status = SpecializationStatus.Completed;
+        Status = "Completed";
     }
 
     public void Suspend()
     {
-        if (Status == SpecializationStatus.Completed)
+        if (Status == "Completed")
         {
             throw new InvalidOperationException("Cannot suspend a completed specialization.");
         }
 
-        if (Status == SpecializationStatus.Cancelled)
+        if (Status == "Cancelled")
         {
             throw new InvalidOperationException("Cannot suspend a cancelled specialization.");
         }
 
-        Status = SpecializationStatus.Suspended;
+        Status = "Suspended";
     }
 
     public void Resume()
     {
-        if (Status != SpecializationStatus.Suspended)
+        if (Status != "Suspended")
         {
             throw new InvalidOperationException("Can only resume a suspended specialization.");
         }
 
-        Status = SpecializationStatus.Active;
+        Status = "Active";
     }
 
     public void Cancel()
     {
-        if (Status == SpecializationStatus.Completed)
+        if (Status == "Completed")
         {
             throw new InvalidOperationException("Cannot cancel a completed specialization.");
         }
 
-        Status = SpecializationStatus.Cancelled;
+        Status = "Cancelled";
         ActualEndDate = DateTime.UtcNow;
     }
     

@@ -80,7 +80,7 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
             Result result;
             ProcedureBase? createdProcedure = null;
 
-            if (specialization.SmkVersion == SmkVersion.Old)
+            if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
             {
                 // Validate year for Old SMK
                 int procedureYear = command.Year;
@@ -93,8 +93,12 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
 
                 // Use domain method to add procedure
                 var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
-                var addResult = internship.AddProcedureOldSmk(
+                
+                // Method removed in MAUI phase 2 - create using factory method
+                createdProcedure = ProcedureOldSmk.Create(
                     procedureId,
+                    new ModuleId(internship.ModuleId ?? 0),
+                    new InternshipId(command.InternshipId),
                     command.Date,
                     procedureYear,
                     command.Code,
@@ -102,13 +106,6 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
                     command.Location,
                     executionType,
                     command.SupervisorName);
-
-                if (addResult.IsFailure)
-                {
-                    return Result<int>.Failure(addResult.Error, addResult.ErrorCode);
-                }
-
-                createdProcedure = addResult.Value;
                 
                 // Set additional Old SMK specific fields
                 var oldSmkProcedure = (ProcedureOldSmk)createdProcedure;
@@ -131,7 +128,7 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
             else
             {
                 // For New SMK
-                var moduleId = command.ModuleId ?? internship.ModuleId?.Value;
+                var moduleId = command.ModuleId ?? internship.ModuleId;
                 if (!moduleId.HasValue)
                 {
                     return Result<int>.Failure("Module ID is required for New SMK procedures.", "MODULE_ID_REQUIRED");
@@ -142,23 +139,19 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
 
                 // Use domain method to add procedure
                 var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
-                var addResult = internship.AddProcedureNewSmk(
+                
+                // Method removed in MAUI phase 2 - create using factory method
+                createdProcedure = ProcedureNewSmk.Create(
                     procedureId,
+                    new ModuleId(moduleId.Value),
+                    new InternshipId(command.InternshipId),
                     command.Date,
                     command.Code,
-                    command.Location,
-                    new ModuleId(moduleId.Value),
-                    procedureRequirementId,
                     procedureName,
+                    command.Location,
                     executionType,
-                    command.SupervisorName);
-
-                if (addResult.IsFailure)
-                {
-                    return Result<int>.Failure(addResult.Error, addResult.ErrorCode);
-                }
-
-                createdProcedure = addResult.Value;
+                    command.SupervisorName,
+                    procedureRequirementId);
                 
                 // Set additional New SMK specific fields
                 var newSmkProcedure = (ProcedureNewSmk)createdProcedure;
@@ -186,11 +179,11 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
             // Validate before changing status to completed
             if (procedureStatus == ProcedureStatus.Completed)
             {
-                if (specialization.SmkVersion == SmkVersion.Old && string.IsNullOrWhiteSpace(command.PerformingPerson))
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.Old && string.IsNullOrWhiteSpace(command.PerformingPerson))
                 {
                     return Result<int>.Failure("Performing person is required for completed procedures in Old SMK.", "PERFORMING_PERSON_REQUIRED");
                 }
-                else if (specialization.SmkVersion == SmkVersion.New && string.IsNullOrWhiteSpace(command.Supervisor))
+                else if (specialization.SmkVersion == Core.Enums.SmkVersion.New && string.IsNullOrWhiteSpace(command.Supervisor))
                 {
                     return Result<int>.Failure("Supervisor is required for completed procedures in New SMK.", "SUPERVISOR_REQUIRED");
                 }
@@ -203,7 +196,7 @@ public sealed class AddProcedureResultHandler : IResultCommandHandler<AddProcedu
             }
 
             // Validate using template service
-            var validationResult = await _validationService.ValidateProcedureAsync(createdProcedure, specialization.Id.Value);
+            var validationResult = await _validationService.ValidateProcedureAsync(createdProcedure, specialization.SpecializationId);
             if (!validationResult.IsValid)
             {
                 return Result<int>.Failure($"Procedure validation failed: {string.Join(", ", validationResult.Errors)}", "VALIDATION_FAILED");

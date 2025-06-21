@@ -4,6 +4,7 @@ using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Exceptions;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.Features.Procedures.Handlers;
 
@@ -40,7 +41,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             Console.WriteLine($"[ERROR] Internship with ID {command.InternshipId} not found");
             throw new InvalidOperationException($"Internship with ID {command.InternshipId} not found.");
         }
-        Console.WriteLine($"[DEBUG] Found internship: {internship.InternshipId.Value}, Specialization: {internship.SpecializationId.Value}");
+        Console.WriteLine($"[DEBUG] Found internship: {internship.InternshipId}, Specialization: {internship.SpecializationId}");
 
         // Get specialization to determine SMK version
         var specialization = await _specializationRepository.GetByIdAsync(internship.SpecializationId);
@@ -81,7 +82,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
 
         // Validate year based on specialization
         int procedureYear = command.Year;
-        if (specialization.SmkVersion == SmkVersion.Old)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
         {
             // For Old SMK, validate the year is within available years
             var availableYears = _yearCalculationService.GetAvailableYears(specialization);
@@ -110,16 +111,16 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         ProcedureBase procedure;
         try
         {
-            if (specialization.SmkVersion == SmkVersion.Old)
+            if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
             {
                 Console.WriteLine($"[DEBUG] Creating ProcedureOldSmk");
-                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ?? 1; // Default to 1 if not specified
+                var moduleId = command.ModuleId ?? internship.ModuleId ?? 1; // Default to 1 if not specified
                 var executionType = Enum.Parse<ProcedureExecutionType>(command.ExecutionType);
                 
                 procedure = ProcedureOldSmk.Create(
                     procedureId,
                     new ModuleId(moduleId),
-                    internship.Id,
+                    internship.InternshipId,
                     command.Date,
                     procedureYear,
                     command.Code,
@@ -132,7 +133,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
             {
                 Console.WriteLine($"[DEBUG] Creating ProcedureNewSmk");
                 // For New SMK, we need moduleId, procedureRequirementId and procedureName
-                var moduleId = command.ModuleId ?? internship.ModuleId?.Value ??
+                var moduleId = command.ModuleId ?? internship.ModuleId ??
                     throw new InvalidOperationException("Module ID is required for New SMK procedures");
                 var procedureRequirementId = command.ProcedureRequirementId ?? 0; // Will be validated later
                 var procedureName = command.ProcedureName ?? command.Name ?? command.Code; // Use name or code as fallback
@@ -141,7 +142,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
                 procedure = ProcedureNewSmk.Create(
                     procedureId,
                     new ModuleId(moduleId),
-                    internship.Id,
+                    internship.InternshipId,
                     command.Date,
                     command.Code,
                     procedureName,
@@ -173,7 +174,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         }
         
         // Set SMK-specific fields
-        if (specialization.SmkVersion == SmkVersion.Old)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
         {
             var oldSmkProcedure = (ProcedureOldSmk)procedure;
 
@@ -207,7 +208,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         // SMK version-specific validation for completed procedures
         if (procedureStatus == ProcedureStatus.Completed)
         {
-            if (specialization.SmkVersion == SmkVersion.Old)
+            if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
             {
                 // For Old SMK, performing person is required for completed procedures
                 if (string.IsNullOrWhiteSpace(command.PerformingPerson))
@@ -245,7 +246,7 @@ public sealed class AddProcedureHandler : ICommandHandler<AddProcedure, int>
         }
 
         // Validate using template service before saving
-        var validationResult = await _validationService.ValidateProcedureAsync(procedure, specialization.Id.Value);
+        var validationResult = await _validationService.ValidateProcedureAsync(procedure, specialization.SpecializationId);
         if (!validationResult.IsValid)
         {
             throw new InvalidOperationException($"Procedure validation failed: {string.Join(", ", validationResult.Errors)}");

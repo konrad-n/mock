@@ -2,7 +2,6 @@ using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Exceptions;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
-using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Application.Security;
 
 namespace SledzSpecke.Application.Commands.Handlers;
@@ -31,7 +30,7 @@ public sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword
         try
         {
             var currentUserId = _userContextService.GetUserId();
-            var user = await _userRepository.GetByIdAsync(new UserId((int)currentUserId));
+            var user = await _userRepository.GetByIdAsync((int)currentUserId);
             
             if (user is null)
             {
@@ -39,7 +38,7 @@ public sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword
             }
 
             // Verify current password
-            if (!_passwordManager.Verify(command.CurrentPassword, user.Password.Value))
+            if (!_passwordManager.Verify(command.CurrentPassword, user.Password))
             {
                 return Result.Failure("Current password is incorrect.");
             }
@@ -52,7 +51,7 @@ public sealed class ChangePasswordHandler : IResultCommandHandler<ChangePassword
 
             // Hash and update password
             var hashedPassword = _passwordManager.Secure(command.NewPassword);
-            user.ChangePassword(new HashedPassword(hashedPassword));
+            user.ChangePassword(hashedPassword);
 
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();

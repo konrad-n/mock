@@ -1,52 +1,78 @@
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Core.Entities;
 
 public class Module
 {
-    public ModuleId Id { get; private set; }
-    public SpecializationId SpecializationId { get; private set; }
-    public ModuleType Type { get; private set; }
-    public SmkVersion SmkVersion { get; private set; }
-    public string Version { get; private set; }
-    public string Name { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime EndDate { get; private set; }
-    public string Structure { get; private set; }
+    public int ModuleId { get; set; }
+    public int SpecializationId { get; set; }
+    public ModuleType Type { get; set; }
+    public SmkVersion SmkVersion { get; set; }
+    public string Version { get; set; }
+    public string Name { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string Structure { get; set; }
 
-    public int CompletedInternships { get; private set; }
-    public int TotalInternships { get; private set; }
-    public int CompletedCourses { get; private set; }
-    public int TotalCourses { get; private set; }
-    public int CompletedProceduresA { get; private set; }
-    public int TotalProceduresA { get; private set; }
-    public int CompletedProceduresB { get; private set; }
-    public int TotalProceduresB { get; private set; }
-    public int CompletedShiftHours { get; private set; }
-    public int RequiredShiftHours { get; private set; }
-    public double WeeklyShiftHours { get; private set; }
-    public int CompletedSelfEducationDays { get; private set; }
-    public int TotalSelfEducationDays { get; private set; }
+    public int CompletedInternships { get; set; }
+    public int TotalInternships { get; set; }
+    public int CompletedCourses { get; set; }
+    public int TotalCourses { get; set; }
+    public int CompletedProceduresA { get; set; }
+    public int TotalProceduresA { get; set; }
+    public int CompletedProceduresB { get; set; }
+    public int TotalProceduresB { get; set; }
+    public int CompletedShiftHours { get; set; }
+    public int RequiredShiftHours { get; set; }
+    public double WeeklyShiftHours { get; set; }
+    public int CompletedSelfEducationDays { get; set; }
+    public int TotalSelfEducationDays { get; set; }
 
     // Navigation properties
-    public ICollection<Internship> Internships { get; private set; } = new List<Internship>();
-    public ICollection<Course> Courses { get; private set; } = new List<Course>();
-    public ICollection<MedicalShift> MedicalShifts { get; private set; } = new List<MedicalShift>();
-    public ICollection<ProcedureBase> Procedures { get; private set; } = new List<ProcedureBase>();
-    public ICollection<SelfEducation> SelfEducations { get; private set; } = new List<SelfEducation>();
+    public ICollection<Internship> Internships { get; set; } = new List<Internship>();
+    public ICollection<Course> Courses { get; set; } = new List<Course>();
+    public ICollection<MedicalShift> MedicalShifts { get; set; } = new List<MedicalShift>();
+    public ICollection<ProcedureBase> Procedures { get; set; } = new List<ProcedureBase>();
+    public ICollection<SelfEducation> SelfEducations { get; set; } = new List<SelfEducation>();
 
-    public Module(ModuleId id, SpecializationId specializationId, ModuleType type, SmkVersion smkVersion,
+    // Parameterless constructor for EF Core
+    private Module() { }
+
+    // Factory method for creating new module
+    public static Module Create(int specializationId, ModuleType type, SmkVersion smkVersion,
         string version, string name, DateTime startDate, DateTime endDate, string structure)
     {
-        Id = id;
-        SpecializationId = specializationId;
-        Type = type;
-        SmkVersion = smkVersion;
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        StartDate = startDate;
-        EndDate = endDate;
-        Structure = structure ?? throw new ArgumentNullException(nameof(structure));
+        if (string.IsNullOrEmpty(version))
+            throw new ArgumentNullException(nameof(version));
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentNullException(nameof(name));
+        if (string.IsNullOrEmpty(structure))
+            throw new ArgumentNullException(nameof(structure));
+
+        return new Module
+        {
+            SpecializationId = specializationId,
+            Type = type,
+            SmkVersion = smkVersion,
+            Version = version,
+            Name = name,
+            StartDate = startDate,
+            EndDate = endDate,
+            Structure = structure,
+            CompletedInternships = 0,
+            TotalInternships = 0,
+            CompletedCourses = 0,
+            TotalCourses = 0,
+            CompletedProceduresA = 0,
+            TotalProceduresA = 0,
+            CompletedProceduresB = 0,
+            TotalProceduresB = 0,
+            CompletedShiftHours = 0,
+            RequiredShiftHours = 0,
+            WeeklyShiftHours = 0,
+            CompletedSelfEducationDays = 0,
+            TotalSelfEducationDays = 0
+        };
     }
 
     public void UpdateProgress(int completedInternships, int totalInternships, int completedCourses, int totalCourses)

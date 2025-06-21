@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Entities;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Infrastructure.DAL;
 using System.Text.Json;
 
@@ -52,12 +52,12 @@ public class PopulateProcedureRequirements
                     // Get the template for this specialization
                     var template = await _templateService.GetTemplateAsync(
                         specialization.ProgramCode, 
-                        specialization.SmkVersion);
+                        new SledzSpecke.Core.ValueObjects.SmkVersion(specialization.SmkVersion.ToString().ToLower()));
                         
                     if (template == null)
                     {
                         _logger.LogWarning("No template found for specialization {Code} {Version}", 
-                            specialization.ProgramCode, specialization.SmkVersion);
+                            specialization.ProgramCode, specialization.SmkVersion.ToString());
                         result.SpecializationsWithoutTemplate++;
                         continue;
                     }
@@ -81,7 +81,7 @@ public class PopulateProcedureRequirements
                             // Check if requirement already exists
                             var existingRequirement = await _context.Set<ProcedureRequirement>()
                                 .FirstOrDefaultAsync(pr => 
-                                    pr.ModuleId == module.Id &&
+                                    pr.ModuleId == module.ModuleId &&
                                     pr.Code == procedureTemplate.Type,
                                     cancellationToken);
                                     
@@ -96,7 +96,7 @@ public class PopulateProcedureRequirements
                             {
                                 // Create new requirement
                                 var requirement = new ProcedureRequirement(
-                                    module.Id,
+                                    module.ModuleId,
                                     procedureTemplate.Type, // Use Type as Code since ProcedureTemplate doesn't have Code
                                     procedureTemplate.Name,
                                     procedureTemplate.RequiredCountA,
@@ -127,7 +127,7 @@ public class PopulateProcedureRequirements
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing specialization {Id}", specialization.Id);
+                    _logger.LogError(ex, "Error processing specialization {Id}", specialization.SpecializationId);
                     result.Errors.Add($"Specialization {specialization.Name}: {ex.Message}");
                 }
             }
@@ -171,7 +171,7 @@ public class PopulateProcedureRequirements
                 templateCode, smkVersion);
                 
             // Get the template
-            var template = await _templateService.GetTemplateAsync(templateCode, smkVersion);
+            var template = await _templateService.GetTemplateAsync(templateCode, new SledzSpecke.Core.ValueObjects.SmkVersion(smkVersion.ToString().ToLower()));
             if (template == null)
             {
                 result.Success = false;
@@ -199,7 +199,7 @@ public class PopulateProcedureRequirements
                 foreach (var procedureTemplate in moduleTemplate.Procedures)
                 {
                     var existingRequirement = await _context.Set<ProcedureRequirement>()
-                        .AnyAsync(pr => pr.ModuleId == module.Id && pr.Code == procedureTemplate.Type,
+                        .AnyAsync(pr => pr.ModuleId == module.ModuleId && pr.Code == procedureTemplate.Type,
                             cancellationToken);
                             
                     if (!existingRequirement)
@@ -207,7 +207,7 @@ public class PopulateProcedureRequirements
                         try
                         {
                             var requirement = new ProcedureRequirement(
-                                module.Id,
+                                module.ModuleId,
                                 procedureTemplate.Type, // Use Type as Code
                                 procedureTemplate.Name,
                                 procedureTemplate.RequiredCountA,

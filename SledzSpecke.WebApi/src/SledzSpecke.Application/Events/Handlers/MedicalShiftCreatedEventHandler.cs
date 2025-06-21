@@ -45,7 +45,7 @@ public sealed class MedicalShiftCreatedEventHandler : INotificationHandler<Medic
             var existingShifts = await _medicalShiftRepository.GetByInternshipIdAsync(notification.InternshipId.Value);
             var conflictingShift = existingShifts.FirstOrDefault(s => 
                 s.Date == notification.Date && 
-                s.Id != notification.ShiftId.Value &&
+                s.ShiftId != notification.ShiftId.Value &&
                 s.IsApproved);
 
             if (conflictingShift != null)

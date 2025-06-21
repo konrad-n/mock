@@ -1,5 +1,6 @@
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Core.ValueObjects;
 using System.Linq.Expressions;
 
@@ -16,7 +17,7 @@ public sealed class ModuleByIdSpecification : Specification<Module>
 
     public override Expression<Func<Module, bool>> ToExpression()
     {
-        return module => module.Id == _id;
+        return module => module.ModuleId == _id.Value;
     }
 }
 
@@ -37,16 +38,16 @@ public sealed class ModuleBySpecializationSpecification : Specification<Module>
 
 public sealed class ModuleByTypeSpecification : Specification<Module>
 {
-    private readonly ModuleType _moduleType;
+    private readonly ValueObjects.ModuleType _moduleType;
 
-    public ModuleByTypeSpecification(ModuleType moduleType)
+    public ModuleByTypeSpecification(ValueObjects.ModuleType moduleType)
     {
         _moduleType = moduleType;
     }
 
     public override Expression<Func<Module, bool>> ToExpression()
     {
-        return module => module.Type == _moduleType;
+        return module => module.Type == (_moduleType == ValueObjects.ModuleType.Basic ? Enums.ModuleType.Basic : Enums.ModuleType.Specialist);
     }
 }
 
@@ -72,13 +73,13 @@ public static class ModuleSpecificationExtensions
     public static ISpecification<Module> GetBasicModulesForSpecialization(SpecializationId specializationId)
     {
         return new ModuleBySpecializationSpecification(specializationId)
-            .And(new ModuleByTypeSpecification(ModuleType.Basic));
+            .And(new ModuleByTypeSpecification(ValueObjects.ModuleType.Basic));
     }
 
     public static ISpecification<Module> GetSpecialistModulesForSpecialization(SpecializationId specializationId)
     {
         return new ModuleBySpecializationSpecification(specializationId)
-            .And(new ModuleByTypeSpecification(ModuleType.Specialist));
+            .And(new ModuleByTypeSpecification(ValueObjects.ModuleType.Specialist));
     }
 
     public static ISpecification<Module> GetModulesInDateRange(SpecializationId specializationId, DateTime startDate, DateTime endDate)

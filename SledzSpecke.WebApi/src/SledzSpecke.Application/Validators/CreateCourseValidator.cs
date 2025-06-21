@@ -131,7 +131,7 @@ public class CreateCourseValidator : AbstractValidator<CreateCourse>
                 if (module == null) return false;
                 
                 var specialization = await specializationRepository.GetByIdAsync(command.SpecializationId);
-                return specialization != null && module.SpecializationId == specialization.Id;
+                return specialization != null && module.SpecializationId == specialization.SpecializationId;
             })
             .WithMessage("Module does not belong to the specified specialization")
             .WithErrorCode("MODULE_SPECIALIZATION_MISMATCH")

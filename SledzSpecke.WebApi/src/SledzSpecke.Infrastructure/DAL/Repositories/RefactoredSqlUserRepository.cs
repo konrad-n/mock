@@ -3,7 +3,6 @@ using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.Specifications;
-using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Application.Abstractions;
 using System.Data;
 
@@ -28,20 +27,13 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<User?> GetByIdAsync(UserId id)
+    public async Task<User?> GetByIdAsync(int userId)
     {
-        // Use the base repository method with conversion
-        return await base.GetByIdAsync(id.Value, default);
+        // Use the base repository method
+        return await base.GetByIdAsync(userId, default);
     }
 
-    public async Task<User?> GetByIdAsync(UserId id, CancellationToken cancellationToken = default)
-    {
-        // Use the base repository method with conversion
-        return await base.GetByIdAsync(id.Value, cancellationToken);
-    }
-
-
-    public async Task<User?> GetByEmailAsync(Email email)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         var specification = new UserByEmailSpecification(email);
         return await GetSingleBySpecificationAsync(specification);
@@ -52,11 +44,11 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         return await GetAllAsync(default);
     }
 
-    public async Task<UserId> AddAsync(User user)
+    public async Task<int> AddAsync(User user)
     {
         // Use PostgreSQL sequence for ID generation
         var newId = await GetNextUserIdAsync();
-        user.SetId(newId);
+        user.UserId = newId;
         
         await AddAsync(user, default);
         
@@ -64,7 +56,7 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         // Keeping it here for backward compatibility with existing implementation
         await _unitOfWork.SaveChangesAsync();
         
-        return user.Id!; // ID is guaranteed to be set after AddAsync
+        return user.UserId; // ID is guaranteed to be set after AddAsync
     }
 
     public async Task UpdateAsync(User user)
@@ -75,9 +67,9 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(UserId id)
+    public async Task DeleteAsync(int userId)
     {
-        var user = await GetByIdAsync(id);
+        var user = await GetByIdAsync(userId);
         if (user is not null)
         {
             Remove(user);
@@ -88,7 +80,7 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
     }
 
 
-    public async Task<bool> ExistsByEmailAsync(Email email)
+    public async Task<bool> ExistsByEmailAsync(string email)
     {
         var specification = new UserByEmailSpecification(email);
         return await AnyAsync(specification);
@@ -99,7 +91,7 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
     /// <summary>
     /// Get users by specialization using specification pattern
     /// </summary>
-    public async Task<IEnumerable<User>> GetBySpecializationAsync(SpecializationId specializationId)
+    public async Task<IEnumerable<User>> GetBySpecializationAsync(int specializationId)
     {
         // TODO: User no longer has SpecializationId - need to redesign User-Specialization relationship
         return Enumerable.Empty<User>();
@@ -151,7 +143,7 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
     /// PostgreSQL sequence-based ID generation
     /// This maintains compatibility with existing database schema
     /// </summary>
-    private async Task<UserId> GetNextUserIdAsync()
+    private async Task<int> GetNextUserIdAsync()
     {
         // Create sequence if it doesn't exist and get next value
         await using var command = Context.Database.GetDbConnection().CreateCommand();
@@ -163,7 +155,7 @@ internal sealed class RefactoredSqlUserRepository : BaseRepository<User>, IUserR
         var result = await command.ExecuteScalarAsync();
         await Context.Database.CloseConnectionAsync();
         
-        return new UserId(Convert.ToInt32(result));
+        return Convert.ToInt32(result);
     }
 
     /// <summary>

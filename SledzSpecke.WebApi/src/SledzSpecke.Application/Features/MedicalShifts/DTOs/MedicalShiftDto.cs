@@ -1,5 +1,5 @@
 using SledzSpecke.Application.Helpers;
-using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.Features.MedicalShifts.DTOs;
 

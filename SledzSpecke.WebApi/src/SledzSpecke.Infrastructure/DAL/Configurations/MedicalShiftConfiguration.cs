@@ -8,18 +8,16 @@ internal sealed class MedicalShiftConfiguration : IEntityTypeConfiguration<Medic
 {
     public void Configure(EntityTypeBuilder<MedicalShift> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.HasKey(x => x.ShiftId);
 
-        builder.Property(x => x.Id)
-            .HasConversion(x => x.Value, x => new Core.ValueObjects.MedicalShiftId(x));
+        builder.Property(x => x.ShiftId)
+            .ValueGeneratedOnAdd();
 
         builder.Property(x => x.InternshipId)
-            .HasConversion(x => x.Value, x => new Core.ValueObjects.InternshipId(x));
+            .IsRequired();
 
         builder.Property(x => x.ModuleId)
-            .HasConversion(
-                x => x != null ? x.Value : (int?)null,
-                x => x.HasValue ? new Core.ValueObjects.ModuleId(x.Value) : null);
+            .IsRequired(false);
 
         builder.Property(x => x.Type)
             .HasConversion<int>()
@@ -43,17 +41,5 @@ internal sealed class MedicalShiftConfiguration : IEntityTypeConfiguration<Medic
 
         builder.Ignore(x => x.IsApproved);
         builder.Ignore(x => x.CanBeDeleted);
-        
-        // Configure Duration as an owned entity
-        builder.OwnsOne(x => x.Duration, duration =>
-        {
-            duration.Property(d => d.Hours)
-                .HasColumnName("Hours")
-                .IsRequired();
-            duration.Property(d => d.Minutes)
-                .HasColumnName("Minutes")
-                .IsRequired();
-            duration.Ignore(d => d.TotalMinutes);
-        });
     }
 }

@@ -1,6 +1,7 @@
 using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Core.Entities;
 using SledzSpecke.Core.ValueObjects;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Application.Services;
 
@@ -17,7 +18,7 @@ public class YearCalculationService : IYearCalculationService
     /// </summary>
     public int[] GetAvailableYears(Specialization specialization)
     {
-        if (specialization.SmkVersion == SmkVersion.New)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
         {
             // New SMK doesn't use years
             return Array.Empty<int>();
@@ -47,19 +48,19 @@ public class YearCalculationService : IYearCalculationService
     /// </summary>
     public (int startYear, int endYear) GetModuleYearRange(Module module, Specialization specialization)
     {
-        if (specialization.SmkVersion == SmkVersion.New)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
         {
             // New SMK doesn't use years
             return (0, 0);
         }
 
-        var hasBasicModule = specialization.Modules.Any(m => m.Type == ModuleType.Basic);
+        var hasBasicModule = specialization.Modules.Any(m => m.Type == Core.Enums.ModuleType.Basic);
 
-        if (module.Type == ModuleType.Basic)
+        if (module.Type == Core.Enums.ModuleType.Basic)
         {
             return (1, 2);
         }
-        else if (module.Type == ModuleType.Specialist)
+        else if (module.Type == Core.Enums.ModuleType.Specialist)
         {
             if (hasBasicModule)
             {
@@ -81,7 +82,7 @@ public class YearCalculationService : IYearCalculationService
     /// </summary>
     public bool IsYearValidForModule(int year, Module module, Specialization specialization)
     {
-        if (specialization.SmkVersion == SmkVersion.New)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
         {
             // New SMK doesn't use years
             return year == 0;
@@ -104,7 +105,7 @@ public class YearCalculationService : IYearCalculationService
     /// </summary>
     public int CalculateCurrentYear(Specialization specialization, DateTime? referenceDate = null)
     {
-        if (specialization.SmkVersion == SmkVersion.New)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
         {
             // New SMK doesn't use years
             return 0;
@@ -131,10 +132,10 @@ public class YearCalculationService : IYearCalculationService
     /// </summary>
     public Module? GetModuleForYear(int year, Specialization specialization)
     {
-        if (specialization.SmkVersion == SmkVersion.New)
+        if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
         {
             // New SMK uses current module, not year-based
-            return specialization.Modules.FirstOrDefault(m => m.Id == specialization.CurrentModuleId);
+            return specialization.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId);
         }
 
         // Find the module that contains this year
@@ -153,9 +154,9 @@ public class YearCalculationService : IYearCalculationService
     /// <summary>
     /// Determines if an entity (procedure, shift) should be counted in year-based statistics.
     /// </summary>
-    public bool ShouldIncludeInYearStatistics(int entityYear, int targetYear, SmkVersion smkVersion)
+    public bool ShouldIncludeInYearStatistics(int entityYear, int targetYear, Core.ValueObjects.SmkVersion smkVersion)
     {
-        if (smkVersion == SmkVersion.New)
+        if (smkVersion.IsNew)
         {
             // New SMK doesn't use year-based statistics
             return false;

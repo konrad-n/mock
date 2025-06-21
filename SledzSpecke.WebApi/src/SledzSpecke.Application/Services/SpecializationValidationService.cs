@@ -34,7 +34,8 @@ public class SpecializationValidationService : ISpecializationValidationService
                 return ValidationResult.Failure("Specialization not found");
             }
 
-            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, specialization.SmkVersion);
+            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, 
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New);
             if (template == null)
             {
                 result.AddWarning("Template not found for validation");
@@ -42,7 +43,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             }
 
             // Module-based validation for New SMK
-            if (specialization.SmkVersion == SmkVersion.New)
+            if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
             {
                 // Ensure current module is set
                 if (specialization.CurrentModuleId == null)
@@ -68,7 +69,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             foreach (var module in template.Modules)
             {
                 // For New SMK, match by procedure name
-                if (specialization.SmkVersion == SmkVersion.New)
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
                 {
                     procedureTemplate = module.Procedures.FirstOrDefault(p =>
                         p.Name.Equals(procedure.Code, StringComparison.OrdinalIgnoreCase));
@@ -91,7 +92,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             if (procedureTemplate == null)
             {
                 // For New SMK, this is an error - procedures must match template
-                if (specialization.SmkVersion == SmkVersion.New)
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
                 {
                     result.AddError($"Procedure '{procedure.Code}' is not a valid procedure for this specialization");
                 }
@@ -104,7 +105,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             else
             {
                 // Module-based validation for New SMK procedures
-                if (specialization.SmkVersion == SmkVersion.New)
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
                 {
                     // Ensure procedure is from the current module
                     if (specialization.CurrentModuleId == null)
@@ -134,7 +135,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                 }
 
                 // Validate execution type
-                if (specialization.SmkVersion == SmkVersion.New)
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
                 {
                     // For New SMK, execution type must match the requirement type
                     if (procedure.ExecutionType == ProcedureExecutionType.CodeA && procedureTemplate.RequiredCountA == 0)
@@ -146,7 +147,7 @@ public class SpecializationValidationService : ISpecializationValidationService
                         result.AddError("This procedure does not require assistant role (Code B)");
                     }
                 }
-                else if (specialization.SmkVersion == SmkVersion.Old)
+                else if (specialization.SmkVersion == Core.Enums.SmkVersion.Old)
                 {
                     // For Old SMK, only Code A is tracked (no Code B in old SMK)
                     // Execution type validation is handled by the entity itself
@@ -197,7 +198,8 @@ public class SpecializationValidationService : ISpecializationValidationService
                 return ValidationResult.Failure("Specialization not found");
             }
 
-            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, specialization.SmkVersion);
+            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, 
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New);
             if (template == null)
             {
                 result.AddWarning("Template not found for validation");
@@ -205,7 +207,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             }
 
             // Get module template for medical shift requirements
-            var currentModule = template.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId?.Value);
+            var currentModule = template.Modules.FirstOrDefault(m => m.ModuleId == specialization.CurrentModuleId);
             if (currentModule != null && currentModule.MedicalShifts != null)
             {
                 // MAUI implementation does not enforce maximum shift duration limits
@@ -237,7 +239,7 @@ public class SpecializationValidationService : ISpecializationValidationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating medical shift {ShiftId}", medicalShift.Id);
+            _logger.LogError(ex, "Error validating medical shift {ShiftId}", medicalShift.ShiftId);
             return ValidationResult.Failure("Validation error occurred");
         }
     }
@@ -254,7 +256,8 @@ public class SpecializationValidationService : ISpecializationValidationService
                 return ValidationResult.Failure("Specialization not found");
             }
 
-            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, specialization.SmkVersion);
+            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, 
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New);
             if (template == null)
             {
                 result.AddWarning("Template not found for validation");
@@ -264,8 +267,8 @@ public class SpecializationValidationService : ISpecializationValidationService
             // Find internship template
             var internshipTemplate = await _templateService.GetInternshipTemplateAsync(
                 specialization.ProgramCode,
-                specialization.SmkVersion,
-                internship.Id);
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New,
+                internship.InternshipId);
 
             if (internshipTemplate != null)
             {
@@ -292,7 +295,7 @@ public class SpecializationValidationService : ISpecializationValidationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating internship {InternshipId}", internship.Id);
+            _logger.LogError(ex, "Error validating internship {InternshipId}", internship.InternshipId);
             return ValidationResult.Failure("Validation error occurred");
         }
     }
@@ -309,7 +312,8 @@ public class SpecializationValidationService : ISpecializationValidationService
                 return ValidationResult.Failure("Specialization not found");
             }
 
-            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, specialization.SmkVersion);
+            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, 
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New);
             if (template == null)
             {
                 result.AddWarning("Template not found for validation");
@@ -319,7 +323,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             // Find course template
             var courseTemplate = await _templateService.GetCourseTemplateAsync(
                 specialization.ProgramCode,
-                specialization.SmkVersion,
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New,
                 course.Id);
 
             if (courseTemplate != null)
@@ -358,7 +362,7 @@ public class SpecializationValidationService : ISpecializationValidationService
 
             var moduleTemplate = await _templateService.GetModuleTemplateAsync(
                 specialization.ProgramCode,
-                specialization.SmkVersion,
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? Core.ValueObjects.SmkVersion.Old : Core.ValueObjects.SmkVersion.New,
                 moduleId);
 
             if (moduleTemplate == null)
@@ -367,7 +371,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             }
 
             // Get current module progress
-            var module = specialization.Modules.FirstOrDefault(m => m.Id.Value == moduleId);
+            var module = specialization.Modules.FirstOrDefault(m => m.ModuleId == moduleId);
             if (module == null)
             {
                 return (false, "Module not found in specialization");
@@ -438,7 +442,8 @@ public class SpecializationValidationService : ISpecializationValidationService
                 return ValidationResult.Failure("Specialization not found");
             }
 
-            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, specialization.SmkVersion);
+            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, 
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New);
             if (template == null)
             {
                 result.AddWarning("Template not found for validation");
@@ -447,7 +452,7 @@ public class SpecializationValidationService : ISpecializationValidationService
 
             // Module-based validation for New SMK
             ModuleTemplate? targetModule = null;
-            if (specialization.SmkVersion == SmkVersion.New)
+            if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
             {
                 if (specialization.CurrentModuleId == null)
                 {
@@ -463,7 +468,7 @@ public class SpecializationValidationService : ISpecializationValidationService
 
             // Find the procedure template in the appropriate module
             ProcedureTemplate? procedureTemplate = null;
-            if (specialization.SmkVersion == SmkVersion.New && targetModule != null)
+            if (specialization.SmkVersion == Core.Enums.SmkVersion.New && targetModule != null)
             {
                 // For New SMK, only search in current module
                 procedureTemplate = targetModule.Procedures.FirstOrDefault(p =>
@@ -488,7 +493,7 @@ public class SpecializationValidationService : ISpecializationValidationService
 
             if (procedureTemplate == null)
             {
-                if (specialization.SmkVersion == SmkVersion.New)
+                if (specialization.SmkVersion == Core.Enums.SmkVersion.New)
                 {
                     result.AddError($"Procedure '{procedureCode}' is not a valid procedure for this specialization");
                     return result;
@@ -542,7 +547,8 @@ public class SpecializationValidationService : ISpecializationValidationService
                 return progress;
             }
 
-            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, specialization.SmkVersion);
+            var template = await _templateService.GetTemplateAsync(specialization.ProgramCode, 
+                specialization.SmkVersion == Core.Enums.SmkVersion.Old ? SmkVersion.Old : SmkVersion.New);
             if (template == null)
             {
                 return progress;
@@ -568,7 +574,7 @@ public class SpecializationValidationService : ISpecializationValidationService
             }
 
             // Get actual module progress from specialization
-            var module = specialization.Modules.FirstOrDefault(m => m.Id.Value == moduleId);
+            var module = specialization.Modules.FirstOrDefault(m => m.ModuleId == moduleId);
             if (module != null)
             {
                 progress.CompletedProceduresA = module.CompletedProceduresA;

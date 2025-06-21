@@ -21,7 +21,7 @@ internal sealed class SqlSpecializationRepository : ISpecializationRepository
         // Using Include will cause: "The expression 's.Modules' is invalid inside an 'Include' operation"
         // The Modules collection is handled differently in the domain model
         return await _context.Specializations
-            .FirstOrDefaultAsync(s => s.Id == id);
+            .FirstOrDefaultAsync(s => s.SpecializationId == id.Value);
     }
 
     public async Task<IEnumerable<Specialization>> GetByUserIdAsync(UserId userId)
@@ -41,7 +41,7 @@ internal sealed class SqlSpecializationRepository : ISpecializationRepository
     {
         await _context.Specializations.AddAsync(specialization);
         await _context.SaveChangesAsync();
-        return specialization.Id;
+        return new SpecializationId(specialization.SpecializationId);
     }
 
     public async Task UpdateAsync(Specialization specialization)

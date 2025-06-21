@@ -73,7 +73,7 @@ internal sealed class SqlInternshipRepositoryEnhanced : IInternshipRepository
     public async Task AddAsync(Internship internship)
     {
         // Generate new ID if it's 0
-        if (internship.InternshipId.Value == 0)
+        if (internship.InternshipId == 0)
         {
             // Query raw database to get max ID
             var connection = _context.Database.GetDbConnection();

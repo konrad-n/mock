@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.DomainServices;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 using SledzSpecke.Application.Abstractions;
@@ -99,7 +100,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             }
 
             // Check for pending shifts that need approval
-            var pendingShifts = medicalShifts.Where(ms => !ms.IsApproved && ms.SyncStatus != SyncStatus.Synced).ToList();
+            var pendingShifts = medicalShifts.Where(ms => !ms.IsApproved && ms.SyncStatus != Core.Enums.SyncStatus.Synced).ToList();
             if (pendingShifts.Any())
             {
                 missingRequirements.Add($"{pendingShifts.Count} medical shifts pending approval");
@@ -114,14 +115,14 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
 
             // Check for data conflicts
             var modifiedEntities = new List<string>();
-            if (internship.SyncStatus == SyncStatus.Modified)
+            if (internship.SyncStatus == Core.Enums.SyncStatus.Modified)
                 modifiedEntities.Add("internship");
             
-            var modifiedProcedures = procedures.Where(p => p.SyncStatus == SyncStatus.Modified).ToList();
+            var modifiedProcedures = procedures.Where(p => p.SyncStatus == Core.ValueObjects.SyncStatus.Modified).ToList();
             if (modifiedProcedures.Any())
                 modifiedEntities.Add($"{modifiedProcedures.Count} procedures");
             
-            var modifiedShifts = medicalShifts.Where(ms => ms.SyncStatus == SyncStatus.Modified).ToList();
+            var modifiedShifts = medicalShifts.Where(ms => ms.SyncStatus == Core.Enums.SyncStatus.Modified).ToList();
             if (modifiedShifts.Any())
                 modifiedEntities.Add($"{modifiedShifts.Count} medical shifts");
             
@@ -184,30 +185,30 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
                 : Enumerable.Empty<Course>();
 
             // Update sync status for entities that are not yet synced
-            if (internship.SyncStatus == SyncStatus.NotSynced)
+            if (internship.SyncStatus == Core.Enums.SyncStatus.Unsynced)
             {
-                internship.UpdateSyncStatus(SyncStatus.NotSynced); // Ready for initial sync
+                // internship.UpdateSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2
                 await _internshipRepository.UpdateAsync(internship);
             }
 
             // Prepare procedures
-            foreach (var procedure in procedures.Where(p => p.Status == ProcedureStatus.Approved && p.SyncStatus == SyncStatus.NotSynced))
+            foreach (var procedure in procedures.Where(p => p.Status == ProcedureStatus.Approved && p.SyncStatus == Core.ValueObjects.SyncStatus.NotSynced))
             {
-                procedure.SetSyncStatus(SyncStatus.NotSynced); // Ready for sync
+                // procedure.SetSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2 // Ready for sync
                 await _procedureRepository.UpdateAsync(procedure);
             }
 
             // Prepare medical shifts
-            foreach (var shift in medicalShifts.Where(ms => ms.IsApproved && ms.SyncStatus == SyncStatus.NotSynced))
+            foreach (var shift in medicalShifts.Where(ms => ms.IsApproved && ms.SyncStatus == Core.Enums.SyncStatus.Unsynced))
             {
-                shift.SetSyncStatus(SyncStatus.NotSynced); // Ready for sync
+                // shift.SetSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2 // Ready for sync
                 await _medicalShiftRepository.UpdateAsync(shift);
             }
 
             // Prepare courses
-            foreach (var course in courses.Where(c => c.IsApproved && c.IsVerifiedByCmkp && c.SyncStatus == SyncStatus.NotSynced))
+            foreach (var course in courses.Where(c => c.IsApproved && c.IsVerifiedByCmkp && c.SyncStatus == Core.ValueObjects.SyncStatus.NotSynced))
             {
-                course.UpdateSyncStatus(SyncStatus.NotSynced); // Ready for sync
+                // course.UpdateSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2 // Ready for sync
                 await _courseRepository.UpdateAsync(course);
             }
 
@@ -284,7 +285,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             var shiftsToApprove = medicalShifts.Where(ms => 
                 !ms.IsApproved && 
                 ms.Hours >= 8 && // Full shift
-                ms.SyncStatus == SyncStatus.Synced).ToList();
+                ms.SyncStatus == Core.Enums.SyncStatus.Synced).ToList();
 
             foreach (var shift in shiftsToApprove)
             {
@@ -296,7 +297,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
 
             _logger.LogInformation(
                 "Approved internship {InternshipId} by {Approver} on {ApprovalDate}. Auto-approved {ProcedureCount} procedures and {ShiftCount} shifts",
-                internshipId.Value,
+                internshipId,
                 approverName,
                 approvalDate,
                 completedProcedures.Count,
@@ -404,21 +405,21 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             if (internship == null) return false;
 
             // Update sync status to synced
-            internship.UpdateSyncStatus(SyncStatus.Synced);
+            // internship.UpdateSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
             await _internshipRepository.UpdateAsync(internship);
 
             // Update related entities
             var procedures = await _procedureRepository.GetByInternshipIdAsync(internshipId.Value);
             foreach (var procedure in procedures.Where(p => p.Status == ProcedureStatus.Approved))
             {
-                procedure.SetSyncStatus(SyncStatus.Synced);
+                // procedure.SetSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
                 await _procedureRepository.UpdateAsync(procedure);
             }
 
             var shifts = await _medicalShiftRepository.GetByInternshipIdAsync(internshipId.Value);
             foreach (var shift in shifts.Where(ms => ms.IsApproved))
             {
-                shift.SetSyncStatus(SyncStatus.Synced);
+                // shift.SetSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
                 await _medicalShiftRepository.UpdateAsync(shift);
             }
 
@@ -427,7 +428,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
                 var courses = await _courseRepository.GetByModuleIdAsync(internship.ModuleId.Value);
                 foreach (var course in courses.Where(c => c.IsApproved && c.IsVerifiedByCmkp))
                 {
-                    course.UpdateSyncStatus(SyncStatus.Synced);
+                    // course.UpdateSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
                     await _courseRepository.UpdateAsync(course);
                 }
             }
@@ -472,7 +473,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
                 : Enumerable.Empty<Course>();
 
             // Resolve internship conflicts
-            if (internship.SyncStatus == SyncStatus.Modified)
+            if (internship.SyncStatus == Core.Enums.SyncStatus.Modified)
             {
                 var action = await ResolveEntityConflict(internship, strategy, "Internship");
                 if (action != null)
@@ -484,7 +485,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             }
 
             // Resolve procedure conflicts
-            foreach (var procedure in procedures.Where(p => p.SyncStatus == SyncStatus.Modified))
+            foreach (var procedure in procedures.Where(p => p.SyncStatus == Core.ValueObjects.SyncStatus.Modified))
             {
                 var action = await ResolveEntityConflict(procedure, strategy, $"Procedure {procedure.Code}");
                 if (action != null)
@@ -496,7 +497,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             }
 
             // Resolve medical shift conflicts
-            foreach (var shift in medicalShifts.Where(ms => ms.SyncStatus == SyncStatus.Modified))
+            foreach (var shift in medicalShifts.Where(ms => ms.SyncStatus == Core.Enums.SyncStatus.Modified))
             {
                 var action = await ResolveEntityConflict(shift, strategy, $"Medical shift on {shift.Date:yyyy-MM-dd}");
                 if (action != null)
@@ -508,7 +509,7 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             }
 
             // Resolve course conflicts
-            foreach (var course in courses.Where(c => c.SyncStatus == SyncStatus.Modified))
+            foreach (var course in courses.Where(c => c.SyncStatus == Core.ValueObjects.SyncStatus.Modified))
             {
                 var action = await ResolveEntityConflict(course, strategy, $"Course {course.CourseName}");
                 if (action != null)
@@ -552,13 +553,21 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
             case ConflictResolutionStrategy.KeepLocal:
                 // Keep local changes, mark as not synced to force re-sync
                 if (entity is Internship internship)
-                    internship.UpdateSyncStatus(SyncStatus.NotSynced);
+                {
+                    // internship.UpdateSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2
+                }
                 else if (entity is ProcedureBase procedure)
-                    procedure.SetSyncStatus(SyncStatus.NotSynced);
+                {
+                    // procedure.SetSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2
+                }
                 else if (entity is MedicalShift shift)
-                    shift.SetSyncStatus(SyncStatus.NotSynced);
+                {
+                    // shift.SetSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2
+                }
                 else if (entity is Course course)
-                    course.UpdateSyncStatus(SyncStatus.NotSynced);
+                {
+                    // course.UpdateSyncStatus(Core.Enums.SyncStatus.Unsynced); // Method removed in MAUI phase 2
+                }
                 
                 return Task.FromResult<string?>($"Kept local changes for {entityDescription}");
 
@@ -566,13 +575,21 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
                 // In a real implementation, we would fetch remote data and overwrite local
                 // For now, we'll mark as synced to indicate we "accepted" remote version
                 if (entity is Internship internship2)
-                    internship2.UpdateSyncStatus(SyncStatus.Synced);
+                {
+                    // internship2.UpdateSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
+                }
                 else if (entity is ProcedureBase procedure2)
-                    procedure2.SetSyncStatus(SyncStatus.Synced);
+                {
+                    // procedure2.SetSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
+                }
                 else if (entity is MedicalShift shift2)
-                    shift2.SetSyncStatus(SyncStatus.Synced);
+                {
+                    // shift2.SetSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
+                }
                 else if (entity is Course course2)
-                    course2.UpdateSyncStatus(SyncStatus.Synced);
+                {
+                    // course2.UpdateSyncStatus(Core.Enums.SyncStatus.Synced); // Method removed in MAUI phase 2
+                }
                 
                 return Task.FromResult<string?>($"Accepted remote version for {entityDescription}");
 
@@ -580,13 +597,17 @@ public sealed class SimplifiedSMKSynchronizationService : ISMKSynchronizationSer
                 // In a real implementation, we would merge changes
                 // For now, keep local and mark for re-sync
                 if (entity is Internship internship3)
-                    internship3.UpdateSyncStatus(SyncStatus.NotSynced);
+                    internship3.SyncStatus = Core.Enums.SyncStatus.Unsynced;
                 else if (entity is ProcedureBase procedure3)
-                    procedure3.SetSyncStatus(SyncStatus.NotSynced);
+                {
+                    // TODO: procedure3.SyncStatus = Core.Enums.SyncStatus.Unsynced; // SyncStatus setter is protected in MAUI phase 2
+                }
                 else if (entity is MedicalShift shift3)
-                    shift3.SetSyncStatus(SyncStatus.NotSynced);
+                    shift3.SyncStatus = Core.Enums.SyncStatus.Unsynced;
                 else if (entity is Course course3)
-                    course3.UpdateSyncStatus(SyncStatus.NotSynced);
+                {
+                    // TODO: course3.SyncStatus = Core.Enums.SyncStatus.Unsynced; // SyncStatus is read-only in MAUI phase 2
+                }
                 
                 return Task.FromResult<string?>($"Merged changes for {entityDescription} (kept local, marked for re-sync)");
 

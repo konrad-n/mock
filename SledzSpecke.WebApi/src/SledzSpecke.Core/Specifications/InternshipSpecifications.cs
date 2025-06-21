@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Core.Specifications;
@@ -75,8 +76,8 @@ public sealed class InternshipNeedsSyncSpecification : Specification<Internship>
 {
     public override Expression<Func<Internship, bool>> ToExpression()
     {
-        return internship => internship.SyncStatus == SyncStatus.NotSynced ||
-                           internship.SyncStatus == SyncStatus.Modified ||
-                           internship.SyncStatus == SyncStatus.SyncFailed;
+        return internship => internship.SyncStatus == Enums.SyncStatus.Unsynced ||
+                           internship.SyncStatus == Enums.SyncStatus.Modified ||
+                           internship.SyncStatus == Enums.SyncStatus.SyncFailed;
     }
 }

@@ -1,5 +1,6 @@
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Entities;
+using SledzSpecke.Core.Enums;
 using SledzSpecke.Core.Repositories;
 using SledzSpecke.Core.ValueObjects;
 
@@ -13,7 +14,7 @@ public interface IModuleProgressionService
 {
     Task<Result<Module>> CanProgressToModuleAsync(
         Specialization specialization, 
-        ModuleType targetType,
+        ValueObjects.ModuleType targetType,
         CancellationToken cancellationToken = default);
         
     Task<Result<bool>> ValidateModuleCompletionAsync(
@@ -43,7 +44,7 @@ public class ModuleProgressionService : IModuleProgressionService
 
     public async Task<Result<Module>> CanProgressToModuleAsync(
         Specialization specialization, 
-        ModuleType targetType,
+        ValueObjects.ModuleType targetType,
         CancellationToken cancellationToken = default)
     {
         // Validate specialization has modules
@@ -56,7 +57,8 @@ public class ModuleProgressionService : IModuleProgressionService
 
         // Check if target module already exists
         var existingTargetModule = specialization.Modules
-            .FirstOrDefault(m => m.Type.Equals(targetType));
+            .FirstOrDefault(m => (m.Type == Enums.ModuleType.Basic && targetType == ValueObjects.ModuleType.Basic) || 
+                             (m.Type == Enums.ModuleType.Specialist && targetType == ValueObjects.ModuleType.Specialist));
             
         if (existingTargetModule != null)
         {
@@ -66,11 +68,11 @@ public class ModuleProgressionService : IModuleProgressionService
         }
 
         // Validate progression rules
-        if (targetType == ModuleType.Specialist)
+        if (targetType == ValueObjects.ModuleType.Specialist)
         {
             // Must complete Basic module before Specialist
             var basicModule = specialization.Modules
-                .FirstOrDefault(m => m.Type.Equals(ModuleType.Basic));
+                .FirstOrDefault(m => m.Type == Enums.ModuleType.Basic);
                 
             if (basicModule == null)
             {
@@ -90,7 +92,7 @@ public class ModuleProgressionService : IModuleProgressionService
         }
 
         // For SMK "new" version, additional validation may be required
-        if (specialization.SmkVersion == SmkVersion.New)
+        if (specialization.SmkVersion == Enums.SmkVersion.New)
         {
             // New SMK may have additional requirements
             // This is where we'd add them based on SMK documentation
@@ -106,7 +108,7 @@ public class ModuleProgressionService : IModuleProgressionService
         CancellationToken cancellationToken = default)
     {
         // Check if all required internships are completed
-        var internships = await _internshipRepository.GetByModuleIdAsync(module.Id);
+        var internships = await _internshipRepository.GetByModuleIdAsync(new ModuleId(module.ModuleId));
             
         if (!internships.Any())
         {
@@ -130,7 +132,7 @@ public class ModuleProgressionService : IModuleProgressionService
                 
             totalHours += shifts
                 .Where(s => s.IsApproved)
-                .Sum(s => s.Duration.Hours);
+                .Sum(s => s.Hours);
         }
 
         // Module is considered complete if it has the expected progress
@@ -160,8 +162,8 @@ public class ModuleProgressionService : IModuleProgressionService
     {
         var status = new ModuleProgressionStatus
         {
-            SpecializationId = specialization.Id,
-            SmkVersion = specialization.SmkVersion
+            SpecializationId = new SpecializationId(specialization.SpecializationId),
+            SmkVersion = specialization.SmkVersion == Enums.SmkVersion.Old ? ValueObjects.SmkVersion.Old : ValueObjects.SmkVersion.New
         };
 
         if (specialization.Modules == null || !specialization.Modules.Any())
@@ -172,7 +174,7 @@ public class ModuleProgressionService : IModuleProgressionService
 
         // Check for Basic module
         var basicModule = specialization.Modules
-            .FirstOrDefault(m => m.Type.Equals(ModuleType.Basic));
+            .FirstOrDefault(m => m.Type == Enums.ModuleType.Basic);
             
         if (basicModule == null)
         {
@@ -180,7 +182,7 @@ public class ModuleProgressionService : IModuleProgressionService
             return Result<ModuleProgressionStatus>.Success(status);
         }
 
-        status.BasicModuleId = basicModule.Id;
+        status.BasicModuleId = new ModuleId(basicModule.ModuleId);
         
         // Check Basic module completion
         var basicCompletionResult = await ValidateModuleCompletionAsync(
@@ -197,11 +199,11 @@ public class ModuleProgressionService : IModuleProgressionService
 
         // Check for Specialist module
         var specialistModule = specialization.Modules
-            .FirstOrDefault(m => m.Type.Equals(ModuleType.Specialist));
+            .FirstOrDefault(m => m.Type == Enums.ModuleType.Specialist);
             
         if (specialistModule != null)
         {
-            status.SpecialistModuleId = specialistModule.Id;
+            status.SpecialistModuleId = new ModuleId(specialistModule.ModuleId);
             
             var specialistCompletionResult = await ValidateModuleCompletionAsync(
                 specialistModule, cancellationToken);
@@ -244,7 +246,7 @@ public class ModuleProgressionService : IModuleProgressionService
 public class ModuleProgressionStatus
 {
     public SpecializationId SpecializationId { get; set; } = null!;
-    public SmkVersion SmkVersion { get; set; }
+    public ValueObjects.SmkVersion SmkVersion { get; set; }
     public ModuleProgressionStage CurrentStage { get; set; }
     public ModuleId? BasicModuleId { get; set; }
     public ModuleId? SpecialistModuleId { get; set; }

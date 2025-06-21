@@ -47,7 +47,7 @@ internal sealed class RefactoredSqlSpecializationRepository : BaseRepository<Spe
     {
         // ID generation should be handled by database or a dedicated service
         // For now, keeping the existing logic but moving it to a private method
-        if (specialization.Id.Value <= 0)
+        if (specialization.SpecializationId <= 0)
         {
             await GenerateIdForEntity(specialization);
         }
@@ -56,7 +56,7 @@ internal sealed class RefactoredSqlSpecializationRepository : BaseRepository<Spe
         // Note: SaveChangesAsync should be called by Unit of Work, not here
         // But keeping it for backward compatibility
         await _unitOfWork.SaveChangesAsync();
-        return specialization.Id;
+        return new SpecializationId(specialization.SpecializationId);
     }
 
     public async Task UpdateAsync(Specialization specialization)
@@ -120,13 +120,13 @@ internal sealed class RefactoredSqlSpecializationRepository : BaseRepository<Spe
         await connection.OpenAsync();
 
         using var command = connection.CreateCommand();
-        command.CommandText = "SELECT COALESCE(MAX(\"Id\"), 0) FROM \"Specializations\"";
+        command.CommandText = "SELECT COALESCE(MAX(\"SpecializationId\"), 0) FROM \"Specializations\"";
         var maxId = (int)(await command.ExecuteScalarAsync() ?? 0);
 
-        var newId = new SpecializationId(maxId + 1);
+        var newId = maxId + 1;
 
         // Use reflection to set the ID since it's private
-        var idProperty = specialization.GetType().GetProperty("Id");
+        var idProperty = specialization.GetType().GetProperty("SpecializationId");
         idProperty?.SetValue(specialization, newId);
 
         await connection.CloseAsync();

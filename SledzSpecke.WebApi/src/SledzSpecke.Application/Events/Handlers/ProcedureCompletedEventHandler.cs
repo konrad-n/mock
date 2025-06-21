@@ -64,7 +64,7 @@ public sealed class ProcedureCompletedEventHandler : INotificationHandler<Core.E
 
             // 3. Update projections
             await _projectionService.UpdateStudentProgressProjectionAsync(
-                new InternshipId(internship.Id),
+                new InternshipId(internship.InternshipId),
                 cancellationToken);
 
             await _projectionService.UpdateDepartmentAnalyticsProjectionAsync(
@@ -72,14 +72,14 @@ public sealed class ProcedureCompletedEventHandler : INotificationHandler<Core.E
                 cancellationToken);
 
             // 4. Track procedure count milestones
-            var allProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.Id);
+            var allProcedures = await _procedureRepository.GetByInternshipIdAsync(internship.InternshipId);
             var totalProceduresOfType = allProcedures.Count(p => p.Code == notification.ProcedureCode);
             
             if (totalProceduresOfType == 10 || totalProceduresOfType == 50 || totalProceduresOfType == 100)
             {
                 _logger.LogInformation(
                     "Procedure milestone reached: InternshipId={InternshipId}, Code={Code}, Total={Total}",
-                    internship.Id,
+                    internship.InternshipId,
                     notification.ProcedureCode,
                     totalProceduresOfType);
             }

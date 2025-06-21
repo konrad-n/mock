@@ -39,9 +39,7 @@ public sealed class CreateInternshipHandler : ICommandHandler<CreateInternship, 
             }
         }
 
-        var internshipId = InternshipId.New();
         var internship = Internship.Create(
-            internshipId,
             command.SpecializationId,
             command.Name,
             command.InstitutionName,
@@ -62,6 +60,6 @@ public sealed class CreateInternshipHandler : ICommandHandler<CreateInternship, 
         }
 
         await _internshipRepository.AddAsync(internship);
-        return internship.InternshipId.Value;
+        return internship.InternshipId;
     }
 }

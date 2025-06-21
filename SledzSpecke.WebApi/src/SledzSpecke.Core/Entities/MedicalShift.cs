@@ -1,102 +1,83 @@
-using SledzSpecke.Core.Exceptions;
-using SledzSpecke.Core.ValueObjects;
-using SledzSpecke.Core.Entities.Base;
-using SledzSpecke.Core.DomainEvents;
-using SledzSpecke.Core.DomainEvents.Base;
-using SledzSpecke.Core.Abstractions;
+using SledzSpecke.Core.Enums;
 
 namespace SledzSpecke.Core.Entities;
 
-public class MedicalShift : Entity
+public class MedicalShift
 {
-    public MedicalShiftId Id { get; private set; }
-    public InternshipId InternshipId { get; private set; }
-    public ModuleId? ModuleId { get; private set; }
-    public DateTime Date { get; private set; }
-    public ShiftDuration Duration { get; private set; }
-    public ShiftType Type { get; private set; }
-    public string Location { get; private set; }
-    public string? SupervisorName { get; private set; }
-    public int Year { get; private set; } // For Stary SMK (1-6)
-    public SmkVersion SmkVersion { get; private set; }
-    public SyncStatus SyncStatus { get; private set; }
-    public DateTime? ApprovalDate { get; private set; }
-    public string? ApproverName { get; private set; }
-    public string? ApproverRole { get; private set; }
-    public string? AdditionalFields { get; private set; }
+    public int ShiftId { get; set; }
+    public int InternshipId { get; set; }
+    public int? ModuleId { get; set; }
+    public DateTime Date { get; set; }
+    public int Hours { get; set; }
+    public int Minutes { get; set; }
+    public string Type { get; set; }
+    public string Location { get; set; }
+    public string? SupervisorName { get; set; }
+    public int Year { get; set; } // For Stary SMK (1-6)
+    public SmkVersion SmkVersion { get; set; }
+    public SyncStatus SyncStatus { get; set; }
+    public DateTime? ApprovalDate { get; set; }
+    public string? ApproverName { get; set; }
+    public string? ApproverRole { get; set; }
+    public string? AdditionalFields { get; set; }
     
     // Properties for compatibility
     public bool IsApproved => SyncStatus == SyncStatus.Synced && ApprovalDate.HasValue;
     public bool CanBeDeleted => !IsApproved;
-    public int Hours => Duration.Hours;
-    public int Minutes => Duration.Minutes;
-    public int TotalMinutes => Duration.TotalMinutes;
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
+    public int TotalMinutes => Hours * 60 + Minutes;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     // Parameterless constructor for EF Core
     private MedicalShift() { }
 
-    private MedicalShift(MedicalShiftId id, InternshipId internshipId, ModuleId? moduleId,
-        DateTime date, ShiftDuration duration, ShiftType type, string location, string? supervisorName, int year)
-    {
-        Id = id;
-        InternshipId = internshipId;
-        ModuleId = moduleId;
-        Date = EnsureUtc(date);
-        Duration = duration ?? throw new ArgumentNullException(nameof(duration));
-        Type = type;
-        Location = location ?? throw new ArgumentNullException(nameof(location));
-        SupervisorName = supervisorName;
-        Year = year;
-        SyncStatus = SyncStatus.NotSynced;
-        SmkVersion = SmkVersion.New; // Default to new
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public static MedicalShift Create(MedicalShiftId id, InternshipId internshipId, ModuleId? moduleId,
-        DateTime date, int hours, int minutes, ShiftType type, string location, 
+    // Factory method for creating new shifts
+    public static MedicalShift Create(int internshipId, int? moduleId,
+        DateTime date, int hours, int minutes, string type, string location, 
         string? supervisorName, int year)
     {
         if (string.IsNullOrWhiteSpace(location))
             throw new ArgumentException("Location cannot be empty.", nameof(location));
+        if (string.IsNullOrWhiteSpace(type))
+            throw new ArgumentException("Type cannot be empty.", nameof(type));
+        if (hours < 0 || hours > 24)
+            throw new ArgumentException("Hours must be between 0 and 24.", nameof(hours));
+        if (minutes < 0)
+            throw new ArgumentException("Minutes cannot be negative.", nameof(minutes));
 
-        // No future date validation - MAUI app allows future dates
-        var duration = new ShiftDuration(hours, minutes);
-
-        var shift = new MedicalShift(id, internshipId, moduleId, date, duration, type, 
-            location, supervisorName, year);
-        
-        // Raise domain event
-        shift.AddDomainEvent(new MedicalShiftCreated(
-            shift.Id,
-            shift.InternshipId,
-            shift.Date,
-            shift.Duration,
-            shift.Type,
-            shift.Location));
-            
-        return shift;
+        return new MedicalShift
+        {
+            InternshipId = internshipId,
+            ModuleId = moduleId,
+            Date = date.ToUniversalTime(),
+            Hours = hours,
+            Minutes = minutes,
+            Type = type,
+            Location = location,
+            SupervisorName = supervisorName,
+            Year = year,
+            SyncStatus = SyncStatus.Unsynced,
+            SmkVersion = SmkVersion.New, // Default to new
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
     }
 
     public void UpdateShiftDetails(int hours, int minutes, string location)
     {
         EnsureCanModify();
 
-        var oldDuration = Duration;
-        Duration = new ShiftDuration(hours, minutes);
-        Location = location ?? throw new ArgumentNullException(nameof(location));
+        if (string.IsNullOrWhiteSpace(location))
+            throw new ArgumentNullException(nameof(location));
+        if (hours < 0 || hours > 24)
+            throw new ArgumentException("Hours must be between 0 and 24.", nameof(hours));
+        if (minutes < 0)
+            throw new ArgumentException("Minutes cannot be negative.", nameof(minutes));
+
+        Hours = hours;
+        Minutes = minutes;
+        Location = location;
         UpdatedAt = DateTime.UtcNow;
-        
-        // Raise domain event if duration changed
-        if (oldDuration.TotalMinutes != Duration.TotalMinutes)
-        {
-            AddDomainEvent(new MedicalShiftDurationChanged(
-                Id,
-                oldDuration,
-                Duration));
-        }
 
         // When a synced item is modified, we automatically transition it to Modified status.
         if (SyncStatus == SyncStatus.Synced)
@@ -122,15 +103,6 @@ public class MedicalShift : Entity
         ApproverName = approverName ?? throw new ArgumentNullException(nameof(approverName));
         ApproverRole = approverRole ?? throw new ArgumentNullException(nameof(approverRole));
         UpdatedAt = DateTime.UtcNow;
-        
-        // Raise domain event
-        AddDomainEvent(new MedicalShiftCompleted(
-            Id,
-            InternshipId,
-            Date,
-            Duration,
-            Type,
-            ApprovalDate.Value));
     }
     
     private void EnsureCanModify()
@@ -139,14 +111,4 @@ public class MedicalShift : Entity
             throw new InvalidOperationException("Cannot modify approved medical shift.");
     }
 
-    private static DateTime EnsureUtc(DateTime dateTime)
-    {
-        return dateTime.Kind switch
-        {
-            DateTimeKind.Utc => dateTime,
-            DateTimeKind.Local => dateTime.ToUniversalTime(),
-            DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
-            _ => dateTime
-        };
-    }
 }

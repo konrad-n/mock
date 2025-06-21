@@ -21,9 +21,9 @@ public sealed class GetInternshipsHandler : IQueryHandler<GetInternships, IEnume
 
         return internships.Select(i => new InternshipDto
         {
-            Id = i.Id,
+            Id = i.InternshipId,
             SpecializationId = i.SpecializationId,
-            ModuleId = i.ModuleId?.Value,
+            ModuleId = i.ModuleId,
             InstitutionName = i.InstitutionName,
             DepartmentName = i.DepartmentName,
             SupervisorName = i.SupervisorName,
@@ -37,8 +37,8 @@ public sealed class GetInternshipsHandler : IQueryHandler<GetInternships, IEnume
             SyncStatus = i.SyncStatus.ToString(),
             CreatedAt = i.CreatedAt,
             UpdatedAt = i.UpdatedAt,
-            TotalShiftHours = i.GetTotalShiftHours(),
-            ApprovedProceduresCount = i.GetApprovedProceduresCount()
+            TotalShiftHours = 0, // i.GetTotalShiftHours() - Method removed in MAUI phase 2
+            ApprovedProceduresCount = 0 // i.GetApprovedProceduresCount() - Method removed in MAUI phase 2
         });
     }
 }

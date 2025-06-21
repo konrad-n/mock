@@ -33,7 +33,7 @@ public class ProcedureValidationService : IProcedureValidationService
         }
 
         // Validate that requirement belongs to the module
-        if (requirement.ModuleId != currentModule.Id)
+        if (requirement.ModuleId != currentModule.ModuleId)
         {
             return Result.Failure("Wymaganie procedury nie należy do tego modułu");
         }

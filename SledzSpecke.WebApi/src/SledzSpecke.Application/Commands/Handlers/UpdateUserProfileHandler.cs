@@ -2,7 +2,6 @@ using SledzSpecke.Application.Abstractions;
 using SledzSpecke.Application.Exceptions;
 using SledzSpecke.Core.Abstractions;
 using SledzSpecke.Core.Repositories;
-using SledzSpecke.Core.ValueObjects;
 
 namespace SledzSpecke.Application.Commands.Handlers;
 
@@ -27,41 +26,28 @@ public sealed class UpdateUserProfileHandler : IResultCommandHandler<UpdateUserP
         try
         {
             var currentUserId = _userContextService.GetUserId();
-            var user = await _userRepository.GetByIdAsync(new UserId((int)currentUserId));
+            var user = await _userRepository.GetByIdAsync((int)currentUserId);
             
             if (user is null)
             {
                 return Result.Failure($"User with ID {currentUserId} not found.");
             }
 
-            // Validate and create value objects
-            Email email;
-            FirstName firstName;
-            LastName lastName;
-            PhoneNumber phoneNumber;
-            Address address;
+            // Validate input
+            if (string.IsNullOrEmpty(command.Email))
+                return Result.Failure("Email is required");
+            if (string.IsNullOrEmpty(command.FirstName) || string.IsNullOrEmpty(command.LastName))
+                return Result.Failure("First name and last name are required");
+            if (string.IsNullOrEmpty(command.PhoneNumber))
+                return Result.Failure("Phone number is required");
             
-            try
-            {
-                email = new Email(command.Email);
-                firstName = new FirstName(command.FirstName);
-                lastName = new LastName(command.LastName);
-                phoneNumber = new PhoneNumber(command.PhoneNumber);
-                address = new Address(
-                    command.CorrespondenceAddress.Street,
-                    command.CorrespondenceAddress.HouseNumber,
-                    command.CorrespondenceAddress.ApartmentNumber,
-                    command.CorrespondenceAddress.PostalCode,
-                    command.CorrespondenceAddress.City,
-                    command.CorrespondenceAddress.Province
-                );
-            }
-            catch (Exception ex)
-            {
-                return Result.Failure($"Invalid profile data: {ex.Message}");
-            }
+            // Build full name and address
+            var fullName = $"{command.FirstName} {command.LastName}";
+            var address = $"{command.CorrespondenceAddress.Street} {command.CorrespondenceAddress.HouseNumber}" +
+                         (string.IsNullOrEmpty(command.CorrespondenceAddress.ApartmentNumber) ? "" : $"/{command.CorrespondenceAddress.ApartmentNumber}") +
+                         $", {command.CorrespondenceAddress.PostalCode} {command.CorrespondenceAddress.City}, {command.CorrespondenceAddress.Province}";
             
-            user.UpdateProfile(email, firstName, lastName, phoneNumber, address);
+            user.UpdateProfile(command.Email, fullName, command.PhoneNumber, address);
 
             await _userRepository.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();

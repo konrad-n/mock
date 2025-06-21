@@ -89,20 +89,20 @@ public sealed class GetDashboardOverviewHandler : IQueryHandler<GetDashboardOver
         return new DashboardOverviewDto
         {
             OverallProgress = overallProgress,
-            CurrentModuleId = currentModule?.Id.Value ?? 0,
+            CurrentModuleId = currentModule?.ModuleId ?? 0,
             CurrentModuleName = currentModule?.Name ?? "Module not started",
             ModuleType = currentModule != null && currentModule.Name.Contains("podstawowy", StringComparison.OrdinalIgnoreCase)
                 ? DashboardModuleType.Basic 
                 : DashboardModuleType.Specialist,
             Specialization = new SpecializationInfoDto
             {
-                Id = specialization.Id.Value,
+                Id = specialization.SpecializationId,
                 Name = specialization.Name,
                 ProgramCode = specialization.ProgramCode,
                 StartDate = DateTime.UtcNow, // Would need to track this
                 PlannedEndDate = DateTime.UtcNow.AddYears(5),
                 DurationYears = 5,
-                SmkVersion = specialization.SmkVersion.Value
+                SmkVersion = specialization.SmkVersion == Core.Enums.SmkVersion.Old ? "old" : "new"
             },
             ModuleProgress = new ModuleProgressDto
             {

@@ -56,8 +56,8 @@ public sealed class AddAdditionalSelfEducationDaysHandler : ICommandHandler<AddA
         }
 
         // Get an active internship from the module
-        var internships = await _internshipRepository.GetByModuleIdAsync(activeModule.Id);
-        var activeInternship = internships.FirstOrDefault(i => i.Status == InternshipStatus.InProgress);
+        var internships = await _internshipRepository.GetByModuleIdAsync(activeModule.ModuleId);
+        var activeInternship = internships.FirstOrDefault(i => i.Status == "InProgress");
         
         if (activeInternship == null)
         {
@@ -66,7 +66,7 @@ public sealed class AddAdditionalSelfEducationDaysHandler : ICommandHandler<AddA
 
         // Check the yearly limit
         var existingDays = await _repository.GetTotalDaysInYearAsync(
-            activeModule.Id, 
+            activeModule.ModuleId, 
             command.Year);
             
         if (existingDays + command.DaysUsed > 6)
@@ -80,8 +80,8 @@ public sealed class AddAdditionalSelfEducationDaysHandler : ICommandHandler<AddA
         var endDate = startDate.AddDays(command.DaysUsed - 1);
         
         var result = Core.Entities.AdditionalSelfEducationDays.Create(
-            new ModuleId(activeModule.Id),
-            new InternshipId(activeInternship.Id),
+            new ModuleId(activeModule.ModuleId),
+            new InternshipId(activeInternship.InternshipId),
             startDate,
             endDate,
             command.Comment ?? "Additional self-education days",
